@@ -14,6 +14,9 @@ from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
 from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from tests.data_context.cloud_data_context.conftest import MockResponse
 
 
@@ -127,7 +130,7 @@ def mocked_get_response(
         ),
     ],
 )
-def test_base_data_context_in_cloud_mode_add_checkpoint(
+def test_cloud_backed_data_context_add_checkpoint(
     data_context_fixture_name: str,
     data_context_type: Type[AbstractDataContext],
     checkpoint_id: str,
@@ -156,7 +159,62 @@ def test_base_data_context_in_cloud_mode_add_checkpoint(
     ) as mock_get:
         checkpoint = context.add_checkpoint(**checkpoint_config)
 
-        assert mock_post.call_count == 1
+        assert mock_post.assert_called_with(
+            "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/contracts",
+            json={
+                "data": {
+                    "attributes": {
+                        "checkpoint_config": {
+                            "action_list": [
+                                {
+                                    "action": {
+                                        "class_name": "StoreValidationResultAction"
+                                    },
+                                    "name": "store_validation_result",
+                                },
+                                {
+                                    "action": {
+                                        "class_name": "StoreEvaluationParametersAction"
+                                    },
+                                    "name": "store_evaluation_params",
+                                },
+                                {
+                                    "action": {
+                                        "class_name": "UpdateDataDocsAction",
+                                        "site_names": [],
+                                    },
+                                    "name": "update_data_docs",
+                                },
+                            ],
+                            "batch_request": {},
+                            "class_name": "Checkpoint",
+                            "config_version": 1.0,
+                            "evaluation_parameters": {},
+                            "expectation_suite_ge_cloud_id": None,
+                            "expectation_suite_name": "my_expectation_suite",
+                            "ge_cloud_id": None,
+                            "module_name": "great_expectations.checkpoint",
+                            "name": "my_simple_checkpoint",
+                            "profilers": [],
+                            "run_name_template": None,
+                            "runtime_configuration": {},
+                            "template_name": None,
+                            "validations": [
+                                {"expectation_suite_name": "taxi.demo_pass"},
+                                {},
+                            ],
+                        },
+                        "organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
+                    },
+                },
+                "type": GeCloudRESTResource.CONTRACT,
+            },
+            headers={
+                "Content-Type": "application/vnd.api+json",
+                "Authorization": "Bearer 6bb5b6f5c7794892a4ca168c65c2603e",
+            },
+        )
+
         assert mock_get.call_count == 1
 
     assert checkpoint.ge_cloud_id == checkpoint_id
