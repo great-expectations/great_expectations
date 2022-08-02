@@ -13,7 +13,13 @@ import json
 import invoke
 
 from scripts import check_type_hint_coverage
-from tests.integration.usage_statistics import usage_stats_utils
+
+try:
+    from tests.integration.usage_statistics import usage_stats_utils
+
+    is_ge_installed: bool = True
+except ModuleNotFoundError:
+    is_ge_installed = False
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
@@ -172,6 +178,11 @@ def get_usage_stats_json(ctx):
     """
     Dump usage stats event examples to json file
     """
+    if not is_ge_installed:
+        print(
+            "This invoke task requires GE to be installed in the environment. Please try again"
+        )
+        return
     events = usage_stats_utils.get_usage_stats_example_events()
     version = usage_stats_utils.get_gx_version()
 
@@ -187,6 +198,12 @@ def mv_usage_stats_json(ctx):
     """
     Use databricks-cli lib to move usage stats event examples to dbfs:/
     """
+    if not is_ge_installed:
+        print(
+            "This invoke task requires GE to be installed in the environment. Please try again"
+        )
+        return
+
     version = usage_stats_utils.get_gx_version()
     outfile = f"v{version}_example_events.json"
     cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
