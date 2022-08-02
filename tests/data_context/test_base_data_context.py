@@ -6,7 +6,6 @@ from unittest import mock
 
 import pandas as pd
 import pytest
-from sqlalchemy.util.langhelpers import NoneType
 
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -171,11 +170,11 @@ def test_get_config_with_variables_substituted(
 
 @pytest.fixture
 def prepare_validator_for_cloud_e2e() -> Callable[
-    [DataContext], Generator[Tuple[Validator, str], NoneType, NoneType]
+    [DataContext], Generator[Tuple[Validator, str], None, None]
 ]:
     def _closure(
         context: DataContext,
-    ) -> Generator[Tuple[Validator, str], NoneType, NoneType]:
+    ) -> Generator[Tuple[Validator, str], None, None]:
 
         # Create a suite to be used in Validator instantiation
         suites = context.list_expectation_suites()
@@ -271,7 +270,7 @@ def prepare_validator_for_cloud_e2e() -> Callable[
 def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
     mock_save_project_config: mock.MagicMock,
     prepare_validator_for_cloud_e2e: Callable[
-        [DataContext], Generator[Tuple[Validator, str], NoneType, NoneType]
+        [DataContext], Generator[Tuple[Validator, str], None, None]
     ],
 ) -> None:
     """
@@ -303,7 +302,7 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
 def test_validator_e2e_workflow_with_cloud_enabled_context(
     mock_save_project_config: mock.MagicMock,
     prepare_validator_for_cloud_e2e: Callable[
-        [DataContext], Generator[Tuple[Validator, str], NoneType, NoneType]
+        [DataContext], Generator[Tuple[Validator, str], None, None]
     ],
 ) -> None:
     """
