@@ -8,6 +8,9 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+import pathlib
+import shutil
+
 import invoke
 
 from scripts import check_type_hint_coverage
@@ -31,7 +34,7 @@ def sort(ctx, path=".", check=False, exclude=None):
         cmds.append("--check-only")
     if exclude:
         cmds.extend(["--skip", exclude])
-    ctx.run(" ".join(cmds))
+    ctx.run(" ".join(cmds), echo=True)
 
 
 @invoke.task(
@@ -54,7 +57,7 @@ def fmt(ctx, path=".", sort_=True, check=False, exclude=None):
         cmds.append("--check")
     if exclude:
         cmds.extend(["--exclude", exclude])
-    ctx.run(" ".join(cmds))
+    ctx.run(" ".join(cmds), echo=True)
 
 
 @invoke.task
@@ -143,12 +146,27 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
         "daemon": "Run mypy in daemon mode with faster analysis."
         " The daemon will be started and re-used for subsequent calls."
         " For detailed usage see `dmypy --help`.",
+        "clear-cache": "Clear the local mypy cache directory.",
     },
 )
 def type_check(
-    ctx, packages, install_types=False, show_default_packages=False, daemon=False
+    ctx,
+    packages,
+    install_types=False,
+    show_default_packages=False,
+    daemon=False,
+    clear_cache=False,
 ):
     """Run mypy static type-checking on select packages."""
+    if clear_cache:
+        mypy_cache = pathlib.Path(".mypy_cache")
+        print(f"  Clearing {mypy_cache} ... ", end="")
+        try:
+            shutil.rmtree(mypy_cache)
+            print("✅"),
+        except FileNotFoundError as exc:
+            print(f"❌\n  {exc}")
+
     if show_default_packages:
         # Use this to keep the Type-checking section of the docs up to date.
         # https://docs.greatexpectations.io/docs/contributing/style_guides/code_style#type-checking
