@@ -171,9 +171,10 @@ stages:
               PYTEST="docker run --network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
               PYTEST+="-e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) -e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) "
               PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) greatexpectations/test:$(DOCKER_TAG) "
-              PYTEST+="pytest --postgresql --spark --cloud --napoleon-docstrings "
-              PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml:/coverage/xml "
-              PYTEST+=" --cov-report=html:/coverage/html --ignore=tests/cli --ignore=tests/integration/usage_statistics"
+              PYTEST+="pytest --postgresql --spark --cloud --napoleon-docstrings --no-docker-discovery "
+              PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml:/coverage/coverage.xml "
+              PYTEST+="--cov-report=html:/coverage/htmlcov --ignore=tests/cli --ignore=tests/integration/usage_statistics"
+              PYTEST+=" tests/expectations/test_expectation.py"
               echo ${PYTEST}
               eval ${PYTEST}
             env:
@@ -191,8 +192,8 @@ stages:
           - task: PublishCodeCoverageResults@1
             inputs:
               codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/coverage/**/htmlcov'
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/coverage/htmlcov'
 
   - stage: import_ge
     dependsOn: [lint]
