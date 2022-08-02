@@ -142,9 +142,7 @@ stages:
               TAG="$(python.version)_develop_${EPOCH}_${RANDOM}"
               # We repull the develop branch. We could build the local branch that is already present but we should
               # prune it's depth since we don't need the git history.
-              # CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${TAG} --target azure --build-arg PYTHON_VERSION=$(python.version) --build-arg SOURCE=github --build-arg BRANCH=develop ."
-              # Temporarily use local copy of repo
-              CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${TAG} --target azure --build-arg PYTHON_VERSION=$(python.version) ."
+              CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${TAG} --target azure --build-arg PYTHON_VERSION=$(python.version) --build-arg SOURCE=github --build-arg BRANCH=develop ."
               echo ${CMD}
               eval ${CMD}
               # Set this variable so other steps can read it.
