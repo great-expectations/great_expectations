@@ -169,7 +169,7 @@ stages:
               eval ${PULL}
               PYTEST="docker run --network=host -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) -e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) "
               PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) greatexpectations/test:$(DOCKER_TAG) pytest --postgresql "
-              PYTEST+="--spark --cloud --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html "
+              PYTEST+="--spark --cloud --napoleon-docstrings "
               PYTEST+="--ignore=tests/cli --ignore=tests/integration/usage_statistics"
               echo ${PYTEST}
               eval ${PYTEST}
