@@ -391,7 +391,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def build_key(
         self,
-        resource_type: DataContextVariableSchema,
+        resource_type: Optional[DataContextVariableSchema] = None,
         id_: Optional[str] = None,
         name: Optional[str] = None,
     ) -> GeCloudIdentifier:
