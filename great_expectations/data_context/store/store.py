@@ -169,16 +169,6 @@ class Store:
             self.key_to_tuple(key), self.serialize(value), **kwargs
         )
 
-    # def create(self, config: AbstractConfig) -> AbstractConfig:
-    #     key: Union[
-    #         GeCloudIdentifier, DataContextVariableKey
-    #     ] = self._build_key_from_config(config)
-    #     config = self.set(key, config)
-    #     return config
-    #
-    # def _create(self):
-    #     raise NotImplementedError
-
     def list_keys(self) -> List[DataContextKey]:
         keys_without_store_backend_id = [
             key

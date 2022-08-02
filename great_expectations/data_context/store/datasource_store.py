@@ -184,25 +184,6 @@ class DatasourceStore(Store):
 
         return config
 
-    # def _create(
-    #     self, datasource_config: DatasourceConfig
-    # ) -> DatasourceConfig:
-    #     # """Create a datasource config in the store using a store_backend-specific key.
-    #     #
-    #     # Args:
-    #     #     datasource_config: Config containing the datasource name.
-    #     #
-    #     # Returns:
-    #     #     None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
-    #     #     which was used to create the config in the backend.
-    #     # """
-    #     # key: Union[
-    #     #     GeCloudIdentifier, DataContextVariableKey
-    #     # ] = self._build_key_from_config(datasource_config)
-    #     # config = self.set(key, datasource_config)
-    #     self._create(datasource_config)
-    #     return DatasourceConfig(**config)
-
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
     ) -> None:
