@@ -210,8 +210,8 @@ class GeCloudIdentifier(DataContextKey):
         super().__init__()
 
         self._resource_type = resource_type
-        self._ge_cloud_id = ge_cloud_id if ge_cloud_id is not None else ""
-        self._resource_name = resource_name if resource_name is not None else ""
+        self._ge_cloud_id = ge_cloud_id or ""
+        self._resource_name = resource_name or ""
 
     @property
     def resource_type(self):
