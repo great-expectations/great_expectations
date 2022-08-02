@@ -1842,9 +1842,9 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             "n_resamples": 9139,
             "random_seed": 43792,
             "false_positive_rate": 5.0e-2,
-            "quantile_statistic_interpolation_method": "nearest",
-            "quantile_bias_correction": False,
-            "quantile_bias_std_error_ratio_threshold": None,
+            "quantile_statistic_interpolation_method": "auto",
+            "quantile_bias_correction": True,
+            "quantile_bias_std_error_ratio_threshold": 0.25,
         },
         rules={
             "column_quantiles_rule": {
@@ -1945,9 +1945,9 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             "n_resamples": 9139,
             "random_seed": 43792,
             "false_positive_rate": 5.0e-2,
-            "quantile_statistic_interpolation_method": "nearest",
-            "quantile_bias_correction": False,
-            "quantile_bias_std_error_ratio_threshold": None,
+            "quantile_statistic_interpolation_method": "auto",
+            "quantile_bias_correction": True,
+            "quantile_bias_std_error_ratio_threshold": 0.25,
         },
         rules={
             "column_quantiles_rule": {
