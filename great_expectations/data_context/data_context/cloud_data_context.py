@@ -318,14 +318,11 @@ class CloudDataContext(AbstractDataContext):
         """
 
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(config)
+        datasource_config.name = name
 
         if save_changes:
 
-            datasource_config["name"] = name
-            resource_ref: GeCloudResourceRef = self._datasource_store.create(
-                datasource_config
-            )
-            datasource_config.id_ = resource_ref.ge_cloud_id
+            datasource_config = self._datasource_store.set(datasource_config)
 
         self.config.datasources[name] = datasource_config
 

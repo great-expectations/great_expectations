@@ -172,22 +172,36 @@ class DatasourceStore(Store):
         )
         self.set(datasource_key, datasource_config)
 
-    def create(
-        self, datasource_config: DatasourceConfig
-    ) -> Optional[GeCloudResourceRef]:
-        """Create a datasource config in the store using a store_backend-specific key.
-
-        Args:
-            datasource_config: Config containing the datasource name.
-
-        Returns:
-            None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
-            which was used to create the config in the backend.
-        """
+    def set(self, config: DatasourceConfig) -> DatasourceConfig:
+        """Create a datasource config in the store using a store_backend-specific key."""
         key: Union[
             GeCloudIdentifier, DataContextVariableKey
-        ] = self._build_key_from_config(datasource_config)
-        return self.set(key, datasource_config)
+        ] = self._build_key_from_config(config)
+
+        identifier: Optional[Union[bool, GeCloudResourceRef]] = super().set(key, config)
+        if isinstance(identifier, GeCloudResourceRef):
+            config.id_ = identifier.ge_cloud_id
+
+        return config
+
+    # def _create(
+    #     self, datasource_config: DatasourceConfig
+    # ) -> DatasourceConfig:
+    #     # """Create a datasource config in the store using a store_backend-specific key.
+    #     #
+    #     # Args:
+    #     #     datasource_config: Config containing the datasource name.
+    #     #
+    #     # Returns:
+    #     #     None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
+    #     #     which was used to create the config in the backend.
+    #     # """
+    #     # key: Union[
+    #     #     GeCloudIdentifier, DataContextVariableKey
+    #     # ] = self._build_key_from_config(datasource_config)
+    #     # config = self.set(key, datasource_config)
+    #     self._create(datasource_config)
+    #     return DatasourceConfig(**config)
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
