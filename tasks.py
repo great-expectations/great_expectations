@@ -224,7 +224,7 @@ def get_usage_stats_json(ctx):
     print(f"File written to '{outfile}'.")
 
 
-@invoke.task(get_usage_stats_json, aliases=["move-stats"])
+@invoke.task(pre=[get_usage_stats_json], aliases=["move-stats"])
 def mv_usage_stats_json(ctx):
     """
     Use databricks-cli lib to move usage stats event examples to dbfs:/
