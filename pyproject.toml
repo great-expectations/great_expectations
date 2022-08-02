@@ -8,6 +8,7 @@ extend_excludes = '''(docs/.*|tests/.*.fixture|.*.ge_store_backend_id)'''
 [tool.isort]
 profile = "black"
 skip_gitignore = true
+extend_skip_glob = ['venv/*', 'docs/*']
 
 [tool.pytest.ini_options]
 filterwarnings = [
