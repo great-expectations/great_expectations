@@ -697,20 +697,20 @@ def _determine_quantile_bias_corrected_point_estimate(
     # See:
     # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
     #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
-    quantile_bias_corrected_point_estimate: np.float64
+    # quantile_bias_corrected_point_estimate: np.float64
+    #
+    # if (
+    #     bootstrap_quantile_standard_error > 0.0
+    #     and bootstrap_quantile_bias / bootstrap_quantile_standard_error
+    #     <= quantile_bias_std_error_ratio_threshold
+    # ):
+    #     quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate
+    # else:
+    #     quantile_bias_corrected_point_estimate = (
+    #         bootstrap_quantile_point_estimate - bootstrap_quantile_bias
+    #     )
 
-    if (
-        bootstrap_quantile_standard_error > 0.0
-        and bootstrap_quantile_bias / bootstrap_quantile_standard_error
-        <= quantile_bias_std_error_ratio_threshold
-    ):
-        quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate
-    else:
-        quantile_bias_corrected_point_estimate = (
-            bootstrap_quantile_point_estimate - bootstrap_quantile_bias
-        )
-
-    return quantile_bias_corrected_point_estimate
+    return bootstrap_quantile_point_estimate
 
 
 def get_validator_with_expectation_suite(
