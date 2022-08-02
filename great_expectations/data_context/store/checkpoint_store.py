@@ -15,7 +15,10 @@ from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfigDefaults,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import (
+    GeCloudIdAwareRef,
+    GeCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -187,7 +190,11 @@ class CheckpointStore(ConfigurationStore):
 
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        self.set(key, checkpoint_config)
+        ref: Optional[GeCloudResourceRef] = self.set(key, checkpoint_config)
+        if ref:
+            assert isinstance(key, GeCloudIdentifier)
+            key.ge_cloud_id = ref.ge_cloud_id
+
         config = self.get(key=key)
 
         return config
