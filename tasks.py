@@ -180,7 +180,7 @@ def get_usage_stats_json(ctx):
     """
     if not is_ge_installed:
         print(
-            "This invoke task requires GE to be installed in the environment. Please try again"
+            "This invoke task requires Great Expecations to be installed in the environment. Please try again."
         )
         return
     events = usage_stats_utils.get_usage_stats_example_events()
@@ -200,7 +200,7 @@ def mv_usage_stats_json(ctx):
     """
     if not is_ge_installed:
         print(
-            "This invoke task requires GE to be installed in the environment. Please try again"
+            "This invoke task requires Great Expectations to be installed in the environment. Please try again."
         )
         return
 
