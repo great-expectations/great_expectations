@@ -1903,7 +1903,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
 
     value_ranges_expected = [
         [
-            5.85,
+            5.94,
             6.5,
         ],
         [
@@ -1911,7 +1911,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             9.56,
         ],
         [
-            13.35,
+            13.44,
             15.62,
         ],
     ]
