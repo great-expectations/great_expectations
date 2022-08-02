@@ -7,6 +7,7 @@ import pathlib
 import random
 import shutil
 import warnings
+from dataclasses import dataclass
 from typing import Dict, List, Optional
 from unittest import mock
 
@@ -252,29 +253,37 @@ def pytest_generate_tests(metafunc):
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption("--aws-integration"):
-        # --aws-integration given in cli: do not skip aws-integration tests
-        return
-    if config.getoption("--docs-tests"):
-        # --docs-tests given in cli: do not skip documentation integration tests
-        return
-    if config.getoption("--cloud"):
-        # --cloud given in cli: do not skip GX Cloud integration tests
-        return
+    @dataclass
+    class Category:
+        mark: str
+        flag: str
+        reason: str
 
-    skip_aws_integration = pytest.mark.skip(
-        reason="need --aws-integration option to run"
+    categories = (
+        Category(
+            mark="aws_integration",
+            flag="--aws-integration",
+            reason="need --aws-integration option to run",
+        ),
+        Category(
+            mark="docs",
+            flag="--docs-tests",
+            reason="need --docs-tests option to run",
+        ),
+        Category(mark="cloud", flag="--cloud", reason="need --cloud option to run"),
     )
-    skip_docs_integration = pytest.mark.skip(reason="need --docs-tests option to run")
-    skip_cloud = pytest.mark.skip(reason="need --cloud option to run")
 
-    for item in items:
-        if "aws_integration" in item.keywords:
-            item.add_marker(skip_aws_integration)
-        if "docs" in item.keywords:
-            item.add_marker(skip_docs_integration)
-        if "cloud" in item.keywords:
-            item.add_marker(skip_cloud)
+    for category in categories:
+        # If flag is provided, exit early so we don't add `pytest.mark.skip`
+        if config.getoption(category.flag):
+            continue
+
+        # For each test collected, check if they use a mark that matches our flag name.
+        # If so, add a `pytest.mark.skip` dynamically.
+        for item in items:
+            if category.mark in item.keywords:
+                marker = pytest.mark.skip(reason=category.reason)
+                item.add_marker(marker)
 
 
 @pytest.fixture(autouse=True)

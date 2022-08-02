@@ -10,7 +10,7 @@ import warnings
 from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
-from typing import List
+from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
 
@@ -343,7 +343,9 @@ class DataAsset:
         return outer_wrapper
 
     def _initialize_expectations(
-        self, expectation_suite=None, expectation_suite_name=None
+        self,
+        expectation_suite: Union[Dict, ExpectationSuite, None] = None,
+        expectation_suite_name: Optional[str] = None,
     ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
@@ -372,7 +374,7 @@ class DataAsset:
                 expectation_suite_dict: dict = expectationSuiteSchema.load(
                     expectation_suite
                 )
-                expectation_suite: ExpectationSuite = ExpectationSuite(
+                expectation_suite = ExpectationSuite(
                     **expectation_suite_dict, data_context=self._data_context
                 )
             else:
