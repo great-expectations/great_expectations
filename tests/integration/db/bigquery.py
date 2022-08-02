@@ -125,10 +125,10 @@ batch_request_without_temp_table: RuntimeBatchRequest = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "default_identifier"},
     batch_spec_passthrough={
         "create_temp_table": False
-    },  # this is the name of the table you would like to use a 'temp_table'
+    },
 )
 validator_without_temp_table = context.get_validator(
-    batch_request=batch_request_without_temp_table, expectation_suite_name="test_suit_2"
+    batch_request=batch_request_without_temp_table, expectation_suite_name="test_suite_2"
 )
 
 assert validator.head(n_rows=5, fetch_all=False)
