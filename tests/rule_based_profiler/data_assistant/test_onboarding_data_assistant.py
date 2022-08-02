@@ -528,7 +528,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics()
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 85
+    assert len(column_domain_charts) == 100
 
     columns: List[str] = [
         "VendorID",
