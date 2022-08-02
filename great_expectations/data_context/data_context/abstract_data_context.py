@@ -642,6 +642,7 @@ class AbstractDataContext(ABC):
         if save_changes:
             self._datasource_store.delete_by_name(datasource_name)
         self._cached_datasources.pop(datasource_name, None)
+        self.config.datasources.pop(datasource_name, None)
 
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None
@@ -980,6 +981,7 @@ class AbstractDataContext(ABC):
     def delete_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
 
