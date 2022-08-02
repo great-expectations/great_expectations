@@ -1,6 +1,8 @@
 [build-sytem]
 requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+# uncomment to enable pep517 after versioneer problem is fixed.
+# https://github.com/python-versioneer/python-versioneer/issues/193
+# build-backend = "setuptools.build_meta"
 
 [tool.black]
 extend_excludes = '''(docs/.*|tests/.*.fixture|.*.ge_store_backend_id)'''
