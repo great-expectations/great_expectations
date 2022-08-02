@@ -642,6 +642,7 @@ class AbstractDataContext(ABC):
         if save_changes:
             self._datasource_store.delete_by_name(datasource_name)
         self._cached_datasources.pop(datasource_name, None)
+        self.config.datasources.pop(datasource_name, None)
 
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None
