@@ -158,12 +158,6 @@ def type_check(
     clear_cache=False,
 ):
     """Run mypy static type-checking on select packages."""
-    if show_default_packages:
-        # Use this to keep the Type-checking section of the docs up to date.
-        # https://docs.greatexpectations.io/docs/contributing/style_guides/code_style#type-checking
-        print("\n".join(DEFAULT_PACKAGES_TO_TYPE_CHECK))
-        raise invoke.Exit(code=0)
-
     if clear_cache:
         mypy_cache = pathlib.Path(".mypy_cache")
         print(f"  Clearing {mypy_cache} ... ", end="")
@@ -172,6 +166,12 @@ def type_check(
             print("✅"),
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
+
+    if show_default_packages:
+        # Use this to keep the Type-checking section of the docs up to date.
+        # https://docs.greatexpectations.io/docs/contributing/style_guides/code_style#type-checking
+        print("\n".join(DEFAULT_PACKAGES_TO_TYPE_CHECK))
+        raise invoke.Exit(code=0)
 
     if daemon:
         bin = "dmypy run --"
