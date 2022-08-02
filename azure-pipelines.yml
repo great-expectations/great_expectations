@@ -13,7 +13,7 @@ schedules:
   branches:
     include:
     - develop
-  always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
+  always: false # Will only trigger if the state of the codebase has changed since the last scheduled run
 
 trigger:
   tags:
@@ -115,6 +115,85 @@ stages:
           # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
+
+  - stage: docker_tests
+    dependsOn: [lint, custom_checks]
+    condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+      - job: build_push_test_
+        timeoutInMinutes: 120
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        services:
+          postgres: postgres
+        variables:
+          DOCKER_TAG: none
+        steps:
+          - bash: |
+              EPOCH=`date +%s`
+              TAG="$(python.version)_develop_${EPOCH}_${RANDOM}"
+              # We repull the develop branch. We could build the local branch that is already present but we should
+              # prune it's depth since we don't need the git history.
+              CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${TAG} --target azure --build-arg PYTHON_VERSION=$(python.version) --build-arg SOURCE=github --build-arg BRANCH=develop ."
+              echo ${CMD}
+              eval ${CMD}
+              # Set this variable so other steps can read it.
+              echo "##vso[task.setvariable variable=DOCKER_TAG]${TAG}"
+            displayName: 'Build $(python.version)'
+
+          - bash: |
+              docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
+              PUSH="docker push greatexpectations/test:${DOCKER_TAG}"
+              echo ${PUSH}
+              eval ${PUSH}
+              echo "Docker image can be found at https://hub.docker.com/r/greatexpectations/test/tags"
+              echo "Pull it locally using: docker pull greatexpectations/test:${DOCKER_TAG}"
+            displayName: 'Push $(python.version)'
+            env:
+              DOCKER_USER: $(DOCKER_USER)
+              DOCKER_TOKEN: $(DOCKER_TOKEN)
+
+          - bash: |
+              PULL="docker pull greatexpectations/test:$(DOCKER_TAG)"
+              echo ${PULL}
+              eval ${PULL}
+              mkdir coverage
+              PYTEST="docker run --network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
+              PYTEST+="-e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) -e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) "
+              PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) greatexpectations/test:$(DOCKER_TAG) "
+              PYTEST+="/bin/bash -c \"pytest --postgresql --spark --cloud --napoleon-docstrings --no-docker-discovery "
+              # We should be able to specify --cov-report=xml:path but this doesn't work so we write to the default
+              # path and then mv it.
+              PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
+              PYTEST+="--ignore=tests/cli --ignore=tests/integration/usage_statistics "
+              PYTEST+="&& mv coverage.xml /coverage/coverage.xml\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
+            displayName: 'pytest $(python.version)'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '$(System.DefaultWorkingDirectory)/coverage/**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/coverage/htmlcov'
 
   - stage: import_ge
     dependsOn: [lint]
