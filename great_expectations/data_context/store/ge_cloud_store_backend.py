@@ -148,17 +148,16 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _get(self, key: Tuple[str, ...]) -> dict:
         ge_cloud_url = self.get_url_for_key(key=key)
+        params: Optional[dict] = None
         try:
-            params: dict
             # if name is included in the key, add as a param
             if len(key) > 2 and key[2]:
                 params = {"name": key[2]}
                 ge_cloud_url = ge_cloud_url.rstrip("/")
-                response = requests.get(
-                    ge_cloud_url, headers=self.auth_headers, params=params
-                )
-            else:
-                response = requests.get(ge_cloud_url, headers=self.auth_headers)
+
+            response = requests.get(
+                ge_cloud_url, headers=self.auth_headers, params=params
+            )
             return response.json()
         except JSONDecodeError as jsonError:
             logger.debug(

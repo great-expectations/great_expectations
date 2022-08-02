@@ -95,6 +95,7 @@ def test_datasource_store_get_by_id(
         mock_get.assert_called_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id_}",
             headers=request_headers,
+            params=None,
         )
 
 
