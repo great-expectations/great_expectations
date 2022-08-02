@@ -23,7 +23,7 @@ from great_expectations.rule_based_profiler.types import (
 
 
 class ExpectTableColumnsToMatchSet(TableExpectation):
-    """Expect the columns to exactly match an *unordered* set.
+    """Expect the columns to match an *unordered* set.
 
     expect_table_columns_to_match_set is a :func:`expectation \
     <great_expectations.validator.validator.Validator.expectation>`, not a
@@ -31,7 +31,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
 
     Args:
         column_set (list of str): \
-            The column names, in the correct order.
+            The column names, in any order.
         exact_match (boolean): \
             Whether the list of columns must exactly match the observed columns.
 
@@ -83,7 +83,6 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         mean_table_columns_set_match_multi_batch_parameter_builder_config,

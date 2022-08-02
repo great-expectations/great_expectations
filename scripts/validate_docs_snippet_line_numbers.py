@@ -49,7 +49,7 @@ def collect_docusaurus_refs(directory: str) -> Dict[str, List[DocusaurusRef]]:
     """
     docusaurus_refs: Dict[str, List[DocusaurusRef]] = defaultdict(list)
     for file in glob.glob(f"{directory}/**/*.md", recursive=True):
-        logger.debug("Checking %s for Docusaurus links", file)
+        logger.debug(f"Checking {file} for Docusaurus links")
         _collect_docusaurus_refs(file=file, reference_map=docusaurus_refs)
 
     return docusaurus_refs
@@ -69,8 +69,7 @@ def _collect_docusaurus_refs(
         )
         reference_map[docusaurus_ref.py_file].append(docusaurus_ref)
         logger.debug(
-            "Create association between %s and the docs that use it",
-            docusaurus_ref.py_file,
+            f"Create association between {docusaurus_ref.py_file} and the docs that use it"
         )
 
 
@@ -98,10 +97,7 @@ def evaluate_snippet_validity(
     """
     all_broken_refs: List[DocusaurusRef] = []
     for docs_file, ref_list in docusaurus_refs.items():
-        logger.debug(
-            "Checking %s for snippet validity",
-            docs_file,
-        )
+        logger.debug(f"Checking {docs_file} for snippet validity")
         file_broken_refs: List[DocusaurusRef] = _evaluate_snippet_validity(
             docs_file, ref_list
         )
@@ -130,7 +126,7 @@ def _validate_docusaurus_ref(
     start_line, end_line = docusaurus_ref.line_numbers
     if start_line > len(file_contents) or end_line > len(file_contents):
         logger.warning(
-            "Invalid snippet due to out-of-bounds reference: %s", docusaurus_ref
+            f"Invalid snippet due to out-of-bounds reference: {docusaurus_ref}"
         )
         return False
 

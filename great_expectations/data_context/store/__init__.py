@@ -14,6 +14,7 @@ from .tuple_store_backend import (  # isort:skip
     TupleAzureBlobStoreBackend,
 )
 from .database_store_backend import DatabaseStoreBackend  # isort:skip
+from .inline_store_backend import InlineStoreBackend  # isort:skip
 from .configuration_store import ConfigurationStore  # isort:skip
 from .checkpoint_store import CheckpointStore  # isort:skip
 from .metric_store import (  # isort:skip
@@ -24,23 +25,6 @@ from .expectations_store import ExpectationsStore  # isort:skip
 from .validations_store import ValidationsStore  # isort:skip
 from .query_store import SqlAlchemyQueryStore  # isort:skip
 from .html_site_store import HtmlSiteStore  # isort:skip
+from .datasource_store import DatasourceStore  # isort:skip
 from .profiler_store import ProfilerStore  # isort:skip
-
-
-for module_name in (
-    ".store",
-    ".validations_store",
-    ".configuration_store",
-    ".expectations_store",
-    ".html_site_store",
-    ".profiler_store",
-    ".metric_store",
-    ".checkpoint_store",
-    ".store_backend",
-    ".tuple_store_backend",
-    ".database_store_backend",
-    ".ge_cloud_store_backend",
-):
-    verify_dynamic_loading_support(
-        module_name=module_name, package_name="great_expectations.data_context.store"
-    )
+from .data_context_store import DataContextStore  # isort:skip

@@ -265,6 +265,7 @@ def pytest_generate_tests(metafunc):
 
 
 @pytest.mark.order(index=1)
+@pytest.mark.integration
 def test_case_runner(test_case):
     if test_case["skip"]:
         pytest.skip()

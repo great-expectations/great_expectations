@@ -10,7 +10,7 @@ import warnings
 from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
-from typing import List
+from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
 
@@ -330,7 +330,10 @@ class DataAsset:
 
                 return_obj = recursively_convert_to_json_serializable(return_obj)
 
-                if self._data_context is not None:
+                # NOTE: <DataContextRefactor> Indirect way to checking whether _data_context is a ExplorerDataContext
+                if self._data_context is not None and hasattr(
+                    self._data_context, "update_return_obj"
+                ):
                     return_obj = self._data_context.update_return_obj(self, return_obj)
 
                 return return_obj
@@ -340,7 +343,9 @@ class DataAsset:
         return outer_wrapper
 
     def _initialize_expectations(
-        self, expectation_suite=None, expectation_suite_name=None
+        self,
+        expectation_suite: Union[Dict, ExpectationSuite, None] = None,
+        expectation_suite_name: Optional[str] = None,
     ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
@@ -369,7 +374,7 @@ class DataAsset:
                 expectation_suite_dict: dict = expectationSuiteSchema.load(
                     expectation_suite
                 )
-                expectation_suite: ExpectationSuite = ExpectationSuite(
+                expectation_suite = ExpectationSuite(
                     **expectation_suite_dict, data_context=self._data_context
                 )
             else:
@@ -613,9 +618,8 @@ class DataAsset:
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (
-                " Omitting %d expectation(s) that failed when last run; set "
+                f" Omitting {discards['failed_expectations']} expectation(s) that failed when last run; set "
                 "discard_failed_expectations=False to include them."
-                % discards["failed_expectations"]
             )
 
         for expectation in expectations:
@@ -853,8 +857,7 @@ class DataAsset:
                     raise
                 except OSError:
                     raise GreatExpectationsError(
-                        "Unable to load expectation suite: IO error while reading %s"
-                        % expectation_suite
+                        f"Unable to load expectation suite: IO error while reading {expectation_suite}"
                     )
             elif isinstance(expectation_suite, dict):
                 expectation_suite_dict: dict = expectation_suite

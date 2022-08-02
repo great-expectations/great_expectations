@@ -337,8 +337,10 @@ data_connectors:
       pattern: (.*)
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset_name:
+        batch_identifiers:
+          - runtime_batch_identifier_name
 """'''
 
     def prompt(self) -> None:

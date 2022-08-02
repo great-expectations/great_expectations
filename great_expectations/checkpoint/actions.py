@@ -1063,7 +1063,7 @@ class UpdateDataDocsAction(ValidationAction):
             )
 
         # TODO Update for RenderedDataDocs
-        # build_data_docs will return the index page for the validation results, but we want to return the url for the valiation result using the code below
+        # build_data_docs will return the index page for the validation results, but we want to return the url for the validation result using the code below
         self.data_context.build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[

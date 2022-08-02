@@ -5,7 +5,7 @@ parameters:
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
-      timeoutInMinutes: 75
+      timeoutInMinutes: 120
       displayName: full${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
@@ -39,6 +39,7 @@ jobs:
             reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
     - job:
+      timeoutInMinutes: 120
       displayName: lightweight${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0

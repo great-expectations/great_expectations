@@ -18,7 +18,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     materialize_batch_request,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -83,11 +83,6 @@ def get_validator(
             variables=variables,
             parameters=parameters,
         )
-
-        validator = data_context.get_validator(
-            batch_request=batch_request,
-            create_expectation_suite_with_name=expectation_suite_name,
-        )
     else:
         num_batches: int = len(batch_list)
         if num_batches == 0:
@@ -96,16 +91,19 @@ def get_validator(
 """
             )
 
-        expectation_suite: ExpectationSuite = data_context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        validator = data_context.get_validator_using_batch_list(
-            expectation_suite=expectation_suite,
-            batch_list=batch_list,
-        )
+    validator = get_validator_with_expectation_suite(
+        data_context=data_context,
+        batch_list=batch_list,
+        batch_request=batch_request,
+        expectation_suite=None,
+        expectation_suite_name=expectation_suite_name,
+        component_name=f"rule_based_profiler-{expectation_suite_name}",
+        persist=False,
+    )
 
     # Always disabled for RBP and DataAssistants due to volume of metric calculations
     validator.show_progress_bars = False
+
     return validator
 
 
@@ -464,7 +462,7 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
                 SemanticDomainTypes.LOGIC,
                 SemanticDomainTypes.IDENTIFIER,
             ]
-            for semantic_domain_type in (inferred_semantic_domain_type.values())
+            for semantic_domain_type in inferred_semantic_domain_type.values()
         ]
     )
 
@@ -486,17 +484,19 @@ def compute_quantiles(
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
-    return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
-        value_range=np.asarray([lower_quantile, upper_quantile]),
+
+    return build_numeric_range_estimation_result(
+        metric_values=metric_values,
+        min_value=lower_quantile,
+        max_value=upper_quantile,
     )
 
 
 def compute_kde_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-    quantile_statistic_interpolation_method: str,
     n_resamples: int,
+    quantile_statistic_interpolation_method: str,
     bw_method: Union[str, float, Callable],
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
@@ -512,12 +512,13 @@ def compute_kde_quantiles_point_estimate(
     Bandwidth Method: https://stats.stackexchange.com/questions/90656/kernel-bandwidth-scotts-vs-silvermans-rules
 
     Args:
+        metric_values: "numpy.ndarray" of "dtype.float" values with elements corresponding to "Batch" data samples.
         false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
             identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
-        quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
-            statistic, used for confidence intervals.
         n_resamples: A positive integer indicating the sample size resulting from the sampling with replacement
             procedure.
+        quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
+            statistic, used for confidence intervals.
         bw_method: The estimator bandwidth as described in:
             https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.gaussian_kde.html
         random_seed: An optional random_seed to pass to "np.random.Generator(np.random.PCG64(random_seed))"
@@ -529,7 +530,7 @@ def compute_kde_quantiles_point_estimate(
     metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
         metric_values, bw_method=bw_method
     )
-    metric_values_gaussian_sample: float
+    metric_values_gaussian_sample: np.ndarray
     if random_seed:
         metric_values_gaussian_sample = metric_values_density_estimate.resample(
             n_resamples,
@@ -540,33 +541,30 @@ def compute_kde_quantiles_point_estimate(
             n_resamples,
         )
 
-    lower_quantile_point_estimate: float = np.quantile(
+    lower_quantile_point_estimate: np.float64 = numpy_quantile(
         metric_values_gaussian_sample,
         q=lower_quantile_pct,
-        interpolation=quantile_statistic_interpolation_method,
+        method=quantile_statistic_interpolation_method,
     )
-    upper_quantile_point_estimate: float = np.quantile(
+    upper_quantile_point_estimate: np.float64 = numpy_quantile(
         metric_values_gaussian_sample,
         q=upper_quantile_pct,
-        interpolation=quantile_statistic_interpolation_method,
+        method=quantile_statistic_interpolation_method,
     )
 
-    return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(
-            a=metric_values_gaussian_sample, bins=NUM_HISTOGRAM_BINS
-        )[0],
-        value_range=[
-            lower_quantile_point_estimate,
-            upper_quantile_point_estimate,
-        ],
+    return build_numeric_range_estimation_result(
+        metric_values=metric_values,
+        min_value=lower_quantile_point_estimate,
+        max_value=upper_quantile_point_estimate,
     )
 
 
 def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-    quantile_statistic_interpolation_method: str,
     n_resamples: int,
+    quantile_statistic_interpolation_method: str,
+    quantile_bias_std_error_ratio_threshold: float,
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
     """
@@ -650,28 +648,26 @@ def compute_bootstrap_quantiles_point_estimate(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
-    lower_quantile_bias_corrected_point_estimate: Number = _determine_quantile_bias_corrected_point_estimate(
+    lower_quantile_bias_corrected_point_estimate: np.float64 = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=lower_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_lower_quantile,
     )
 
-    upper_quantile_bias_corrected_point_estimate: Number = _determine_quantile_bias_corrected_point_estimate(
+    upper_quantile_bias_corrected_point_estimate: np.float64 = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_upper_quantile,
     )
 
-    return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(
-            a=bootstraps.flatten(), bins=NUM_HISTOGRAM_BINS
-        )[0],
-        value_range=[
-            lower_quantile_bias_corrected_point_estimate,
-            upper_quantile_bias_corrected_point_estimate,
-        ],
+    return build_numeric_range_estimation_result(
+        metric_values=metric_values,
+        min_value=lower_quantile_bias_corrected_point_estimate,
+        max_value=upper_quantile_bias_corrected_point_estimate,
     )
 
 
@@ -679,9 +675,10 @@ def _determine_quantile_bias_corrected_point_estimate(
     bootstraps: np.ndarray,
     quantile_pct: float,
     quantile_statistic_interpolation_method: str,
+    quantile_bias_std_error_ratio_threshold: float,
     sample_quantile: np.ndarray,
-) -> Number:
-    bootstrap_quantiles: Union[np.ndarray, Number] = numpy_quantile(
+) -> np.float64:
+    bootstrap_quantiles: Union[np.ndarray, np.float64] = numpy_quantile(
         bootstraps,
         q=quantile_pct,
         axis=1,
@@ -695,31 +692,69 @@ def _determine_quantile_bias_corrected_point_estimate(
     # See:
     # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
     #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
-    quantile_bias_corrected_point_estimate: Number
+    quantile_bias_corrected_point_estimate: np.float64
 
     if (
-        bootstrap_quantile_standard_error > 0
-        and bootstrap_quantile_bias / bootstrap_quantile_standard_error <= 0.25
+        bootstrap_quantile_standard_error > 0.0
+        and bootstrap_quantile_bias / bootstrap_quantile_standard_error
+        <= quantile_bias_std_error_ratio_threshold
     ):
         quantile_bias_corrected_point_estimate = bootstrap_quantile_point_estimate
     else:
         quantile_bias_corrected_point_estimate = (
             bootstrap_quantile_point_estimate - bootstrap_quantile_bias
         )
+
     return quantile_bias_corrected_point_estimate
 
 
+def build_numeric_range_estimation_result(
+    metric_values: np.ndarray,
+    min_value: Number,
+    max_value: Number,
+) -> NumericRangeEstimationResult:
+    """
+    Computes histogram of 1-dimensional set of data points and packages it together with value range as returned output.
+
+    Args:
+        metric_values: "numpy.ndarray" of "dtype.float" values with elements corresponding to "Batch" data samples.
+        min_value: pre-computed supremum of "metric_values" (properly conditioned for output).
+        max_value: pre-computed infimum of "metric_values" (properly conditioned for output).
+
+    Returns:
+        Structured "NumericRangeEstimationResult" object, containing histogram and value_range attributes.
+    """
+    histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
+        a=metric_values, bins=NUM_HISTOGRAM_BINS
+    )
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.vstack(
+            (
+                np.pad(
+                    array=histogram[0],
+                    pad_width=(0, 1),
+                    mode="constant",
+                    constant_values=0,
+                ),
+                histogram[1],
+            )
+        ),
+        value_range=np.asarray([min_value, max_value]),
+    )
+
+
 def get_validator_with_expectation_suite(
-    batch_request: Union[BatchRequestBase, dict],
     data_context: "BaseDataContext",  # noqa: F821
+    batch_list: Optional[List[Batch]] = None,
+    batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
     expectation_suite_name: Optional[str] = None,
     component_name: str = "test",
     persist: bool = False,
 ) -> "Validator":  # noqa: F821
     """
-    Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
-    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    Instantiates and returns "Validator" using "data_context", "batch_list" or "batch_request", and other information.
+    Use "expectation_suite" if provided; otherwise, if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
     """
     assert expectation_suite is None or isinstance(expectation_suite, ExpectationSuite)
@@ -732,9 +767,9 @@ def get_validator_with_expectation_suite(
         component_name=component_name,
         persist=persist,
     )
-
     batch_request = materialize_batch_request(batch_request=batch_request)
     validator: "Validator" = data_context.get_validator(  # noqa: F821
+        batch_list=batch_list,
         batch_request=batch_request,
         expectation_suite=expectation_suite,
     )

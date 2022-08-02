@@ -103,19 +103,21 @@ Note: Splitter methods can be specified with or without a preceding underscore.
 | `split_on_mod_integer`            | `table_name='table', column_name='col', mod=<int>`                       | Rows where value of column_name divided (using modular division) by the given mod are same                                                                                                                 |
 | `split_on_multi_column_values`    | `table_name='table', column_names='<list[col]>'`                         | Rows where values of column_names are same                                                                                                                                                                 |
 | `split_on_converted_datetime`     | `table_name='table', column_name='col', date_format_string=<'%Y-%m-%d'>` | Rows where value of column_name converted to datetime using the given date_format_string are same                                                                                                          |
-| `split_on_hashed_column`          | `column_name='col'`                                                      | Rows where value of column_name hashed (using "md5" hash function) are same (experimental)                                                                                                                 |
+| `split_on_hashed_column`          | `column_name='col', hash_digits=<int>`                                   | Rows where value of column_name hashed (using "md5" hash function) and retaining the stated number of hash_digits are same (experimental)     |
     
 
 
 Available `Sampling` methods and their configuration parameters:
 
+Note: Sampling methods can be specified with or without a preceding underscore.
+
 | Method               | Parameters                                               | Returned Batch Data                                                                                                 |
 |----------------------|----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| `_sample_using_limit`  | `n=num_rows`                                             | First up to to n (specific limit parameter) rows of batch                                                           |
-| `_sample_using_random` | `p=fraction`                                             | Rows selected at random, whose number amounts to selected fraction of total number of rows in batch                 |
-| `_sample_using_mod`    | `column_name='col', mod=<int>`                           | Take the mod of named column, and only keep rows that match the given value                                         |
-| `_sample_using_a_list` | `column_name='col', value_list=<list[val]>`              | Match the values in the named column against value_list, and only keep the matches                                  |
-| `_sample_using_hash`   | `column_name='col', hash_digits=<int>, hash_value=<str>` | Hash the values in the named column (using "md5" hash function), and only keep rows that match the given hash_value |
+| `sample_using_limit`  | `n=num_rows`                                             | First up to to n (specific limit parameter) rows of batch                                                           |
+| `sample_using_random` | `p=fraction`                                             | Rows selected at random, whose number amounts to selected fraction of total number of rows in batch                 |
+| `sample_using_mod`    | `column_name='col', mod=<int>`                           | Take the mod of named column, and only keep rows that match the given value                                         |
+| `sample_using_a_list` | `column_name='col', value_list=<list[val]>`              | Match the values in the named column against value_list, and only keep the matches                                  |
+| `sample_using_hash`   | `column_name='col', hash_digits=<int>, hash_value=<str>` | Hash the values in the named column (using "md5" hash function), and only keep rows that match the given hash_value |
 
 
 To view the full script used in this page, see it on GitHub:

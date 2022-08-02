@@ -30,10 +30,10 @@ class ConfigPeer(ABC):
 
     # TODO: <Alex>2/11/2022</Alex>
     When -- as part of a potential future architecture update -- serialization is decoupled from configuration, the
-    configuration objects, persitable as YAML files, will no longer inherit from the BaseYamlConfig class.  Rather,
+    configuration objects, persistable as YAML files, will no longer inherit from the BaseYamlConfig class.  Rather,
     any form of serialization (YAML, JSON, SQL Database Tables, Pickle, etc.) will apply as peers, independent of the
     configuration classes themselves.  Hence, as part of this change, ConfigPeer will cease being the superclass of
-    business objects (such as BaseDataContext, BaseCheckpoint, and BaseRuleBasedProfiler).  Instead, every persitable
+    business objects (such as BaseDataContext, BaseCheckpoint, and BaseRuleBasedProfiler).  Instead, every persistable
     business object will contain a reference to its corresponding peer class, supporting the ConfigPeer interfaces.
     """
 

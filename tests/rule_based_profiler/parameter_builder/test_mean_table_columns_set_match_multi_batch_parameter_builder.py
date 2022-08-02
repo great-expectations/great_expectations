@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
 from great_expectations import DataContext
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -53,7 +53,6 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=None,
-            json_serialize=True,
             data_context=data_context,
         )
     )
@@ -106,7 +105,7 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=mean_table_columns_set_match_multi_batch_parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=mean_table_columns_set_match_multi_batch_parameter_builder.json_serialized_fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,

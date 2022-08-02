@@ -7,6 +7,9 @@ from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import ConfigurationStore
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfigDefaults,
@@ -50,7 +53,8 @@ class CheckpointStore(ConfigurationStore):
         )
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
-                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+                resource_type=GeCloudRESTResource.CONTRACT,
+                ge_cloud_id=str(uuid.uuid4()),
             )
         else:
             test_key: ConfigurationIdentifier = self.key_class(

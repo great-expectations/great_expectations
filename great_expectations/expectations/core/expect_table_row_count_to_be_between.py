@@ -8,7 +8,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
-    parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 from great_expectations.rule_based_profiler.config import (
@@ -93,21 +92,22 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="table_row_count_range_estimator",
         metric_name="table.row_count",
+        metric_multi_batch_parameter_builder_name=None,
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=True,
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
         false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
         estimator=f"{VARIABLES_KEY}estimator",
         n_resamples=f"{VARIABLES_KEY}n_resamples",
         random_seed=f"{VARIABLES_KEY}random_seed",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
         include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         table_row_count_range_estimator_parameter_builder_config,
@@ -120,10 +120,11 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "default_expect_table_row_count_to_be_between_rule": {
                 "variables": {
                     "false_positive_rate": 0.05,
-                    "quantile_statistic_interpolation_method": "auto",
                     "estimator": "bootstrap",
                     "n_resamples": 9999,
                     "random_seed": None,
+                    "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_std_error_ratio_threshold": 0.25,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": 0,
@@ -205,8 +206,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             [
                 "min_value",
                 "max_value",
-                "row_condition",
-                "condition_parser",
                 "strict_min",
                 "strict_max",
             ],
@@ -220,10 +219,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "max_value": {
                 "schema": {"type": "number"},
                 "value": params.get("max_value"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
             },
             "strict_min": {
                 "schema": {"type": "boolean"},
@@ -246,21 +241,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
 
@@ -286,8 +266,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             [
                 "min_value",
                 "max_value",
-                "row_condition",
-                "condition_parser",
                 "strict_min",
                 "strict_max",
             ],
@@ -304,19 +282,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(

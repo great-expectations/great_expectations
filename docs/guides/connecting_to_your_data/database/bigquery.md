@@ -104,6 +104,12 @@ Feel free to adjust your configuration and re-run `test_yaml_config` as needed.
 
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
+:::note
+
+In order to support tables that are created as the result of queries in BigQuery, Great Expectations previously asked users to define a named permanent table to be used as a "temporary" table that could later be deleted, or set to expire by the database. This is no longer the case, and Great Expectations will automatically set tables that are created as the result of queries to expire after 1 day. 
+
+:::
+
 <Tabs
   groupId="yaml-or-python"
   defaultValue='yaml'

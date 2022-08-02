@@ -14,6 +14,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -75,15 +76,18 @@ class BaseYamlConfig(SerializableDictDot):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."
             )
+
         if not issubclass(cls.get_config_class(), BaseYamlConfig):
             raise ge_exceptions.InvalidConfigError(
                 "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
             )
+
         if hasattr(cls.get_config_class(), "_schema_instance"):
             # noinspection PyProtectedMember
-            schema_instance: Schema = cls.get_config_class()._schema_instance
+            schema_instance: Optional[Schema] = cls.get_config_class()._schema_instance
             if schema_instance is None:
                 cls.get_config_class()._schema_instance = (cls.get_schema_class())()
+                return cls.get_config_class().schema_instance
             else:
                 return schema_instance
         else:
@@ -91,13 +95,13 @@ class BaseYamlConfig(SerializableDictDot):
             return cls.get_config_class().schema_instance
 
     @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap):
+    def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
         try:
-            config: Union[dict, BaseYamlConfig] = cls._get_schema_instance().load(
-                commented_map
-            )
+            schema_instance: Any = cls._get_schema_instance()
+            config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
+
             return config
         except ValidationError:
             logger.error(
@@ -107,10 +111,11 @@ class BaseYamlConfig(SerializableDictDot):
 
     def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
         commented_map: CommentedMap = copy.deepcopy(self._commented_map)
-        commented_map.update(self._get_schema_instance().dump(self))
+        schema_validated_map: dict = self._get_schema_instance().dump(self)
+        commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile) -> None:
+    def to_yaml(self, outfile: str) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
@@ -134,15 +139,15 @@ class BaseYamlConfig(SerializableDictDot):
         return self._get_schema_validated_updated_commented_map()
 
     @classmethod
-    def get_config_class(cls) -> None:
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         raise NotImplementedError
 
     @classmethod
-    def get_schema_class(cls) -> None:
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         raise NotImplementedError
 
 
-class AssetConfig(DictDot):
+class AssetConfig(SerializableDictDot):
     def __init__(
         self,
         name: Optional[str] = None,
@@ -197,6 +202,18 @@ class AssetConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
 
 class AssetConfigSchema(Schema):
@@ -342,7 +359,7 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class DataConnectorConfig(DictDot):
+class DataConnectorConfig(SerializableDictDot):
     def __init__(
         self,
         class_name,
@@ -432,6 +449,18 @@ class DataConnectorConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
 
 class DataConnectorConfigSchema(Schema):
@@ -796,10 +825,15 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(DictDot):
+class DatasourceConfig(AbstractConfig):
     def __init__(
         self,
-        class_name=None,
+        name: Optional[
+            str
+        ] = None,  # Note: name is optional currently to avoid updating all documentation within
+        # the scope of this work.
+        id_: Optional[str] = None,
+        class_name: Optional[str] = None,
         module_name: str = "great_expectations.datasource",
         execution_engine=None,
         data_connectors=None,
@@ -818,6 +852,8 @@ class DatasourceConfig(DictDot):
         limit=None,
         **kwargs,
     ) -> None:
+
+        super().__init__(id_=id_, name=name)
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
@@ -880,10 +916,33 @@ class DatasourceConfig(DictDot):
     def module_name(self):
         return self._module_name
 
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
 
 class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
+
+    # Note: name is optional currently to avoid updating all documentation within
+    # the scope of this work.
+    name = fields.String(
+        required=False,
+        allow_none=True,
+    )
+    id_ = fields.String(
+        required=False,
+        allow_none=True,
+    )
 
     class_name = fields.String(
         required=False,
@@ -896,9 +955,7 @@ class DatasourceConfigSchema(Schema):
         missing="great_expectations.datasource",
     )
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
-    spark_config = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
+    spark_config = fields.Raw(required=False, allow_none=True)
     execution_engine = fields.Nested(
         ExecutionEngineConfigSchema, required=False, allow_none=True
     )
@@ -1343,6 +1400,7 @@ class DataContextConfigSchema(Schema):
         "progress_bars",  # 0.13.49
     ]
 
+    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
         data = copy.deepcopy(data)
@@ -2034,9 +2092,9 @@ class DataContextConfig(BaseYamlConfig):
         validation_operators=None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
-        notebooks=None,
+        notebooks: Optional[NotebookConfig] = None,
         config_variables_file_path: Optional[str] = None,
-        anonymous_usage_statistics=None,
+        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
@@ -2100,16 +2158,20 @@ class DataContextConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls):
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         return cls  # DataContextConfig
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         return DataContextConfigSchema
 
     @property
     def config_version(self):
         return self._config_version
+
+    @config_version.setter
+    def config_version(self, config_version: float) -> None:
+        self._config_version = config_version
 
     def to_json_dict(self) -> dict:
         """
@@ -2163,6 +2225,22 @@ class DataContextConfig(BaseYamlConfig):
         refactoring infeasible at the present time.
         """
         return self.__repr__()
+
+
+class CheckpointValidationConfig(AbstractConfig):
+    def __init__(self, id_: Optional[str] = None, **kwargs: dict) -> None:
+        super().__init__(id_=id_)
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+
+class CheckpointValidationConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    name = fields.String(required=False, allow_none=False)
+    id_ = fields.String(required=False, allow_none=False)
 
 
 class CheckpointConfigSchema(Schema):
@@ -2314,7 +2392,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[List[CheckpointValidationConfig]] = None,
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
@@ -2360,11 +2438,11 @@ class CheckpointConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls) -> type:
+    def get_config_class(cls):  # type: ignore[no-untyped-def]
         return cls  # CheckpointConfig
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls):  # type: ignore[no-untyped-def]
         return CheckpointConfigSchema
 
     @property
@@ -2424,11 +2502,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = value
 
     @property
-    def validations(self) -> List[dict]:
+    def validations(self) -> List[CheckpointValidationConfig]:
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[dict]) -> None:
+    def validations(self, value: List[CheckpointValidationConfig]) -> None:
         self._validations = value
 
     @property
@@ -2606,7 +2684,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[List[CheckpointValidationConfig]] = None,
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
@@ -2637,6 +2715,10 @@ class CheckpointConfig(BaseYamlConfig):
         )
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
+
+        if validations is None:
+            validations = []
+
         validations = get_validations_with_batch_request_as_dict(
             validations=validations
         )
@@ -2700,14 +2782,6 @@ class CheckpointConfig(BaseYamlConfig):
             validation_dict["action_list"] = validation_action_list
 
         return substituted_runtime_config
-
-
-class CheckpointValidationConfig(DictDot):
-    pass
-
-
-class CheckpointValidationConfigSchema(Schema):
-    pass
 
 
 dataContextConfigSchema = DataContextConfigSchema()

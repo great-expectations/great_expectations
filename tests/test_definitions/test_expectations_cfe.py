@@ -1,8 +1,6 @@
 import glob
 import json
 import os
-import random
-import string
 
 import pandas as pd
 import pytest
@@ -347,6 +345,7 @@ def pytest_generate_tests(metafunc):
 
 
 @pytest.mark.order(index=0)
+@pytest.mark.integration
 def test_case_runner_cfe(test_case):
     if test_case["skip"]:
         pytest.skip()

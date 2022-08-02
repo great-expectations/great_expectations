@@ -5,6 +5,7 @@ from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.dataset.util import (
     build_continuous_partition_object,
     is_valid_continuous_partition_object,
+    validate_mostly,
 )
 
 
@@ -50,3 +51,16 @@ def test_build_continuous_partition_object(
     assert np.allclose(partition["weights"], weights / n)
     assert np.allclose(partition["bins"], bin_edges)
     assert is_valid_continuous_partition_object(partition)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("mostly", [0, 0.5, 1])
+def test_validate_mostly_number(mostly):
+    validate_mostly(mostly)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("mostly", [-1, 1.5, "a"])
+def test_validate_mostly_invalid(mostly):
+    with pytest.raises(AssertionError):
+        validate_mostly(mostly)

@@ -130,7 +130,7 @@ rules:
     domain_builder:
       class_name: CategoricalColumnDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
-      limit_mode: VERY_FEW
+      cardinality_limit_mode: VERY_FEW
       exclude_column_names:
         - DOLocationID
         - RatecodeID

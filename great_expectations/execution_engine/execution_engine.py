@@ -9,6 +9,7 @@ import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
@@ -50,13 +51,6 @@ class MetricFunctionTypes(Enum):
     MAP_VALUES = "value"  # "map_values"
     WINDOW_VALUES = "value"  # "window_values"
     AGGREGATE_VALUE = "value"  # "aggregate_value"
-
-
-class MetricDomainTypes(Enum):
-    COLUMN = "column"
-    COLUMN_PAIR = "column_pair"
-    MULTICOLUMN = "multicolumn"
-    TABLE = "table"
 
 
 class DataConnectorStorageDataReferenceResolver:
@@ -179,8 +173,7 @@ class ExecutionEngine(ABC):
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
-                "Unrecognized batch_spec_default(s): %s"
-                % str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)
+                f"Unrecognized batch_spec_default(s): {str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}"
             )
 
         self._batch_spec_defaults = {
@@ -241,8 +234,8 @@ class ExecutionEngine(ABC):
         """The data from the currently-active batch."""
         if self.active_batch_data_id is None:
             return None
-        else:
-            return self.loaded_batch_data_dict.get(self.active_batch_data_id)
+
+        return self.loaded_batch_data_dict.get(self.active_batch_data_id)
 
     @property
     def loaded_batch_data_dict(self):
@@ -609,6 +602,7 @@ class ExecutionEngine(ABC):
                 logger.warning(
                     f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
                 )
+
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod

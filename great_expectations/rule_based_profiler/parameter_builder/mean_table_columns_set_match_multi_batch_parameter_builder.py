@@ -50,7 +50,6 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> None:
         """
@@ -63,7 +62,6 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
@@ -75,7 +73,6 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             replace_nan_with_zero=False,
             reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -98,14 +95,13 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            json_serialize=False,
             recompute_existing_parameter_values=recompute_existing_parameter_values,
         )
 
         # Retrieve "table.columns" metric values for all Batch objects.
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self.fully_qualified_parameter_name,
+            parameter_reference=self.raw_fully_qualified_parameter_name,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
@@ -116,7 +112,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         one_batch_table_columns_names_value: MetricValue
         multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
-            set(one_batch_table_columns_names_value.tolist())
+            set(one_batch_table_columns_names_value)
             for one_batch_table_columns_names_value in table_columns_names_multi_batch_value
         ]
 

@@ -1,10 +1,13 @@
+import logging
 import subprocess
 from collections import defaultdict
 from typing import Dict, List, Optional
 
 TYPE_HINT_ERROR_THRESHOLD: int = (
-    2570  # This number is to be reduced as we annotate more functions!
+    2476  # This number is to be reduced as we annotate more functions!
 )
+
+logger = logging.getLogger(__name__)
 
 
 def get_changed_files(branch: str) -> List[str]:
@@ -56,6 +59,11 @@ def run_mypy(directory: str) -> List[str]:
         universal_newlines=True,
     )
 
+    # Check to make sure `mypy` actually ran
+    err: str = raw_results.stderr
+    if "command not found" in err:
+        raise ValueError(err)
+
     filtered_results: List[str] = _filter_mypy_results(raw_results)
     return filtered_results
 
@@ -103,6 +111,11 @@ def render_deviations(changed_files: List[str], deviations: List[str]) -> None:
     ), f"""A function without proper type annotations was introduced; please resolve the matter before merging.
                 We expect there to be {TYPE_HINT_ERROR_THRESHOLD} or fewer violations of the style guide (actual: {error_count})"""
 
+    if TYPE_HINT_ERROR_THRESHOLD != error_count:
+        logger.warning(
+            f"The threshold needs to be updated! {TYPE_HINT_ERROR_THRESHOLD} should be reduced to {error_count}"
+        )
+
 
 def _build_deviations_dict(mypy_results: List[str]) -> Dict[str, List[str]]:
     deviations_dict: Dict[str, List[str]] = defaultdict(list)
@@ -113,7 +126,11 @@ def _build_deviations_dict(mypy_results: List[str]) -> Dict[str, List[str]]:
     return deviations_dict
 
 
-if __name__ == "__main__":
+def main():
     changed_files: List[str] = get_changed_files("origin/develop")
     untyped_def_deviations: List[str] = run_mypy("great_expectations")
     render_deviations(changed_files, untyped_def_deviations)
+
+
+if __name__ == "__main__":
+    main()

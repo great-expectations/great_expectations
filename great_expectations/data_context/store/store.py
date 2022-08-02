@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.ge_cloud_store_backend import (
@@ -29,7 +29,10 @@ class Store:
     _key_class = DataContextKey
 
     def __init__(
-        self, store_backend=None, runtime_environment=None, store_name="no_store_name"
+        self,
+        store_backend: Optional[dict] = None,
+        runtime_environment: Optional[dict] = None,
+        store_name: str = "no_store_name",
     ) -> None:
         """
         Runtime environment may be necessary to instantiate store backend elements.
@@ -68,7 +71,7 @@ class Store:
         """
         return response_json
 
-    def _validate_key(self, key):
+    def _validate_key(self, key: DataContextKey) -> None:
         # STORE_BACKEND_ID_KEY always validated
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return
@@ -78,15 +81,15 @@ class Store:
             )
 
     @property
-    def ge_cloud_mode(self):
+    def ge_cloud_mode(self) -> bool:
         return isinstance(self._store_backend, GeCloudStoreBackend)
 
     @property
-    def store_backend(self):
+    def store_backend(self) -> StoreBackend:
         return self._store_backend
 
     @property
-    def store_name(self):
+    def store_name(self) -> str:
         return self._store_name
 
     @property
@@ -99,13 +102,13 @@ class Store:
         return self._store_backend.store_backend_id
 
     @property
-    def key_class(self):
+    def key_class(self) -> Type[DataContextKey]:
         if self.ge_cloud_mode:
             return GeCloudIdentifier
         return self._key_class
 
     @property
-    def store_backend_id_warnings_suppressed(self):
+    def store_backend_id_warnings_suppressed(self) -> str:
         """
         Report the store_backend_id of the currently-configured StoreBackend, suppressing warnings for invalid configurations.
         Returns:
@@ -113,17 +116,21 @@ class Store:
         """
         return self._store_backend.store_backend_id_warnings_suppressed
 
+    @property
+    def config(self) -> dict:
+        raise NotImplementedError
+
     # noinspection PyMethodMayBeStatic
-    def serialize(self, key, value):
+    def serialize(self, value: Any) -> Any:
         return value
 
     # noinspection PyMethodMayBeStatic
-    def key_to_tuple(self, key):
+    def key_to_tuple(self, key: DataContextKey) -> Tuple[str, ...]:
         if self._use_fixed_length_key:
             return key.to_fixed_length_tuple()
         return key.to_tuple()
 
-    def tuple_to_key(self, tuple_):
+    def tuple_to_key(self, tuple_: Tuple[str, ...]) -> DataContextKey:
         if tuple_ == StoreBackend.STORE_BACKEND_ID_KEY:
             return StoreBackend.STORE_BACKEND_ID_KEY[0]
         if self._use_fixed_length_key:
@@ -131,10 +138,10 @@ class Store:
         return self.key_class.from_tuple(tuple_)
 
     # noinspection PyMethodMayBeStatic
-    def deserialize(self, key, value):
+    def deserialize(self, value: Any) -> Any:
         return value
 
-    def get(self, key):
+    def get(self, key: DataContextKey) -> Optional[Any]:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
         elif self.ge_cloud_mode:
@@ -148,20 +155,20 @@ class Store:
             value = self._store_backend.get(self.key_to_tuple(key))
 
         if value:
-            return self.deserialize(key, value)
+            return self.deserialize(value)
         else:
             return None
 
-    def set(self, key, value, **kwargs):
+    def set(self, key: DataContextKey, value: Any, **kwargs: dict) -> None:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.set(key, value, **kwargs)
-        else:
-            self._validate_key(key)
-            return self._store_backend.set(
-                self.key_to_tuple(key), self.serialize(key, value), **kwargs
-            )
 
-    def list_keys(self):
+        self._validate_key(key)
+        return self._store_backend.set(
+            self.key_to_tuple(key), self.serialize(value), **kwargs
+        )
+
+    def list_keys(self) -> List[DataContextKey]:
         keys_without_store_backend_id = [
             key
             for key in self._store_backend.list_keys()
@@ -169,7 +176,7 @@ class Store:
         ]
         return [self.tuple_to_key(key) for key in keys_without_store_backend_id]
 
-    def has_key(self, key):
+    def has_key(self, key: DataContextKey) -> bool:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.has_key(key)
         else:
@@ -177,11 +184,7 @@ class Store:
                 return self._store_backend.has_key(key.to_fixed_length_tuple())
             return self._store_backend.has_key(key.to_tuple())
 
-    def self_check(self, pretty_print) -> None:
+    def self_check(self, pretty_print: bool) -> None:
         NotImplementedError(
             f"The test method is not implemented for Store class {self.__class__.__name__}."
         )
-
-    @property
-    def config(self) -> dict:
-        raise NotImplementedError

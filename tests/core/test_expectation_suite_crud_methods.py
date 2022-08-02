@@ -268,12 +268,6 @@ def suite_with_column_pair_and_table_expectations(
 
 
 @pytest.fixture
-def ge_cloud_id():
-    # Fake id but adheres to the format required of a UUID
-    return "731ee1bd-604a-4851-9ee8-bca8ffb32bce"
-
-
-@pytest.fixture
 def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3, empty_data_context_stats_enabled):
     context: DataContext = empty_data_context_stats_enabled
 

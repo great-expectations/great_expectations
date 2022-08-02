@@ -9,3 +9,4 @@ title: "Reference Architectures: Index"
 - [How to Use Great Expectations in Flyte](../deployment_patterns/how_to_use_great_expectations_in_flyte.md)
 - [How to use Great Expectations in Deepnote](../deployment_patterns/how_to_use_great_expectations_in_deepnote.md)
 - [How to Use Great Expectations with Meltano](../deployment_patterns/how_to_use_great_expectations_with_meltano.md)
+- [How to Use Great Expectations with YData-Synthetic](./how_to_use_great_expectations_with_ydata_synthetic.md)

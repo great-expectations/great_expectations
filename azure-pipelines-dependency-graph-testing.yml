@@ -49,6 +49,7 @@ resources:
 variables:
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
+
 stages:
   - stage: scope_check
     pool:
@@ -113,9 +114,16 @@ stages:
     - job: type_hint_checker
       steps:
       - script: |
-          pip install mypy # Prereq for type hint script
-          python scripts/check_type_hint_coverage.py
+          pip install mypy invoke # Prereq for type hint script
+          invoke type-coverage
         name: TypeHintChecker
+
+    - job: static_type_check
+      steps:
+      - script: |
+          pip install mypy invoke
+          invoke type-check --install-types
+        name: StaticTypeCheck
 
     - job: docstring_checker
       steps:
@@ -238,14 +246,17 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
           - task: PublishTestResults@2
@@ -262,20 +273,20 @@ stages:
 
       - job: comprehensive
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 90
+        timeoutInMinutes: 120
 
         services:
           postgres: postgres
 
         variables:
-          GE_pytest_opts: ''
+          GE_pytest_opts: '--postgresql --spark'
 
         strategy:
           matrix:
             Python37:
               python.version: '3.7'
               pandas.version: 'latest'
-              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python38:
               python.version: '3.8'
               pandas.version: 'latest'
@@ -312,14 +323,17 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
           - script: |
@@ -344,8 +358,12 @@ stages:
           - script: |
               # These are tests that are specific to Great Expectations Cloud.
               # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest -m cloud
+              pytest tests -m cloud --cloud
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest-cloud-overrides'
 
           - task: PublishTestResults@2
@@ -402,7 +420,7 @@ stages:
     jobs:
       - job: mysql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 75
+        timeoutInMinutes: 120
 
         services:
           mysql: mysql
@@ -441,19 +459,22 @@ stages:
           - script: |
               # Install dependencies
               pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 75
+        timeoutInMinutes: 120
 
         services:
           mssql: mssql
@@ -481,19 +502,22 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 75
+        timeoutInMinutes: 120
 
         services:
           trino: trino
@@ -528,14 +552,17 @@ stages:
           - script: |
               # Install dependencies
               pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
   - stage: cli_integration
@@ -570,9 +597,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
 
               # Run dgtest
               dgtest run great_expectations --filter 'tests/cli' --aws-integration -v

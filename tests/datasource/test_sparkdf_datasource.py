@@ -103,7 +103,7 @@ def test_force_reuse_spark_context(
     data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
 ):
     """
-    Ensure that using an external sparkSession can be used by specfying the
+    Ensure that an external sparkSession can be reused by specifying the
     force_reuse_spark_context argument.
     """
     if "SparkDFDataset" not in test_backends:
@@ -150,15 +150,17 @@ def test_spark_kwargs_are_passed_through(
 ):
     """
     Ensure that an external SparkSession is not stopped when the spark_config matches
-    the one specfied in the GE Context.
+    the one specified in the GE Context.
     """
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
     dataset_name = "test_spark_dataset"
+
+    spark_config = dict(spark_session.sparkContext.getConf().getAll())
     data_context_parameterized_expectation_suite.add_datasource(
         dataset_name,
         class_name="SparkDFDatasource",
-        spark_config=dict(spark_session.sparkContext.getConf().getAll()),
+        spark_config=spark_config,
         force_reuse_spark_context=False,
         module_name="great_expectations.datasource",
         batch_kwargs_generators={},
@@ -166,10 +168,18 @@ def test_spark_kwargs_are_passed_through(
     datasource_config = data_context_parameterized_expectation_suite.get_datasource(
         dataset_name
     ).config
-    assert datasource_config["spark_config"] == dict(
-        spark_session.sparkContext.getConf().getAll()
-    )
-    assert datasource_config["force_reuse_spark_context"] == False
+
+    actual_spark_config = datasource_config["spark_config"]
+    expected_spark_config = dict(spark_session.sparkContext.getConf().getAll())
+
+    # 20220714 - Chetan `spark.sql.warehouse.dir` intermittently shows up in Spark config
+    # As the rest of the config adheres to expectations, we conditionally pop and assert
+    # against known values in the payload.
+    for config in (actual_spark_config, expected_spark_config):
+        config.pop("spark.sql.warehouse.dir", None)
+
+    assert datasource_config["spark_config"] == expected_spark_config
+    assert datasource_config["force_reuse_spark_context"] is False
 
     dataset_name = "test_spark_dataset_2"
     data_context_parameterized_expectation_suite.add_datasource(
