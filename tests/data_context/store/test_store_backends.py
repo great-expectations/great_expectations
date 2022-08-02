@@ -1427,6 +1427,7 @@ def test_GeCloudStoreBackend():
                 "Content-Type": "application/vnd.api+json",
                 "Authorization": "Bearer 1234",
             },
+            params=None,
         )
 
     # test .list_keys
@@ -1468,7 +1469,7 @@ def test_GeCloudStoreBackend():
             json={
                 "data": {
                     "type": "contract",
-                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "id_": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },
@@ -1523,6 +1524,7 @@ def test_GeCloudStoreBackend():
                 "Content-Type": "application/vnd.api+json",
                 "Authorization": "Bearer 1234",
             },
+            params=None,
         )
 
     # test .list_keys
@@ -1564,7 +1566,7 @@ def test_GeCloudStoreBackend():
             json={
                 "data": {
                     "type": "rendered_data_doc",
-                    "id": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "id_": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },
@@ -1573,6 +1575,24 @@ def test_GeCloudStoreBackend():
                 "Authorization": "Bearer 1234",
             },
         )
+
+
+@pytest.mark.unit
+def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() -> None:
+    ge_cloud_base_url = "https://app.greatexpectations.io/"
+    ge_cloud_credentials = {
+        "access_token": "1234",
+        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+    }
+    ge_cloud_resource_type = "contract"  # Instead of using enum
+
+    my_store_backend = GeCloudStoreBackend(
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_credentials=ge_cloud_credentials,
+        ge_cloud_resource_type=ge_cloud_resource_type,
+    )
+
+    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CONTRACT
 
 
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:

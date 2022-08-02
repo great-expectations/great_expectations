@@ -3,7 +3,8 @@ from unittest import mock
 import pytest
 from ruamel import yaml
 
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import BaseDataContext, DataContext
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import DataContextError, GeCloudError
 
@@ -176,3 +177,48 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
             ge_cloud_organization_id=ge_cloud_runtime_organization_id,
             ge_cloud_access_token=ge_cloud_runtime_access_token,
         )
+
+
+@pytest.mark.cloud
+@pytest.mark.unit
+@mock.patch("requests.get")
+def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
+    mock_request,
+    ge_cloud_base_url,
+    empty_base_data_context_in_cloud_mode_custom_base_url: BaseDataContext,
+    ge_cloud_runtime_organization_id,
+    ge_cloud_runtime_access_token,
+):
+
+    custom_base_url: str = "https://some_url.org"
+    # Ensure that the request goes through
+    mock_request.return_value.status_code = 200
+
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode_custom_base_url
+
+    # Assertions that the context fixture is set up properly
+    assert not context.ge_cloud_config.base_url == GeCloudStoreBackend.DEFAULT_BASE_URL
+    assert not context.ge_cloud_config.base_url == ge_cloud_base_url
+    assert (
+        not context.ge_cloud_config.base_url == "https://app.test.greatexpectations.io"
+    )
+
+    # The DatasourceStore should not have the default base_url or commonly used test base urls
+    assert (
+        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        == GeCloudStoreBackend.DEFAULT_BASE_URL
+    )
+    assert (
+        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        == ge_cloud_base_url
+    )
+    assert (
+        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        == "https://app.test.greatexpectations.io"
+    )
+
+    # The DatasourceStore should have the custom base url set
+    assert (
+        context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        == custom_base_url
+    )

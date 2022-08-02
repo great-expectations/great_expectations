@@ -939,7 +939,7 @@ class DatasourceConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
-    id = fields.String(
+    id_ = fields.String(
         required=False,
         allow_none=True,
     )
@@ -2227,6 +2227,22 @@ class DataContextConfig(BaseYamlConfig):
         return self.__repr__()
 
 
+class CheckpointValidationConfig(AbstractConfig):
+    def __init__(self, id_: Optional[str] = None, **kwargs: dict) -> None:
+        super().__init__(id_=id_)
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+
+class CheckpointValidationConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    name = fields.String(required=False, allow_none=False)
+    id_ = fields.String(required=False, allow_none=False)
+
+
 class CheckpointConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
@@ -2376,7 +2392,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[List[CheckpointValidationConfig]] = None,
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
@@ -2486,11 +2502,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = value
 
     @property
-    def validations(self) -> List[dict]:
+    def validations(self) -> List[CheckpointValidationConfig]:
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[dict]) -> None:
+    def validations(self, value: List[CheckpointValidationConfig]) -> None:
         self._validations = value
 
     @property
@@ -2668,7 +2684,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[List[CheckpointValidationConfig]] = None,
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
@@ -2699,6 +2715,10 @@ class CheckpointConfig(BaseYamlConfig):
         )
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
+
+        if validations is None:
+            validations = []
+
         validations = get_validations_with_batch_request_as_dict(
             validations=validations
         )
@@ -2762,14 +2782,6 @@ class CheckpointConfig(BaseYamlConfig):
             validation_dict["action_list"] = validation_action_list
 
         return substituted_runtime_config
-
-
-class CheckpointValidationConfig(DictDot):
-    pass
-
-
-class CheckpointValidationConfigSchema(Schema):
-    pass
 
 
 dataContextConfigSchema = DataContextConfigSchema()
