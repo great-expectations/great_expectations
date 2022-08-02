@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 from typing import List, Optional, Tuple, Union
 
@@ -90,6 +92,19 @@ class DatasourceStore(Store):
         else:
             return self._schema.loads(value)
 
+    def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
+        """
+        This method takes full json response from GE cloud and outputs a dict appropriate for
+        deserialization into a GE object
+        """
+        datasource_ge_cloud_id: str = response_json["data"]["id_"]
+        datasource_config_dict: dict = response_json["data"]["attributes"][
+            "datasource_config"
+        ]
+        datasource_config_dict["ge_cloud_id"] = datasource_ge_cloud_id
+
+        return datasource_config_dict
+
     def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig:
         """Retrieves a DatasourceConfig persisted in the store by it's given name.
 
@@ -103,8 +118,10 @@ class DatasourceStore(Store):
         Raises:
             ValueError if a DatasourceConfig is not found.
         """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
+        datasource_key: Union[
+            DataContextVariableKey, GeCloudIdentifier
+        ] = self.store_backend.build_key(
+            resource_type=DataContextVariableSchema.DATASOURCES, name=datasource_name
         )
         if not self.has_key(datasource_key):
             raise ValueError(
@@ -145,7 +162,11 @@ class DatasourceStore(Store):
             name = datasource_config.name
         else:
             name = None
-        return self.store_backend.build_key(name=name, id_=id_)
+        return self.store_backend.build_key(
+            resource_type=DataContextVariableSchema.DATASOURCES,
+            name=name,
+            id_=id_,
+        )
 
     def set_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig

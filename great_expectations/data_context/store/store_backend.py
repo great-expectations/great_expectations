@@ -1,11 +1,14 @@
 import logging
 import uuid
 from abc import ABCMeta, abstractmethod
-from typing import Optional
+from typing import Any, Optional
 
 import pyparsing as pp
 
-from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import filter_properties_dict
 
@@ -205,6 +208,15 @@ class StoreBackend(metaclass=ABCMeta):
     def config(self) -> dict:
         raise NotImplementedError
 
+    def build_key(
+        self,
+        resource_type: DataContextVariableSchema,
+        id_: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> Any:
+        """Build a key specific to the store backend implementation."""
+        raise NotImplementedError
+
 
 class InMemoryStoreBackend(StoreBackend):
     """Uses an in-memory dictionary as a store backend."""
@@ -264,24 +276,18 @@ class InMemoryStoreBackend(StoreBackend):
     def remove_key(self, key) -> None:
         del self._store[key]
 
-    def build_key(self, name: Optional[str], id_: Optional[str]) -> DataContextKey:
-        """
-        Utility to build a conditionally build specific key types based on input arguments.
-        Note that the implementation of this function by child classes is optional.
-
-        Args:
-            name: The name of the object to be stored
-            id_: The id of the object to be stored
-
-        Returns:
-            key: The key generated as a result of the input name and id_
-
-        Raises:
-            NotImplementedError if used without being overridden by child classes in the StoreBackend hierarchy
-            and called.
-        """
-        raise NotImplementedError
-
     @property
     def config(self) -> dict:
         return self._config
+
+    def build_key(
+        self,
+        resource_type: DataContextVariableSchema,
+        id_: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> DataContextVariableKey:
+        """Get the store backend specific implementation of the key. id_ included for super class compatibility."""
+        return DataContextVariableKey(
+            resource_type=resource_type,
+            resource_name=name,
+        )
