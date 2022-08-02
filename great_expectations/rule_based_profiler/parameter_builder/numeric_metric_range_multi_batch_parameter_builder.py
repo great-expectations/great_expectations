@@ -137,7 +137,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             quantile_statistic_interpolation_method: Applicable only for the "bootstrap" sampling method --
                 supplies value of (interpolation) "method" to "np.quantile()" statistic, used for confidence intervals.
             quantile_bias_correction: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
-                False is used (bias correction is disabled).
+                False is used (bias correction is disabled) and quantile_bias_std_error_ratio_threshold will have no
+                effect.
             quantile_bias_std_error_ratio_threshold: Applicable only for the "bootstrap" sampling method -- if omitted
                 (default), then 0.25 is used (as minimum ratio of bias to standard error for applying bias correction).
             bw_method: Applicable only for the "kde" sampling method -- if omitted (default), then "scott" is used.
