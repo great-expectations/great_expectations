@@ -11,7 +11,17 @@ import traceback
 import warnings
 from functools import wraps
 from types import ModuleType
-from typing import Dict, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import numpy as np
 import pandas as pd
@@ -54,6 +64,9 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import import_library_module
 from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Connection
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -159,7 +172,7 @@ except ImportError:
         )
         try:
             getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple = {}
+            bigquery_types_tuple = {}  # type: ignore[var-annotated]
             BIGQUERY_TYPES = {
                 "INTEGER": sqla_bigquery.INTEGER,
                 "NUMERIC": sqla_bigquery.NUMERIC,
@@ -181,15 +194,15 @@ except ImportError:
             )
             from collections import namedtuple
 
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc]
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)  # type: ignore[assignment]
             BIGQUERY_TYPES = {}
 
     except (ImportError, AttributeError):
         sqla_bigquery = None
-        bigquery_types_tuple = None
+        bigquery_types_tuple = None  # type: ignore[assignment]
         BigQueryDialect = None
-        pybigquery = None
+        pybigquery = None  # type: ignore[var-annotated]
         BIGQUERY_TYPES = {}
 
 
@@ -331,7 +344,7 @@ SQL_DIALECT_NAMES = (
 class SqlAlchemyConnectionManager:
     def __init__(self) -> None:
         self.lock = threading.Lock()
-        self._connections = {}
+        self._connections: Dict[str, "Connection"] = {}
 
     def get_engine(self, connection_string):
         if sqlalchemy is not None:
@@ -1069,7 +1082,7 @@ def build_sa_validator_with_data(
     sqlite_db_path=None,
     batch_definition: Optional[BatchDefinition] = None,
 ):
-    dialect_classes = {}
+    dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
     try:
         dialect_classes["sqlite"] = sqlitetypes.dialect
@@ -1137,13 +1150,12 @@ def build_sa_validator_with_data(
     if (
         schemas
         and sa_engine_name in schemas
-        and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
+        and isinstance(engine.dialect, dialect_classes[sa_engine_name])
     ):
         schema = schemas[sa_engine_name]
 
         sql_dtypes = {
-            col: dialect_types.get(sa_engine_name)[dtype]
-            for (col, dtype) in schema.items()
+            col: dialect_types[sa_engine_name][dtype] for (col, dtype) in schema.items()
         }
         for col in schema:
             type_ = schema[col]
@@ -1323,7 +1335,7 @@ def build_spark_engine(
         )
 
     if batch_id is None:
-        batch_id = batch_definition.id
+        batch_id = cast(BatchDefinition, batch_definition).id
 
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -1336,7 +1348,7 @@ def build_spark_engine(
             ],
             df.columns.tolist(),
         )
-    conf: List[tuple] = spark.sparkContext.getConf().getAll()
+    conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
     execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
         spark_config=spark_config
@@ -1564,6 +1576,7 @@ def build_test_backends_list(
     include_bigquery=False,
     include_aws=False,
     include_trino=False,
+    include_azure=False,
     raise_exceptions_for_backends: bool = True,
 ) -> List[str]:
     """Attempts to identify supported backends by checking which imports are available."""
@@ -1734,6 +1747,19 @@ def build_test_backends_list(
                     )
             else:
                 test_backends += ["trino"]
+        if include_azure:
+            azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
+            azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
+            if not azure_access_key and not azure_credential:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "Azure tests are requested, but credentials were not set up"
+                    )
+                else:
+                    logger.warning(
+                        "Azure tests are requested, but credentials were not set up"
+                    )
+            test_backends += ["azure"]
 
     return test_backends
 
@@ -2426,7 +2452,11 @@ def _create_trino_engine(
 
     with engine.begin() as conn:
         try:
-            res = conn.execute(text(f"create schema {schema_name}"))
+            schemas = conn.execute(
+                text(f"show schemas from memory like {repr(schema_name)}")
+            ).fetchall()
+            if (schema_name,) not in schemas:
+                res = conn.execute(text(f"create schema {schema_name}"))
         except TrinoUserError:
             pass
     return engine

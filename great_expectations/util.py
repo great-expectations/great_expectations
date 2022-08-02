@@ -1320,9 +1320,9 @@ def is_nan(value: Any) -> bool:
 def isclose(
     operand_a: Union[datetime.datetime, Number],
     operand_b: Union[datetime.datetime, Number],
-    rtol=1.0e-5,  # controls relative weight of "operand_b" (when its magnitude is large)
-    atol=1.0e-8,  # controls absolute accuracy (based on floating point machine precision)
-    equal_nan=False,
+    rtol: float = 1.0e-5,  # controls relative weight of "operand_b" (when its magnitude is large)
+    atol: float = 1.0e-8,  # controls absolute accuracy (based on floating point machine precision)
+    equal_nan: bool = False,
 ) -> bool:
     """
     Checks whether or not two numbers (or timestamps) are approximately close to one another.
@@ -1342,18 +1342,15 @@ def isclose(
     relative tolerance ("rtol") parameter carries a greater weight in the comparison assessment, because the acceptable
     deviation between the two quantities can be relatively larger for them to be deemed as "close enough" in this case.
     """
-    operand_a_as_number: np.float64
-    operand_b_as_number: np.float64
-    if isinstance(operand_a, datetime.datetime):
-        operand_a_as_number = np.float64(int(operand_a.strftime("%Y%m%d%H%M%S")))
-        operand_b_as_number = np.float64(int(operand_b.strftime("%Y%m%d%H%M%S")))
-    else:
-        operand_a_as_number = np.float64(operand_a)
-        operand_b_as_number = np.float64(operand_b)
+    if (isinstance(operand_a, str) and isinstance(operand_b, str)) or (
+        isinstance(operand_a, datetime.datetime)
+        and isinstance(operand_b, datetime.datetime)
+    ):
+        return operand_a == operand_b
 
     return np.isclose(
-        a=operand_a_as_number,
-        b=operand_b_as_number,
+        a=np.float64(operand_a),
+        b=np.float64(operand_b),
         rtol=rtol,
         atol=atol,
         equal_nan=equal_nan,
@@ -1529,14 +1526,14 @@ def pandas_series_between_inclusive(
     if version.parse(pd.__version__) >= version.parse("1.3.0"):
         metric_series = series.between(min_value, max_value, inclusive="both")
     else:
-        metric_series = series.between(min_value, max_value, inclusive=True)
+        metric_series = series.between(min_value, max_value)
 
     return metric_series
 
 
 def numpy_quantile(
     a: np.ndarray, q: float, method: str, axis: Optional[int] = None
-) -> np.ndarray:
+) -> Union[np.float64, np.ndarray]:
     """
     As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
@@ -1556,4 +1553,5 @@ def numpy_quantile(
             axis=axis,
             interpolation=method,
         )
+
     return quantile

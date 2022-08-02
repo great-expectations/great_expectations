@@ -246,9 +246,8 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
@@ -324,9 +323,8 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
@@ -360,7 +358,7 @@ stages:
           - script: |
               # These are tests that are specific to Great Expectations Cloud.
               # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest -m cloud
+              pytest tests -m cloud --cloud
 
             env:
               GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
@@ -461,9 +459,8 @@ stages:
           - script: |
               # Install dependencies
               pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
@@ -505,9 +502,8 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
@@ -556,9 +552,8 @@ stages:
           - script: |
               # Install dependencies
               pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
@@ -602,9 +597,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
 
               # Run dgtest
               dgtest run great_expectations --filter 'tests/cli' --aws-integration -v
