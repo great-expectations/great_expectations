@@ -14,9 +14,6 @@ from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     checkpointConfigSchema,
@@ -27,18 +24,18 @@ from tests.data_context.cloud_data_context.conftest import MockResponse
 @pytest.fixture
 def checkpoint_config() -> dict:
     checkpoint_config = {
-        "name": "my_checkpoint",
+        "name": "oss_test_checkpoint",
         "config_version": 1.0,
         "class_name": "Checkpoint",
-        "expectation_suite_name": "my_expectation_suite",
+        "expectation_suite_name": "oss_test_expectation_suite",
         "validations": [
             {
                 "expectation_suite_name": "taxi.demo_pass",
             },
             {
                 "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
+                    "datasource_name": "oss_test_datasource",
+                    "data_connector_name": "oss_test_data_connector",
                     "data_asset_name": "users",
                 },
             },
@@ -99,18 +96,76 @@ def mocked_post_response(
 @pytest.fixture
 def mocked_get_response(
     mock_response_factory: Callable,
-    checkpoint_id: str,
     checkpoint_config_with_ids: dict,
+    checkpoint_id: str,
 ) -> Callable[[], MockResponse]:
     def _mocked_get_response(*args, **kwargs):
+        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
+        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
+        contract_id = checkpoint_id
+
         return mock_response_factory(
             {
                 "data": {
-                    "id": checkpoint_id,
                     "attributes": {
                         "checkpoint_config": checkpoint_config_with_ids,
+                        "created_at": "2022-08-02T17:55:45.107550",
+                        "created_by_id": created_by_id,
+                        "deleted": False,
+                        "deleted_at": None,
+                        "desc": None,
+                        "name": "oss_test_checkpoint",
+                        "organization_id": f"{organization_id}",
+                        "updated_at": "2022-08-02T17:55:45.107550",
                     },
-                }
+                    "id": contract_id,
+                    "links": {
+                        "self": f"/organizations/{organization_id}/contracts/{contract_id}"
+                    },
+                    "relationships": {
+                        "assets": {
+                            "links": {
+                                "related": f"/organizations/{organization_id}/contracts/{contract_id}/assets",
+                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/assets",
+                            }
+                        },
+                        "attributes": {
+                            "links": {
+                                "related": f"/organizations/{organization_id}/contracts/{contract_id}/attributes",
+                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/attributes",
+                            }
+                        },
+                        "clauses": {
+                            "links": {
+                                "related": f"/organizations/{organization_id}/contracts/{contract_id}/clauses",
+                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/clauses",
+                            }
+                        },
+                        "created_by": {
+                            "links": {
+                                "related": f"/organizations/{organization_id}/contracts/{contract_id}/created-by",
+                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/created-by",
+                            }
+                        },
+                        "organization": {
+                            "links": {
+                                "related": f"/organizations/{organization_id}/contracts/{contract_id}/organization",
+                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/organization",
+                            }
+                        },
+                        "suite_validation_results": {
+                            "links": {
+                                "related": f"/organizations/{organization_id}/contract/{contract_id}/suite-validation-results",
+                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/suite-validation-results",
+                            }
+                        },
+                    },
+                    "type": "contract",
+                },
+                "jsonapi": {"version": "1.0"},
+                "links": {
+                    "self": f"/organizations/{organization_id}/contracts/{contract_id}"
+                },
             },
             200,
         )
@@ -203,3 +258,25 @@ def test_cloud_backed_data_context_add_checkpoint(
 
     assert checkpoint.config.validations[1]["id"] == validation_id_2
     assert checkpoint.validations[1]["id"] == validation_id_2
+
+
+@pytest.mark.integration
+@pytest.mark.cloud
+@mock.patch("great_expectations.data_context.DataContext._save_project_config")
+def test_cloud_backed_data_context_add_checkpoint_e2e(
+    mock_save_project_config: mock.MagicMock,
+    checkpoint_config: dict,
+) -> None:
+    context = DataContext(ge_cloud_mode=True)
+
+    checkpoint = context.add_checkpoint(**checkpoint_config)
+
+    ge_cloud_id = checkpoint.ge_cloud_id
+
+    checkpoint_stored_in_cloud = context.get_checkpoint(ge_cloud_id=ge_cloud_id)
+
+    assert checkpoint.ge_cloud_id == checkpoint_stored_in_cloud.ge_cloud_id
+    assert (
+        checkpoint.config.to_json_dict()
+        == checkpoint_stored_in_cloud.config.to_json_dict()
+    )
