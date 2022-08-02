@@ -267,6 +267,7 @@ class InMemoryStoreBackend(StoreBackend):
     def build_key(self, name: Optional[str], id_: Optional[str]) -> DataContextKey:
         """
         Utility to build a conditionally build specific key types based on input arguments.
+        Note that the implementation of this function by child classes is optional.
 
         Args:
             name: The name of the object to be stored
@@ -277,6 +278,7 @@ class InMemoryStoreBackend(StoreBackend):
 
         Raises:
             NotImplementedError if not defined by child classes in the StoreBackend hierarchy
+            and called.
         """
         raise NotImplementedError
 
