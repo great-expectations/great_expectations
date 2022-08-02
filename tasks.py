@@ -8,6 +8,9 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+import pathlib
+import shutil
+
 import invoke
 
 from scripts import check_type_hint_coverage
@@ -162,9 +165,13 @@ def type_check(
         raise invoke.Exit(code=0)
 
     if clear_cache:
-        print("  Clearing the mypy cache ... ", end="")
-        ctx.run(" ".join(["rm", "-rf", ".mypy_cache"]))
-        print("✅"),
+        mypy_cache = pathlib.Path(".mypy_cache")
+        print(f"  Clearing {mypy_cache} ... ", end="")
+        try:
+            shutil.rmtree(mypy_cache)
+            print("✅"),
+        except FileNotFoundError as exc:
+            print(f"❌\n  {exc}")
 
     if daemon:
         bin = "dmypy run --"
