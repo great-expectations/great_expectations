@@ -5,6 +5,10 @@ from typing import Any, Optional
 
 import pyparsing as pp
 
+from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import filter_properties_dict
 
@@ -204,7 +208,12 @@ class StoreBackend(metaclass=ABCMeta):
     def config(self) -> dict:
         raise NotImplementedError
 
-    def build_key(self, id_: Optional[str] = None, name: Optional[str] = None) -> Any:
+    def build_key(
+        self,
+        resource_type: DataContextVariableSchema,
+        id_: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> Any:
         """Build a key specific to the store backend implementation."""
         raise NotImplementedError
 
@@ -270,3 +279,15 @@ class InMemoryStoreBackend(StoreBackend):
     @property
     def config(self) -> dict:
         return self._config
+
+    def build_key(
+        self,
+        resource_type: DataContextVariableSchema,
+        id_: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> DataContextVariableKey:
+        """Get the store backend specific implementation of the key. id_ included for super class compatibility."""
+        return DataContextVariableKey(
+            resource_type=resource_type,
+            resource_name=name,
+        )

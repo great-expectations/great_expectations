@@ -7,6 +7,9 @@ from urllib.parse import urljoin
 
 import requests
 
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -387,9 +390,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._config
 
     def build_key(
-        self, id_: Optional[str] = None, name: Optional[str] = None
+        self,
+        resource_type: DataContextVariableSchema,
+        id_: Optional[str] = None,
+        name: Optional[str] = None,
     ) -> GeCloudIdentifier:
-        """Get the store backend specific implementation of the key."""
+        """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
         return GeCloudIdentifier(
             resource_type=self.ge_cloud_resource_type,
             ge_cloud_id=id_,

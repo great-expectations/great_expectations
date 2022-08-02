@@ -120,7 +120,9 @@ class DatasourceStore(Store):
         """
         datasource_key: Union[
             DataContextVariableKey, GeCloudIdentifier
-        ] = self.store_backend.build_key(name=datasource_name)
+        ] = self.store_backend.build_key(
+            resource_type=DataContextVariableSchema.DATASOURCES, name=datasource_name
+        )
         if not self.has_key(datasource_key):
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
@@ -160,7 +162,11 @@ class DatasourceStore(Store):
             name = datasource_config.name
         else:
             name = None
-        return self.store_backend.build_key(name=name, id_=id_)
+        return self.store_backend.build_key(
+            resource_type=DataContextVariableSchema.DATASOURCES,
+            name=name,
+            id_=id_,
+        )
 
     def set_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
