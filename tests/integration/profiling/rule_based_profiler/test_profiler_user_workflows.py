@@ -890,8 +890,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.success
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
-        "min_value": -50.5,
-        "max_value": 2121.9,
+        "min_value": -52.0,
+        "max_value": 2183.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 1.0,
@@ -914,7 +914,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": 0.0,
-        "max_value": 2121.9,
+        "max_value": 2183.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 1.0,
@@ -938,7 +938,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": 0.0,
-        "max_value": 2121.9,
+        "max_value": 2183.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 8.75e-1,
@@ -1584,7 +1584,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 7,
+                "variable_count": 6,
             },
             "event": "profiler.run",
             "success": True,
@@ -1810,7 +1810,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 9,
+                "variable_count": 8,
             },
             "event": "profiler.run",
             "success": True,
@@ -2141,7 +2141,7 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
     )
 
     max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
-    max_value_expected: float = 56314.8
+    max_value_expected: float = 3004.0
     np.testing.assert_allclose(
         actual=float(max_value_actual),
         desired=float(max_value_expected),
@@ -2327,7 +2327,7 @@ def test_quentin_expect_column_stdev_to_be_between_auto_yes_default_profiler_con
     validator: Validator = quentin_validator
 
     test_cases: Tuple[Tuple[str, float, float], ...] = (
-        ("fare_amount", 10.0, 565.0),
+        ("fare_amount", 10.0, 32.57),
         ("passenger_count", 1.0, 2.0),
     )
 
