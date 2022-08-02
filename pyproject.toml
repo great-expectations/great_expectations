@@ -10,6 +10,13 @@ profile = "black"
 skip_gitignore = true
 extend_skip_glob = ['venv/*', 'docs/*']
 
+[tool.mypy]
+warn_unused_configs = true
+ignore_missing_imports = true
+follow_imports = 'silent'
+warn_redundant_casts = true
+show_error_codes = true
+
 [tool.pytest.ini_options]
 filterwarnings = [
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
