@@ -277,7 +277,7 @@ class InMemoryStoreBackend(StoreBackend):
             key: The key generated as a result of the input name and id_
 
         Raises:
-            NotImplementedError if not defined by child classes in the StoreBackend hierarchy
+            NotImplementedError if used without being overridden by child classes in the StoreBackend hierarchy
             and called.
         """
         raise NotImplementedError
