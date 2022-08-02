@@ -12,7 +12,17 @@ import traceback
 import warnings
 from functools import wraps
 from types import ModuleType
-from typing import Dict, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import numpy as np
 import pandas as pd
@@ -55,6 +65,9 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import import_library_module
 from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Connection
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -160,7 +173,7 @@ except ImportError:
         )
         try:
             getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple = {}
+            bigquery_types_tuple = {}  # type: ignore[var-annotated]
             BIGQUERY_TYPES = {
                 "INTEGER": sqla_bigquery.INTEGER,
                 "NUMERIC": sqla_bigquery.NUMERIC,
@@ -182,15 +195,15 @@ except ImportError:
             )
             from collections import namedtuple
 
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc]
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)  # type: ignore[assignment]
             BIGQUERY_TYPES = {}
 
     except (ImportError, AttributeError):
         sqla_bigquery = None
-        bigquery_types_tuple = None
+        bigquery_types_tuple = None  # type: ignore[assignment]
         BigQueryDialect = None
-        pybigquery = None
+        pybigquery = None  # type: ignore[var-annotated]
         BIGQUERY_TYPES = {}
 
 
@@ -461,7 +474,7 @@ SQL_DIALECT_NAMES = (
 class SqlAlchemyConnectionManager:
     def __init__(self) -> None:
         self.lock = threading.Lock()
-        self._connections = {}
+        self._connections: Dict[str, "Connection"] = {}
 
     def get_engine(self, connection_string):
         if sqlalchemy is not None:
@@ -1383,7 +1396,7 @@ def build_sa_validator_with_data(
     if debug_logger:
         _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")
 
-    dialect_classes = {}
+    dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
     try:
         dialect_classes["sqlite"] = sqlitetypes.dialect
@@ -1472,14 +1485,13 @@ def build_sa_validator_with_data(
     if (
         schemas
         and sa_engine_name in schemas
-        and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
+        and isinstance(engine.dialect, dialect_classes[sa_engine_name])
     ):
         _debug(f"{sa_engine_name} is in schemas")
         schema = schemas[sa_engine_name]
 
         sql_dtypes = {
-            col: dialect_types.get(sa_engine_name)[dtype]
-            for (col, dtype) in schema.items()
+            col: dialect_types[sa_engine_name][dtype] for (col, dtype) in schema.items()
         }
         for col in schema:
             type_ = schema[col]
@@ -1664,7 +1676,7 @@ def build_spark_engine(
         )
 
     if batch_id is None:
-        batch_id = batch_definition.id
+        batch_id = cast(BatchDefinition, batch_definition).id
 
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -1677,7 +1689,7 @@ def build_spark_engine(
             ],
             df.columns.tolist(),
         )
-    conf: List[tuple] = spark.sparkContext.getConf().getAll()
+    conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
     execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
         spark_config=spark_config
