@@ -117,7 +117,8 @@ stages:
         name: UnusedImportChecker
 
   - stage: docker_tests
-    dependsOn: []
+    dependsOn: [lint, custom_checks]
+    condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
@@ -126,39 +127,38 @@ stages:
         strategy:
           matrix:
             Python37:
-              minor_version: '7'
+              python.version: '3.7'
             Python38:
-              minor_version: '8'
+              python.version: '3.8'
             Python39:
-              minor_version: '9'
+              python.version: '3.9'
         services:
           postgres: postgres
         variables:
           DOCKER_TAG: none
         steps:
           - bash: |
-              # login to docker first so we die fast if this fails
-              docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
-
               EPOCH=`date +%s`
-              TAG="3.$(minor_version)_develop_${EPOCH}_${RANDOM}"
+              TAG="$(python.version)_develop_${EPOCH}_${RANDOM}"
               # We repull the develop branch. We could build the local branch that is already present but we should
               # prune it's depth since we don't need the git history.
-              # CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${TAG} --target azure --build-arg PYTHON_VERSION=3.$(minor_version) --build-arg SOURCE=github --build-arg BRANCH=develop ."
+              # CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${TAG} --target azure --build-arg PYTHON_VERSION=$(python.version) --build-arg SOURCE=github --build-arg BRANCH=develop ."
               # Temporarily use local copy of repo
-              CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${TAG} --target azure --build-arg PYTHON_VERSION=3.$(minor_version) ."
+              CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${TAG} --target azure --build-arg PYTHON_VERSION=$(python.version) ."
               echo ${CMD}
               eval ${CMD}
-              PUSH="docker push greatexpectations/test:${TAG}"
+              # Set this variable so other steps can read it.
+              echo "##vso[task.setvariable variable=DOCKER_TAG]${TAG}"
+            displayName: 'Build $(python.version)'
+
+          - bash: |
+              docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
+              PUSH="docker push greatexpectations/test:${DOCKER_TAG}"
               echo ${PUSH}
               eval ${PUSH}
               echo "Docker image can be found at https://hub.docker.com/r/greatexpectations/test/tags"
-              echo "Pull it locally using: docker pull greatexpectations/test:${TAG}"
-
-              # Set this variable so other steps can read it.
-              echo "##vso[task.setvariable variable=DOCKER_TAG]${TAG}"
-
-            displayName: 'Build and push 3.$(minor_version)'
+              echo "Pull it locally using: docker pull greatexpectations/test:${DOCKER_TAG}"
+            displayName: 'Push $(python.version)'
             env:
               DOCKER_USER: $(DOCKER_USER)
               DOCKER_TOKEN: $(DOCKER_TOKEN)
@@ -183,13 +183,13 @@ stages:
               GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
               GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
               GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-            displayName: 'pytest 3.$(minor_version)'
+            displayName: 'pytest $(python.version)'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
             inputs:
               testResultsFiles: '$(System.DefaultWorkingDirectory)/coverage/**/test-*.xml'
-              testRunTitle: 'Publish test results for Python 3.$(minor_version)'
+              testRunTitle: 'Publish test results for Python $(python.version)'
 
           - task: PublishCodeCoverageResults@1
             inputs:

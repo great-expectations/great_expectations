@@ -96,8 +96,10 @@ class GEDependencies:
             "pyspark",
             "pytest",
             "pytest-benchmark",
+            "pytest-azurepipelines",
             "pytest-cov",
             "pytest-order",
+            "pytest-random-order",
             "pyupgrade",
             "requirements-parser",
             "s3fs",
@@ -144,7 +146,6 @@ class GEDependencies:
         "thrift-sasl",
         # requirements-dev-test-pipeline.txt:
         "pytest-azurepipelines",
-        "pytest-cov",
         "pytest-random-order",
     ]
 
