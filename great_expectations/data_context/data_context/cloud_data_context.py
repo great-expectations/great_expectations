@@ -220,7 +220,7 @@ class CloudDataContext(AbstractDataContext):
         )
         if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
-                "expectation_suite with name {} does not exist."
+                f"expectation_suite with id {ge_cloud_id} does not exist."
             )
         else:
             self.expectations_store.remove_key(key)
