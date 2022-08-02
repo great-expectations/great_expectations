@@ -47,7 +47,7 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_config_dict["ge_cloud_id"] = ge_cloud_checkpoint_id
 
         # Checkpoints accept a `ge_cloud_id` but not an `id`
-        checkpoint_config_dict.pop("id")
+        checkpoint_config_dict.pop("id", None)
 
         return checkpoint_config_dict
 
