@@ -1278,9 +1278,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_name: str = datasource.name
 
         if save_changes:
-            self._datasource_store.update_by_name(
-                datasource_name=datasource_name, datasource_config=datasource_config
-            )
+            self._datasource_store.update(datasource_config=datasource_config)
         self.config.datasources[datasource_name] = datasource_config
         self._cached_datasources[datasource_name] = datasource_config
 

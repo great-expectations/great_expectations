@@ -177,9 +177,13 @@ class DatasourceStore(Store):
             datasource_name: The name of the Datasource to update.
             datasource_config: The config object to persist using the StoreBackend.
         """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
+        if not datasource_config.name:
+            datasource_config.name = datasource_name
+
+        datasource_key: Union[
+            GeCloudIdentifier, DataContextVariableKey
+        ] = self._build_key_from_config(datasource_config)
+
         self.set(datasource_key, datasource_config)
 
     def create(
@@ -199,28 +203,27 @@ class DatasourceStore(Store):
         ] = self._build_key_from_config(datasource_config)
         return self.set(key, datasource_config)
 
-    def update_by_name(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> None:
+    def update(self, datasource_config: DatasourceConfig) -> None:
         """Updates a DatasourceConfig that already exists in the store.
 
         Args:
-            datasource_name: The name of the Datasource to retrieve.
             datasource_config: The config object to persist using the StoreBackend.
 
         Raises:
             ValueError if a DatasourceConfig is not found.
         """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
+
+        datasource_key: Union[
+            GeCloudIdentifier, DataContextVariableKey
+        ] = self._build_key_from_config(datasource_config)
+
         if not self.has_key(datasource_key):
             raise ValueError(
-                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
+                f"Unable to load datasource `{datasource_config.name}` -- no configuration found or invalid configuration."
             )
 
         self.set_by_name(
-            datasource_name=datasource_name, datasource_config=datasource_config
+            datasource_name=datasource_config.name, datasource_config=datasource_config
         )
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
