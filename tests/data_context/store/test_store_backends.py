@@ -1427,6 +1427,7 @@ def test_GeCloudStoreBackend():
                 "Content-Type": "application/vnd.api+json",
                 "Authorization": "Bearer 1234",
             },
+            params=None,
         )
 
     # test .list_keys
@@ -1468,7 +1469,7 @@ def test_GeCloudStoreBackend():
             json={
                 "data": {
                     "type": "contract",
-                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "id_": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },
@@ -1523,6 +1524,7 @@ def test_GeCloudStoreBackend():
                 "Content-Type": "application/vnd.api+json",
                 "Authorization": "Bearer 1234",
             },
+            params=None,
         )
 
     # test .list_keys
@@ -1564,7 +1566,7 @@ def test_GeCloudStoreBackend():
             json={
                 "data": {
                     "type": "rendered_data_doc",
-                    "id": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "id_": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },

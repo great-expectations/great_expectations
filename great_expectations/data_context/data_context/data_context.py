@@ -368,7 +368,8 @@ class DataContext(BaseDataContext):
             self._save_project_config()
 
     def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
-        """If there are differences between the DataContextConfig used to instantiate
+        """
+        If there are differences between the DataContextConfig used to instantiate
         the DataContext and the DataContextConfig assigned to `self.config`, we want
         to save those changes to disk so that subsequent instantiations will utilize
         the same values.
@@ -384,15 +385,21 @@ class DataContext(BaseDataContext):
             A boolean signifying whether or not the current DataContext's config needs
             to be persisted in order to recognize changes made to usage statistics.
         """
-        if project_config.anonymous_usage_statistics.explicit_id is False:
-            return True
-
         project_config_usage_stats: Optional[
             AnonymizedUsageStatisticsConfig
         ] = project_config.anonymous_usage_statistics
         context_config_usage_stats: Optional[
             AnonymizedUsageStatisticsConfig
         ] = self.config.anonymous_usage_statistics
+
+        if (
+            project_config_usage_stats.enabled is False
+            or context_config_usage_stats.enabled is False
+        ):
+            return False
+
+        if project_config_usage_stats.explicit_id is False:
+            return True
 
         if project_config_usage_stats == context_config_usage_stats:
             return False

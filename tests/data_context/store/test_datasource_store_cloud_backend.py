@@ -34,7 +34,7 @@ def test_datasource_store_create(
 
         datasource_store_ge_cloud_backend.set(key=key, value=datasource_config)
 
-        mock_post.assert_called_with(
+        mock_post.assert_called_once_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {
@@ -78,15 +78,79 @@ def test_datasource_store_get_by_id(
             def json(self):
                 return self._json_data
 
-        return MockResponse({"data": {"id": id_}}, 201)
+        return MockResponse(
+            {
+                "data": {
+                    "id_": id_,
+                    "attributes": {"datasource_config": datasource_config},
+                }
+            },
+            200,
+        )
 
     with patch("requests.get", autospec=True, side_effect=mocked_response) as mock_get:
 
         datasource_store_ge_cloud_backend.get(key=key)
 
-        mock_get.assert_called_with(
+        mock_get.assert_called_once_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id_}",
             headers=request_headers,
+            params=None,
+        )
+
+
+@pytest.mark.cloud
+@pytest.mark.unit
+def test_datasource_store_get_by_name(
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+    request_headers: dict,
+    datasource_config: DatasourceConfig,
+    datasource_store_ge_cloud_backend: DatasourceStore,
+) -> None:
+    """What does this test and why?
+
+    The datasource store when used with a cloud backend should emit the correct request when getting a datasource with a name.
+    """
+
+    id_: str = "example_id_normally_uuid"
+    datasource_name: str = "example_datasource_config_name"
+
+    def mocked_response(*args, **kwargs):
+        class MockResponse:
+            def __init__(self, json_data: dict, status_code: int) -> None:
+                self._json_data = json_data
+                self._status_code = status_code
+
+            def json(self):
+                return self._json_data
+
+        return MockResponse(
+            {
+                "data": {
+                    "id_": id_,
+                    "attributes": {"datasource_config": datasource_config},
+                }
+            },
+            200,
+        )
+
+    with patch(
+        "requests.get", autospec=True, side_effect=mocked_response
+    ) as mock_get, patch(
+        "great_expectations.data_context.store.DatasourceStore.has_key", autospec=True
+    ) as mock_has_key:
+        # Mocking has_key so that we don't try to connect to the cloud backend to verify key existence.
+        mock_has_key.return_value = True
+
+        datasource_store_ge_cloud_backend.retrieve_by_name(
+            datasource_name=datasource_name
+        )
+
+        mock_get.assert_called_once_with(
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
+            headers=request_headers,
+            params={"name": datasource_name},
         )
 
 
@@ -114,12 +178,12 @@ def test_datasource_store_delete_by_id(
 
         datasource_store_ge_cloud_backend.remove_key(key=key)
 
-        mock_delete.assert_called_with(
+        mock_delete.assert_called_once_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id_}",
             json={
                 "data": {
                     "type": "datasource",
-                    "id": id_,
+                    "id_": id_,
                     "attributes": {"deleted": True},
                 }
             },
