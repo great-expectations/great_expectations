@@ -210,10 +210,11 @@ def get_usage_stats_json(ctx):
     Dump usage stats event examples to json file
     """
     if not is_ge_installed:
-        print(
-            "This invoke task requires Great Expecations to be installed in the environment. Please try again."
+        raise invoke.Exit(
+            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
+            code=1,
         )
-        return
+
     events = usage_stats_utils.get_usage_stats_example_events()
     version = usage_stats_utils.get_gx_version()
 
@@ -229,12 +230,6 @@ def mv_usage_stats_json(ctx):
     """
     Use databricks-cli lib to move usage stats event examples to dbfs:/
     """
-    if not is_ge_installed:
-        print(
-            "This invoke task requires Great Expectations to be installed in the environment. Please try again."
-        )
-        return
-
     version = usage_stats_utils.get_gx_version()
     outfile = f"v{version}_example_events.json"
     cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
