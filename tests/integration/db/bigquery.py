@@ -123,12 +123,11 @@ batch_request_without_temp_table: RuntimeBatchRequest = RuntimeBatchRequest(
     data_asset_name="asset_a",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
-    batch_spec_passthrough={
-        "create_temp_table": False
-    },
+    batch_spec_passthrough={"create_temp_table": False},
 )
 validator_without_temp_table = context.get_validator(
-    batch_request=batch_request_without_temp_table, expectation_suite_name="test_suite_2"
+    batch_request=batch_request_without_temp_table,
+    expectation_suite_name="test_suite_2",
 )
 
 assert validator.head(n_rows=5, fetch_all=False)
