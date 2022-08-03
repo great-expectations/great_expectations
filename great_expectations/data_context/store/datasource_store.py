@@ -64,15 +64,6 @@ class DatasourceStore(Store):
         """
         return self._store_backend.remove_key(key.to_tuple())
 
-    def serialize(self, value: DatasourceConfig) -> Union[str, DatasourceConfig]:
-        """
-        See parent 'Store.serialize()' for more information
-        """
-        if self.ge_cloud_mode:
-            # GeCloudStoreBackend expects a json str
-            return self._schema.dump(value)
-        return value
-
     def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
         """
         See parent 'Store.deserialize()' for more information
