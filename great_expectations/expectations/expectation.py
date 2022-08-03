@@ -1709,19 +1709,23 @@ class TableExpectation(Expectation, ABC):
         min_value: Optional[Any] = self.get_success_kwargs(configuration).get(
             "min_value"
         )
-        strict_min: Optional[Any] = self.get_success_kwargs(configuration).get(
+        strict_min: Optional[bool] = self.get_success_kwargs(configuration).get(
             "strict_min"
         )
         max_value: Optional[Any] = self.get_success_kwargs(configuration).get(
             "max_value"
         )
-        strict_max: Optional[Any] = self.get_success_kwargs(configuration).get(
+        strict_max: Optional[bool] = self.get_success_kwargs(configuration).get(
             "strict_max"
         )
 
-        parse_strings_as_datetimes: bool = self.get_success_kwargs(configuration).get(
-            "parse_strings_as_datetimes"
-        )
+        parse_strings_as_datetimes: Optional[bool] = self.get_success_kwargs(
+            configuration
+        ).get("parse_strings_as_datetimes")
+
+        metric_value_for_comparison: Optional[Any] = metric_value
+        min_value_for_comparison: Optional[Any] = min_value
+        max_value_for_comparison: Optional[Any] = max_value
 
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
@@ -1735,22 +1739,29 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
 
             if min_value is not None:
                 try:
-                    min_value = parse(min_value)
+                    min_value_for_comparison = round(
+                        (parse(min_value) - EPOCH_DATE_TIME).total_seconds()
+                    )
+                    metric_value_for_comparison = round(
+                        (metric_value - EPOCH_DATE_TIME).total_seconds()
+                    )
                 except TypeError:
                     pass
 
             if max_value is not None:
                 try:
-                    max_value = parse(max_value)
+                    max_value_for_comparison = round(
+                        (parse(max_value) - EPOCH_DATE_TIME).total_seconds()
+                    )
+                    metric_value_for_comparison = round(
+                        (metric_value - EPOCH_DATE_TIME).total_seconds()
+                    )
                 except TypeError:
                     pass
 
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
 
-        metric_value_for_comparison: Optional[Any] = metric_value
-        min_value_for_comparison: Optional[Any] = min_value
-        max_value_for_comparison: Optional[Any] = max_value
         if isinstance(metric_value, datetime.datetime):
             metric_value_for_comparison = round(
                 (metric_value - EPOCH_DATE_TIME).total_seconds()

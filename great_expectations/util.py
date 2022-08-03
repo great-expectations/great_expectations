@@ -72,7 +72,7 @@ except ImportError:
     Select = None
 
 
-EPOCH_DATE_TIME: datetime.datetime = datetime.datetime(1970, 1, 1)
+EPOCH_DATE_TIME: datetime.datetime = datetime.datetime(1970, 1, 1, 0, 0, 0)
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
