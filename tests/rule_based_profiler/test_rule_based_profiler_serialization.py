@@ -50,6 +50,11 @@ def test_rule_based_profiler_config_is_serialized(
     rbp_config: RuleBasedProfilerConfig, expected_serialized_rbp_config: dict
 ):
     """RBP Config should be serialized appropriately with/without optional params."""
-    observed = ruleBasedProfilerConfigSchema.dump(rbp_config)
+    observed_dump = ruleBasedProfilerConfigSchema.dump(rbp_config)
+    assert observed_dump == expected_serialized_rbp_config
 
-    assert dict(observed) == expected_serialized_rbp_config
+    loaded_data = ruleBasedProfilerConfigSchema.load(observed_dump)
+    for attr in ("class_name", "module_name"):
+        loaded_data.pop(attr)
+    observed_load = RuleBasedProfilerConfig(**loaded_data)
+    assert observed_load.to_json_dict() == rbp_config.to_json_dict()

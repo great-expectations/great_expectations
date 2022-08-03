@@ -40,6 +40,9 @@ def test_datasource_config_is_serialized(
     datasource_config: DatasourceConfig, expected_serialized_datasource_config: dict
 ):
     """Datasource Config should be serialized appropriately with/without optional params."""
-    observed = datasourceConfigSchema.dump(datasource_config)
+    observed_dump = datasourceConfigSchema.dump(datasource_config)
+    assert observed_dump == expected_serialized_datasource_config
 
-    assert observed == expected_serialized_datasource_config
+    loaded_data = datasourceConfigSchema.load(observed_dump)
+    observed_load = DatasourceConfig(**loaded_data)
+    assert observed_load.to_json_dict() == datasource_config.to_json_dict()
