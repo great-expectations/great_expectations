@@ -82,11 +82,12 @@ from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
-from great_expectations.util import camel_to_snake, is_parseable_date
+from great_expectations.util import EPOCH_DATE_TIME, camel_to_snake, is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
+
 
 _TEST_DEFS_DIR = os.path.join(
     os.path.dirname(__file__),
@@ -1699,18 +1700,26 @@ class TableExpectation(Expectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        metric_value = metrics.get(metric_name)
+        metric_value: Optional[Any] = metrics.get(metric_name)
 
         if metric_value is None:
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
+        min_value: Optional[Any] = self.get_success_kwargs(configuration).get(
+            "min_value"
+        )
+        strict_min: Optional[Any] = self.get_success_kwargs(configuration).get(
+            "strict_min"
+        )
+        max_value: Optional[Any] = self.get_success_kwargs(configuration).get(
+            "max_value"
+        )
+        strict_max: Optional[Any] = self.get_success_kwargs(configuration).get(
+            "strict_max"
+        )
 
-        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
+        parse_strings_as_datetimes: bool = self.get_success_kwargs(configuration).get(
             "parse_strings_as_datetimes"
         )
 
@@ -1736,30 +1745,46 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 except TypeError:
                     pass
 
-        elif isinstance(metric_value, datetime.datetime):
-            if isinstance(min_value, str):
-                min_value = parse(min_value)
-
-            if isinstance(max_value, str):
-                max_value = parse(max_value)
-
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
+
+        metric_value_for_comparison: Optional[Any] = metric_value
+        min_value_for_comparison: Optional[Any] = min_value
+        max_value_for_comparison: Optional[Any] = max_value
+        if isinstance(metric_value, datetime.datetime):
+            metric_value_for_comparison = round(
+                (metric_value - EPOCH_DATE_TIME).total_seconds()
+            )
+            if isinstance(min_value, str):
+                try:
+                    min_value_for_comparison = round(
+                        (parse(min_value) - EPOCH_DATE_TIME).total_seconds()
+                    )
+                except TypeError:
+                    pass
+
+            if isinstance(max_value, str):
+                try:
+                    max_value_for_comparison = round(
+                        (parse(max_value) - EPOCH_DATE_TIME).total_seconds()
+                    )
+                except TypeError:
+                    pass
 
         # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
-                above_min = metric_value > min_value
+                above_min = metric_value_for_comparison > min_value_for_comparison
             else:
-                above_min = metric_value >= min_value
+                above_min = metric_value_for_comparison >= min_value_for_comparison
         else:
             above_min = True
 
         if max_value is not None:
             if strict_max:
-                below_max = metric_value < max_value
+                below_max = metric_value_for_comparison < max_value_for_comparison
             else:
-                below_max = metric_value <= max_value
+                below_max = metric_value_for_comparison <= max_value_for_comparison
         else:
             below_max = True
 
