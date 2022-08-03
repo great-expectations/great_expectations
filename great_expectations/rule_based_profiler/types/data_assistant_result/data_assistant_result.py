@@ -709,34 +709,45 @@ class DataAssistantResult(SerializableDictDot):
         return [chart.configure(**theme) for chart in charts]
 
     @staticmethod
-    def _transform_column_list_to_rows(
+    def _transform_column_lists_to_rows(
         df: pd.DataFrame,
-        sanitized_metric_name: str,
-        batch_identifiers: List[str],
     ) -> pd.DataFrame:
-        # explode list of column names into separate rows for each name in list
-        # flatten columns of lists
-        col_flat: List[str] = [
-            item for sublist in df[sanitized_metric_name] for item in sublist
-        ]
+        col_has_list: pd.DataFrame = pd.DataFrame(
+            {"column_name": df.columns, "has_list": (df.applymap(type) == list).any()}
+        )
+        list_column_names: List[str] = list(
+            col_has_list[col_has_list["has_list"]]["column_name"]
+        )
+
+        column_name: str
+        cols_flat: List[List[str]] = []
+        for idx, column_name in enumerate(list_column_names):
+            # explode list of column names into separate rows for each name in list
+            # flatten columns of lists
+            cols_flat.append([item for sublist in df[column_name] for item in sublist])
+
         # row numbers to repeat
-        ilocations: np.ndarray = np.repeat(
-            range(df.shape[0]), df[sanitized_metric_name].apply(len)
+        ilocations: List[int] = list(
+            np.repeat(range(df.shape[0]), df[list_column_names[0]].apply(len))
         )
         # replicate rows and add flattened column of lists
-        cols: List[int] = [
-            i for i, c in enumerate(df.columns) if c != sanitized_metric_name
+        columns: List[int] = [
+            idx for idx, col in enumerate(df.columns) if col not in list_column_names
         ]
-        df = df.iloc[ilocations, cols]
-        df[sanitized_metric_name] = col_flat
+        df = df.iloc[ilocations, columns].reset_index(drop=True)
+        cols_flat_df: pd.DataFrame = pd.DataFrame(cols_flat).T
+        cols_flat_df.columns = list_column_names
+        df = pd.concat([df, cols_flat_df], axis=1)
+
         groupby_columns: List[str] = [
-            column for column in df.columns if column != sanitized_metric_name
+            column for column in df.columns if column not in list_column_names
         ]
         df["metric_list_position"] = df.groupby(by=groupby_columns).cumcount()
 
-        if sanitized_metric_name == "table_columns":
+        if "table_columns" in list_column_names:
             # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
-            df["column_number"] = pd.factorize(df[sanitized_metric_name])[0] + 1
+            df["column_number"] = pd.factorize(df["table_columns"])[0] + 1
+
         return df
 
     @staticmethod
@@ -2882,7 +2893,9 @@ class DataAssistantResult(SerializableDictDot):
                                 for column in metric_df.columns
                                 if column not in sanitized_metric_names
                             ]
-                            df = df.merge(metric_df, on=join_keys)
+                            df = df.merge(metric_df, on=join_keys).reset_index(
+                                drop=True
+                            )
 
                     column_name: str = domain.domain_kwargs.column
                     subtitle = f"Column: {column_name}"
@@ -3069,21 +3082,37 @@ class DataAssistantResult(SerializableDictDot):
 
         df = pd.concat([df, batch_identifier_df], axis=1)
 
-        if isinstance(metric_values[0], list):
-            df = DataAssistantResult._transform_column_list_to_rows(
+        if plot_mode == PlotMode.DIAGNOSTIC:
+            for kwarg_name in expectation_configuration.kwargs:
+                # column name was already retrieved from the domain
+                if kwarg_name != "column":
+                    if isinstance(expectation_configuration.kwargs[kwarg_name], dict):
+                        for key, value in expectation_configuration.kwargs[
+                            kwarg_name
+                        ].items():
+                            if isinstance(value, list):
+                                df[key] = [value for _ in df.index]
+                            else:
+                                df[key] = value
+
+                    elif isinstance(expectation_configuration.kwargs[kwarg_name], list):
+                        df[kwarg_name] = [
+                            expectation_configuration.kwargs[kwarg_name]
+                            for _ in df.index
+                        ]
+                    else:
+                        df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
+
+        # if there are any lists in the dataframe
+        if (df.applymap(type) == list).any().any():
+            df = DataAssistantResult._transform_column_lists_to_rows(
                 df=df,
-                sanitized_metric_name=sanitized_metric_name,
-                batch_identifiers=batch_identifier_keys_sorted,
             )
 
-        if plot_mode is PlotMode.DIAGNOSTIC:
-            for kwarg_name in expectation_configuration.kwargs:
-                if isinstance(expectation_configuration.kwargs[kwarg_name], list):
-                    df[kwarg_name] = [
-                        expectation_configuration.kwargs[kwarg_name] for _ in df.index
-                    ]
-                else:
-                    df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
+        df = df.reset_index(drop=True)
+
+        if metric_name == "column.quantile_values":
+            print(df.head())
 
         return df
 
@@ -3144,7 +3173,7 @@ class DataAssistantResult(SerializableDictDot):
                             for column in metric_df.columns
                             if column not in sanitized_metric_names
                         ]
-                        df = df.merge(metric_df, on=join_keys)
+                        df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
 
                 column_df = ColumnDataFrame(column_name, df)
                 column_dfs.append(column_df)
@@ -3185,7 +3214,7 @@ class DataAssistantResult(SerializableDictDot):
                     for column in metric_df.columns
                     if column not in sanitized_metric_names
                 ]
-                df = df.merge(metric_df, on=join_keys)
+                df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
 
         # If columns are included/excluded we need to filter them out for table level metrics here
         table_column_metrics: List[str] = ["table_columns"]
