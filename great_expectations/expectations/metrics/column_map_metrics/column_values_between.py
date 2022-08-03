@@ -1,4 +1,3 @@
-import datetime
 import warnings
 
 from dateutil.parser import parse
