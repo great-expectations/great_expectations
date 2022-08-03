@@ -1723,10 +1723,6 @@ class TableExpectation(Expectation, ABC):
             configuration
         ).get("parse_strings_as_datetimes")
 
-        metric_value_for_comparison: Optional[Any] = metric_value
-        min_value_for_comparison: Optional[Any] = min_value
-        max_value_for_comparison: Optional[Any] = max_value
-
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
             warnings.warn(
@@ -1739,23 +1735,13 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
 
             if min_value is not None:
                 try:
-                    min_value_for_comparison = round(
-                        (parse(min_value) - EPOCH_DATE_TIME).total_seconds()
-                    )
-                    metric_value_for_comparison = round(
-                        (metric_value - EPOCH_DATE_TIME).total_seconds()
-                    )
+                    min_value = parse(min_value)
                 except TypeError:
                     pass
 
             if max_value is not None:
                 try:
-                    max_value_for_comparison = round(
-                        (parse(max_value) - EPOCH_DATE_TIME).total_seconds()
-                    )
-                    metric_value_for_comparison = round(
-                        (metric_value - EPOCH_DATE_TIME).total_seconds()
-                    )
+                    max_value = parse(max_value)
                 except TypeError:
                     pass
 
@@ -1763,39 +1749,38 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             return {"success": False, "result": {"observed_value": None}}
 
         if isinstance(metric_value, datetime.datetime):
-            metric_value_for_comparison = round(
-                (metric_value - EPOCH_DATE_TIME).total_seconds()
-            )
             if isinstance(min_value, str):
                 try:
-                    min_value_for_comparison = round(
-                        (parse(min_value) - EPOCH_DATE_TIME).total_seconds()
-                    )
+                    min_value = parse(min_value)
                 except TypeError:
-                    pass
+                    raise ValueError(
+                        f"""Could not parse "min_value" of {min_value} (of type "{str(type(min_value))}) into datetime \
+representation."""
+                    )
 
             if isinstance(max_value, str):
                 try:
-                    max_value_for_comparison = round(
-                        (parse(max_value) - EPOCH_DATE_TIME).total_seconds()
-                    )
+                    max_value = parse(max_value)
                 except TypeError:
-                    pass
+                    raise ValueError(
+                        f"""Could not parse "max_value" of {max_value} (of type "{str(type(max_value))}) into datetime \
+representation."""
+                    )
 
         # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
-                above_min = metric_value_for_comparison > min_value_for_comparison
+                above_min = metric_value > min_value
             else:
-                above_min = metric_value_for_comparison >= min_value_for_comparison
+                above_min = metric_value >= min_value
         else:
             above_min = True
 
         if max_value is not None:
             if strict_max:
-                below_max = metric_value_for_comparison < max_value_for_comparison
+                below_max = metric_value < max_value
             else:
-                below_max = metric_value_for_comparison <= max_value_for_comparison
+                below_max = metric_value <= max_value
         else:
             below_max = True
 
