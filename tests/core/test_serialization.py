@@ -566,7 +566,7 @@ def test_checkpoint_config_print(
                             },
                             "datasource_name": "my_datasource",
                         },
-                        "id_": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                        "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     },
                 ],
             },
