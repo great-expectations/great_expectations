@@ -434,21 +434,21 @@ except ImportError:
     athenaDialect = None
     ATHENA_TYPES = {}
 
-# Others from great_expectations/dataset/sqlalchemy_dataset.py
-try:
-    import sqlalchemy_dremio.pyodbc
-
-    sqlalchemy.dialects.registry.register(
-        "dremio", "sqlalchemy_dremio.pyodbc", "dialect"
-    )
-except ImportError:
-    sqlalchemy_dremio = None
-
-try:
-    import teradatasqlalchemy.dialect
-    import teradatasqlalchemy.types as teradatatypes
-except ImportError:
-    teradatasqlalchemy = None
+# # Others from great_expectations/dataset/sqlalchemy_dataset.py
+# try:
+#     import sqlalchemy_dremio.pyodbc
+# 
+#     sqlalchemy.dialects.registry.register(
+#         "dremio", "sqlalchemy_dremio.pyodbc", "dialect"
+#     )
+# except ImportError:
+#     sqlalchemy_dremio = None
+# 
+# try:
+#     import teradatasqlalchemy.dialect
+#     import teradatasqlalchemy.types as teradatatypes
+# except ImportError:
+#     teradatasqlalchemy = None
 
 import tempfile
 
