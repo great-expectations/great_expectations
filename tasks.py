@@ -127,6 +127,7 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
     # "core",  # 242
     "data_asset",  # 0
     # "data_context",  # 272
+    "data_context/types",  # 30
     # "datasource",  # 98
     "exceptions",  # 0
     # "execution_engine",  # 109
