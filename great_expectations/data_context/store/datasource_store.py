@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import copy
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
@@ -54,7 +55,7 @@ class DatasourceStore(Store):
         """
         keys_without_store_backend_id: List[str] = list(
             filter(
-                lambda k: k != self._store_backend.STORE_BACKEND_ID_KEY,
+                lambda k: k != StoreBackend.STORE_BACKEND_ID_KEY,
                 self._store_backend.list_keys(),
             )
         )
