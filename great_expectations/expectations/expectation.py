@@ -82,7 +82,7 @@ from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
-from great_expectations.util import EPOCH_DATE_TIME, camel_to_snake, is_parseable_date
+from great_expectations.util import camel_to_snake, is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
