@@ -6,8 +6,8 @@ import altair as alt
 
 @dataclass(frozen=True)
 class PlotComponent:
+    alt_type: alt.StandardType
     name: Optional[str] = None
-    alt_type: Optional[alt.StandardType] = None
     axis_title: Optional[str] = None
 
     @property

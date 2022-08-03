@@ -1189,7 +1189,7 @@ class DataAssistantResult(SerializableDictDot):
 
         domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name=None,
-            alt_type=None,
+            alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
         )
 
@@ -1336,7 +1336,7 @@ class DataAssistantResult(SerializableDictDot):
         else:
             domain_plot_component = DomainPlotComponent(
                 name=None,
-                alt_type=None,
+                alt_type=AltairDataTypes.NOMINAL.value,
                 subtitle=subtitle,
             )
             tooltip = (
@@ -1984,7 +1984,7 @@ class DataAssistantResult(SerializableDictDot):
 
         input_dropdown_initial_state: pd.DataFrame = df.groupby(
             [batch_plot_component.name], as_index=False
-        )[batch_plot_component.name].max()
+        ).max()
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers + [domain_plot_component.name]
         ] = " "
