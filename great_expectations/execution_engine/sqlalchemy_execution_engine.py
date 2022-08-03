@@ -17,6 +17,7 @@ from great_expectations._version import get_versions  # isort:skip
 __version__ = get_versions()["version"]  # isort:skip
 
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.bundled_metric_configuration import (
     BundledMetricConfiguration,
 )
@@ -985,7 +986,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             idx: int
             metric_id: Tuple[str, str, str]
             for idx, metric_id in enumerate(query["ids"]):
-                resolved_metrics[metric_id] = res[0][idx]
+                # Converting SQL query execution results into JSON-serializable format produces simple data types,
+                # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
+                resolved_metrics[metric_id] = convert_to_json_serializable(
+                    data=res[0][idx]
+                )
 
         return resolved_metrics
 

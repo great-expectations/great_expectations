@@ -2648,7 +2648,9 @@ def _mostly_success(
     unexpected_cnt: int,
     mostly: float,
 ) -> bool:
+    rows_considered_cnt_as_float: float = float(rows_considered_cnt)
+    unexpected_cnt_as_float: float = float(unexpected_cnt)
     success_ratio: float = (
-        float(rows_considered_cnt - unexpected_cnt) / rows_considered_cnt
-    )
+        rows_considered_cnt_as_float - unexpected_cnt_as_float
+    ) / rows_considered_cnt_as_float
     return success_ratio >= mostly

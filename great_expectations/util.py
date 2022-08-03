@@ -1,6 +1,7 @@
 import copy
 import cProfile
 import datetime
+import decimal
 import importlib
 import io
 import json
@@ -8,6 +9,7 @@ import logging
 import os
 import pstats
 import re
+import sys
 import time
 import uuid
 from collections import OrderedDict
@@ -1317,6 +1319,21 @@ def is_nan(value: Any) -> bool:
         return np.isnan(value)
     except TypeError:
         return True
+
+
+def convert_decimal_to_float(number: Number) -> float:
+    # noinspection PyTypeChecker
+    if requires_lossy_conversion(d=number):
+        logger.warning(
+            f"Using lossy conversion for decimal {number} to float object to support serialization."
+        )
+
+    # noinspection PyTypeChecker
+    return float(number)
+
+
+def requires_lossy_conversion(d):
+    return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
 
 
 def isclose(
