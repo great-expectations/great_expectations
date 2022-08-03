@@ -319,6 +319,11 @@ class ExpectProfileNumericColumnsDiffBetweenExclusiveThresholdRange(TableExpecta
         failed_stats = 0.0
         for column, value in delta_between_thresholds.items():
             column_unexpected_values = {}
+            if not isinstance(value, dict):
+                unexpected_values[column] = value
+                failed_stats += 1.0
+                total_stats += 1.0
+                continue
             for stat, val in value.items():
                 if val is not True:
                     column_unexpected_values[stat] = val

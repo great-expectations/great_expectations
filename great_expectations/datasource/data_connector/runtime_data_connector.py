@@ -421,7 +421,11 @@ class RuntimeDataConnector(DataConnector):
         if not set(batch_identifiers_keys) == set(asset.batch_identifiers):
             raise ge_exceptions.DataConnectorError(
                 f"""
-                Data Asset {data_asset_name} was invoked with one or more batch_identifiers that were not configured for the asset.
+                Data Asset {data_asset_name} was invoked with one or more batch_identifiers
+                that were not configured for the asset.
+
+                The Data Asset was configured with : {asset.batch_identifiers}
+                It was invoked with : {batch_identifiers_keys}
                 """
             )
 
@@ -434,8 +438,11 @@ class RuntimeDataConnector(DataConnector):
         batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
         if not set(batch_identifiers_keys) <= set(self._batch_identifiers[self.name]):
             raise ge_exceptions.DataConnectorError(
-                f"""RuntimeDataConnector "{self.name}" was invoked with one or more batch identifiers that do not
+                f"""RuntimeDataConnector {self.name} was invoked with one or more batch identifiers that do not
         appear among the configured batch identifiers.
+
+                The RuntimeDataConnector was configured with : {self._batch_identifiers[self.name]}
+                It was invoked with : {batch_identifiers_keys}
                 """
             )
 

@@ -9,10 +9,11 @@ All Expectations return a JSON-serializable dictionary when evaluated, and share
 * [catch_exceptions](#catch_exceptions): If true, execution will not fail if the Expectation encounters an error.
   Instead, it will return success = False and provide an informative error message.
 * [meta](#meta): Allows user-supplied meta-data to be stored with an Expectation.
-  
-All `ColumnMapExpectations` also have the following argument:
 
-* [mostly](#mostly): A special argument that allows for _fuzzy_ validation based on some percentage (available for all `column_map_expectations`)
+All `ColumnMapExpectations` and `MultiColumnMapExpectation` also have the following argument:
+
+* [mostly](#mostly): A special argument that allows for _fuzzy_ validation based on some percentage 
+(available for all `column_map_expectations` and `multicolumn_map_expectations`)
 
 ## `result_format`
 
@@ -72,9 +73,10 @@ validator.expect_column_values_to_be_in_set(
 
 ## `mostly`
 
-`mostly` is a special argument that is automatically available in all `column_map_expectations`. `mostly` must be a 
-float between 0 and 1. Great Expectations evaluates it as a percentage, allowing some wiggle room when evaluating 
-Expectations: as long as `mostly` percent of rows evaluate to `True`, the Expectation returns `"success": True`.
+`mostly` is a special argument that is automatically available in all `column_map_expectations` and
+`multicolumn_map_expectations`. `mostly` must be a float between 0 and 1. Great Expectations evaluates
+it as a percentage, allowing some wiggle room when evaluating Expectations: as long as `mostly` percent
+of rows evaluate to `True`, the Expectation returns `"success": True`.
 
 ```python
 [0,1,2,3,4,5,6,7,8,9]

@@ -38,6 +38,7 @@ class GEDependencies:
             "cryptography",
             "importlib-metadata",
             "Ipython",
+            "ipywidgets",
             "jinja2",
             "jsonpatch",
             "jsonschema",
@@ -77,11 +78,12 @@ class GEDependencies:
             "gcsfs",
             "google-cloud-secret-manager",
             "google-cloud-storage",
-            "ipywidgets",
+            "invoke",
             "isort",
             "mistune",
             "mock-alchemy",
             "moto",
+            "mypy",
             "nbconvert",
             "openpyxl",
             "pre-commit",
@@ -94,8 +96,10 @@ class GEDependencies:
             "pyspark",
             "pytest",
             "pytest-benchmark",
+            "pytest-azurepipelines",
             "pytest-cov",
             "pytest-order",
+            "pytest-random-order",
             "pyupgrade",
             "requirements-parser",
             "s3fs",
@@ -115,7 +119,9 @@ class GEDependencies:
         # requirements-dev-contrib.txt:
         "black",
         "flake8",
+        "invoke",
         "isort",
+        "mypy",
         "pre-commit",
         "pytest-cov",
         "pytest-order",
@@ -123,7 +129,6 @@ class GEDependencies:
         # requirements-dev-lite.txt:
         "flask",
         "freezegun",
-        "ipywidgets",
         "mistune",
         "mock-alchemy",
         "moto",
@@ -139,6 +144,9 @@ class GEDependencies:
         "PyHive",
         "thrift",
         "thrift-sasl",
+        # requirements-dev-test-pipeline.txt:
+        "pytest-azurepipelines",
+        "pytest-random-order",
     ]
 
     GE_DEV_DEPENDENCIES: List[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(

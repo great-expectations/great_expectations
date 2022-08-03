@@ -110,11 +110,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
             data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
         """
         name: str = profiler_config.name
+        id_: Optional[str] = None
+        if hasattr(profiler_config, "id_"):
+            id_ = profiler_config.id_
         config_version: float = profiler_config.config_version
         variables: Optional[Dict[str, Any]] = profiler_config.variables
         rules: Optional[Dict[str, Dict[str, Any]]] = profiler_config.rules
 
         self._name = name
+        self._id = id_
         self._config_version = config_version
 
         self._profiler_config = profiler_config
@@ -340,7 +344,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 rule_state.rule.name: rule_state.execution_time
                 for rule_state in self.rule_states
             },
-            usage_statistics_handler=self._usage_statistics_handler,
+            _usage_statistics_handler=self._usage_statistics_handler,
         )
 
     def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
@@ -1410,6 +1414,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        id_: Optional[str] = None,
     ) -> None:
         """
         Create a new Profiler using configured rules.
@@ -1419,6 +1424,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
 
         Args:
             name: The name of the RBP instance
+            id_: Identifier specific to this RBP instance.
             config_version: The version of the RBP (currently only 1.0 is supported)
             variables: Any variables to be substituted within the rules
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
@@ -1427,6 +1433,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
             name=name,
+            id_=id_,
             config_version=config_version,
             variables=variables,
             rules=rules,

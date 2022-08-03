@@ -302,7 +302,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # necessary properties / overrides
         self._synchronize_self_with_underlying_data_context()
 
-        self._variables = self._init_variables()
+        self._variables = self._data_context.variables
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -364,8 +364,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         logger.debug("Starting DataContext._save_project_config")
 
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                self.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
 
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -648,7 +652,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        super().delete_datasource(datasource_name)
+        super().delete_datasource(datasource_name, save_changes=save_changes)
         self._synchronize_self_with_underlying_data_context()
 
     def get_available_data_asset_names(
@@ -1277,9 +1281,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._datasource_store.update_by_name(
                 datasource_name=datasource_name, datasource_config=datasource_config
             )
-        else:
-            self.config.datasources[datasource_name] = datasource_config
-            self._cached_datasources[datasource_name] = datasource_config
+        self.config.datasources[datasource_name] = datasource_config
+        self._cached_datasources[datasource_name] = datasource_config
 
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
@@ -1315,20 +1318,54 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             validation_operators.append(value)
         return validation_operators
 
-    def send_usage_message(
-        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
-    ) -> None:
-        """helper method to send a usage method using DataContext. Used when sending usage events from
-            classes like ExpectationSuite.
-            event
-        Args:
-            event (str): str representation of event
-            event_payload (dict): optional event payload
-            success (bool): optional success param
-        Returns:
-            None
+    def list_expectation_suite_names(self) -> List[str]:
+        return self._data_context.list_expectation_suite_names()
+
+    def create_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        overwrite_existing: bool = False,
+        ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ) -> ExpectationSuite:
         """
-        send_usage_message(self, event, event_payload, success)
+        See `AbstractDataContext.create_expectation_suite` for more information.
+        """
+        res = self._data_context.create_expectation_suite(
+            expectation_suite_name,
+            overwrite_existing=overwrite_existing,
+            ge_cloud_id=ge_cloud_id,
+            **kwargs,
+        )
+        self._synchronize_self_with_underlying_data_context()
+        return res
+
+    def get_expectation_suite(
+        self,
+        expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> ExpectationSuite:
+        """
+        See `AbstractDataContext.get_expectation_suite` for more information.
+        """
+        res = self._data_context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
+        )
+        return res
+
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> ExpectationSuite:
+        """
+        See `AbstractDataContext.delete_expectation_suite` for more information.
+        """
+        res = self._data_context.delete_expectation_suite(
+            expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
+        )
+        self._synchronize_self_with_underlying_data_context()
+        return res
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
@@ -1353,7 +1390,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             None
         """
         if ge_cloud_id:
-            super().save_expectation_suite(
+            self._data_context.save_expectation_suite(
                 expectation_suite,
                 expectation_suite_name,
                 overwrite_existing,
@@ -1361,7 +1398,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 **kwargs,
             )
         else:
-            super().save_expectation_suite(
+            self._data_context.save_expectation_suite(
                 expectation_suite,
                 expectation_suite_name,
                 overwrite_existing,
@@ -2021,10 +2058,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Checkpoint:
-
-        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
-            data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,
+        """
+        See parent 'AbstractDataContext.add_checkpoint()' for more information
+        """
+        checkpoint = self._data_context.add_checkpoint(
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -2038,10 +2075,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            # Next two fields are for LegacyCheckpoint configuration
             validation_operator_name=validation_operator_name,
             batches=batches,
-            # the following four arguments are used by SimpleCheckpoint
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
@@ -2049,8 +2084,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
-
-        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
+        self._synchronize_self_with_underlying_data_context()
         return checkpoint
 
     def get_checkpoint(
@@ -2788,3 +2822,31 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ]
 
         return instantiated_class, usage_stats_event_payload
+
+    def _instantiate_datasource_from_config_and_update_project_config(
+        self,
+        name: str,
+        config: dict,
+        initialize: bool = True,
+        save_changes: bool = False,
+    ) -> Optional[Datasource]:
+        """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
+
+        Args:
+            name: Desired name for the datasource.
+            config: Config for the datasource.
+            initialize: Whether to initialize the datasource or return None.
+            save_changes: Whether to save the datasource config to the configured Datasource store.
+
+        Returns:
+            If initialize=True return an instantiated Datasource object, else None.
+        """
+
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(
+            name=name,
+            config=config,
+            initialize=initialize,
+            save_changes=save_changes,
+        )
+        self._synchronize_self_with_underlying_data_context()
+        return datasource

@@ -327,10 +327,11 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 replace_nan_with_zero=True,
                 reduce_scalar_metric=True,
                 false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-                quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
                 estimator=f"{VARIABLES_KEY}estimator",
                 n_resamples=f"{VARIABLES_KEY}n_resamples",
                 random_seed=f"{VARIABLES_KEY}random_seed",
+                quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+                quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
                 include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
                 truncate_values=f"{VARIABLES_KEY}truncate_values",
                 round_decimals=f"{VARIABLES_KEY}round_decimals",
@@ -461,9 +462,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             batches = {}
 
         data_assistant_result: DataAssistantResult = DataAssistantResult(
-            batch_id_to_batch_identifier_display_name_map=self.batch_id_to_batch_identifier_display_name_map(),
+            _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
-            usage_statistics_handler=usage_statistics_handler,
+            _usage_statistics_handler=usage_statistics_handler,
         )
         run_profiler_on_data(
             data_assistant=self,
@@ -589,7 +590,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         return parameter_values_for_fully_qualified_parameter_names_by_domain
 
-    def batch_id_to_batch_identifier_display_name_map(
+    def _batch_id_to_batch_identifier_display_name_map(
         self,
     ) -> Dict[str, Set[Tuple[str, Any]]]:
         """
