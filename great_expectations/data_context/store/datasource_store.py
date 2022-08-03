@@ -136,17 +136,16 @@ class DatasourceStore(Store):
     def _build_key_from_config(
         self, datasource_config: DatasourceConfig
     ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
-        if hasattr(datasource_config, "id_"):
-            id_ = datasource_config.id_
-        else:
-            id_ = None
+        # TODO: 20220803 Remove this method once we can get resource_type from the backend
+
+        # TODO: 20220803 Remove this hasattr call once name is required
         if hasattr(datasource_config, "name"):
             name = datasource_config.name
         else:
             name = None
         return self.store_backend.build_key(
             name=name,
-            id_=id_,
+            id_=datasource_config.id_,
         )
 
     def set_by_name(
@@ -163,17 +162,20 @@ class DatasourceStore(Store):
         )
         self.set(datasource_key, datasource_config)
 
-    def set(self, config: DatasourceConfig) -> DatasourceConfig:
+    def set(
+        self,
+        key: Optional[DataContextKey],
+        config: DatasourceConfig,
+    ) -> DatasourceConfig:
         """Create a datasource config in the store using a store_backend-specific key."""
-        key: Union[
-            GeCloudIdentifier, DataContextVariableKey
-        ] = self._build_key_from_config(config)
 
-        identifier: Optional[Union[bool, GeCloudResourceRef]] = super().set(key, config)
-        if isinstance(identifier, GeCloudResourceRef):
-            config.id_ = identifier.ge_cloud_id
+        # TODO: AJB 20220803 Remove GeCloudIdentifier from here:
+        if not key:
+            key: Union[
+                GeCloudIdentifier, DataContextVariableKey
+            ] = self._build_key_from_config(config)
 
-        return config
+        return super().set(key, config)
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig

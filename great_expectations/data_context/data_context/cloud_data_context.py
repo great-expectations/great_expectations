@@ -320,8 +320,9 @@ class CloudDataContext(AbstractDataContext):
         datasource_config.name = name
 
         if save_changes:
-
-            datasource_config = self._datasource_store.set(datasource_config)
+            datasource_config = self._datasource_store.set(
+                key=None, config=datasource_config
+            )
 
         self.config.datasources[name] = datasource_config
 
@@ -332,6 +333,10 @@ class CloudDataContext(AbstractDataContext):
         substituted_config_dict: dict = substitute_all_config_variables(
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
+
+        # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
+        #  instead of popping the name field
+        # substituted_config.pop("name", None). # remove this?
 
         # Round trip through schema validation and config creation to ensure "id_" is present
         #
