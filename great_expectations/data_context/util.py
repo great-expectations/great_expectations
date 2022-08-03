@@ -113,6 +113,10 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         if "runtime_environment" in missing_args:
             config_with_defaults.update({"runtime_environment": runtime_environment})
 
+    # TODO: AJB 20220803 is this needed or can we handle elsewhere or more elegantly?
+    if "id" in config_with_defaults:
+        config_with_defaults["id_"] = config_with_defaults.pop("id")
+
     try:
         class_instance = class_(**config_with_defaults)
     except TypeError as e:
