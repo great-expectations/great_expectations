@@ -81,7 +81,7 @@ stages:
 
     jobs:
       - job: build_gallery
-        timeoutInMinutes: 180
+        timeoutInMinutes: 300
         variables:
           python.version: '3.7'
           GE_pytest_pip_opts: '"cookiecutter==1.7.3" "google-cloud-bigquery-storage" --requirement requirements-dev.txt --constraint constraints-dev.txt'
@@ -148,7 +148,7 @@ stages:
               secureFile: 'aws_config_sandbox'
               retryCount: '2'
 
-          - bash: python ./build_gallery.py --no-contrib
+          - bash: python ./build_gallery.py | tee output--build_gallery.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
             env:
