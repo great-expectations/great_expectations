@@ -307,7 +307,7 @@ class FileDataContextVariables(DataContextVariables):
 
         store_backend: dict = {
             "class_name": "InlineStoreBackend",
-            "resource_type": None,
+            "resource_type": DataContextVariableSchema.ALL_VARIABLES,
             "data_context": self.data_context,
         }
         store: DataContextStore = DataContextStore(

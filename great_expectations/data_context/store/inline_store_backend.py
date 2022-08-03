@@ -35,7 +35,7 @@ class InlineStoreBackend(StoreBackend):
     def __init__(
         self,
         data_context: "DataContext",  # noqa: F821
-        resource_type: Optional[DataContextVariableSchema] = None,
+        resource_type: DataContextVariableSchema,
         runtime_environment: Optional[dict] = None,
         fixed_length_key: bool = False,
         suppress_store_backend_id: bool = False,
@@ -89,7 +89,7 @@ class InlineStoreBackend(StoreBackend):
         project_config: DataContextConfig = self._data_context.config
         resource_type = self._resource_type
 
-        if resource_type is None:
+        if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             config_commented_map_from_yaml = yaml.load(value)
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
@@ -145,7 +145,7 @@ class InlineStoreBackend(StoreBackend):
         resource_name = InlineStoreBackend._determine_resource_name(key)
         resource_type = self._resource_type
 
-        if resource_type is None:
+        if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             raise StoreBackendError(
                 "InlineStoreBackend does not support the deletion of the overall DataContext project config"
             )
