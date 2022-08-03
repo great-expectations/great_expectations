@@ -2260,7 +2260,8 @@ class CheckpointValidationConfigSchema(Schema):
             if key not in data and key not in self.declared_fields:
                 data[key] = value
 
-        return data
+        sorted_data = dict(sorted(data.items()))
+        return sorted_data
 
 
 class CheckpointConfigSchema(Schema):
