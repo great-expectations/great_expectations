@@ -2245,7 +2245,7 @@ class CheckpointValidationConfigSchema(Schema):
 
     id_ = fields.String(required=False, allow_none=False, data_key="id")
 
-    def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:
+    def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:  # type: ignore[override]
         """
         Chetan - 20220803 - By design, Marshmallow accepts unknown fields through the
         `unknown = INCLUDE` directive but only upon load. When dumping, it validates
