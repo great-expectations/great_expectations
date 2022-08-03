@@ -272,7 +272,7 @@ def convert_to_json_serializable(data):
         return dict(data)
 
     if isinstance(data, decimal.Decimal):
-        return convert_decimal_to_float(number=data)
+        return convert_decimal_to_float(d=data)
 
     if isinstance(data, RunIdentifier):
         return data.to_json_dict()

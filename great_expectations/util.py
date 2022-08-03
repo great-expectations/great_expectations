@@ -1321,18 +1321,23 @@ def is_nan(value: Any) -> bool:
         return True
 
 
-def convert_decimal_to_float(number: Number) -> float:
-    # noinspection PyTypeChecker
-    if requires_lossy_conversion(d=number):
+def convert_decimal_to_float(d: decimal.Decimal) -> float:
+    """
+    This method convers "decimal.Decimal" to standard "float" type.
+    """
+    if requires_lossy_conversion(d=d):
         logger.warning(
-            f"Using lossy conversion for decimal {number} to float object to support serialization."
+            f"Using lossy conversion for decimal {d} to float object to support serialization."
         )
 
     # noinspection PyTypeChecker
-    return float(number)
+    return float(d)
 
 
-def requires_lossy_conversion(d):
+def requires_lossy_conversion(d: decimal.Decimal) -> bool:
+    """
+    This method determines whether or not conversion from "decimal.Decimal" to standard "float" type cannot be lossless.
+    """
     return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
 
 
