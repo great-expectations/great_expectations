@@ -199,7 +199,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             url = urljoin(f"{url}/", ge_cloud_id)
 
         try:
-            response = requests.put(url, json=data, headers=self.auth_headers)
+            response = requests.put(
+                url, json=data, headers=self.auth_headers, timeout=15
+            )
             response_status_code = response.status_code
 
             # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
@@ -210,11 +212,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
             ):
                 response = requests.patch(url, json=data, headers=self.auth_headers)
-                response_status_code = response.status_code
 
-            if response_status_code < 300:
-                return True
-            return False
+            response.raise_for_status()
+
+        except requests.HTTPError as httperror:
+            logger.warning(str(httperror))
+            raise StoreBackendError(
+                f"Unable to update object in GE Cloud Store Backend: HttpError: {response}"
+            )
+
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
