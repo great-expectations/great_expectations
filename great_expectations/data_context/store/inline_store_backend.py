@@ -74,7 +74,7 @@ class InlineStoreBackend(StoreBackend):
         project_config: DataContextConfig = self._data_context.config
         resource_type = self._resource_type
 
-        if resource_type is None:
+        if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             return project_config
 
         variable_config: Any = project_config[resource_type]
@@ -173,14 +173,6 @@ class InlineStoreBackend(StoreBackend):
             return resource_name in res
 
         return False
-
-    # def _validate_key(self, key: Tuple[str, ...]) -> None:
-    #     if not isinstance(
-    #         resource_type, DataContextVariableSchema
-    #     ) and not DataContextVariableSchema.has_value(resource_type):
-    #         raise TypeError(
-    #             f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextVariableSchema.__name__}; invalid value ({resource_type}) of type {type(resource_type)} found"
-    #         )
 
     def _save_changes(self) -> None:
         # NOTE: <DataContextRefactor> This responsibility will be moved into DataContext Variables object
