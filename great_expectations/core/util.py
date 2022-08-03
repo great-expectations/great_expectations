@@ -24,6 +24,7 @@ from great_expectations.types.base import SerializableDotDict
 
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+from great_expectations.util import convert_decimal_to_float
 
 logger = logging.getLogger(__name__)
 
@@ -211,6 +212,7 @@ def convert_to_json_serializable(data):
     if isinstance(data, (uuid.UUID, bytes)):
         return str(data)
 
+    # noinspection PyTypeChecker
     if Polygon and isinstance(data, (Point, Polygon)):
         return str(data)
 
@@ -270,11 +272,7 @@ def convert_to_json_serializable(data):
         return dict(data)
 
     if isinstance(data, decimal.Decimal):
-        if requires_lossy_conversion(data):
-            logger.warning(
-                f"Using lossy conversion for decimal {data} to float object to support serialization."
-            )
-        return float(data)
+        return convert_decimal_to_float(d=data)
 
     if isinstance(data, RunIdentifier):
         return data.to_json_dict()
@@ -387,10 +385,6 @@ def ensure_json_serializable(data):
         raise InvalidExpectationConfigurationError(
             f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
         )
-
-
-def requires_lossy_conversion(d):
-    return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
 
 
 def substitute_all_strftime_format_strings(
