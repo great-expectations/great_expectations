@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Type
 
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudStoreBackend,
@@ -85,7 +86,7 @@ class Store:
         return isinstance(self._store_backend, GeCloudStoreBackend)
 
     @property
-    def store_backend(self) -> dict:
+    def store_backend(self) -> StoreBackend:
         return self._store_backend
 
     @property
@@ -188,3 +189,12 @@ class Store:
         NotImplementedError(
             f"The test method is not implemented for Store class {self.__class__.__name__}."
         )
+
+    def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
+        id_: Optional[str] = None
+        if hasattr(config, "id_"):
+            id_ = config.id_
+        name: Optional[str] = None
+        if hasattr(config, "name"):
+            name = config.name
+        return self.store_backend.build_key(name=name, id_=id_)

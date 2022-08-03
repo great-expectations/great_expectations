@@ -14,6 +14,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -824,10 +825,15 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(SerializableDictDot):
+class DatasourceConfig(AbstractConfig):
     def __init__(
         self,
-        class_name=None,
+        name: Optional[
+            str
+        ] = None,  # Note: name is optional currently to avoid updating all documentation within
+        # the scope of this work.
+        id_: Optional[str] = None,
+        class_name: Optional[str] = None,
         module_name: str = "great_expectations.datasource",
         execution_engine=None,
         data_connectors=None,
@@ -846,6 +852,8 @@ class DatasourceConfig(SerializableDictDot):
         limit=None,
         **kwargs,
     ) -> None:
+
+        super().__init__(id_=id_, name=name)
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
@@ -924,6 +932,17 @@ class DatasourceConfig(SerializableDictDot):
 class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
+
+    # Note: name is optional currently to avoid updating all documentation within
+    # the scope of this work.
+    name = fields.String(
+        required=False,
+        allow_none=True,
+    )
+    id_ = fields.String(
+        required=False,
+        allow_none=True,
+    )
 
     class_name = fields.String(
         required=False,
@@ -2208,6 +2227,22 @@ class DataContextConfig(BaseYamlConfig):
         return self.__repr__()
 
 
+class CheckpointValidationConfig(AbstractConfig):
+    def __init__(self, id_: Optional[str] = None, **kwargs: dict) -> None:
+        super().__init__(id_=id_)
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+
+class CheckpointValidationConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    name = fields.String(required=False, allow_none=False)
+    id_ = fields.String(required=False, allow_none=False)
+
+
 class CheckpointConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
@@ -2357,7 +2392,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[List[CheckpointValidationConfig]] = None,
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
@@ -2467,11 +2502,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = value
 
     @property
-    def validations(self) -> List[dict]:
+    def validations(self) -> List[CheckpointValidationConfig]:
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[dict]) -> None:
+    def validations(self, value: List[CheckpointValidationConfig]) -> None:
         self._validations = value
 
     @property
@@ -2649,7 +2684,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[List[CheckpointValidationConfig]] = None,
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
@@ -2680,6 +2715,10 @@ class CheckpointConfig(BaseYamlConfig):
         )
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
+
+        if validations is None:
+            validations = []
+
         validations = get_validations_with_batch_request_as_dict(
             validations=validations
         )
@@ -2743,14 +2782,6 @@ class CheckpointConfig(BaseYamlConfig):
             validation_dict["action_list"] = validation_action_list
 
         return substituted_runtime_config
-
-
-class CheckpointValidationConfig(DictDot):
-    pass
-
-
-class CheckpointValidationConfigSchema(Schema):
-    pass
 
 
 dataContextConfigSchema = DataContextConfigSchema()

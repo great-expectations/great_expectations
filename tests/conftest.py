@@ -1,11 +1,15 @@
+import copy
 import datetime
 import locale
 import logging
 import os
+import pathlib
 import random
 import shutil
 import warnings
+from dataclasses import dataclass
 from typing import Dict, List, Optional
+from unittest import mock
 
 import numpy as np
 import pandas as pd
@@ -25,7 +29,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
@@ -104,6 +108,10 @@ def pytest_configure(config):
         "markers",
         "aws_integration: runs aws integration test that may be very slow and requires credentials",
     )
+    config.addinivalue_line(
+        "markers",
+        "cloud: runs GX Cloud tests that may be slow and requires credentials",
+    )
 
 
 def pytest_addoption(parser):
@@ -170,6 +178,12 @@ def pytest_addoption(parser):
         help="If set, run integration tests for docs",
     )
     parser.addoption(
+        "--azure", action="store_true", help="If set, execute tests again Azure"
+    )
+    parser.addoption(
+        "--cloud", action="store_true", help="If set, execute tests again GX Cloud"
+    )
+    parser.addoption(
         "--performance-tests",
         action="store_true",
         help="If set, run performance tests (which might also require additional arguments like --bigquery)",
@@ -214,6 +228,7 @@ def build_test_backends_list_cfe(metafunc):
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
     include_aws: bool = metafunc.config.getoption("--aws")
     include_trino: bool = metafunc.config.getoption("--trino")
+    include_azure: bool = metafunc.config.getoption("--azure")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -224,6 +239,7 @@ def build_test_backends_list_cfe(metafunc):
         include_bigquery=include_bigquery,
         include_aws=include_aws,
         include_trino=include_trino,
+        include_azure=include_azure,
     )
     return test_backend_names
 
@@ -237,21 +253,37 @@ def pytest_generate_tests(metafunc):
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption("--aws-integration"):
-        # --aws-integration given in cli: do not skip aws-integration tests
-        return
-    if config.getoption("--docs-tests"):
-        # --docs-tests given in cli: do not skip documentation integration tests
-        return
-    skip_aws_integration = pytest.mark.skip(
-        reason="need --aws-integration option to run"
+    @dataclass
+    class Category:
+        mark: str
+        flag: str
+        reason: str
+
+    categories = (
+        Category(
+            mark="aws_integration",
+            flag="--aws-integration",
+            reason="need --aws-integration option to run",
+        ),
+        Category(
+            mark="docs",
+            flag="--docs-tests",
+            reason="need --docs-tests option to run",
+        ),
+        Category(mark="cloud", flag="--cloud", reason="need --cloud option to run"),
     )
-    skip_docs_integration = pytest.mark.skip(reason="need --docs-tests option to run")
-    for item in items:
-        if "aws_integration" in item.keywords:
-            item.add_marker(skip_aws_integration)
-        if "docs" in item.keywords:
-            item.add_marker(skip_docs_integration)
+
+    for category in categories:
+        # If flag is provided, exit early so we don't add `pytest.mark.skip`
+        if config.getoption(category.flag):
+            continue
+
+        # For each test collected, check if they use a mark that matches our flag name.
+        # If so, add a `pytest.mark.skip` dynamically.
+        for item in items:
+            if category.mark in item.keywords:
+                marker = pytest.mark.skip(reason=category.reason)
+                item.add_marker(marker)
 
 
 @pytest.fixture(autouse=True)
@@ -2331,10 +2363,33 @@ checkpoint_store_name: default_checkpoint_store
     return DataContextConfig(**data_context_config_dict)
 
 
-@pytest.fixture(scope="function")
-def empty_cloud_data_context(
-    tmp_path, empty_ge_cloud_data_context_config, ge_cloud_config
-) -> DataContext:
+@pytest.fixture
+def ge_cloud_config_e2e() -> GeCloudConfig:
+    """
+    Uses live credentials stored in the Great Expectations Cloud backend.
+    """
+    base_url = os.environ["GE_CLOUD_BASE_URL"]
+    organization_id = os.environ["GE_CLOUD_ORGANIZATION_ID"]
+    access_token = os.environ["GE_CLOUD_ACCESS_TOKEN"]
+    ge_cloud_config = GeCloudConfig(
+        base_url=base_url,
+        organization_id=organization_id,
+        access_token=access_token,
+    )
+    return ge_cloud_config
+
+
+@pytest.fixture
+@mock.patch(
+    "great_expectations.data_context.store.DatasourceStore.list_keys",
+    return_value=[],
+)
+def empty_base_data_context_in_cloud_mode(
+    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    tmp_path: pathlib.Path,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_config: GeCloudConfig,
+) -> BaseDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -2350,8 +2405,94 @@ def empty_cloud_data_context(
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
-    context = empty_cloud_data_context
+def empty_data_context_in_cloud_mode(
+    tmp_path: pathlib.Path,
+    ge_cloud_config: GeCloudConfig,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+):
+    """This fixture is a DataContext in cloud mode that mocks calls to the cloud backend during setup so that it can be instantiated in tests."""
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_name: str = str(project_path)
+
+    def mocked_config(*args, **kwargs) -> DataContextConfig:
+        return empty_ge_cloud_data_context_config
+
+    def mocked_get_ge_cloud_config(*args, **kwargs) -> GeCloudConfig:
+        return ge_cloud_config
+
+    with mock.patch(
+        "great_expectations.data_context.DataContext._save_project_config"
+    ), mock.patch(
+        "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+        autospec=True,
+        side_effect=mocked_config,
+    ), mock.patch(
+        "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
+        autospec=True,
+        side_effect=mocked_get_ge_cloud_config,
+    ):
+        context: DataContext = DataContext(
+            ge_cloud_mode=True,
+            context_root_dir=project_path_name,
+        )
+        return context
+
+
+@pytest.fixture
+def empty_cloud_data_context(
+    tmp_path: pathlib.Path,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_config: GeCloudConfig,
+) -> CloudDataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_name: str = str(project_path)
+
+    cloud_data_context: CloudDataContext = CloudDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path_name,
+        ge_cloud_config=ge_cloud_config,
+    )
+    return cloud_data_context
+
+
+@pytest.fixture
+@mock.patch(
+    "great_expectations.data_context.store.DatasourceStore.list_keys",
+    return_value=[],
+)
+def empty_base_data_context_in_cloud_mode_custom_base_url(
+    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    tmp_path: pathlib.Path,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_config: GeCloudConfig,
+) -> BaseDataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+
+    custom_base_url: str = "https://some_url.org"
+    custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
+    custom_ge_cloud_config.base_url = custom_base_url
+
+    context = ge.data_context.BaseDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        ge_cloud_mode=True,
+        ge_cloud_config=custom_ge_cloud_config,
+    )
+    assert context.list_datasources() == []
+    assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
+    assert context.ge_cloud_config.base_url == custom_base_url
+    return context
+
+
+@pytest.fixture
+def cloud_data_context_with_datasource_pandas_engine(
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
+):
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
     config = yaml.load(
         """
     class_name: Datasource
@@ -2373,9 +2514,9 @@ def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
 
 @pytest.fixture
 def cloud_data_context_with_datasource_sqlalchemy_engine(
-    empty_cloud_data_context, db_file
+    empty_base_data_context_in_cloud_mode: BaseDataContext, db_file
 ):
-    context = empty_cloud_data_context
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode
     config = yaml.load(
         f"""
     class_name: Datasource
@@ -4238,6 +4379,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "include_estimator_samples_histogram_in_details": False,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
+                        "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
                         "evaluation_parameter_builder_configs": None,
@@ -4290,6 +4432,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "include_estimator_samples_histogram_in_details": False,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
+                        "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
                         "round_decimals": 2,
                         "evaluation_parameter_builder_configs": None,
@@ -4311,6 +4454,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "include_estimator_samples_histogram_in_details": False,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
+                        "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
                         "round_decimals": 2,
                         "evaluation_parameter_builder_configs": None,
