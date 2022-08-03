@@ -3,7 +3,14 @@ from __future__ import annotations
 import copy
 from typing import List, Optional, Union
 
-from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.core.data_context_key import (
+    DataContextKey,
+    DataContextVariableKey,
+)
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
+from great_expectations.data_context.store.ge_cloud_store_backend import ResponsePayload
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
@@ -76,7 +83,10 @@ class DatasourceStore(Store):
         else:
             return self._schema.loads(value)
 
-    def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
+    # TODO: AJB 20220803 move this ge_cloud_response_json_to_object_dict method into the cloud backend
+    def ge_cloud_response_json_to_object_dict(
+        self, response_json: ResponsePayload
+    ) -> dict:
         """
         This method takes full json response from GE cloud and outputs a dict appropriate for
         deserialization into a GE object
@@ -85,6 +95,7 @@ class DatasourceStore(Store):
         datasource_config_dict: dict = response_json["data"]["attributes"][
             "datasource_config"
         ]
+        # TODO: AJB 20220803 Can we get rid of this since the id is already in the datasource config?
         datasource_config_dict["ge_cloud_id"] = datasource_ge_cloud_id
 
         return datasource_config_dict
@@ -148,34 +159,35 @@ class DatasourceStore(Store):
             id_=datasource_config.id_,
         )
 
-    def set_by_name(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> None:
-        """Persists a DatasourceConfig in the store by a given name.
+    # TODO: AJB 20220803 modify or remove associated test for set_by_name.
 
-        Args:
-            datasource_name: The name of the Datasource to update.
-            datasource_config: The config object to persist using the StoreBackend.
-        """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
-        self.set(datasource_key, datasource_config)
+    # def set_by_name(
+    #     self, datasource_name: str, datasource_config: DatasourceConfig
+    # ) -> None:
+    #     """Persists a DatasourceConfig in the store by a given name.
+    #
+    #     Args:
+    #         datasource_name: The name of the Datasource to update.
+    #         datasource_config: The config object to persist using the StoreBackend.
+    #     """
+    #     datasource_key: DataContextVariableKey = self._determine_datasource_key(
+    #         datasource_name=datasource_name
+    #     )
+    #     self.set(datasource_key, datasource_config)
 
     def set(
         self,
-        key: Optional[DataContextKey],
+        key: Union[DataContextKey, None],
         config: DatasourceConfig,
     ) -> DatasourceConfig:
         """Create a datasource config in the store using a store_backend-specific key."""
 
-        # TODO: AJB 20220803 Remove GeCloudIdentifier from here:
+        # TODO: AJB 20220803 Remove _build_key_from_config from here:
         if not key:
-            key: Union[
-                GeCloudIdentifier, DataContextVariableKey
-            ] = self._build_key_from_config(config)
+            key: DataContextKey = self._build_key_from_config(config)
 
-        return super().set(key, config)
+        # TODO: AJB 20220803 Simplify this by making multiple lines:
+        return DatasourceConfig(**self._schema.load(super().set(key, config)))
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig

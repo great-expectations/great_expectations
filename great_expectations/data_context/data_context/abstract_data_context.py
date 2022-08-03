@@ -1631,9 +1631,11 @@ class AbstractDataContext(ABC):
             CommentedMap(**config)
         )
 
+        # TODO: AJB 20220803 THIS IS WHERE I ENDED BEFORE STANDUP
+
         if save_changes:
-            self._datasource_store.set_by_name(
-                datasource_name=name, datasource_config=datasource_config
+            datasource_config = self._datasource_store.set(
+                key=None, config=datasource_config
             )
         self.config.datasources[name] = datasource_config
 
@@ -1643,6 +1645,10 @@ class AbstractDataContext(ABC):
         substituted_config: dict = substitute_all_config_variables(
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
+
+        # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
+        #  instead of popping the name field
+        substituted_config.pop("name", None)
 
         datasource: Optional[Datasource] = None
         if initialize:

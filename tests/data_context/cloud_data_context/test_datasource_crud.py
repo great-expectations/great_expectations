@@ -9,6 +9,59 @@ from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.datasource import BaseDatasource
+from tests.data_context.cloud_data_context.conftest import MockResponse
+
+
+@pytest.fixture
+def datasource_id() -> str:
+    return "some_uuid"
+
+
+@pytest.fixture
+def mocked_get_response(
+    mock_response_factory: Callable,
+    datasource_name: str,
+    datasource_id: str,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_response(*args, **kwargs):
+        datasource_config_with_ids: dict = {
+            "name": datasource_name,
+            "data_connectors": {
+                "tripdata_monthly_configured": {
+                    "class_name": "ConfiguredAssetFilesystemDataConnector",
+                    "base_directory": "/path/to/trip_data",
+                    "assets": {
+                        "yellow": {
+                            "group_names": ["year", "month"],
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "pattern": "yellow_tripdata_(\\d{4})-(\\d{2})\\.csv$",
+                            "class_name": "Asset",
+                        }
+                    },
+                    "module_name": "great_expectations.datasource.data_connector",
+                }
+            },
+            "module_name": "great_expectations.datasource",
+            "class_name": "Datasource",
+            "id": datasource_id,
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+        }
+
+        # TODO: AJB 20220803 Add the rest of the mocked response
+        return mock_response_factory(
+            {
+                "data": {
+                    "attributes": {"datasource_config": datasource_config_with_ids},
+                    "id": datasource_id,
+                }
+            },
+            200,
+        )
+
+    return _mocked_get_response
 
 
 @pytest.mark.cloud
@@ -17,19 +70,19 @@ from great_expectations.datasource import BaseDatasource
     "save_changes",
     [
         pytest.param(True, id="save_changes=True"),
-        pytest.param(False, id="save_changes=False"),
+        # pytest.param(False, id="save_changes=False"),
     ],
 )
 @pytest.mark.parametrize(
     "config_includes_name_setting",
     [
         pytest.param("name_supplied_separately", id="name supplied separately"),
-        pytest.param("config_includes_name", id="config includes name"),
-        pytest.param(
-            "name_supplied_separately_and_included_in_config",
-            id="name supplied separately and config includes name",
-            marks=pytest.mark.xfail(strict=True, raises=TypeError),
-        ),
+        # pytest.param("config_includes_name", id="config includes name"),
+        # pytest.param(
+        #     "name_supplied_separately_and_included_in_config",
+        #     id="name supplied separately and config includes name",
+        #     marks=pytest.mark.xfail(strict=True, raises=TypeError),
+        # ),
     ],
 )
 def test_base_data_context_in_cloud_mode_add_datasource(
@@ -38,10 +91,12 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
     datasource_config: DatasourceConfig,
     datasource_name: str,
+    datasource_id: str,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     request_headers: dict,
     mock_response_factory: Callable,
+    mocked_get_response: Callable[[], MockResponse],
 ):
     """A BaseDataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource
     with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response
@@ -54,7 +109,6 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     assert len(context.list_datasources()) == 0
 
     # Setup
-    datasource_id: str = "some_uuid"
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
@@ -63,7 +117,9 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 
     with patch(
         "requests.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post:
+    ) as mock_post, patch(
+        "requests.get", autospec=True, side_effect=mocked_get_response
+    ) as mock_get:
 
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
@@ -108,8 +164,11 @@ def test_base_data_context_in_cloud_mode_add_datasource(
                 },
                 headers=request_headers,
             )
+            mock_get.assert_called_once()
+            # TODO: AJB 20220803 Assert that mock_get is called also, make sure that the same id is used in both calls
         else:
             assert not mock_post.called
+            assert not mock_get.called
 
         if save_changes:
             # Make sure the id was populated correctly into the created datasource object and config
@@ -125,7 +184,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
         assert retrieved_datasource.name == datasource_name
         assert retrieved_datasource.config["name"] == datasource_name
 
-
+# commented out on AB branch
 @pytest.mark.cloud
 @pytest.mark.e2e
 @pytest.mark.parametrize(

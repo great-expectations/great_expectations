@@ -328,15 +328,12 @@ class CloudDataContext(AbstractDataContext):
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
+        # TODO: AJB 20220803 HERE IS WHERE WE LOSE THE id:
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
 
         substituted_config_dict: dict = substitute_all_config_variables(
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
-
-        # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
-        #  instead of popping the name field
-        # substituted_config.pop("name", None). # remove this?
 
         # Round trip through schema validation and config creation to ensure "id_" is present
         #
@@ -347,6 +344,9 @@ class CloudDataContext(AbstractDataContext):
             **datasourceConfigSchema.load(substituted_config_dict)
         )
         schema_validated_substituted_config_dict = substituted_config.to_json_dict()
+        # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
+        #  instead of popping the name field
+        substituted_config.pop("name")
 
         datasource: Optional[Datasource] = None
         if initialize:

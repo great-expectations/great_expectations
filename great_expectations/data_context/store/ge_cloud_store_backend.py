@@ -2,7 +2,7 @@ import logging
 from abc import ABCMeta
 from enum import Enum
 from json import JSONDecodeError
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, TypedDict, Union
 from urllib.parse import urljoin
 
 import requests
@@ -19,6 +19,18 @@ from great_expectations.marshmallow__shade import Schema
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
 logger = logging.getLogger(__name__)
+
+
+class ResponsePayloadDataField(TypedDict):
+    attributes: dict
+    id: str
+    type: str
+
+
+class ResponsePayload(TypedDict):
+    data: ResponsePayloadDataField
+    jsonapi: dict
+    links: dict
 
 
 class GeCloudRESTResource(str, Enum):
@@ -156,6 +168,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
 
     def _get(self, key: Tuple[str, ...]) -> dict:
+        # TODO: AJB 20220803 move this to Store and make this method take a non-tuple key:
+        if isinstance(key, GeCloudIdentifier):
+            key = key.to_tuple()
         ge_cloud_url = self.get_url_for_key(key=key)
         params: Optional[dict] = None
         try:
@@ -164,13 +179,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 params = {"name": key[2]}
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
-            response = requests.get(
+            response: ResponsePayload = requests.get(
                 ge_cloud_url, headers=self.auth_headers, params=params
             )
             return response.json()
         except JSONDecodeError as jsonError:
             logger.debug(
-                "Failed to parse GE Cloud Response into JSON",
+                "Failed to parse GE Cloud ResponsePayload into JSON",
                 str(response.text),
                 str(jsonError),
             )
@@ -181,7 +196,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self) -> None:
         pass
 
-    def _update(self, ge_cloud_id: str, value: Any) -> None:
+    def _update(self, key: GeCloudIdentifier, value: AbstractConfig) -> ResponsePayload:
+
+        assert isinstance(value, AbstractConfig)
+
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -224,6 +242,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             response.raise_for_status()
 
+            return self.get(key=key)
+
         except requests.HTTPError as httperror:
             logger.warning(str(httperror))
             raise StoreBackendError(
@@ -252,13 +272,22 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             extra_kwargs = kwarg_names - self.allowed_set_kwargs
             raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')
 
-    def _set(self, key: Tuple[str, ...], value: Any, **kwargs: dict) -> Any:
-        # Each resource type has corresponding attribute key to include in POST body
-        ge_cloud_resource: GeCloudRESTResource = key[0]
-        ge_cloud_id: str = key[1]
+    def _validate_key(self, key: GeCloudIdentifier) -> None:
+        assert isinstance(
+            key, GeCloudIdentifier
+        ), f"Only {GeCloudIdentifier.__name__} is supported in {self.__class__.__name__}"
 
-        if isinstance(value, AbstractConfig):
-            serialized_value: dict = self._schema.dump(value)
+    def _set(
+        self, key: GeCloudIdentifier, value: AbstractConfig, **kwargs
+    ) -> ResponsePayload:
+
+        assert isinstance(value, AbstractConfig)
+
+        # Each resource type has corresponding attribute key to include in POST body
+        ge_cloud_resource: GeCloudRESTResource = key.resource_type
+        ge_cloud_id: str = key.ge_cloud_id
+
+        serialized_value: dict = self._schema.dump(value)
 
         # if key has ge_cloud_id, perform _update instead
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
@@ -267,10 +296,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ge_cloud_id
             or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES
         ):
-            # TODO: AJB 20220803 don't use serialized value for update call
-            return self._update(
-                ge_cloud_id=ge_cloud_id, value=serialized_value, **kwargs
-            )
+            return self._update(key=key, value=value)
 
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
@@ -298,10 +324,14 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 url, json=data, headers=self.auth_headers
             )
 
-            if isinstance(value, AbstractConfig):
-                value.id_ = self._retrieve_id_from_response(response)
+            value.id_ = self._retrieve_id_from_response(response)
 
-            return value
+            key: GeCloudIdentifier = self.build_key(
+                name=value.name,
+                id_=value.id_,
+            )
+
+            return self.get(key)
 
         # TODO Show more detailed error messages
         except Exception as e:

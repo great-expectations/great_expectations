@@ -165,9 +165,15 @@ class Store:
             return self._store_backend.set(key, value, **kwargs)
 
         self._validate_key(key)
-        return self._store_backend.set(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        # TODO: AJB 20220803 remove this isinstance call
+        if isinstance(self._store_backend, GeCloudStoreBackend):
+            return self.ge_cloud_response_json_to_object_dict(
+                response_json=self._store_backend.set(key, value, **kwargs)
+            )
+        else:
+            return self._store_backend.set(
+                self.key_to_tuple(key), self.serialize(value), **kwargs
+            )
 
     def list_keys(self) -> List[DataContextKey]:
         keys_without_store_backend_id = [

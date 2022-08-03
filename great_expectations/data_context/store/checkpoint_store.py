@@ -176,7 +176,7 @@ class CheckpointStore(ConfigurationStore):
             ge_cloud_id = checkpoint_ref.ge_cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)
 
-    def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
+    def create(self, checkpoint_config: CheckpointConfig) -> CheckpointConfig:
         """Create a checkpoint config in the store using a store_backend-specific key.
 
         Args:
