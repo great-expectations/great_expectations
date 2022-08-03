@@ -3085,23 +3085,21 @@ class DataAssistantResult(SerializableDictDot):
         if plot_mode == PlotMode.DIAGNOSTIC:
             for kwarg_name in expectation_configuration.kwargs:
                 # column name was already retrieved from the domain
-                if kwarg_name != "column":
-                    if isinstance(expectation_configuration.kwargs[kwarg_name], dict):
-                        for key, value in expectation_configuration.kwargs[
-                            kwarg_name
-                        ].items():
-                            if isinstance(value, list):
-                                df[key] = [value for _ in df.index]
-                            else:
-                                df[key] = value
+                if isinstance(expectation_configuration.kwargs[kwarg_name], dict):
+                    for key, value in expectation_configuration.kwargs[
+                        kwarg_name
+                    ].items():
+                        if isinstance(value, list):
+                            df[key] = [value for _ in df.index]
+                        else:
+                            df[key] = value
 
-                    elif isinstance(expectation_configuration.kwargs[kwarg_name], list):
-                        df[kwarg_name] = [
-                            expectation_configuration.kwargs[kwarg_name]
-                            for _ in df.index
-                        ]
-                    else:
-                        df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
+                elif isinstance(expectation_configuration.kwargs[kwarg_name], list):
+                    df[kwarg_name] = [
+                        expectation_configuration.kwargs[kwarg_name] for _ in df.index
+                    ]
+                else:
+                    df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
 
         # if there are any lists in the dataframe
         if (df.applymap(type) == list).any().any():
@@ -3110,9 +3108,6 @@ class DataAssistantResult(SerializableDictDot):
             )
 
         df = df.reset_index(drop=True)
-
-        if metric_name == "column.quantile_values":
-            print(df.head())
 
         return df
 
