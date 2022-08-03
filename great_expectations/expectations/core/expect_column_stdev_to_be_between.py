@@ -265,6 +265,8 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
             },
         }
 
+        template_str: Optional[str] = None
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "standard deviation may have any numerical value."
         else:
@@ -333,6 +335,8 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
                 template_str = f"standard deviation must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"standard deviation must be {at_least_str} $min_value."
+
+        template_str: Optional[str] = None
 
         if include_column_name:
             template_str = f"$column {template_str}"

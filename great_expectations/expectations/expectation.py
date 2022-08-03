@@ -1736,6 +1736,13 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 except TypeError:
                     pass
 
+        elif isinstance(metric_value, datetime.datetime):
+            if isinstance(min_value, str):
+                min_value = parse(min_value)
+
+            if isinstance(max_value, str):
+                max_value = parse(max_value)
+
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
 
