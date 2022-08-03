@@ -1595,170 +1595,170 @@ def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() ->
     assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CONTRACT
 
 
-def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
-    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
-        data_context=empty_data_context,
-    )
-    new_config_version: float = 5.0
+# def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
+#     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
+#         data_context=empty_data_context,
+#     )
+#     new_config_version: float = 5.0
 
-    # test invalid .set
-    key = DataContextVariableKey(resource_type="my_fake_variable")
-    tuple_ = key.to_tuple()
-    with pytest.raises(ValueError) as e:
-        inline_store_backend.set(tuple_, "a_random_string_value")
+#     # test invalid .set
+#     key = DataContextVariableKey(resource_type="my_fake_variable")
+#     tuple_ = key.to_tuple()
+#     with pytest.raises(ValueError) as e:
+#         inline_store_backend.set(tuple_, "a_random_string_value")
 
-    assert "'my_fake_variable' is not a valid DataContextVariableSchema" in str(e.value)
+#     assert "'my_fake_variable' is not a valid DataContextVariableSchema" in str(e.value)
 
-    # test valid .set
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
-    tuple_ = key.to_tuple()
-    with patch(
-        "great_expectations.data_context.DataContext._save_project_config"
-    ) as mock_save:
-        inline_store_backend.set(tuple_, new_config_version)
+#     # test valid .set
+#     key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+#     tuple_ = key.to_tuple()
+#     with patch(
+#         "great_expectations.data_context.DataContext._save_project_config"
+#     ) as mock_save:
+#         inline_store_backend.set(tuple_, new_config_version)
 
-    assert empty_data_context.variables.config.config_version == new_config_version
-    assert mock_save.call_count == 1
+#     assert empty_data_context.variables.config.config_version == new_config_version
+#     assert mock_save.call_count == 1
 
-    # test .get
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
-    tuple_ = key.to_tuple()
-    ret = inline_store_backend.get(tuple_)
-    assert ret == new_config_version
+#     # test .get
+#     key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+#     tuple_ = key.to_tuple()
+#     ret = inline_store_backend.get(tuple_)
+#     assert ret == new_config_version
 
-    # test .list_keys
-    assert sorted(inline_store_backend.list_keys()) == [
-        "anonymous_usage_statistics",
-        "checkpoint_store_name",
-        "concurrency",
-        "config_variables_file_path",
-        "config_version",
-        "data_docs_sites",
-        "datasources",
-        "evaluation_parameter_store_name",
-        "expectations_store_name",
-        "notebooks",
-        "plugins_directory",
-        "progress_bars",
-        "stores",
-        "validations_store_name",
-    ]
+#     # test .list_keys
+#     assert sorted(inline_store_backend.list_keys()) == [
+#         "anonymous_usage_statistics",
+#         "checkpoint_store_name",
+#         "concurrency",
+#         "config_variables_file_path",
+#         "config_version",
+#         "data_docs_sites",
+#         "datasources",
+#         "evaluation_parameter_store_name",
+#         "expectations_store_name",
+#         "notebooks",
+#         "plugins_directory",
+#         "progress_bars",
+#         "stores",
+#         "validations_store_name",
+#     ]
 
-    # test .move
-    key1 = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.CONFIG_VERSION
-    )
-    tuple1 = key1.to_tuple()
+#     # test .move
+#     key1 = DataContextVariableKey(
+#         resource_type=DataContextVariableSchema.CONFIG_VERSION
+#     )
+#     tuple1 = key1.to_tuple()
 
-    key2 = DataContextVariableKey(resource_type=DataContextVariableSchema.STORES)
-    tuple2 = key2.to_tuple()
+#     key2 = DataContextVariableKey(resource_type=DataContextVariableSchema.STORES)
+#     tuple2 = key2.to_tuple()
 
-    with pytest.raises(StoreBackendError) as e:
-        inline_store_backend.move(tuple1, tuple2)
+#     with pytest.raises(StoreBackendError) as e:
+#         inline_store_backend.move(tuple1, tuple2)
 
-    assert "InlineStoreBackend does not support moving of keys" in str(e.value)
+#     assert "InlineStoreBackend does not support moving of keys" in str(e.value)
 
-    # test invalid .remove_key
-    key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.PROGRESS_BARS, resource_name="profilers"
-    )
-    tuple_ = key.to_tuple()
-    with pytest.raises(StoreBackendError) as e:
-        inline_store_backend.remove_key(tuple_)
+#     # test invalid .remove_key
+#     key = DataContextVariableKey(
+#         resource_type=DataContextVariableSchema.PROGRESS_BARS, resource_name="profilers"
+#     )
+#     tuple_ = key.to_tuple()
+#     with pytest.raises(StoreBackendError) as e:
+#         inline_store_backend.remove_key(tuple_)
 
-    assert "Could not find a value associated with key" in str(e.value)
+#     assert "Could not find a value associated with key" in str(e.value)
 
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
-    tuple_ = key.to_tuple()
-    with pytest.raises(StoreBackendError) as e:
-        inline_store_backend.remove_key(tuple_)
+#     key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+#     tuple_ = key.to_tuple()
+#     with pytest.raises(StoreBackendError) as e:
+#         inline_store_backend.remove_key(tuple_)
 
-    assert "InlineStoreBackend does not support the deletion of top level keys" in str(
-        e.value
-    )
+#     assert "InlineStoreBackend does not support the deletion of top level keys" in str(
+#         e.value
+#     )
 
-    # test valid .remove_key
-    store_name: str = "my_store"
-    store_value: dict = {
-        "class_name": "ExpectationsStore",
-        "store_backend": {
-            "class_name": "TupleFilesystemStoreBackend",
-        },
-    }
-    key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.STORES, resource_name=store_name
-    )
+#     # test valid .remove_key
+#     store_name: str = "my_store"
+#     store_value: dict = {
+#         "class_name": "ExpectationsStore",
+#         "store_backend": {
+#             "class_name": "TupleFilesystemStoreBackend",
+#         },
+#     }
+#     key = DataContextVariableKey(
+#         resource_type=DataContextVariableSchema.STORES, resource_name=store_name
+#     )
 
-    tuple_ = key.to_tuple()
-    inline_store_backend.set(key=tuple_, value=store_value)
-    inline_store_backend.remove_key(tuple_)
+#     tuple_ = key.to_tuple()
+#     inline_store_backend.set(key=tuple_, value=store_value)
+#     inline_store_backend.remove_key(tuple_)
 
 
-@pytest.mark.integration
-def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
-    path_to_great_expectations_yml: str = os.path.join(
-        empty_data_context.root_directory, empty_data_context.GE_YML
-    )
+# @pytest.mark.integration
+# def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
+#     path_to_great_expectations_yml: str = os.path.join(
+#         empty_data_context.root_directory, empty_data_context.GE_YML
+#     )
 
-    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
-        data_context=empty_data_context,
-    )
+#     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
+#         data_context=empty_data_context,
+#     )
 
-    # 1. Set simple string config value and confirm it persists in the GE.yml
+#     # 1. Set simple string config value and confirm it persists in the GE.yml
 
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
+#     with open(path_to_great_expectations_yml) as data:
+#         config_commented_map_from_yaml = yaml.load(data)
 
-    assert config_commented_map_from_yaml["config_version"] == 3.0
+#     assert config_commented_map_from_yaml["config_version"] == 3.0
 
-    new_config_version: float = 5.0
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
-    tuple_ = key.to_tuple()
+#     new_config_version: float = 5.0
+#     key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+#     tuple_ = key.to_tuple()
 
-    inline_store_backend.set(tuple_, new_config_version)
+#     inline_store_backend.set(tuple_, new_config_version)
 
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
+#     with open(path_to_great_expectations_yml) as data:
+#         config_commented_map_from_yaml = yaml.load(data)
 
-    assert config_commented_map_from_yaml["config_version"] == new_config_version
+#     assert config_commented_map_from_yaml["config_version"] == new_config_version
 
-    # 2. Set nested dictionary config value and confirm it persists in the GE.yml
+#     # 2. Set nested dictionary config value and confirm it persists in the GE.yml
 
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
+#     with open(path_to_great_expectations_yml) as data:
+#         config_commented_map_from_yaml = yaml.load(data)
 
-    assert config_commented_map_from_yaml["datasources"] == {}
+#     assert config_commented_map_from_yaml["datasources"] == {}
 
-    datasource_config_string: str = """
-        class_name: Datasource
+#     datasource_config_string: str = """
+#         class_name: Datasource
 
-        execution_engine:
-            class_name: PandasExecutionEngine
+#         execution_engine:
+#             class_name: PandasExecutionEngine
 
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: my/base/dir/
-                glob_directive: "*.csv"
+#         data_connectors:
+#             my_other_data_connector:
+#                 class_name: ConfiguredAssetFilesystemDataConnector
+#                 base_directory: my/base/dir/
+#                 glob_directive: "*.csv"
 
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-        """
-    datasource_config: dict = yaml.load(datasource_config_string)
+#                 default_regex:
+#                     pattern: (.+)\\.csv
+#                     group_names:
+#                         - name
+#         """
+#     datasource_config: dict = yaml.load(datasource_config_string)
 
-    key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
-        resource_name="my_datasource",
-    )
-    tuple_ = key.to_tuple()
+#     key = DataContextVariableKey(
+#         resource_type=DataContextVariableSchema.DATASOURCES,
+#         resource_name="my_datasource",
+#     )
+#     tuple_ = key.to_tuple()
 
-    inline_store_backend.set(tuple_, datasource_config)
+#     inline_store_backend.set(tuple_, datasource_config)
 
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
+#     with open(path_to_great_expectations_yml) as data:
+#         config_commented_map_from_yaml = yaml.load(data)
 
-    datasources: dict = config_commented_map_from_yaml["datasources"]
-    assert len(datasources) == 1
-    assert datasources["my_datasource"] == datasource_config
+#     datasources: dict = config_commented_map_from_yaml["datasources"]
+#     assert len(datasources) == 1
+#     assert datasources["my_datasource"] == datasource_config

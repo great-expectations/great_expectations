@@ -210,7 +210,6 @@ class StoreBackend(metaclass=ABCMeta):
 
     def build_key(
         self,
-        resource_type: Optional[DataContextVariableSchema] = None,
         id_: Optional[str] = None,
         name: Optional[str] = None,
     ) -> Any:
@@ -282,12 +281,10 @@ class InMemoryStoreBackend(StoreBackend):
 
     def build_key(
         self,
-        resource_type: Optional[DataContextVariableSchema] = None,
         id_: Optional[str] = None,
         name: Optional[str] = None,
     ) -> DataContextVariableKey:
         """Get the store backend specific implementation of the key. id_ included for super class compatibility."""
         return DataContextVariableKey(
-            resource_type=resource_type,
             resource_name=name,
         )
