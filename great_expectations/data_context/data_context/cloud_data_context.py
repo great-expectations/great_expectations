@@ -220,7 +220,7 @@ class CloudDataContext(AbstractDataContext):
         )
         if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
-                "expectation_suite with name {} does not exist."
+                f"expectation_suite with id {ge_cloud_id} does not exist."
             )
         else:
             self.expectations_store.remove_key(key)
@@ -352,3 +352,72 @@ class CloudDataContext(AbstractDataContext):
                 raise e
 
         return datasource
+
+    def add_checkpoint(
+        self,
+        name: str,
+        config_version: Optional[Union[int, float]] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[dict] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: Optional[Union[str, List[str]]] = None,
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = None,
+        notify_with: Optional[Union[str, List[str]]] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+    ) -> "Checkpoint":  # noqa: F821
+        """
+        See `AbstractDataContext.add_checkpoint` for more information.
+        """
+
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
+            data_context=self,
+            checkpoint_store_name=self.checkpoint_store_name,
+            name=name,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            # Next two fields are for LegacyCheckpoint configuration
+            validation_operator_name=validation_operator_name,
+            batches=batches,
+            # the following four arguments are used by SimpleCheckpoint
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+            ge_cloud_id=ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+        )
+
+        checkpoint_config = self.checkpoint_store.create(
+            checkpoint_config=checkpoint.config
+        )
+
+        checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
+            checkpoint_config=checkpoint_config, data_context=self
+        )
+        return checkpoint

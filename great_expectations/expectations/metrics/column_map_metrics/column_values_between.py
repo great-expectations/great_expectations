@@ -75,7 +75,6 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             raise ValueError("min_value cannot be greater than max_value")
 
         def is_between(val):
-            # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
             # print type(val), type(min_value), type(max_value), val, min_value, max_value
@@ -200,7 +199,6 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
         if min_value is None:
             if strict_max:
                 return column < sa.literal(max_value)
@@ -314,7 +312,6 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        # TODO: <Alex>Make "rtol" and "atol" customizable at "ExpectationConfiguration" level.</Alex>
         if min_value is None:
             if strict_max:
                 return column < F.lit(max_value)

@@ -52,7 +52,10 @@ class TableHead(TableMetricProvider):
         )
         df = None
         table_name = getattr(selectable, "name", None)
-        if table_name is None:
+        if (
+            isinstance(table_name, sa.sql.elements._anonymous_label)
+            or table_name is None
+        ):
             # if a custom query was passed
             try:
                 if metric_value_kwargs["fetch_all"]:
