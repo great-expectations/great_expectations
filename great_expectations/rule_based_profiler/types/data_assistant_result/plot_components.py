@@ -195,7 +195,7 @@ def determine_plot_title(
 
     title: alt.TitleParams
     if subtitle:
-        title = alt.TitleParams(contents, subtitle=[subtitle])
+        title = alt.TitleParams(contents, subtitle=[subtitle], dy=-5)
     elif domain_selector:
         title = alt.TitleParams(contents, dy=-35)
     else:
