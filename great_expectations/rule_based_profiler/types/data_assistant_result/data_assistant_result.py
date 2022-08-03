@@ -1982,13 +1982,14 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = df.groupby(
-            [batch_plot_component.name], as_index=False
-        ).max()
-        input_dropdown_initial_state[
-            batch_plot_component.batch_identifiers + [domain_plot_component.name]
-        ] = " "
-        df = pd.concat([input_dropdown_initial_state, df], axis=0)
+        if expectation_type is None:
+            input_dropdown_initial_state: pd.DataFrame = df.groupby(
+                [batch_plot_component.name], as_index=False
+            ).max()
+            input_dropdown_initial_state[
+                batch_plot_component.batch_identifiers + [domain_plot_component.name]
+            ] = " "
+            df = pd.concat([input_dropdown_initial_state, df], axis=0)
 
         columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
@@ -2151,7 +2152,7 @@ class DataAssistantResult(SerializableDictDot):
 
         input_dropdown_initial_state: pd.DataFrame = df.groupby(
             [batch_plot_component.name], as_index=False
-        )[batch_plot_component.name].max()
+        ).max()
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers
             + [
