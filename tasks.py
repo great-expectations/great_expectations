@@ -37,7 +37,7 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
 )
 def sort(ctx, path=".", check=False, exclude=None):
     """Sort module imports."""
-    cmds = ["isort", path, "--profile", "black"]
+    cmds = ["isort", path]
     if check:
         cmds.append("--check-only")
     if exclude:
