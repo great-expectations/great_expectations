@@ -28,7 +28,7 @@ from great_expectations.data_context.types.base import (
             ),
             {
                 "name": "my_datasource",
-                "id_": "d3a14abd-d4cb-4343-806e-55b555b15c28",
+                "id": "d3a14abd-d4cb-4343-806e-55b555b15c28",
                 "class_name": "Datasource",
                 "module_name": "great_expectations.datasource",
             },

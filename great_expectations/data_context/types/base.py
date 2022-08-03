@@ -942,6 +942,7 @@ class DatasourceConfigSchema(Schema):
     id_ = fields.String(
         required=False,
         allow_none=True,
+        data_key="id",
     )
 
     class_name = fields.String(
@@ -2240,7 +2241,7 @@ class CheckpointValidationConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=False, allow_none=False)
-    id_ = fields.String(required=False, allow_none=False)
+    id_ = fields.String(required=False, allow_none=False, data_key="id")
 
 
 class CheckpointConfigSchema(Schema):
