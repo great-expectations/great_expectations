@@ -719,34 +719,44 @@ class DataAssistantResult(SerializableDictDot):
             col_has_list[col_has_list["has_list"]]["column_name"]
         )
 
-        column_name: str
-        cols_flat: List[List[str]] = []
-        for idx, column_name in enumerate(list_column_names):
-            # explode list of column names into separate rows for each name in list
-            # flatten columns of lists
-            cols_flat.append([item for sublist in df[column_name] for item in sublist])
+        if (
+            "table_columns" in list_column_names
+            and len(np.unique(df["table_columns"])) == 1
+        ):
+            df = df.iloc[:1]
+        else:
+            column_name: str
+            cols_flat: List[List[str]] = []
+            for idx, column_name in enumerate(list_column_names):
+                # explode list of column names into separate rows for each name in list
+                # flatten columns of lists
+                cols_flat.append(
+                    [item for sublist in df[column_name] for item in sublist]
+                )
 
-        # row numbers to repeat
-        ilocations: List[int] = list(
-            np.repeat(range(df.shape[0]), df[list_column_names[0]].apply(len))
-        )
-        # replicate rows and add flattened column of lists
-        columns: List[int] = [
-            idx for idx, col in enumerate(df.columns) if col not in list_column_names
-        ]
-        df = df.iloc[ilocations, columns].reset_index(drop=True)
-        cols_flat_df: pd.DataFrame = pd.DataFrame(cols_flat).T
-        cols_flat_df.columns = list_column_names
-        df = pd.concat([df, cols_flat_df], axis=1)
+            # row numbers to repeat
+            ilocations: List[int] = list(
+                np.repeat(range(df.shape[0]), df[list_column_names[0]].apply(len))
+            )
+            # replicate rows and add flattened column of lists
+            columns: List[int] = [
+                idx
+                for idx, col in enumerate(df.columns)
+                if col not in list_column_names
+            ]
+            df = df.iloc[ilocations, columns].reset_index(drop=True)
+            cols_flat_df: pd.DataFrame = pd.DataFrame(cols_flat).T
+            cols_flat_df.columns = list_column_names
+            df = pd.concat([df, cols_flat_df], axis=1)
 
-        groupby_columns: List[str] = [
-            column for column in df.columns if column not in list_column_names
-        ]
-        df["metric_list_position"] = df.groupby(by=groupby_columns).cumcount()
+            groupby_columns: List[str] = [
+                column for column in df.columns if column not in list_column_names
+            ]
+            df["metric_list_position"] = df.groupby(by=groupby_columns).cumcount()
 
-        if "table_columns" in list_column_names:
-            # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
-            df["column_number"] = pd.factorize(df["table_columns"])[0] + 1
+            if "table_columns" in list_column_names:
+                # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
+                df["column_number"] = pd.factorize(df["table_columns"])[0] + 1
 
         return df
 
@@ -809,6 +819,9 @@ class DataAssistantResult(SerializableDictDot):
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
+            if sanitized_metric_name == "table_columns" and len(df.index) == 1:
+                column_set = df[sanitized_metric_name].iloc[0]
+
             metric_plot_component = MetricPlotComponent(
                 name=sanitized_metric_name,
                 alt_type=metric_type,
@@ -889,16 +902,15 @@ class DataAssistantResult(SerializableDictDot):
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
+            if sanitized_metric_name == "table_columns" and len(df.index) == 1:
+                column_set = df[sanitized_metric_name].iloc[0]
+
             metric_plot_component = MetricPlotComponent(
                 name=sanitized_metric_name,
                 alt_type=metric_type,
             )
 
             metric_plot_components.append(metric_plot_component)
-
-        # we need at least one record to plot the column_set as text
-        if column_set is not None:
-            df = df.iloc[:1]
 
         column_number: str = "column_number"
 
