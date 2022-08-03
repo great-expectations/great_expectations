@@ -191,7 +191,7 @@ stages:
               awsCredentials: 'aws-ci-great-expectations'
               bucketName: 'superconductive-public'
               sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
+              globExpressions: '*.(json|txt)'
               targetFolder: 'static/gallery/'
               filesAcl: 'public-read'
 
