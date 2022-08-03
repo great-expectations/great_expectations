@@ -8,10 +8,7 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    requires_lossy_conversion,
-)
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -20,6 +17,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
+    requires_lossy_conversion,
 )
 
 
