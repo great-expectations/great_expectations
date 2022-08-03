@@ -267,6 +267,8 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
             },
         }
 
+        template_str: str = ""
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "standard deviation may have any numerical value."
         else:
@@ -292,7 +294,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, styling
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -323,6 +325,8 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
                 "strict_max",
             ],
         )
+
+        template_str: str = ""
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "standard deviation may have any numerical value."
