@@ -2242,6 +2242,26 @@ class CheckpointValidationConfigSchema(Schema):
 
     id_ = fields.String(required=False, allow_none=False, data_key="id")
 
+    def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:
+        """
+        Chetan - 20220803 - By design, Marshmallow accepts unknown fields through the
+        `unknown = INCLUDE` directive but only upon load. When dumping, it validates
+        each item against the declared fields and only includes explicitly named values.
+
+        As such, this override of parent behavior is meant to keep ALL values provided
+        to the config in the output dict. To get rid of this function, we need to
+        explicitly name all possible values in CheckpoingValidationConfigSchema as
+        schema fields.
+        """
+        original_obj = copy.deepcopy(obj)
+        data = super().dump(obj, many=many)
+
+        for key, value in original_obj.items():
+            if key not in data and key not in self.declared_fields:
+                data[key] = value
+
+        return data
+
 
 class CheckpointConfigSchema(Schema):
     class Meta:
@@ -2311,7 +2331,9 @@ class CheckpointConfigSchema(Schema):
     evaluation_parameters = fields.Dict(required=False, allow_none=True)
     runtime_configuration = fields.Dict(required=False, allow_none=True)
     validations = fields.List(
-        cls_or_instance=fields.Dict(), required=False, allow_none=True
+        cls_or_instance=fields.Nested(CheckpointValidationConfigSchema),
+        required=False,
+        allow_none=True,
     )
     profilers = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
