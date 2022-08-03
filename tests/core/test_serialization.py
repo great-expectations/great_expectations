@@ -564,7 +564,7 @@ def test_checkpoint_config_print(
                             },
                             "datasource_name": "my_datasource",
                         },
-                        "id_": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                        "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     },
                 ],
             },
@@ -576,6 +576,9 @@ def test_checkpoint_validation_config_within_checkpoint_config_is_serialized(
     checkpoint_config: CheckpointConfig, expected_serialized_checkpoint_config: dict
 ) -> None:
     """CheckpointValidationConfig within CheckpointConfig should be serialized appropriately with/without optional params."""
-    observed = checkpointConfigSchema.dump(checkpoint_config)
+    observed_dump = checkpointConfigSchema.dump(checkpoint_config)
+    assert observed_dump == expected_serialized_checkpoint_config
 
-    assert observed == expected_serialized_checkpoint_config
+    loaded_data = checkpointConfigSchema.load(observed_dump)
+    observed_load = CheckpointConfig(**loaded_data)
+    assert observed_load.to_json_dict() == checkpoint_config.to_json_dict()
