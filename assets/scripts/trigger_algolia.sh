@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-which nvm
 which npm
 which node
 which yarn
@@ -15,5 +14,5 @@ if [[ ! -d "node_modules" ]]; then
     npm install || exit 1
 fi
 
-node upload-expec
-node upload-packages
+node ./upload_s3_expectation_to_algolia.js
+node ./upload_s3_packages_to_algolia.js
