@@ -1,5 +1,6 @@
 import logging
 import warnings
+from collections import OrderedDict
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -130,11 +131,22 @@ class RuntimeDataConnector(DataConnector):
                 )
             if batch_identifiers:
                 # deprecated-v0.15.1
+                # this is the warning
                 warnings.warn(
                     "Specifying batch_identifiers as part of the RuntimeDataConnector config is deprecated as of v0.15.1 and will be removed by v0.18. Please configure batch_identifiers as part of Assets instead.",
                     DeprecationWarning,
                 )
                 self._batch_identifiers[self.name] = batch_identifiers
+
+    def add_data_asset(self, data_asset_name: str, batch_identifiers: List[str]):
+        batch_identifiers_dict: OrderedDict = OrderedDict(
+            {"batch_identifiers": batch_identifiers}
+        )
+        data_asset_config: Dict[str, OrderedDict] = {
+            data_asset_name: batch_identifiers_dict
+        }
+        self._build_assets_from_config(config=data_asset_config)
+        # self._write_update_config()
 
     def _refresh_data_references_cache(self) -> None:
         self._data_references_cache = {}
@@ -406,6 +418,9 @@ class RuntimeDataConnector(DataConnector):
                 data_asset_name=data_asset_name, batch_identifiers=batch_identifiers
             )
         else:
+            warnings.warn(
+                f"you are doing something we dont recommend", DeprecationWarning
+            )
             self._validate_data_connector_level_batch_identifiers(
                 batch_identifiers=batch_identifiers
             )
@@ -481,16 +496,13 @@ class RuntimeDataConnector(DataConnector):
                 "data_asset_count": len_asset_names,
                 "example_data_asset_names": asset_names[:max_examples],
                 "data_assets": {},
-                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
+                "note": "Assets can be added by running add_asset()",
             }
             if pretty_print:
                 print(
                     f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):"
                 )
-                print(
-                    "\t\t"
-                    + "Note : RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
-                )
+                print("\t\t" + "Note : Assets can be added by running add_asset()")
 
             unmatched_data_references: List[str] = self.get_unmatched_data_references()
             len_unmatched_data_references: int = len(unmatched_data_references)
