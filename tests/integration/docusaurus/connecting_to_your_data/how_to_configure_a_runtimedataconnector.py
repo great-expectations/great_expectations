@@ -15,10 +15,11 @@ execution_engine:
   module_name: great_expectations.execution_engine
   class_name: PandasExecutionEngine
 data_connectors:
-  default_runtime_data_connector_name:
+  runtime:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    yellow_taxi_data:
+        batch_identifiers:
+          - custom_identifier_name
 """
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
@@ -33,9 +34,9 @@ datasource_config = {
         "class_name": "PandasExecutionEngine",
     },
     "data_connectors": {
-        "default_runtime_data_connector_name": {
+        "runtime": {
             "class_name": "RuntimeDataConnector",
-            "batch_identifiers": ["default_identifier_name"],
+            "batch_identifiers": ["custom_identifier_name"],
         },
     },
 }
@@ -50,10 +51,10 @@ context.add_datasource(**datasource_config)
 
 batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
-    data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="<YOUR MEANINGFUL NAME>",  # This can be anything that identifies this data_asset for you
+    data_connector_name="runtime",
+    data_asset_name="yellow_taxi_data",  # This should match the asset name you defined
     runtime_parameters={"path": "<PATH TO YOUR DATA HERE>"},  # Add your path here.
-    batch_identifiers={"default_identifier_name": "<YOUR MEANINGFUL IDENTIFIER>"},
+    batch_identifiers={"custom_identifier_name": "<YOUR MEANINGFUL IDENTIFIER>"},
 )
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -71,10 +72,8 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-assert "<YOUR MEANINGFUL NAME>" in set(
-    context.get_available_data_asset_names()["taxi_datasource"][
-        "default_runtime_data_connector_name"
-    ]
+assert "yellow_taxi_data" in set(
+    context.get_available_data_asset_names()["taxi_datasource"]["runtime"]
 )
 
 path = "<PATH TO YOUR DATA HERE>"
@@ -84,10 +83,10 @@ df = pd.read_csv(path)
 
 batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
-    data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="<YOUR MEANINGFUL NAME>",  # This can be anything that identifies this data_asset for you
+    data_connector_name="runtime",
+    data_asset_name="yellow_taxi_data",  # This should match the asset name you defined
     runtime_parameters={"batch_data": df},  # Pass your DataFrame here.
-    batch_identifiers={"default_identifier_name": "<YOUR MEANINGFUL IDENTIFIER>"},
+    batch_identifiers={"custom_identifier_name": "<YOUR MEANINGFUL IDENTIFIER>"},
 )
 
 validator = context.get_validator(
@@ -99,8 +98,6 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-assert "<YOUR MEANINGFUL NAME>" in set(
-    context.get_available_data_asset_names()["taxi_datasource"][
-        "default_runtime_data_connector_name"
-    ]
+assert "yellow_taxi_data" in set(
+    context.get_available_data_asset_names()["taxi_datasource"]["runtime"]
 )

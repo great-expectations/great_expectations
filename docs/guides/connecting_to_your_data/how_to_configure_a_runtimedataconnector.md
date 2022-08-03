@@ -49,7 +49,8 @@ Import these necessary packages and modules:
 
 ### 2. Set up a Datasource
 
-All of the examples below assume you’re testing configuration using something like:
+All of the examples below assume you’re testing configuration similar to the one below. The runtime dataconnector can
+be used with any of supported execution engine, including Pandas, spark or SQL-based engines.
 
 <Tabs
   groupId="yaml-or-python"
