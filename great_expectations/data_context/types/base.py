@@ -2240,7 +2240,6 @@ class CheckpointValidationConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    name = fields.String(required=False, allow_none=False)
     id_ = fields.String(required=False, allow_none=False, data_key="id")
 
 
