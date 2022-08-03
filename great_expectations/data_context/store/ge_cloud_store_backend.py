@@ -7,6 +7,9 @@ from urllib.parse import urljoin
 
 import requests
 
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
+)
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -148,8 +151,16 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _get(self, key: Tuple[str, ...]) -> dict:
         ge_cloud_url = self.get_url_for_key(key=key)
+        params: Optional[dict] = None
         try:
-            response = requests.get(ge_cloud_url, headers=self.auth_headers)
+            # if name is included in the key, add as a param
+            if len(key) > 2 and key[2]:
+                params = {"name": key[2]}
+                ge_cloud_url = ge_cloud_url.rstrip("/")
+
+            response = requests.get(
+                ge_cloud_url, headers=self.auth_headers, params=params
+            )
             return response.json()
         except JSONDecodeError as jsonError:
             logger.debug(
@@ -343,7 +354,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         data = {
             "data": {
                 "type": self.ge_cloud_resource_type,
-                "id": ge_cloud_id,
+                "id_": ge_cloud_id,
                 "attributes": {
                     "deleted": True,
                 },
@@ -371,6 +382,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
+        # self.list_keys() generates a list of length 2 tuples
+        if len(key) == 3:
+            key = key[:2]
         all_keys = self.list_keys()
         return key in all_keys
 
@@ -378,8 +392,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def config(self) -> dict:
         return self._config
 
-    def build_key(self, id_: Optional[str] = None, **kwargs) -> GeCloudIdentifier:
-        """Get the store backend specific implementation of the key, ignore irrelevant kwargs."""
+    def build_key(
+        self,
+        resource_type: Optional[DataContextVariableSchema] = None,
+        id_: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> GeCloudIdentifier:
+        """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
         return GeCloudIdentifier(
-            resource_type=self.ge_cloud_resource_type, ge_cloud_id=id_
+            resource_type=self.ge_cloud_resource_type,
+            ge_cloud_id=id_,
+            resource_name=name,
         )
