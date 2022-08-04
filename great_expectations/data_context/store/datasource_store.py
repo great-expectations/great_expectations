@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import copy
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
-from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.core.data_context_key import (
+    DataContextKey,
+    DataContextVariableKey,
+)
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -174,9 +177,7 @@ class DatasourceStore(Store):
         if not datasource_config.name:
             datasource_config.name = datasource_name
 
-        datasource_key: Union[
-            GeCloudIdentifier, DataContextVariableKey
-        ] = self._build_key_from_config(datasource_config)
+        datasource_key: DataContextKey = self._build_key_from_config(datasource_config)
 
         self.set(datasource_key, datasource_config)
 
@@ -197,28 +198,27 @@ class DatasourceStore(Store):
         ] = self._build_key_from_config(datasource_config)
         return self.set(key, datasource_config)
 
-    def update(self, datasource_config: DatasourceConfig) -> None:
+    def update(self, config: DatasourceConfig) -> DatasourceConfig:
         """Updates a DatasourceConfig that already exists in the store.
 
         Args:
-            datasource_config: The config object to persist using the StoreBackend.
+            config: The DatasourceConfig to persist using the StoreBackend.
 
         Raises:
             ValueError if a DatasourceConfig is not found.
         """
 
-        datasource_key: Union[
-            GeCloudIdentifier, DataContextVariableKey
-        ] = self._build_key_from_config(datasource_config)
+        key: DataContextKey = self._build_key_from_config(config)
 
-        if not self.has_key(datasource_key):
+        if not self.has_key(key):
             raise ValueError(
-                f"Unable to load datasource `{datasource_config.name}` -- no configuration found or invalid configuration."
+                f"Unable to load datasource `{config.name}` -- no configuration found or invalid configuration."
             )
 
-        self.set_by_name(
-            datasource_name=datasource_config.name, datasource_config=datasource_config
-        )
+        raw_config: dict = self.store_backend.update(key=key, value=config)
+        validated_config = cast(dict, self._schema.load(raw_config))
+        datasource_config: DatasourceConfig = DatasourceConfig(**validated_config)
+        return datasource_config
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
         datasource_key: DataContextVariableKey = DataContextVariableKey(
