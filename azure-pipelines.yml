@@ -209,18 +209,6 @@ stages:
               GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest $(python.version)'
 
-          - script: |
-              # These are integration/E2E tests that are specific to Great Expectations Cloud.
-              # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest tests --cloud -m "cloud and not unit"
-
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-            displayName: 'gx-cloud-integration'
-
-
           - task: PublishTestResults@2
             condition: succeededOrFailed()
             inputs:
@@ -419,6 +407,17 @@ stages:
               GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
               GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
+
+          - script: |
+              # These are integration/E2E tests that are specific to Great Expectations Cloud.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              pytest tests --cloud -m "cloud and not unit"
+
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
+            displayName: 'gx-cloud-integration'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
