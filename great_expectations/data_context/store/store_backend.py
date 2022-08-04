@@ -5,7 +5,11 @@ from typing import Any, Optional
 
 import pyparsing as pp
 
-from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.data_context_key import (
+    DataContextKey,
+    DataContextVariableKey,
+)
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import filter_properties_dict
 
@@ -132,6 +136,26 @@ class StoreBackend(metaclass=ABCMeta):
             logger.debug(str(e))
             raise StoreBackendError("ValueError while calling _set on store backend.")
 
+    def update(self, key: DataContextKey, value: AbstractConfig) -> dict:
+        """Update a config within a store and then retrieve raw config from the store.
+
+        Args:
+            key: Key of config to update.
+            value: New config to use.
+
+        Returns:
+            Config as updated in the store after retrieval as dict.
+        """
+        self._validate_key(key)
+        self._validate_value(value)
+        try:
+            return self._update(key, value)
+        except ValueError as e:
+            logger.debug(str(e))
+            raise StoreBackendError(
+                f"ValueError while calling _update on store backend {self.__class__.__name__}"
+            )
+
     def move(self, source_key, dest_key, **kwargs):
         self._validate_key(source_key)
         self._validate_key(dest_key)
@@ -178,6 +202,12 @@ class StoreBackend(metaclass=ABCMeta):
     @abstractmethod
     def _set(self, key, value, **kwargs) -> None:
         raise NotImplementedError
+
+    def _update(self, key, value) -> Any:
+        """Optionally implemented by subclass, not decorated with @abstractmethod"""
+        raise StoreBackendError(
+            f"_update() not implemented for {self.__class__.__name__}"
+        )
 
     @abstractmethod
     def _move(self, source_key, dest_key, **kwargs) -> None:
