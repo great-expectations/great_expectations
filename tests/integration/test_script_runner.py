@@ -1795,7 +1795,7 @@ def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments
 
 
 def _execute_integration_test(
-        integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
+    integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
 ):
     """
     Prepare and environment and run integration tests from a list of tests.
@@ -1881,19 +1881,19 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
     if not dependencies:
         return
     elif dependencies == BackendDependencies.POSTGRESQL and (
-            not pytest_args.postgresql or pytest_args.no_sqlalchemy
+        not pytest_args.postgresql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping postgres tests")
     elif dependencies == BackendDependencies.MYSQL and (
-            not pytest_args.mysql or pytest_args.no_sqlalchemy
+        not pytest_args.mysql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping mysql tests")
     elif dependencies == BackendDependencies.MSSQL and (
-            not pytest_args.mssql or pytest_args.no_sqlalchemy
+        not pytest_args.mssql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping mssql tests")
     elif dependencies == BackendDependencies.BIGQUERY and (
-            pytest_args.no_sqlalchemy or not pytest_args.bigquery
+        pytest_args.no_sqlalchemy or not pytest_args.bigquery
     ):
         # TODO : Investigate whether this test should be handled by azure-pipelines-cloud-db-integration.yml
         pytest.skip("Skipping bigquery tests")
