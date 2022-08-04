@@ -166,6 +166,7 @@ class Store:
 
         self._validate_key(key)
         # TODO: AJB 20220803 remove this isinstance call
+        # TODO: AJB 20220803 Add code comment
         if isinstance(self._store_backend, GeCloudStoreBackend):
             return self.ge_cloud_response_json_to_object_dict(
                 response_json=self._store_backend.set(key, value, **kwargs)
