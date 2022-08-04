@@ -89,6 +89,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     DEFAULT_BASE_URL: str = "https://app.greatexpectations.io/"
 
+    TIMEOUT: int = 15
+
     def __init__(
         self,
         ge_cloud_credentials: Dict,
@@ -181,7 +183,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
             response: requests.Response = requests.get(
-                ge_cloud_url, headers=self.auth_headers, params=params, timeout=15
+                ge_cloud_url,
+                headers=self.auth_headers,
+                params=params,
+                timeout=self.TIMEOUT,
             )
             return response.json()
         except JSONDecodeError as jsonError:
@@ -199,7 +204,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _update(self, key: GeCloudIdentifier, value: AbstractConfig) -> ResponsePayload:
 
-        assert isinstance(value, AbstractConfig)
+        assert isinstance(
+            value, AbstractConfig
+        ), f"Only {AbstractConfig.__name__} is supported in {self.__class__.__name__}"
 
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
@@ -228,7 +235,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         try:
             response = requests.put(
-                url, json=data, headers=self.auth_headers, timeout=15
+                url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
             )
             response_status_code = response.status_code
 
@@ -240,7 +247,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
             ):
                 response = requests.patch(
-                    url, json=data, headers=self.auth_headers, timeout=15
+                    url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
                 )
 
             response.raise_for_status()
@@ -284,7 +291,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self, key: GeCloudIdentifier, value: AbstractConfig, **kwargs
     ) -> ResponsePayload:
 
-        assert isinstance(value, AbstractConfig)
+        assert isinstance(
+            value, AbstractConfig
+        ), f"Only {AbstractConfig.__name__} is supported in {self.__class__.__name__}"
 
         # Each resource type has corresponding attribute key to include in POST body
         ge_cloud_resource: GeCloudRESTResource = key.resource_type
@@ -324,7 +333,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
         try:
             response: requests.Response = requests.post(
-                url, json=data, headers=self.auth_headers, timeout=15
+                url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
             )
 
             value.id_ = self._retrieve_id_from_response(response)
@@ -378,7 +387,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
         try:
-            response = requests.get(url, headers=self.auth_headers, timeout=15)
+            response = requests.get(
+                url, headers=self.auth_headers, timeout=self.TIMEOUT
+            )
             response_json = response.json()
             keys = [
                 (
@@ -429,7 +440,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
         try:
             response = requests.delete(
-                url, json=data, headers=self.auth_headers, timeout=15
+                url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
             )
             response_status_code = response.status_code
 

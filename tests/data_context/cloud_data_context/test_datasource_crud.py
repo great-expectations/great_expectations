@@ -12,6 +12,7 @@ from great_expectations.data_context import (
     BaseDataContext,
     CloudDataContext,
 )
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
@@ -257,6 +258,7 @@ def test_cloud_backed_data_context_add_datasource(
                     }
                 },
                 headers=request_headers,
+                timeout=GeCloudStoreBackend.TIMEOUT,
             )
             mock_get.assert_called_once()
             # TODO: AJB 20220803 Assert that mock_get is called also, make sure that the same id is used in both calls

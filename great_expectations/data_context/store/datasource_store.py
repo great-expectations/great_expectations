@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 from great_expectations.core.data_context_key import (
     DataContextKey,
@@ -146,7 +146,7 @@ class DatasourceStore(Store):
 
     def _build_key_from_config(
         self, datasource_config: DatasourceConfig
-    ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
+    ) -> DataContextKey:
         # TODO: 20220803 Remove this method once we can get resource_type from the backend
 
         # TODO: 20220803 Remove this hasattr call once name is required
@@ -175,15 +175,14 @@ class DatasourceStore(Store):
         self.set(datasource_key, datasource_config)
 
     def set(
-        self,
-        key: Union[DataContextKey, None],
-        value: DatasourceConfig,
+        self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
     ) -> DatasourceConfig:
         """Create a datasource config in the store using a store_backend-specific key."""
         if not key:
-            key: DataContextKey = self._build_key_from_config(value)
+            key = self._build_key_from_config(value)
 
-        validated_config: dict = self._schema.load(super().set(key, value))
+        raw_config: dict = cast(dict, super().set(key, value))
+        validated_config = cast(dict, self._schema.load(raw_config))
         datasource_config: DatasourceConfig = DatasourceConfig(**validated_config)
         return datasource_config
 

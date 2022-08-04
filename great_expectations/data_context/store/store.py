@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.data_context_key import DataContextKey
@@ -160,7 +160,7 @@ class Store:
         else:
             return None
 
-    def set(self, key: DataContextKey, value: Any, **kwargs: dict) -> None:
+    def set(self, key: DataContextKey, value: Any, **kwargs: dict) -> Union[None, Dict]:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.set(key, value, **kwargs)
 
