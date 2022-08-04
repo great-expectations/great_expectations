@@ -187,7 +187,7 @@ class DatasourceStore(Store):
         datasource_config: DatasourceConfig = DatasourceConfig(**validated_config)
         return datasource_config
 
-    # TODO: AJB 20220803 Remove this method and modify associated tests and logic to use update.
+    # TODO: AJB 20220803 Change this method to update and implement similarly to `set`.
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
     ) -> None:

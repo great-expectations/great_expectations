@@ -156,7 +156,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
         filter_properties_dict(properties=self._config, inplace=True)
 
-        # TODO: AJB 20220803 make this lookup table for all resource types
+        # TODO: AJB 20220803 pass schema in during init
         if ge_cloud_resource_type == GeCloudRESTResource.DATASOURCE:
             self._schema: Schema = datasourceConfigSchema
 
@@ -168,7 +168,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
 
     def _get(self, key: Tuple[str, ...]) -> dict:
-        # TODO: AJB 20220803 move this to Store and make this method take a non-tuple key:
+        # TODO: AJB 20220803 move this isinstance check to store.py and make this method take a non-tuple
+        #  AbstractConfig key (similar to _set()):
         if isinstance(key, GeCloudIdentifier):
             key = key.to_tuple()
         ge_cloud_url = self.get_url_for_key(key=key)
@@ -180,12 +181,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
             response: ResponsePayload = requests.get(
-                ge_cloud_url, headers=self.auth_headers, params=params
+                ge_cloud_url, headers=self.auth_headers, params=params, timeout=15
             )
             return response.json()
         except JSONDecodeError as jsonError:
             logger.debug(
-                "Failed to parse GE Cloud ResponsePayload into JSON",
+                "Failed to parse GE Cloud Response into JSON",
                 str(response.text),
                 str(jsonError),
             )
@@ -238,7 +239,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code == 405
                 and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
             ):
-                response = requests.patch(url, json=data, headers=self.auth_headers)
+                response = requests.patch(
+                    url, json=data, headers=self.auth_headers, timeout=15
+                )
 
             response.raise_for_status()
 
@@ -321,7 +324,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
         try:
             response: requests.Response = requests.post(
-                url, json=data, headers=self.auth_headers
+                url, json=data, headers=self.auth_headers, timeout=15
             )
 
             value.id_ = self._retrieve_id_from_response(response)
@@ -375,7 +378,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
         try:
-            response = requests.get(url, headers=self.auth_headers)
+            response = requests.get(url, headers=self.auth_headers, timeout=15)
             response_json = response.json()
             keys = [
                 (
@@ -425,7 +428,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{ge_cloud_id}",
         )
         try:
-            response = requests.delete(url, json=data, headers=self.auth_headers)
+            response = requests.delete(
+                url, json=data, headers=self.auth_headers, timeout=15
+            )
             response_status_code = response.status_code
 
             if response_status_code < 300:
