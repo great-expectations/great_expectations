@@ -3,9 +3,11 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 
 from great_expectations.core.util import convert_to_json_serializable, nested_update
-from great_expectations.rule_based_profiler import ParameterContainer
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
 )
 from great_expectations.types import SerializableDictDot
 

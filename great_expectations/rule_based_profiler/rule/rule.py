@@ -7,17 +7,12 @@ from great_expectations.core.util import (
     convert_to_json_serializable,
     determine_progress_bar_method_by_environment,
 )
-from great_expectations.rule_based_profiler import (
-    Domain,
-    ParameterContainer,
-    RuleState,
-    build_parameter_container_for_variables,
-)
 from great_expectations.rule_based_profiler.config.base import (
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -31,6 +26,11 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+    build_parameter_container_for_variables,
+)
+from great_expectations.rule_based_profiler.rule_state import RuleState
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     deep_filter_properties_iterable,
