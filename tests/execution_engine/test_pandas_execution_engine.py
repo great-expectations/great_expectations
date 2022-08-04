@@ -6,6 +6,7 @@ import pytest
 
 # noinspection PyBroadException
 try:
+    # noinspection PyUnresolvedReferences
     from azure.storage.blob import BlobServiceClient
 except:
     azure = None
