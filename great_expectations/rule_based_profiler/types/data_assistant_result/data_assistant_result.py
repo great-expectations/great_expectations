@@ -177,6 +177,58 @@ class DataAssistantResult(SerializableDictDot):
     # Reference to "UsageStatisticsHandler" object for this "DataAssistantResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
+    def show_expectations_by_domain_type(
+        self,
+        expectation_suite_name: str,
+        include_profiler_config: bool = False,
+        send_usage_event: bool = True,
+    ) -> None:
+        """
+        Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
+        and displays this "ExpectationConfiguration" list, grouped by "domain_type", in predetermined order.
+        """
+        self.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            include_profiler_config=include_profiler_config,
+            send_usage_event=send_usage_event,
+        ).show_expectations_by_domain_type()
+
+    def show_expectations_by_expectation_type(
+        self,
+        expectation_suite_name: str,
+        include_profiler_config: bool = False,
+        send_usage_event: bool = True,
+    ) -> None:
+        """
+        Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
+        and displays this "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined order.
+        """
+        self.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            include_profiler_config=include_profiler_config,
+            send_usage_event=send_usage_event,
+        ).show_expectations_by_expectation_type()
+
+    def get_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        include_profiler_config: bool = False,
+        send_usage_event: bool = True,
+    ) -> ExpectationSuite:
+        """
+        Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
+        """
+        if send_usage_event:
+            return self._get_expectation_suite_with_usage_statistics(
+                expectation_suite_name=expectation_suite_name,
+                include_profiler_config=include_profiler_config,
+            )
+
+        return self._get_expectation_suite_without_usage_statistics(
+            expectation_suite_name=expectation_suite_name,
+            include_profiler_config=include_profiler_config,
+        )
+
     def to_dict(self) -> dict:
         """
         Returns: This DataAssistantResult as dictionary (JSON-serializable dictionary for DataAssistantResult objects).
@@ -373,13 +425,28 @@ class DataAssistantResult(SerializableDictDot):
         event_name=UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value,
         args_payload_fn=get_expectation_suite_usage_statistics,
     )
-    def get_expectation_suite(
+    def _get_expectation_suite_with_usage_statistics(
         self,
         expectation_suite_name: str,
         include_profiler_config: bool = False,
     ) -> ExpectationSuite:
         """
         Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
+        Side Effects: One usage statistics event (specified in "usage_statistics_enabled_method" decorator) is emitted.
+        """
+        return self._get_expectation_suite_without_usage_statistics(
+            expectation_suite_name=expectation_suite_name,
+            include_profiler_config=include_profiler_config,
+        )
+
+    def _get_expectation_suite_without_usage_statistics(
+        self,
+        expectation_suite_name: str,
+        include_profiler_config: bool = False,
+    ) -> ExpectationSuite:
+        """
+        Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
+        Side Effects: None -- no usage statistics event is emitted.
         """
         expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
             data_context=None,

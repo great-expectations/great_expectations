@@ -7,9 +7,6 @@ from urllib.parse import urljoin
 
 import requests
 
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariableSchema,
-)
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -382,6 +379,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
+        # self.list_keys() generates a list of length 2 tuples
+        if len(key) == 3:
+            key = key[:2]
         all_keys = self.list_keys()
         return key in all_keys
 
@@ -391,7 +391,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def build_key(
         self,
-        resource_type: DataContextVariableSchema,
         id_: Optional[str] = None,
         name: Optional[str] = None,
     ) -> GeCloudIdentifier:

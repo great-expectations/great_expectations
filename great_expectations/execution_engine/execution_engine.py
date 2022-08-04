@@ -3,7 +3,7 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -11,6 +11,9 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
+from great_expectations.execution_engine.bundled_metric_configuration import (
+    BundledMetricConfiguration,
+)
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
     RowCondition,
@@ -310,7 +313,18 @@ class ExecutionEngine(ABC):
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
-        metric_fn_bundle = []
+        metric_fn_bundle: List[BundledMetricConfiguration] = []
+
+        metric_fn_type: MetricFunctionTypes
+        metric_class: "MetricProvider"  # noqa: F821
+        metric_fn: Any
+        compute_domain_kwargs: dict
+        accessor_domain_kwargs: dict
+        metric_provider_kwargs: dict
+        metric_to_resolve: MetricConfiguration
+        metric_dependencies: dict
+        k: Tuple[str, str, str]
+        v: MetricConfiguration
         for metric_to_resolve in metrics_to_resolve:
             metric_dependencies = {}
             for k, v in metric_to_resolve.metric_dependencies.items():
@@ -345,13 +359,14 @@ class ExecutionEngine(ABC):
                     raise ge_exceptions.MetricError(
                         message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
                     )
+
                 metric_fn_bundle.append(
-                    (
-                        metric_to_resolve,
-                        metric_fn,
-                        compute_domain_kwargs,
-                        accessor_domain_kwargs,
-                        metric_provider_kwargs,
+                    BundledMetricConfiguration(
+                        metric_configuration=metric_to_resolve,
+                        metric_fn=metric_fn,
+                        compute_domain_kwargs=compute_domain_kwargs,
+                        accessor_domain_kwargs=accessor_domain_kwargs,
+                        metric_provider_kwargs=metric_provider_kwargs,
                     )
                 )
                 continue
@@ -359,7 +374,6 @@ class ExecutionEngine(ABC):
             metric_fn_type = getattr(
                 metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
             )
-
             if metric_fn_type not in [
                 MetricPartialFunctionTypes.MAP_FN,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
@@ -388,12 +402,15 @@ class ExecutionEngine(ABC):
             try:
                 # an engine-specific way of computing metrics together
                 # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
-                new_resolved = self.resolve_metric_bundle(metric_fn_bundle)
+                new_resolved: Dict[
+                    Tuple[str, str, str], Any
+                ] = self.resolve_metric_bundle(metric_fn_bundle)
                 resolved_metrics.update(new_resolved)
             except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
                     message=str(e), failed_metrics=[x[0] for x in metric_fn_bundle]
                 )
+
         if self._caching:
             self._metric_cache.update(resolved_metrics)
 
