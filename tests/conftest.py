@@ -2120,6 +2120,16 @@ data_connectors:
             - pipeline_stage_name
             - airflow_run_id
             - custom_key_0
+        assets:
+            asset_a:
+                batch_identifiers:
+                    - day
+                    - month
+            asset_b:
+                batch_identifiers:
+                    - day
+                    - month
+                    - year
 
 execution_engine:
     class_name: PandasExecutionEngine

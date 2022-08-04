@@ -38,6 +38,15 @@ def test_batch_data_get_batch_successful_specification_pandas_engine(
     assert isinstance(batch_list[0], Batch)
 
 
+def test_batch_data_add_asset(
+    data_context_with_datasource_pandas_engine, test_df_pandas
+):
+    data_context: DataContext = data_context_with_datasource_pandas_engine
+    test_df: pd.DataFrame = test_df_pandas
+    res = data_context.get_available_data_asset_names(datasource_names="my_datasource")
+    print(res)
+
+
 def test_batch_data_get_batch_successful_specification_pandas_engine_named_asset(
     data_context_with_datasource_pandas_engine, test_df_pandas
 ):

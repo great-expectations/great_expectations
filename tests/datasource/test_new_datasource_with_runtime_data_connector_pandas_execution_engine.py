@@ -62,7 +62,6 @@ def datasource_with_runtime_data_connector_and_pandas_execution_engine():
 #########################################
 # Tests with data passed in as batch_data
 #########################################
-
 # Tests with PandasExecutionEngine : batch_data
 def test_pandas_execution_engine_self_check(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
@@ -101,6 +100,79 @@ def test_pandas_execution_engine_self_check(
             "module_name": "great_expectations.execution_engine.pandas_execution_engine",
         },
     }
+
+
+def test_batch_data_pandas_execution_engine_add_asset(
+    datasource_with_runtime_data_connector_and_pandas_execution_engine,
+):
+    my_datasource: Datasource = (
+        datasource_with_runtime_data_connector_and_pandas_execution_engine
+    )
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    # empty if data_connector has not been used
+
+    batch_identifiers: dict = {
+        "pipeline_stage_name": "my_pipeline",
+        "airflow_run_id": 12345,
+        "custom_key_0": "my_identifier",
+    }
+
+    batch_request: dict = {
+        "datasource_name": my_datasource.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_new_data_asset_1",
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    with pytest.warns(DeprecationWarning):
+        batch_list: List[Batch] = my_datasource.get_batch_list_from_batch_request(
+            batch_request
+        )
+        assert len(batch_list) == 1
+        assert my_datasource.get_available_data_asset_names() == {
+            "test_runtime_data_connector": ["asset_a", "asset_b", "my_new_data_asset_1"]
+        }
+
+    my_datasource.add_data_asset(
+        data_connector_name="test_runtime_data_connector",
+        data_asset_name="asset_c",
+        batch_identifiers=["apples", "oranges"],
+    )
+
+    batch_identifiers = {
+        "apples": 12,
+        "oranges": 15,
+    }
+
+    batch_request: dict = {
+        "datasource_name": my_datasource.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "asset_c",
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    with pytest.warns(None):
+        batch_list: List[Batch] = my_datasource.get_batch_list_from_batch_request(
+            batch_request
+        )
+        assert len(batch_list) == 1
+        assert my_datasource.get_available_data_asset_names() == {
+            "test_runtime_data_connector": [
+                "asset_a",
+                "asset_b",
+                "asset_c",
+                "my_new_data_asset_1",
+            ]
+        }
 
 
 def test_batch_data_pandas_execution_engine_unknown_datasource(

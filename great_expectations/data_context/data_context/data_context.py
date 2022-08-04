@@ -32,7 +32,6 @@ from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.exceptions import DataContextError
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from tests.integration.db.test_sql_data_sampling import data_asset_name
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
