@@ -143,8 +143,8 @@ class DataAsset:
             self
         )
 
-    @classmethod
-    def expectation(cls, method_arg_names):  # noqa: C901 - complexity 24
+    @classmethod  # noqa: C901 - complexity 24
+    def expectation(cls, method_arg_names):  # noqa: C901
         """Manages configuration and running of expectation objects.
 
         Expectation builds and saves a new expectation configuration to the DataAsset object. It is the core decorator \
