@@ -1270,7 +1270,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Updates a DatasourceConfig that already exists in the store.
 
         Args:
-            datasource_config: The config object to persist using the DatasourceStore.
+            datasource: The datasource object whose config to persist using the DatasourceStore.
             save_changes: do I save changes to disk?
         """
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
