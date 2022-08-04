@@ -141,9 +141,14 @@ def test_cli_init_on_new_project(
                         short-logo-vector.svg
                         short-logo.png
                         validation_failed_unexpected_values.gif
+                    scripts/
+                        app.js
+                        vendor.js
+                        vendor.js.LICENSE.txt
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
+                        vendor.css
                 validations/
                     Titanic/
                         warning/
@@ -672,9 +677,14 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
                         short-logo-vector.svg
                         short-logo.png
                         validation_failed_unexpected_values.gif
+                    scripts/
+                        app.js
+                        vendor.js
+                        vendor.js.LICENSE.txt
                     styles/
                         data_docs_custom_styles_template.css
                         data_docs_default_styles.css
+                        vendor.css
                 validations/
                     Titanic/
                         warning/

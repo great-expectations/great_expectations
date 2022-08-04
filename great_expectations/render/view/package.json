@@ -1,0 +1,26 @@
+{
+  "name": "data-docs",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "webpack --mode production",
+    "build-dev": "webpack --mode development",
+    "postinstall": "npm run build"
+  },
+  "devDependencies": {
+    "@babel/runtime": "^7.14.0",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.0",
+    "webpack-merge-and-include-globally": "^2.3.4"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.10.1",
+    "bootstrap": "^4.3.1",
+    "bootstrap-datepicker": "^1.9.0",
+    "bootstrap-table": "^1.16.0",
+    "jquery": "^3.4.1",
+    "popper.js": "^1.12.9",
+    "vega": "^5.20.2",
+    "vega-embed": "^6.18.2",
+    "vega-lite": "^4.17.0"
+  }
+}
