@@ -1,5 +1,6 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
+from typing import Callable
 from unittest.mock import patch
 
 import pytest
@@ -40,6 +41,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     request_headers: dict,
+    mock_response_factory: Callable,
 ):
     """A BaseDataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource
     with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response
@@ -57,15 +59,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     datasource_config_with_name.name = datasource_name
 
     def mocked_post_response(*args, **kwargs):
-        class MockResponse:
-            def __init__(self, json_data: dict, status_code: int) -> None:
-                self._json_data = json_data
-                self._status_code = status_code
-
-            def json(self):
-                return self._json_data
-
-        return MockResponse({"data": {"id": datasource_id}}, 201)
+        return mock_response_factory({"data": {"id": datasource_id}}, 201)
 
     with patch(
         "requests.post", autospec=True, side_effect=mocked_post_response
@@ -154,6 +148,7 @@ def test_data_context_in_cloud_mode_add_datasource(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     request_headers: dict,
+    mock_response_factory: Callable,
 ):
     """A DataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
     to create the datasource."""
@@ -170,15 +165,7 @@ def test_data_context_in_cloud_mode_add_datasource(
     datasource_config_with_name.name = datasource_name
 
     def mocked_post_response(*args, **kwargs):
-        class MockResponse:
-            def __init__(self, json_data: dict, status_code: int) -> None:
-                self._json_data = json_data
-                self._status_code = status_code
-
-            def json(self):
-                return self._json_data
-
-        return MockResponse({"data": {"id": datasource_id}}, 201)
+        return mock_response_factory({"data": {"id": datasource_id}}, 201)
 
     with patch(
         "requests.post", autospec=True, side_effect=mocked_post_response
@@ -257,6 +244,7 @@ def test_cloud_data_context_add_datasource(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     request_headers: dict,
+    mock_response_factory: Callable,
 ):
     """A CloudDataContext should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
     to create the datasource."""
@@ -273,15 +261,7 @@ def test_cloud_data_context_add_datasource(
     datasource_config_with_name.name = datasource_name
 
     def mocked_post_response(*args, **kwargs):
-        class MockResponse:
-            def __init__(self, json_data: dict, status_code: int) -> None:
-                self._json_data = json_data
-                self._status_code = status_code
-
-            def json(self):
-                return self._json_data
-
-        return MockResponse({"data": {"id": datasource_id}}, 201)
+        return mock_response_factory({"data": {"id": datasource_id}}, 201)
 
     with patch(
         "requests.post", autospec=True, side_effect=mocked_post_response

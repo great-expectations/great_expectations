@@ -8,12 +8,20 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+import json
 import pathlib
 import shutil
 
 import invoke
 
 from scripts import check_type_hint_coverage
+
+try:
+    from tests.integration.usage_statistics import usage_stats_utils
+
+    is_ge_installed: bool = True
+except ModuleNotFoundError:
+    is_ge_installed = False
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
@@ -29,7 +37,7 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
 )
 def sort(ctx, path=".", check=False, exclude=None):
     """Sort module imports."""
-    cmds = ["isort", path, "--profile", "black"]
+    cmds = ["isort", path]
     if check:
         cmds.append("--check-only")
     if exclude:
@@ -118,7 +126,10 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
     # "cli",  # 237
     # "core",  # 242
     "data_asset",  # 0
-    # "data_context",  # 272
+    # "data_context",  # 242
+    # "data_context/data_context",  # 195
+    # "data_context/store", # 83
+    "data_context/types",  # 0
     # "datasource",  # 98
     "exceptions",  # 0
     # "execution_engine",  # 109
@@ -194,3 +205,37 @@ def type_check(
         cmds.extend(["--follow-imports=normal"])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
+
+
+@invoke.task(aliases=["get-stats"])
+def get_usage_stats_json(ctx):
+    """
+    Dump usage stats event examples to json file
+    """
+    if not is_ge_installed:
+        raise invoke.Exit(
+            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
+            code=1,
+        )
+
+    events = usage_stats_utils.get_usage_stats_example_events()
+    version = usage_stats_utils.get_gx_version()
+
+    outfile = f"v{version}_example_events.json"
+    with open(outfile, "w") as f:
+        json.dump(events, f)
+
+    print(f"File written to '{outfile}'.")
+
+
+@invoke.task(pre=[get_usage_stats_json], aliases=["move-stats"])
+def mv_usage_stats_json(ctx):
+    """
+    Use databricks-cli lib to move usage stats event examples to dbfs:/
+    """
+    version = usage_stats_utils.get_gx_version()
+    outfile = f"v{version}_example_events.json"
+    cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
+    cmd = cmd.format(outfile)
+    ctx.run(cmd)
+    print(f"'{outfile}' copied to dbfs.")

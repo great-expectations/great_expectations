@@ -6,6 +6,7 @@ import uuid
 from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
@@ -14,7 +15,10 @@ from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfigDefaults,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import (
+    GeCloudIdAwareRef,
+    GeCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -41,6 +45,9 @@ class CheckpointStore(ConfigurationStore):
             "checkpoint_config"
         ]
         checkpoint_config_dict["ge_cloud_id"] = ge_cloud_checkpoint_id
+
+        # Checkpoints accept a `ge_cloud_id` but not an `id`
+        checkpoint_config_dict.pop("id", None)
 
         return checkpoint_config_dict
 
@@ -168,3 +175,26 @@ class CheckpointStore(ConfigurationStore):
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
             ge_cloud_id = checkpoint_ref.ge_cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)
+
+    def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
+        """Create a checkpoint config in the store using a store_backend-specific key.
+
+        Args:
+            checkpoint_config: Config containing the checkpoint name.
+
+        Returns:
+            None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
+            which was used to create the config in the backend.
+        """
+        key: DataContextKey = self._build_key_from_config(checkpoint_config)
+
+        # Make two separate requests to set and get in order to obtain any additional
+        # values that may have been added to the config by the StoreBackend (i.e. object ids)
+        ref: Optional[GeCloudResourceRef] = self.set(key, checkpoint_config)
+        if ref:
+            assert isinstance(key, GeCloudIdentifier)
+            key.ge_cloud_id = ref.ge_cloud_id
+
+        config = self.get(key=key)
+
+        return config

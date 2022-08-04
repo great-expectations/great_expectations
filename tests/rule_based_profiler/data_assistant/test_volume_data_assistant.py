@@ -1044,7 +1044,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "truncate_values": {
                             "lower_bound": 0.0,
                         },
-                        "round_decimals": 12,
+                        "round_decimals": 15,
                     },
                     "domain_builder": {
                         "allowed_semantic_types_passthrough": ["logic"],

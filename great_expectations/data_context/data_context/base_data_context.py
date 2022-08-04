@@ -2056,10 +2056,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Checkpoint:
-
-        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
-            data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,
+        """
+        See parent 'AbstractDataContext.add_checkpoint()' for more information
+        """
+        checkpoint = self._data_context.add_checkpoint(
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -2073,10 +2073,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            # Next two fields are for LegacyCheckpoint configuration
             validation_operator_name=validation_operator_name,
             batches=batches,
-            # the following four arguments are used by SimpleCheckpoint
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
@@ -2084,8 +2082,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
-
-        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
+        self._synchronize_self_with_underlying_data_context()
         return checkpoint
 
     def get_checkpoint(
