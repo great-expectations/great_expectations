@@ -1,4 +1,7 @@
+import boto3
+import yaml
 from pyspark import SQLContext
+
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
@@ -6,8 +9,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     S3StoreBackendDefaults,
 )
-import boto3
-import yaml
 
 if __name__ == "__main__":
     ### critical part to reinitialize spark context
