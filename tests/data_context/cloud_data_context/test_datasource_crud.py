@@ -7,7 +7,10 @@ import pytest
 
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext, CloudDataContext
-from great_expectations.data_context.types.base import DatasourceConfig
+from great_expectations.data_context.types.base import (
+    DatasourceConfig,
+    datasourceConfigSchema,
+)
 from great_expectations.datasource import BaseDatasource
 from tests.data_context.cloud_data_context.conftest import MockResponse
 
@@ -70,19 +73,19 @@ def mocked_get_response(
     "save_changes",
     [
         pytest.param(True, id="save_changes=True"),
-        # pytest.param(False, id="save_changes=False"),
+        pytest.param(False, id="save_changes=False"),
     ],
 )
 @pytest.mark.parametrize(
     "config_includes_name_setting",
     [
         pytest.param("name_supplied_separately", id="name supplied separately"),
-        # pytest.param("config_includes_name", id="config includes name"),
-        # pytest.param(
-        #     "name_supplied_separately_and_included_in_config",
-        #     id="name supplied separately and config includes name",
-        #     marks=pytest.mark.xfail(strict=True, raises=TypeError),
-        # ),
+        pytest.param("config_includes_name", id="config includes name"),
+        pytest.param(
+            "name_supplied_separately_and_included_in_config",
+            id="name supplied separately and config includes name",
+            marks=pytest.mark.xfail(strict=True, raises=TypeError),
+        ),
     ],
 )
 def test_base_data_context_in_cloud_mode_add_datasource(
@@ -148,16 +151,22 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 
         retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
 
+        # Round trip through schema to mimic updates made during store serialization process
+        expected_datasource_config = datasourceConfigSchema.dump(
+            DatasourceConfig(**datasource_config_with_name.to_json_dict())
+        )
+
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
         if save_changes:
+            mock_post.assert_called_once()
             mock_post.assert_called_with(
                 f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
                 json={
                     "data": {
                         "type": "datasource",
                         "attributes": {
-                            "datasource_config": datasource_config_with_name.to_json_dict(),
+                            "datasource_config": expected_datasource_config,
                             "organization_id": ge_cloud_organization_id,
                         },
                     }
