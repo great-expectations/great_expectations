@@ -1282,6 +1282,7 @@ class DataAssistantResult(SerializableDictDot):
                 axis_title=y_axis_title,
             )
             metric_plot_components.append(metric_plot_component)
+
         min_value_plot_component: ExpectationKwargPlotComponent = (
             ExpectationKwargPlotComponent(
                 name=min_value,
@@ -1391,7 +1392,7 @@ class DataAssistantResult(SerializableDictDot):
             sequential: Whether batches are sequential in nature
 
         Returns:
-            A interactive detail altair multi-chart
+            An interactive chart
         """
         batch_name: str = "batch"
         all_columns: List[str] = list(column_dfs[0].df.columns)
@@ -1464,13 +1465,14 @@ class DataAssistantResult(SerializableDictDot):
             sequential: Whether batches are sequential in nature
 
         Returns:
-            An interactive detail multi line expect_column_values_to_be_between chart
+            An interactive expect_column_values_to_be_between chart
         """
         column_name: str = "column"
         min_value: str = "min_value"
         max_value: str = "max_value"
         strict_min: str = "strict_min"
         strict_max: str = "strict_max"
+        value_ranges: str = "value_ranges"
 
         batch_name: str = "batch"
         all_columns: List[str] = list(column_dfs[0].df.columns)
@@ -1487,6 +1489,7 @@ class DataAssistantResult(SerializableDictDot):
                     max_value,
                     strict_min,
                     strict_max,
+                    value_ranges,
                 }
             )
         ]
@@ -1550,6 +1553,13 @@ class DataAssistantResult(SerializableDictDot):
                 axis_title=y_axis_title,
             )
         )
+        value_ranges_plot_component: ExpectationKwargPlotComponent = (
+            ExpectationKwargPlotComponent(
+                name=value_ranges,
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
+            )
+        )
 
         df: pd.DataFrame = pd.DataFrame(
             columns=[
@@ -1563,6 +1573,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value,
                 strict_min,
                 strict_max,
+                value_ranges,
             ]
         )
 
@@ -1605,7 +1616,7 @@ class DataAssistantResult(SerializableDictDot):
                         & (alt.datum.max_value < alt.datum[metric_plot_component.name])
                     )
                 )
-            else:
+            elif not strict_min and not strict_max:
                 predicates.append(
                     (
                         (alt.datum.min_value >= alt.datum[metric_plot_component.name])
@@ -1614,6 +1625,29 @@ class DataAssistantResult(SerializableDictDot):
                     | (
                         (alt.datum.min_value <= alt.datum[metric_plot_component.name])
                         & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
+                    )
+                )
+            elif values_ranges:
+                predicates.append(
+                    (
+                        (
+                            alt.datum.value_ranges[0]
+                            >= alt.datum[metric_plot_component.name]
+                        )
+                        & (
+                            alt.datum.value_ranges[1]
+                            >= alt.datum[metric_plot_component.name]
+                        )
+                    )
+                    | (
+                        (
+                            alt.datum.value_ranges[0]
+                            <= alt.datum[metric_plot_component.name]
+                        )
+                        & (
+                            alt.datum.value_ranges[1]
+                            <= alt.datum[metric_plot_component.name]
+                        )
                     )
                 )
 
@@ -1628,6 +1662,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component=max_value_plot_component,
                 strict_min_plot_component=strict_min_plot_component,
                 strict_max_plot_component=strict_max_plot_component,
+                value_ranges_plot_component=value_ranges_plot_component,
                 predicates=predicates,
             )
         else:
@@ -1641,6 +1676,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component=max_value_plot_component,
                 strict_min_plot_component=strict_min_plot_component,
                 strict_max_plot_component=strict_max_plot_component,
+                value_ranges_plot_component=value_ranges_plot_component,
                 predicates=predicates,
             )
 
@@ -1751,8 +1787,8 @@ class DataAssistantResult(SerializableDictDot):
         metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        min_value_plot_component: PlotComponent,
-        max_value_plot_component: PlotComponent,
+        min_value_plot_component: ExpectationKwargPlotComponent,
+        max_value_plot_component: ExpectationKwargPlotComponent,
         tooltip: List[alt.Tooltip],
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
@@ -2124,10 +2160,11 @@ class DataAssistantResult(SerializableDictDot):
         metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        min_value_plot_component: PlotComponent,
-        max_value_plot_component: PlotComponent,
-        strict_min_plot_component: PlotComponent,
-        strict_max_plot_component: PlotComponent,
+        min_value_plot_component: ExpectationKwargPlotComponent,
+        max_value_plot_component: ExpectationKwargPlotComponent,
+        strict_min_plot_component: ExpectationKwargPlotComponent,
+        strict_max_plot_component: ExpectationKwargPlotComponent,
+        value_ranges_plot_component: ExpectationKwargPlotComponent,
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
@@ -2143,6 +2180,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component.generate_tooltip(format=","),
                 strict_min_plot_component.generate_tooltip(),
                 strict_max_plot_component.generate_tooltip(),
+                value_ranges_plot_component.generate_tooltip(),
             ]
             + [
                 metric_plot_component.generate_tooltip(format=",")
@@ -2161,6 +2199,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component.name,
                 strict_min_plot_component.name,
                 strict_max_plot_component.name,
+                value_ranges_plot_component.name,
             ]
         ] = " "
         df = pd.concat([input_dropdown_initial_state, df], axis=0)
