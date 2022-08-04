@@ -159,36 +159,35 @@ class DatasourceStore(Store):
             id_=datasource_config.id_,
         )
 
-    # TODO: AJB 20220803 modify or remove associated test for set_by_name.
+    # TODO: AJB 20220803 Remove this method and modify associated test and logic for set_by_name to use set.
+    def set_by_name(
+        self, datasource_name: str, datasource_config: DatasourceConfig
+    ) -> None:
+        """Persists a DatasourceConfig in the store by a given name.
 
-    # def set_by_name(
-    #     self, datasource_name: str, datasource_config: DatasourceConfig
-    # ) -> None:
-    #     """Persists a DatasourceConfig in the store by a given name.
-    #
-    #     Args:
-    #         datasource_name: The name of the Datasource to update.
-    #         datasource_config: The config object to persist using the StoreBackend.
-    #     """
-    #     datasource_key: DataContextVariableKey = self._determine_datasource_key(
-    #         datasource_name=datasource_name
-    #     )
-    #     self.set(datasource_key, datasource_config)
+        Args:
+            datasource_name: The name of the Datasource to update.
+            datasource_config: The config object to persist using the StoreBackend.
+        """
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(
+            datasource_name=datasource_name
+        )
+        self.set(datasource_key, datasource_config)
 
     def set(
         self,
         key: Union[DataContextKey, None],
-        config: DatasourceConfig,
+        value: DatasourceConfig,
     ) -> DatasourceConfig:
         """Create a datasource config in the store using a store_backend-specific key."""
-
-        # TODO: AJB 20220803 Remove _build_key_from_config from here:
         if not key:
-            key: DataContextKey = self._build_key_from_config(config)
+            key: DataContextKey = self._build_key_from_config(value)
 
-        # TODO: AJB 20220803 Simplify this by making multiple lines:
-        return DatasourceConfig(**self._schema.load(super().set(key, config)))
+        validated_config: dict = self._schema.load(super().set(key, value))
+        datasource_config: DatasourceConfig = DatasourceConfig(**validated_config)
+        return datasource_config
 
+    # TODO: AJB 20220803 Remove this method and modify associated tests and logic to use update.
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
     ) -> None:

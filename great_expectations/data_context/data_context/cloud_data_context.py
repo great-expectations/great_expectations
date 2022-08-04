@@ -328,7 +328,6 @@ class CloudDataContext(AbstractDataContext):
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
-        # TODO: AJB 20220803 HERE IS WHERE WE LOSE THE id:
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
 
         substituted_config_dict: dict = substitute_all_config_variables(

@@ -1631,8 +1631,6 @@ class AbstractDataContext(ABC):
             CommentedMap(**config)
         )
 
-        # TODO: AJB 20220803 THIS IS WHERE I ENDED BEFORE STANDUP
-
         if save_changes:
             datasource_config = self._datasource_store.set(
                 key=None, config=datasource_config
