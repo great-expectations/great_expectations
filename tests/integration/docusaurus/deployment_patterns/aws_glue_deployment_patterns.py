@@ -1,4 +1,4 @@
-# isort:skip
+# isort: skip_file
 import boto3
 import yaml
 from awsglue.context import GlueContext
