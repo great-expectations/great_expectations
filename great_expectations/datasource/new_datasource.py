@@ -14,6 +14,7 @@ from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
+from great_expectations.exceptions import DataConnectorError
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -111,6 +112,22 @@ class BaseDatasource:
                 f"Got {len(batch_list)} batches instead of a single batch."
             )
         return batch_list[0]
+
+    def add_data_asset(
+        self,
+        data_connector_name: str,
+        data_asset_name: str,
+        batch_identifiers: List[str],
+    ) -> None:
+        data_connector: DataConnector = self.data_connectors.get(data_connector_name)
+
+        if not data_connector:
+            raise DataConnectorError(
+                f"DataConnector {data_connector_name} does not exist in configuration"
+            )
+
+        if hasattr(data_connector, "add_data_asset"):
+            data_connector.add_data_asset(data_asset_name, batch_identifiers)
 
     def get_batch_definition_list_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]

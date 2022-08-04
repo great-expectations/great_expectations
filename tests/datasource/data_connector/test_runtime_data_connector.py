@@ -603,8 +603,8 @@ def test_get_available_data_asset_names_named_assets(basic_datasource_with_asset
     ]
 
 
+# this works
 def test_add_data_asset(basic_datasource_with_assets):
-
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
@@ -675,13 +675,47 @@ def test_add_data_asset(basic_datasource_with_assets):
             "my_new_data_asset_1",
         ]
 
-    # persistence needs to be addedj
-
 
 def test_add_data_asset_without_first_adding(basic_datasource_with_assets):
-    # we want to add data_asset_c
-    # w
-    pass
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    # empty if data_connector has not been used
+    assert test_runtime_data_connector.get_available_data_asset_names() == [
+        "asset_a",
+        "asset_b",
+    ]
+    batch_identifiers = {
+        "hour": 12,
+        "minute": 15,
+    }
+
+    batch_request: dict = {
+        "datasource_name": basic_datasource_with_assets.name,
+        "data_connector_name": test_runtime_data_connector.name,
+        "data_asset_name": "my_new_data_asset_1",
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    # the not recommended path
+    with pytest.warns(DeprecationWarning):
+        test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
+
+        # updated to my_data_asset_1
+        # but we get a warning
+        assert test_runtime_data_connector.get_available_data_asset_names() == [
+            "asset_a",
+            "asset_b",
+            "my_new_data_asset_1",
+        ]
 
 
 def test_get_available_data_asset_names_updating_after_batch_request(

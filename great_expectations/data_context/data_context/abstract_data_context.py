@@ -164,9 +164,7 @@ class AbstractDataContext(ABC):
         self._config_variables = None
 
         # Init plugin support
-        if self.plugins_directory is not None and os.path.exists(
-            self.plugins_directory
-        ):
+        if self.plugins_directory is not None and os.path.exists(self.plugins_direcory):
             sys.path.append(self.plugins_directory)
 
         # We want to have directories set up before initializing usage statistics so
@@ -643,6 +641,16 @@ class AbstractDataContext(ABC):
             self._datasource_store.delete_by_name(datasource_name)
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)
+
+    def add_data_asset(
+        self,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        batch_identifiers: List[str],
+    ):
+        # how
+        pass
 
     def add_checkpoint(
         self,

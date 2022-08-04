@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 import warnings
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 from ruamel.yaml import YAML, YAMLError
@@ -32,6 +32,7 @@ from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.exceptions import DataContextError
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from tests.integration.db.test_sql_data_sampling import data_asset_name
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -513,6 +514,22 @@ class DataContext(BaseDataContext):
             Union[LegacyDatasource, BaseDatasource]
         ] = super().add_datasource(name=name, save_changes=True, **kwargs)
         return new_datasource
+
+    def add_data_asset(
+        self,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        batch_identifiers: List[str],
+    ):
+        """
+        This is the method we are using to add
+        """
+        logger.debug(f"Adding data asset to runtime data connector")
+        super().add_data_asset(
+            datasource_name, data_connector_name, data_asset_name, batch_identifiers
+        )
+        self._save_project_config()
 
     def update_datasource(
         self,
