@@ -1633,7 +1633,7 @@ class AbstractDataContext(ABC):
 
         if save_changes:
             datasource_config = self._datasource_store.set(
-                key=None, config=datasource_config
+                key=None, value=datasource_config
             )
         self.config.datasources[name] = datasource_config
 
