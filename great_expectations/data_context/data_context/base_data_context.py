@@ -1278,9 +1278,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_name: str = datasource.name
 
         if save_changes:
-            self._datasource_store.update(datasource_config=datasource_config)
+            updated_datasource_config: DatasourceConfig = self._datasource_store.update(
+                config=datasource_config
+            )
+            # Use datasource config updated from store if saved to store
+            self.config.datasources[datasource_name] = updated_datasource_config
         self.config.datasources[datasource_name] = datasource_config
-        self._cached_datasources[datasource_name] = datasource_config
+        self._cached_datasources[datasource_name] = datasource
 
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
