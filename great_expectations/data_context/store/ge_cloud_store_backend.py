@@ -7,9 +7,6 @@ from urllib.parse import urljoin
 
 import requests
 
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariableSchema,
-)
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier

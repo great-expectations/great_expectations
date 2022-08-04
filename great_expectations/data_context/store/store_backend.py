@@ -6,9 +6,6 @@ from typing import Any, Optional
 import pyparsing as pp
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariableSchema,
-)
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import filter_properties_dict
 
