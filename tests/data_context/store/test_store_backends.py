@@ -2,7 +2,7 @@ import datetime
 import json
 import os
 from collections import OrderedDict
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import boto3
 import pyparsing as pp
@@ -1598,19 +1598,20 @@ def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() ->
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.CONFIG_VERSION,
     )
     new_config_version: float = 5.0
 
     # test invalid .set
-    key = DataContextVariableKey(resource_type="my_fake_variable")
+    key = DataContextVariableKey()
     tuple_ = key.to_tuple()
-    with pytest.raises(ValueError) as e:
-        inline_store_backend.set(tuple_, "a_random_string_value")
+    with pytest.raises(StoreBackendError) as e:
+        inline_store_backend.set(tuple_, "a_random_string_value")  # Invalid type
 
-    assert "'my_fake_variable' is not a valid DataContextVariableSchema" in str(e.value)
+    assert "ValueError while calling _set on store backend" in str(e.value)
 
     # test valid .set
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+    key = DataContextVariableKey()
     tuple_ = key.to_tuple()
     with patch(
         "great_expectations.data_context.DataContext._save_project_config"
@@ -1621,7 +1622,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     assert mock_save.call_count == 1
 
     # test .get
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+    key = DataContextVariableKey()
     tuple_ = key.to_tuple()
     ret = inline_store_backend.get(tuple_)
     assert ret == new_config_version
@@ -1645,12 +1646,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     ]
 
     # test .move
-    key1 = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.CONFIG_VERSION
-    )
+    key1 = DataContextVariableKey()
     tuple1 = key1.to_tuple()
 
-    key2 = DataContextVariableKey(resource_type=DataContextVariableSchema.STORES)
+    key2 = DataContextVariableKey()
     tuple2 = key2.to_tuple()
 
     with pytest.raises(StoreBackendError) as e:
@@ -1659,16 +1658,18 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     assert "InlineStoreBackend does not support moving of keys" in str(e.value)
 
     # test invalid .remove_key
-    key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.PROGRESS_BARS, resource_name="profilers"
+    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.PROGRESS_BARS,
     )
+    key = DataContextVariableKey(resource_name="profilers")
     tuple_ = key.to_tuple()
     with pytest.raises(StoreBackendError) as e:
         inline_store_backend.remove_key(tuple_)
 
     assert "Could not find a value associated with key" in str(e.value)
 
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+    key = DataContextVariableKey()
     tuple_ = key.to_tuple()
     with pytest.raises(StoreBackendError) as e:
         inline_store_backend.remove_key(tuple_)
@@ -1678,6 +1679,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     )
 
     # test valid .remove_key
+    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.STORES,
+    )
     store_name: str = "my_store"
     store_value: dict = {
         "class_name": "ExpectationsStore",
@@ -1685,9 +1690,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
             "class_name": "TupleFilesystemStoreBackend",
         },
     }
-    key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.STORES, resource_name=store_name
-    )
+    key = DataContextVariableKey(resource_name=store_name)
 
     tuple_ = key.to_tuple()
     inline_store_backend.set(key=tuple_, value=store_value)
@@ -1700,11 +1703,12 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
         empty_data_context.root_directory, empty_data_context.GE_YML
     )
 
+    # 1. Set simple string config value and confirm it persists in the GE.yml
+
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.CONFIG_VERSION,
     )
-
-    # 1. Set simple string config value and confirm it persists in the GE.yml
 
     with open(path_to_great_expectations_yml) as data:
         config_commented_map_from_yaml = yaml.load(data)
@@ -1712,7 +1716,7 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
     assert config_commented_map_from_yaml["config_version"] == 3.0
 
     new_config_version: float = 5.0
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+    key = DataContextVariableKey()
     tuple_ = key.to_tuple()
 
     inline_store_backend.set(tuple_, new_config_version)
@@ -1723,6 +1727,11 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
     assert config_commented_map_from_yaml["config_version"] == new_config_version
 
     # 2. Set nested dictionary config value and confirm it persists in the GE.yml
+
+    inline_store_backend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.DATASOURCES,
+    )
 
     with open(path_to_great_expectations_yml) as data:
         config_commented_map_from_yaml = yaml.load(data)
@@ -1749,7 +1758,6 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
     datasource_config: dict = yaml.load(datasource_config_string)
 
     key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name="my_datasource",
     )
     tuple_ = key.to_tuple()

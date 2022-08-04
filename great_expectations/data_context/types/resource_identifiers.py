@@ -295,13 +295,13 @@ class SiteSectionIdentifier(DataContextKey):
                 )
         elif site_section_name == "expectations":
             if isinstance(resource_identifier, ExpectationSuiteIdentifier):
-                self._resource_identifier = resource_identifier
+                self._resource_identifier = resource_identifier  # type: ignore[assignment]
             elif isinstance(resource_identifier, (tuple, list)):
-                self._resource_identifier = ExpectationSuiteIdentifier(
+                self._resource_identifier = ExpectationSuiteIdentifier(  # type: ignore[assignment]
                     *resource_identifier
                 )
             else:
-                self._resource_identifier = ExpectationSuiteIdentifier(
+                self._resource_identifier = ExpectationSuiteIdentifier(  # type: ignore[assignment]
                     **resource_identifier
                 )
         else:

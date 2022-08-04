@@ -17,6 +17,10 @@ from great_expectations._version import get_versions  # isort:skip
 __version__ = get_versions()["version"]  # isort:skip
 
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.execution_engine.bundled_metric_configuration import (
+    BundledMetricConfiguration,
+)
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
@@ -33,7 +37,6 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
@@ -875,34 +878,46 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def resolve_metric_bundle(
         self,
-        metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
+        metric_fn_bundle: Iterable[BundledMetricConfiguration],
     ) -> Dict[Tuple[str, str, str], Any]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
 
             Args:
-                metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]): \
-                    A Dictionary containing a MetricProvider's MetricConfiguration (its unique identifier), its metric provider function
-                    (the function that actually executes the metric), and the arguments to pass to the metric provider function.
-                    A dictionary of metrics defined in the registry and corresponding arguments
+                metric_fn_bundle (Iterable[BundledMetricConfiguration]): \
+                    "BundledMetricConfiguration" contains MetricProvider's MetricConfiguration (its unique identifier),
+                    its metric provider function (the function that actually executes the metric), and arguments to pass
+                    to metric provider function (dictionary of metrics defined in registry and corresponding arguments).
 
             Returns:
-                A dictionary of metric names and their corresponding now-queried values.
+                A dictionary of "MetricConfiguration" IDs and their corresponding now-queried (fully resolved) values.
         """
-        resolved_metrics = {}
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+
+        res: List[Row]
 
         # We need a different query for each domain (where clause).
         queries: Dict[Tuple, dict] = {}
-        for (
-            metric_to_resolve,
-            engine_fn,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-            metric_provider_kwargs,
-        ) in metric_fn_bundle:
+
+        query: dict
+
+        domain_id: Tuple[str, str, str]
+
+        bundled_metric_configuration: BundledMetricConfiguration
+        for bundled_metric_configuration in metric_fn_bundle:
+            bundled_metric_configuration: BundledMetricConfiguration
+            metric_to_resolve: MetricConfiguration = (
+                bundled_metric_configuration.metric_configuration
+            )
+            metric_fn: Any = bundled_metric_configuration.metric_fn
+            compute_domain_kwargs: dict = (
+                bundled_metric_configuration.compute_domain_kwargs
+            )
+
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
+
             domain_id = compute_domain_kwargs.to_id()
             if domain_id not in queries:
                 queries[domain_id] = {
@@ -910,9 +925,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
+
             if self.engine.dialect.name == "clickhouse":
                 queries[domain_id]["select"].append(
-                    engine_fn.label(
+                    metric_fn.label(
                         metric_to_resolve.metric_name.join(
                             random.choices(string.ascii_lowercase, k=2)
                         )
@@ -920,15 +936,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             else:
                 queries[domain_id]["select"].append(
-                    engine_fn.label(metric_to_resolve.metric_name)
+                    metric_fn.label(metric_to_resolve.metric_name)
                 )
+
             queries[domain_id]["ids"].append(metric_to_resolve.id)
+
         for query in queries.values():
-            domain_kwargs = query["domain_kwargs"]
-            selectable = self.get_domain_records(
+            domain_kwargs: dict = query["domain_kwargs"]
+            selectable: Any = self.get_domain_records(
                 domain_kwargs=domain_kwargs,
             )
+
             assert len(query["select"]) == len(query["ids"])
+
             try:
                 """
                 If a custom query is passed, selectable will be TextClause and not formatted
@@ -945,6 +965,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     res = self.engine.execute(
                         sa.select(query["select"]).select_from(selectable)
                     ).fetchall()
+
                 logger.debug(
                     f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
                 )
@@ -954,14 +975,22 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 exception_message += f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message)
                 raise ExecutionEngineError(message=exception_message)
+
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
             assert len(query["ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
-            for idx, count in enumerate(query["ids"]):
-                resolved_metrics[count] = convert_to_json_serializable(res[0][idx])
+
+            idx: int
+            metric_id: Tuple[str, str, str]
+            for idx, metric_id in enumerate(query["ids"]):
+                # Converting SQL query execution results into JSON-serializable format produces simple data types,
+                # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
+                resolved_metrics[metric_id] = convert_to_json_serializable(
+                    data=res[0][idx]
+                )
 
         return resolved_metrics
 
