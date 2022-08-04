@@ -79,7 +79,7 @@ notebooks:
     suite_edit:
         class_name: SuiteEditNotebookRenderer
         module_name: great_expectations.render.renderer.suite_edit_notebook_renderer
-        custom_templates_module: notebook_assets.suite_edit
+        custom_templates_module: tests.test_fixtures.notebook_assets.suite_edit
         header_markdown:
             file_name: HEADER.md
             template_kwargs:

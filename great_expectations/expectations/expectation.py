@@ -10,10 +10,8 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from numbers import Number
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
@@ -1738,6 +1736,12 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 except TypeError:
                     pass
 
+        elif isinstance(metric_value, datetime.datetime):
+            if isinstance(min_value, str):
+                min_value = parse(min_value)
+            if isinstance(max_value, str):
+                max_value = parse(max_value)
+
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
 
@@ -1746,10 +1750,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_min:
                 above_min = metric_value > min_value
             else:
-                above_min = (
-                    self._isclose(operand_a=metric_value, operand_b=min_value)
-                    or metric_value >= min_value
-                )
+                above_min = metric_value >= min_value
         else:
             above_min = True
 
@@ -1757,35 +1758,13 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 below_max = metric_value < max_value
             else:
-                below_max = (
-                    self._isclose(operand_a=metric_value, operand_b=min_value)
-                    or metric_value <= max_value
-                )
+                below_max = metric_value <= max_value
         else:
             below_max = True
 
         success = above_min and below_max
 
         return {"success": success, "result": {"observed_value": metric_value}}
-
-    @staticmethod
-    def _isclose(
-        operand_a: Union[datetime.datetime, Number],
-        operand_b: Union[datetime.datetime, Number],
-    ) -> bool:
-        """
-        Checks whether or not two numbers (or timestamps) are approximately close to one another.
-        """
-        operand_a_as_number: np.float64
-        operand_b_as_number: np.float64
-        if isinstance(operand_a, datetime.datetime):
-            operand_a_as_number = np.float64(int(operand_a.strftime("%Y%m%d%H%M%S")))
-            operand_b_as_number = np.float64(int(operand_b.strftime("%Y%m%d%H%M%S")))
-        else:
-            operand_a_as_number = np.float64(operand_a)
-            operand_b_as_number = np.float64(operand_b)
-
-        return np.isclose(operand_a_as_number, operand_b_as_number)
 
 
 class QueryExpectation(TableExpectation, ABC):
@@ -2086,7 +2065,11 @@ class ColumnMapExpectation(TableExpectation, ABC):
             success = True
         elif nonnull_count > 0:
             success = _mostly_success(
-                nonnull_count, unexpected_count, self.get_success_kwargs().get("mostly")
+                nonnull_count,
+                unexpected_count,
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
             )
 
         return _format_map_output(
@@ -2277,7 +2260,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get("mostly"),
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
             )
 
         return _format_map_output(
@@ -2465,7 +2450,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             success = _mostly_success(
                 filtered_row_count,
                 unexpected_count,
-                self.get_success_kwargs().get("mostly"),
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
             )
 
         return _format_map_output(
@@ -2631,6 +2618,11 @@ def _validate_mostly_config(configuration: Optional[ExpectationConfiguration]) -
 
 
 def _mostly_success(
-    rows_considered_cnt: int, unexpected_cnt: int, mostly: float
+    rows_considered_cnt: int,
+    unexpected_cnt: int,
+    mostly: float,
 ) -> bool:
-    return float((rows_considered_cnt - unexpected_cnt) / rows_considered_cnt) >= mostly
+    success_ratio: float = (
+        float(rows_considered_cnt - unexpected_cnt) / rows_considered_cnt
+    )
+    return success_ratio >= mostly

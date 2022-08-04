@@ -7,7 +7,7 @@ import pytest
 import scipy.stats as stats
 
 RANDOM_SEED: int = 43792
-RANDOM_STATE: np.float = np.random.Generator(np.random.PCG64(RANDOM_SEED))
+RANDOM_STATE: np.random.Generator = np.random.Generator(np.random.PCG64(RANDOM_SEED))
 
 
 def generate_distribution_parameters(
@@ -64,7 +64,7 @@ def generate_distribution_parameters(
         a=bimodal_approximation, q=1 - false_positive_rate / 2
     )
 
-    exponential_shape: int = 1.5
+    exponential_shape: float = 1.5
     exponential_lower_bound: int = 5000
     exponential_scale: int = 1000
     exponential_lower_quantile: Number = stats.gamma.ppf(

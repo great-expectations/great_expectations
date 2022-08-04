@@ -955,9 +955,11 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
                 strings.remove(string_to_remove)
                 if not strings:
                     return True
+
         return False
 
     success: bool = _find_string(obj)
     if not success:
         logger.info(f"Could not find the following target strings: {strings}")
+
     return success

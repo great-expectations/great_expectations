@@ -1,8 +1,6 @@
 import glob
 import json
 import os
-import random
-import string
 
 import pandas as pd
 import pytest
