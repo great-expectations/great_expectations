@@ -160,7 +160,6 @@ class DatasourceStore(Store):
         else:
             name = None
         return self.store_backend.build_key(
-            resource_type=DataContextVariableSchema.DATASOURCES,
             name=name,
             id_=id_,
         )
