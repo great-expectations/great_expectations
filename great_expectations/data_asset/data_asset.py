@@ -905,9 +905,6 @@ class DataAsset:
 
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
-            suite_ge_version = expectation_suite.meta.get(  # noqa: F841
-                "great_expectations_version"
-            ) or expectation_suite.meta.get("great_expectations.__version__")
 
             ###
             # This is an early example of what will become part of the ValidationOperator
