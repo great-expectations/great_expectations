@@ -26,15 +26,17 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotResult,
 )
+from great_expectations.rule_based_profiler.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
     ParameterNode,
-    SemanticDomainTypes,
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator

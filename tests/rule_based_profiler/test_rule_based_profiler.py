@@ -34,8 +34,10 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
 from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.util import deep_filter_properties_iterable
 
 

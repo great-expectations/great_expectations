@@ -20,9 +20,9 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotResult,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    Domain,
     ParameterNode,
 )
 from tests.render.test_util import load_notebook_from_path
