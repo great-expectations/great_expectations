@@ -41,7 +41,6 @@ class InlineStoreBackend(StoreBackend):
         suppress_store_backend_id: bool = False,
         manually_initialize_store_backend_id: str = "",
         store_name: Optional[str] = None,
-        # ge_cloud_resource_type: Optional[Union[str, GeCloudRESTResource]] = None,
     ) -> None:
         super().__init__(
             fixed_length_key=fixed_length_key,
