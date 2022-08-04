@@ -762,7 +762,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         return query
 
-    def run(
+    # complexity 18
+    def run(  # noqa: C901
         self,
         assets_to_validate,
         run_id=None,
@@ -809,8 +810,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             batch_id = batch.batch_id
             run_id = run_id
 
-            assert not batch_id is None
-            assert not run_id is None
+            assert batch_id is not None
+            assert run_id is not None
 
             failure_expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=base_expectation_suite_name
