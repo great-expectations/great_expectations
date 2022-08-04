@@ -371,6 +371,21 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
 
+    def add_data_asset(
+        self,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        batch_identifiers: List[str],
+    ) -> None:
+        self._data_context.add_data_asset(
+            datasource_name,
+            data_connector_name,
+            data_asset_name,
+            batch_identifiers,
+        )
+        self._synchronize_self_with_underlying_data_context()
+
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 

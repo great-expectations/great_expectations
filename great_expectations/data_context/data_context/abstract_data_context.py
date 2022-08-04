@@ -164,7 +164,9 @@ class AbstractDataContext(ABC):
         self._config_variables = None
 
         # Init plugin support
-        if self.plugins_directory is not None and os.path.exists(self.plugins_direcory):
+        if self.plugins_directory is not None and os.path.exists(
+            self.plugins_directory
+        ):
             sys.path.append(self.plugins_directory)
 
         # We want to have directories set up before initializing usage statistics so
@@ -648,9 +650,20 @@ class AbstractDataContext(ABC):
         data_connector_name: str,
         data_asset_name: str,
         batch_identifiers: List[str],
-    ):
-        # how
-        pass
+    ) -> None:
+        if datasource_name in self.datasources:
+            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        else:
+            raise ge_exceptions.DatasourceError(
+                datasource_name,
+                "The given datasource could not be retrieved from the DataContext; "
+                "please confirm that your configuration is accurate.",
+            )
+        datasource.add_data_asset(
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_identifiers=batch_identifiers,
+        )
 
     def add_checkpoint(
         self,

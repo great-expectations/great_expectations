@@ -43,8 +43,46 @@ def test_batch_data_add_asset(
 ):
     data_context: DataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = test_df_pandas
-    res = data_context.get_available_data_asset_names(datasource_names="my_datasource")
-    print(res)
+    assert data_context.get_available_data_asset_names(
+        datasource_names="my_datasource"
+    ) == {
+        "my_datasource": {"default_runtime_data_connector_name": ["asset_a", "asset_b"]}
+    }
+
+    data_context.add_data_asset(
+        datasource_name="my_datasource",
+        data_connector_name="default_runtime_data_connector_name",
+        data_asset_name="asset_c",
+        batch_identifiers=["apples", "oranges"],
+    )
+
+    batch_identifiers: dict = {
+        "apples": 12,
+        "oranges": 15,
+    }
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "default_runtime_data_connector_name",
+        "data_asset_name": "asset_c",
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    with pytest.warns(None):
+        batch_list: List[Batch] = data_context.get_batch_list(
+            batch_request=batch_request
+        )
+        assert len(batch_list) == 1
+        assert data_context.get_available_data_asset_names() == {
+            "my_datasource": {
+                "default_runtime_data_connector_name": ["asset_a", "asset_b", "asset_c"]
+            }
+        }
 
 
 def test_batch_data_get_batch_successful_specification_pandas_engine_named_asset(
