@@ -1,28 +1,23 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.expectation import (
-    ColumnPairMapExpectation,
-    ExpectationValidationResult,
-)
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.expectation import ColumnPairMapExpectation
+from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
+
 
 class ColumnPairValuesDiffCustomPercentageOrLess(ColumnPairMapMetricProvider):
     """MetricProvider Class for Pair Values Diff Less Than Custom Percentage"""
-
 
     condition_metric_name = "column_pair_values.diff_custom_percentage"
 
@@ -40,10 +35,15 @@ class ColumnPairValuesDiffCustomPercentageOrLess(ColumnPairMapMetricProvider):
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_A, column_B, percentage, **kwargs):
-        return F.when(F.abs(column_A - column_B) <= F.abs(column_A * percentage), True).otherwise(False)
+        return F.when(
+            F.abs(column_A - column_B) <= F.abs(column_A * percentage), True
+        ).otherwise(False)
 
-class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(ColumnPairMapExpectation):
-    """Expect two columns to have a row-wise difference less than custom percentage."""
+
+class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
+    ColumnPairMapExpectation
+):
+    """Expect two columns to have a row-wise difference of three."""
 
     map_metric = "column_pair_values.diff_custom_percentage"
 
@@ -59,7 +59,12 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(ColumnPairMapExpe
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column_A": "col_a", "column_B": "col_b", "percentage" : 0.2,  "mostly": 0.8},
+                    "in": {
+                        "column_A": "col_a",
+                        "column_B": "col_b",
+                        "percentage": 0.2,
+                        "mostly": 0.8,
+                    },
                     "out": {
                         "success": True,
                     },
@@ -68,7 +73,12 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(ColumnPairMapExpe
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column_A": "col_a", "column_B": "col_b", "percentage" : 0.1,  "mostly": 1},
+                    "in": {
+                        "column_A": "col_a",
+                        "column_B": "col_b",
+                        "percentage": 0.1,
+                        "mostly": 1,
+                    },
                     "out": {
                         "success": False,
                     },
@@ -92,7 +102,6 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(ColumnPairMapExpe
         "catch_exceptions": False,
     }
 
-
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -106,25 +115,21 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(ColumnPairMapExpe
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
         super().validate_configuration(configuration)
-        
+
         mostly = configuration.kwargs["mostly"]
         percentage = configuration.kwargs["percentage"]
-        
+
         if configuration is None:
             configuration = self.configuration
 
-        #Check if both columns are provided and values of mostly and percentage are correct
+        # Check if both columns are provided and values of mostly and percentage are correct
         try:
             assert (
                 "column_A" in configuration.kwargs
                 and "column_B" in configuration.kwargs
             ), "both columns must be provided"
-            assert (
-                0 <= mostly <= 1
-            ), "Mostly must be between 0 and 1"
-            assert (
-                percentage >= 0
-            ), "Percentage must be positive"
+            assert 0 <= mostly <= 1, "Mostly must be between 0 and 1"
+            assert percentage >= 0, "Percentage must be positive"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -137,19 +142,6 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(ColumnPairMapExpe
         "contributors": ["@jorgicol", "@exteli"],
     }
 
+
 if __name__ == "__main__":
     ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage().print_diagnostic_checklist()
-
-diagnostics = ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage().run_diagnostics()
-
-for check in diagnostics["tests"]:
-    assert check["test_passed"] is True
-    assert check["error_diagnostics"] is None
-
-for check in diagnostics["errors"]:
-    assert check is None
-
-for check in diagnostics["maturity_checklist"]["experimental"]:
-    if check["message"] == "Passes all linting checks":
-        continue
-    assert check["passed"] is True
