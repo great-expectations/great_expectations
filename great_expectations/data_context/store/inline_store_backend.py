@@ -162,27 +162,6 @@ class InlineStoreBackend(StoreBackend):
 
         self._save_changes()
 
-    def _has_key(self, key: Tuple[str, ...]) -> bool:
-        resource_name = InlineStoreBackend._determine_resource_name(key)
-        resource_type = self._resource_type
-
-        if len(key) == 0:
-            return resource_type in self._data_context.config
-        elif len(key) == 1:
-            res: dict = self._data_context.config.get(resource_type) or {}
-            return resource_name in res
-
-        return False
-
-    def _save_changes(self) -> None:
-        # NOTE: <DataContextRefactor> This responsibility will be moved into DataContext Variables object
-        self._data_context._save_project_config()
-
-    @staticmethod
-    def _determine_resource_name(key: Tuple[str, ...]) -> Optional[str]:
-        resource_name: Optional[str] = key[0] or None
-        return resource_name
-
     def build_key(
         self,
         id_: Optional[str] = None,
@@ -192,3 +171,23 @@ class InlineStoreBackend(StoreBackend):
         return DataContextVariableKey(
             resource_name=name,
         )
+
+    def _has_key(self, key: Tuple[str, ...]) -> bool:
+        resource_name = InlineStoreBackend._determine_resource_name(key)
+        resource_type = self._resource_type
+
+        breakpoint()
+        if resource_name is not None:
+            res: dict = self._data_context.config.get(resource_type) or {}
+            return resource_name in res
+
+        return resource_type in self._data_context.config
+
+    def _save_changes(self) -> None:
+        # NOTE: <DataContextRefactor> This responsibility will be moved into DataContext Variables object
+        self._data_context._save_project_config()
+
+    @staticmethod
+    def _determine_resource_name(key: Tuple[str, ...]) -> Optional[str]:
+        resource_name: Optional[str] = key[0] or None
+        return resource_name
