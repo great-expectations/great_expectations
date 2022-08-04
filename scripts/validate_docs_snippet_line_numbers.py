@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import glob
 import logging
 import os
@@ -32,7 +30,7 @@ class DocusaurusRef:
 
         start_line: int = int(start)
         end_line: int = int(end) if end else start_line
-        line_numbers: Tuple[int, int] = start_line, end_line
+        line_numbers: Tuple[int, int] = (start_line, end_line)
 
         relative_path: str = os.path.join(os.path.dirname(file), path)
         cleaned_path: str = os.path.normpath(relative_path)
