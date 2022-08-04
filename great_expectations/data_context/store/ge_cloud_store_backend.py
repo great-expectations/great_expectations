@@ -167,7 +167,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             "Authorization": f'Bearer {self.ge_cloud_credentials.get("access_token")}',
         }
 
-    def _get(self, key: Tuple[str, ...]) -> dict:
+    def _get(self, key: Tuple[str, ...]) -> ResponsePayload:
         # TODO: AJB 20220803 move this isinstance check to store.py and make this method take a non-tuple
         #  AbstractConfig key (similar to _set()):
         if isinstance(key, GeCloudIdentifier):
@@ -180,7 +180,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 params = {"name": key[2]}
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
-            response: ResponsePayload = requests.get(
+            response: requests.Response = requests.get(
                 ge_cloud_url, headers=self.auth_headers, params=params, timeout=15
             )
             return response.json()
