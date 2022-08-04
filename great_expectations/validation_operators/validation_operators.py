@@ -762,8 +762,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         return query
 
-    # complexity 18
-    def run(  # noqa: C901
+    def run(  # noqa: C901 - complexity 18
         self,
         assets_to_validate,
         run_id=None,
