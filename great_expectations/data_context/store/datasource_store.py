@@ -7,9 +7,6 @@ from great_expectations.core.data_context_key import (
     DataContextKey,
     DataContextVariableKey,
 )
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariableSchema,
-)
 from great_expectations.data_context.store.ge_cloud_store_backend import ResponsePayload
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -17,7 +14,6 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.util import filter_properties_dict
 

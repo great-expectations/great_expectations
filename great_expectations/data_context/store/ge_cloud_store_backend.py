@@ -2,7 +2,7 @@ import logging
 from abc import ABCMeta
 from enum import Enum
 from json import JSONDecodeError
-from typing import Any, Dict, List, Optional, Set, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -19,6 +19,8 @@ from great_expectations.marshmallow__shade import Schema
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
 logger = logging.getLogger(__name__)
+
+from typing_extensions import TypedDict
 
 
 class ResponsePayloadDataField(TypedDict):
