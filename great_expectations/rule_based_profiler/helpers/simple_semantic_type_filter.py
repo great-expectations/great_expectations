@@ -2,9 +2,11 @@ from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.rule_based_profiler import (
+from great_expectations.rule_based_profiler.domain import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
