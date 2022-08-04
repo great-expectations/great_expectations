@@ -101,7 +101,7 @@ stages:
               EXIT_STATUS=0
               isort . --check-only || EXIT_STATUS=$?
               black --check . || EXIT_STATUS=$?
-              flake8 great_expectations/core || EXIT_STATUS=$?
+              flake8 . || EXIT_STATUS=$?
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
