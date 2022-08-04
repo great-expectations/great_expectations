@@ -18,6 +18,7 @@ Changelog
 * [BUGFIX] SlackRenderer / EmailRenderer links to deprecated doc (#5648)
 * [BUGFIX] Fix table.head metric issue when using BQ without temp tables (#5630)
 * [BUGFIX] Quick bugfix on all profile numeric column diff bounds expectations (#5651) (thanks @stevensecreti)
+* [BUGFIX] Patch bug with `id` vs `id_` in Cloud integration tests (#5677)
 * [DOCS] Fix a typo in batch_request_parameters variable (#5612) (thanks @StasDeep)
 * [MAINTENANCE] CloudDataContext add_datasource test (#5626)
 * [MAINTENANCE] Update stale.yml (#5602)
@@ -37,6 +38,7 @@ Changelog
 * [MAINTENANCE] Only run Cloud E2E tests in primary pipeline (#5670)
 * [MAINTENANCE] Improve DateTime Conversion Candling in Comparison Metrics & Expectations and Provide a Clean Object Model for Metrics Computation Bundling (#5656)
 * [MAINTENANCE] Ensure that `id_` fields in Marshmallow schema serialize as `id` (#5660)
+* [MAINTENANCE] data_context initial type checking (#5662)
 
 0.15.16
 -----------------
