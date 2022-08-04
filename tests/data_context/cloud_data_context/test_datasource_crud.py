@@ -245,8 +245,7 @@ def test_cloud_backed_data_context_add_datasource(
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
         if save_changes:
-            mock_post.assert_called_once()
-            mock_post.assert_called_with(
+            mock_post.assert_called_once_with(
                 f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
                 json={
                     "data": {
