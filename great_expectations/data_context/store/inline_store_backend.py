@@ -176,7 +176,6 @@ class InlineStoreBackend(StoreBackend):
         resource_name = InlineStoreBackend._determine_resource_name(key)
         resource_type = self._resource_type
 
-        breakpoint()
         if resource_name is not None:
             res: dict = self._data_context.config.get(resource_type) or {}
             return resource_name in res
