@@ -1,7 +1,7 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
 import enum
-from typing import Callable, Type
+from typing import Callable, Type, Union
 from unittest.mock import patch
 
 import pytest
@@ -87,7 +87,7 @@ def _add_datasource_helper(
     datasource_name: str,
     datasource_config: DatasourceConfig,
 ) -> BaseDatasource:
-    """Helper method"""
+    """Helper method to call add_datasource with the right parameters based on the test parametrization config."""
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
@@ -95,46 +95,35 @@ def _add_datasource_helper(
     stored_datasource: BaseDatasource
     if isinstance(context, DataContext):
         # Don't add the `save_changes` param for DataContext
-        if config_type == ConfigType.NAME_SUPPLIED_SEPARATELY:
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **datasource_config.to_dict(),
-            )
-        elif config_type == ConfigType.CONFIG_INCLUDES_NAME:
-            stored_datasource = context.add_datasource(
-                **datasource_config_with_name.to_dict(),
-            )
-        elif config_type == ConfigType.NAME_SUPPLIED_SEPARATELY_AND_INCLUDED_IN_CONFIG:
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **datasource_config_with_name.to_dict(),
-            )
-        else:
-            raise Exception(
-                f"config_type must be one of {','.join([str(config_type.value) for config_type in ConfigType])}"
-            )
+        name_and_save_changes_params_base: dict = {}
     else:
-        if config_type == ConfigType.NAME_SUPPLIED_SEPARATELY:
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **datasource_config.to_dict(),
-                save_changes=save_changes,
-            )
-        elif config_type == ConfigType.CONFIG_INCLUDES_NAME:
-            stored_datasource = context.add_datasource(
-                **datasource_config_with_name.to_dict(), save_changes=save_changes
-            )
-        elif config_type == ConfigType.NAME_SUPPLIED_SEPARATELY_AND_INCLUDED_IN_CONFIG:
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **datasource_config_with_name.to_dict(),
-                save_changes=save_changes,
-            )
-        else:
-            raise Exception(
-                f"config_type must be one of {','.join([str(config_type.value) for config_type in ConfigType])}"
-            )
+        name_and_save_changes_params_base: dict = {"save_changes": save_changes}
 
+    if config_type == ConfigType.NAME_SUPPLIED_SEPARATELY:
+        name_and_save_changes_params: dict = name_and_save_changes_params_base.copy()
+        name_and_save_changes_params.update({"name": datasource_name})
+        stored_datasource = context.add_datasource(
+            **name_and_save_changes_params,
+            **datasource_config.to_dict(),
+        )
+    elif config_type == ConfigType.CONFIG_INCLUDES_NAME:
+        name_and_save_changes_params: dict = name_and_save_changes_params_base.copy()
+        name_and_save_changes_params.update({})
+        stored_datasource = context.add_datasource(
+            **name_and_save_changes_params,
+            **datasource_config_with_name.to_dict(),
+        )
+    elif config_type == ConfigType.NAME_SUPPLIED_SEPARATELY_AND_INCLUDED_IN_CONFIG:
+        name_and_save_changes_params: dict = name_and_save_changes_params_base.copy()
+        name_and_save_changes_params.update({"name": datasource_name})
+        stored_datasource = context.add_datasource(
+            **name_and_save_changes_params,
+            **datasource_config_with_name.to_dict(),
+        )
+    else:
+        raise Exception(
+            f"config_type must be one of {','.join([str(config_type) for config_type in ConfigType])}"
+        )
     return stored_datasource
 
 
@@ -180,13 +169,6 @@ def _add_datasource_helper(
         ),
     ],
 )
-# @pytest.mark.parametrize(
-#     "save_changes",
-#     [
-#         pytest.param(True, id="save_changes=True"),
-#         pytest.param(False, id="save_changes=False"),
-#     ],
-# )
 @pytest.mark.parametrize(
     "config_type",
     [
@@ -201,7 +183,7 @@ def _add_datasource_helper(
         ),
     ],
 )
-def test_base_data_context_in_cloud_mode_add_datasource(
+def test_cloud_backed_data_context_add_datasource(
     data_context_fixture_name: str,
     data_context_type: Type[AbstractDataContext],
     save_changes: bool,
@@ -215,22 +197,18 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     mock_response_factory: Callable,
     mocked_get_response: Callable[[], MockResponse],
     request,
-):
-    """A BaseDataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource
-    with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response
-    to create the datasource."""
+) -> None:
 
-    context = request.getfixturevalue(data_context_fixture_name)
+    """test_add_datasource_in_all_data_contexts_supporting_cloud_mode Any Data Context in cloud mode should save to the cloud backed Datasource store when calling add_datasource with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response to create the datasource."""
+
+    context: Union[
+        BaseDataContext, DataContext, CloudDataContext
+    ] = request.getfixturevalue(data_context_fixture_name)
 
     # Make sure the fixture has the right configuration
     assert isinstance(context, data_context_type)
     assert context.ge_cloud_mode
-
-    # context: BaseDataContext = empty_base_data_context_in_cloud_mode
-    # # Make sure the fixture has the right configuration
-    # assert isinstance(context, BaseDataContext)
-    # assert context.ge_cloud_mode
-    # assert len(context.list_datasources()) == 0
+    assert len(context.list_datasources()) == 0
 
     # Setup
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
@@ -245,27 +223,6 @@ def test_base_data_context_in_cloud_mode_add_datasource(
         "requests.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
 
-        # Call add_datasource with and without the name field included in the datasource config
-        # stored_datasource: BaseDatasource
-        # if config_type == ConfigType.NAME_SUPPLIED_SEPARATELY.value:
-        #     stored_datasource = context.add_datasource(
-        #         name=datasource_name,
-        #         **datasource_config.to_dict(),
-        #         save_changes=save_changes,
-        #     )
-        # elif config_type == "config_includes_name":
-        #     stored_datasource = context.add_datasource(
-        #         **datasource_config_with_name.to_dict(), save_changes=save_changes
-        #     )
-        # elif (
-        #     config_type
-        #     == "name_supplied_separately_and_included_in_config"
-        # ):
-        #     stored_datasource = context.add_datasource(
-        #         name=datasource_name,
-        #         **datasource_config_with_name.to_dict(),
-        #         save_changes=save_changes,
-        #     )
         stored_datasource: BaseDatasource = _add_datasource_helper(
             context=context,
             config_type=config_type,
