@@ -9,10 +9,10 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.rule_based_profiler import Domain, ParameterNode
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.types import SerializableDictDot
 
 

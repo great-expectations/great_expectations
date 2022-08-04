@@ -10,6 +10,19 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.rule_based_profiler import (
+    PARAMETER_KEY,
+    RAW_PARAMETER_KEY,
+    AttributedResolvedMetrics,
+    Builder,
+    Domain,
+    MetricComputationResult,
+    MetricValue,
+    MetricValues,
+    ParameterContainer,
+    build_parameter_container,
+    get_fully_qualified_parameter_names,
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
@@ -22,19 +35,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.types import (
-    PARAMETER_KEY,
-    RAW_PARAMETER_KEY,
-    AttributedResolvedMetrics,
-    Builder,
-    Domain,
-    MetricComputationResult,
-    MetricValue,
-    MetricValues,
-    ParameterContainer,
-    build_parameter_container,
-    get_fully_qualified_parameter_names,
 )
 from great_expectations.types.attributes import Attributes
 from great_expectations.validator.metric_configuration import MetricConfiguration

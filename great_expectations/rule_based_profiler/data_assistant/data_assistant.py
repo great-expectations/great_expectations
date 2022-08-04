@@ -6,8 +6,21 @@ from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
-from great_expectations.rule_based_profiler import RuleBasedProfilerResult
+from great_expectations.rule_based_profiler import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    VARIABLES_KEY,
+    Domain,
+    ParameterNode,
+    RuleBasedProfilerResult,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+)
 from great_expectations.rule_based_profiler.domain_builder import (
     MapMetricColumnDomainBuilder,
 )
@@ -37,19 +50,6 @@ from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
-)
-from great_expectations.rule_based_profiler.types import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    VARIABLES_KEY,
-    Domain,
-    ParameterNode,
-    SemanticDomainTypes,
-)
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
 )
 from great_expectations.util import camel_to_snake, measure_execution_time
 from great_expectations.validator.validator import Validator

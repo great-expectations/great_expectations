@@ -15,13 +15,10 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
+from great_expectations.rule_based_profiler import VARIABLES_PREFIX, ParameterContainer
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
-)
-from great_expectations.rule_based_profiler.types import (
-    VARIABLES_PREFIX,
-    ParameterContainer,
 )
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.util import (

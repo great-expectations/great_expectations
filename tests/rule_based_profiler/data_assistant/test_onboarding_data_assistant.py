@@ -12,18 +12,18 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.rule_based_profiler.altair import AltairDataTypes
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+    OnboardingDataAssistantResult,
+)
+from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
+    PlotResult,
+)
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     Domain,
     ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
-    OnboardingDataAssistantResult,
-)
-from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
-    PlotResult,
 )
 from tests.render.test_util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj

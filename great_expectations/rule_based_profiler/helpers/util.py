@@ -19,7 +19,7 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler import (
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     INFERRED_SEMANTIC_TYPE_KEY,
     VARIABLES_PREFIX,
@@ -31,7 +31,7 @@ from great_expectations.rule_based_profiler.types import (
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
-from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
+from great_expectations.rule_based_profiler.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
 )
 from great_expectations.types import safe_deep_copy

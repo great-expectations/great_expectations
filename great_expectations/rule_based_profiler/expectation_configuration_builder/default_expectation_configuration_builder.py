@@ -17,6 +17,7 @@ from pyparsing import (
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.rule_based_profiler import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -24,7 +25,6 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 
 text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))

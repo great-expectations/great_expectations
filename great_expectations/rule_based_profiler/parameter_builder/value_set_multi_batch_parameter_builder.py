@@ -3,14 +3,7 @@ from typing import Any, Collection, Dict, List, Optional, Set, Union
 
 import numpy as np
 
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_parameter_value_and_validate_return_type,
-)
-from great_expectations.rule_based_profiler.parameter_builder import (
-    MetricMultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
@@ -19,6 +12,13 @@ from great_expectations.rule_based_profiler.types import (
     MetricValues,
     ParameterContainer,
     ParameterNode,
+)
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
 )
 from great_expectations.types.attributes import Attributes
 

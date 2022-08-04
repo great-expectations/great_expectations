@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler import Builder, Domain, ParameterContainer
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
 )
@@ -11,11 +12,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.types import (
-    Builder,
-    Domain,
-    ParameterContainer,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 

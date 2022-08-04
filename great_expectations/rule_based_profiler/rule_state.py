@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler import Domain, ParameterContainer
 
 
 class RuleState:

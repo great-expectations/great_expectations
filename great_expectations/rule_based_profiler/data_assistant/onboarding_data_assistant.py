@@ -1,9 +1,21 @@
 from typing import Any, Dict, List, Optional
 
+from great_expectations.rule_based_profiler import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    VARIABLES_KEY,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
     build_map_metric_rule,
+)
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+    OnboardingDataAssistantResult,
 )
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
@@ -25,18 +37,6 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ValueSetMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.types import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    VARIABLES_KEY,
-    SemanticDomainTypes,
-)
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
-    OnboardingDataAssistantResult,
-)
 from great_expectations.validator.validator import Validator
 
 

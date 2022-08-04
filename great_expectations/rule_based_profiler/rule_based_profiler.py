@@ -32,7 +32,14 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.rule_based_profiler import RuleBasedProfilerResult
+from great_expectations.rule_based_profiler import (
+    Domain,
+    ParameterContainer,
+    ParameterNode,
+    RuleBasedProfilerResult,
+    RuleState,
+    build_parameter_container_for_variables,
+)
 from great_expectations.rule_based_profiler.config.base import (
     DomainBuilderConfig,
     ExpectationConfigurationBuilderConfig,
@@ -68,13 +75,6 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     init_rule_parameter_builders,
 )
 from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    ParameterNode,
-    RuleState,
-    build_parameter_container_for_variables,
-)
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)

@@ -1,6 +1,11 @@
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler import (
+    Domain,
+    ParameterContainer,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     AbsoluteCardinalityLimit,
@@ -13,11 +18,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
-)
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    SemanticDomainTypes,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
