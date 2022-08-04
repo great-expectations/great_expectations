@@ -7,17 +7,8 @@ from typing import Any, Callable, Dict, List, Optional, Union, cast
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler import (
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    RAW_PARAMETER_KEY,
-    Domain,
-    MetricValues,
-    NumericRangeEstimationResult,
-    ParameterContainer,
-    ParameterNode,
-)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     build_numeric_range_estimation_result,
@@ -27,11 +18,22 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
     integer_semantic_domain_type,
 )
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricValues,
+)
 from great_expectations.rule_based_profiler.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
+    NumericRangeEstimationResult,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    RAW_PARAMETER_KEY,
+    ParameterContainer,
+    ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_numeric

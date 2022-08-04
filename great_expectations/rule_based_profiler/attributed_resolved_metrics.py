@@ -5,7 +5,10 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler import MetricValue, MetricValues
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricValue,
+    MetricValues,
+)
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
 
