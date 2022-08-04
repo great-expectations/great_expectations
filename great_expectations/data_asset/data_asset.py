@@ -144,7 +144,7 @@ class DataAsset:
         )
 
     @classmethod
-    def expectation(cls, method_arg_names):
+    def expectation(cls, method_arg_names):  # noqa: C901 - complexity 24
         """Manages configuration and running of expectation objects.
 
         Expectation builds and saves a new expectation configuration to the DataAsset object. It is the core decorator \
@@ -561,7 +561,7 @@ class DataAsset:
             suppress_warnings,
         )
 
-    def get_expectation_suite(
+    def get_expectation_suite(  # noqa: C901 - complexity 17
         self,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
@@ -721,7 +721,7 @@ class DataAsset:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    def validate(
+    def validate(  # noqa: C901 - complexity 36
         self,
         expectation_suite=None,
         run_id=None,
@@ -905,7 +905,7 @@ class DataAsset:
 
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
-            suite_ge_version = expectation_suite.meta.get(
+            suite_ge_version = expectation_suite.meta.get(  # noqa: F841
                 "great_expectations_version"
             ) or expectation_suite.meta.get("great_expectations.__version__")
 
