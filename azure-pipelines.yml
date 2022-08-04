@@ -121,6 +121,8 @@ stages:
     condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-latest'
+    variables:
+      default_python_version: '3.8'
     jobs:
       - job: make_suffix
         steps:
@@ -150,8 +152,8 @@ stages:
               # We repull the develop branch. We could build the local branch that is already present but we should
               # prune it's depth since we don't need the git history.
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
-              CMD+="--target azure --build-arg PYTHON_VERSION=$(python.version) --build-arg SOURCE=github "
-              CMD+="--build-arg BRANCH=develop ."
+              CMD+="--target azure --build-arg PYTHON_VERSION=$(python.version) "
+              CMD+=" --build-arg SOURCE=github --build-arg BRANCH=develop ."
               echo ${CMD}
               eval ${CMD}
             displayName: 'Build python $(python.version) image'
@@ -169,7 +171,7 @@ stages:
               DOCKER_USER: $(DOCKER_USER)
               DOCKER_TOKEN: $(DOCKER_TOKEN)
 
-      - job: comprehensive_test_
+      - job: test_comprehensive_
         dependsOn: [make_suffix, build_push_]
         condition: succeeded()
         timeoutInMinutes: 120
@@ -183,30 +185,29 @@ stages:
               python.version: '3.9'
         services:
           postgres: postgres
+          trino: trino
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
           - bash: |
+              echo "Wait for trino"
+              sleep 30
+
+          - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PULL="docker pull greatexpectations/test:${DOCKER_TAG}"
-              echo ${PULL}
-              eval ${PULL}
               mkdir coverage
               PYTEST="docker run --network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
-              PYTEST+="-e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) -e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) "
-              PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="/bin/bash -c \"pytest --postgresql --spark --cloud --napoleon-docstrings --no-docker-discovery "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="/bin/bash -c \"pytest --postgresql --spark --trino "
+              PYTEST+="--napoleon-docstrings --no-docker-discovery "
               # We should be able to specify --cov-report=xml:path but this doesn't work so we write to the default
               # path and then mv it.
               PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
               PYTEST+="--ignore=tests/cli --ignore=tests/integration/usage_statistics "
+              # The last \" closes the quote from bash -c \"
               PYTEST+="&& mv coverage.xml /coverage/coverage.xml\""
               echo ${PYTEST}
               eval ${PYTEST}
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest $(python.version)'
 
           - task: PublishTestResults@2
@@ -220,6 +221,87 @@ stages:
               codeCoverageTool: Cobertura
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/coverage/htmlcov'
+
+      - job: test_cloud_
+        dependsOn: [ make_suffix, build_push_ ]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              # These are integration/E2E tests that are specific to Great Expectations Cloud.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run -e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) "
+              PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest tests --cloud -m \"cloud and not unit\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
+            displayName: 'test_cloud_integration'
+
+      - job: test_mysql_
+        dependsOn: [ make_suffix, build_push_ ]
+        condition: succeeded()
+        timeoutInMinutes: 120
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        services:
+          mysql: mysql
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              printf "Waiting for MySQL database to accept connections: "
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+              printf "\n"
+          - bash: |
+              mkdir script
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > script/mysql_setup.sql
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host --mount type=bind,source=${PWD}/script,target=/script "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \""
+              PYTEST+="mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < /script/mysql_setup.sql && "
+              # The last \" closes the quote from bash -c \".
+              PYTEST+="pytest --mysql --ignore=tests/cli --ignore=tests/integration/usage_statistics\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'test_mysql'
+
+      - job: test_usage_stats
+        dependsOn: [make_suffix, build_push_]
+        condition: succeeded()
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(default_python_version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest --no-sqlalchemy --aws-integration tests/integration/usage_statistics"
+              echo ${PYTEST}
+              eval ${PYTEST}
+
 
   - stage: import_ge
     dependsOn: [lint]
