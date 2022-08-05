@@ -79,7 +79,7 @@ class DocInherit:
         return f
 
 
-def recursively_convert_to_json_serializable(test_obj):
+def recursively_convert_to_json_serializable(test_obj):  # noqa: C901 - complexity 20
     """
     Helper function to convert a dict object to one that is serializable
 
