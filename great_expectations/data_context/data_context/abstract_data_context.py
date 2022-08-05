@@ -614,7 +614,9 @@ class AbstractDataContext(ABC):
         datasource_name: str
         datasource_config: DatasourceConfig
         for datasource_name, datasource_config in self.config.datasources.items():
-            datasource_dict: dict = datasource_config.to_json_dict()
+            datasource_dict: dict = cast(
+                dict, datasourceConfigSchema.dump(datasource_config)
+            )
             datasource_dict["name"] = datasource_name
             substituted_config: dict = cast(
                 dict,
