@@ -75,7 +75,21 @@ class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeInSetSparkOptimized(ColumnExpectation):
-    """TODO: add a docstring here"""
+    """Expect each column value to be in a given set; optimized using `join` for spark backends.
+
+    Args:
+        column (str): \
+            The column name.
+        value_set (set-like): \
+            A set of objects used for comparison.
+
+    Keyword Args:
+        mostly (None or a float between 0 and 1): \
+            Return `"success": True` if at least mostly fraction of values match the expectation. \
+            For more detail, see :ref:`mostly`.
+        strict (boolean or None) : If True, percentage of values in set must exceed mostly.
+
+    """
 
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
     metric_dependencies = ("column_values.in_set.spark_optimized",)
@@ -136,7 +150,7 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnExpectation):
         result = metrics.get("column_values.in_set.spark_optimized")
         result = dict(result)
 
-        if strict is True:
+        if strict is True and mostly < 1:
             success = (sum(result.values()) / len(result.values())) > mostly
         else:
             success = (sum(result.values()) / len(result.values())) >= mostly
