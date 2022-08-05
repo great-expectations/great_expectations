@@ -135,8 +135,9 @@ class VolumeDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_std_error_ratio_threshold": 0.25,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": 0,
@@ -235,8 +236,9 @@ class VolumeDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_std_error_ratio_threshold": 0.25,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": 0.0,

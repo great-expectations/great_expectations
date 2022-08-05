@@ -678,7 +678,7 @@ def get_batch_request_as_dict(
     return batch_request
 
 
-def get_batch_request_from_acceptable_arguments(
+def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     datasource_name: Optional[str] = None,
     data_connector_name: Optional[str] = None,
     data_asset_name: Optional[str] = None,
