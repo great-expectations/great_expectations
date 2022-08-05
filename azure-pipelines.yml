@@ -121,8 +121,6 @@ stages:
     condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-latest'
-    variables:
-      default_python_version: '3.8'
     jobs:
       - job: make_suffix
         steps:
@@ -190,16 +188,11 @@ stages:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
           - bash: |
-              echo "Wait for trino"
-              sleep 30
-
-          - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               mkdir coverage
               PYTEST="docker run --network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
-              PYTEST+="greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="/bin/bash -c \"pytest --postgresql --spark --trino "
-              PYTEST+="--napoleon-docstrings --no-docker-discovery "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest "
+              PYTEST+="--postgresql --spark --napoleon-docstrings --no-docker-discovery "
               # We should be able to specify --cov-report=xml:path but this doesn't work so we write to the default
               # path and then mv it.
               PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
@@ -289,14 +282,47 @@ stages:
               eval ${PYTEST}
             displayName: 'test_mysql'
 
-      - job: test_usage_stats
+      - job: test_trino
         dependsOn: [make_suffix, build_push_]
         condition: succeeded()
+        timeoutInMinutes: 120
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
           - bash: |
-              DOCKER_TAG="$(default_python_version)_$(IMAGE_SUFFIX)"
+              printf 'Waiting for Trino database to accept connections'
+              sleep 30
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest --trino --ignore=tests/cli --ignore=tests/integration/usage_statistics"
+              echo ${PYTEST}
+              eval ${PYTEST}
+
+      - job: test_usage_stats
+        dependsOn: [make_suffix, build_push_]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
               PYTEST+="pytest --no-sqlalchemy --aws-integration tests/integration/usage_statistics"
               echo ${PYTEST}
