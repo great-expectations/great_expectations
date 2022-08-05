@@ -4,7 +4,6 @@ import shutil
 from typing import List
 
 import nbformat
-import pytest
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 from nbformat import NotebookNode
 
