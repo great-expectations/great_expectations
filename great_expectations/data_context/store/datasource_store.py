@@ -173,14 +173,15 @@ class DatasourceStore(Store):
     def set(
         self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
     ) -> DatasourceConfig:
-        """Create a datasource config in the store using a store_backend-specific key."""
+        """Create a datasource config in the store using a store_backend-specific key, then get and return that config."""
         if not key:
             key = self._build_key_from_config(value)
 
-        raw_config: dict = cast(dict, super().set(key, value))
-        validated_config = cast(dict, self._schema.load(raw_config))
-        datasource_config: DatasourceConfig = DatasourceConfig(**validated_config)
-        return datasource_config
+        super().set(key, value)
+
+        datasource_config_from_store: DatasourceConfig = self.get(key)
+
+        return datasource_config_from_store
 
     # TODO: AJB 20220803 Change this method to update and implement similarly to `set`.
     def update_by_name(

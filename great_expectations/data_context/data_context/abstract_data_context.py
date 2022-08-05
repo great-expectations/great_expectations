@@ -1637,6 +1637,7 @@ class AbstractDataContext(ABC):
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
+        datasource_config.name = name
 
         if save_changes:
             datasource_config = self._datasource_store.set(
