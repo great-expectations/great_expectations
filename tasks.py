@@ -240,3 +240,34 @@ def mv_usage_stats_json(ctx):
     cmd = cmd.format(outfile)
     ctx.run(cmd)
     print(f"'{outfile}' copied to dbfs.")
+
+
+@invoke.task
+def docker(ctx, name="gx38", tag="dev", source=pathlib.Path.cwd(), build=False):
+    if build:
+        cmds = [
+            "docker",
+            "buildx",
+            "build",
+            "-f",
+            "docker/Dockerfile.tests",
+            f"--tag {name}:{tag}",
+            *[f"--build-arg {arg}" for arg in ["SOURCE=local", "PYTHON_VERSION=3.8"]],
+            ".",
+        ]
+
+    else:
+        cmds = [
+            "docker",
+            "run",
+            "-it",
+            "--rm",
+            "--mount",
+            f"type=bind,source={source},target=/great_expectations",
+            "-w",
+            "/great_expectations",
+            f"{name}:{tag}",
+            "bash",
+        ]
+    # print(cmds)
+    ctx.run(" ".join(cmds), echo=True, pty=True)
