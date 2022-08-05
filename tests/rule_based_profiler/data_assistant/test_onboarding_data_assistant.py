@@ -12,18 +12,18 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.rule_based_profiler.types import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    Domain,
-    ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
+from great_expectations.rule_based_profiler.altair import AltairDataTypes
+from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
     OnboardingDataAssistantResult,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
+from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotResult,
+)
+from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    ParameterNode,
 )
 from tests.render.test_util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
@@ -144,7 +144,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
         DataAssistant,
         OnboardingDataAssistant,
     )
-    from great_expectations.rule_based_profiler.types.data_assistant_result import DataAssistantResult
+    from great_expectations.rule_based_profiler.data_assistant_result import DataAssistantResult
     from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
     import great_expectations.exceptions as ge_exceptions
 
@@ -338,7 +338,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         # column_value_nonnullity_rule={
         # },
         numeric_columns_rule={
-            "round_decimals": 12,
+            "round_decimals": 15,
             "false_positive_rate": 0.1,
             "random_seed": 43792,
         },
@@ -363,7 +363,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         data_assistant_result.profiler_config.rules["numeric_columns_rule"][
             "variables"
         ]["round_decimals"]
-        == 12
+        == 15
     )
     assert (
         data_assistant_result.profiler_config.rules["numeric_columns_rule"][

@@ -155,7 +155,7 @@ def determine_progress_bar_method_by_environment() -> Callable:
     return tqdm
 
 
-def convert_to_json_serializable(data):
+def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
     """
     Helper function to convert an object to one that is json serializable
     Args:
@@ -283,7 +283,7 @@ def convert_to_json_serializable(data):
         )
 
 
-def ensure_json_serializable(data):
+def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     """
     Helper function to convert an object to one that is json serializable
     Args:

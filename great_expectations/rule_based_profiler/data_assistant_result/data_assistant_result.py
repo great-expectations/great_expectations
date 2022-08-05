@@ -28,23 +28,9 @@ from great_expectations.core.util import (
     in_jupyter_notebook,
     nested_update,
 )
+from great_expectations.rule_based_profiler.altair import AltairDataTypes, AltairThemes
 from great_expectations.rule_based_profiler.config import RuleConfig
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_or_create_expectation_suite,
-    sanitize_parameter_name,
-)
-from great_expectations.rule_based_profiler.types import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    Domain,
-    MetricValues,
-    ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.altair import (
-    AltairDataTypes,
-    AltairThemes,
-)
-from great_expectations.rule_based_profiler.types.data_assistant_result.plot_components import (
+from great_expectations.rule_based_profiler.data_assistant_result.plot_components import (
     BatchPlotComponent,
     DomainPlotComponent,
     ExpectationKwargPlotComponent,
@@ -52,9 +38,22 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_com
     PlotComponent,
     determine_plot_title,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
+from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotMode,
     PlotResult,
+)
+from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_or_create_expectation_suite,
+    sanitize_parameter_name,
+)
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricValues,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    ParameterNode,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
@@ -162,6 +161,58 @@ class DataAssistantResult(SerializableDictDot):
     ] = None  # Overall DataAssistant execution time (in seconds).
     # Reference to "UsageStatisticsHandler" object for this "DataAssistantResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
+
+    def show_expectations_by_domain_type(
+        self,
+        expectation_suite_name: str,
+        include_profiler_config: bool = False,
+        send_usage_event: bool = True,
+    ) -> None:
+        """
+        Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
+        and displays this "ExpectationConfiguration" list, grouped by "domain_type", in predetermined order.
+        """
+        self.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            include_profiler_config=include_profiler_config,
+            send_usage_event=send_usage_event,
+        ).show_expectations_by_domain_type()
+
+    def show_expectations_by_expectation_type(
+        self,
+        expectation_suite_name: str,
+        include_profiler_config: bool = False,
+        send_usage_event: bool = True,
+    ) -> None:
+        """
+        Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
+        and displays this "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined order.
+        """
+        self.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            include_profiler_config=include_profiler_config,
+            send_usage_event=send_usage_event,
+        ).show_expectations_by_expectation_type()
+
+    def get_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        include_profiler_config: bool = False,
+        send_usage_event: bool = True,
+    ) -> ExpectationSuite:
+        """
+        Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
+        """
+        if send_usage_event:
+            return self._get_expectation_suite_with_usage_statistics(
+                expectation_suite_name=expectation_suite_name,
+                include_profiler_config=include_profiler_config,
+            )
+
+        return self._get_expectation_suite_without_usage_statistics(
+            expectation_suite_name=expectation_suite_name,
+            include_profiler_config=include_profiler_config,
+        )
 
     def to_dict(self) -> dict:
         """
@@ -343,13 +394,28 @@ class DataAssistantResult(SerializableDictDot):
         event_name=UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value,
         args_payload_fn=get_expectation_suite_usage_statistics,
     )
-    def get_expectation_suite(
+    def _get_expectation_suite_with_usage_statistics(
         self,
         expectation_suite_name: str,
         include_profiler_config: bool = False,
     ) -> ExpectationSuite:
         """
         Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
+        Side Effects: One usage statistics event (specified in "usage_statistics_enabled_method" decorator) is emitted.
+        """
+        return self._get_expectation_suite_without_usage_statistics(
+            expectation_suite_name=expectation_suite_name,
+            include_profiler_config=include_profiler_config,
+        )
+
+    def _get_expectation_suite_without_usage_statistics(
+        self,
+        expectation_suite_name: str,
+        include_profiler_config: bool = False,
+    ) -> ExpectationSuite:
+        """
+        Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
+        Side Effects: None -- no usage statistics event is emitted.
         """
         expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
             data_context=None,
