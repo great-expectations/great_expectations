@@ -2281,10 +2281,54 @@ def generate_expectation_tests(
             include_snowflake=dialects_to_include.get("snowflake", False),
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
+        titles = []
+        only_fors = []
+        suppress_test_fors = []
+        for _test_case in d.tests:
+            titles.append(_test_case.title)
+            only_fors.append(_test_case.only_for)
+            suppress_test_fors.append(_test_case.suppress_test_for)
+        _debug(f"titles -> {titles}")
+        _debug(
+            f"only_fors -> {only_fors}  suppress_test_fors -> {suppress_test_fors}  only_consider_these_backends -> {only_consider_these_backends}"
+        )
+        _debug(f"backends -> {backends}")
+        if not backends:
+            _debug(f"No suitable backends for this test_data_case")
+            continue
 
         for c in backends:
-
             _debug(f"Getting validators with data: {c}")
+
+            tests_suppressed_for_backend = [
+                c in sup or ("sqlalchemy" in sup and c in SQL_DIALECT_NAMES)
+                if sup
+                else False
+                for sup in suppress_test_fors
+            ]
+            only_fors_ok = []
+            for i, only_for in enumerate(only_fors):
+                if not only_for:
+                    only_fors_ok.append(True)
+                    continue
+                if c in only_for or (
+                    "sqlalchemy" in only_for and c in SQL_DIALECT_NAMES
+                ):
+                    only_fors_ok.append(True)
+                else:
+                    only_fors_ok.append(False)
+            if tests_suppressed_for_backend and all(tests_suppressed_for_backend):
+                _debug(
+                    f"All {len(tests_suppressed_for_backend)} tests are SUPPRESSED for {c}"
+                )
+                continue
+            if not any(only_fors_ok):
+                _debug(f"No tests are allowed for {c}")
+                _debug(
+                    f"c -> {c}  only_fors -> {only_fors}  only_fors_ok -> {only_fors_ok}"
+                )
+                continue
+
             datasets = []
 
             try:

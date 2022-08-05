@@ -1150,14 +1150,27 @@ class Expectation(metaclass=MetaExpectation):
             #   - https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/column_map_expectations/expect_column_values_to_be_unique.json#L174
             #   - https://github.com/great-expectations/great_expectations/pull/4073
             top_level_only_for = example.get("only_for")
+            top_level_suppress_test_for = example.get("suppress_test_for")
             for test in example["tests"]:
                 if (
                     test.get("include_in_gallery") == True
                     or return_only_gallery_examples == False
                 ):
                     copied_test = deepcopy(test)
-                    if top_level_only_for and "only_for" not in copied_test:
-                        copied_test["only_for"] = top_level_only_for
+                    if top_level_only_for:
+                        if "only_for" not in copied_test:
+                            copied_test["only_for"] = top_level_only_for
+                        else:
+                            copied_test["only_for"].extend(top_level_only_for)
+                    if top_level_suppress_test_for:
+                        if "suppress_test_for" not in copied_test:
+                            copied_test[
+                                "suppress_test_for"
+                            ] = top_level_suppress_test_for
+                        else:
+                            copied_test["suppress_test_for"].extend(
+                                top_level_suppress_test_for
+                            )
                     included_test_cases.append(
                         ExpectationLegacyTestCaseAdapter(**copied_test)
                     )
@@ -1169,6 +1182,7 @@ class Expectation(metaclass=MetaExpectation):
                 copied_example["tests"] = included_test_cases
                 copied_example.pop("_notes", None)
                 copied_example.pop("only_for", None)
+                copied_example.pop("suppress_test_for", None)
                 if "test_backends" in copied_example:
                     copied_example["test_backends"] = [
                         TestBackend(**tb) for tb in copied_example["test_backends"]
