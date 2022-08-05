@@ -8,6 +8,7 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
     FileDataContextVariables,
 )
 from great_expectations.data_context.types.base import DataContextConfig
@@ -57,7 +58,10 @@ class FileDataContext(AbstractDataContext):
 
         store_name: str = "datasource_store"  # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
-        store_backend: dict = {"class_name": "InlineStoreBackend"}
+        store_backend: dict = {
+            "class_name": "InlineStoreBackend",
+            "resource_type": DataContextVariableSchema.DATASOURCES,
+        }
         runtime_environment: dict = {
             "root_directory": self.root_directory,
             "data_context": self,

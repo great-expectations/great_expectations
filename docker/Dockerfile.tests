@@ -5,7 +5,7 @@ ARG SOURCE=local
 
 # Our base image is the official python image. If needed we can look into slimming this down.
 FROM python:${PYTHON_VERSION} AS base
-RUN apt update && apt install default-jre unixodbc unixodbc-dev locales locales-all -y && apt clean
+RUN apt update && apt install default-jre unixodbc unixodbc-dev default-mysql-client locales locales-all -y && apt clean
 RUN python -m pip install --no-cache-dir --upgrade pip
 
 FROM base as build_local
