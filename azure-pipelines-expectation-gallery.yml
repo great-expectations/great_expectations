@@ -148,7 +148,7 @@ stages:
               secureFile: 'aws_config_sandbox'
               retryCount: '2'
 
-          - bash: python ./build_gallery.py | tee output--build_gallery.txt
+          - bash: python ./build_gallery.py --outfile-name "expectation_library_v3.json" --backends "sqlite, spark, postgresql, snowflake, bigquery" --no-contrib expect_column_quantile_values_to_be_between | tee output--build_gallery.txt ; grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
             env:
@@ -180,6 +180,30 @@ stages:
               # Azure credentials
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show checklist issues'
+
+          - bash: cat testing-error-messages.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing errors'
+
+          - bash: cat gallery-tracebacks.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show gallery tracebacks'
+
+          - bash: grep "to df.to_sql" testing-times.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show DataFrame to SQL times'
+
+          - bash: grep "to run" testing-times.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times grouped by backend and Expectation'
+
+          - bash: grep "to evaluate_json" testing-times.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times for individual tests'
 
           - bash: python ./build_package_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/

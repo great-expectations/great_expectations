@@ -438,6 +438,13 @@ def format_docstring_to_markdown(docstr: str) -> str:
     help="Do not include contrib/package Expectations",
 )
 @click.option(
+    "--outfile-name",
+    "-o",
+    "outfile_name",
+    default="expectation_library_v2.json",
+    help="Name for the generated JSON file",
+)
+@click.option(
     "--backends",
     "-b",
     "backends",
@@ -461,18 +468,12 @@ def main(**kwargs):
     tracebacks = expectation_tracebacks.getvalue()
     checklists = expectation_checklists.getvalue()
     if tracebacks != "":
-        print("\n\n\n" + "#" * 30 + "   T R A C E B A C K S   " + "#" * 30 + "\n")
-        print(tracebacks)
-        print(
-            "\n\n" + "#" * 30 + "   E N D   T R A C E B A C K S   " + "#" * 30 + "\n\n"
-        )
-        with open("./gallery-errors.txt", "w") as outfile:
+        with open("./gallery-tracebacks.txt", "w") as outfile:
             outfile.write(tracebacks)
     if checklists != "":
-        print(checklists)
         with open("./checklists.txt", "w") as outfile:
             outfile.write(checklists)
-    with open("./expectation_library_v3.json", "w") as outfile:
+    with open(f"./{kwargs['outfile_name']}", "w") as outfile:
         json.dump(gallery_info, outfile, indent=4)
 
 
