@@ -96,8 +96,10 @@ class GEDependencies:
             "pyspark",
             "pytest",
             "pytest-benchmark",
+            "pytest-azurepipelines",
             "pytest-cov",
             "pytest-order",
+            "pytest-random-order",
             "pyupgrade",
             "requirements-parser",
             "s3fs",
@@ -142,6 +144,9 @@ class GEDependencies:
         "PyHive",
         "thrift",
         "thrift-sasl",
+        # requirements-dev-test-pipeline.txt:
+        "pytest-azurepipelines",
+        "pytest-random-order",
     ]
 
     GE_DEV_DEPENDENCIES: List[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(

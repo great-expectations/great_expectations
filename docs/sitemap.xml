@@ -518,6 +518,11 @@
   <priority>0.41</priority>
 </url>
 <url>
+  <loc>https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_aws_glue/</loc>
+  <lastmod>2022-07-19T20:46:21+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
   <loc>https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_airflow/</loc>
   <lastmod>2022-04-07T20:46:21+00:00</lastmod>
   <priority>0.41</priority>

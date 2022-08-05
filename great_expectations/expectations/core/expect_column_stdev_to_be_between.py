@@ -120,6 +120,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
         n_resamples=f"{VARIABLES_KEY}n_resamples",
         random_seed=f"{VARIABLES_KEY}random_seed",
         quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
         quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
         include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
@@ -142,8 +143,9 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
                     "estimator": "bootstrap",
                     "n_resamples": 9999,
                     "random_seed": None,
-                    "quantile_statistic_interpolation_method": "auto",
-                    "quantile_bias_std_error_ratio_threshold": 0.25,
+                    "quantile_statistic_interpolation_method": "nearest",
+                    "quantile_bias_correction": False,
+                    "quantile_bias_std_error_ratio_threshold": None,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": 0,
@@ -265,6 +267,8 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
             },
         }
 
+        template_str: str = ""
+
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "standard deviation may have any numerical value."
         else:
@@ -290,7 +294,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
-        return (template_str, params_with_json_schema, styling)
+        return template_str, params_with_json_schema, styling
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -321,6 +325,8 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
                 "strict_max",
             ],
         )
+
+        template_str: str = ""
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "standard deviation may have any numerical value."

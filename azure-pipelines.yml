@@ -13,7 +13,7 @@ schedules:
   branches:
     include:
     - develop
-  always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
+  always: false # Will only trigger if the state of the codebase has changed since the last scheduled run
 
 trigger:
   tags:
@@ -73,9 +73,9 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==22.3.0 pyupgrade==2.7.2 invoke
+              pip install isort[requirements]==5.10.1 flake8==3.9.2 black==22.3.0 pyupgrade==2.7.2 invoke==1.7.1
               EXIT_STATUS=0
-              invoke fmt --check --exclude docs/ || EXIT_STATUS=$?
+              invoke fmt --check || EXIT_STATUS=$?
               invoke lint || EXIT_STATUS=$?
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
@@ -115,6 +115,224 @@ stages:
           # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
+
+  - stage: docker_tests
+    dependsOn: [lint, custom_checks]
+    condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+      - job: make_suffix
+        steps:
+          - bash: |
+              EPOCH=`date +%s`
+              SUFFIX="develop_${EPOCH}_${RANDOM}"
+              echo "Generated image suffix: ${SUFFIX}"
+              echo "##vso[task.setvariable variable=IMAGE_SUFFIX;isOutput=true]${SUFFIX}"
+            name: suffix
+
+      - job: build_push_
+        dependsOn: make_suffix
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              # We repull the develop branch. We could build the local branch that is already present but we should
+              # prune it's depth since we don't need the git history.
+              CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
+              CMD+="--target azure --build-arg PYTHON_VERSION=$(python.version) "
+              CMD+=" --build-arg SOURCE=github --build-arg BRANCH=develop ."
+              echo ${CMD}
+              eval ${CMD}
+            displayName: 'Build python $(python.version) image'
+
+          - bash: |
+              docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PUSH="docker push greatexpectations/test:${DOCKER_TAG}"
+              echo ${PUSH}
+              eval ${PUSH}
+              echo "Docker image can be found at https://hub.docker.com/r/greatexpectations/test/tags"
+              echo "Pull it locally using: docker pull greatexpectations/test:${DOCKER_TAG}"
+            displayName: 'Push python $(python.version) image'
+            env:
+              DOCKER_USER: $(DOCKER_USER)
+              DOCKER_TOKEN: $(DOCKER_TOKEN)
+
+      - job: test_comprehensive_
+        dependsOn: [make_suffix, build_push_]
+        condition: succeeded()
+        timeoutInMinutes: 120
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        services:
+          postgres: postgres
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              mkdir coverage
+              PYTEST="docker run --network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest "
+              PYTEST+="--postgresql --spark --napoleon-docstrings --no-docker-discovery "
+              # We should be able to specify --cov-report=xml:path but this doesn't work so we write to the default
+              # path and then mv it.
+              PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
+              PYTEST+="--ignore=tests/cli --ignore=tests/integration/usage_statistics "
+              # The last \" closes the quote from bash -c \"
+              PYTEST+="&& mv coverage.xml /coverage/coverage.xml\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'Pytest $(python.version)'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '$(System.DefaultWorkingDirectory)/coverage/**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/coverage/htmlcov'
+
+      - job: test_cloud_
+        dependsOn: [ make_suffix, build_push_ ]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              # These are integration/E2E tests that are specific to Great Expectations Cloud.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run -e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) "
+              PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest tests --no-docker-discovery --cloud -m \"cloud and e2e\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
+            displayName: 'Pytest cloud integration'
+
+      - job: test_mysql_
+        dependsOn: [ make_suffix, build_push_ ]
+        condition: succeeded()
+        timeoutInMinutes: 120
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        services:
+          mysql: mysql
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              printf "Waiting for MySQL database to accept connections: "
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+              printf "\n"
+            displayName: 'Wait for MySQL'
+          - bash: |
+              mkdir script
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > script/mysql_setup.sql
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host --mount type=bind,source=${PWD}/script,target=/script "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \""
+              PYTEST+="mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < /script/mysql_setup.sql && "
+              # The last \" closes the quote from bash -c \".
+              PYTEST+="pytest --no-docker-discovery --mysql --ignore=tests/cli --ignore=tests/integration/usage_statistics\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'Pytest MySQL'
+
+      - job: test_trino
+        dependsOn: [make_suffix, build_push_]
+        condition: succeeded()
+        timeoutInMinutes: 120
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        services:
+          trino: trino
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              printf 'Waiting for Trino database to accept connections'
+              sleep 30
+            displayName: 'Wait for Trino'
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest --no-docker-discovery --trino --ignore=tests/cli --ignore=tests/integration/usage_statistics"
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'Pytest Trino'
+
+      - job: test_usage_stats
+        dependsOn: [make_suffix, build_push_]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest --no-docker-discovery --no-sqlalchemy --aws-integration tests/integration/usage_statistics"
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'Pytest Usage Stats'
+
 
   - stage: import_ge
     dependsOn: [lint]
@@ -227,10 +445,6 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -253,7 +467,7 @@ stages:
           postgres: postgres
 
         variables:
-          GE_pytest_opts: '--postgresql --spark --cloud'
+          GE_pytest_opts: '--postgresql --spark --cloud -m "not e2e"'
 
         strategy:
           matrix:
@@ -297,11 +511,18 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            displayName: 'pytest'
+
+          - script: |
+              # These are E2E tests that are specific to Great Expectations Cloud.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              pytest tests --cloud -m "cloud and e2e"
+
             env:
               GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
               GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
               GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-            displayName: 'pytest'
+            displayName: 'gx-cloud-e2e'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -395,10 +616,6 @@ stages:
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
       - job: mssql
@@ -432,10 +649,6 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
       - job: trino
@@ -475,10 +688,6 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
   - stage: cli_integration
