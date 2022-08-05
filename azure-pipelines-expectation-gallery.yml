@@ -181,7 +181,11 @@ stages:
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
-          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists.txt
+          - bash: cat checklists.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show full checklist summary'
+
+          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show checklist issues'
 
