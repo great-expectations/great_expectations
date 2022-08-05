@@ -25,7 +25,7 @@ jobs:
         # Scope
         only-pr-labels: community
         only-issue-labels: community
-        exempt-issue-labels: core-team, "help wanted", "DevRel Triage"
+        exempt-issue-labels: core-team, triage, "help wanted", "DevRel Triage"
 
         # Issue messages
         stale-issue-message: >
