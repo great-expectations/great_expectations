@@ -345,7 +345,7 @@ class CloudDataContext(AbstractDataContext):
         schema_validated_substituted_config_dict = substituted_config.to_json_dict()
         # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
         #  instead of popping the name field
-        schema_validated_substituted_config_dict.pop("name")
+        schema_validated_substituted_config_dict.pop("name", None)
 
         datasource: Optional[Datasource] = None
         if initialize:

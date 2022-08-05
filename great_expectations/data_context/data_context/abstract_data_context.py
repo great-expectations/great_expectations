@@ -1596,8 +1596,15 @@ class AbstractDataContext(ABC):
         self, name: str, config: Union[dict, DatasourceConfig]
     ) -> Datasource:
         # We convert from the type back to a dictionary for purposes of instantiation
+        # Round trip through schema validation and config creation to ensure "id_" is present
+        #
+        # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
+        # be refactored to into the config/schema. Also, downstream methods should be refactored
+        # to accept the config object (as opposed to a dict).
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
+            validated_config = DatasourceConfig(**datasourceConfigSchema.load(config))
+            config = validated_config.to_json_dict()
         config.update({"name": name})
         # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
         if config["class_name"] in [
@@ -1640,13 +1647,24 @@ class AbstractDataContext(ABC):
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
-        substituted_config: dict = substitute_all_config_variables(
+
+        substituted_config_dict: dict = substitute_all_config_variables(
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
+        # Round trip through schema validation and config creation to ensure "id_" is present
+        #
+        # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
+        # be refactored to into the config/schema. Also, downstream methods should be refactored
+        # to accept the config object (as opposed to a dict).
+        substituted_config = DatasourceConfig(
+            **datasourceConfigSchema.load(substituted_config_dict)
+        )
+        schema_validated_substituted_config_dict = substituted_config.to_json_dict()
+
         # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
         #  instead of popping the name field
-        substituted_config.pop("name", None)
+        schema_validated_substituted_config_dict.pop("name", None)
 
         datasource: Optional[Datasource] = None
         if initialize:
