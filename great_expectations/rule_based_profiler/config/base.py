@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 from typing import Any, Dict, List, Optional, Type, Union
@@ -732,6 +733,14 @@ class RuleBasedProfilerConfigSchema(Schema):
         required=True,
         allow_none=False,
     )
+
+    @post_dump
+    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
+        data = copy.deepcopy(data)
+        for key in ("id", "name"):
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
 
 
 expectationConfigurationBuilderConfigSchema = (
