@@ -15,7 +15,7 @@ from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
@@ -146,7 +146,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                     "n_resamples": 9999,
                     "random_seed": None,
                     "quantile_statistic_interpolation_method": "nearest",
-                    "quantile_bias_correcdtion": False,
+                    "quantile_bias_correction": False,
                     "quantile_bias_std_error_ratio_threshold": None,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {

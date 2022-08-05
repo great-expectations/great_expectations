@@ -5,6 +5,7 @@ import pytest
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -15,8 +16,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
     DEFAULT_CANDIDATE_STRINGS,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
