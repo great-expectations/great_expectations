@@ -190,8 +190,8 @@ stages:
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               mkdir coverage
               PYTEST="docker run --network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
-              PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest --no-docker-discovery "
-              PYTEST+="--postgresql --spark --cloud -m \"not e2e\" --napoleon-docstrings "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest -m 'not e2e' "
+              PYTEST+="--no-docker-discovery --postgresql --spark --cloud --napoleon-docstrings "
               # We should be able to specify --cov-report=xml:path but this doesn't work so we write to the default
               # path and then mv it.
               PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
