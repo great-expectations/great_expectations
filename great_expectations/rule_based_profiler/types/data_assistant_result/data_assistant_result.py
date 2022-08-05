@@ -825,6 +825,9 @@ class DataAssistantResult(SerializableDictDot):
                 # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
                 df["column_number"] = pd.factorize(df["table_columns"])[0] + 1
 
+            if "value_ranges" in list_column_names:
+                df[["min_value", "max_value"]] = df["value_ranges"].tolist()
+
         return df
 
     @staticmethod
@@ -1609,7 +1612,7 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        df_columns: List[str] = (
+        possible_df_columns: List[str] = (
             [
                 batch_name,
             ]
@@ -1625,17 +1628,20 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        df: pd.DataFrame = pd.DataFrame(columns=df_columns)
-
+        df_columns: List[str]
+        df: Optional[pd.DataFrame] = None
         for _, column_df in column_dfs:
-            df = pd.concat(
-                [df, column_df[column_df.columns.intersection(df_columns)]], axis=0
-            )
+            df_columns = column_df.columns.intersection(possible_df_columns)
+
+            if df is None:
+                df = pd.DataFrame(columns=df_columns)
+
+            df = pd.concat([df, column_df[df_columns]], axis=0)
 
         strict_min_predicate: bool = False
         strict_min_plot_component: Optional[ExpectationKwargPlotComponent] = None
         if strict_min in df.columns:
-            strict_min_predicate = df[strict_min].all()
+            strict_min_predicate = bool(df[strict_min].all())
             strict_min_plot_component = ExpectationKwargPlotComponent(
                 name=strict_min,
                 alt_type=AltairDataTypes.NOMINAL.value,
@@ -1645,17 +1651,15 @@ class DataAssistantResult(SerializableDictDot):
         strict_max_predicate: bool = False
         strict_max_plot_component: Optional[ExpectationKwargPlotComponent] = None
         if strict_max in df.columns:
-            strict_max_predicate = df[strict_max].all()
+            strict_max_predicate = bool(df[strict_max].all())
             strict_max_plot_component = ExpectationKwargPlotComponent(
                 name=strict_max,
                 alt_type=AltairDataTypes.NOMINAL.value,
                 axis_title=y_axis_title,
             )
 
-        value_ranges_predicate: bool = False
         value_ranges_plot_component: Optional[ExpectationKwargPlotComponent] = None
         if value_ranges in df.columns:
-            value_ranges_predicate = True
             value_ranges_plot_component = ExpectationKwargPlotComponent(
                 name=value_ranges,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
@@ -1665,30 +1669,7 @@ class DataAssistantResult(SerializableDictDot):
         # encode point color based on anomalies
         predicates: List[Union[bool, int]] = []
         for metric_plot_component in metric_plot_components:
-            if value_ranges_predicate:
-                predicates.append(
-                    (
-                        (
-                            alt.datum.value_ranges[0]
-                            >= alt.datum[metric_plot_component.name]
-                        )
-                        & (
-                            alt.datum.value_ranges[1]
-                            >= alt.datum[metric_plot_component.name]
-                        )
-                    )
-                    | (
-                        (
-                            alt.datum.value_ranges[0]
-                            <= alt.datum[metric_plot_component.name]
-                        )
-                        & (
-                            alt.datum.value_ranges[1]
-                            <= alt.datum[metric_plot_component.name]
-                        )
-                    )
-                )
-            elif strict_min_predicate and strict_max_predicate:
+            if strict_min_predicate and strict_max_predicate:
                 predicates.append(
                     (
                         (alt.datum.min_value > alt.datum[metric_plot_component.name])
@@ -2121,32 +2102,18 @@ class DataAssistantResult(SerializableDictDot):
 
         line_and_points_list: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
-            metric_list_position: str = "metric_list_position"
-            if metric_list_position in df.columns:
-                line: alt.Chart = (
-                    alt.Chart(data=df, title=title)
-                    .mark_line()
-                    .encode(
-                        x=batch_plot_component.plot_on_axis(),
-                        y=metric_plot_component.plot_on_axis(),
-                        tooltip=tooltip,
-                        color=alt.Y(
-                            metric_list_position,
-                            type=AltairDataTypes.ORDINAL.value,
-                            legend=None,
-                        ),
-                    )
+            line: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_line()
+                .encode(
+                    x=batch_plot_component.plot_on_axis(),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
                 )
-            else:
-                line: alt.Chart = (
-                    alt.Chart(data=df, title=title)
-                    .mark_line()
-                    .encode(
-                        x=batch_plot_component.plot_on_axis(),
-                        y=metric_plot_component.plot_on_axis(),
-                        tooltip=tooltip,
-                    )
-                )
+            )
+
+            if "metric_list_position" in df.columns:
+                line = line.encode(detail="metric_list_position")
 
             points: alt.Chart = (
                 alt.Chart(data=df, title=title)
@@ -2254,16 +2221,35 @@ class DataAssistantResult(SerializableDictDot):
         )
         expectation_kwarg_line_stroke_width: int = 5
 
+        expectation_kwargs_tooltip: List[alt.Tooltip] = []
+        expectation_kwargs_initial_dropdown_state: List[str] = []
+        detail: Optional[str] = None
+        if strict_min_plot_component and strict_max_plot_component:
+            expectation_kwargs_tooltip = [
+                strict_min_plot_component.generate_tooltip(),
+                strict_max_plot_component.generate_tooltip(),
+            ]
+            expectation_kwargs_initial_dropdown_state = [
+                strict_min_plot_component.name,
+                strict_max_plot_component.name,
+            ]
+        elif value_ranges_plot_component:
+            expectation_kwargs_tooltip = [
+                value_ranges_plot_component.generate_tooltip(format=",")
+            ]
+            expectation_kwargs_initial_dropdown_state = [
+                value_ranges_plot_component.name
+            ]
+            detail = "quantiles"
+
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
             + batch_plot_component.generate_tooltip()
             + [
                 min_value_plot_component.generate_tooltip(format=","),
                 max_value_plot_component.generate_tooltip(format=","),
-                strict_min_plot_component.generate_tooltip(),
-                strict_max_plot_component.generate_tooltip(),
-                value_ranges_plot_component.generate_tooltip(format=","),
             ]
+            + expectation_kwargs_tooltip
             + [
                 metric_plot_component.generate_tooltip(format=",")
                 for metric_plot_component in metric_plot_components
@@ -2279,10 +2265,8 @@ class DataAssistantResult(SerializableDictDot):
                 domain_plot_component.name,
                 min_value_plot_component.name,
                 max_value_plot_component.name,
-                strict_min_plot_component.name,
-                strict_max_plot_component.name,
-                value_ranges_plot_component.name,
             ]
+            + expectation_kwargs_initial_dropdown_state
         ] = " "
         df = pd.concat([input_dropdown_initial_state, df], axis=0)
 
@@ -2355,6 +2339,11 @@ class DataAssistantResult(SerializableDictDot):
             )
             .transform_filter(selection)
         )
+
+        if detail is not None:
+            lower_limit = lower_limit.encode(detail=detail)
+            upper_limit = upper_limit.encode(detail=detail)
+            band = band.encode(detail=detail)
 
         lines_and_points: alt.LayerChart = (
             DataAssistantResult._get_interactive_line_chart(
