@@ -1500,7 +1500,9 @@ class DataAssistantResult(SerializableDictDot):
         df: pd.DataFrame = pd.DataFrame(columns=df_columns)
         for column, column_df in column_dfs:
             column_df[domain_name] = column
-            df = pd.concat([df, column_df[column_df.columns & df_columns]], axis=0)
+            df = pd.concat(
+                [df, column_df[column_df.columns.intersection(df_columns)]], axis=0
+            )
 
         if sequential:
             return DataAssistantResult._get_interactive_line_chart(
@@ -1606,27 +1608,6 @@ class DataAssistantResult(SerializableDictDot):
                 axis_title=y_axis_title,
             )
         )
-        strict_min_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=strict_min,
-                alt_type=AltairDataTypes.NOMINAL.value,
-                axis_title=y_axis_title,
-            )
-        )
-        strict_max_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=strict_max,
-                alt_type=AltairDataTypes.NOMINAL.value,
-                axis_title=y_axis_title,
-            )
-        )
-        value_ranges_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=value_ranges,
-                alt_type=AltairDataTypes.QUANTITATIVE.value,
-                axis_title=y_axis_title,
-            )
-        )
 
         df_columns: List[str] = (
             [
@@ -1647,56 +1628,44 @@ class DataAssistantResult(SerializableDictDot):
         df: pd.DataFrame = pd.DataFrame(columns=df_columns)
 
         for _, column_df in column_dfs:
-            df = pd.concat([df, column_df[column_df.columns & df_columns]], axis=0)
+            df = pd.concat(
+                [df, column_df[column_df.columns.intersection(df_columns)]], axis=0
+            )
+
+        strict_min_predicate: bool = False
+        strict_min_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        if strict_min in df.columns:
+            strict_min_predicate = df[strict_min].all()
+            strict_min_plot_component = ExpectationKwargPlotComponent(
+                name=strict_min,
+                alt_type=AltairDataTypes.NOMINAL.value,
+                axis_title=y_axis_title,
+            )
+
+        strict_max_predicate: bool = False
+        strict_max_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        if strict_max in df.columns:
+            strict_max_predicate = df[strict_max].all()
+            strict_max_plot_component = ExpectationKwargPlotComponent(
+                name=strict_max,
+                alt_type=AltairDataTypes.NOMINAL.value,
+                axis_title=y_axis_title,
+            )
+
+        value_ranges_predicate: bool = False
+        value_ranges_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        if value_ranges in df.columns:
+            value_ranges_predicate = True
+            value_ranges_plot_component = ExpectationKwargPlotComponent(
+                name=value_ranges,
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
+            )
 
         # encode point color based on anomalies
         predicates: List[Union[bool, int]] = []
         for metric_plot_component in metric_plot_components:
-            if strict_min and strict_max:
-                predicates.append(
-                    (
-                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value > alt.datum[metric_plot_component.name])
-                    )
-                    | (
-                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value < alt.datum[metric_plot_component.name])
-                    )
-                )
-            elif strict_min:
-                predicates.append(
-                    (
-                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
-                    )
-                    | (
-                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
-                    )
-                )
-            elif strict_max:
-                predicates.append(
-                    (
-                        (alt.datum.min_value >= alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value > alt.datum[metric_plot_component.name])
-                    )
-                    | (
-                        (alt.datum.min_value <= alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value < alt.datum[metric_plot_component.name])
-                    )
-                )
-            elif not strict_min and not strict_max:
-                predicates.append(
-                    (
-                        (alt.datum.min_value >= alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
-                    )
-                    | (
-                        (alt.datum.min_value <= alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
-                    )
-                )
-            elif value_ranges:
+            if value_ranges_predicate:
                 predicates.append(
                     (
                         (
@@ -1717,6 +1686,50 @@ class DataAssistantResult(SerializableDictDot):
                             alt.datum.value_ranges[1]
                             <= alt.datum[metric_plot_component.name]
                         )
+                    )
+                )
+            elif strict_min_predicate and strict_max_predicate:
+                predicates.append(
+                    (
+                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value > alt.datum[metric_plot_component.name])
+                    )
+                    | (
+                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value < alt.datum[metric_plot_component.name])
+                    )
+                )
+            elif strict_min_predicate:
+                predicates.append(
+                    (
+                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
+                    )
+                    | (
+                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
+                    )
+                )
+            elif strict_max_predicate:
+                predicates.append(
+                    (
+                        (alt.datum.min_value >= alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value > alt.datum[metric_plot_component.name])
+                    )
+                    | (
+                        (alt.datum.min_value <= alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value < alt.datum[metric_plot_component.name])
+                    )
+                )
+            else:
+                predicates.append(
+                    (
+                        (alt.datum.min_value >= alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
+                    )
+                    | (
+                        (alt.datum.min_value <= alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
                     )
                 )
 
@@ -2231,9 +2244,9 @@ class DataAssistantResult(SerializableDictDot):
         domain_plot_component: DomainPlotComponent,
         min_value_plot_component: ExpectationKwargPlotComponent,
         max_value_plot_component: ExpectationKwargPlotComponent,
-        strict_min_plot_component: ExpectationKwargPlotComponent,
-        strict_max_plot_component: ExpectationKwargPlotComponent,
-        value_ranges_plot_component: ExpectationKwargPlotComponent,
+        strict_min_plot_component: Optional[ExpectationKwargPlotComponent],
+        strict_max_plot_component: Optional[ExpectationKwargPlotComponent],
+        value_ranges_plot_component: Optional[ExpectationKwargPlotComponent],
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
