@@ -448,6 +448,7 @@ def test_simple_checkpoint_persisted_to_store(
         "site_names": None,
         "slack_webhook": None,
         "template_name": None,
+        "validation_id": None,
         "validations": [],
     }
     result = checkpoint.run(validations=[one_validation])

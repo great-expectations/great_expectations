@@ -2057,6 +2057,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
+        validation_id: Optional[str] = None,
     ) -> Checkpoint:
         """
         See parent 'AbstractDataContext.add_checkpoint()' for more information
@@ -2083,6 +2084,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             notify_with=notify_with,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            validation_id=validation_id,
         )
         self._synchronize_self_with_underlying_data_context()
         return checkpoint
