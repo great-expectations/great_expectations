@@ -99,6 +99,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         n_resamples: Optional[Union[str, int]] = None,
         random_seed: Optional[Union[str, int]] = None,
         quantile_statistic_interpolation_method: str = "auto",
+        quantile_bias_correction: bool = False,
         quantile_bias_std_error_ratio_threshold: Optional[Union[str, float]] = None,
         bw_method: Optional[Union[str, float, Callable]] = None,
         include_estimator_samples_histogram_in_details: Union[str, bool] = False,
@@ -133,8 +134,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             random_seed: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 uses "np.random.choice"; otherwise, utilizes "np.random.Generator(np.random.PCG64(random_seed))".
-            quantile_statistic_interpolation_method: Applicable only for the "bootstrap" sampling method --
-                supplies value of (interpolation) "method" to "np.quantile()" statistic, used for confidence intervals.
+            quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
+                statistic, used for confidence intervals.
+            quantile_bias_correction: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
+                False is used (bias correction is disabled) and quantile_bias_std_error_ratio_threshold will have no
+                effect.
             quantile_bias_std_error_ratio_threshold: Applicable only for the "bootstrap" sampling method -- if omitted
                 (default), then 0.25 is used (as minimum ratio of bias to standard error for applying bias correction).
             bw_method: Applicable only for the "kde" sampling method -- if omitted (default), then "scott" is used.
@@ -182,6 +186,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         self._quantile_statistic_interpolation_method = (
             quantile_statistic_interpolation_method
         )
+
+        self._quantile_bias_correction = quantile_bias_correction
 
         self._quantile_bias_std_error_ratio_threshold = (
             quantile_bias_std_error_ratio_threshold
@@ -239,6 +245,10 @@ detected.
     @property
     def quantile_statistic_interpolation_method(self) -> str:
         return self._quantile_statistic_interpolation_method
+
+    @property
+    def quantile_bias_correction(self) -> bool:
+        return self._quantile_bias_correction
 
     @property
     def quantile_bias_std_error_ratio_threshold(self) -> str:
@@ -422,6 +432,7 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                 "n_resamples": self.n_resamples,
                 "random_seed": self.random_seed,
                 "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
+                "quantile_bias_correction": self.quantile_bias_correction,
                 "quantile_bias_std_error_ratio_threshold": self.quantile_bias_std_error_ratio_threshold,
             }
         elif estimator == "kde":
@@ -731,6 +742,20 @@ positive integer, or must be omitted (or set to None).
             "quantile_statistic_interpolation_method"
         )
 
+        # Obtain quantile_bias_correction override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        quantile_bias_correction: Optional[
+            bool
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=kwargs.get("quantile_bias_correction"),
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        if quantile_bias_correction is None:
+            quantile_bias_correction = False
+
         # Obtain quantile_bias_std_error_ratio_threshold override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         quantile_bias_std_error_ratio_threshold: Optional[
             float
@@ -753,6 +778,7 @@ positive integer, or must be omitted (or set to None).
             n_resamples=n_resamples,
             random_seed=random_seed,
             quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+            quantile_bias_correction=quantile_bias_correction,
             quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         )
 

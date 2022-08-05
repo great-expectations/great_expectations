@@ -564,6 +564,7 @@ def compute_bootstrap_quantiles_point_estimate(
     false_positive_rate: np.float64,
     n_resamples: int,
     quantile_statistic_interpolation_method: str,
+    quantile_bias_correction: bool,
     quantile_bias_std_error_ratio_threshold: float,
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
@@ -652,6 +653,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=lower_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_correction=quantile_bias_correction,
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_lower_quantile,
     )
@@ -660,6 +662,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_correction=quantile_bias_correction,
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_upper_quantile,
     )
@@ -675,6 +678,7 @@ def _determine_quantile_bias_corrected_point_estimate(
     bootstraps: np.ndarray,
     quantile_pct: float,
     quantile_statistic_interpolation_method: str,
+    quantile_bias_correction: bool,
     quantile_bias_std_error_ratio_threshold: float,
     sample_quantile: np.ndarray,
 ) -> np.float64:
@@ -695,7 +699,8 @@ def _determine_quantile_bias_corrected_point_estimate(
     quantile_bias_corrected_point_estimate: np.float64
 
     if (
-        bootstrap_quantile_standard_error > 0.0
+        not quantile_bias_correction
+        and bootstrap_quantile_standard_error > 0.0
         and bootstrap_quantile_bias / bootstrap_quantile_standard_error
         <= quantile_bias_std_error_ratio_threshold
     ):
