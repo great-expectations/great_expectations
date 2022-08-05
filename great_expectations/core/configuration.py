@@ -1,7 +1,10 @@
 """Contains general abstract or base classes used across configuration objects."""
+import copy
 from abc import ABC
 from typing import Optional
 
+from great_expectations.marshmallow__shade.decorators import post_dump
+from great_expectations.marshmallow__shade.schema import Schema
 from great_expectations.types import SerializableDictDot
 
 
@@ -13,18 +16,14 @@ class AbstractConfig(ABC, SerializableDictDot):
         self.name = name
         super().__init__()
 
-    def to_dict(self) -> dict:
-        return AbstractConfig._remove_null_identifiers(super().to_dict())
 
-    def to_raw_dict(self) -> dict:
-        return AbstractConfig._remove_null_identifiers(super().to_raw_dict())
+class AbstractConfigSchema(Schema):
+    REMOVE_KEYS_IF_NONE = ["id", "name"]
 
-    def to_json_dict(self) -> dict:
-        return self.to_dict()
-
-    @staticmethod
-    def _remove_null_identifiers(data: dict) -> dict:
-        for attr in ("id_", "name"):
-            if data.get(attr) is None:
-                data.pop(attr)
+    @post_dump
+    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
+        data = copy.deepcopy(data)
+        for key in AbstractConfigSchema.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
         return data

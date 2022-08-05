@@ -1,11 +1,10 @@
-import copy
 import json
 import logging
 from typing import Any, Dict, List, Optional, Type, Union
 
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
@@ -666,7 +665,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         return rule_dict
 
 
-class RuleBasedProfilerConfigSchema(Schema):
+class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     """
     Schema classes for configurations which extend from BaseYamlConfig must extend top-level Marshmallow Schema class.
     Schema classes for their constituent configurations which extend DictDot leve must extend NotNullSchema class.
@@ -733,14 +732,6 @@ class RuleBasedProfilerConfigSchema(Schema):
         required=True,
         allow_none=False,
     )
-
-    @post_dump
-    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
-        data = copy.deepcopy(data)
-        for key in ("id", "name"):
-            if key in data and data[key] is None:
-                data.pop(key)
-        return data
 
 
 expectationConfigurationBuilderConfigSchema = (

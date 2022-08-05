@@ -14,7 +14,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
-from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -932,7 +932,7 @@ class DatasourceConfig(AbstractConfig):
         return serializeable_dict
 
 
-class DatasourceConfigSchema(Schema):
+class DatasourceConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
@@ -1032,14 +1032,6 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
     @post_load
     def make_datasource_config(self, data, **kwargs):
         return DatasourceConfig(**data)
-
-    @post_dump
-    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
-        data = copy.deepcopy(data)
-        for key in ("id", "name"):
-            if key in data and data[key] is None:
-                data.pop(key)
-        return data
 
 
 class AnonymizedUsageStatisticsConfig(DictDot):
