@@ -1202,6 +1202,7 @@ def get_test_validator_with_data(
     caching=True,
     table_name=None,
     sqlite_db_path=None,
+    extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
 ):
     """Utility to create datasets for json-formatted tests."""
@@ -1256,6 +1257,7 @@ def get_test_validator_with_data(
             caching=caching,
             table_name=table_name,
             sqlite_db_path=sqlite_db_path,
+            extra_debug_info=extra_debug_info,
             debug_logger=debug_logger,
         )
         return result
@@ -1396,6 +1398,7 @@ def build_sa_validator_with_data(
     caching=True,
     table_name=None,
     sqlite_db_path=None,
+    extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
 ):
@@ -1494,7 +1497,6 @@ def build_sa_validator_with_data(
         and sa_engine_name in schemas
         and isinstance(engine.dialect, dialect_classes[sa_engine_name])
     ):
-        _debug(f"{sa_engine_name} is in schemas")
         schema = schemas[sa_engine_name]
 
         sql_dtypes = {
@@ -1528,7 +1530,6 @@ def build_sa_validator_with_data(
                 df[col] = pd.to_datetime(df[col])
             elif type_ in ["VARCHAR", "STRING"]:
                 df[col] = df[col].apply(str)
-        _debug(f"Finished conversions in the dataframe")
 
     if table_name is None:
         table_name = generate_test_table_name()
@@ -1552,7 +1553,9 @@ def build_sa_validator_with_data(
         method=sql_insert_method,
     )
     _end = time.time()
-    _debug(f"df.to_sql for {sa_engine_name} took {_end - _start} seconds")
+    _debug(
+        f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
+    )
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     batch = Batch(data=batch_data, batch_definition=batch_definition)
@@ -2189,8 +2192,10 @@ def generate_expectation_tests(
     :return: list of parametrized tests with loaded validators and accessible backends
     """
     _debug = lambda x: x
+    _error = lambda x: x
     if debug_logger:
         _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")
+        _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")
 
     parametrized_tests = []
 
@@ -2200,6 +2205,17 @@ def generate_expectation_tests(
             for backend in only_consider_these_backends
             if backend in BACKEND_TO_ENGINE_NAME_DICT
         ]
+
+    engines_implemented = []
+    if execution_engine_diagnostics.PandasExecutionEngine:
+        engines_implemented.append("pandas")
+    if execution_engine_diagnostics.SparkDFExecutionEngine:
+        engines_implemented.append("spark")
+    if execution_engine_diagnostics.SqlAlchemyExecutionEngine:
+        engines_implemented.append("sqlalchemy")
+    _debug(
+        f"Implemented engines for {expectation_type}: {', '.join(engines_implemented)}"
+    )
 
     num_test_data_cases = len(test_data_cases)
     for i, d in enumerate(test_data_cases, 1):
@@ -2342,27 +2358,35 @@ def generate_expectation_tests(
                                 dataset.get("schemas"),
                                 table_name=dataset.get("dataset_name"),
                                 sqlite_db_path=sqlite_db_path,
+                                extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
                             )
                         )
                     validator_with_data = datasets[0]
                 else:
                     validator_with_data = get_test_validator_with_data(
-                        c, d["data"], d["schemas"], debug_logger=debug_logger
+                        c,
+                        d["data"],
+                        d["schemas"],
+                        extra_debug_info=expectation_type,
+                        debug_logger=debug_logger,
                     )
             except Exception as e:
-                # Adding these print statements for build_gallery.py's console output
-                print("\n\n[[ Problem calling get_test_validator_with_data ]]")
-                print(f"expectation_type -> {expectation_type}")
-                print(f"c -> {c}\ne -> {e}")
-                print(f"d['data'] -> {d.get('data')}")
-                print(f"d['schemas'] -> {d.get('schemas')}")
-                print("DataFrame from data without any casting/conversion ->")
-                print(pd.DataFrame(d.get("data")))
-                print()
+                _error(
+                    f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} {repr(e)[:300]}"
+                )
+                # # Adding these print statements for build_gallery.py's console output
+                # print("\n\n[[ Problem calling get_test_validator_with_data ]]")
+                # print(f"expectation_type -> {expectation_type}")
+                # print(f"c -> {c}\ne -> {e}")
+                # print(f"d['data'] -> {d.get('data')}")
+                # print(f"d['schemas'] -> {d.get('schemas')}")
+                # print("DataFrame from data without any casting/conversion ->")
+                # print(pd.DataFrame(d.get("data")))
+                # print()
 
                 if "data_alt" in d and d["data_alt"] is not None:
-                    print("There is alternate data to try!!")
+                    # print("There is alternate data to try!!")
                     try:
                         if isinstance(d["data_alt"], list):
                             sqlite_db_path = generate_sqlite_db_path()
@@ -2374,6 +2398,7 @@ def generate_expectation_tests(
                                         dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
+                                        extra_debug_info=expectation_type,
                                         debug_logger=debug_logger,
                                     )
                                 )
@@ -2383,11 +2408,21 @@ def generate_expectation_tests(
                                 c,
                                 d["data_alt"],
                                 d["schemas"],
+                                extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
                             )
                     except Exception as e2:
-                        print(
-                            "\n[[ STILL Problem calling get_test_validator_with_data ]]"
+                        # print(
+                        #     "\n[[ STILL Problem calling get_test_validator_with_data ]]"
+                        # )
+                        # print(f"expectation_type -> {expectation_type}")
+                        # print(f"c -> {c}\ne2 -> {e2}")
+                        # print(f"d['data_alt'] -> {d.get('data_alt')}")
+                        # print(
+                        #     "DataFrame from data_alt without any casting/conversion ->"
+                        # )
+                        # print(pd.DataFrame(d.get("data_alt")))
+                        # print()
                         parametrized_tests.append(
                             {
                                 "expectation_type": expectation_type,
@@ -2397,17 +2432,10 @@ def generate_expectation_tests(
                                 "backend": c,
                             }
                         )
-                        print(f"expectation_type -> {expectation_type}")
-                        print(f"c -> {c}\ne2 -> {e2}")
-                        print(f"d['data_alt'] -> {d.get('data_alt')}")
-                        print(
-                            "DataFrame from data_alt without any casting/conversion ->"
-                        )
-                        print(pd.DataFrame(d.get("data_alt")))
-                        print()
                         continue
                     else:
-                        print("\n[[ The alternate data worked!! ]]\n")
+                        # print("\n[[ The alternate data worked!! ]]\n")
+                        pass
                 else:
                     parametrized_tests.append(
                         {
@@ -2427,6 +2455,8 @@ def generate_expectation_tests(
                 if not should_we_generate_this_test(
                     backend=c,
                     expectation_test_case=test,
+                    extra_debug_info=expectation_type,
+                    debug_logger=debug_logger,
                 ):
                     continue
 
@@ -2456,7 +2486,13 @@ def generate_expectation_tests(
 def should_we_generate_this_test(
     backend: str,
     expectation_test_case: ExpectationTestCase,
+    extra_debug_info: str = "",
+    debug_logger: Optional[logging.Logger] = None,
 ):
+
+    _debug = lambda x: x
+    if debug_logger:
+        _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")
 
     # backend will only ever be pandas, spark, or a specific SQL dialect, but sometimes
     # suppress_test_for or only_for may include "sqlalchemy"
@@ -2466,11 +2502,17 @@ def should_we_generate_this_test(
     #   - only_for can be any of: pandas, pandas_022, pandas_023, pandas>=024
     #   - See: https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/test_expectations_cfe.py#L176-L185
     if backend in expectation_test_case.suppress_test_for:
+        _debug(
+            f"Backend {backend} is suppressed for test {expectation_test_case.title}: | {extra_debug_info}"
+        )
         return False
     if (
         "sqlalchemy" in expectation_test_case.suppress_test_for
         and backend in SQL_DIALECT_NAMES
     ):
+        _debug(
+            f"All sqlalchemy (including {backend}) is suppressed for test: {expectation_test_case.title} | {extra_debug_info}"
+        )
         return False
     if expectation_test_case.only_for != None and expectation_test_case.only_for:
         if not backend in expectation_test_case.only_for:
@@ -2490,6 +2532,9 @@ def should_we_generate_this_test(
                 elif "pandas>=024" in expectation_test_case.only_for:
                     if (major == "0" and int(minor) >= 24) or int(major) >= 1:
                         return True
+            _debug(
+                f"Only {expectation_test_case.only_for} allowed (not {backend}) for test: {expectation_test_case.title} | {extra_debug_info}"
+            )
             return False
 
     return True

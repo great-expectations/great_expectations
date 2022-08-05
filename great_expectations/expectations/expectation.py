@@ -1301,8 +1301,10 @@ class Expectation(metaclass=MetaExpectation):
         """Generate test results. This is an internal method for run_diagnostics."""
 
         _debug = lambda x: x
+        _error = lambda x: x
         if debug_logger:
             _debug = lambda x: debug_logger.debug(f"(_get_test_results) {x}")
+            _error = lambda x: debug_logger.error(f"(_get_test_results) {x}")
         _debug("Starting")
 
         test_results = []
@@ -1363,7 +1365,7 @@ class Expectation(metaclass=MetaExpectation):
                 test_passed = True
                 error_diagnostics = None
             else:
-                print(f"  ERROR: {repr(error_message)}")
+                _error(f"{repr(error_message)} for {exp_combined_test_name}")
                 print(f"{stack_trace[0]}")
                 error_diagnostics = ExpectationErrorDiagnostics(
                     error_msg=error_message,
