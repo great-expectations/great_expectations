@@ -293,6 +293,21 @@ def pytest_generate_tests(metafunc):
                                     == "bigquery"
                                 )
                                 or (
+                                    "bigquery_cfe" in suppress_test_for
+                                    and BigQueryDialect is not None
+                                    and validator_with_data
+                                    and isinstance(
+                                        validator_with_data.execution_engine.active_batch_data,
+                                        SqlAlchemyBatchData,
+                                    )
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "bigquery"
+                                )
+                                or (
                                     "trino" in suppress_test_for
                                     and trinoDialect is not None
                                     and validator_with_data
