@@ -339,10 +339,13 @@ class CloudDataContext(AbstractDataContext):
         # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
         # be refactored to into the config/schema. Also, downstream methods should be refactored
         # to accept the config object (as opposed to a dict).
-        substituted_config = DatasourceConfig(
-            **datasourceConfigSchema.load(substituted_config_dict)
+        substituted_config: DatasourceConfig = datasourceConfigSchema.load(
+            substituted_config_dict
         )
-        schema_validated_substituted_config_dict = substituted_config.to_json_dict()
+        schema_validated_substituted_config_dict: dict = (
+            substituted_config.to_json_dict()
+        )
+
         # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
         #  instead of popping the name field
         schema_validated_substituted_config_dict.pop("name", None)

@@ -1602,9 +1602,9 @@ class AbstractDataContext(ABC):
         # be refactored to into the config/schema. Also, downstream methods should be refactored
         # to accept the config object (as opposed to a dict).
         if isinstance(config, DatasourceConfig):
-            config = datasourceConfigSchema.dump(config)
-            validated_config = DatasourceConfig(**datasourceConfigSchema.load(config))
-            config = validated_config.to_json_dict()
+            config: dict = datasourceConfigSchema.dump(config)
+            validated_config: DatasourceConfig = datasourceConfigSchema.load(config)
+            config: dict = validated_config.to_json_dict()
         config.update({"name": name})
         # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
         if config["class_name"] in [
@@ -1657,10 +1657,12 @@ class AbstractDataContext(ABC):
         # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
         # be refactored to into the config/schema. Also, downstream methods should be refactored
         # to accept the config object (as opposed to a dict).
-        substituted_config = DatasourceConfig(
-            **datasourceConfigSchema.load(substituted_config_dict)
+        substituted_config: DatasourceConfig = datasourceConfigSchema.load(
+            substituted_config_dict
         )
-        schema_validated_substituted_config_dict = substituted_config.to_json_dict()
+        schema_validated_substituted_config_dict: dict = (
+            substituted_config.to_json_dict()
+        )
 
         # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
         #  instead of popping the name field
