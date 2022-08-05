@@ -575,6 +575,11 @@ class AbstractDataContext(ABC):
         Returns:
             datasource (Datasource)
         """
+        if datasource_name is None:
+            raise ValueError(
+                "Must provide a datasource_name to retrieve an existing Datasource"
+            )
+
         if datasource_name in self._cached_datasources:
             return self._cached_datasources[datasource_name]
 
