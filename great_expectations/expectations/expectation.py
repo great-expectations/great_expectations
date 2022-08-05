@@ -1318,7 +1318,32 @@ class Expectation(metaclass=MetaExpectation):
 
         backend_test_times = defaultdict(list)
         for exp_test in exp_tests:
-            print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
+            if exp_test["test"] is None:
+                _debug(
+                    f"validator_with_data failure for {exp_test['backend']}--{expectation_type}"
+                )
+
+                error_diagnostics = ExpectationErrorDiagnostics(
+                    error_msg=exp_test["error"],
+                    stack_trace="",
+                    test_title="all",
+                    test_backend=exp_test["backend"],
+                )
+
+                test_results.append(
+                    ExpectationTestDiagnostics(
+                        test_title="all",
+                        backend=exp_test["backend"],
+                        test_passed=False,
+                        include_in_gallery=False,
+                        validation_result=None,
+                        error_diagnostics=error_diagnostics,
+                    )
+                )
+                continue
+
+            exp_combined_test_name = f"{exp_test['backend']}--{exp_test['test']['title']}--{expectation_type}"
+            _debug(f"Starting {exp_combined_test_name}")
             _start = time.time()
             validation_result, error_message, stack_trace = evaluate_json_test_cfe(
                 validator=exp_test["validator_with_data"],
@@ -1330,9 +1355,11 @@ class Expectation(metaclass=MetaExpectation):
             _end = time.time()
             _duration = _end - _start
             backend_test_times[exp_test["backend"]].append(_duration)
-            print(f"  Ran in {_duration} seconds")
+            _debug(
+                f"Took {_duration} seconds to evaluate_json_test_cfe for {exp_combined_test_name}"
+            )
             if error_message is None:
-                print(f"  PASSED")
+                _debug(f"PASSED {exp_combined_test_name}")
                 test_passed = True
                 error_diagnostics = None
             else:
@@ -1365,7 +1392,9 @@ class Expectation(metaclass=MetaExpectation):
             )
 
         for backend_name, test_times in sorted(backend_test_times.items()):
-            _debug(f"{backend_name} took {sum(test_times)} seconds")
+            _debug(
+                f"Took {sum(test_times)} seconds to run {len(test_times)} tests {backend_name}--{expectation_type}"
+            )
 
         return test_results
 

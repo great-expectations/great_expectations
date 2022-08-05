@@ -2388,6 +2388,14 @@ def generate_expectation_tests(
                     except Exception as e2:
                         print(
                             "\n[[ STILL Problem calling get_test_validator_with_data ]]"
+                        parametrized_tests.append(
+                            {
+                                "expectation_type": expectation_type,
+                                "validator_with_data": None,
+                                "error": repr(e)[:300],
+                                "test": None,
+                                "backend": c,
+                            }
                         )
                         print(f"expectation_type -> {expectation_type}")
                         print(f"c -> {c}\ne2 -> {e2}")
@@ -2401,6 +2409,15 @@ def generate_expectation_tests(
                     else:
                         print("\n[[ The alternate data worked!! ]]\n")
                 else:
+                    parametrized_tests.append(
+                        {
+                            "expectation_type": expectation_type,
+                            "validator_with_data": None,
+                            "error": repr(e)[:300],
+                            "test": None,
+                            "backend": c,
+                        }
+                    )
                     continue
 
             except Exception as e:
