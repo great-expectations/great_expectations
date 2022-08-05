@@ -470,6 +470,13 @@ SQL_DIALECT_NAMES = (
     "snowflake",
 )
 
+BACKEND_TO_ENGINE_NAME_DICT = {
+    "pandas": "pandas",
+    "spark": "spark",
+}
+
+BACKEND_TO_ENGINE_NAME_DICT.update({name: "sqlalchemy" for name in SQL_DIALECT_NAMES})
+
 
 class SqlAlchemyConnectionManager:
     def __init__(self) -> None:
@@ -2172,6 +2179,7 @@ def generate_expectation_tests(
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     raise_exceptions_for_backends: bool = False,
     debug_logger: Optional[logging.Logger] = None,
+    only_consider_these_backends: Optional[List[str]] = None,
 ):
     """Determine tests to run
 
@@ -2185,6 +2193,13 @@ def generate_expectation_tests(
         _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")
 
     parametrized_tests = []
+
+    if only_consider_these_backends:
+        only_consider_these_backends = [
+            backend
+            for backend in only_consider_these_backends
+            if backend in BACKEND_TO_ENGINE_NAME_DICT
+        ]
 
     num_test_data_cases = len(test_data_cases)
     for i, d in enumerate(test_data_cases, 1):
@@ -2200,6 +2215,23 @@ def generate_expectation_tests(
                 if tb.backend == "sqlalchemy":
                     for dialect in tb.dialects:
                         dialects_to_include[dialect] = True
+            _debug(
+                f"Tests specify specific backends only: engines_to_include -> {engines_to_include}  dialects_to_include -> {dialects_to_include}"
+            )
+            if only_consider_these_backends:
+                test_backends = list(engines_to_include.keys()) + list(
+                    dialects_to_include.keys()
+                )
+                if "sqlalchemy" in test_backends:
+                    test_backends.extend(list(SQL_DIALECT_NAMES))
+                engines_to_include = {}
+                dialects_to_include = {}
+                for backend in set(test_backends) & set(only_consider_these_backends):
+                    dialects_to_include[backend] = True
+                    if backend in SQL_DIALECT_NAMES:
+                        engines_to_include["sqlalchemy"] = True
+                    else:
+                        engines_to_include[BACKEND_TO_ENGINE_NAME_DICT[backend]] = True
         else:
             engines_to_include[
                 "pandas"
@@ -2214,11 +2246,21 @@ def generate_expectation_tests(
                 engines_to_include.get("sqlalchemy") is True
                 and raise_exceptions_for_backends is False
             ):
-                dialects_to_include = {
-                    dialect: True
-                    for dialect in SQL_DIALECT_NAMES
-                    # if dialect != "bigquery"
-                }
+                dialects_to_include = {dialect: True for dialect in SQL_DIALECT_NAMES}
+
+            if only_consider_these_backends:
+                engines_to_include = {}
+                dialects_to_include = {}
+                for backend in only_consider_these_backends:
+                    if backend in SQL_DIALECT_NAMES:
+                        if "sqlalchemy" in engines_implemented:
+                            dialects_to_include[backend] = True
+                            engines_to_include["sqlalchemy"] = True
+                    else:
+                        if backend == "pandas" and "pandas" in engines_implemented:
+                            engines_to_include["pandas"] = True
+                        elif backend == "spark" and "spark" in engines_implemented:
+                            engines_to_include["spark"] = True
 
         # # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
         # if engines_to_include.get("sqlalchemy") is True and not dialects_to_include:

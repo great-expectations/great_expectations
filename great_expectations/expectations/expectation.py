@@ -951,6 +951,7 @@ class Expectation(metaclass=MetaExpectation):
         self,
         raise_exceptions_for_backends: bool = False,
         debug_logger: Optional[logging.Logger] = None,
+        only_consider_these_backends: Optional[List[str]] = None,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -1022,6 +1023,7 @@ class Expectation(metaclass=MetaExpectation):
             execution_engine_diagnostics=introspected_execution_engines,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
             debug_logger=debug_logger,
+            only_consider_these_backends=only_consider_these_backends,
         )
 
         backend_test_result_counts: List[
@@ -1280,6 +1282,7 @@ class Expectation(metaclass=MetaExpectation):
         raise_exceptions_for_backends: bool = False,
         force_no_progress_bar: bool = True,
         debug_logger: Optional[logging.Logger] = None,
+        only_consider_these_backends: Optional[List[str]] = None,
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
 
@@ -1296,6 +1299,7 @@ class Expectation(metaclass=MetaExpectation):
             execution_engine_diagnostics=execution_engine_diagnostics,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
             debug_logger=debug_logger,
+            only_consider_these_backends=only_consider_these_backends,
         )
 
         backend_test_times = defaultdict(list)
