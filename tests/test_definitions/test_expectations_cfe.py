@@ -143,6 +143,17 @@ def pytest_generate_tests(metafunc):
                                 ):
                                     generate_test = True
                                 elif (
+                                    "bigquery" in only_for
+                                    and BigQueryDialect is not None
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "bigquery"
+                                ):
+                                    generate_test = True
+                                elif (
                                     "bigquery_cfe" in only_for
                                     and BigQueryDialect is not None
                                     and hasattr(
