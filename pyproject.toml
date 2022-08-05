@@ -1,4 +1,4 @@
-[build-sytem]
+[build-system]
 requires = ["setuptools", "wheel"]
 # uncomment to enable pep517 after versioneer problem is fixed.
 # https://github.com/python-versioneer/python-versioneer/issues/193
