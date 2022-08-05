@@ -22,6 +22,7 @@
           "title": "basic_positive_test_extremes",
           "include_in_gallery": true,
           "exact_match_out": false,
+          "suppress_test_for": ["redshift"],
           "in": {
             "column": "norm_0_1",
             "quantile_ranges": {
