@@ -183,7 +183,6 @@ stages:
               python.version: '3.9'
         services:
           postgres: postgres
-          trino: trino
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
@@ -236,7 +235,7 @@ stages:
               PYTEST="docker run -e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) "
               PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) "
               PYTEST+="greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest tests --cloud -m \"cloud and not unit\""
+              PYTEST+="pytest tests --no-docker-discovery --cloud -m \"cloud and not unit\""
               echo ${PYTEST}
               eval ${PYTEST}
             env:
@@ -277,7 +276,7 @@ stages:
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \""
               PYTEST+="mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < /script/mysql_setup.sql && "
               # The last \" closes the quote from bash -c \".
-              PYTEST+="pytest --mysql --ignore=tests/cli --ignore=tests/integration/usage_statistics\""
+              PYTEST+="pytest --no-docker-discovery --mysql --ignore=tests/cli --ignore=tests/integration/usage_statistics\""
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'test_mysql'
@@ -294,6 +293,8 @@ stages:
               python.version: '3.8'
             Python39:
               python.version: '3.9'
+        services:
+          trino: trino
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
@@ -303,7 +304,7 @@ stages:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest --trino --ignore=tests/cli --ignore=tests/integration/usage_statistics"
+              PYTEST+="pytest --no-docker-discovery --trino --ignore=tests/cli --ignore=tests/integration/usage_statistics"
               echo ${PYTEST}
               eval ${PYTEST}
 
@@ -324,7 +325,7 @@ stages:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest --no-sqlalchemy --aws-integration tests/integration/usage_statistics"
+              PYTEST+="pytest --no-docker-discovery --no-sqlalchemy --aws-integration tests/integration/usage_statistics"
               echo ${PYTEST}
               eval ${PYTEST}
 
