@@ -332,10 +332,6 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -358,7 +354,7 @@ stages:
           postgres: postgres
 
         variables:
-          GE_pytest_opts: '--postgresql --spark --cloud'
+          GE_pytest_opts: '--postgresql --spark --cloud -m "not e2e"'
 
         strategy:
           matrix:
@@ -402,10 +398,6 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
           - script: |
@@ -417,7 +409,7 @@ stages:
               GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
               GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
               GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-            displayName: 'gx-cloud-integration'
+            displayName: 'gx-cloud-e2e'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -511,10 +503,6 @@ stages:
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
       - job: mssql
@@ -548,10 +536,6 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
       - job: trino
@@ -591,10 +575,6 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
   - stage: cli_integration
