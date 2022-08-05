@@ -44,24 +44,24 @@ When you will configure a job, it's necessary to define additional params to Spa
 ```
 
 Then import necessary libs:
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L1-L7
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L1-L11
 ```
 
 ### 2. Set up Great Expectations
 Here we initialize a Spark, and read great_expectations.yaml
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L8-L19
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L13-L26
 ```
 
 ### 3. Connect to your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L22-L37
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L27-L48
 ```
 
 ### 4. Create Expectations
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L39-L52
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L50-L66
 ```
 
 ### 5. Validate your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L54-L95
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L68-L109
 ```
 
 ### 6. Congratulations!
