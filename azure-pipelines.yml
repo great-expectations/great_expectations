@@ -235,7 +235,7 @@ stages:
               PYTEST="docker run -e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) "
               PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) "
               PYTEST+="greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest tests --no-docker-discovery --cloud -m \"cloud and not unit\""
+              PYTEST+="pytest tests --no-docker-discovery --cloud -m \"cloud and e2e\""
               echo ${PYTEST}
               eval ${PYTEST}
             env:
