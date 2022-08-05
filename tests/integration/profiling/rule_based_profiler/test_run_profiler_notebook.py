@@ -4,6 +4,7 @@ import shutil
 from typing import List
 
 import nbformat
+import pytest
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 from nbformat import NotebookNode
 
@@ -11,6 +12,19 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
+
+try:
+    pyspark = pytest.importorskip("pyspark")
+    # noinspection PyPep8Naming
+    import pyspark.sql.functions as F
+    from pyspark.sql.types import IntegerType, LongType, Row, StringType
+except ImportError:
+    pyspark = None
+    F = None
+    IntegerType = None
+    LongType = None
+    StringType = None
+    Row = None
 
 
 def clean_up_test_files(base_dir: str, paths: List[str]) -> None:
@@ -156,7 +170,7 @@ def test_run_self_initializing_expectations_notebook(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
-def test_run_multibatch_inferred_asset_example_spark(tmp_path):
+def test_run_multibatch_inferred_asset_example_spark(tmp_path, spark_session):
     """
     What does this test and why?
     One of the resources we have for multi-batch Expectations is a Jupyter notebook that explains/shows the components
@@ -201,7 +215,7 @@ def test_run_multibatch_inferred_asset_example_spark(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
-def test_run_multibatch_configured_asset_example_spark(tmp_path):
+def test_run_multibatch_configured_asset_example_spark(tmp_path, spark_session):
     """
     What does this test and why?
     One of the resources we have for multi-batch Expectations is a Jupyter notebook that explains/shows the components
