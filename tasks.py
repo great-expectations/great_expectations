@@ -68,11 +68,11 @@ def fmt(ctx, path=".", sort_=True, check=False, exclude=None):
     ctx.run(" ".join(cmds), echo=True)
 
 
-@invoke.task
-def lint(ctx, path="great_expectations/core"):
+@invoke.task(help={"path": _PATH_HELP_DESC})
+def lint(ctx, path="."):
     """Run code linter"""
-    cmds = ["flake8", path]
-    ctx.run(" ".join(cmds))
+    cmds = ["flake8", path, "--statistics"]
+    ctx.run(" ".join(cmds), echo=True)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
