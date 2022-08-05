@@ -148,7 +148,7 @@ stages:
               secureFile: 'aws_config_sandbox'
               retryCount: '2'
 
-          - bash: python ./build_gallery.py --outfile-name "expectation_library_v3.json" --backends "sqlite, spark, postgresql, snowflake, bigquery" --no-contrib expect_column_quantile_values_to_be_between | tee output--build_gallery.txt ; grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
+          - bash: python ./build_gallery.py --outfile-name "expectation_library_v3.json" | tee output--build_gallery.txt ; grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
             env:
