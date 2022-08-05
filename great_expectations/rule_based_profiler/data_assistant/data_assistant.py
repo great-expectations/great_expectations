@@ -330,6 +330,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 n_resamples=f"{VARIABLES_KEY}n_resamples",
                 random_seed=f"{VARIABLES_KEY}random_seed",
                 quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+                quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
                 quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
                 include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
                 truncate_values=f"{VARIABLES_KEY}truncate_values",
