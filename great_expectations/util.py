@@ -1285,8 +1285,7 @@ def is_numeric(value: Any) -> bool:
 
 def is_int(value: Any) -> bool:
     try:
-        # noinspection PyUnusedLocal
-        num: int = int(value)
+        int(value)
     except (TypeError, ValueError):
         return False
     return True
@@ -1294,8 +1293,7 @@ def is_int(value: Any) -> bool:
 
 def is_float(value: Any) -> bool:
     try:
-        # noinspection PyUnusedLocal
-        num: float = float(value)
+        float(value)
     except (TypeError, ValueError):
         return False
     return True
@@ -1408,8 +1406,7 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
-        # noinspection PyUnusedLocal
-        parsed_date: datetime.datetime = parse(value, fuzzy=fuzzy)
+        parse(value, fuzzy=fuzzy)
     except (TypeError, ValueError):
         return False
     return True
