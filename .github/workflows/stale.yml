@@ -25,7 +25,8 @@ jobs:
         # Scope
         only-pr-labels: community
         only-issue-labels: community
-        exempt-issue-labels: core-team, core-engineering-queue, triage, "help wanted", "DevRel Triage"
+        exempt-issue-labels: core-team, core-engineering-queue, documentation, triage, "help wanted", "DevRel Triage"
+        # exempt-pr-labels: "example label"  # This needs to be reviewed if we move to staling PRs
 
         # Issue messages
         stale-issue-message: >
