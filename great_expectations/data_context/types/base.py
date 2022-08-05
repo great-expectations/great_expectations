@@ -1033,6 +1033,14 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
     def make_datasource_config(self, data, **kwargs):
         return DatasourceConfig(**data)
 
+    @post_dump
+    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
+        data = copy.deepcopy(data)
+        for key in ("id", "name"):
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
+
 
 class AnonymizedUsageStatisticsConfig(DictDot):
     def __init__(
