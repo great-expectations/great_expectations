@@ -1493,14 +1493,14 @@ class DataAssistantResult(SerializableDictDot):
             alt_type=AltairDataTypes.NOMINAL.value,
         )
 
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[batch_name, domain_name]
-            + list(sanitized_metric_names)
-            + batch_identifiers
+        df_columns: List[str] = (
+            [batch_name, domain_name] + list(sanitized_metric_names) + batch_identifiers
         )
-        for column_df in column_dfs:
-            column_df.df[domain_name] = column_df.column
-            df = pd.concat([df, column_df.df], axis=0)
+
+        df: pd.DataFrame = pd.DataFrame(columns=df_columns)
+        for column, column_df in column_dfs:
+            column_df[domain_name] = column
+            df = pd.concat([df, column_df[column_df.columns & df_columns]], axis=0)
 
         if sequential:
             return DataAssistantResult._get_interactive_line_chart(
@@ -1628,8 +1628,8 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[
+        df_columns: List[str] = (
+            [
                 batch_name,
             ]
             + batch_identifiers
@@ -1644,8 +1644,10 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
+        df: pd.DataFrame = pd.DataFrame(columns=df_columns)
+
         for _, column_df in column_dfs:
-            df = pd.concat([df, column_df], axis=0)
+            df = pd.concat([df, column_df[column_df.columns & df_columns]], axis=0)
 
         # encode point color based on anomalies
         predicates: List[Union[bool, int]] = []
@@ -1694,7 +1696,7 @@ class DataAssistantResult(SerializableDictDot):
                         & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
                     )
                 )
-            elif values_ranges:
+            elif value_ranges:
                 predicates.append(
                     (
                         (
@@ -2247,7 +2249,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component.generate_tooltip(format=","),
                 strict_min_plot_component.generate_tooltip(),
                 strict_max_plot_component.generate_tooltip(),
-                value_ranges_plot_component.generate_tooltip(),
+                value_ranges_plot_component.generate_tooltip(format=","),
             ]
             + [
                 metric_plot_component.generate_tooltip(format=",")
@@ -2396,10 +2398,11 @@ class DataAssistantResult(SerializableDictDot):
         metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        min_value_plot_component: PlotComponent,
-        max_value_plot_component: PlotComponent,
-        strict_min_plot_component: PlotComponent,
-        strict_max_plot_component: PlotComponent,
+        min_value_plot_component: ExpectationKwargPlotComponent,
+        max_value_plot_component: ExpectationKwargPlotComponent,
+        strict_min_plot_component: ExpectationKwargPlotComponent,
+        strict_max_plot_component: ExpectationKwargPlotComponent,
+        value_ranges_plot_component: ExpectationKwargPlotComponent,
         predicates: List[Union[bool, int]],
     ) -> alt.VConcatChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
@@ -2415,6 +2418,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component.generate_tooltip(format=","),
                 strict_min_plot_component.generate_tooltip(),
                 strict_max_plot_component.generate_tooltip(),
+                value_ranges_plot_component.generate_tooltip(format=","),
             ]
             + [
                 metric_plot_component.generate_tooltip(format=",")
@@ -2433,6 +2437,7 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component.name,
                 strict_min_plot_component.name,
                 strict_max_plot_component.name,
+                value_ranges_plot_component.name,
             ]
         ] = " "
         df = pd.concat([input_dropdown_initial_state, df], axis=0)
