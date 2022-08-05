@@ -179,15 +179,27 @@ class BaseCheckpoint(ConfigPeer):
                     run_id=run_id,
                 )
 
-            run_results: dict = {}
+            checkpoint_run_results: dict = {}
+            async_validation_operator_result: AsyncResult
             for async_validation_operator_result in async_validation_operator_results:
-                run_results.update(
-                    async_validation_operator_result.result().run_results
-                )
+                async_result = async_validation_operator_result.result()
+                run_results = async_result.run_results
+
+                run_result: dict
+                validation_result: Optional[ExpectationSuiteValidationResult]
+                meta: ExpectationSuiteValidationResultMeta
+                for run_result in run_results.values():
+                    validation_result = run_result.get("validation_result")
+                    if validation_result:
+                        meta = validation_result.meta
+                        id_ = str(self.ge_cloud_id) if self.ge_cloud_id else None
+                        meta["checkpoint_id"] = id_
+
+                checkpoint_run_results.update(run_results)
 
         return CheckpointResult(
             run_id=run_id,
-            run_results=run_results,
+            run_results=checkpoint_run_results,
             checkpoint_config=self.config,
         )
 

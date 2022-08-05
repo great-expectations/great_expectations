@@ -3013,7 +3013,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     result = checkpoint.run()
-    assert result["success"] == False
+    assert result["success"] is False
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
@@ -3106,7 +3106,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     result = checkpoint.run()
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 1
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -3122,7 +3122,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 2
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -3210,7 +3210,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     context.add_checkpoint(**checkpoint_config)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
-    assert result["success"] == False
+    assert result["success"] is False
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
@@ -3302,7 +3302,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     context.add_checkpoint(**checkpoint_config)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 1
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -3321,7 +3321,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
         checkpoint_name="my_checkpoint",
         validations=[{"batch_request": runtime_batch_request}],
     )
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 2
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
