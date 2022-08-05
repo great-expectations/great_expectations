@@ -409,9 +409,9 @@ stages:
             displayName: 'pytest'
 
           - script: |
-              # These are integration/E2E tests that are specific to Great Expectations Cloud.
+              # These are E2E tests that are specific to Great Expectations Cloud.
               # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest tests --cloud -m "cloud and not unit"
+              pytest tests --cloud -m "cloud and e2e"
 
             env:
               GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)

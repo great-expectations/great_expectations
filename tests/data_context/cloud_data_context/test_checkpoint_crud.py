@@ -260,7 +260,7 @@ def test_cloud_backed_data_context_add_checkpoint(
     assert checkpoint.validations[1]["id_"] == validation_id_2
 
 
-@pytest.mark.integration
+@pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_cloud_backed_data_context_add_checkpoint_e2e(
