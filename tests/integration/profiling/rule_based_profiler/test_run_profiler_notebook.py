@@ -13,19 +13,6 @@ from great_expectations.exceptions.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
 
-try:
-    pyspark = pytest.importorskip("pyspark")
-    # noinspection PyPep8Naming
-    import pyspark.sql.functions as F
-    from pyspark.sql.types import IntegerType, LongType, Row, StringType
-except ImportError:
-    pyspark = None
-    F = None
-    IntegerType = None
-    LongType = None
-    StringType = None
-    Row = None
-
 
 def clean_up_test_files(base_dir: str, paths: List[str]) -> None:
     """
@@ -176,6 +163,10 @@ def test_run_multibatch_inferred_asset_example_spark(tmp_path, spark_session):
     One of the resources we have for multi-batch Expectations is a Jupyter notebook that explains/shows the components
     in code. This test ensures the codepaths and examples described in the Notebook actually run and pass, nbconvert's
     `preprocess` function.
+
+
+    **Note**: The spark_session parameter, although not accessed, is what enables this test to be run or skipped using
+    the correct spark environment
     """
     base_dir: str = file_relative_path(
         __file__, "../../../test_fixtures/rule_based_profiler/example_notebooks"
@@ -221,6 +212,9 @@ def test_run_multibatch_configured_asset_example_spark(tmp_path, spark_session):
     One of the resources we have for multi-batch Expectations is a Jupyter notebook that explains/shows the components
     in code. This test ensures the codepaths and examples described in the Notebook actually run and pass, nbconvert's
     `preprocess` function.
+
+    **Note**: The spark_session parameter, although not accessed, is what enables this test to be run or skipped using
+    the correct spark environment
     """
     base_dir: str = file_relative_path(
         __file__, "../../../test_fixtures/rule_based_profiler/example_notebooks"
