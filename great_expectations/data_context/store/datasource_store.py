@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import copy
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariableSchema,
-)
 from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
@@ -52,18 +50,13 @@ class DatasourceStore(Store):
         """
         See parent 'Store.list_keys()' for more information
         """
-        from great_expectations.data_context.data_context_variables import (
-            DataContextVariableSchema,
+        keys_without_store_backend_id: List[str] = list(
+            filter(
+                lambda k: k != StoreBackend.STORE_BACKEND_ID_KEY,
+                self._store_backend.list_keys(),
+            )
         )
-
-        datasource_key: Tuple[DataContextVariableSchema] = (
-            DataContextVariableSchema.DATASOURCES,
-        )
-
-        keys_without_store_backend_id: List[str] = [
-            key for key in self._store_backend.list_keys(prefix=datasource_key)
-        ]
-        return [key for key in keys_without_store_backend_id]
+        return keys_without_store_backend_id
 
     def remove_key(self, key: Union[DataContextVariableKey, GeCloudIdentifier]) -> None:
         """
@@ -120,9 +113,7 @@ class DatasourceStore(Store):
         """
         datasource_key: Union[
             DataContextVariableKey, GeCloudIdentifier
-        ] = self.store_backend.build_key(
-            resource_type=DataContextVariableSchema.DATASOURCES, name=datasource_name
-        )
+        ] = self.store_backend.build_key(name=datasource_name)
         if not self.has_key(datasource_key):
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
@@ -163,7 +154,6 @@ class DatasourceStore(Store):
         else:
             name = None
         return self.store_backend.build_key(
-            resource_type=DataContextVariableSchema.DATASOURCES,
             name=name,
             id_=id_,
         )
@@ -225,7 +215,6 @@ class DatasourceStore(Store):
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
         datasource_key: DataContextVariableKey = DataContextVariableKey(
-            resource_type=DataContextVariableSchema.DATASOURCES,
             resource_name=datasource_name,
         )
         return datasource_key

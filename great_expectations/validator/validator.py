@@ -1240,7 +1240,7 @@ class Validator:
                     runtime_configuration=runtime_configuration,
                 )
 
-    def resolve_validation_graph(
+    def resolve_validation_graph(  # noqa: C901 - complexity 16
         self,
         graph: ValidationGraph,
         metrics: Dict[Tuple[str, str, str], Any],
@@ -1597,7 +1597,7 @@ set as active.
             suppress_warnings,
         )
 
-    def get_expectation_suite(
+    def get_expectation_suite(  # noqa: C901 - complexity 17
         self,
         discard_failed_expectations: bool = True,
         discard_result_format_kwargs: bool = True,
@@ -1763,7 +1763,7 @@ set as active.
             )
 
     # TODO: <Alex>Should "include_config" also be an argument of this method?</Alex>
-    def validate(
+    def validate(  # noqa: C901 - complexity 31
         self,
         expectation_suite=None,
         run_id=None,
@@ -1951,10 +1951,6 @@ set as active.
 
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
-            # noinspection PyUnusedLocal
-            suite_ge_version = expectation_suite.meta.get(
-                "great_expectations_version"
-            ) or expectation_suite.meta.get("great_expectations.__version__")
 
             # Group expectations by column
             columns = {}

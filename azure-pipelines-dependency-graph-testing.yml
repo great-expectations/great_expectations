@@ -97,11 +97,10 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==22.3.0 pyupgrade==2.7.2
+              pip install isort[requirements]==5.10.1 flake8==3.9.2 black==22.3.0 pyupgrade==2.7.2 invoke==1.7.1
               EXIT_STATUS=0
-              isort . --check-only --skip docs/ || EXIT_STATUS=$?
-              black --check --exclude docs/ . || EXIT_STATUS=$?
-              flake8 great_expectations/core || EXIT_STATUS=$?
+              invoke fmt --check || EXIT_STATUS=$?
+              invoke lint || EXIT_STATUS=$?
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
@@ -253,10 +252,6 @@ stages:
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
           - task: PublishTestResults@2
@@ -330,10 +325,6 @@ stages:
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
           - script: |
@@ -358,12 +349,8 @@ stages:
           - script: |
               # These are tests that are specific to Great Expectations Cloud.
               # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest tests -m cloud --cloud
+              pytest tests --cloud -m "cloud and not e2e"
 
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest-cloud-overrides'
 
           - task: PublishTestResults@2
@@ -466,10 +453,6 @@ stages:
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
       - job: mssql
@@ -509,10 +492,6 @@ stages:
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
       - job: trino
@@ -559,10 +538,6 @@ stages:
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'dgtest'
 
   - stage: cli_integration

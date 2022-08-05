@@ -37,7 +37,7 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
 )
 def sort(ctx, path=".", check=False, exclude=None):
     """Sort module imports."""
-    cmds = ["isort", path, "--profile", "black"]
+    cmds = ["isort", path]
     if check:
         cmds.append("--check-only")
     if exclude:
@@ -68,11 +68,11 @@ def fmt(ctx, path=".", sort_=True, check=False, exclude=None):
     ctx.run(" ".join(cmds), echo=True)
 
 
-@invoke.task
-def lint(ctx, path="great_expectations/core"):
+@invoke.task(help={"path": _PATH_HELP_DESC})
+def lint(ctx, path="."):
     """Run code linter"""
-    cmds = ["flake8", path]
-    ctx.run(" ".join(cmds))
+    cmds = ["flake8", path, "--statistics"]
+    ctx.run(" ".join(cmds), echo=True)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
@@ -126,7 +126,10 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
     # "cli",  # 237
     # "core",  # 242
     "data_asset",  # 0
-    # "data_context",  # 272
+    # "data_context",  # 242
+    # "data_context/data_context",  # 195
+    # "data_context/store", # 83
+    "data_context/types",  # 0
     # "datasource",  # 98
     "exceptions",  # 0
     # "execution_engine",  # 109

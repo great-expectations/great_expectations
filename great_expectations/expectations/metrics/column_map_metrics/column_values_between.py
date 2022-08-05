@@ -1,4 +1,3 @@
-import datetime
 import warnings
 
 from dateutil.parser import parse
@@ -86,17 +85,21 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 if allow_cross_type_comparisons:
                     try:
                         if strict_min and strict_max:
-                            return (min_value < val) and (val < max_value)
-                        elif strict_min:
-                            return (min_value < val) and (val <= max_value)
-                        elif strict_max:
-                            return (min_value <= val) and (val < max_value)
-                        else:
-                            return (min_value <= val) and (val <= max_value)
+                            return (val > min_value) and (val < max_value)
+
+                        if strict_min:
+                            return (val > min_value) and (val <= max_value)
+
+                        if strict_max:
+                            return (val >= min_value) and (val < max_value)
+
+                        return (val >= min_value) and (val <= max_value)
                     except TypeError:
                         return False
 
                 else:
+                    # Type of column values is either string or specific rich type (or "None").  In all cases, type of
+                    # column must match type of constant being compared to column value (otherwise, error is raised).
                     if (isinstance(val, str) != isinstance(min_value, str)) or (
                         isinstance(val, str) != isinstance(max_value, str)
                     ):
@@ -105,25 +108,29 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                         )
 
                     if strict_min and strict_max:
-                        return (min_value < val) and (val < max_value)
-                    elif strict_min:
-                        return (min_value < val) and (val <= max_value)
-                    elif strict_max:
-                        return (min_value <= val) and (val < max_value)
-                    else:
-                        return (min_value <= val) and (val <= max_value)
+                        return (val > min_value) and (val < max_value)
+
+                    if strict_min:
+                        return (val > min_value) and (val <= max_value)
+
+                    if strict_max:
+                        return (val >= min_value) and (val < max_value)
+
+                    return (val >= min_value) and (val <= max_value)
 
             elif min_value is None and max_value is not None:
                 if allow_cross_type_comparisons:
                     try:
                         if strict_max:
                             return val < max_value
-                        else:
-                            return val <= max_value
+
+                        return val <= max_value
                     except TypeError:
                         return False
 
                 else:
+                    # Type of column values is either string or specific rich type (or "None").  In all cases, type of
+                    # column must match type of constant being compared to column value (otherwise, error is raised).
                     if isinstance(val, str) != isinstance(max_value, str):
                         raise TypeError(
                             "Column values, min_value, and max_value must either be None or of the same type."
@@ -131,29 +138,31 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
 
                     if strict_max:
                         return val < max_value
-                    else:
-                        return val <= max_value
+
+                    return val <= max_value
 
             elif min_value is not None and max_value is None:
                 if allow_cross_type_comparisons:
                     try:
                         if strict_min:
-                            return min_value < val
-                        else:
-                            return min_value <= val
+                            return val > min_value
+
+                        return val >= min_value
                     except TypeError:
                         return False
 
                 else:
+                    # Type of column values is either string or specific rich type (or "None").  In all cases, type of
+                    # column must match type of constant being compared to column value (otherwise, error is raised).
                     if isinstance(val, str) != isinstance(min_value, str):
                         raise TypeError(
                             "Column values, min_value, and max_value must either be None or of the same type."
                         )
 
                     if strict_min:
-                        return min_value < val
-                    else:
-                        return min_value <= val
+                        return val > min_value
+
+                    return val >= min_value
 
             else:
                 return False
@@ -203,69 +212,31 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 return column < sa.literal(max_value)
 
-            if isinstance(max_value, (str, datetime.datetime)):
-                return column <= sa.literal(max_value)
-
             return column <= sa.literal(max_value)
 
         elif max_value is None:
             if strict_min:
-                return sa.literal(min_value) < column
-
-            if isinstance(min_value, (str, datetime.datetime)):
-                return column >= sa.literal(min_value)
+                return column > sa.literal(min_value)
 
             return column >= sa.literal(min_value)
 
         else:
             if strict_min and strict_max:
                 return sa.and_(
-                    sa.literal(min_value) < column, column < sa.literal(max_value)
+                    column > sa.literal(min_value),
+                    column < sa.literal(max_value),
                 )
 
             if strict_min:
-                if isinstance(max_value, (str, datetime.datetime)):
-                    return sa.and_(
-                        column <= sa.literal(max_value),
-                        sa.literal(min_value) < column,
-                    )
-
                 return sa.and_(
-                    sa.literal(min_value) < column,
+                    column > sa.literal(min_value),
                     column <= sa.literal(max_value),
                 )
 
             if strict_max:
-                if isinstance(min_value, (str, datetime.datetime)):
-                    return sa.and_(
-                        column >= sa.literal(min_value),
-                        column < sa.literal(max_value),
-                    )
-
                 return sa.and_(
+                    column >= sa.literal(min_value),
                     column < sa.literal(max_value),
-                    column >= sa.literal(min_value),
-                )
-
-            if (isinstance(max_value, str) and isinstance(min_value, str)) or (
-                isinstance(max_value, datetime.datetime)
-                and isinstance(min_value, datetime.datetime)
-            ):
-                return sa.and_(
-                    column >= sa.literal(min_value),
-                    column <= sa.literal(max_value),
-                )
-
-            if isinstance(max_value, (str, datetime.datetime)):
-                return sa.and_(
-                    column <= sa.literal(max_value),
-                    column >= sa.literal(min_value),
-                )
-
-            if isinstance(min_value, (str, datetime.datetime)):
-                return sa.and_(
-                    column >= sa.literal(min_value),
-                    column <= sa.literal(max_value),
                 )
 
             return sa.and_(
@@ -316,46 +287,22 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 return column < F.lit(max_value)
 
-            if isinstance(max_value, (str, datetime.datetime)):
-                return column <= F.lit(max_value)
-
             return column <= F.lit(max_value)
 
         elif max_value is None:
             if strict_min:
-                return F.lit(min_value) < column
+                return column > F.lit(min_value)
 
-            if isinstance(min_value, (str, datetime.datetime)):
-                return F.lit(min_value) <= column
-
-            return F.lit(min_value) <= column
+            return column >= F.lit(min_value)
 
         else:
             if strict_min and strict_max:
-                return (F.lit(min_value) < column) & (column < F.lit(max_value))
+                return (column > F.lit(min_value)) & (column < F.lit(max_value))
 
             if strict_min:
-                if isinstance(max_value, (str, datetime.datetime)):
-                    return (F.lit(min_value) < column) & (column <= F.lit(max_value))
-
-                return (F.lit(min_value) < column) & (column <= F.lit(max_value))
+                return (column > F.lit(min_value)) & (column <= F.lit(max_value))
 
             if strict_max:
-                if isinstance(min_value, (str, datetime.datetime)):
-                    return (F.lit(min_value) <= column) & (column < F.lit(max_value))
+                return (column >= F.lit(min_value)) & (column < F.lit(max_value))
 
-                return (F.lit(min_value) <= column) & (column < F.lit(max_value))
-
-            if (isinstance(max_value, str) and isinstance(min_value, str)) or (
-                isinstance(max_value, datetime.datetime)
-                and isinstance(min_value, datetime.datetime)
-            ):
-                return (F.lit(min_value) <= column) & (column <= F.lit(max_value))
-
-            if isinstance(max_value, (str, datetime.datetime)):
-                return (F.lit(min_value) <= column) & (column <= F.lit(max_value))
-
-            if isinstance(min_value, (str, datetime.datetime)):
-                return (F.lit(min_value) <= column) & (column <= F.lit(max_value))
-
-            return (F.lit(min_value) <= column) & (column <= F.lit(max_value))
+            return (column >= F.lit(min_value)) & (column <= F.lit(max_value))

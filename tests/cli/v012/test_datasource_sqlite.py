@@ -438,9 +438,11 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
     )
+    # noinspection PyUnusedLocal
     res = context.get_available_data_asset_names("wow_a_datasource")
 
     runner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
         [
