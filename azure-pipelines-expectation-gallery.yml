@@ -189,7 +189,7 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing errors'
 
-          - bash: cat gallery-tracebacks.txt
+          - bash: [[ -f gallery-tracebacks.txt ]] && cat gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show gallery tracebacks'
 
