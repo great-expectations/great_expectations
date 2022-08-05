@@ -342,12 +342,15 @@ class SiteIndexPageRenderer(Renderer):
 
     @classmethod
     def _render_validation_success_cell(cls, validation_success):
+
         return RenderedStringTemplateContent(
             **{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "$validation_success",
-                    "params": {"validation_success": ""},
+                    # CR: validation results tab Status icon replaced
+                    # to allow js offline rendering
+                    "template": "Success" if validation_success else "Failed", # "$validation_success",
+                    "params": {"validation_success": ""},   
                     "styling": {
                         "params": {
                             "validation_success": {

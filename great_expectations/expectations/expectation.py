@@ -420,17 +420,19 @@ class Expectation(metaclass=MetaExpectation):
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
-                        "template": "$icon",
+                        # CR: individual expectation Status icon replaced
+                        # to allow js offline rendering
+                        "template": "Success", #"$icon",
                         "params": {"icon": "", "markdown_status_icon": "✅"},
                         "styling": {
                             "params": {
                                 "icon": {
                                     "classes": [
                                         "fas",
-                                        "fa-check-circle",
+                                        "fa-check-circle", # <i class="fa-thin fa-circle-check"></i>
                                         "text-success",
                                     ],
-                                    "tag": "i",
+                                    "tag": "p",
                                 }
                             }
                         },
@@ -447,7 +449,9 @@ class Expectation(metaclass=MetaExpectation):
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
-                        "template": "$icon",
+                        # CR: individual expectation Status icon replaced
+                        # to allow js offline rendering
+                        "template": "Failed", #"$icon",
                         "params": {"icon": "", "markdown_status_icon": "❌"},
                         "styling": {
                             "params": {
