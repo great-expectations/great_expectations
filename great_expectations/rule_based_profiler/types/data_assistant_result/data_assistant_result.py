@@ -334,7 +334,7 @@ class DataAssistantResult(SerializableDictDot):
             for metric_names in self.METRIC_EXPECTATION_MAP.keys()
         ):
             raise ge_exceptions.DataAssistantResultExecutionError(
-                f"All METRIC_EXPECTATION_MAP keys must be of type str or tuple."
+                "All METRIC_EXPECTATION_MAP keys must be of type str or tuple."
             )
 
         return {
@@ -695,7 +695,7 @@ class DataAssistantResult(SerializableDictDot):
 
         dropdown_selection: widgets.Dropdown = widgets.Dropdown(
             options=chart_titles,
-            description="Select Plot: ",
+            description="Select Plot Type: ",
             style={"description_width": "initial"},
             layout={"width": "max-content", "margin": "0px"},
         )
