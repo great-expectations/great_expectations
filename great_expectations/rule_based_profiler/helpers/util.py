@@ -19,20 +19,22 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.types import (
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+from great_expectations.rule_based_profiler.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
+    SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
+    NumericRangeEstimationResult,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     VARIABLES_PREFIX,
     Domain,
-    NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
-    SemanticDomainTypes,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
-)
-from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
-    NUM_HISTOGRAM_BINS,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import numpy_quantile
