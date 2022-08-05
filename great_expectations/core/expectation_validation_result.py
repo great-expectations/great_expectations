@@ -2,7 +2,14 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import Dict, Optional, TypedDict, Union
+from typing import Dict, Optional, Union
+
+try:
+    from typing import TypedDict
+except ImportError:
+    # Fallback for python < 3.8
+    from typing_extensions import TypedDict
+
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
