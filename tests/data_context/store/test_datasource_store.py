@@ -29,7 +29,6 @@ def datasource_store_with_single_datasource(
     empty_datasource_store: DatasourceStore,
 ) -> DatasourceStore:
     key: DataContextVariableKey = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name=datasource_name,
     )
     empty_datasource_store.set(key=key, value=datasource_config)
@@ -58,7 +57,6 @@ def test_datasource_store_retrieval(
     store: DatasourceStore = empty_datasource_store
 
     key: DataContextVariableKey = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name="my_datasource",
     )
     store.set(key=key, value=datasource_config)
@@ -123,6 +121,7 @@ def test_datasource_store_with_inline_store_backend(
 ) -> None:
     inline_store_backend_config: dict = {
         "class_name": "InlineStoreBackend",
+        "resource_type": DataContextVariableSchema.DATASOURCES,
         "data_context": empty_data_context,
         "suppress_store_backend_id": True,
     }
@@ -133,7 +132,6 @@ def test_datasource_store_with_inline_store_backend(
     )
 
     key: DataContextVariableKey = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name="my_datasource",
     )
 
@@ -201,7 +199,6 @@ def test_datasource_store_update_by_name(
     )
 
     key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name=datasource_name,
     )
     actual_config = cast(
