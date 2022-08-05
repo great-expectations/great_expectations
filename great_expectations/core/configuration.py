@@ -14,18 +14,17 @@ class AbstractConfig(ABC, SerializableDictDot):
         super().__init__()
 
     def to_dict(self) -> dict:
-        data = super().to_dict()
-        for attr in ("id_", "name"):
-            if data.get(attr) is None:
-                data.pop(attr)
-        return data
+        return AbstractConfig._remove_null_identifiers(super().to_dict())
 
     def to_raw_dict(self) -> dict:
-        data = super().to_raw_dict()
-        for attr in ("id_", "name"):
-            if data.get(attr) is None:
-                data.pop(attr)
-        return data
+        return AbstractConfig._remove_null_identifiers(super().to_raw_dict())
 
     def to_json_dict(self) -> dict:
         return self.to_dict()
+
+    @staticmethod
+    def _remove_null_identifiers(data: dict) -> dict:
+        for attr in ("id_", "name"):
+            if data.get(attr) is None:
+                data.pop(attr)
+        return data
