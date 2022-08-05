@@ -26,7 +26,8 @@ module.exports = {
              './node_modules/bootstrap-table/dist/bootstrap-table.min.css',
              './node_modules/bootstrap/dist/css/bootstrap.min.css',
              './node_modules/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.min.css',
-             './node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css'
+             './node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css',
+             './node_modules/@forevolve/bootstrap-dark/dist/css/bootstrap-prefers-dark.css'
         ]
       }
     })
