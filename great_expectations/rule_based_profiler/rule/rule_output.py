@@ -1,16 +1,16 @@
 from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
-    RuleState,
     get_fully_qualified_parameter_names,
     get_parameter_values_for_fully_qualified_parameter_names,
 )
+from great_expectations.rule_based_profiler.rule_state import RuleState
 
 
 class RuleOutput:
