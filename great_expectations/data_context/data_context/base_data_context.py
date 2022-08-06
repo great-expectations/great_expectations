@@ -387,7 +387,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
-    ) -> "ValidationOperator":
+    ) -> "ValidationOperator":  # noqa: F821
         """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
 
         Args:
@@ -1621,7 +1621,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         site_builder.clean_site()
         return True
 
-    def profile_datasource(
+    def profile_datasource(  # noqa: C901 - complexity 25
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -1636,6 +1636,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         run_name=None,
         run_time=None,
     ):
+
         """Profile the named datasource using the named profiler.
 
         Args:
@@ -1663,6 +1664,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # We don't need the datasource object, but this line serves to check if the datasource by the name passed as
         # an arg exists and raise an error if it does not.
         datasource = self.get_datasource(datasource_name)
+        assert datasource
 
         if not dry_run:
             logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
@@ -1842,7 +1844,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         profiling_results["success"] = True
         return profiling_results
 
-    def profile_data_asset(
+    def profile_data_asset(  # noqa: C901 - complexity 16
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -1931,7 +1933,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         profiling_results = {"success": False, "results": []}
 
-        total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
+        total_columns, total_expectations, total_rows = 0, 0, 0
         total_start_time = datetime.datetime.now()
 
         name = data_asset_name
@@ -2084,6 +2086,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
+        # <TODO> Remove this after BaseDataContext refactor is complete.
+        # currently this can cause problems if the Checkpoint is instantiated with
+        # EphemeralDataContext, which does not (yet) have full functionality.
+        checkpoint._data_context = self
+
         self._synchronize_self_with_underlying_data_context()
         return checkpoint
 
@@ -2336,7 +2343,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ge_cloud_id=ge_cloud_id,
         )
 
-    def test_yaml_config(
+    def test_yaml_config(  # noqa: C901 - copmlexity 17
         self,
         yaml_config: str,
         name: Optional[str] = None,
