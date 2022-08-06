@@ -8,11 +8,11 @@ from great_expectations.core.batch import BatchRequestBase
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigOutputModeType
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
-)
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
