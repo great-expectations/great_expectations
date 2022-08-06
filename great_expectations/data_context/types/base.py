@@ -2239,7 +2239,7 @@ class CheckpointValidationConfig(AbstractConfig):
             setattr(self, k, v)
 
 
-class CheckpointValidationConfigSchema(Schema):
+class CheckpointValidationConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
@@ -2256,11 +2256,14 @@ class CheckpointValidationConfigSchema(Schema):
         explicitly name all possible values in CheckpoingValidationConfigSchema as
         schema fields.
         """
-        original_obj = copy.deepcopy(obj)
         data = super().dump(obj, many=many)
 
-        for key, value in original_obj.items():
-            if key not in data and key not in self.declared_fields:
+        for key, value in obj.items():
+            if (
+                key not in data
+                and key not in self.declared_fields
+                and value is not None
+            ):
                 data[key] = value
 
         sorted_data = dict(sorted(data.items()))

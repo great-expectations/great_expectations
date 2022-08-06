@@ -581,4 +581,6 @@ def test_checkpoint_validation_config_within_checkpoint_config_is_serialized(
 
     loaded_data = checkpointConfigSchema.load(observed_dump)
     observed_load = CheckpointConfig(**loaded_data)
-    assert observed_load.to_json_dict() == checkpoint_config.to_json_dict()
+    assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
+        checkpoint_config
+    )
