@@ -6,7 +6,23 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.validation_operators.validation_operators import (
+        ValidationOperator,
+    )
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML
@@ -387,7 +403,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
-    ) -> "ValidationOperator":  # noqa: F821
+    ) -> "ValidationOperator":
         """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
 
         Args:
