@@ -167,6 +167,7 @@ class AssetConfig(SerializableDictDot):
         splitter_kwargs: Optional[Dict[str, str]] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
+        reader_options: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         if name is not None:
@@ -195,6 +196,8 @@ class AssetConfig(SerializableDictDot):
             self.sampling_method = sampling_method
         if sampling_kwargs is not None:
             self.sampling_kwargs = sampling_kwargs
+        if reader_options is not None:
+            self.reader_options = reader_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -259,6 +262,8 @@ class AssetConfigSchema(Schema):
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
+
+    reader_options = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
