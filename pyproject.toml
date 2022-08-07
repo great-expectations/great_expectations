@@ -13,11 +13,24 @@ skip_gitignore = true
 extend_skip_glob = ['venv/*', 'docs/*']
 
 [tool.mypy]
+files = ["great_expectations"]
 warn_unused_configs = true
 ignore_missing_imports = true
 follow_imports = 'silent'
 warn_redundant_casts = true
 show_error_codes = true
+exclude = [
+    'checkpoint',
+    'cli',
+    'core',
+    'datasource',
+    'data_context',
+    'execution_engine',
+    'marshmallow__shade',
+    'expectations/metrics',
+    '.*render',
+    'expectations/expectation',
+]
 
 [tool.pytest.ini_options]
 filterwarnings = [
