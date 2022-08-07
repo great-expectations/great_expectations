@@ -2,13 +2,13 @@ from typing import Optional
 
 import pytest
 
-from great_expectations.rule_based_profiler.helpers.util import (
-    integer_semantic_domain_type,
-)
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    integer_semantic_domain_type,
 )
 
 
