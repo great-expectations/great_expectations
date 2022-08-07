@@ -4,9 +4,6 @@ import copy
 from typing import List, Optional, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariableSchema,
-)
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (

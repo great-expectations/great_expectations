@@ -2,6 +2,10 @@ from typing import Any, Dict, List, Optional
 
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+    VolumeDataAssistantResult,
+)
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
     TableDomainBuilder,
@@ -14,18 +18,14 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     VARIABLES_KEY,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
-    VolumeDataAssistantResult,
-)
+from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.validator.validator import Validator
 
 
