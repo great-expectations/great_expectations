@@ -164,7 +164,7 @@ def pytest_generate_tests(metafunc):
                                     == "bigquery"
                                 ):
                                     # <WILL> : Marker to get the test to only run for CFE
-                                    # expect_column_values_to_be_unique:positive_case_all_null_values_bigquery_nones
+                                    # expect_column_values_to_be_unique:negative_case_all_null_values_bigquery_nones
                                     # works in different ways between CFE (V3) and V2 Expectations. This flag allows for
                                     # the test to only be run in the CFE case
                                     generate_test = True

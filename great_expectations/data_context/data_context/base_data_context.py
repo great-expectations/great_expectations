@@ -1652,7 +1652,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         run_name=None,
         run_time=None,
     ):
-
         """Profile the named datasource using the named profiler.
 
         Args:
@@ -2359,7 +2358,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ge_cloud_id=ge_cloud_id,
         )
 
-    def test_yaml_config(  # noqa: C901 - copmlexity 17
+    def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,
         name: Optional[str] = None,
