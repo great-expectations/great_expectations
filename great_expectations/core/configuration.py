@@ -21,7 +21,7 @@ class AbstractConfigSchema(Schema):
     REMOVE_KEYS_IF_NONE = ["id", "name"]
 
     @post_dump
-    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
+    def filter_none(self, data: dict, **kwargs) -> dict:
         data = copy.deepcopy(data)
         for key in AbstractConfigSchema.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
