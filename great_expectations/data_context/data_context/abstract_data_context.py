@@ -202,7 +202,6 @@ class AbstractDataContext(ABC):
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
-    @abstractmethod
     def _save_project_config(self) -> None:
         """
         Each DataContext will define how its project_config will be saved.
@@ -210,7 +209,7 @@ class AbstractDataContext(ABC):
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
         """
-        raise NotImplementedError
+        self.variables.save_config()
 
     @abstractmethod
     def save_expectation_suite(

@@ -121,12 +121,12 @@ class CloudDataContext(AbstractDataContext):
         # if in ge_cloud_mode, use ge_cloud_organization_id
         return self.ge_cloud_config.organization_id
 
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug(
-            "ge_cloud_mode detected - skipping DataContext._save_project_config"
-        )
-        return None
+    # def _save_project_config(self) -> None:
+    #     """Save the current project to disk."""
+    #     logger.debug(
+    #         "ge_cloud_mode detected - skipping DataContext._save_project_config"
+    #     )
+    #     return None
 
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None

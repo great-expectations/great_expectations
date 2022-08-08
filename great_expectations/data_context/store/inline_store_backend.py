@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Any, List, Optional, Tuple
 
 from great_expectations.core.data_context_key import DataContextVariableKey
@@ -183,8 +184,14 @@ class InlineStoreBackend(StoreBackend):
         return resource_type in self._data_context.config
 
     def _save_changes(self) -> None:
-        # NOTE: <DataContextRefactor> This responsibility will be moved into DataContext Variables object
-        self._data_context._save_project_config()
+        context = self._data_context
+        config_filepath = os.path.join(context.root_directory, context.GE_YML)
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                context.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
 
     @staticmethod
     def _determine_resource_name(key: Tuple[str, ...]) -> Optional[str]:
