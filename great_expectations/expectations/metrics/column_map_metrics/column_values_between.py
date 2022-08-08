@@ -75,7 +75,22 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             raise ValueError("min_value cannot be greater than max_value")
 
         # Use a vectorized approach for native numpy dtypes
-        if column.dtype in [int, float, bool, np.dtype("datetime64[ns]")]:
+        if column.dtype in [int, float]:
+            return cls._pandas_vectorized(
+                temp_column, min_value, max_value, strict_min, strict_max
+            )
+        elif column.dtype == np.dtype("datetime64[ns]"):
+            if min_value is not None:
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
+
+            if max_value is not None and not isinstance(max_value, datetime.datetime):
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
             return cls._pandas_vectorized(
                 temp_column, min_value, max_value, strict_min, strict_max
             )
