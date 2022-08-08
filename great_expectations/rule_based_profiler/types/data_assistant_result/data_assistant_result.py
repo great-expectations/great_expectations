@@ -1273,12 +1273,20 @@ class DataAssistantResult(SerializableDictDot):
                 domain_plot_component=domain_plot_component,
             )
         else:
-            return DataAssistantResult._get_bar_chart(
-                df=df,
-                metric_plot_components=metric_plot_components,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
+            if "column_quantile_values" in df.columns:
+                return DataAssistantResult._get_range_chart(
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                )
+            else:
+                return DataAssistantResult._get_bar_chart(
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                )
 
     @staticmethod
     def _get_expect_domain_values_to_be_between_chart(
@@ -1446,8 +1454,8 @@ class DataAssistantResult(SerializableDictDot):
                 )
             )
         else:
-            return (
-                DataAssistantResult._get_expect_domain_values_to_be_between_bar_chart(
+            if "column_quantile_values" in df.columns:
+                return DataAssistantResult._get_expect_domain_values_to_be_between_range_chart(
                     expectation_type=expectation_type,
                     df=df,
                     metric_plot_components=metric_plot_components,
@@ -1457,7 +1465,17 @@ class DataAssistantResult(SerializableDictDot):
                     max_value_plot_component=max_value_plot_component,
                     tooltip=tooltip,
                 )
-            )
+            else:
+                return DataAssistantResult._get_expect_domain_values_to_be_between_bar_chart(
+                    expectation_type=expectation_type,
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                    min_value_plot_component=min_value_plot_component,
+                    max_value_plot_component=max_value_plot_component,
+                    tooltip=tooltip,
+                )
 
     @staticmethod
     def _get_interactive_metrics_chart(
@@ -1860,6 +1878,51 @@ class DataAssistantResult(SerializableDictDot):
         return alt.layer(*bars_list)
 
     @staticmethod
+    def _get_range_chart(
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+    ) -> alt.LayerChart:
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+        )
+
+        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+            metric_plot_component.generate_tooltip(format=",")
+            for metric_plot_component in metric_plot_components
+        ]
+
+        lines_and_points_list: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            line: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_line()
+                .encode(
+                    x=batch_plot_component.plot_on_axis(),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                    detail="batch",
+                )
+            )
+
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point()
+                .encode(
+                    x=batch_plot_component.plot_on_axis(),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+            )
+
+            lines_and_points_list.append(line + points)
+
+        return alt.layer(*lines_and_points_list)
+
+    @staticmethod
     def _get_expect_domain_values_to_be_between_line_chart(
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
@@ -2084,6 +2147,114 @@ class DataAssistantResult(SerializableDictDot):
             anomaly_coded_bars.append(anomaly_coded_bar)
 
         return alt.layer(band, lower_limit, upper_limit, *anomaly_coded_bars)
+
+    @staticmethod
+    def _get_expect_domain_values_to_be_between_range_chart(
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        min_value_plot_component: ExpectationKwargPlotComponent,
+        max_value_plot_component: ExpectationKwargPlotComponent,
+        tooltip: List[alt.Tooltip],
+        expectation_type: Optional[str] = None,
+    ) -> alt.Chart:
+        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
+            ColorPalettes.HEATMAP_6.value[4]
+        )
+        expectation_kwarg_line_stroke_width: int = 5
+
+        title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+        )
+
+        lower_limit: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
+            .encode(
+                x=batch_plot_component.plot_on_axis(),
+                y=min_value_plot_component.plot_on_axis(),
+                tooltip=tooltip,
+            )
+            .properties(title=title)
+        )
+
+        upper_limit: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
+            .encode(
+                x=batch_plot_component.plot_on_axis(),
+                y=max_value_plot_component.plot_on_axis(),
+                tooltip=tooltip,
+            )
+            .properties(title=title)
+        )
+
+        band: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_area()
+            .encode(
+                x=batch_plot_component.plot_on_axis(),
+                y=min_value_plot_component.plot_on_axis(),
+                y2=alt.Y2(
+                    max_value_plot_component.name, title=max_value_plot_component.title
+                ),
+            )
+            .properties(title=title)
+        )
+
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
+
+        metric_name: str
+        predicate: Union[bool, int]
+        anomaly_coded_line: alt.Chart
+        anomaly_coded_lines: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            # encode point color based on anomalies
+            metric_name = metric_plot_component.name
+            predicate = (
+                (alt.datum.min_value > alt.datum[metric_name])
+                & (alt.datum.max_value > alt.datum[metric_name])
+            ) | (
+                (alt.datum.min_value < alt.datum[metric_name])
+                & (alt.datum.max_value < alt.datum[metric_name])
+            )
+            point_color_condition: alt.condition = alt.condition(
+                predicate=predicate,
+                if_false=alt.value(Colors.GREEN.value),
+                if_true=alt.value(Colors.PINK.value),
+            )
+
+            anomaly_coded_base = alt.Chart(data=df, title=title)
+
+            anomaly_coded_line = anomaly_coded_base.mark_line().encode(
+                x=batch_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(),
+                tooltip=tooltip,
+                detail="batch",
+            )
+
+            anomaly_coded_points = anomaly_coded_base.mark_point().encode(
+                x=batch_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(),
+                tooltip=tooltip,
+                color=point_color_condition,
+            )
+            anomaly_coded_lines.append(anomaly_coded_line + anomaly_coded_points)
+
+        return alt.layer(band, lower_limit, upper_limit, *anomaly_coded_lines)
 
     @staticmethod
     def _get_interactive_line_chart(
