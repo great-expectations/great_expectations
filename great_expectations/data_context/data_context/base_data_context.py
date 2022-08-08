@@ -14,9 +14,6 @@ from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.data_context.data_context_variables import (
-    FileDataContextVariables,
-)
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
@@ -363,19 +360,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._assistants = self._data_context._assistants
 
     def _save_project_config(self) -> None:
-        """
-        Although the BaseDataContext has the ability to act ephemeral or cloud-backed,
-        the `_save_project_config` method has always historically written to disk.
-
-        As such, it utilizes an instance of `FileDataContextVariables` to maintain
-        legacy behavior.
-        """
+        """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 
-        file_backed_vars = FileDataContextVariables(
-            config=self.config, data_context=self
-        )
-        file_backed_vars.save_config()
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                self.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
 
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
