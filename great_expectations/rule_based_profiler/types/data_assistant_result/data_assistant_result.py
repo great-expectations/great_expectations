@@ -1674,28 +1674,17 @@ class DataAssistantResult(SerializableDictDot):
             if strict_min_predicate and strict_max_predicate:
                 predicates.append(
                     (
-                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value > alt.datum[metric_plot_component.name])
+                        (alt.datum.min_value >= alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
                     )
                     | (
-                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value < alt.datum[metric_plot_component.name])
+                        (alt.datum.min_value <= alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
                     )
                 )
             elif strict_min_predicate:
                 predicates.append(
                     (
-                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
-                    )
-                    | (
-                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
-                    )
-                )
-            elif strict_max_predicate:
-                predicates.append(
-                    (
                         (alt.datum.min_value >= alt.datum[metric_plot_component.name])
                         & (alt.datum.max_value > alt.datum[metric_plot_component.name])
                     )
@@ -1704,15 +1693,26 @@ class DataAssistantResult(SerializableDictDot):
                         & (alt.datum.max_value < alt.datum[metric_plot_component.name])
                     )
                 )
-            else:
+            elif strict_max_predicate:
                 predicates.append(
                     (
-                        (alt.datum.min_value >= alt.datum[metric_plot_component.name])
+                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
                         & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
                     )
                     | (
-                        (alt.datum.min_value <= alt.datum[metric_plot_component.name])
+                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
                         & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
+                    )
+                )
+            else:
+                predicates.append(
+                    (
+                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value > alt.datum[metric_plot_component.name])
+                    )
+                    | (
+                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
+                        & (alt.datum.max_value < alt.datum[metric_plot_component.name])
                     )
                 )
 
