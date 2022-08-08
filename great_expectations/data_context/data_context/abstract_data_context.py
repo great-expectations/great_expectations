@@ -674,7 +674,7 @@ class AbstractDataContext(ABC):
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
-        validation_id: Optional[str] = None,
+        default_validation_id: Optional[str] = None,
     ) -> "Checkpoint":  # noqa: F821
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -705,7 +705,7 @@ class AbstractDataContext(ABC):
             notify_with=notify_with,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-            validation_id=validation_id,
+            default_validation_id=default_validation_id,
         )
 
         self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)

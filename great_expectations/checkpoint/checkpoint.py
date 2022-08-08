@@ -536,7 +536,7 @@ class Checkpoint(BaseCheckpoint):
         batches: Optional[List[dict]] = None,
         ge_cloud_id: Optional[UUID] = None,
         expectation_suite_ge_cloud_id: Optional[UUID] = None,
-        validation_id: Optional[str] = None,
+        default_validation_id: Optional[str] = None,
     ) -> None:
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
         if batch_request_contains_batch_data(batch_request=batch_request):
@@ -569,7 +569,7 @@ constructor arguments.
             batches=batches,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-            validation_id=validation_id,
+            default_validation_id=default_validation_id,
         )
         super().__init__(
             checkpoint_config=checkpoint_config,
@@ -678,7 +678,7 @@ constructor arguments.
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
-        validation_id: Optional[str] = None,
+        default_validation_id: Optional[str] = None,
     ) -> "Checkpoint":
         checkpoint_config: Union[CheckpointConfig, dict]
 
@@ -723,7 +723,7 @@ constructor arguments.
             "notify_with": notify_with,
             "ge_cloud_id": ge_cloud_id,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
-            "validation_id": validation_id,
+            "default_validation_id": default_validation_id,
         }
 
         checkpoint_config = deep_filter_properties_iterable(

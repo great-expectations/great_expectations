@@ -389,7 +389,7 @@ class CloudDataContext(AbstractDataContext):
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
-        validation_id: Optional[str] = None,
+        default_validation_id: Optional[str] = None,
     ) -> "Checkpoint":  # noqa: F821
         """
         See `AbstractDataContext.add_checkpoint` for more information.
@@ -423,7 +423,7 @@ class CloudDataContext(AbstractDataContext):
             notify_with=notify_with,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-            validation_id=validation_id,
+            default_validation_id=default_validation_id,
         )
 
         checkpoint_config = self.checkpoint_store.create(
