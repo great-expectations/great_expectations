@@ -1,8 +1,12 @@
-from typing import Union
+from typing import List, Union
 
-from pandas.core.series import Series
-from pyspark.sql.column import Column
-from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
+from pandas.core.frame import DataFrame as pandas_dataframe
+from pandas.core.series import Series as pandas_series
+from pyspark.sql.column import Column as spark_column
+from pyspark.sql.dataframe import DataFrame as spark_dataframe
+from sqlalchemy.sql.elements import BinaryExpression as sql_binary_expression
+from sqlalchemy.sql.elements import BooleanClauseList as sql_boolean_clause_list
+from sqlalchemy.sql.elements import ColumnClause as sql_column_clause
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -34,7 +38,7 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
     )
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column_list, **kwargs) -> Series:
+    def _pandas(cls, column_list: pandas_dataframe, **kwargs: dict) -> pandas_series:
         min_value = kwargs.get("min_value")
         max_value = kwargs.get("max_value")
         strict_min = kwargs.get("strict_min")
@@ -72,8 +76,8 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
 
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
-        cls, column_list, **kwargs
-    ) -> Union[BinaryExpression, BooleanClauseList]:
+        cls, column_list: List[sql_column_clause], **kwargs: dict
+    ) -> Union[sql_binary_expression, sql_boolean_clause_list]:
         min_value = kwargs.get("min_value")
         max_value = kwargs.get("max_value")
         strict_min = kwargs.get("strict_min")
@@ -110,7 +114,7 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
                 return sa.and_(min_value <= row_wise_sum, row_wise_sum <= max_value)
 
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column_list, **kwargs) -> Column:
+    def _spark(cls, column_list: spark_dataframe, **kwargs) -> spark_column:
         min_value = kwargs.get("min_value")
         max_value = kwargs.get("max_value")
         strict_min = kwargs.get("strict_min")

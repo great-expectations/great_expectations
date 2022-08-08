@@ -2,6 +2,7 @@ from typing import Optional
 
 from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
+    ExpectationValidationResult,
     MulticolumnMapExpectation,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
@@ -146,11 +147,11 @@ class ExpectMulticolumnSumToBeBetween(MulticolumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
+        configuration: ExpectationConfiguration = None,
+        resul: ExpectationValidationResult = None,
+        language: str = None,
+        runtime_configuration: dict = None,
+        **kwargs: dict,
     ) -> None:
         pass
 
@@ -158,10 +159,10 @@ class ExpectMulticolumnSumToBeBetween(MulticolumnMapExpectation):
     @renderer(renderer_type="renderer.diagnostic.observed_value")
     def _diagnostic_observed_value_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
+        configuration: ExpectationConfiguration = None,
+        result: ExpectationValidationResult = None,
+        language: str = None,
+        runtime_configuration: dict = None,
+        **kwargs: dict,
     ) -> None:
         pass
