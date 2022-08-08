@@ -12,7 +12,7 @@ from great_expectations.datasource import BaseDatasource
 
 
 @pytest.mark.cloud
-@pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "save_changes",
     [
@@ -127,7 +127,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 
 
 @pytest.mark.cloud
-@pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "config_includes_name_setting",
     [
@@ -223,7 +223,7 @@ def test_data_context_in_cloud_mode_add_datasource(
 
 
 @pytest.mark.cloud
-@pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "config_includes_name_setting",
     [
