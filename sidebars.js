@@ -285,6 +285,7 @@ module.exports = {
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
+        'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
         { type: 'doc', id: 'integrations/integration_datahub' },
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
@@ -292,6 +293,7 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_meltano',
         'deployment_patterns/how_to_use_great_expectations_with_prefect',
         'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
+        { type: 'doc', id: 'integrations/integration_zenml' },
         { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
       ]
     },

@@ -5,9 +5,6 @@ from typing import Any, Optional
 
 import pyparsing as pp
 
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariableSchema,
-)
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 
 logger = logging.getLogger(__name__)
@@ -208,7 +205,6 @@ class StoreBackend(metaclass=ABCMeta):
 
     def build_key(
         self,
-        resource_type: Optional[DataContextVariableSchema] = None,
         id_: Optional[str] = None,
         name: Optional[str] = None,
     ) -> Any:
