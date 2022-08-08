@@ -434,6 +434,7 @@ def test_simple_checkpoint_persisted_to_store(
         "batch_request": {},
         "class_name": "Checkpoint",
         "config_version": 1.0,
+        "default_validation_id": None,
         "evaluation_parameters": {},
         "expectation_suite_ge_cloud_id": None,
         "expectation_suite_name": None,
@@ -448,7 +449,6 @@ def test_simple_checkpoint_persisted_to_store(
         "site_names": None,
         "slack_webhook": None,
         "template_name": None,
-        "validation_id": None,
         "validations": [],
     }
     result = checkpoint.run(validations=[one_validation])
