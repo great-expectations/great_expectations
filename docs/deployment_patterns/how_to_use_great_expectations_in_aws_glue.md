@@ -20,7 +20,7 @@ You need to add to your AWS Glue Spark Job Parameters to install great expectati
   — additional-python-modules great_expectations
 ```
 Then import necessary libs:
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L1-L12
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L1-L13
 ```
 
 ### 2. Set up Great Expectations
@@ -29,7 +29,7 @@ Here we initialize a Spark and Glue, and read great_expectations.yaml
 ```
 
 ### 3. Connect to your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L124-L43
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L24-L43
 ```
 
 ### 4. Create Expectations
