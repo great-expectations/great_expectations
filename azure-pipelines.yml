@@ -191,7 +191,7 @@ stages:
               mkdir coverage
               PYTEST="docker run --network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest -m 'not e2e' "
-              PYTEST+="--no-docker-discovery --postgresql --spark --cloud --napoleon-docstrings "
+              PYTEST+="--postgresql --spark --cloud "
               # We should be able to specify --cov-report=xml:path but this doesn't work so we write to the default
               # path and then mv it.
               PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
@@ -235,7 +235,7 @@ stages:
               PYTEST="docker run -e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) "
               PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) "
               PYTEST+="greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest tests --no-docker-discovery --cloud -m \"cloud and e2e\""
+              PYTEST+="pytest tests --cloud -m \"cloud and e2e\""
               echo ${PYTEST}
               eval ${PYTEST}
             env:
@@ -277,7 +277,7 @@ stages:
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \""
               PYTEST+="mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < /script/mysql_setup.sql && "
               # The last \" closes the quote from bash -c \".
-              PYTEST+="pytest --no-docker-discovery --mysql --ignore=tests/cli --ignore=tests/integration/usage_statistics\""
+              PYTEST+="pytest --mysql --ignore=tests/cli --ignore=tests/integration/usage_statistics\""
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest MySQL'
@@ -306,7 +306,7 @@ stages:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest --no-docker-discovery --trino --ignore=tests/cli --ignore=tests/integration/usage_statistics"
+              PYTEST+="pytest --trino --ignore=tests/cli --ignore=tests/integration/usage_statistics"
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest Trino'
@@ -328,7 +328,7 @@ stages:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest --no-docker-discovery --no-sqlalchemy --aws-integration tests/integration/usage_statistics"
+              PYTEST+="pytest --no-sqlalchemy --aws-integration tests/integration/usage_statistics"
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest Usage Stats'
