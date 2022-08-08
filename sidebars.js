@@ -293,6 +293,7 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_meltano',
         'deployment_patterns/how_to_use_great_expectations_with_prefect',
         'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
+        { type: 'doc', id: 'integrations/integration_zenml' },
         { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
       ]
     },
