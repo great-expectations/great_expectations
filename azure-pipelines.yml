@@ -311,6 +311,28 @@ stages:
               eval ${PYTEST}
             displayName: 'Pytest Trino'
 
+      - job: test_cli
+        dependsOn: [make_suffix, build_push_]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest --postgresql --spark --aws-integration tests/cli"
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'Pytest cli'
+
       - job: test_usage_stats
         dependsOn: [make_suffix, build_push_]
         condition: succeeded()
