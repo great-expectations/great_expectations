@@ -106,7 +106,7 @@ result = context.assistants.onboarding.run(
     # column_value_nonnullity_rule={
     # },
     # numeric_columns_rule={
-    #     "round_decimals": 12,
+    #     "round_decimals": 15,
     #     "false_positive_rate": 0.1,
     #     "random_seed": 43792,
     # },

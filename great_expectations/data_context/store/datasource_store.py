@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import copy
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariableSchema,
-)
 from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
@@ -50,18 +50,13 @@ class DatasourceStore(Store):
         """
         See parent 'Store.list_keys()' for more information
         """
-        from great_expectations.data_context.data_context_variables import (
-            DataContextVariableSchema,
+        keys_without_store_backend_id: List[str] = list(
+            filter(
+                lambda k: k != StoreBackend.STORE_BACKEND_ID_KEY,
+                self._store_backend.list_keys(),
+            )
         )
-
-        datasource_key: Tuple[DataContextVariableSchema] = (
-            DataContextVariableSchema.DATASOURCES,
-        )
-
-        keys_without_store_backend_id: List[str] = [
-            key for key in self._store_backend.list_keys(prefix=datasource_key)
-        ]
-        return [key for key in keys_without_store_backend_id]
+        return keys_without_store_backend_id
 
     def remove_key(self, key: Union[DataContextVariableKey, GeCloudIdentifier]) -> None:
         """
@@ -90,6 +85,19 @@ class DatasourceStore(Store):
         else:
             return self._schema.loads(value)
 
+    def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
+        """
+        This method takes full json response from GE cloud and outputs a dict appropriate for
+        deserialization into a GE object
+        """
+        datasource_ge_cloud_id: str = response_json["data"]["id_"]
+        datasource_config_dict: dict = response_json["data"]["attributes"][
+            "datasource_config"
+        ]
+        datasource_config_dict["ge_cloud_id"] = datasource_ge_cloud_id
+
+        return datasource_config_dict
+
     def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig:
         """Retrieves a DatasourceConfig persisted in the store by it's given name.
 
@@ -103,9 +111,9 @@ class DatasourceStore(Store):
         Raises:
             ValueError if a DatasourceConfig is not found.
         """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
+        datasource_key: Union[
+            DataContextVariableKey, GeCloudIdentifier
+        ] = self.store_backend.build_key(name=datasource_name)
         if not self.has_key(datasource_key):
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
@@ -145,7 +153,10 @@ class DatasourceStore(Store):
             name = datasource_config.name
         else:
             name = None
-        return self.store_backend.build_key(name=name, id_=id_)
+        return self.store_backend.build_key(
+            name=name,
+            id_=id_,
+        )
 
     def set_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
@@ -204,7 +215,6 @@ class DatasourceStore(Store):
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
         datasource_key: DataContextVariableKey = DataContextVariableKey(
-            resource_type=DataContextVariableSchema.DATASOURCES,
             resource_name=datasource_name,
         )
         return datasource_key

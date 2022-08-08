@@ -13,31 +13,30 @@ from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
-from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
-    CardinalityLimitMode,
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+    VolumeDataAssistantResult,
+)
+from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
+    PlotResult,
+)
+from great_expectations.rule_based_profiler.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
     ParameterNode,
-    SemanticDomainTypes,
-)
-from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
-    VolumeDataAssistantResult,
-)
-from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
-    PlotResult,
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
@@ -955,8 +954,9 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                 "table_rule": {
                     "variables": {
                         "false_positive_rate": 0.05,
-                        "quantile_statistic_interpolation_method": "auto",
-                        "quantile_bias_std_error_ratio_threshold": 0.25,
+                        "quantile_statistic_interpolation_method": "nearest",
+                        "quantile_bias_correction": False,
+                        "quantile_bias_std_error_ratio_threshold": None,
                         "estimator": "bootstrap",
                         "n_resamples": 9999,
                         "include_estimator_samples_histogram_in_details": False,
@@ -999,6 +999,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "metric_domain_kwargs": "$domain.domain_kwargs",
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                                    "quantile_bias_correction": "$variables.quantile_bias_correction",
                                     "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
                                     "random_seed": "$variables.random_seed",
                                     "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
@@ -1036,15 +1037,16 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "strict_min": False,
                         "strict_max": False,
                         "false_positive_rate": 0.05,
-                        "quantile_statistic_interpolation_method": "auto",
-                        "quantile_bias_std_error_ratio_threshold": 0.25,
+                        "quantile_statistic_interpolation_method": "nearest",
+                        "quantile_bias_correction": False,
+                        "quantile_bias_std_error_ratio_threshold": None,
                         "estimator": "bootstrap",
                         "n_resamples": 9999,
                         "include_estimator_samples_histogram_in_details": False,
                         "truncate_values": {
                             "lower_bound": 0.0,
                         },
-                        "round_decimals": 12,
+                        "round_decimals": 15,
                     },
                     "domain_builder": {
                         "allowed_semantic_types_passthrough": ["logic"],
@@ -1098,6 +1100,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "metric_name": "column.distinct_values.count",
                                     "enforce_numeric_metric": True,
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                                    "quantile_bias_correction": "$variables.quantile_bias_correction",
                                     "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
                                     "replace_nan_with_zero": True,
                                     "n_resamples": "$variables.n_resamples",
@@ -1574,7 +1577,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         DataAssistant,
         VolumeDataAssistant,
     )
-    from great_expectations.rule_based_profiler.types.data_assistant_result import DataAssistantResult
+    from great_expectations.rule_based_profiler.data_assistant_result import DataAssistantResult
     from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
     import great_expectations.exceptions as ge_exceptions
 

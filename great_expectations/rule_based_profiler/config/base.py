@@ -19,7 +19,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_PREFIX,
     ParameterContainer,
 )
@@ -691,6 +691,7 @@ class RuleBasedProfilerConfigSchema(Schema):
     id_ = fields.String(
         required=False,
         allow_none=False,
+        data_key="id",
     )
     config_version = fields.Float(
         required=True,

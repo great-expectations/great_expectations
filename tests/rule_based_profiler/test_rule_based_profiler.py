@@ -34,8 +34,10 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
 from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.util import deep_filter_properties_iterable
 
 
@@ -190,6 +192,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_correction": False,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
                 },
@@ -403,6 +406,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
                     "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_correction": False,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
                 },
@@ -626,6 +630,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_correction": False,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
                 },
@@ -741,6 +746,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_correction": False,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
                 },
@@ -869,6 +875,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_correction": False,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
                 },
