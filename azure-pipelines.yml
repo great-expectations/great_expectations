@@ -73,7 +73,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.10.1 flake8==3.8.3 black==22.3.0 pyupgrade==2.7.2 invoke
+              pip install isort[requirements]==5.10.1 flake8==3.9.2 black==22.3.0 pyupgrade==2.7.2 invoke==1.7.1
               EXIT_STATUS=0
               invoke fmt --check || EXIT_STATUS=$?
               invoke lint || EXIT_STATUS=$?
@@ -150,8 +150,8 @@ stages:
               # We repull the develop branch. We could build the local branch that is already present but we should
               # prune it's depth since we don't need the git history.
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
-              CMD+="--target azure --build-arg PYTHON_VERSION=$(python.version) --build-arg SOURCE=github "
-              CMD+="--build-arg BRANCH=develop ."
+              CMD+="--target azure --build-arg PYTHON_VERSION=$(python.version) "
+              CMD+=" --build-arg SOURCE=github --build-arg BRANCH=develop ."
               echo ${CMD}
               eval ${CMD}
             displayName: 'Build python $(python.version) image'
@@ -169,7 +169,7 @@ stages:
               DOCKER_USER: $(DOCKER_USER)
               DOCKER_TOKEN: $(DOCKER_TOKEN)
 
-      - job: comprehensive_test_
+      - job: test_comprehensive_
         dependsOn: [make_suffix, build_push_]
         condition: succeeded()
         timeoutInMinutes: 120
@@ -188,26 +188,19 @@ stages:
         steps:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PULL="docker pull greatexpectations/test:${DOCKER_TAG}"
-              echo ${PULL}
-              eval ${PULL}
               mkdir coverage
               PYTEST="docker run --network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
-              PYTEST+="-e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) -e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) "
-              PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="/bin/bash -c \"pytest --postgresql --spark --cloud --napoleon-docstrings --no-docker-discovery "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest -m 'not e2e' "
+              PYTEST+="--no-docker-discovery --postgresql --spark --cloud --napoleon-docstrings "
               # We should be able to specify --cov-report=xml:path but this doesn't work so we write to the default
               # path and then mv it.
               PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
               PYTEST+="--ignore=tests/cli --ignore=tests/integration/usage_statistics "
+              # The last \" closes the quote from bash -c \"
               PYTEST+="&& mv coverage.xml /coverage/coverage.xml\""
               echo ${PYTEST}
               eval ${PYTEST}
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-            displayName: 'pytest $(python.version)'
+            displayName: 'Pytest $(python.version)'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -220,6 +213,126 @@ stages:
               codeCoverageTool: Cobertura
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/coverage/htmlcov'
+
+      - job: test_cloud_
+        dependsOn: [ make_suffix, build_push_ ]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              # These are integration/E2E tests that are specific to Great Expectations Cloud.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run -e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) "
+              PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest tests --no-docker-discovery --cloud -m \"cloud and e2e\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
+            displayName: 'Pytest cloud integration'
+
+      - job: test_mysql_
+        dependsOn: [ make_suffix, build_push_ ]
+        condition: succeeded()
+        timeoutInMinutes: 120
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        services:
+          mysql: mysql
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              printf "Waiting for MySQL database to accept connections: "
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+              printf "\n"
+            displayName: 'Wait for MySQL'
+          - bash: |
+              mkdir script
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > script/mysql_setup.sql
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host --mount type=bind,source=${PWD}/script,target=/script "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \""
+              PYTEST+="mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < /script/mysql_setup.sql && "
+              # The last \" closes the quote from bash -c \".
+              PYTEST+="pytest --no-docker-discovery --mysql --ignore=tests/cli --ignore=tests/integration/usage_statistics\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'Pytest MySQL'
+
+      - job: test_trino
+        dependsOn: [make_suffix, build_push_]
+        condition: succeeded()
+        timeoutInMinutes: 120
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        services:
+          trino: trino
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              printf 'Waiting for Trino database to accept connections'
+              sleep 30
+            displayName: 'Wait for Trino'
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest --no-docker-discovery --trino --ignore=tests/cli --ignore=tests/integration/usage_statistics"
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'Pytest Trino'
+
+      - job: test_usage_stats
+        dependsOn: [make_suffix, build_push_]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest --no-docker-discovery --no-sqlalchemy --aws-integration tests/integration/usage_statistics"
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'Pytest Usage Stats'
+
 
   - stage: import_ge
     dependsOn: [lint]
@@ -332,10 +445,6 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -350,173 +459,12 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-      - job: comprehensive
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 120
-
-        services:
-          postgres: postgres
-
-        variables:
-          GE_pytest_opts: '--postgresql --spark --cloud'
-
-        strategy:
-          matrix:
-            Python37:
-              python.version: '3.7'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python38:
-              python.version: '3.8'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python39:
-              python.version: '3.9'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
-
-          - script: |
-              if [[ $(pandas.version) == 'latest' ]]; then
-                pip install pandas
-              else
-                pip install pandas==$(pandas.version)
-              fi
-            displayName: 'Install pandas'
-
-          - script: |
-              pip install --requirement requirements.txt
-              echo "about to run pip install $(GE_pytest_pip_opts)"
-              pip install $(GE_pytest_pip_opts)
-              pip install  .
-            displayName: 'Install dependencies'
-
-          - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-            displayName: 'pytest'
-
-          - script: |
-              # These are integration/E2E tests that are specific to Great Expectations Cloud.
-              # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest tests --cloud -m "cloud and not unit"
-
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-            displayName: 'gx-cloud-integration'
-
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: 'Publish test results for Python $(python.version)'
-
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
-
-  - stage: usage_stats_integration
-    dependsOn: [lint, import_ge, custom_checks]
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-      - job: test_usage_stats_messages
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        variables:
-          python.version: '3.8'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
-
-          - script: |
-              pip install --requirement requirements-dev-test.txt
-              pip install --requirement requirements.txt
-              pip install .
-            displayName: 'Install dependencies'
-
-          - script: |
-              pip install pytest pytest-azurepipelines
-              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
-            displayName: 'pytest'
 
   - stage: db_integration
     pool:
       vmImage: 'ubuntu-latest'
-
     dependsOn: [lint, import_ge, custom_checks]
-
     jobs:
-      - job: mysql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 120
-
-        services:
-          mysql: mysql
-
-        variables:
-          python.version: '3.8'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
-
-          - script: |
-              printf 'Waiting for MySQL database to accept connections'
-              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
-                printf '.'
-                sleep 1;
-              done;
-            displayName: Wait for database to initialise
-
-          - script: |
-              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
-              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
-            displayName: 'Configure mysql'
-
-          - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
-            displayName: 'Install dependencies'
-
-          - script: |
-              pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-            displayName: 'pytest'
-
       - job: mssql
         condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
         timeoutInMinutes: 120
@@ -548,53 +496,6 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-            displayName: 'pytest'
-
-      - job: trino
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-        timeoutInMinutes: 120
-
-        services:
-          trino: trino
-
-        variables:
-          python.version: '3.8'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
-
-          - script: |
-              printf 'Waiting for Trino database to accept connections'
-              sleep 30
-#             until trino --execute "SHOW CATALOGS"; do
-#               printf '.'
-#               sleep 1;
-#             done;
-            displayName: Wait for database to initialise
-
-          - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
-            displayName: 'Install dependencies'
-
-          - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'pytest'
 
   - stage: cli_integration
@@ -636,7 +537,7 @@ stages:
     condition: and(succeeded(), eq(variables.isRelease, true))
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [import_ge, custom_checks, required, lint, db_integration, usage_stats_integration, cli_integration]
+    dependsOn: [import_ge, custom_checks, required, lint, db_integration, docker_tests, cli_integration]
 
     jobs:
       - job: deploy
