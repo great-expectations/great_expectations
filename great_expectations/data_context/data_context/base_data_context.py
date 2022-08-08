@@ -361,6 +361,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def _save_project_config(self) -> None:
         """Save the current project to disk."""
+        logger.debug("Starting DataContext._save_project_config")
+
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
 
         try:

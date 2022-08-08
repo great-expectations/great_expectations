@@ -204,7 +204,7 @@ class AbstractDataContext(ABC):
 
     def _save_project_config(self) -> None:
         """
-        Each DataContext will define how its project_config will be saved.
+        Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
