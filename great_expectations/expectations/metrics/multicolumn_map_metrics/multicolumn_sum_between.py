@@ -1,3 +1,9 @@
+from typing import Union
+
+from pandas.core.series import Series
+from pyspark.sql.column import Column
+from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
+
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -28,12 +34,12 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
     )
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column_list, **kwargs):
+    def _pandas(cls, column_list, **kwargs) -> Series:
         min_value = kwargs.get("min_value")
         max_value = kwargs.get("max_value")
         strict_min = kwargs.get("strict_min")
         strict_max = kwargs.get("strict_max")
-        
+
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
@@ -53,7 +59,7 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
                 return min_value < series
             else:
                 return min_value <= series
-            
+
         else:
             if strict_min and strict_max:
                 return (min_value < series) & (series < max_value)
@@ -65,18 +71,20 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
                 return (min_value <= series) & (series <= max_value)
 
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column_list, **kwargs):
+    def _sqlalchemy(
+        cls, column_list, **kwargs
+    ) -> Union[BinaryExpression, BooleanClauseList]:
         min_value = kwargs.get("min_value")
         max_value = kwargs.get("max_value")
         strict_min = kwargs.get("strict_min")
         strict_max = kwargs.get("strict_max")
-        
+
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
-        
+
         row_wise_sum = sum(column_list)
 
         if min_value is None:
@@ -102,7 +110,7 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
                 return sa.and_(min_value <= row_wise_sum, row_wise_sum <= max_value)
 
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column_list, **kwargs):
+    def _spark(cls, column_list, **kwargs) -> Column:
         min_value = kwargs.get("min_value")
         max_value = kwargs.get("max_value")
         strict_min = kwargs.get("strict_min")
@@ -113,7 +121,7 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
 
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
-        
+
         expression = "+".join(
             [f"COALESCE({column_name}, 0)" for column_name in column_list.columns]
         )

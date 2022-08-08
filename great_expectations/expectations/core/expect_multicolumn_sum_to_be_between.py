@@ -1,4 +1,9 @@
-from great_expectations.expectations.expectation import MulticolumnMapExpectation
+from typing import Optional
+
+from great_expectations.expectations.expectation import (
+    ExpectationConfiguration,
+    MulticolumnMapExpectation,
+)
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 
@@ -34,32 +39,39 @@ class ExpectMulticolumnSumToBeBetween(MulticolumnMapExpectation):
         An ExpectationSuiteValidationResult
     """
 
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+        super().validate_configuration(configuration)
+        self.validate_metric_value_between_configuration(configuration=configuration)
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "column aggregate expectation",
             "needs migration to modular expectations api",
         ],
-        "contributors": ["@great_expectations"],
+        "contributors": ["@qwwqwwq"],
         "requirements": [],
     }
 
     examples = [
         {
             "data": {
-                "a": [
-                    0,
-                    1,
-                    2
-                ],
-                "b": [
-                    1,
-                    2,
-                    3
-                ],
+                "a": [0, 1, 2],
+                "b": [1, 2, 3],
             },
             "tests": [
                 {
@@ -80,7 +92,12 @@ class ExpectMulticolumnSumToBeBetween(MulticolumnMapExpectation):
                     "title": "strict_min_example",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column_list": ["a", "b"], "min_value": 1, "max_value": 5, "strict_min": True},
+                    "in": {
+                        "column_list": ["a", "b"],
+                        "min_value": 1,
+                        "max_value": 5,
+                        "strict_min": True,
+                    },
                     "out": {"success": False},
                 },
             ],
@@ -134,7 +151,7 @@ class ExpectMulticolumnSumToBeBetween(MulticolumnMapExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass
 
     @classmethod
@@ -146,5 +163,5 @@ class ExpectMulticolumnSumToBeBetween(MulticolumnMapExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass
