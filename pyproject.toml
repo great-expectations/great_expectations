@@ -1,4 +1,4 @@
-[build-sytem]
+[build-system]
 requires = ["setuptools", "wheel"]
 # uncomment to enable pep517 after versioneer problem is fixed.
 # https://github.com/python-versioneer/python-versioneer/issues/193
@@ -35,6 +35,7 @@ markers = [
     "docs: mark a test as a docs test.",
     "unit: mark a test as a unit test.",
     "integration: mark test as an integration test.",
+    "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "base_data_context: mark test as being relevant to BaseDataContext, which will be removed during refactor",

@@ -23,6 +23,7 @@ class QueryTable(QueryMetricProvider):
     metric_name = "query.table"
     value_keys = ("query",)
 
+    # <snippet>
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
@@ -60,6 +61,7 @@ class QueryTable(QueryMetricProvider):
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
         return result
+        # </snippet>
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(

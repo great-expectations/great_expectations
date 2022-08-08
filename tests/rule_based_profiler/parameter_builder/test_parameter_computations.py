@@ -6,12 +6,14 @@ import pandas as pd
 from great_expectations.rule_based_profiler.helpers.util import (
     compute_bootstrap_quantiles_point_estimate,
 )
+
+# Allowable tolerance for how closely a bootstrap method approximates the sample
+from great_expectations.rule_based_profiler.numeric_range_estimation_result import (
+    NumericRangeEstimationResult,
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
 )
-
-# Allowable tolerance for how closely a bootstrap method approximates the sample
-from great_expectations.rule_based_profiler.types import NumericRangeEstimationResult
 
 EFFICACY_TOLERANCE: float = 1.0e-2
 
@@ -50,6 +52,7 @@ def test_bootstrap_point_estimate_efficacy(
             false_positive_rate=false_positive_rate,
             n_resamples=NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
             quantile_statistic_interpolation_method="linear",
+            quantile_bias_correction=True,
             quantile_bias_std_error_ratio_threshold=2.5e-1,
         )
         lower_quantile_point_estimate = numeric_range_estimation_result.value_range[0]

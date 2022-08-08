@@ -2,6 +2,7 @@ from typing import Dict, Optional
 
 from great_expectations import DataContext
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -9,10 +10,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MeanTableColumnsSetMatchMultiBatchParameterBuilder,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    Domain,
     ParameterContainer,
     ParameterNode,
 )

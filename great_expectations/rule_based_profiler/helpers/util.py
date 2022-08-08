@@ -19,20 +19,22 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.types import (
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+from great_expectations.rule_based_profiler.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
+    SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
+    NumericRangeEstimationResult,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     VARIABLES_PREFIX,
     Domain,
-    NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
-    SemanticDomainTypes,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
-)
-from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
-    NUM_HISTOGRAM_BINS,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import numpy_quantile
@@ -564,6 +566,7 @@ def compute_bootstrap_quantiles_point_estimate(
     false_positive_rate: np.float64,
     n_resamples: int,
     quantile_statistic_interpolation_method: str,
+    quantile_bias_correction: bool,
     quantile_bias_std_error_ratio_threshold: float,
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
@@ -652,6 +655,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=lower_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_correction=quantile_bias_correction,
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_lower_quantile,
     )
@@ -660,6 +664,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_correction=quantile_bias_correction,
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_upper_quantile,
     )
@@ -675,6 +680,7 @@ def _determine_quantile_bias_corrected_point_estimate(
     bootstraps: np.ndarray,
     quantile_pct: float,
     quantile_statistic_interpolation_method: str,
+    quantile_bias_correction: bool,
     quantile_bias_std_error_ratio_threshold: float,
     sample_quantile: np.ndarray,
 ) -> np.float64:
@@ -695,7 +701,8 @@ def _determine_quantile_bias_corrected_point_estimate(
     quantile_bias_corrected_point_estimate: np.float64
 
     if (
-        bootstrap_quantile_standard_error > 0.0
+        not quantile_bias_correction
+        and bootstrap_quantile_standard_error > 0.0
         and bootstrap_quantile_bias / bootstrap_quantile_standard_error
         <= quantile_bias_std_error_ratio_threshold
     ):
