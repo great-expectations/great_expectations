@@ -1378,29 +1378,37 @@ class DataAssistantResult(SerializableDictDot):
                 alt_type=AltairDataTypes.NOMINAL.value,
                 subtitle=subtitle,
             )
-            strict_min_plot_component: ExpectationKwargPlotComponent = (
-                ExpectationKwargPlotComponent(
-                    name=strict_min,
-                    alt_type=AltairDataTypes.NOMINAL.value,
-                    axis_title=y_axis_title,
+            expectation_kwarg_tooltips: List[alt.Tooltip] = []
+            if strict_min in df.columns:
+                strict_min_plot_component: ExpectationKwargPlotComponent = (
+                    ExpectationKwargPlotComponent(
+                        name=strict_min,
+                        alt_type=AltairDataTypes.NOMINAL.value,
+                        axis_title=y_axis_title,
+                    )
                 )
-            )
-            strict_max_plot_component: ExpectationKwargPlotComponent = (
-                ExpectationKwargPlotComponent(
-                    name=strict_max,
-                    alt_type=AltairDataTypes.NOMINAL.value,
-                    axis_title=y_axis_title,
+                expectation_kwarg_tooltips.append(
+                    strict_min_plot_component.generate_tooltip()
                 )
-            )
+            if strict_max in df.columns:
+                strict_max_plot_component: ExpectationKwargPlotComponent = (
+                    ExpectationKwargPlotComponent(
+                        name=strict_max,
+                        alt_type=AltairDataTypes.NOMINAL.value,
+                        axis_title=y_axis_title,
+                    )
+                )
+                expectation_kwarg_tooltips.append(
+                    strict_max_plot_component.generate_tooltip()
+                )
             tooltip = (
                 [domain_plot_component.generate_tooltip()]
                 + batch_plot_component.generate_tooltip()
                 + [
                     min_value_plot_component.generate_tooltip(format=","),
                     max_value_plot_component.generate_tooltip(format=","),
-                    strict_min_plot_component.generate_tooltip(),
-                    strict_max_plot_component.generate_tooltip(),
                 ]
+                + expectation_kwarg_tooltips
                 + [
                     metric_plot_component.generate_tooltip(format=",")
                     for metric_plot_component in metric_plot_components
@@ -1546,7 +1554,6 @@ class DataAssistantResult(SerializableDictDot):
         max_value: str = "max_value"
         strict_min: str = "strict_min"
         strict_max: str = "strict_max"
-        value_ranges: str = "value_ranges"
 
         batch_name: str = "batch"
         all_columns: List[str] = list(column_dfs[0].df.columns)
@@ -1563,7 +1570,6 @@ class DataAssistantResult(SerializableDictDot):
                     max_value,
                     strict_min,
                     strict_max,
-                    value_ranges,
                 }
             )
         ]
@@ -1626,7 +1632,6 @@ class DataAssistantResult(SerializableDictDot):
                 max_value,
                 strict_min,
                 strict_max,
-                value_ranges,
             ]
         )
 
@@ -1657,14 +1662,6 @@ class DataAssistantResult(SerializableDictDot):
             strict_max_plot_component = ExpectationKwargPlotComponent(
                 name=strict_max,
                 alt_type=AltairDataTypes.NOMINAL.value,
-                axis_title=y_axis_title,
-            )
-
-        value_ranges_plot_component: Optional[ExpectationKwargPlotComponent] = None
-        if value_ranges in df.columns:
-            value_ranges_plot_component = ExpectationKwargPlotComponent(
-                name=value_ranges,
-                alt_type=AltairDataTypes.QUANTITATIVE.value,
                 axis_title=y_axis_title,
             )
 
@@ -1727,7 +1724,6 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component=max_value_plot_component,
                 strict_min_plot_component=strict_min_plot_component,
                 strict_max_plot_component=strict_max_plot_component,
-                value_ranges_plot_component=value_ranges_plot_component,
                 predicates=predicates,
             )
         else:
@@ -1741,7 +1737,6 @@ class DataAssistantResult(SerializableDictDot):
                 max_value_plot_component=max_value_plot_component,
                 strict_min_plot_component=strict_min_plot_component,
                 strict_max_plot_component=strict_max_plot_component,
-                value_ranges_plot_component=value_ranges_plot_component,
                 predicates=predicates,
             )
 
@@ -1906,6 +1901,11 @@ class DataAssistantResult(SerializableDictDot):
             .properties(title=title)
         )
 
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
+
         metric_name: str
         predicate: Union[bool, int]
         anomaly_coded_line: alt.Chart
@@ -1933,6 +1933,9 @@ class DataAssistantResult(SerializableDictDot):
                 y=metric_plot_component.plot_on_axis(),
                 tooltip=tooltip,
             )
+
+            if "quantiles" in df.columns:
+                anomaly_coded_line = anomaly_coded_line.encode(detail="quantiles")
 
             anomaly_coded_points = anomaly_coded_base.mark_point().encode(
                 x=batch_plot_component.plot_on_axis(),
@@ -2022,6 +2025,11 @@ class DataAssistantResult(SerializableDictDot):
             )
             .properties(title=title)
         )
+
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
 
         metric_name: str
         predicate: Union[bool, int]
@@ -2211,7 +2219,6 @@ class DataAssistantResult(SerializableDictDot):
         max_value_plot_component: ExpectationKwargPlotComponent,
         strict_min_plot_component: Optional[ExpectationKwargPlotComponent],
         strict_max_plot_component: Optional[ExpectationKwargPlotComponent],
-        value_ranges_plot_component: Optional[ExpectationKwargPlotComponent],
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
@@ -2221,7 +2228,6 @@ class DataAssistantResult(SerializableDictDot):
 
         expectation_kwargs_tooltip: List[alt.Tooltip] = []
         expectation_kwargs_initial_dropdown_state: List[str] = []
-        detail: Optional[str] = None
         if strict_min_plot_component and strict_max_plot_component:
             expectation_kwargs_tooltip = [
                 strict_min_plot_component.generate_tooltip(),
@@ -2231,14 +2237,6 @@ class DataAssistantResult(SerializableDictDot):
                 strict_min_plot_component.name,
                 strict_max_plot_component.name,
             ]
-        elif value_ranges_plot_component:
-            expectation_kwargs_tooltip = [
-                value_ranges_plot_component.generate_tooltip(format=",")
-            ]
-            expectation_kwargs_initial_dropdown_state = [
-                value_ranges_plot_component.name
-            ]
-            detail = "quantiles"
 
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
@@ -2338,10 +2336,10 @@ class DataAssistantResult(SerializableDictDot):
             .transform_filter(selection)
         )
 
-        if detail is not None:
-            lower_limit = lower_limit.encode(detail=detail)
-            upper_limit = upper_limit.encode(detail=detail)
-            band = band.encode(detail=detail)
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
 
         lines_and_points: alt.LayerChart = (
             DataAssistantResult._get_interactive_line_chart(
@@ -2402,7 +2400,6 @@ class DataAssistantResult(SerializableDictDot):
         max_value_plot_component: ExpectationKwargPlotComponent,
         strict_min_plot_component: ExpectationKwargPlotComponent,
         strict_max_plot_component: ExpectationKwargPlotComponent,
-        value_ranges_plot_component: ExpectationKwargPlotComponent,
         predicates: List[Union[bool, int]],
     ) -> alt.VConcatChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
@@ -2410,16 +2407,26 @@ class DataAssistantResult(SerializableDictDot):
         )
         expectation_kwarg_line_stroke_width: int = 5
 
+        expectation_kwargs_tooltip: List[alt.Tooltip] = []
+        expectation_kwargs_initial_dropdown_state: List[str] = []
+        if strict_min_plot_component and strict_max_plot_component:
+            expectation_kwargs_tooltip = [
+                strict_min_plot_component.generate_tooltip(),
+                strict_max_plot_component.generate_tooltip(),
+            ]
+            expectation_kwargs_initial_dropdown_state = [
+                strict_min_plot_component.name,
+                strict_max_plot_component.name,
+            ]
+
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
             + batch_plot_component.generate_tooltip()
             + [
                 min_value_plot_component.generate_tooltip(format=","),
                 max_value_plot_component.generate_tooltip(format=","),
-                strict_min_plot_component.generate_tooltip(),
-                strict_max_plot_component.generate_tooltip(),
-                value_ranges_plot_component.generate_tooltip(format=","),
             ]
+            + expectation_kwargs_tooltip
             + [
                 metric_plot_component.generate_tooltip(format=",")
                 for metric_plot_component in metric_plot_components
@@ -2435,10 +2442,8 @@ class DataAssistantResult(SerializableDictDot):
                 domain_plot_component.name,
                 min_value_plot_component.name,
                 max_value_plot_component.name,
-                strict_min_plot_component.name,
-                strict_max_plot_component.name,
-                value_ranges_plot_component.name,
             ]
+            + expectation_kwargs_initial_dropdown_state
         ] = " "
         df = pd.concat([input_dropdown_initial_state, df], axis=0)
 
@@ -2514,6 +2519,11 @@ class DataAssistantResult(SerializableDictDot):
             )
             .transform_filter(selection)
         )
+
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
 
         bars: alt.LayerChart = DataAssistantResult._get_interactive_bar_chart(
             expectation_type=expectation_type,
