@@ -1,8 +1,9 @@
 from typing import Dict, List
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.rule_based_profiler.rule import RuleOutput
-from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 
 
 def test_rule_output_get_get_expectation_configurations(

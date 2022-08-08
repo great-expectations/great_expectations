@@ -15,6 +15,7 @@ from great_expectations.core.id_dict import BatchSpec, IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -22,8 +23,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     RegexPatternStringParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
