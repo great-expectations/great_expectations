@@ -525,7 +525,7 @@ def test_checkpoint_config_print(
             CheckpointConfig(
                 name="my_nested_checkpoint",
                 config_version=1,
-                validation_id="93e015ee-6405-4d5e-894c-741dc763f509",
+                default_validation_id="93e015ee-6405-4d5e-894c-741dc763f509",
                 template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
@@ -544,7 +544,7 @@ def test_checkpoint_config_print(
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
-                "validation_id": "93e015ee-6405-4d5e-894c-741dc763f509",
+                "default_validation_id": "93e015ee-6405-4d5e-894c-741dc763f509",
                 "evaluation_parameters": {},
                 "expectation_suite_ge_cloud_id": None,
                 "expectation_suite_name": "users.delivery",
@@ -574,7 +574,7 @@ def test_checkpoint_config_print(
             CheckpointConfig(
                 name="my_nested_checkpoint",
                 config_version=1,
-                validation_id="e3ff7a3a-3529-4c2a-be22-598493269680",
+                default_validation_id="e3ff7a3a-3529-4c2a-be22-598493269680",
                 template_name="my_nested_checkpoint_template",
                 expectation_suite_name="users.delivery",
                 validations=[
@@ -594,7 +594,7 @@ def test_checkpoint_config_print(
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
-                "validation_id": "e3ff7a3a-3529-4c2a-be22-598493269680",
+                "default_validation_id": "e3ff7a3a-3529-4c2a-be22-598493269680",
                 "evaluation_parameters": {},
                 "expectation_suite_ge_cloud_id": None,
                 "expectation_suite_name": "users.delivery",
