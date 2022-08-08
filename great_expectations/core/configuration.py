@@ -1,5 +1,4 @@
 """Contains general abstract or base classes used across configuration objects."""
-import copy
 from abc import ABC
 from typing import Optional
 
@@ -22,8 +21,8 @@ class AbstractConfigSchema(Schema):
 
     @post_dump
     def filter_none(self, data: dict, **kwargs) -> dict:
-        data = copy.deepcopy(data)
-        for key in AbstractConfigSchema.REMOVE_KEYS_IF_NONE:
-            if key in data and data[key] is None:
-                data.pop(key)
-        return data
+        return {
+            key: value
+            for key, value in data.items()
+            if key not in AbstractConfigSchema.REMOVE_KEYS_IF_NONE or value is not None
+        }
