@@ -2291,6 +2291,7 @@ class CheckpointConfigSchema(Schema):
             "evaluation_parameters",
             "runtime_configuration",
             "validations",
+            "default_validation_id",
             "profilers",
             # Next two fields are for LegacyCheckpoint configuration
             "validation_operator_name",
@@ -2313,6 +2314,7 @@ class CheckpointConfigSchema(Schema):
         "notify_with",
         "validation_operator_name",
         "batches",
+        "default_validation_id",
     ]
 
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
@@ -2347,6 +2349,8 @@ class CheckpointConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
+    default_validation_id = fields.String(required=False, allow_none=True)
+
     profilers = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
     )
@@ -2427,6 +2431,7 @@ class CheckpointConfig(BaseYamlConfig):
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[CheckpointValidationConfig]] = None,
+        default_validation_id: Optional[str] = None,
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
@@ -2457,6 +2462,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
+            self._default_validation_id = default_validation_id
             self._profilers = profilers or []
             self._ge_cloud_id = ge_cloud_id
             # the following attributes are used by SimpleCheckpoint
@@ -2542,6 +2548,14 @@ class CheckpointConfig(BaseYamlConfig):
     @validations.setter
     def validations(self, value: List[CheckpointValidationConfig]) -> None:
         self._validations = value
+
+    @property
+    def default_validation_id(self) -> Optional[str]:
+        return self._default_validation_id
+
+    @default_validation_id.setter
+    def default_validation_id(self, validation_id: str) -> None:
+        self._default_validation_id = validation_id
 
     @property
     def profilers(self) -> List[dict]:
