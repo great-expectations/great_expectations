@@ -563,7 +563,8 @@ def test_onboarding_data_assistant_plot_metrics_exclude_column_names_filters_out
 ) -> None:
     exclude_column_names: List[str] = ["VendorID", "passenger_count"]
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics(
-        exclude_column_names=exclude_column_names
+        exclude_column_names=exclude_column_names,
+        sequential=False,
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]

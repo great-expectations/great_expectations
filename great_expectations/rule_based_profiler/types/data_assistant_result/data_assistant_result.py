@@ -1525,12 +1525,20 @@ class DataAssistantResult(SerializableDictDot):
                 domain_plot_component=domain_plot_component,
             )
         else:
-            return DataAssistantResult._get_interactive_bar_chart(
-                df=df,
-                metric_plot_components=metric_plot_components,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
+            if "column_quantile_values" in df.columns:
+                return DataAssistantResult._get_interactive_range_chart(
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                )
+            else:
+                return DataAssistantResult._get_interactive_bar_chart(
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                )
 
     @staticmethod
     def _get_interactive_expect_column_values_to_be_between_chart(
@@ -1727,18 +1735,32 @@ class DataAssistantResult(SerializableDictDot):
                 predicates=predicates,
             )
         else:
-            return DataAssistantResult._get_interactive_expect_column_values_to_be_between_bar_chart(
-                expectation_type=expectation_type,
-                df=df,
-                metric_plot_components=metric_plot_components,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-                min_value_plot_component=min_value_plot_component,
-                max_value_plot_component=max_value_plot_component,
-                strict_min_plot_component=strict_min_plot_component,
-                strict_max_plot_component=strict_max_plot_component,
-                predicates=predicates,
-            )
+            if "column_quantile_values" in df.columns:
+                return DataAssistantResult._get_interactive_expect_column_values_to_be_between_range_chart(
+                    expectation_type=expectation_type,
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                    min_value_plot_component=min_value_plot_component,
+                    max_value_plot_component=max_value_plot_component,
+                    strict_min_plot_component=strict_min_plot_component,
+                    strict_max_plot_component=strict_max_plot_component,
+                    predicates=predicates,
+                )
+            else:
+                return DataAssistantResult._get_interactive_expect_column_values_to_be_between_bar_chart(
+                    expectation_type=expectation_type,
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                    min_value_plot_component=min_value_plot_component,
+                    max_value_plot_component=max_value_plot_component,
+                    strict_min_plot_component=strict_min_plot_component,
+                    strict_max_plot_component=strict_max_plot_component,
+                    predicates=predicates,
+                )
 
     @staticmethod
     def _get_line_chart(
@@ -2185,6 +2207,7 @@ class DataAssistantResult(SerializableDictDot):
             fields=[domain_plot_component.name],
         )
 
+        bars: alt.Chart
         bars_list: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             bars: alt.Chart = (
@@ -2207,6 +2230,84 @@ class DataAssistantResult(SerializableDictDot):
             bars_list.append(bars)
 
         return alt.layer(*bars_list)
+
+    @staticmethod
+    def _get_interactive_range_chart(
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        expectation_type: Optional[str] = None,
+    ) -> alt.LayerChart:
+        title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+        )
+
+        tooltip: List[alt.Tooltip] = (
+            [domain_plot_component.generate_tooltip()]
+            + batch_plot_component.generate_tooltip()
+            + [
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
+            ]
+        )
+
+        if expectation_type is None:
+            input_dropdown_initial_state: pd.DataFrame = df.groupby(
+                [batch_plot_component.name], as_index=False
+            ).max()
+            input_dropdown_initial_state[
+                batch_plot_component.batch_identifiers + [domain_plot_component.name]
+            ] = " "
+            df = pd.concat([input_dropdown_initial_state, df], axis=0)
+
+        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        input_dropdown: alt.binding_select = alt.binding_select(
+            options=columns, name="Select Column: "
+        )
+        selection: alt.selection_single = alt.selection_single(
+            empty="none",
+            bind=input_dropdown,
+            fields=[domain_plot_component.name],
+        )
+
+        line_and_points_list: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            line: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_line()
+                .encode(
+                    x=batch_plot_component.plot_on_axis(),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                    detail="batch",
+                )
+            )
+
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point()
+                .encode(
+                    x=batch_plot_component.plot_on_axis(),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+            )
+
+            line_and_points_list.append(
+                alt.layer(line, points)
+                .add_selection(selection)
+                .transform_filter(selection)
+            )
+
+        return (
+            alt.layer(*line_and_points_list)
+            .add_selection(selection)
+            .transform_filter(selection)
+        )
 
     @staticmethod
     def _get_interactive_expect_column_values_to_be_between_line_chart(
@@ -2556,6 +2657,187 @@ class DataAssistantResult(SerializableDictDot):
         return (alt.layer(band, lower_limit, upper_limit, bars)).add_selection(
             selection
         )
+
+    @staticmethod
+    def _get_interactive_expect_column_values_to_be_between_range_chart(
+        expectation_type: str,
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        min_value_plot_component: ExpectationKwargPlotComponent,
+        max_value_plot_component: ExpectationKwargPlotComponent,
+        strict_min_plot_component: Optional[ExpectationKwargPlotComponent],
+        strict_max_plot_component: Optional[ExpectationKwargPlotComponent],
+        predicates: List[Union[bool, int]],
+    ) -> alt.LayerChart:
+        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
+            ColorPalettes.HEATMAP_6.value[4]
+        )
+        expectation_kwarg_line_stroke_width: int = 5
+
+        expectation_kwargs_tooltip: List[alt.Tooltip] = []
+        expectation_kwargs_initial_dropdown_state: List[str] = []
+        if strict_min_plot_component and strict_max_plot_component:
+            expectation_kwargs_tooltip = [
+                strict_min_plot_component.generate_tooltip(),
+                strict_max_plot_component.generate_tooltip(),
+            ]
+            expectation_kwargs_initial_dropdown_state = [
+                strict_min_plot_component.name,
+                strict_max_plot_component.name,
+            ]
+
+        tooltip: List[alt.Tooltip] = (
+            [domain_plot_component.generate_tooltip()]
+            + batch_plot_component.generate_tooltip()
+            + [
+                min_value_plot_component.generate_tooltip(format=","),
+                max_value_plot_component.generate_tooltip(format=","),
+            ]
+            + expectation_kwargs_tooltip
+            + [
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
+            ]
+        )
+
+        input_dropdown_initial_state: pd.DataFrame = df.groupby(
+            [batch_plot_component.name], as_index=False
+        ).max()
+        input_dropdown_initial_state[
+            batch_plot_component.batch_identifiers
+            + [
+                domain_plot_component.name,
+                min_value_plot_component.name,
+                max_value_plot_component.name,
+            ]
+            + expectation_kwargs_initial_dropdown_state
+        ] = " "
+        df = pd.concat([input_dropdown_initial_state, df], axis=0)
+
+        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        input_dropdown: alt.binding_select = alt.binding_select(
+            options=columns, name="Select Column: "
+        )
+        selection: alt.selection_single = alt.selection_single(
+            empty="none",
+            bind=input_dropdown,
+            fields=[domain_plot_component.name],
+        )
+
+        lower_limit: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
+            .encode(
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                ),
+                y=alt.Y(
+                    min_value_plot_component.name,
+                    type=min_value_plot_component.alt_type,
+                ),
+                tooltip=tooltip,
+            )
+            .transform_filter(selection)
+        )
+
+        upper_limit: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_line(
+                color=expectation_kwarg_line_color,
+                strokeWidth=expectation_kwarg_line_stroke_width,
+            )
+            .encode(
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                ),
+                y=alt.Y(
+                    max_value_plot_component.name,
+                    type=max_value_plot_component.alt_type,
+                ),
+                tooltip=tooltip,
+            )
+            .transform_filter(selection)
+        )
+
+        band: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_area()
+            .encode(
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                ),
+                y=alt.Y(
+                    min_value_plot_component.name,
+                    type=min_value_plot_component.alt_type,
+                ),
+                y2=alt.Y2(max_value_plot_component.name),
+            )
+            .transform_filter(selection)
+        )
+
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
+
+        lines_and_points: alt.LayerChart = (
+            DataAssistantResult._get_interactive_range_chart(
+                expectation_type=expectation_type,
+                df=df,
+                metric_plot_components=metric_plot_components,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+            )
+        )
+
+        line: alt.Chart
+        points: alt.Chart
+        point_color_condition: alt.condition
+        anomaly_coded_points: alt.Chart
+        for idx, line_layer in enumerate(lines_and_points.layer):
+            line = line_layer.layer[0]
+            points = line_layer.layer[1]
+
+            line_layer.selection = alt.Undefined
+            line_layer.transform = alt.Undefined
+            line.selection = alt.Undefined
+            line.transform = alt.Undefined
+            points.selection = alt.Undefined
+            points.transform = alt.Undefined
+
+            point_color_condition: alt.condition = alt.condition(
+                predicate=predicates[idx],
+                if_false=alt.value(Colors.GREEN.value),
+                if_true=alt.value(Colors.PINK.value),
+            )
+
+            anomaly_coded_points = points.encode(
+                color=point_color_condition, tooltip=tooltip
+            ).transform_filter(selection)
+
+            line = line.transform_filter(selection)
+
+            line_layer.layer[0] = line
+            line_layer.layer[1] = anomaly_coded_points
+
+        lines_and_points.selection = alt.Undefined
+        lines_and_points.transform = alt.Undefined
+        lines_and_points = lines_and_points.transform_filter(selection)
+
+        return (
+            alt.layer(band, lower_limit, upper_limit, lines_and_points)
+        ).add_selection(selection)
 
     @staticmethod
     def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
