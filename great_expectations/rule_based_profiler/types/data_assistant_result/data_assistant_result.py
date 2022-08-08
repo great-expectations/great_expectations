@@ -826,7 +826,9 @@ class DataAssistantResult(SerializableDictDot):
                 df["column_number"] = pd.factorize(df["table_columns"])[0] + 1
 
             if "value_ranges" in list_column_names:
+                # split value ranges into two columns
                 df[["min_value", "max_value"]] = df["value_ranges"].tolist()
+                df = df.drop(columns=["value_ranges"], axis=1)
 
         return df
 
@@ -1772,11 +1774,7 @@ class DataAssistantResult(SerializableDictDot):
                         x=batch_plot_component.plot_on_axis(),
                         y=metric_plot_component.plot_on_axis(),
                         tooltip=tooltip,
-                        color=alt.Y(
-                            metric_list_position,
-                            type=AltairDataTypes.ORDINAL.value,
-                            legend=None,
-                        ),
+                        detail=metric_list_position,
                     )
                 )
             else:
