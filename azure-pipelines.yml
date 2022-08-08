@@ -322,6 +322,8 @@ stages:
               python.version: '3.8'
             Python39:
               python.version: '3.9'
+        services:
+          postgres: postgres
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
