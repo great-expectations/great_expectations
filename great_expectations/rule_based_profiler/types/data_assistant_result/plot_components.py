@@ -118,7 +118,6 @@ class BatchPlotComponent(PlotComponent):
             self.name,
             type=self.alt_type,
             title=self.title,
-            scale=alt.Scale(align=0.05),
         )
 
     def generate_tooltip(self, format: str = "") -> List[alt.Tooltip]:
