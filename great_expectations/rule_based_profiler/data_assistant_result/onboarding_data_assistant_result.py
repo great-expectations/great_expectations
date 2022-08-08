@@ -1,5 +1,5 @@
-from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
+from great_expectations.rule_based_profiler.altair import AltairDataTypes
+from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
 

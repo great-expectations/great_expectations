@@ -39,23 +39,9 @@ from great_expectations.core.util import (
     in_jupyter_notebook,
     nested_update,
 )
+from great_expectations.rule_based_profiler.altair import AltairDataTypes, AltairThemes
 from great_expectations.rule_based_profiler.config import RuleConfig
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_or_create_expectation_suite,
-    sanitize_parameter_name,
-)
-from great_expectations.rule_based_profiler.types import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    Domain,
-    MetricValues,
-    ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.altair import (
-    AltairDataTypes,
-    AltairThemes,
-)
-from great_expectations.rule_based_profiler.types.data_assistant_result.plot_components import (
+from great_expectations.rule_based_profiler.data_assistant_result.plot_components import (
     BatchPlotComponent,
     DomainPlotComponent,
     ExpectationKwargPlotComponent,
@@ -63,9 +49,22 @@ from great_expectations.rule_based_profiler.types.data_assistant_result.plot_com
     PlotComponent,
     determine_plot_title,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
+from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotMode,
     PlotResult,
+)
+from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_or_create_expectation_suite,
+    sanitize_parameter_name,
+)
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricValues,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    ParameterNode,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
