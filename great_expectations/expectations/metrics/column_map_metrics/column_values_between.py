@@ -1,5 +1,6 @@
 import warnings
 
+import numpy as np
 from dateutil.parser import parse
 
 from great_expectations.execution_engine import (
@@ -72,6 +73,12 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
 
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
+
+        # Use a vectorized approach for native numpy dtypes
+        if column.dtype in [int, float, bool, np.dtype("datetime64[ns]")]:
+            return cls._pandas_vectorized(
+                temp_column, min_value, max_value, strict_min, strict_max
+            )
 
         def is_between(val):
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
@@ -168,6 +175,29 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 return False
 
         return temp_column.map(is_between)
+
+    @classmethod
+    def _pandas_vectorized(cls, column, min_value, max_value, strict_min, strict_max):
+        if min_value is None:
+            if strict_max:
+                return column < max_value
+            else:
+                return column <= max_value
+
+        if max_value is None:
+            if strict_min:
+                return min_value < column
+            else:
+                return min_value <= column
+
+        if strict_min and strict_max:
+            return (min_value < column) & (column < max_value)
+        elif strict_min:
+            return (min_value < column) & (column <= max_value)
+        elif strict_max:
+            return (min_value <= column) & (column < max_value)
+        else:
+            return (min_value <= column) & (column <= max_value)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
