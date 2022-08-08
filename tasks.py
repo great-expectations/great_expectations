@@ -125,7 +125,6 @@ def type_coverage(ctx):
     iterable=["packages"],
     help={
         "packages": "One or more `great_expectatations` sub-packages to type-check with mypy.",
-        "show-default-packages": "Print the default packages to type-check and then exit.",
         "install-types": "Automatically install any needed types from `typeshed`.",
         "daemon": "Run mypy in daemon mode with faster analysis."
         " The daemon will be started and re-used for subsequent calls."
