@@ -6,12 +6,14 @@ import pandas as pd
 from great_expectations.rule_based_profiler.helpers.util import (
     compute_bootstrap_quantiles_point_estimate,
 )
+
+# Allowable tolerance for how closely a bootstrap method approximates the sample
+from great_expectations.rule_based_profiler.numeric_range_estimation_result import (
+    NumericRangeEstimationResult,
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
 )
-
-# Allowable tolerance for how closely a bootstrap method approximates the sample
-from great_expectations.rule_based_profiler.types import NumericRangeEstimationResult
 
 EFFICACY_TOLERANCE: float = 1.0e-2
 

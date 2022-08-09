@@ -66,13 +66,6 @@ class EphemeralDataContext(AbstractDataContext):
         )
         self._datasource_store = datasource_store
 
-    def _save_project_config(self) -> None:
-        """Since EphemeralDataContext does not have config as a file, display logging message instead"""
-        logger.debug(
-            "EphemeralDataContext has been detected - skipping DataContext._save_project_config"
-        )
-        return None
-
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,

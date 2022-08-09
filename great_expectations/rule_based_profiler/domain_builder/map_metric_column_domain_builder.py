@@ -1,15 +1,14 @@
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
-    SemanticDomainTypes,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 

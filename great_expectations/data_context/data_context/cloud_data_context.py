@@ -120,13 +120,6 @@ class CloudDataContext(AbstractDataContext):
         # if in ge_cloud_mode, use ge_cloud_organization_id
         return self.ge_cloud_config.organization_id
 
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug(
-            "ge_cloud_mode detected - skipping DataContext._save_project_config"
-        )
-        return None
-
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
     ) -> DataContextConfig:
@@ -392,6 +385,7 @@ class CloudDataContext(AbstractDataContext):
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
+        default_validation_id: Optional[str] = None,
     ) -> "Checkpoint":  # noqa: F821
         """
         See `AbstractDataContext.add_checkpoint` for more information.
@@ -425,6 +419,7 @@ class CloudDataContext(AbstractDataContext):
             notify_with=notify_with,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            default_validation_id=default_validation_id,
         )
 
         checkpoint_config = self.checkpoint_store.create(

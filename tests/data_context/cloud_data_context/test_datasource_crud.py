@@ -129,7 +129,7 @@ def _add_datasource_helper(
 
 
 @pytest.mark.cloud
-@pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "data_context_fixture_name,data_context_type,save_changes",
     [
@@ -282,7 +282,7 @@ def test_cloud_backed_data_context_add_datasource(
 
 @pytest.mark.xfail(reason="temp xfail remove before merge")
 @pytest.mark.cloud
-@pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "config_includes_name_setting",
     [
@@ -329,9 +329,10 @@ def test_data_context_in_cloud_mode_add_datasource(
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
+            expected_datasource_config = datasourceConfigSchema.dump(datasource_config)
             stored_datasource = context.add_datasource(
                 name=datasource_name,
-                **datasource_config.to_dict(),
+                **expected_datasource_config,
             )
         elif config_includes_name_setting == "config_includes_name":
             stored_datasource = context.add_datasource(
@@ -350,6 +351,9 @@ def test_data_context_in_cloud_mode_add_datasource(
         assert len(context.list_datasources()) == 1
 
         retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
+        expected_datasource_config = datasourceConfigSchema.dump(
+            datasource_config_with_name
+        )
 
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
@@ -359,7 +363,7 @@ def test_data_context_in_cloud_mode_add_datasource(
                 "data": {
                     "type": "datasource",
                     "attributes": {
-                        "datasource_config": datasource_config_with_name.to_json_dict(),
+                        "datasource_config": expected_datasource_config,
                         "organization_id": ge_cloud_organization_id,
                     },
                 }
@@ -379,7 +383,7 @@ def test_data_context_in_cloud_mode_add_datasource(
 
 @pytest.mark.xfail(reason="temp xfail remove before merge")
 @pytest.mark.cloud
-@pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "config_includes_name_setting",
     [
@@ -426,9 +430,10 @@ def test_cloud_data_context_add_datasource(
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
+            expected_datasource_config = datasourceConfigSchema.dump(datasource_config)
             stored_datasource = context.add_datasource(
                 name=datasource_name,
-                **datasource_config.to_dict(),
+                **expected_datasource_config,
                 save_changes=True,
             )
         elif config_includes_name_setting == "config_includes_name":
@@ -450,6 +455,9 @@ def test_cloud_data_context_add_datasource(
         assert len(context.list_datasources()) == 1
 
         retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
+        expected_datasource_config = datasourceConfigSchema.dump(
+            datasource_config_with_name
+        )
 
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
@@ -459,7 +467,7 @@ def test_cloud_data_context_add_datasource(
                 "data": {
                     "type": "datasource",
                     "attributes": {
-                        "datasource_config": datasource_config_with_name.to_json_dict(),
+                        "datasource_config": expected_datasource_config,
                         "organization_id": ge_cloud_organization_id,
                     },
                 }
