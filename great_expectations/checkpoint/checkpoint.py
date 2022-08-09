@@ -142,9 +142,8 @@ class BaseCheckpoint(ConfigPeer):
         run_name_template = substituted_runtime_config.get("run_name_template")
 
         batch_request = substituted_runtime_config.get("batch_request")
-        validations = substituted_runtime_config.get("validations") or []
+        validations = cast(list, substituted_runtime_config.get("validations") or [])
 
-        assert validations is not None
         if len(validations) == 0 and not batch_request:
             raise ge_exceptions.CheckpointError(
                 f'Checkpoint "{self.name}" must contain either a batch_request or validations.'
