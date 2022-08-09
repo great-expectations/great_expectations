@@ -1962,6 +1962,8 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         expectation_kwarg_tooltips: List[alt.Tooltip] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwarg_tooltips.append(
                 expectation_kwarg_plot_component.generate_tooltip()
@@ -2094,6 +2096,8 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         expectation_kwarg_tooltips: List[alt.Tooltip] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwarg_tooltips.append(
                 expectation_kwarg_plot_component.generate_tooltip()
@@ -2232,6 +2236,8 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         expectation_kwarg_tooltips: List[alt.Tooltip] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwarg_tooltips.append(
                 expectation_kwarg_plot_component.generate_tooltip()
@@ -2592,6 +2598,8 @@ class DataAssistantResult(SerializableDictDot):
 
         expectation_kwargs_tooltip: List[alt.Tooltip] = []
         expectation_kwargs_initial_dropdown_state: List[str] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwargs_tooltip.append(
                 expectation_kwarg_plot_component.generate_tooltip(),
@@ -2767,6 +2775,8 @@ class DataAssistantResult(SerializableDictDot):
 
         expectation_kwargs_tooltip: List[alt.Tooltip] = []
         expectation_kwargs_initial_dropdown_state: List[str] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwargs_tooltip.append(
                 expectation_kwarg_plot_component.generate_tooltip(),
@@ -2929,6 +2939,8 @@ class DataAssistantResult(SerializableDictDot):
 
         expectation_kwargs_tooltip: List[alt.Tooltip] = []
         expectation_kwargs_initial_dropdown_state: List[str] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwargs_tooltip = [
                 expectation_kwarg_plot_component.generate_tooltip(),
