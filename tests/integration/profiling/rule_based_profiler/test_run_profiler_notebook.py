@@ -343,13 +343,19 @@ def test_run_multibatch_configured_asset_example_pandas(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
-def test_run_multibatch_sql_asset_example(tmp_path):
+# this is what needs to be updated
+def test_run_multibatch_sql_asset_example(tmp_path, sa, test_backends):
     """
     What does this test and why?
     One of the resources we have for multi-batch Expectations is a Jupyter notebook that explains/shows the components
     in code. This test ensures the codepaths and examples described in the Notebook actually run and pass, nbconvert's
     `preprocess` function.
     """
+    if "postgresql" not in test_backends:
+        pass
+    else:
+        load_data_into_postgres_database()
+
     base_dir: str = file_relative_path(
         __file__, "../../../test_fixtures/rule_based_profiler/example_notebooks"
     )
@@ -378,7 +384,87 @@ def test_run_multibatch_sql_asset_example(tmp_path):
             "great_expectations/expectations/.ge_store_backend_id",
             "great_expectations/expectations/example_sql_suite.json",
             "great_expectations/checkpoints/my_checkpoint.yml",
-            "great_expectations/uncommitted/data_docs",
+            "great_expectations/unommitted/data_docs",
             "great_expectations/uncommitted/validations/example_sql_suite",
         ]
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
+
+
+def load_data_into_postgres_database():
+    from typing import List
+
+    import sqlalchemy as sa
+
+    from tests.test_utils import load_data_into_test_database
+
+    CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
+
+    base_dir: str = file_relative_path(
+        __file__, "../../../test_fixtures/rule_based_profiler/example_notebooks"
+    )
+
+    data_paths: List[str] = [
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-01.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-02.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-03.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-04.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-05.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-06.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-07.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-08.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-09.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-10.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-11.csv",
+        ),
+        file_relative_path(
+            __file__,
+            "../../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-12.csv",
+        ),
+    ]
+
+    engine = sa.create_engine(CONNECTION_STRING)
+    connection = engine.connect()
+    table_name = "yellow_tripdata_sample_2020"
+    res = connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+
+    for data_path in data_paths:
+        load_data_into_test_database(
+            table_name="yellow_tripdata_sample_2020",
+            csv_path=data_path,
+            connection_string=CONNECTION_STRING,
+            load_full_dataset=True,
+            drop_existing_table=False,
+            convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
+        )

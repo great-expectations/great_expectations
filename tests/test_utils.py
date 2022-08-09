@@ -591,6 +591,7 @@ def load_data_into_test_database(
     convert_colnames_to_datetime: Optional[List[str]] = None,
     random_table_suffix: bool = False,
     to_sql_method: Optional[str] = None,
+    drop_existing_table: bool = True,
 ) -> LoadedTable:
     """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
 
@@ -661,9 +662,15 @@ def load_data_into_test_database(
     else:
         try:
             connection = engine.connect()
-            print(f"Dropping table {table_name}")
-            connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-            print(f"Creating table {table_name} and adding data from {csv_paths}")
+            if drop_existing_table:
+                print(f"Dropping table {table_name}")
+                connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+                print(f"Creating table {table_name} and adding data from {csv_paths}")
+            else:
+                print(
+                    f"Adding to existing table {table_name} and adding data from {csv_paths}"
+                )
+
             all_dfs_concatenated.to_sql(
                 name=table_name,
                 con=engine,
