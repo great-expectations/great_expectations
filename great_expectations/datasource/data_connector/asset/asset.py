@@ -32,6 +32,7 @@ class Asset:
         prefix: Optional[str] = None,
         # Both S3/Azure
         delimiter: Optional[str] = None,
+        reader_options: Optional[dict] = None,
     ) -> None:
         self._name = name
         self._base_directory = base_directory
@@ -59,6 +60,8 @@ class Asset:
 
         # Both S3/Azure
         self._delimiter = delimiter
+
+        self._reader_options = reader_options
 
     @property
     def name(self) -> str:
