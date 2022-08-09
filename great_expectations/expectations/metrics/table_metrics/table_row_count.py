@@ -9,6 +9,9 @@ from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
     MetricPartialFunctionTypes,
 )
+from great_expectations.execution_engine.polars_execution_engine import (
+    PolarsExecutionEngine,
+)
 from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
@@ -26,6 +29,20 @@ class TableRowCount(TableMetricProvider):
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: Dict,
+    ):
+        df, _, _ = execution_engine.get_compute_domain(
+            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        )
+        return df.shape[0]
+
+    @metric_value(engine=PolarsExecutionEngine)
+    def _polars(
+        cls,
+        execution_engine: PolarsExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],

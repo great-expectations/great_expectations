@@ -5,6 +5,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
+    PolarsExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
@@ -35,6 +36,11 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Standard Deviation implementation"""
+        return column.std()
+
+    @column_aggregate_value(engine=PolarsExecutionEngine)
+    def _polars(cls, column, **kwargs):
+        """Polars Standard Deviation implementation"""
         return column.std()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)

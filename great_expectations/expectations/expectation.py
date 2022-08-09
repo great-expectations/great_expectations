@@ -1463,6 +1463,7 @@ class Expectation(metaclass=MetaExpectation):
             "PandasExecutionEngine",
             "SqlAlchemyExecutionEngine",
             "SparkDFExecutionEngine",
+            "PolarsExecutionEngine",
         ],
     ) -> ExpectationExecutionEngineDiagnostics:
         """Check to see which execution_engines are fully supported for this Expectation.

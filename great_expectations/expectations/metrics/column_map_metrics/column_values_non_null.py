@@ -7,6 +7,9 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.polars_execution_engine import (
+    PolarsExecutionEngine,
+)
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -25,6 +28,10 @@ class ColumnValuesNonNull(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return ~column.isnull()
+
+    @column_condition_partial(engine=PolarsExecutionEngine)
+    def _polars(cls, column, **kwargs):
+        return column.is_not_null()
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):

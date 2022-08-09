@@ -1,4 +1,5 @@
 from .execution_engine import ExecutionEngine
 from .pandas_execution_engine import PandasExecutionEngine
+from .polars_execution_engine import PolarsExecutionEngine
 from .sparkdf_execution_engine import SparkDFExecutionEngine
 from .sqlalchemy_execution_engine import SqlAlchemyExecutionEngine

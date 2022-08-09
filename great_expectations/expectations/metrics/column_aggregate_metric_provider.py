@@ -4,7 +4,11 @@ from typing import Any, Callable, Dict, Optional, Type
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    PolarsExecutionEngine,
+)
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
     MetricPartialFunctionTypes,
@@ -89,9 +93,55 @@ def column_aggregate_value(
             return inner_func
 
         return wrapper
+
+    elif issubclass(engine, PolarsExecutionEngine):
+
+        def wrapper(metric_fn: Callable):
+            @metric_value(
+                engine=PolarsExecutionEngine,
+                metric_fn_type=metric_fn_type,
+                domain_type=domain_type,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PolarsExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                filter_column_isnull = kwargs.get(
+                    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+                )
+
+                df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_name = accessor_domain_kwargs["column"]
+
+                if column_name not in metrics["table.columns"]:
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                    )
+
+                if filter_column_isnull:
+                    df = df[df[column_name].is_not_null()]
+
+                return metric_fn(
+                    cls,
+                    column=df[column_name],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+
+            return inner_func
+
+        return wrapper
     else:
         raise ValueError(
-            "column_aggregate_value decorator only supports PandasExecutionEngine"
+            "column_aggregate_value decorator only supports PandasExecutionEngine & PolarsExecutionEngine"
         )
 
 

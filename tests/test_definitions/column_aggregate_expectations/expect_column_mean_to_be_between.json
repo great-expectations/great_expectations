@@ -9,6 +9,13 @@
         "b": [true, false]
       },
       "schemas": {
+        "polars": {
+          "x": "Float32",
+          "y": "Int16",
+          "z": "Int16",
+          "n": "Int16",
+          "b": "Boolean"
+        },
         "spark": {
           "x": "FloatType",
           "y": "IntegerType",
@@ -141,10 +148,17 @@
         "b": [true, false, false, true],
         "x": [true, null, false, null]
       },
+      "schemas": {
+        "polars": {
+          "s": "Utf8",
+          "b": "Boolean",
+          "x": "Boolean"
+        }
+      },
       "tests": [{
           "title": "type_mismatch_null_observed_value",
           "exact_match_out": false,
-	        "suppress_test_for": ["sqlalchemy"],
+	        "suppress_test_for": ["sqlalchemy", "polars"],
           "in": {
             "column": "s",
             "min_value": 0,

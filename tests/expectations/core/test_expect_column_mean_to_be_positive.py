@@ -47,3 +47,28 @@ def test_expect_column_mean_to_be_positive(data_context_with_datasource_pandas_e
     result = validator.expect_column_mean_to_be_positive(column="a")
 
     assert result.success is True
+
+
+def test_expect_column_mean_to_be_positive_polars(
+    data_context_with_datasource_polars_engine,
+):
+    context: DataContext = data_context_with_datasource_polars_engine
+    import polars as pl
+
+    df = pl.DataFrame({"a": [0, 1, 3, 4, 5]})
+
+    batch_request = RuntimeBatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="default_runtime_data_connector_name",
+        data_asset_name="my_data_asset",
+        runtime_parameters={"batch_data": df},
+        batch_identifiers={"default_identifier_name": "my_identifier"},
+    )
+    validator = context.get_validator(
+        batch_request=batch_request,
+        create_expectation_suite_with_name="test",
+    )
+
+    result = validator.expect_column_mean_to_be_positive(column="a")
+
+    assert result.success is True

@@ -212,6 +212,8 @@ def get_metric_provider(
 ) -> Tuple["MetricProvider", Callable]:  # noqa: F821
     try:
         metric_definition = _registered_metrics[metric_name]
+        # if type(execution_engine).__name__ == "PolarsExecutionEngine":
+        #     return metric_definition["providers"]["PandasExecutionEngine"]
         return metric_definition["providers"][type(execution_engine).__name__]
     except KeyError:
         raise ge_exceptions.MetricProviderError(

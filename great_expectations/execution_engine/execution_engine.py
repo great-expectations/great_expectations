@@ -78,6 +78,12 @@ class DataConnectorStorageDataReferenceResolver:
         ),
         (
             "S3",
+            "PolarsExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "S3",
             "SparkDFExecutionEngine",
         ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
             **template_arguments

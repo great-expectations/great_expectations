@@ -19,6 +19,9 @@ from great_expectations.execution_engine.execution_engine import (
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
+from great_expectations.execution_engine.polars_execution_engine import (
+    PolarsExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
@@ -336,6 +339,68 @@ def column_condition_partial(
                 )
                 return (
                     ~meets_expectation_series,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
+    if issubclass(engine, PolarsExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
+            raise ValueError(
+                "PolarsExecutionEngine only supports map_condition_series for column_condition_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PolarsExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+                column_name = accessor_domain_kwargs["column"]
+
+                if column_name not in metrics["table.columns"]:
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                    )
+
+                filter_column_isnull = kwargs.get(
+                    "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
+                )
+                if filter_column_isnull:
+                    df = df[df[column_name].is_not_null()]
+
+                meets_expectation_series = metric_fn(
+                    cls,
+                    df[column_name],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+
+                return (
+                    np.array(~meets_expectation_series),
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 )
@@ -1372,6 +1437,18 @@ def _pandas_map_condition_unexpected_count(
     return np.count_nonzero(metrics["unexpected_condition"][0])
 
 
+def _polars_map_condition_unexpected_count(
+    cls,
+    execution_engine: PolarsExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Returns unexpected count for MapExpectations"""
+    return np.count_nonzero(metrics["unexpected_condition"][0])
+
+
 def _pandas_column_map_condition_values(
     cls,
     execution_engine: PandasExecutionEngine,
@@ -1427,9 +1504,125 @@ def _pandas_column_map_condition_values(
         return list(domain_values[: result_format["partial_unexpected_count"]])
 
 
+def _polars_column_map_condition_values(
+    cls,
+    execution_engine: PolarsExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+    df = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs,
+    )
+
+    if "column" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_pandas_column_map_condition_values).
+"""
+        )
+
+    column_name = accessor_domain_kwargs["column"]
+
+    if column_name not in metrics["table.columns"]:
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+        )
+
+    ###
+    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
+    # currently handle filter_column_isnull differently than other map_fn / map_condition
+    # cases.
+    ###
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[column_name].is_not_null()]
+
+    domain_values = df[column_name]
+
+    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+
+    result_format = metric_value_kwargs["result_format"]
+
+    if result_format["result_format"] == "COMPLETE":
+        return list(domain_values)
+    else:
+        return list(domain_values[: result_format["partial_unexpected_count"]])
+
+
 def _pandas_column_pair_map_condition_values(
     cls,
     execution_engine: PandasExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
+    )
+
+    if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
+        raise ValueError(
+            """No "column_A" and "column_B" found in provided metric_domain_kwargs, but it is required for a column pair map metric
+(_pandas_column_pair_map_condition_values).
+"""
+        )
+
+    # noinspection PyPep8Naming
+    column_A_name = accessor_domain_kwargs["column_A"]
+    # noinspection PyPep8Naming
+    column_B_name = accessor_domain_kwargs["column_B"]
+
+    column_list = [column_A_name, column_B_name]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    domain_values = df[column_list]
+
+    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+
+    result_format = metric_value_kwargs["result_format"]
+
+    unexpected_list = [
+        value_pair
+        for value_pair in zip(
+            domain_values[column_A_name].values, domain_values[column_B_name].values
+        )
+    ]
+    if result_format["result_format"] == "COMPLETE":
+        return unexpected_list
+    else:
+        return unexpected_list[: result_format["partial_unexpected_count"]]
+
+
+def _polars_column_pair_map_condition_values(
+    cls,
+    execution_engine: PolarsExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
@@ -1530,6 +1723,48 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     return df.shape[0]
 
 
+def _polars_column_pair_map_condition_filtered_row_count(
+    cls,
+    execution_engine: PolarsExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
+    )
+
+    if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
+        raise ValueError(
+            """No "column_A" and "column_B" found in provided metric_domain_kwargs, but it is required for a column pair map metric
+(_pandas_column_pair_map_condition_filtered_row_count).
+"""
+        )
+
+    # noinspection PyPep8Naming
+    column_A_name = accessor_domain_kwargs["column_A"]
+    # noinspection PyPep8Naming
+    column_B_name = accessor_domain_kwargs["column_B"]
+
+    column_list = [column_A_name, column_B_name]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    return df.shape[0]
+
+
 def _pandas_multicolumn_map_condition_values(
     cls,
     execution_engine: PandasExecutionEngine,
@@ -1582,9 +1817,98 @@ def _pandas_multicolumn_map_condition_values(
         )
 
 
+def _polars_multicolumn_map_condition_values(
+    cls,
+    execution_engine: PolarsExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
+    )
+
+    if "column_list" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
+(_pandas_multicolumn_map_condition_values).
+"""
+        )
+
+    column_list = accessor_domain_kwargs["column_list"]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    domain_values = df[column_list]
+
+    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+
+    result_format = metric_value_kwargs["result_format"]
+
+    if result_format["result_format"] == "COMPLETE":
+        return domain_values.to_dict("records")
+    else:
+        return domain_values[: result_format["partial_unexpected_count"]].to_dict(
+            "records"
+        )
+
+
 def _pandas_multicolumn_map_condition_filtered_row_count(
     cls,
     execution_engine: PandasExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
+    )
+
+    if "column_list" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
+(_pandas_multicolumn_map_condition_filtered_row_count).
+"""
+        )
+
+    column_list = accessor_domain_kwargs["column_list"]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    return df.shape[0]
+
+
+def _polars_multicolumn_map_condition_filtered_row_count(
+    cls,
+    execution_engine: PolarsExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
@@ -1692,6 +2016,79 @@ def _pandas_column_map_series_and_domain_values(
         )
 
 
+def _polars_column_map_series_and_domain_values(
+    cls,
+    execution_engine: PolarsExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+    (
+        map_series,
+        compute_domain_kwargs_2,
+        accessor_domain_kwargs_2,
+    ) = metrics["metric_partial_fn"]
+    assert (
+        compute_domain_kwargs == compute_domain_kwargs_2
+    ), "map_series and condition must have the same compute domain"
+    assert (
+        accessor_domain_kwargs == accessor_domain_kwargs_2
+    ), "map_series and condition must have the same accessor kwargs"
+    df = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs,
+    )
+
+    if "column" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_pandas_column_map_series_and_domain_values).
+"""
+        )
+
+    column_name = accessor_domain_kwargs["column"]
+
+    if column_name not in metrics["table.columns"]:
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+        )
+
+    ###
+    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
+    # currently handle filter_column_isnull differently than other map_fn / map_condition
+    # cases.
+    ###
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[column_name].is_not_null()]
+
+    domain_values = df[column_name]
+
+    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    map_series = map_series[boolean_mapped_unexpected_values == True]
+
+    result_format = metric_value_kwargs["result_format"]
+
+    if result_format["result_format"] == "COMPLETE":
+        return (
+            list(domain_values),
+            list(map_series),
+        )
+    else:
+        return (
+            list(domain_values[: result_format["partial_unexpected_count"]]),
+            list(map_series[: result_format["partial_unexpected_count"]]),
+        )
+
+
 def _pandas_map_condition_index(
     cls,
     execution_engine: PandasExecutionEngine,
@@ -1732,6 +2129,66 @@ def _pandas_map_condition_index(
         )
         if filter_column_isnull:
             df = df[df[column_name].notnull()]
+
+    elif "column_list" in accessor_domain_kwargs:
+        column_list = accessor_domain_kwargs["column_list"]
+
+        for column_name in column_list:
+            if column_name not in metrics["table.columns"]:
+                raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                    message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                )
+
+    result_format = metric_value_kwargs["result_format"]
+
+    df = df[boolean_mapped_unexpected_values]
+
+    if result_format["result_format"] == "COMPLETE":
+        return list(df.index)
+
+    return list(df.index[: result_format["partial_unexpected_count"]])
+
+
+def _polars_map_condition_index(
+    cls,
+    execution_engine: PolarsExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics.get("unexpected_condition")
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
+    )
+
+    if "column" in accessor_domain_kwargs:
+        column_name = accessor_domain_kwargs["column"]
+
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+        ###
+        # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
+        # currently handle filter_column_isnull differently than other map_fn / map_condition
+        # cases.
+        ###
+        filter_column_isnull = kwargs.get(
+            "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+        )
+        if filter_column_isnull:
+            df = df[df[column_name].is_not_null()]
 
     elif "column_list" in accessor_domain_kwargs:
         column_list = accessor_domain_kwargs["column_list"]
@@ -1820,6 +2277,74 @@ def _pandas_column_map_condition_value_counts(
         return value_counts[result_format["partial_unexpected_count"]]
 
 
+def _polars_column_map_condition_value_counts(
+    cls,
+    execution_engine: PolarsExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Returns respective value counts for distinct column values"""
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics.get("unexpected_condition")
+    df = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs,
+    )
+
+    column_name = accessor_domain_kwargs["column"]
+
+    if "column" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_pandas_column_map_condition_value_counts).
+"""
+        )
+
+    if column_name not in metrics["table.columns"]:
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+        )
+
+    ###
+    # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
+    # currently handle filter_column_isnull differently than other map_fn / map_condition
+    # cases.
+    ###
+    filter_column_isnull = kwargs.get(
+        "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+    )
+    if filter_column_isnull:
+        df = df[df[column_name].is_not_null()]
+
+    domain_values = df[column_name]
+
+    result_format = metric_value_kwargs["result_format"]
+    value_counts = None
+    try:
+        value_counts = domain_values[boolean_mapped_unexpected_values].value_counts()
+    except ValueError:
+        try:
+            value_counts = (
+                domain_values[boolean_mapped_unexpected_values]
+                .apply(tuple)
+                .value_counts()
+            )
+        except ValueError:
+            pass
+
+    if not value_counts:
+        raise ge_exceptions.MetricComputationError("Unable to compute value counts")
+
+    if result_format["result_format"] == "COMPLETE":
+        return value_counts
+    else:
+        return value_counts[result_format["partial_unexpected_count"]]
+
+
 def _pandas_map_condition_rows(
     cls,
     execution_engine: PandasExecutionEngine,
@@ -1879,6 +2404,67 @@ def _pandas_map_condition_rows(
         return df
 
     return df.iloc[: result_format["partial_unexpected_count"]]
+
+
+def _polars_map_condition_rows(
+    cls,
+    execution_engine: PolarsExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain (ignoring the column constraint) that match the map-style metric in the metrics dictionary."""
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics.get("unexpected_condition")
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
+    )
+
+    if "column" in accessor_domain_kwargs:
+        column_name = accessor_domain_kwargs["column"]
+
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+        ###
+        # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
+        # currently handle filter_column_isnull differently than other map_fn / map_condition
+        # cases.
+        ###
+        filter_column_isnull = kwargs.get(
+            "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+        )
+        if filter_column_isnull:
+            df = df[df[column_name].is_not_null()]
+
+    elif "column_list" in accessor_domain_kwargs:
+        column_list = accessor_domain_kwargs["column_list"]
+
+        for column_name in column_list:
+            if column_name not in metrics["table.columns"]:
+                raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                    message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                )
+
+    result_format = metric_value_kwargs["result_format"]
+
+    df = df[boolean_mapped_unexpected_values]
+
+    if result_format["result_format"] == "COMPLETE":
+        return df
+
+    return df[: result_format["partial_unexpected_count"]]
 
 
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
@@ -2863,6 +3449,100 @@ class MapMetricProvider(MetricProvider):
                             execution_engine=engine,
                             metric_class=cls,
                             metric_provider=_pandas_multicolumn_map_condition_filtered_row_count,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                elif issubclass(engine, PolarsExecutionEngine):
+                    register_metric(
+                        metric_name=f"{metric_name}.condition",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=metric_value_keys,
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=condition_provider,
+                        metric_fn_type=metric_fn_type,
+                    )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_count",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=metric_value_keys,
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_polars_map_condition_unexpected_count,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_index_list",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_polars_map_condition_index,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_rows",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_polars_map_condition_rows,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
+                    if domain_type == MetricDomainTypes.COLUMN:
+                        register_metric(
+                            metric_name=f"{metric_name}.unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_polars_column_map_condition_values,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                        register_metric(
+                            metric_name=f"{metric_name}.unexpected_value_counts",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_polars_column_map_condition_value_counts,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                    elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+                        register_metric(
+                            metric_name=f"{metric_name}.unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_polars_column_pair_map_condition_values,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                        register_metric(
+                            metric_name=f"{metric_name}.filtered_row_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_polars_column_pair_map_condition_filtered_row_count,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                    elif domain_type == MetricDomainTypes.MULTICOLUMN:
+                        register_metric(
+                            metric_name=f"{metric_name}.unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_polars_multicolumn_map_condition_values,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                        register_metric(
+                            metric_name=f"{metric_name}.filtered_row_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_polars_multicolumn_map_condition_filtered_row_count,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                 elif issubclass(engine, SqlAlchemyExecutionEngine):

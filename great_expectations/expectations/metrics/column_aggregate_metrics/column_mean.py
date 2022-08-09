@@ -1,5 +1,6 @@
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
+    PolarsExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
@@ -19,6 +20,11 @@ class ColumnMean(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Mean Implementation"""
+        return column.mean()
+
+    @column_aggregate_value(engine=PolarsExecutionEngine)
+    def _polars(cls, column, **kwargs):
+        """Polars Mean Implementation"""
         return column.mean()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)

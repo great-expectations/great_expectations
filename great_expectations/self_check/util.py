@@ -25,6 +25,7 @@ from typing import (
 
 import numpy as np
 import pandas as pd
+import polars as pl
 from dateutil.parser import parse
 
 from great_expectations.core import (
@@ -56,6 +57,9 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.execution_engine.polars_execution_engine import (
+    PolarsExecutionEngine,
 )
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -927,6 +931,47 @@ def get_test_validator_with_data(
 
         return build_pandas_validator_with_data(df=df)
 
+    elif execution_engine == "polars":
+        df = pl.from_numpy(df.to_numpy(), list(df.columns))
+        if schemas and "polars" in schemas:
+            schema = schemas["polars"]
+            polars_schema = {}
+            for (key, value) in schema.items():
+                # Note, these are just names used in our internal schemas to build datasets *for internal tests*
+                # Further, some changes in pandas internal about how datetimes are created means to support pandas
+                # pre- 0.25, we need to explicitly specify when we want timezone.
+
+                # We will use timestamp for timezone-aware (UTC only) dates in our tests
+                if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
+                    df[key] = df[key].str.strptime(pl.Datetime)
+                    continue
+                elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
+                    df[key] = df[key].str.strptime(pl.Datetime)
+                    continue
+                elif value.lower() in ["date"]:
+                    df[key] = df[key].str.strptime(pl.Date)
+                    value = "object"
+                try:
+                    type_ = np.dtype(value)
+                except TypeError:
+                    # noinspection PyUnresolvedReferences
+                    type_ = getattr(pl.datatypes, value)
+                    # If this raises AttributeError it's okay: it means someone built a bad test
+                polars_schema[key] = type_
+            # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
+            typed_df = pl.DataFrame()
+            for x in df.columns:
+                typed_df = typed_df.with_column(
+                    pl.lit(pl.Series(df[x].name, df[x].to_list()))
+                )
+                typed_df[x] = typed_df[x].cast(polars_schema[x], strict=False)
+
+        if table_name is None:
+            # noinspection PyUnusedLocal
+            table_name = generate_test_table_name()
+
+        return build_polars_validator_with_data(df=typed_df)
+
     elif execution_engine in SQL_DIALECT_NAMES:
         if not create_engine:
             return None
@@ -1067,6 +1112,19 @@ def build_pandas_validator_with_data(
     batch: Batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
         execution_engine=PandasExecutionEngine(),
+        batches=[
+            batch,
+        ],
+    )
+
+
+def build_polars_validator_with_data(
+    df: pl.DataFrame,
+    batch_definition: Optional[BatchDefinition] = None,
+) -> Validator:
+    batch: Batch = Batch(data=df, batch_definition=batch_definition)
+    return Validator(
+        execution_engine=PolarsExecutionEngine(),
         batches=[
             batch,
         ],
@@ -1567,6 +1625,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
 
 def build_test_backends_list(
     include_pandas=True,
+    include_polars=False,
     include_spark=False,
     include_sqlalchemy=True,
     include_sqlite=True,
@@ -1585,6 +1644,21 @@ def build_test_backends_list(
 
     if include_pandas:
         test_backends += ["pandas"]
+
+    if include_polars:
+        try:
+            import polars
+        except ImportError:
+            if raise_exceptions_for_backends is True:
+                raise ValueError(
+                    "polars tests are requested, but polars is not installed"
+                )
+            else:
+                logger.warning(
+                    "polars tests are requested, but polars is not installed"
+                )
+        else:
+            test_backends += ["polars"]
 
     if include_spark:
         try:
@@ -1801,6 +1875,9 @@ def generate_expectation_tests(
             engines_to_include[
                 "sqlalchemy"
             ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
+            engines_to_include[
+                "polars"
+            ] = execution_engine_diagnostics.PolarsExecutionEngine
             if (
                 engines_to_include.get("sqlalchemy") is True
                 and raise_exceptions_for_backends is False
@@ -1817,6 +1894,7 @@ def generate_expectation_tests(
 
         backends = build_test_backends_list(
             include_pandas=engines_to_include.get("pandas", False),
+            include_polars=engines_to_include.get("polars", False),
             include_spark=engines_to_include.get("spark", False),
             include_sqlalchemy=engines_to_include.get("sqlalchemy", False),
             include_sqlite=dialects_to_include.get("sqlite", False),

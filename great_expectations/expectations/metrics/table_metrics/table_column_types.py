@@ -7,6 +7,9 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.polars_execution_engine import (
+    PolarsExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -32,6 +35,23 @@ class ColumnTypes(TableMetricProvider):
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: Dict,
+    ):
+        df, _, _ = execution_engine.get_compute_domain(
+            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        )
+        return [
+            {"name": name, "type": dtype}
+            for (name, dtype) in zip(df.columns, df.dtypes)
+        ]
+
+    @metric_value(engine=PolarsExecutionEngine)
+    def _polars(
+        cls,
+        execution_engine: PolarsExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],

@@ -111,6 +111,7 @@ class ExpectationExecutionEngineDiagnostics(SerializableDictDot):
     PandasExecutionEngine: bool
     SqlAlchemyExecutionEngine: bool
     SparkDFExecutionEngine: bool
+    PolarsExecutionEngine: bool
 
 
 @dataclass
