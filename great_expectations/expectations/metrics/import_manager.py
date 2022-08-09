@@ -25,6 +25,9 @@ except ImportError:
     reflection = None
     sqlalchemy_engine_Engine = None
     sqlalchemy_engine_Row = None
+    sql_binary_expression = None
+    sql_boolean_clause_list = None
+    sql_column_clause = None
 
 try:
     import pyspark.sql.functions as F
@@ -58,3 +61,4 @@ except ImportError:
     pyspark_sql_DataFrame = None
     pyspark_sql_Row = None
     pyspark_sql_SparkSession = None
+    pyspark_sql_column = None
