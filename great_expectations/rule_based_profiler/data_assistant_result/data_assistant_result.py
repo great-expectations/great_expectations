@@ -1555,7 +1555,7 @@ class DataAssistantResult(SerializableDictDot):
                 )
 
     @staticmethod
-    def _get_interactive_expect_column_values_to_be_between_chart(
+    def _get_interactive_expect_column_values_to_be_between_chart(  # noqa: C901 - complexity 16
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
