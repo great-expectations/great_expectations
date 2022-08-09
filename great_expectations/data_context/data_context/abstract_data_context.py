@@ -202,15 +202,14 @@ class AbstractDataContext(ABC):
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
-    @abstractmethod
     def _save_project_config(self) -> None:
         """
-        Each DataContext will define how its project_config will be saved.
+        Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
         """
-        raise NotImplementedError
+        self.variables.save_config()
 
     @abstractmethod
     def save_expectation_suite(
@@ -614,7 +613,9 @@ class AbstractDataContext(ABC):
         datasource_name: str
         datasource_config: DatasourceConfig
         for datasource_name, datasource_config in self.config.datasources.items():
-            datasource_dict: dict = datasource_config.to_json_dict()
+            datasource_dict: dict = cast(
+                dict, datasourceConfigSchema.dump(datasource_config)
+            )
             datasource_dict["name"] = datasource_name
             substituted_config: dict = cast(
                 dict,
