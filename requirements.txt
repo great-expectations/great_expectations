@@ -8,6 +8,7 @@ ipywidgets>=7.5.1
 jinja2>=2.10
 jsonpatch>=1.22
 jsonschema>=2.5.1
+makefun>=1.14.0
 mistune>=0.8.4
 nbformat>=5.0
 notebook>=6.4.10
