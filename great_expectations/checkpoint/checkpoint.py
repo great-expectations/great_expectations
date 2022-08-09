@@ -3,7 +3,7 @@ import datetime
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
