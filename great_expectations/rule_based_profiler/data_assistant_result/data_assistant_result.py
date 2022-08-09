@@ -1919,7 +1919,12 @@ class DataAssistantResult(SerializableDictDot):
                 alt.Chart(data=df, title=title)
                 .mark_line()
                 .encode(
-                    x=batch_plot_component.plot_on_axis(),
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
                     y=metric_plot_component.plot_on_axis(),
                     tooltip=tooltip,
                     detail="batch",
@@ -1930,7 +1935,12 @@ class DataAssistantResult(SerializableDictDot):
                 alt.Chart(data=df, title=title)
                 .mark_point()
                 .encode(
-                    x=batch_plot_component.plot_on_axis(),
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
                     y=metric_plot_component.plot_on_axis(),
                     tooltip=tooltip,
                 )
@@ -2268,7 +2278,12 @@ class DataAssistantResult(SerializableDictDot):
                 strokeWidth=expectation_kwarg_line_stroke_width,
             )
             .encode(
-                x=batch_plot_component.plot_on_axis(),
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
+                ),
                 y=min_value_plot_component.plot_on_axis(),
                 tooltip=tooltip,
             )
@@ -2282,7 +2297,12 @@ class DataAssistantResult(SerializableDictDot):
                 strokeWidth=expectation_kwarg_line_stroke_width,
             )
             .encode(
-                x=batch_plot_component.plot_on_axis(),
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
+                ),
                 y=max_value_plot_component.plot_on_axis(),
                 tooltip=tooltip,
             )
@@ -2293,7 +2313,12 @@ class DataAssistantResult(SerializableDictDot):
             alt.Chart(data=df)
             .mark_area()
             .encode(
-                x=batch_plot_component.plot_on_axis(),
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
+                ),
                 y=min_value_plot_component.plot_on_axis(),
                 y2=alt.Y2(
                     max_value_plot_component.name, title=max_value_plot_component.title
@@ -2330,14 +2355,24 @@ class DataAssistantResult(SerializableDictDot):
             anomaly_coded_base = alt.Chart(data=df, title=title)
 
             anomaly_coded_line = anomaly_coded_base.mark_line().encode(
-                x=batch_plot_component.plot_on_axis(),
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
+                ),
                 y=metric_plot_component.plot_on_axis(),
                 tooltip=tooltip,
                 detail="batch",
             )
 
             anomaly_coded_points = anomaly_coded_base.mark_point().encode(
-                x=batch_plot_component.plot_on_axis(),
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
+                ),
                 y=metric_plot_component.plot_on_axis(),
                 tooltip=tooltip,
                 color=point_color_condition,
@@ -2552,7 +2587,12 @@ class DataAssistantResult(SerializableDictDot):
                 alt.Chart(data=df, title=title)
                 .mark_line()
                 .encode(
-                    x=batch_plot_component.plot_on_axis(),
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
                     y=metric_plot_component.plot_on_axis(),
                     tooltip=tooltip,
                     detail="batch",
@@ -2563,7 +2603,12 @@ class DataAssistantResult(SerializableDictDot):
                 alt.Chart(data=df, title=title)
                 .mark_point()
                 .encode(
-                    x=batch_plot_component.plot_on_axis(),
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
                     y=metric_plot_component.plot_on_axis(),
                     tooltip=tooltip,
                 )
@@ -2997,6 +3042,7 @@ class DataAssistantResult(SerializableDictDot):
                     batch_plot_component.name,
                     type=batch_plot_component.alt_type,
                     title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
                 ),
                 y=alt.Y(
                     min_value_plot_component.name,
@@ -3018,6 +3064,7 @@ class DataAssistantResult(SerializableDictDot):
                     batch_plot_component.name,
                     type=batch_plot_component.alt_type,
                     title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
                 ),
                 y=alt.Y(
                     max_value_plot_component.name,
@@ -3036,6 +3083,7 @@ class DataAssistantResult(SerializableDictDot):
                     batch_plot_component.name,
                     type=batch_plot_component.alt_type,
                     title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
                 ),
                 y=alt.Y(
                     min_value_plot_component.name,
