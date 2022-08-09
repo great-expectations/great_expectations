@@ -815,17 +815,14 @@ class DataAssistantResult(SerializableDictDot):
             cols_flat_df.columns = list_column_names
             df = pd.concat([df, cols_flat_df], axis=1)
 
-            groupby_columns: List[str] = [
-                column for column in df.columns if column not in list_column_names
-            ]
-            df["metric_list_position"] = df.groupby(by=groupby_columns).cumcount()
-
             if "table_columns" in list_column_names:
                 # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
                 df["column_number"] = pd.factorize(df["table_columns"])[0] + 1
 
             if "value_ranges" in list_column_names:
                 # split value ranges into two columns
+                df["min_value"] = 0
+                df["max_value"] = 0
                 df[["min_value", "max_value"]] = df["value_ranges"].values.tolist()
                 df = df.drop(columns=["value_ranges"], axis=1)
 
@@ -869,12 +866,10 @@ class DataAssistantResult(SerializableDictDot):
             An altair chart for nominal metrics
         """
         batch_name: str = "batch"
-        metric_list_position: str = "metric_list_position"
         batch_identifiers: List[str] = [
             column
             for column in df.columns
-            if column
-            not in (sanitized_metric_names | {batch_name, metric_list_position})
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -954,12 +949,10 @@ class DataAssistantResult(SerializableDictDot):
             An altair chart for nominal metrics
         """
         batch_name: str = "batch"
-        metric_list_position: str = "metric_list_position"
         batch_identifiers: List[str] = [
             column
             for column in df.columns
-            if column
-            not in (sanitized_metric_names | {batch_name, metric_list_position})
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1246,12 +1239,10 @@ class DataAssistantResult(SerializableDictDot):
             metric_plot_components.append(metric_plot_component)
 
         batch_name: str = "batch"
-        metric_list_position: str = "metric_list_position"
         batch_identifiers: List[str] = [
             column
             for column in df.columns
-            if column
-            not in (sanitized_metric_names | {batch_name, metric_list_position})
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1320,7 +1311,6 @@ class DataAssistantResult(SerializableDictDot):
 
         column_name: str = "column"
         batch_name: str = "batch"
-        metric_list_position: str = "metric_list_position"
         max_value: str = "max_value"
         min_value: str = "min_value"
         strict_max: str = "strict_max"
@@ -1335,7 +1325,6 @@ class DataAssistantResult(SerializableDictDot):
                 sanitized_metric_names
                 | {
                     batch_name,
-                    metric_list_position,
                     column_name,
                     max_value,
                     min_value,
@@ -1485,13 +1474,11 @@ class DataAssistantResult(SerializableDictDot):
             An interactive chart
         """
         batch_name: str = "batch"
-        metric_list_position: str = "metric_list_position"
         all_columns: List[str] = list(column_dfs[0].df.columns)
         batch_identifiers: List[str] = [
             column
             for column in all_columns
-            if column
-            not in (sanitized_metric_names | {batch_name, metric_list_position})
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
@@ -1519,9 +1506,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         df_columns: List[str] = (
-            [batch_name, domain_name, metric_list_position]
-            + list(sanitized_metric_names)
-            + batch_identifiers
+            [batch_name, domain_name] + list(sanitized_metric_names) + batch_identifiers
         )
 
         df: pd.DataFrame = pd.DataFrame(columns=df_columns)
@@ -1580,7 +1565,6 @@ class DataAssistantResult(SerializableDictDot):
         allow_relative_error: str = "allow_relative_error"
 
         batch_name: str = "batch"
-        metric_list_position: str = "metric_list_position"
         all_columns: List[str] = list(column_dfs[0].df.columns)
         batch_identifiers: List[str] = [
             column
@@ -1590,7 +1574,6 @@ class DataAssistantResult(SerializableDictDot):
                 sanitized_metric_names
                 | {
                     batch_name,
-                    metric_list_position,
                     column_name,
                     min_value,
                     max_value,
@@ -1653,7 +1636,6 @@ class DataAssistantResult(SerializableDictDot):
         possible_df_columns: List[str] = (
             [
                 batch_name,
-                metric_list_position,
             ]
             + batch_identifiers
             + list(sanitized_metric_names)
@@ -1816,10 +1798,10 @@ class DataAssistantResult(SerializableDictDot):
             for metric_plot_component in metric_plot_components
         ]
 
+        quantiles: str = "quantiles"
         lines_and_points_list: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
-            metric_list_position: str = "metric_list_position"
-            if metric_list_position in df.columns:
+            if quantiles in df.columns:
                 line: alt.Chart = (
                     alt.Chart(data=df, title=title)
                     .mark_line()
@@ -1827,7 +1809,7 @@ class DataAssistantResult(SerializableDictDot):
                         x=batch_plot_component.plot_on_axis(),
                         y=metric_plot_component.plot_on_axis(),
                         tooltip=tooltip,
-                        detail=metric_list_position,
+                        detail=quantiles,
                     )
                 )
             else:
@@ -2424,10 +2406,10 @@ class DataAssistantResult(SerializableDictDot):
             fields=[domain_plot_component.name],
         )
 
+        quantiles: str = "quantiles"
         line_and_points_list: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
-            metric_list_position: str = "metric_list_position"
-            if metric_list_position in df.columns:
+            if quantiles in df.columns:
                 line: alt.Chart = (
                     alt.Chart(data=df, title=title)
                     .mark_line()
@@ -2435,7 +2417,7 @@ class DataAssistantResult(SerializableDictDot):
                         x=batch_plot_component.plot_on_axis(),
                         y=metric_plot_component.plot_on_axis(),
                         tooltip=tooltip,
-                        detail=metric_list_position,
+                        detail=quantiles,
                     )
                 )
             else:
@@ -3775,7 +3757,7 @@ class DataAssistantResult(SerializableDictDot):
             ].metric_configuration.metric_value_kwargs.quantiles
             if len(quantiles) == 1:
                 quantiles = quantiles[0]
-            df["quantile"] = [quantiles for idx in df.index]
+            df["quantiles"] = [quantiles for idx in df.index]
 
         batch_identifier_list: List[Set[Tuple[str, str]]] = [
             self._batch_id_to_batch_identifier_display_name_map[batch_id]
