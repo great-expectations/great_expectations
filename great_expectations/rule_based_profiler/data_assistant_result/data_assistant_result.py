@@ -826,7 +826,7 @@ class DataAssistantResult(SerializableDictDot):
 
             if "value_ranges" in list_column_names:
                 # split value ranges into two columns
-                df[["min_value", "max_value"]] = df["value_ranges"].tolist()
+                df[["min_value", "max_value"]] = df["value_ranges"].values.tolist()
                 df = df.drop(columns=["value_ranges"], axis=1)
 
         return df
