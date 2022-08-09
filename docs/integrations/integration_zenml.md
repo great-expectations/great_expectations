@@ -5,6 +5,8 @@ authors:
     url: https://zenml.io
 ---
 
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+
 :::info
 * Maintained By: ZenML
 * Status: Beta
@@ -18,7 +20,7 @@ production ML toolset and workflows. ZenML is [an extensible open source MLOps f
 for creating portable, production-ready ML pipelines.
 
 ZenML eliminates the complexity associated with setting up the Great
-Expectations [Data Context](../terms/data_context)
+Expectations <TechnicalTag tag="data_context" text="Data Context" />
 for use in production by integrating it directly into its [MLOps tool stack construct](https://docs.zenml.io/getting-started/core-concepts#stacks-components-and-stores).
 This allows you to start using Great Expectations in your ML pipelines right
 away, with all the other great features that ZenML brings along: portability,
@@ -28,17 +30,17 @@ tools and services that spans everything else MLOps.
 ### Technical background
 
 :::note Prerequisites
- - An overview of the Great Expectations [Expectation Suites](../terms/expectation_suite),
- [Validation Results](../terms/validation_result)
- and [Data Docs](../terms/data_docs) concepts.
+ - An overview of the Great Expectations <TechnicalTag tag="expectation_suite" text="Expectation Suites" />,
+ <TechnicalTag tag="validation_result" text="Validation Results"/>,
+ and <TechnicalTag tag="data_docs" text="Data Docs" /> concepts.
  - Some understanding of the [ZenML pipelines and steps](https://docs.zenml.io/developer-guide/steps-and-pipelines#pipeline) concepts is recommended, but optional.
 :::
 
 ZenML ships with a couple of builtin pipeline steps that take care of everything
-from configuring temporary [Datasources](../terms/datasource),
-[Data Connectors](../terms/data_connector)
-and runtime [Batch Requests](../terms/batch_request)
-to access in-memory datasets to setting up and running [Profilers](../terms/profiler), [Validators](../terms/validator) and [Checkpoints](../terms/checkpoint), to generating the [Data Docs](../terms/data_docs)
+from configuring temporary <TechnicalTag tag="datasource" text="Datasources" />,
+<TechnicalTag tag="data_connector" text="Data Connectors" />, 
+and <TechnicalTag tag="batch_request" text="Runtime Batch Requests" /> 
+to access in-memory datasets to setting up and running <TechnicalTag tag="profiler" text="Profilers" />, <TechnicalTag tag="validator" text="Validators" /> and <TechnicalTag tag="checkpoint" text="Checkpoints" />, to generating the <TechnicalTag tag="data_docs" text="Data Docs" /> 
 for you. These details are abstracted away from you and all you have left
 to do is simply insert these steps into your ML pipelines to run either data
 profiling or data validation with Great Expectations on any input Pandas
