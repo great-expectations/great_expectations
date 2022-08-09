@@ -57,11 +57,11 @@ Here we initialize a Spark, and read great_expectations.yaml
 ```
 
 ### 4. Create Expectations
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L50-L66
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L50-L68
 ```
 
 ### 5. Validate your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L68-L109
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L70-L111
 ```
 
 ### 6. Congratulations!
