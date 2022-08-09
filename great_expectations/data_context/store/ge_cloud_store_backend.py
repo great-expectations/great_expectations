@@ -180,7 +180,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             "Authorization": f'Bearer {self.ge_cloud_credentials.get("access_token")}',
         }
 
-    def _get(self, key: Tuple[str, ...]) -> dict:  # type: ignore[override]
+    def _get(self, key: Tuple[str, ...]) -> ResponsePayload:  # type: ignore[override]
         ge_cloud_url = self.get_url_for_key(key=key)
         params: Optional[dict] = None
         try:
@@ -195,6 +195,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 params=params,
                 timeout=self.TIMEOUT,
             )
+            response.raise_for_status()
             return response.json()
         except JSONDecodeError as jsonError:
             logger.debug(
@@ -204,6 +205,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
             raise StoreBackendError(
                 f"Unable to get object in GE Cloud Store Backend: {jsonError}"
+            )
+        except (requests.HTTPError, requests.Timeout) as http_exc:
+            raise StoreBackendError(
+                f"Unable to get object in GE Cloud Store Backend: {http_exc}"
             )
 
     def _move(self) -> None:  # type: ignore[override]
