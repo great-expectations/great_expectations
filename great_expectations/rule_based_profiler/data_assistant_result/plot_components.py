@@ -19,6 +19,40 @@ class PlotComponent:
         else:
             return None
 
+    def plot_on_axis(self) -> Union[alt.X, alt.Y]:
+        """Wrapper around alt.X/alt.Y plotting utility.
+
+        Returns:
+            Either an alt.X or alt.Y instance based on desired axis.
+        """
+        raise NotImplementedError
+
+    def plot_on_x_axis(self) -> alt.X:
+        """
+        Plots domain on X axis.
+
+        Returns:
+            An instance of alt.X.
+        """
+        return alt.X(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
+        )
+
+    def plot_on_y_axis(self) -> alt.Y:
+        """
+        Plots domain on Y axis.
+
+        Returns:
+            An instance of alt.Y.
+        """
+        return alt.Y(
+            self.name,
+            type=self.alt_type,
+            title=self.title,
+        )
+
     def generate_tooltip(self, format: str = "") -> alt.Tooltip:
         """Wrapper around alt.Tooltip creation.
 
@@ -35,41 +69,6 @@ class PlotComponent:
             format=format,
         )
 
-    def plot_on_x_axis(self) -> alt.X:
-        """
-        Plots domain on X axis.
-
-        Returns:
-            An instance of alt.X.
-        """
-        return alt.X(
-            self.name,
-            type=self.alt_type,
-            title=self.title,
-            scale=alt.Scale(align=0.05),
-        )
-
-    def plot_on_y_axis(self) -> alt.Y:
-        """
-        Plots domain on Y axis.
-
-        Returns:
-            An instance of alt.Y.
-        """
-        return alt.Y(
-            self.name,
-            type=self.alt_type,
-            title=self.title,
-        )
-
-    def plot_on_axis(self) -> Union[alt.X, alt.Y]:
-        """Wrapper around alt.X/alt.Y plotting utility.
-
-        Returns:
-            Either an alt.X or alt.Y instance based on desired axis.
-        """
-        raise NotImplementedError
-
 
 @dataclass(frozen=True)
 class MetricPlotComponent(PlotComponent):
@@ -82,6 +81,30 @@ class MetricPlotComponent(PlotComponent):
             type=self.alt_type,
             title=self.title,
         )
+
+    def generate_tooltip(self, format: str = "") -> alt.Tooltip:
+        """Wrapper around alt.Tooltip creation.
+
+        Args:
+            format (str): Desired format within tooltip
+
+        Returns:
+            An instance of alt.Tooltip containing relevant information from the PlotComponent class.
+        """
+        if self.name.endswith("s"):
+            return alt.Tooltip(
+                field=self.name,
+                type=self.alt_type,
+                title=self.name.replace("_", " ")[:-1].title(),
+                format=format,
+            )
+        else:
+            return alt.Tooltip(
+                field=self.name,
+                type=self.alt_type,
+                title=self.name.replace("_", " ").title(),
+                format=format,
+            )
 
 
 @dataclass(frozen=True)
@@ -153,6 +176,30 @@ class ExpectationKwargPlotComponent(PlotComponent):
             type=self.alt_type,
             title=self.title,
         )
+
+    def generate_tooltip(self, format: str = "") -> alt.Tooltip:
+        """Wrapper around alt.Tooltip creation.
+
+        Args:
+            format (str): Desired format within tooltip
+
+        Returns:
+            An instance of alt.Tooltip containing relevant information from the PlotComponent class.
+        """
+        if self.name.endswith("s"):
+            return alt.Tooltip(
+                field=self.name,
+                type=self.alt_type,
+                title=self.name.replace("_", " ")[:-1].title(),
+                format=format,
+            )
+        else:
+            return alt.Tooltip(
+                field=self.name,
+                type=self.alt_type,
+                title=self.name.replace("_", " ").title(),
+                format=format,
+            )
 
 
 def determine_plot_title(
