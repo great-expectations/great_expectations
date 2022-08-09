@@ -384,7 +384,7 @@ def test_run_multibatch_sql_asset_example(tmp_path, sa, test_backends):
             "great_expectations/expectations/.ge_store_backend_id",
             "great_expectations/expectations/example_sql_suite.json",
             "great_expectations/checkpoints/my_checkpoint.yml",
-            "great_expectations/unommitted/data_docs",
+            "great_expectations/uncommitted/data_docs",
             "great_expectations/uncommitted/validations/example_sql_suite",
         ]
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
