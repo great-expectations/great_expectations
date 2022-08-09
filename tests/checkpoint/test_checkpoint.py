@@ -5143,6 +5143,8 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     )
 
 
+@pytest.mark.integration
+@pytest.mark.cloud
 @pytest.mark.parametrize(
     "checkpoint_config,expected_validation_id",
     [
