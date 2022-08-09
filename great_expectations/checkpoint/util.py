@@ -210,8 +210,11 @@ def get_substituted_validation_dict(
         or substituted_runtime_config.get("include_rendered_content")
         or False,
     }
-    if validation_dict.get("name") is not None:
-        substituted_validation_dict["name"] = validation_dict["name"]
+
+    for attr in ("name", "id"):
+        if validation_dict.get(attr) is not None:
+            substituted_validation_dict[attr] = validation_dict[attr]
+
     validate_validation_dict(substituted_validation_dict)
     return substituted_validation_dict
 

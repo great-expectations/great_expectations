@@ -3,7 +3,7 @@ import datetime
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
@@ -109,6 +109,10 @@ class BaseCheckpoint(ConfigPeer):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
 
+        # If no validations are provided, the combination of expectation_suite_name, batch_request,
+        # and action_list are considered the "default" validation.
+        using_default_validation = validations is None or len(validations) == 0
+
         run_time = run_time or datetime.datetime.now()
         runtime_configuration = runtime_configuration or {}
         result_format = result_format or runtime_configuration.get("result_format")
@@ -140,6 +144,7 @@ class BaseCheckpoint(ConfigPeer):
         batch_request = substituted_runtime_config.get("batch_request")
         validations = substituted_runtime_config.get("validations") or []
 
+        assert validations is not None
         if len(validations) == 0 and not batch_request:
             raise ge_exceptions.CheckpointError(
                 f'Checkpoint "{self.name}" must contain either a batch_request or validations.'
@@ -151,6 +156,12 @@ class BaseCheckpoint(ConfigPeer):
             )
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
+
+        # Ensure that validations dicts have the most specific id available
+        # (default to Checkpoint's default_validation_id if no validations were passed in the signature)
+        for validation in validations:
+            if using_default_validation:
+                validation["id"] = self.config.default_validation_id
 
         # Use AsyncExecutor to speed up I/O bound validations by running them in parallel with multithreading (if
         # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
@@ -379,20 +390,22 @@ class BaseCheckpoint(ConfigPeer):
             if catch_exceptions_validation is not None:
                 operator_run_kwargs["catch_exceptions"] = catch_exceptions_validation
 
-            async_validation_operator_results.append(
-                async_executor.submit(
-                    action_list_validation_operator.run,
-                    assets_to_validate=[validator],
-                    run_id=run_id,
-                    evaluation_parameters=substituted_validation_dict.get(
-                        "evaluation_parameters"
-                    ),
-                    result_format=result_format,
-                    checkpoint_identifier=checkpoint_identifier,
-                    checkpoint_name=self.name,
-                    **operator_run_kwargs,
-                )
+            validation_id: Optional[str] = substituted_validation_dict.get("id")
+
+            async_validation_operator_result = async_executor.submit(
+                action_list_validation_operator.run,
+                assets_to_validate=[validator],
+                run_id=run_id,
+                evaluation_parameters=substituted_validation_dict.get(
+                    "evaluation_parameters"
+                ),
+                result_format=result_format,
+                checkpoint_identifier=checkpoint_identifier,
+                checkpoint_name=self.name,
+                validation_id=validation_id,
+                **operator_run_kwargs,
             )
+            async_validation_operator_results.append(async_validation_operator_result)
         except (
             ge_exceptions.CheckpointError,
             ge_exceptions.ExecutionEngineError,
