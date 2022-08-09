@@ -47,7 +47,7 @@ suite = context_gx.create_expectation_suite(expectation_suite_name)
 batch_request = RuntimeBatchRequest(
     datasource_name="spark_s3",
     data_asset_name="datafile_name",
-    batch_identifiers={"default_identifier_name": "default_identifier"},
+    batch_identifiers={"runtime_batch_identifier_name": "default_identifier"},
     data_connector_name="default_inferred_data_connector_name",
     runtime_parameters={"path": "s3a://bucket_name/path_to_file.format"},
 )
