@@ -2,8 +2,6 @@ from typing import List, Union
 
 from pandas.core.frame import DataFrame as pandas_dataframe
 from pandas.core.series import Series as pandas_series
-from pyspark.sql.column import Column as spark_column
-from pyspark.sql.dataframe import DataFrame as spark_dataframe
 from sqlalchemy.sql.elements import BinaryExpression as sql_binary_expression
 from sqlalchemy.sql.elements import BooleanClauseList as sql_boolean_clause_list
 from sqlalchemy.sql.elements import ColumnClause as sql_column_clause
@@ -114,7 +112,7 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
                 return sa.and_(min_value <= row_wise_sum, row_wise_sum <= max_value)
 
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column_list: spark_dataframe, **kwargs) -> spark_column:
+    def _spark(cls, column_list, **kwargs):
         min_value = kwargs.get("min_value")
         max_value = kwargs.get("max_value")
         strict_min = kwargs.get("strict_min")
