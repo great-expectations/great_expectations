@@ -17,6 +17,9 @@ try:
     from sqlalchemy.engine import Engine as sqlalchemy_engine_Engine
     from sqlalchemy.engine import Row as sqlalchemy_engine_Row
     from sqlalchemy.engine import reflection
+    from sqlalchemy.sql.elements import BinaryExpression as sql_binary_expression
+    from sqlalchemy.sql.elements import BooleanClauseList as sql_boolean_clause_list
+    from sqlalchemy.sql.elements import ColumnClause as sql_column_clause
 except ImportError:
     logger.debug("No SqlAlchemy module available.")
     reflection = None
@@ -44,6 +47,7 @@ except ImportError:
     Window = None
 
 try:
+    from pyspark.sql import Column as pyspark_sql_column
     from pyspark.sql import DataFrame as pyspark_sql_DataFrame
     from pyspark.sql import Row as pyspark_sql_Row
     from pyspark.sql import SparkSession as pyspark_sql_SparkSession

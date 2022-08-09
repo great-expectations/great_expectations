@@ -8,7 +8,15 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import (
+    F,
+    pyspark_sql_column,
+    pyspark_sql_DataFrame,
+    sa,
+    sql_binary_expression,
+    sql_boolean_clause_list,
+    sql_column_clause,
+)
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
@@ -70,7 +78,9 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
                 return (min_value <= series) & (series <= max_value)
 
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column_list, **kwargs: dict):
+    def _sqlalchemy(
+        cls, column_list: List[sql_column_clause], **kwargs: dict
+    ) -> Union[sql_binary_expression, sql_boolean_clause_list]:
         min_value = kwargs.get("min_value")
         max_value = kwargs.get("max_value")
         strict_min = kwargs.get("strict_min")
@@ -107,7 +117,9 @@ class MulticolumnSumBetween(MulticolumnMapMetricProvider):
                 return sa.and_(min_value <= row_wise_sum, row_wise_sum <= max_value)
 
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column_list, **kwargs):
+    def _spark(
+        cls, column_list: pyspark_sql_DataFrame, **kwargs: dict
+    ) -> pyspark_sql_column:
         min_value = kwargs.get("min_value")
         max_value = kwargs.get("max_value")
         strict_min = kwargs.get("strict_min")
