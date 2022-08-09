@@ -745,21 +745,13 @@ def test_onboarding_data_assistant_plot_return_tooltip(
                 "type": AltairDataTypes.NOMINAL.value,
             }
         ),
-        alt.Tooltip(
-            **{
-                "field": "column_distinct_values_count",
-                "format": ",",
-                "title": "Column Distinct Values Count",
-                "type": AltairDataTypes.QUANTITATIVE.value,
-            }
-        ),
     ]
 
     single_column_return_chart: alt.LayerChart = plot_result.charts[3]
     layer_1: alt.Chart = single_column_return_chart.layer[1]
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
-    assert actual_tooltip == expected_tooltip
+    assert actual_tooltip.issubset(expected_tooltip)
 
 
 def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
