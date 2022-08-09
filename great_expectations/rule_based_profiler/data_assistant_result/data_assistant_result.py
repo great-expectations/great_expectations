@@ -1554,8 +1554,8 @@ class DataAssistantResult(SerializableDictDot):
                     domain_plot_component=domain_plot_component,
                 )
 
-    @staticmethod
-    def _get_interactive_expect_column_values_to_be_between_chart(  # noqa: C901 - complexity 16
+    @staticmethod  # noqa: C901 - complexity 16
+    def _get_interactive_expect_column_values_to_be_between_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
@@ -2987,12 +2987,12 @@ class DataAssistantResult(SerializableDictDot):
         min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
-            expectation_kwargs_tooltip = [
-                expectation_kwarg_plot_component.generate_tooltip(),
-            ]
-            expectation_kwargs_initial_dropdown_state = [
-                expectation_kwarg_plot_component.name,
-            ]
+            expectation_kwargs_tooltip.append(
+                expectation_kwarg_plot_component.generate_tooltip()
+            )
+            expectation_kwargs_initial_dropdown_state.append(
+                expectation_kwarg_plot_component.name
+            )
 
             if expectation_kwarg_plot_component.name == "min_value":
                 min_value_plot_component = expectation_kwarg_plot_component
