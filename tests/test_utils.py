@@ -607,7 +607,7 @@ def load_data_into_test_database(
         random_table_suffix: If true, add 8 random characters to the table suffix and remove other tables with the
             same prefix.
         to_sql_method: Method to pass to method param of pd.to_sql()
-
+        drop_existing_table: boolean value. If set to false, will append to existing table
     Returns:
         LoadedTable which for convenience, contains the pandas dataframe that was used to load the data.
     """

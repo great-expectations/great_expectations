@@ -12,6 +12,10 @@ from great_expectations.exceptions.exceptions import GreatExpectationsError
 
 logger = logging.getLogger(__name__)
 
+# constants used by the sql example
+CONNECTION_STRING: str = "postgresql+psycopg2://postgres:@localhost/test_ci"
+table_name: str = "yellow_tripdata_sample_2020"
+
 
 def clean_up_test_files(base_dir: str, paths: List[str]) -> None:
     """
@@ -343,7 +347,6 @@ def test_run_multibatch_configured_asset_example_pandas(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
-# this is what needs to be updated
 def test_run_multibatch_sql_asset_example(tmp_path, sa, test_backends):
     """
     What does this test and why?
@@ -354,7 +357,7 @@ def test_run_multibatch_sql_asset_example(tmp_path, sa, test_backends):
     if "postgresql" not in test_backends:
         pass
     else:
-        load_data_into_postgres_database()
+        load_data_into_postgres_database(sa)
 
     base_dir: str = file_relative_path(
         __file__, "../../../test_fixtures/rule_based_profiler/example_notebooks"
@@ -390,18 +393,13 @@ def test_run_multibatch_sql_asset_example(tmp_path, sa, test_backends):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
-def load_data_into_postgres_database():
-    from typing import List
-
-    import sqlalchemy as sa
+def load_data_into_postgres_database(sa):
+    """
+    Method to load our 2020 taxi data into a postgres database.  This is a helper method
+    called by test_run_multibatch_sql_asset_example().
+    """
 
     from tests.test_utils import load_data_into_test_database
-
-    CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
-
-    base_dir: str = file_relative_path(
-        __file__, "../../../test_fixtures/rule_based_profiler/example_notebooks"
-    )
 
     data_paths: List[str] = [
         file_relative_path(
@@ -454,14 +452,14 @@ def load_data_into_postgres_database():
         ),
     ]
 
-    engine = sa.create_engine(CONNECTION_STRING)
-    connection = engine.connect()
-    table_name = "yellow_tripdata_sample_2020"
-    res = connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+    engine: sa.engine.Engine = sa.create_engine(CONNECTION_STRING)
+    connection: sa.engine.Connection = engine.connect()
 
+    # ensure we aren't appending to an existing table
+    connection.execute(f"DROP TABLE IF EXISTS {table_name}")
     for data_path in data_paths:
         load_data_into_test_database(
-            table_name="yellow_tripdata_sample_2020",
+            table_name=table_name,
             csv_path=data_path,
             connection_string=CONNECTION_STRING,
             load_full_dataset=True,
