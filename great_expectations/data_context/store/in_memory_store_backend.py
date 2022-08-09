@@ -79,6 +79,5 @@ class InMemoryStoreBackend(StoreBackend):
     ) -> DataContextVariableKey:
         """Get the store backend specific implementation of the key. id_ included for super class compatibility."""
         return DataContextVariableKey(
-            resource_type=resource_type,
             resource_name=name,
         )
