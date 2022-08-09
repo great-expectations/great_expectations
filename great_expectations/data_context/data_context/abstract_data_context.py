@@ -217,6 +217,7 @@ class AbstractDataContext(ABC):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
+        include_rendered_content: bool = False,
         ge_cloud_id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> None:

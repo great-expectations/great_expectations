@@ -253,6 +253,7 @@ class CloudDataContext(AbstractDataContext):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
+        include_rendered_content: bool = True,
         ge_cloud_id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> None:
@@ -262,8 +263,10 @@ class CloudDataContext(AbstractDataContext):
             expectation_suite: the suite to save
             expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
                 be read from the suite
+            overwrite_existing: whether to over-write the suite if it already exists
+            include_rendered_content: whether to save the prescriptive rendered content for each expectation
             ge_cloud_id: cloud id for saving expectation suite
-            overwrite_existing: should I over-write the Suite if it already exists?
+
         Returns:
             None
         """

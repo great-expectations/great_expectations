@@ -71,6 +71,7 @@ class EphemeralDataContext(AbstractDataContext):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
+        include_rendered_content: bool = False,
         **kwargs: Dict[str, Any],
     ):
         """Save the provided expectation suite into the DataContext.
@@ -79,8 +80,8 @@ class EphemeralDataContext(AbstractDataContext):
             expectation_suite: the suite to save
             expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
                 be read from the suite
-
-            overwrite_existing: bool setting whether to overwrite existing ExpectationSuite
+            overwrite_existing: whether to over-write the suite if it already exists
+            include_rendered_content: whether to save the prescriptive rendered content for each expectation
 
         Returns:
             None
