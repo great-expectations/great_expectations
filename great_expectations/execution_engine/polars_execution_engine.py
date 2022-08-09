@@ -379,7 +379,9 @@ Please check your config."""
         """
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
-        elif path.endswith(".parquet"):
+        elif (
+            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
+        ):
             return {"reader_method": "read_parquet"}
         elif path.endswith(".xlsx") or path.endswith(".xls"):
             return {"reader_method": "read_excel"}
