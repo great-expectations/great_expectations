@@ -598,7 +598,7 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_exclude_column_
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 86
+    assert len(column_domain_charts) == 99
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
@@ -716,7 +716,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         alt.Tooltip(
             **{
                 "field": "min_value",
-                "format": ",",
+                "format": "",
                 "title": "Min Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
@@ -724,7 +724,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         alt.Tooltip(
             **{
                 "field": "max_value",
-                "format": ",",
+                "format": "",
                 "title": "Max Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }

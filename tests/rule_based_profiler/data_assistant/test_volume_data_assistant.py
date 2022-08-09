@@ -2392,7 +2392,7 @@ def test_volume_data_assistant_plot_return_tooltip(
         alt.Tooltip(
             **{
                 "field": "min_value",
-                "format": ",",
+                "format": "",
                 "title": "Min Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
@@ -2400,7 +2400,7 @@ def test_volume_data_assistant_plot_return_tooltip(
         alt.Tooltip(
             **{
                 "field": "max_value",
-                "format": ",",
+                "format": "",
                 "title": "Max Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
@@ -2478,20 +2478,3 @@ def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_seq
         new_cell=new_cell,
         implicit=True,
     )
-
-
-def test_volume_data_assistant_plot_non_sequential(
-    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
-) -> None:
-    sequential: bool = False
-    plot_metrics_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics(
-        sequential=sequential
-    )
-
-    assert all([chart.mark == "bar" for chart in plot_metrics_result.charts])
-
-    plot_expectations_result: PlotResult = (
-        bobby_volume_data_assistant_result.plot_metrics(sequential=sequential)
-    )
-
-    assert all([chart.mark == "bar" for chart in plot_expectations_result.charts])

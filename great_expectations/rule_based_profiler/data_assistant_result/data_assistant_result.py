@@ -2792,7 +2792,7 @@ class DataAssistantResult(SerializableDictDot):
 
         input_dropdown_initial_state: pd.DataFrame = df.groupby(
             [batch_plot_component.name], as_index=False
-        )[batch_plot_component.name].max()
+        ).max()
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers
             + [
