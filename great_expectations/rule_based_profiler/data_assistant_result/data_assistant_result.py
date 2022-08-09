@@ -3275,11 +3275,11 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         attributed_metrics_by_domain: Dict[
-            Domain, Dict[str, ParameterNode]
+            Domain, Dict[str, List[ParameterNode]]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
 
         attributed_metrics_by_column_domain: Dict[
-            Domain, Dict[str, ParameterNode]
+            Domain, Dict[str, List[ParameterNode]]
         ] = self._filter_attributed_metrics_by_column_names(
             attributed_metrics_by_domain,
             include_column_names,
@@ -3296,12 +3296,12 @@ class DataAssistantResult(SerializableDictDot):
                         column_based_metric_names.add((metric,))
 
         filtered_attributed_metrics_by_column_domain: Dict[
-            Domain, Dict[str, ParameterNode]
+            Domain, Dict[str, List[ParameterNode]]
         ]
         column_based_expectation_configurations: List[ExpectationConfiguration]
         display_charts: List[alt.VConcatChart] = []
         return_charts: List[Optional[alt.Chart]] = []
-        expectation_type: str
+        expectation_type: Optional[str]
         for metric_names in column_based_metric_names:
             expectation_type = metric_expectation_map[metric_names]
             column_based_expectation_configurations = (
@@ -3391,10 +3391,10 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _filter_attributed_metrics_by_column_names(
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]],
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         def _filter(domain: Domain) -> bool:
             column_name: str = domain.domain_kwargs.column
             if exclude_column_names and column_name in exclude_column_names:
@@ -3408,7 +3408,7 @@ class DataAssistantResult(SerializableDictDot):
         domains: Set[Domain] = set(
             filter(lambda m: _filter(m), list(attributed_metrics.keys()))
         )
-        filtered_attributed_metrics: Dict[Domain, Dict[str, ParameterNode]] = {
+        filtered_attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]] = {
             domain: attributed_metrics[domain] for domain in domains
         }
 
@@ -3416,11 +3416,11 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _filter_attributed_metrics_by_metric_names(
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]],
         metric_names: Tuple[str],
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         domain: Domain
-        filtered_attributed_metrics: Dict[Domain, Dict[str, ParameterNode]] = {}
+        filtered_attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]] = {}
         for domain, attributed_metric_values in attributed_metrics.items():
             filtered_attributed_metrics[domain] = {}
             for metric_name in metric_names:
@@ -3547,7 +3547,7 @@ class DataAssistantResult(SerializableDictDot):
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
         metric_names: Tuple[str],
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
@@ -3586,9 +3586,9 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         expectation_configuration: ExpectationConfiguration
-        attributed_metrics: Dict[str, ParameterNode]
+        attributed_metrics: Dict[str, List[ParameterNode]]
         df: pd.DataFrame
-        attributed_values: ParameterNode
+        attributed_values: List[ParameterNode]
         metric_df: pd.DataFrame
         return_charts: List[alt.Chart] = []
         for domain, attributed_metrics in attributed_metrics_by_domain.items():
@@ -3775,7 +3775,7 @@ class DataAssistantResult(SerializableDictDot):
             ].metric_configuration.metric_value_kwargs.quantiles
             if len(quantiles) == 1:
                 quantiles = quantiles[0]
-            df["quantiles"] = quantiles
+            df["quantile"] = [quantiles for idx in df.index]
 
         batch_identifier_list: List[Set[Tuple[str, str]]] = [
             self._batch_id_to_batch_identifier_display_name_map[batch_id]
@@ -3849,7 +3849,7 @@ class DataAssistantResult(SerializableDictDot):
     def _create_column_dfs_for_charting(
         self,
         metric_names: Tuple[str],
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> List[ColumnDataFrame]:
@@ -3880,7 +3880,7 @@ class DataAssistantResult(SerializableDictDot):
             ][0]
 
             attributed_values_by_metric_name: Dict[
-                str, ParameterNode
+                str, List[ParameterNode]
             ] = attributed_metrics_by_domain[column_domain]
 
             if (
@@ -3915,7 +3915,7 @@ class DataAssistantResult(SerializableDictDot):
         expectation_type: str,
         expectation_configuration: Optional[ExpectationConfiguration],
         metric_names: Tuple[str],
-        attributed_values: List[ParameterNode],
+        attributed_values: List[List[ParameterNode]],
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
         plot_mode: PlotMode,
