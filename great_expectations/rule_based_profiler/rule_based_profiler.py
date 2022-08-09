@@ -42,6 +42,7 @@ from great_expectations.rule_based_profiler.config.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
@@ -67,14 +68,13 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     init_rule_parameter_builders,
 )
-from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
-    RuleState,
     build_parameter_container_for_variables,
 )
+from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
+from great_expectations.rule_based_profiler.rule_state import RuleState
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)

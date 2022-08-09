@@ -150,6 +150,20 @@ def pytest_generate_tests(metafunc):
                                     == "bigquery"
                                 ):
                                     generate_test = True
+                                elif (
+                                    "bigquery_v2" in only_for
+                                    and BigQueryDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and hasattr(data_asset.engine.dialect, "name")
+                                    and data_asset.engine.dialect.name.lower()
+                                    == "bigquery"
+                                ):
+                                    # <WILL> : Marker to get the test to only run for the V2 API
+                                    # expect_column_values_to_be_unique:positive_case_all_null_values_bigquery_nones
+                                    # works in different ways between CFE (V3) and V2 Expectations. This flag allows for
+                                    # the test to only be run in the V2 case
+                                    generate_test = True
+
                             elif isinstance(data_asset, PandasDataset):
                                 major, minor, *_ = pd.__version__.split(".")
                                 if "pandas" in only_for:
