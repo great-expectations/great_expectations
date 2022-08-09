@@ -87,6 +87,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     DEFAULT_BASE_URL: str = "https://app.greatexpectations.io/"
 
+    TIMEOUT: int = 20
+
     def __init__(
         self,
         ge_cloud_credentials: Dict,
@@ -171,7 +173,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
             response = requests.get(
-                ge_cloud_url, headers=self.auth_headers, params=params
+                ge_cloud_url,
+                headers=self.auth_headers,
+                params=params,
+                timeout=self.TIMEOUT,
             )
             return response.json()
         except JSONDecodeError as jsonError:
@@ -214,7 +219,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             url = urljoin(f"{url}/", ge_cloud_id)
 
         try:
-            response = requests.put(url, json=data, headers=self.auth_headers)
+            response = requests.put(
+                url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
+            )
             response_status_code = response.status_code
 
             # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
@@ -224,7 +231,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code == 405
                 and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
             ):
-                response = requests.patch(url, json=data, headers=self.auth_headers)
+                response = requests.patch(
+                    url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
+                )
                 response_status_code = response.status_code
 
             if response_status_code < 300:
@@ -294,7 +303,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"organizations/" f"{organization_id}/" f"{hyphen(resource_name)}",
         )
         try:
-            response = requests.post(url, json=data, headers=self.auth_headers)
+            response = requests.post(
+                url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
+            )
             response_json = response.json()
 
             object_id = response_json["data"]["id"]
@@ -335,7 +346,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
         try:
-            response = requests.get(url, headers=self.auth_headers)
+            response = requests.get(
+                url, headers=self.auth_headers, timeout=self.TIMEOUT
+            )
             response_json = response.json()
             keys = [
                 (
@@ -385,7 +398,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{ge_cloud_id}",
         )
         try:
-            response = requests.delete(url, json=data, headers=self.auth_headers)
+            response = requests.delete(
+                url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
+            )
             response_status_code = response.status_code
 
             if response_status_code < 300:
