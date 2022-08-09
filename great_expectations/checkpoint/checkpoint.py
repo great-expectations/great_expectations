@@ -159,8 +159,8 @@ class BaseCheckpoint(ConfigPeer):
 
         # Ensure that validations dicts have the most specific id available
         # (default to Checkpoint's default_validation_id if no validations were passed in the signature)
-        for validation in validations:
-            if using_default_validation:
+        if using_default_validation:
+            for validation in validations:
                 validation["id"] = self.config.default_validation_id
 
         # Use AsyncExecutor to speed up I/O bound validations by running them in parallel with multithreading (if
