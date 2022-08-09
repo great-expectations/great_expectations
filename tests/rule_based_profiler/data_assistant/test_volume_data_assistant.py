@@ -2427,7 +2427,8 @@ def test_volume_data_assistant_plot_return_tooltip(
     layer_1: alt.Chart = single_column_return_chart.layer[1]
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
-    assert set(actual_tooltip).issubset(expected_tooltip)
+    for tooltip in actual_tooltip:
+        assert tooltip in expected_tooltip
 
 
 def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
