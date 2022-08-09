@@ -113,6 +113,8 @@ class FileDataContext(AbstractDataContext):
                 )
             )
         self._evaluation_parameter_dependencies_compiled = False
+        if include_rendered_content:
+            expectation_suite.render()
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     @property

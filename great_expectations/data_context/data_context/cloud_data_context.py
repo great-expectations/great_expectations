@@ -282,6 +282,8 @@ class CloudDataContext(AbstractDataContext):
                 f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
             )
         self._evaluation_parameter_dependencies_compiled = False
+        if include_rendered_content:
+            expectation_suite.render()
         self.expectations_store.set(key, expectation_suite, **kwargs)
 
     @property

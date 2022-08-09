@@ -59,6 +59,7 @@ class ExpectationSuite(SerializableDictDot):
         data_asset_type=None,
         execution_engine_type=None,
         meta=None,
+        include_rendered_content=None,
         ge_cloud_id=None,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
@@ -88,6 +89,7 @@ class ExpectationSuite(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
+        self._include_rendered_content = include_rendered_content
 
     def add_citation(
         self,
