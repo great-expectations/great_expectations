@@ -1,5 +1,5 @@
 import logging
-import os
+import pathlib
 from typing import Any, List, Optional, Tuple
 
 from great_expectations.core.data_context_key import DataContextVariableKey
@@ -185,11 +185,13 @@ class InlineStoreBackend(StoreBackend):
 
     def _save_changes(self) -> None:
         context = self._data_context
-        config_filepath = os.path.join(context.root_directory, context.GE_YML)
+        config_filepath = pathlib.Path(context.root_directory) / context.GE_YML
 
         try:
             with open(config_filepath, "w") as outfile:
                 context.config.to_yaml(outfile)
+        # In environments where wrting to disk is not allowed, it is impossible to
+        # save changes. As such, we log a warning but do not raise.
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
 
