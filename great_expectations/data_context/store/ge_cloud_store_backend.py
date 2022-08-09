@@ -13,7 +13,24 @@ from great_expectations.data_context.types.resource_identifiers import GeCloudId
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
+try:
+    from typing import TypedDict  # type: ignore[attr-defined]
+except ModuleNotFoundError:
+    from typing_extensions import TypedDict
+
 logger = logging.getLogger(__name__)
+
+
+class PayloadDataField(TypedDict):
+    attributes: dict
+    id: str
+    type: str
+
+
+class ResponsePayload(TypedDict):
+    data: PayloadDataField
+    jsonapi: dict
+    links: dict
 
 
 class GeCloudRESTResource(str, Enum):
