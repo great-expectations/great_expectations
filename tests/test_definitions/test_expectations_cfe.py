@@ -154,6 +154,21 @@ def pytest_generate_tests(metafunc):
                                 ):
                                     generate_test = True
                                 elif (
+                                    "bigquery_cfe" in only_for
+                                    and BigQueryDialect is not None
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "bigquery"
+                                ):
+                                    # <WILL> : Marker to get the test to only run for CFE
+                                    # expect_column_values_to_be_unique:negative_case_all_null_values_bigquery_nones
+                                    # works in different ways between CFE (V3) and V2 Expectations. This flag allows for
+                                    # the test to only be run in the CFE case
+                                    generate_test = True
+                                elif (
                                     "trino" in test["only_for"]
                                     and BigQueryDialect is not None
                                     and hasattr(
@@ -264,6 +279,21 @@ def pytest_generate_tests(metafunc):
                                 )
                                 or (
                                     "bigquery" in suppress_test_for
+                                    and BigQueryDialect is not None
+                                    and validator_with_data
+                                    and isinstance(
+                                        validator_with_data.execution_engine.active_batch_data,
+                                        SqlAlchemyBatchData,
+                                    )
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "bigquery"
+                                )
+                                or (
+                                    "bigquery_cfe" in suppress_test_for
                                     and BigQueryDialect is not None
                                     and validator_with_data
                                     and isinstance(
