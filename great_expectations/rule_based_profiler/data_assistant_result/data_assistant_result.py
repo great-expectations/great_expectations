@@ -3180,14 +3180,14 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         attributed_metrics_by_table_domain: Dict[
-            Domain, Dict[str, ParameterNode]
+            Domain, Dict[str, List[ParameterNode]]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.TABLE)
 
         table_domain: Domain = Domain(
             domain_type=MetricDomainTypes.TABLE, rule_name="table_rule"
         )
         attributed_metrics: Dict[
-            str, ParameterNode
+            str, List[ParameterNode]
         ] = attributed_metrics_by_table_domain[table_domain]
 
         table_based_metric_names: Set[Union[Tuple[str], str]] = set()
@@ -3752,19 +3752,30 @@ class DataAssistantResult(SerializableDictDot):
     def _create_df_for_charting(
         self,
         metric_name: str,
-        attributed_values: ParameterNode,
+        attributed_values: List[ParameterNode],
         expectation_configuration: ExpectationConfiguration,
         plot_mode: PlotMode,
     ) -> pd.DataFrame:
-        batch_ids: KeysView[str] = attributed_values.keys()
+        batch_ids: KeysView[str] = attributed_values[0].keys()
         metric_values: MetricValues = [
             value[0] if len(value) == 1 else value
-            for value in attributed_values.values()
+            for value in attributed_values[0].values()
         ]
 
         sanitized_metric_name: str = sanitize_parameter_name(name=metric_name)
 
         df: pd.DataFrame = pd.DataFrame({sanitized_metric_name: metric_values})
+
+        if (
+            metric_name == "column.quantile_values"
+            and plot_mode == PlotMode.DESCRIPTIVE
+        ):
+            quantiles: Union[List[float], float] = attributed_values[
+                1
+            ].metric_configuration.metric_value_kwargs.quantiles
+            if len(quantiles) == 1:
+                quantiles = quantiles[0]
+            df["quantiles"] = quantiles
 
         batch_identifier_list: List[Set[Tuple[str, str]]] = [
             self._batch_id_to_batch_identifier_display_name_map[batch_id]
@@ -3973,31 +3984,67 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_attributed_metrics_by_domain(
         self,
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         domain: Domain
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         fully_qualified_parameter_name: str
         parameter_node: ParameterNode
-        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
-            domain: {
-                parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ].metric_configuration.metric_name: parameter_node[
+        metrics_attributed_values_by_domain: Dict[
+            Domain, Dict[str, List[ParameterNode]]
+        ] = {}
+        for (
+            domain,
+            parameter_values_for_fully_qualified_parameter_names,
+        ) in self.metrics_by_domain.items():
+            metrics_attributed_values_by_domain[domain] = {}
+            for (
+                fully_qualified_parameter_name,
+                parameter_node,
+            ) in parameter_values_for_fully_qualified_parameter_names.items():
+                if (
                     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-                for fully_qualified_parameter_name, parameter_node in parameter_values_for_fully_qualified_parameter_names.items()
-                if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
-            }
-            for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-        }
+                    in parameter_node
+                    and FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY in parameter_node
+                ):
+                    metrics_attributed_values_by_domain[domain].update(
+                        {
+                            parameter_node[
+                                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                            ].metric_configuration.metric_name: [
+                                parameter_node[
+                                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                                ],
+                                parameter_node[
+                                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                                ],
+                            ]
+                        }
+                    )
+                elif (
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                    in parameter_node
+                ):
+                    metrics_attributed_values_by_domain[domain].update(
+                        {
+                            parameter_node[
+                                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                            ].metric_configuration.metric_name: [
+                                parameter_node[
+                                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                                ]
+                            ]
+                        }
+                    )
 
         return metrics_attributed_values_by_domain
 
     def _determine_attributed_metrics_by_domain_type(
         self, metric_domain_type: MetricDomainTypes
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         # noinspection PyTypeChecker
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
+        attributed_metrics_by_domain: Dict[
+            Domain, Dict[str, List[ParameterNode]]
+        ] = dict(
             filter(
                 lambda element: element[0].domain_type == metric_domain_type,
                 self._get_attributed_metrics_by_domain().items(),
