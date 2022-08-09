@@ -4,6 +4,7 @@ import shutil
 from typing import List
 
 import nbformat
+import pytest
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 from nbformat import NotebookNode
 
@@ -355,7 +356,7 @@ def test_run_multibatch_sql_asset_example(tmp_path, sa, test_backends):
     `preprocess` function.
     """
     if "postgresql" not in test_backends:
-        pass
+        pytest.skip("testing multibatch in sql requires postgres backend")
     else:
         load_data_into_postgres_database(sa)
 
