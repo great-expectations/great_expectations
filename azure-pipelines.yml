@@ -311,6 +311,30 @@ stages:
               eval ${PYTEST}
             displayName: 'Pytest Trino'
 
+      - job: test_cli
+        dependsOn: [make_suffix, build_push_]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        services:
+          postgres: postgres
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest --postgresql --spark --aws-integration tests/cli"
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'Pytest cli'
+
       - job: test_usage_stats
         dependsOn: [make_suffix, build_push_]
         condition: succeeded()
@@ -498,46 +522,11 @@ stages:
               pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
-  - stage: cli_integration
-    dependsOn: [lint, import_ge, custom_checks]
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-      - job: test_cli
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-
-        services:
-          postgres: postgres
-
-        variables:
-          python.version: '3.8'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
-
-          - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
-            displayName: 'Install dependencies'
-
-          - script: |
-              pip install pytest
-              pytest --postgresql --spark --aws-integration -v tests/cli
-            displayName: 'pytest'
-
   - stage: deploy
     condition: and(succeeded(), eq(variables.isRelease, true))
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [import_ge, custom_checks, required, lint, db_integration, docker_tests, cli_integration]
+    dependsOn: [import_ge, custom_checks, required, lint, db_integration, docker_tests]
 
     jobs:
       - job: deploy

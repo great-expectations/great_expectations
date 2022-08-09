@@ -14,7 +14,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
-from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -167,6 +167,7 @@ class AssetConfig(SerializableDictDot):
         splitter_kwargs: Optional[Dict[str, str]] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
+        reader_options: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         if name is not None:
@@ -195,6 +196,8 @@ class AssetConfig(SerializableDictDot):
             self.sampling_method = sampling_method
         if sampling_kwargs is not None:
             self.sampling_kwargs = sampling_kwargs
+        if reader_options is not None:
+            self.reader_options = reader_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -259,6 +262,8 @@ class AssetConfigSchema(Schema):
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
+
+    reader_options = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
@@ -932,7 +937,7 @@ class DatasourceConfig(AbstractConfig):
         return serializeable_dict
 
 
-class DatasourceConfigSchema(Schema):
+class DatasourceConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
@@ -2239,7 +2244,7 @@ class CheckpointValidationConfig(AbstractConfig):
             setattr(self, k, v)
 
 
-class CheckpointValidationConfigSchema(Schema):
+class CheckpointValidationConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
@@ -2256,11 +2261,14 @@ class CheckpointValidationConfigSchema(Schema):
         explicitly name all possible values in CheckpoingValidationConfigSchema as
         schema fields.
         """
-        original_obj = copy.deepcopy(obj)
         data = super().dump(obj, many=many)
 
-        for key, value in original_obj.items():
-            if key not in data and key not in self.declared_fields:
+        for key, value in obj.items():
+            if (
+                key not in data
+                and key not in self.declared_fields
+                and value is not None
+            ):
                 data[key] = value
 
         sorted_data = dict(sorted(data.items()))

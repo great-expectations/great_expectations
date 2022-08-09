@@ -13,7 +13,10 @@ from great_expectations.data_context.store.datasource_store import DatasourceSto
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
-from great_expectations.data_context.types.base import DatasourceConfig
+from great_expectations.data_context.types.base import (
+    DatasourceConfig,
+    datasourceConfigSchema,
+)
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
@@ -97,6 +100,8 @@ def test_datasource_store_retrieval_cloud_mode(
 
         store.set(key=key, value=datasource_config)
 
+        expected_datasource_config = datasourceConfigSchema.dump(datasource_config)
+
         mock_put.assert_called_with(
             "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/datasources/foobarbaz",
             json={
@@ -104,7 +109,7 @@ def test_datasource_store_retrieval_cloud_mode(
                     "type": "datasource",
                     "id": "foobarbaz",
                     "attributes": {
-                        "datasource_config": datasource_config.to_dict(),
+                        "datasource_config": expected_datasource_config,
                         "organization_id": ge_cloud_organization_id,
                     },
                 }
