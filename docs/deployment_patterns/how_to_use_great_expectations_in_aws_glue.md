@@ -20,24 +20,24 @@ You need to add to your AWS Glue Spark Job Parameters to install great expectati
   — additional-python-modules great_expectations
 ```
 Then import necessary libs:
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L1-L9
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L1-L13
 ```
 
 ### 2. Set up Great Expectations
 Here we initialize a Spark and Glue, and read great_expectations.yaml
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L11-L16
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L15-L22
 ```
 
 ### 3. Connect to your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L18-L29
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L24-L43
 ```
 
 ### 4. Create Expectations
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L31-L42
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L45-L60
 ```
 
 ### 5. Validate your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L44-L50
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L62-L76
 ```
 
 ### 6. Congratulations!
