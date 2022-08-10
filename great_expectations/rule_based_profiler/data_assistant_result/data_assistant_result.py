@@ -71,6 +71,10 @@ from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
 
 
+def default_field(obj):
+    return field(default_factory=lambda: copy.copy(obj))
+
+
 @dataclass
 class RuleStats(SerializableDictDot):
     """
@@ -111,18 +115,20 @@ class DataAssistantResult(SerializableDictDot):
     """
 
     # A mapping is defined for which metrics to plot and their associated expectations
-    METRIC_EXPECTATION_MAP = {
-        "table.columns": "expect_table_columns_to_match_set",
-        "table.row_count": "expect_table_row_count_to_be_between",
-        "column.distinct_values.count": "expect_column_unique_value_count_to_be_between",
-        "column.min": "expect_column_min_to_be_between",
-        "column.max": "expect_column_max_to_be_between",
-        "column.mean": "expect_column_mean_to_be_between",
-        "column.median": "expect_column_median_to_be_between",
-        "column.standard_deviation": "expect_column_stdev_to_be_between",
-        "column.quantile_values": "expect_column_quantile_values_to_be_between",
-        ("column.min", "column.max"): "expect_column_values_to_be_between",
-    }
+    METRIC_EXPECTATION_MAP: Dict[Union[str, Tuple[str]], str] = default_field(
+        {
+            "table.columns": "expect_table_columns_to_match_set",
+            "table.row_count": "expect_table_row_count_to_be_between",
+            "column.distinct_values.count": "expect_column_unique_value_count_to_be_between",
+            "column.min": "expect_column_min_to_be_between",
+            "column.max": "expect_column_max_to_be_between",
+            "column.mean": "expect_column_mean_to_be_between",
+            "column.median": "expect_column_median_to_be_between",
+            "column.standard_deviation": "expect_column_stdev_to_be_between",
+            "column.quantile_values": "expect_column_quantile_values_to_be_between",
+            ("column.min", "column.max"): "expect_column_values_to_be_between",
+        }
+    )
 
     # A mapping is defined for the Altair data type associated with each metric
     # Altair data types can be one of:
@@ -130,17 +136,19 @@ class DataAssistantResult(SerializableDictDot):
     #     - Ordinal: Metric is a discrete ordered quantity
     #     - Quantitative: Metric is a continuous real-valued quantity
     #     - Temporal: Metric is a time or date value
-    METRIC_TYPES = {
-        "table.columns": AltairDataTypes.NOMINAL,
-        "table.row_count": AltairDataTypes.QUANTITATIVE,
-        "column.distinct_values.count": AltairDataTypes.QUANTITATIVE,
-        "column.min": AltairDataTypes.QUANTITATIVE,
-        "column.max": AltairDataTypes.QUANTITATIVE,
-        "column.mean": AltairDataTypes.QUANTITATIVE,
-        "column.median": AltairDataTypes.QUANTITATIVE,
-        "column.standard_deviation": AltairDataTypes.QUANTITATIVE,
-        "column.quantile_values": AltairDataTypes.QUANTITATIVE,
-    }
+    METRIC_TYPES: Dict[str, AltairDataTypes] = default_field(
+        {
+            "table.columns": AltairDataTypes.NOMINAL,
+            "table.row_count": AltairDataTypes.QUANTITATIVE,
+            "column.distinct_values.count": AltairDataTypes.QUANTITATIVE,
+            "column.min": AltairDataTypes.QUANTITATIVE,
+            "column.max": AltairDataTypes.QUANTITATIVE,
+            "column.mean": AltairDataTypes.QUANTITATIVE,
+            "column.median": AltairDataTypes.QUANTITATIVE,
+            "column.standard_deviation": AltairDataTypes.QUANTITATIVE,
+            "column.quantile_values": AltairDataTypes.QUANTITATIVE,
+        }
+    )
 
     ALLOWED_KEYS = {
         "_batch_id_to_batch_identifier_display_name_map",
@@ -3179,7 +3187,7 @@ class DataAssistantResult(SerializableDictDot):
 
         charts: List[alt.Chart] = []
         metric_names: Tuple[str]
-        attributed_values: List[ParameterNode]
+        attributed_values: List[List[ParameterNode]]
         expectation_type: str
         expectation_configuration: ExpectationConfiguration
         for metric_names in table_based_metric_names:
@@ -3553,7 +3561,7 @@ class DataAssistantResult(SerializableDictDot):
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
         metric_names: Tuple[str],
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[alt.Chart]:

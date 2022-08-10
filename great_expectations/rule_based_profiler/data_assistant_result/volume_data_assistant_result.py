@@ -1,12 +1,20 @@
+import copy
+from dataclasses import dataclass, field
+from typing import Dict, Tuple, Union
+
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
 
 
+def default_field(obj):
+    return field(default_factory=lambda: copy.copy(obj))
+
+
 class VolumeDataAssistantResult(DataAssistantResult):
     # A mapping is defined for which metrics to plot and their associated expectations
-    METRIC_EXPECTATION_MAP = {
+    METRIC_EXPECTATION_MAP: Dict[Union[str, Tuple[str]], str] = {
         "table.row_count": "expect_table_row_count_to_be_between",
         "column.distinct_values.count": "expect_column_unique_value_count_to_be_between",
     }
@@ -17,7 +25,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
     #     - Ordinal: Metric is a discrete ordered quantity
     #     - Quantitative: Metric is a continuous real-valued quantity
     #     - Temporal: Metric is a time or date value
-    METRIC_TYPES = {
+    METRIC_TYPES: Dict[str, AltairDataTypes] = {
         "table.row_count": AltairDataTypes.QUANTITATIVE,
         "column.distinct_values.count": AltairDataTypes.QUANTITATIVE,
     }
