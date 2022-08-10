@@ -1250,7 +1250,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
-            metric_plot_component: MetricPlotComponent = MetricPlotComponent(
+            metric_plot_component = MetricPlotComponent(
                 name=sanitized_metric_name, alt_type=metric_type
             )
             metric_plot_components.append(metric_plot_component)
@@ -1667,7 +1667,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        df_columns: List[str]
+        df_columns: pd.Index
         df: Optional[pd.DataFrame] = None
         for _, column_df in column_dfs:
             df_columns = column_df.columns.intersection(possible_df_columns)
