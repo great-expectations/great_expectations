@@ -766,7 +766,10 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         ),
     ]
 
-    single_column_return_chart: alt.LayerChart = plot_result.charts[3]
+    for chart in plot_result.charts:
+        chart_title: str = DataAssistantResult._get_chart_layer_title(layer=chart)
+        if chart_title == "expect_column_min_to_be_between":
+            single_column_return_chart: alt.LayerChart = plot_result.charts[3]
     layer_1: alt.Chart = single_column_return_chart.layer[1]
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
