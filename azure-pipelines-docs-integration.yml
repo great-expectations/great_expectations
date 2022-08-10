@@ -141,7 +141,7 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pip install pytest pytest-azurepipelines
+            pip install pytest pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
             pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws --azure tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
