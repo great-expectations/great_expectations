@@ -1365,6 +1365,13 @@ def test_GeCloudStoreBackend():
     )
 
     # test .set
+    default_called_with = dict(
+        timeout=GeCloudStoreBackend.TIMEOUT,
+        headers={
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": "Bearer 1234",
+        },
+    )
     with patch("requests.post", autospec=True) as mock_post:
         my_store_backend = GeCloudStoreBackend(
             ge_cloud_base_url=ge_cloud_base_url,
@@ -1401,10 +1408,7 @@ def test_GeCloudStoreBackend():
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **default_called_with,
         )
 
     # test .get
@@ -1423,11 +1427,8 @@ def test_GeCloudStoreBackend():
         mock_get.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd-8a42-3c35cce574c6",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
             params=None,
+            **default_called_with,
         )
 
     # test .list_keys
@@ -1440,10 +1441,7 @@ def test_GeCloudStoreBackend():
         my_store_backend.list_keys()
         mock_get.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **default_called_with,
         )
 
     # test .remove_key
@@ -1473,10 +1471,7 @@ def test_GeCloudStoreBackend():
                     "attributes": {"deleted": True},
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **default_called_with,
         )
 
     # test .set
@@ -1498,10 +1493,7 @@ def test_GeCloudStoreBackend():
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **default_called_with,
         )
 
     # test .get
@@ -1520,11 +1512,8 @@ def test_GeCloudStoreBackend():
         mock_get.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
             "-4bdd-8a42-3c35cce574c6",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
             params=None,
+            **default_called_with,
         )
 
     # test .list_keys
@@ -1537,10 +1526,7 @@ def test_GeCloudStoreBackend():
         my_store_backend.list_keys()
         mock_get.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **default_called_with,
         )
 
     # test .remove_key
@@ -1570,10 +1556,7 @@ def test_GeCloudStoreBackend():
                     "attributes": {"deleted": True},
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **default_called_with,
         )
 
 
