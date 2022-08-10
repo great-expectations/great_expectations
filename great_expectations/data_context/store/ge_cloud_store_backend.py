@@ -214,7 +214,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self) -> None:  # type: ignore[override]
         pass
 
-    def _update(self, key: str, value: Any) -> bool:
+    def _update(self, key: str, value: Any) -> ResponsePayload:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -258,9 +258,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
                 response_status_code = response.status_code
 
-            if response_status_code < 300:
-                return True
-            return False
+            response.raise_for_status()
+            return self.get(key=key)
+
+        except (requests.HTTPError, requests.Timeout) as http_exc:
+            raise StoreBackendError(
+                f"Unable to update object in GE Cloud Store Backend {http_exc}"
+            )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
