@@ -207,7 +207,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_result_serialization(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -225,7 +225,7 @@ def test_onboarding_data_assistant_result_serialization(
     assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 8
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -251,7 +251,7 @@ def test_onboarding_data_assistant_result_get_expectation_suite(
     )
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_metrics_count(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -283,7 +283,7 @@ def test_onboarding_data_assistant_metrics_count(
     assert num_metrics == 184
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ):
@@ -309,7 +309,7 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
     )
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -408,7 +408,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
     )
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -433,7 +433,7 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
         )
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -454,7 +454,7 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
     )
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -475,7 +475,7 @@ def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
     )
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -498,7 +498,7 @@ def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
     )
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -523,7 +523,7 @@ def test_onboarding_data_assistant_plot_prescriptive_theme_notebook_execution(
     )
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -533,7 +533,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_table_domain
     assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -557,7 +557,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     assert find_strings_in_nested_obj(column_domain_charts, columns)
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_metrics_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -571,7 +571,7 @@ def test_onboarding_data_assistant_plot_metrics_include_column_names_filters_out
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_metrics_exclude_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -586,7 +586,7 @@ def test_onboarding_data_assistant_plot_metrics_exclude_column_names_filters_out
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_expectations_and_metrics_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -602,7 +602,7 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_include_column_
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_expectations_and_metrics_exclude_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -618,7 +618,7 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_exclude_column_
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_include_and_exclude_column_names_raises_error(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -630,7 +630,7 @@ def test_onboarding_data_assistant_plot_include_and_exclude_column_names_raises_
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_custom_theme_overrides(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -691,7 +691,7 @@ def test_onboarding_data_assistant_plot_custom_theme_overrides(
     )
 
 
-@pytest.mark.unit()
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_return_tooltip(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -774,7 +774,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         assert tooltip in actual_tooltip
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -795,7 +795,7 @@ def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_noteb
     )
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):

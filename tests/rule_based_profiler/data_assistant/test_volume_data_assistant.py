@@ -1640,6 +1640,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_result_serialization(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -1657,6 +1658,7 @@ def test_volume_data_assistant_result_serialization(
     assert len(bobby_volume_data_assistant_result.profiler_config.rules) == 2
 
 
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1684,6 +1686,7 @@ def test_volume_data_assistant_result_get_expectation_suite(
     )
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
@@ -1709,6 +1712,7 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_instantiation(
     quentin_explicit_instantiation_result_frozen_time,
     quentin_expected_metrics_by_domain,
@@ -1769,6 +1773,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
     assert actual_expectation_suite == expected_expectation_suite
 
 
+@pytest.mark.unit
 @freeze_time("09/26/2019 13:42:41")
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
@@ -1830,6 +1835,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
+@pytest.mark.unit
 @freeze_time("09/26/2019 13:42:41")
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
     quentin_columnar_table_multi_batch_data_context,
@@ -2003,6 +2009,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -2064,6 +2071,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     )
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
@@ -2075,6 +2083,7 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_explici
     assert data_assistant_result.execution_time > 0.0
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
 ):
@@ -2086,6 +2095,7 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_implici
     assert data_assistant_result.execution_time > 0.0
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
@@ -2110,6 +2120,7 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2134,6 +2145,7 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
         )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2154,6 +2166,7 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution(
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2174,6 +2187,7 @@ def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2196,6 +2210,7 @@ def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2220,6 +2235,7 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     )
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2229,6 +2245,7 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_cha
     assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2252,6 +2269,7 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_ch
     assert find_strings_in_nested_obj(column_domain_charts, columns)
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_include_column_names_filters_output(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2267,6 +2285,7 @@ def test_volume_data_assistant_plot_include_column_names_filters_output(
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_exclude_column_names_filters_output(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2280,6 +2299,7 @@ def test_volume_data_assistant_plot_exclude_column_names_filters_output(
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_error(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2291,6 +2311,7 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_custom_theme_overrides(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2349,6 +2370,7 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
     )
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_return_tooltip(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2431,6 +2453,7 @@ def test_volume_data_assistant_plot_return_tooltip(
         assert tooltip in actual_tooltip
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2451,6 +2474,7 @@ def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
