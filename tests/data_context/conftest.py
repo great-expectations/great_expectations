@@ -6,11 +6,11 @@ from unittest.mock import PropertyMock, patch
 import pytest
 
 import great_expectations as ge
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
 )
-from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -637,7 +637,12 @@ def datasource_config() -> DatasourceConfig:
 
 
 @pytest.fixture
-def shared_called_with_request_kwargs() -> dict:
+def bearer_test_token() -> str:
+    return "6bb5b6f5c7794892a4ca168c65c2603e"
+
+
+@pytest.fixture
+def shared_called_with_request_kwargs(bearer_test_token) -> dict:
     """
     Standard request kwargs that all GeCloudStoreBackend http calls are made with.
     Use in combination with `assert_called_with()`
@@ -646,7 +651,7 @@ def shared_called_with_request_kwargs() -> dict:
         timeout=GeCloudStoreBackend.TIMEOUT,
         headers={
             "Content-Type": "application/vnd.api+json",
-            "Authorization": "Bearer 1234",
+            "Authorization": f"Bearer {bearer_test_token}",
         },
     )
 
