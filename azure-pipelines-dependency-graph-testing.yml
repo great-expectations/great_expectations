@@ -244,6 +244,12 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
+              cd contrib/cli
+              pip install .
+              cd -
+            displayName: 'Install great_expectations_contrib'
+
+          - script: |
               # Install dependencies
               pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
