@@ -10,6 +10,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
 )
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -633,3 +634,30 @@ def datasource_config() -> DatasourceConfig:
             }
         },
     )
+
+
+@pytest.fixture
+def shared_called_with_request_kwargs() -> dict:
+    """
+    Standard request kwargs that all GeCloudStoreBackend http calls are made with.
+    Use in combination with `assert_called_with()`
+    """
+    return dict(
+        timeout=GeCloudStoreBackend.TIMEOUT,
+        headers={
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": "Bearer 1234",
+        },
+    )
+
+
+# @pytest.fixture
+# def gx_cloud_mock() -> responses.RequestsMock:
+#     with responses.RequestsMock() as mock_rsps:
+#         yield mock_rsps
+
+
+@pytest.fixture
+def gx_cloud_mock():
+    with requests_mock.Mocker() as mock_rsps:
+        yield mock_rsps
