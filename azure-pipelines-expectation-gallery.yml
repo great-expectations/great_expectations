@@ -181,6 +181,10 @@ stages:
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
+          - bash: grep -o "coverage_score:.*" output--build_gallery.txt | sort -k2,2nr
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show coverage scores'
+
           - bash: cat checklists.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show full checklist summary'
