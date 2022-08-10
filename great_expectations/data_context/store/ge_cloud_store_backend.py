@@ -15,7 +15,7 @@ from great_expectations.util import bidict, filter_properties_dict, hyphen
 
 try:
     from typing import TypedDict  # type: ignore[attr-defined]
-except ModuleNotFoundError:
+except ImportError:
     from typing_extensions import TypedDict
 
 logger = logging.getLogger(__name__)
