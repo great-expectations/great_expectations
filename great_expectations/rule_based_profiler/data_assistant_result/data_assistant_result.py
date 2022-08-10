@@ -738,7 +738,7 @@ class DataAssistantResult(SerializableDictDot):
         else:
             try:
                 chart_title = layer.title.text
-            except AttributeError as e:
+            except AttributeError:
                 try:
                     for chart_layer in layer.layer:
                         chart_title = DataAssistantResult._get_chart_layer_title(
