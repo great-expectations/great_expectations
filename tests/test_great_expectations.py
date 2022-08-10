@@ -468,7 +468,7 @@ class TestIO(unittest.TestCase):
     def test_read_excel(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_excel(
-            script_path + "/test_sets/Titanic_multi_sheet.xlsx",
+            script_path + "/test_sets/Titanic_multi_sheet.xlsx", engine="openpyxl"
         )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
@@ -478,12 +478,16 @@ class TestIO(unittest.TestCase):
         pandas_version = pd.__version__
         if re.match(r"0\.2[012]\.", pandas_version) is not None:
             dfs_dict = ge.read_excel(
-                script_path + "/test_sets/Titanic_multi_sheet.xlsx", sheetname=None
+                script_path + "/test_sets/Titanic_multi_sheet.xlsx",
+                sheetname=None,
+                engine="openpyxl",
             )
 
         else:
             dfs_dict = ge.read_excel(
-                script_path + "/test_sets/Titanic_multi_sheet.xlsx", sheet_name=None
+                script_path + "/test_sets/Titanic_multi_sheet.xlsx",
+                sheet_name=None,
+                engine="openpyxl",
             )
         assert isinstance(dfs_dict, dict)
         assert list(dfs_dict.keys()) == ["Titanic_1", "Titanic_2", "Titanic_3"]
