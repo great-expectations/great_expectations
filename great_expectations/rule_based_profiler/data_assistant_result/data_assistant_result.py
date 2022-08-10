@@ -1973,32 +1973,26 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=batch_plot_component.plot_on_axis(),
+                    y=expectation_kwarg_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+                .properties(title=title)
             )
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=min_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
             )
-            .properties(title=title)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=max_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(title=title)
         )
 
         band: alt.Chart = (
@@ -2107,42 +2101,31 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False),
+                    ),
+                    y=expectation_kwarg_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+                .properties(title=title)
             )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False),
-                ),
-                y=min_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
             )
-            .properties(title=title)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False),
-                ),
-                y=max_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(title=title)
         )
 
         band: alt.Chart = (
@@ -2247,42 +2230,31 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=expectation_kwarg_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+                .properties(title=title)
             )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=min_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
             )
-            .properties(title=title)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=max_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(title=title)
         )
 
         band: alt.Chart = (
@@ -2666,46 +2638,33 @@ class DataAssistantResult(SerializableDictDot):
             fields=[domain_plot_component.name],
         )
 
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                    ),
+                    y=alt.Y(
+                        expectation_kwarg_plot_component.name,
+                        type=expectation_kwarg_plot_component.alt_type,
+                    ),
+                    tooltip=tooltip,
+                )
+                .transform_filter(selection)
             )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                ),
-                y=alt.Y(
-                    min_value_plot_component.name,
-                    type=min_value_plot_component.alt_type,
-                ),
-                tooltip=tooltip,
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
             )
-            .transform_filter(selection)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                ),
-                y=alt.Y(
-                    max_value_plot_component.name,
-                    type=max_value_plot_component.alt_type,
-                ),
-                tooltip=tooltip,
-            )
-            .transform_filter(selection)
         )
 
         band: alt.Chart = (
@@ -2842,48 +2801,34 @@ class DataAssistantResult(SerializableDictDot):
             fields=[domain_plot_component.name],
         )
 
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=alt.Y(
+                        expectation_kwarg_plot_component.name,
+                        type=expectation_kwarg_plot_component.alt_type,
+                    ),
+                    tooltip=tooltip,
+                )
+                .transform_filter(selection)
             )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=alt.Y(
-                    min_value_plot_component.name,
-                    type=min_value_plot_component.alt_type,
-                ),
-                tooltip=tooltip,
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
             )
-            .transform_filter(selection)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=alt.Y(
-                    max_value_plot_component.name,
-                    type=max_value_plot_component.alt_type,
-                ),
-                tooltip=tooltip,
-            )
-            .transform_filter(selection)
         )
 
         band: alt.Chart = (
@@ -3006,48 +2951,34 @@ class DataAssistantResult(SerializableDictDot):
             fields=[domain_plot_component.name],
         )
 
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=alt.Y(
+                        expectation_kwarg_plot_component.name,
+                        type=expectation_kwarg_plot_component.alt_type,
+                    ),
+                    tooltip=tooltip,
+                )
+                .transform_filter(selection)
             )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=alt.Y(
-                    min_value_plot_component.name,
-                    type=min_value_plot_component.alt_type,
-                ),
-                tooltip=tooltip,
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
             )
-            .transform_filter(selection)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=alt.Y(
-                    max_value_plot_component.name,
-                    type=max_value_plot_component.alt_type,
-                ),
-                tooltip=tooltip,
-            )
-            .transform_filter(selection)
         )
 
         band: alt.Chart = (
