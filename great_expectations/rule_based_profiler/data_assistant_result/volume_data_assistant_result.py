@@ -12,6 +12,7 @@ def default_field(obj):
     return field(default_factory=lambda: copy.copy(obj))
 
 
+@dataclass
 class VolumeDataAssistantResult(DataAssistantResult):
     # A mapping is defined for which metrics to plot and their associated expectations
     METRIC_EXPECTATION_MAP: Dict[Union[str, Tuple[str]], str] = {
