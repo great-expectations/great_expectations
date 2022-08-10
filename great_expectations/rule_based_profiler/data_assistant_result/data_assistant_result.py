@@ -728,25 +728,30 @@ class DataAssistantResult(SerializableDictDot):
         display_chart_dict[chart_title].display()
 
     @staticmethod
-    def _get_chart_layer_title(layer: alt.Chart) -> Optional[str]:
+    def _get_chart_layer_title(
+        layer: Union[alt.Chart, alt.LayerChart]
+    ) -> Optional[str]:
         """Recursively searches through the chart layers for a title and returns one if it exists."""
         chart_title: Optional[str] = None
-        try:
-            chart_title = layer.title.text
-        except AttributeError:
+        if isinstance(layer.title, str):
+            chart_title = layer.title
+        else:
             try:
-                for chart_layer in layer.layer:
-                    chart_title = DataAssistantResult._get_chart_layer_title(
-                        layer=chart_layer
-                    )
-                    if chart_title is not None:
-                        return chart_title
-            except AttributeError:
-                return None
+                chart_title = layer.title.text
+            except AttributeError as e:
+                try:
+                    for chart_layer in layer.layer:
+                        chart_title = DataAssistantResult._get_chart_layer_title(
+                            layer=chart_layer
+                        )
+                        if chart_title is not None:
+                            return chart_title
+                except AttributeError:
+                    return None
         return chart_title
 
     @staticmethod
-    def _get_chart_titles(charts: List[alt.Chart]) -> List[str]:
+    def _get_chart_titles(charts: List[Union[alt.Chart, alt.LayerChart]]) -> List[str]:
         """Recursively searches through each chart layer for a title and returns a list of titles."""
         chart_titles: List[str] = []
         chart_title: Optional[str]
