@@ -3369,18 +3369,16 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         if plot_mode is PlotMode.DIAGNOSTIC:
-            expectation_plot_impl: Optional[
-                Callable[
-                    [
-                        str,
-                        pd.DataFrame,
-                        Set[str],
-                        bool,
-                        Optional[str],
-                    ],
-                    Union[alt.Chart, alt.LayerChart],
-                ]
-            ] = None
+            expectation_plot_impl: Callable[
+                [
+                    str,
+                    pd.DataFrame,
+                    Set[str],
+                    bool,
+                    Optional[str],
+                ],
+                Union[alt.Chart, alt.LayerChart],
+            ]
 
             if DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=nominal_metrics
@@ -3402,6 +3400,10 @@ class DataAssistantResult(SerializableDictDot):
                 metric_names=sanitized_metric_names, iterable=temporal_metrics
             ):
                 expectation_plot_impl = self._get_expect_domain_values_temporal_chart
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                )
 
             return expectation_plot_impl(
                 expectation_type=expectation_type,
@@ -3411,17 +3413,15 @@ class DataAssistantResult(SerializableDictDot):
                 subtitle=subtitle,
             )
         else:
-            metric_plot_impl: Optional[
-                Callable[
-                    [
-                        pd.DataFrame,
-                        Set[str],
-                        bool,
-                        Optional[str],
-                    ],
-                    Union[alt.Chart, alt.LayerChart],
-                ]
-            ] = None
+            metric_plot_impl: Callable[
+                [
+                    pd.DataFrame,
+                    Set[str],
+                    bool,
+                    Optional[str],
+                ],
+                Union[alt.Chart, alt.LayerChart],
+            ]
 
             if DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=nominal_metrics
@@ -3439,6 +3439,10 @@ class DataAssistantResult(SerializableDictDot):
                 metric_names=sanitized_metric_names, iterable=temporal_metrics
             ):
                 metric_plot_impl = self._get_temporal_metrics_chart
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                )
 
             return metric_plot_impl(
                 df=df,
@@ -3572,17 +3576,15 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         if plot_mode is PlotMode.DIAGNOSTIC:
-            expectation_plot_impl: Optional[
-                Callable[
-                    [
-                        str,
-                        List[ColumnDataFrame],
-                        Set[str],
-                        bool,
-                    ],
-                    alt.VConcatChart,
-                ]
-            ] = None
+            expectation_plot_impl: Callable[
+                [
+                    str,
+                    List[ColumnDataFrame],
+                    Set[str],
+                    bool,
+                ],
+                alt.VConcatChart,
+            ]
 
             if DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=nominal_metrics
@@ -3608,6 +3610,10 @@ class DataAssistantResult(SerializableDictDot):
                 expectation_plot_impl = (
                     self._get_interactive_expect_column_values_temporal_chart
                 )
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                )
 
             return [
                 expectation_plot_impl(
@@ -3618,16 +3624,14 @@ class DataAssistantResult(SerializableDictDot):
                 )
             ]
         else:
-            plot_impl: Optional[
-                Callable[
-                    [
-                        List[ColumnDataFrame],
-                        Set[str],
-                        bool,
-                    ],
-                    Union[alt.LayerChart, alt.VConcatChart],
-                ]
-            ] = None
+            plot_impl: Callable[
+                [
+                    List[ColumnDataFrame],
+                    Set[str],
+                    bool,
+                ],
+                Union[alt.LayerChart, alt.VConcatChart],
+            ]
 
             if DataAssistantResult._all_metric_names_in_iterable(
                 metric_names=sanitized_metric_names, iterable=nominal_metrics
@@ -3645,6 +3649,10 @@ class DataAssistantResult(SerializableDictDot):
                 metric_names=sanitized_metric_names, iterable=temporal_metrics
             ):
                 plot_impl = self._get_interactive_temporal_metrics_chart
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                )
 
             return [
                 plot_impl(
