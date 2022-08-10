@@ -293,7 +293,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         key: Tuple[GeCloudRESTResource, ...],
         value: Any,
         **kwargs: dict,
-    ) -> Union[bool, GeCloudResourceRef]:
+    ) -> Union[ResponsePayload, GeCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
         ge_cloud_resource = key[0]
         ge_cloud_id: str = key[1]
@@ -305,7 +305,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ge_cloud_id
             or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES
         ):
-            return self._update(key=ge_cloud_id, value=value, **kwargs)
+            return self._update(key=ge_cloud_id, value=value)
 
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
