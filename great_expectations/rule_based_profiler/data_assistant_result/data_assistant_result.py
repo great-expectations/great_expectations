@@ -802,7 +802,7 @@ class DataAssistantResult(SerializableDictDot):
             "table_columns" in list_column_names
             and len(np.unique(df["table_columns"])) == 1
         ):
-            df = df.iloc[:1]
+            df_transformed = df.iloc[:1]
         else:
             column_name: str
             cols_flat: List[List[str]] = []
@@ -823,23 +823,27 @@ class DataAssistantResult(SerializableDictDot):
                 for idx, col in enumerate(df.columns)
                 if col not in list_column_names
             ]
-            df = df.iloc[ilocations, columns].reset_index(drop=True)
+            df_new_shape = df.iloc[ilocations, columns].reset_index(drop=True)
             cols_flat_df: pd.DataFrame = pd.DataFrame(cols_flat).T
             cols_flat_df.columns = list_column_names
-            df = pd.concat([df, cols_flat_df], axis=1)
+            df_transformed = pd.concat([df_new_shape, cols_flat_df], axis=1)
 
             if "table_columns" in list_column_names:
                 # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
-                df["column_number"] = pd.factorize(df["table_columns"])[0] + 1
+                df_transformed["column_number"] = (
+                    pd.factorize(df_transformed["table_columns"])[0] + 1
+                )
 
             if "value_ranges" in list_column_names:
                 # split value ranges into two columns
-                df["min_value"] = 0
-                df["max_value"] = 0
-                df[["min_value", "max_value"]] = df["value_ranges"].values.tolist()
-                df = df.drop(columns=["value_ranges"], axis=1)
+                df_transformed["min_value"] = 0
+                df_transformed["max_value"] = 0
+                df_transformed[["min_value", "max_value"]] = df_transformed[
+                    "value_ranges"
+                ].values.tolist()
+                df_transformed = df_transformed.drop(columns=["value_ranges"], axis=1)
 
-        return df
+        return df_transformed
 
     @staticmethod
     def _get_column_set_text(column_set: List[str]) -> Tuple[str, int]:
