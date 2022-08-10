@@ -71,7 +71,8 @@ from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
 
 
-def default_field(obj) -> field:
+def default_field(obj: Dict[Union[str, Tuple[str]], str]) -> field:
+    """Shorthand method of allowing mutable dataclass variables."""
     return field(default_factory=lambda: copy.copy(obj))
 
 

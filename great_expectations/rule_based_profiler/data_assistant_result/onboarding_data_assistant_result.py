@@ -8,7 +8,8 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 )
 
 
-def default_field(obj) -> field:
+def default_field(obj: Dict[Union[str, Tuple[str]], str]) -> field:
+    """Shorthand method of allowing mutable dataclass variables."""
     return field(default_factory=lambda: copy.copy(obj))
 
 
