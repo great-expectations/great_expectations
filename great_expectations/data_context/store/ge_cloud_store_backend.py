@@ -214,7 +214,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self) -> None:  # type: ignore[override]
         pass
 
-    def _update(self, key: str, value: Any) -> ResponsePayload:
+    # TODO: GG 20220810 return the `ResponsePayload`
+    def _update(self, ge_cloud_id: str, value: Any) -> bool:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -236,9 +237,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
 
-        if key:
-            data["data"]["id"] = key
-            url = urljoin(f"{url}/", key)
+        if ge_cloud_id:
+            data["data"]["id"] = ge_cloud_id
+            url = urljoin(f"{url}/", ge_cloud_id)
 
         try:
             response = requests.put(
@@ -259,7 +260,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code = response.status_code
 
             response.raise_for_status()
-            return self.get(key=key)
+            return True
 
         except (requests.HTTPError, requests.Timeout) as http_exc:
             raise StoreBackendError(
@@ -305,7 +306,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ge_cloud_id
             or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES
         ):
-            return self._update(key=ge_cloud_id, value=value)
+            return self._update(ge_cloud_id=ge_cloud_id, value=value)
 
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
