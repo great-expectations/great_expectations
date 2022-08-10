@@ -1718,52 +1718,29 @@ class DataAssistantResult(SerializableDictDot):
             )
 
         # encode point color based on anomalies
+        min_value_predicate: Union[bool, int]
+        max_value_predicate: Union[bool, int]
         predicates: List[Union[bool, int]] = []
         for metric_plot_component in metric_plot_components:
-            if strict_min_predicate and strict_max_predicate:
-                predicates.append(
-                    (
-                        (alt.datum.min_value >= alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
-                    )
-                    | (
-                        (alt.datum.min_value <= alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
-                    )
-                )
-            elif strict_min_predicate:
-                predicates.append(
-                    (
-                        (alt.datum.min_value >= alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value > alt.datum[metric_plot_component.name])
-                    )
-                    | (
-                        (alt.datum.min_value <= alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value < alt.datum[metric_plot_component.name])
-                    )
-                )
-            elif strict_max_predicate:
-                predicates.append(
-                    (
-                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
-                    )
-                    | (
-                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
-                    )
+            if strict_min_predicate:
+                min_value_predicate = (
+                    alt.datum.min_value < alt.datum[metric_plot_component.name]
                 )
             else:
-                predicates.append(
-                    (
-                        (alt.datum.min_value > alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value > alt.datum[metric_plot_component.name])
-                    )
-                    | (
-                        (alt.datum.min_value < alt.datum[metric_plot_component.name])
-                        & (alt.datum.max_value < alt.datum[metric_plot_component.name])
-                    )
+                min_value_predicate = (
+                    alt.datum.min_value <= alt.datum[metric_plot_component.name]
                 )
+
+            if strict_max_predicate:
+                max_value_predicate = (
+                    alt.datum.max_value > alt.datum[metric_plot_component.name]
+                )
+            else:
+                max_value_predicate = (
+                    alt.datum.max_value >= alt.datum[metric_plot_component.name]
+                )
+
+                predicates.append(min_value_predicate & max_value_predicate)
 
         if sequential:
             return DataAssistantResult._get_interactive_expect_column_values_to_be_between_line_chart(
@@ -2044,6 +2021,7 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_name: str
         predicate: Union[bool, int]
+        point_color_condition: alt.condition
         anomaly_coded_line: alt.Chart
         anomaly_coded_lines: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
@@ -2056,7 +2034,7 @@ class DataAssistantResult(SerializableDictDot):
                 (alt.datum.min_value < alt.datum[metric_name])
                 & (alt.datum.max_value < alt.datum[metric_name])
             )
-            point_color_condition: alt.condition = alt.condition(
+            point_color_condition = alt.condition(
                 predicate=predicate,
                 if_false=alt.value(Colors.GREEN.value),
                 if_true=alt.value(Colors.PINK.value),
@@ -2781,8 +2759,8 @@ class DataAssistantResult(SerializableDictDot):
 
             point_color_condition: alt.condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(Colors.PINK.value),
+                if_true=alt.value(Colors.GREEN.value),
             )
 
             anomaly_coded_points = points.encode(
@@ -2950,8 +2928,8 @@ class DataAssistantResult(SerializableDictDot):
 
             bar_color_condition: alt.condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(Colors.PINK.value),
+                if_true=alt.value(Colors.GREEN.value),
             )
 
             bars.layer[idx] = bar_layer.encode(
@@ -3125,8 +3103,8 @@ class DataAssistantResult(SerializableDictDot):
 
             point_color_condition: alt.condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(Colors.PINK.value),
+                if_true=alt.value(Colors.GREEN.value),
             )
 
             anomaly_coded_points = points.encode(
