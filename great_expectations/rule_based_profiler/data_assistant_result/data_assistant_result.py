@@ -2021,7 +2021,6 @@ class DataAssistantResult(SerializableDictDot):
 
         metric_name: str
         predicate: Union[bool, int]
-        point_color_condition: alt.condition
         anomaly_coded_line: alt.Chart
         anomaly_coded_lines: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
@@ -2323,7 +2322,7 @@ class DataAssistantResult(SerializableDictDot):
                 (alt.datum.min_value < alt.datum[metric_name])
                 & (alt.datum.max_value < alt.datum[metric_name])
             )
-            point_color_condition: alt.condition = alt.condition(
+            point_color_condition = alt.condition(
                 predicate=predicate,
                 if_false=alt.value(Colors.GREEN.value),
                 if_true=alt.value(Colors.PINK.value),
@@ -2744,7 +2743,6 @@ class DataAssistantResult(SerializableDictDot):
 
         line: alt.Chart
         points: alt.Chart
-        point_color_condition: alt.condition
         anomaly_coded_points: alt.Chart
         for idx, line_layer in enumerate(lines_and_points.layer):
             line = line_layer.layer[0]
@@ -2757,7 +2755,7 @@ class DataAssistantResult(SerializableDictDot):
             points.selection = alt.Undefined
             points.transform = alt.Undefined
 
-            point_color_condition: alt.condition = alt.condition(
+            point_color_condition = alt.condition(
                 predicate=predicates[idx],
                 if_false=alt.value(Colors.PINK.value),
                 if_true=alt.value(Colors.GREEN.value),
@@ -3088,7 +3086,6 @@ class DataAssistantResult(SerializableDictDot):
 
         line: alt.Chart
         points: alt.Chart
-        point_color_condition: alt.condition
         anomaly_coded_points: alt.Chart
         for idx, line_layer in enumerate(lines_and_points.layer):
             line = line_layer.layer[0]
@@ -3101,7 +3098,7 @@ class DataAssistantResult(SerializableDictDot):
             points.selection = alt.Undefined
             points.transform = alt.Undefined
 
-            point_color_condition: alt.condition = alt.condition(
+            point_color_condition = alt.condition(
                 predicate=predicates[idx],
                 if_false=alt.value(Colors.PINK.value),
                 if_true=alt.value(Colors.GREEN.value),
