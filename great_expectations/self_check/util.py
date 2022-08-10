@@ -95,13 +95,13 @@ try:
     from pyspark.sql import DataFrame as SparkDataFrame
     from pyspark.sql import SparkSession
 except ImportError:
-    SparkSession = None
-    SparkDataFrame = type(None)
+    SparkSession = None  # type: ignore
+    SparkDataFrame = type(None)  # type: ignore
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
 except ImportError:
-    spark_DataFrame = type(None)
+    spark_DataFrame = type(None)  # type: ignore
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -431,19 +431,19 @@ try:
 except ImportError:
     pyathena = None
     athenatypes = None
-    athenaDialect = None
+    athenaDialect = None  # type: ignore
     ATHENA_TYPES = {}
 
 # # Others from great_expectations/dataset/sqlalchemy_dataset.py
 # try:
 #     import sqlalchemy_dremio.pyodbc
-# 
+#
 #     sqlalchemy.dialects.registry.register(
 #         "dremio", "sqlalchemy_dremio.pyodbc", "dialect"
 #     )
 # except ImportError:
 #     sqlalchemy_dremio = None
-# 
+#
 # try:
 #     import teradatasqlalchemy.dialect
 #     import teradatasqlalchemy.types as teradatatypes
@@ -1313,7 +1313,7 @@ def get_test_validator_with_data(
                     type_ = schema[col]
                     if type_ in ["IntegerType", "LongType"]:
                         # Ints cannot be None...but None can be valid in Spark (as Null)
-                        vals = []
+                        vals = []  # type: ignore
                         for val in data[col]:
                             if val is None:
                                 vals.append(val)
@@ -1324,9 +1324,9 @@ def get_test_validator_with_data(
                         vals = []
                         for val in data[col]:
                             if val is None:
-                                vals.append(val)
+                                vals.append(val)  # type: ignore
                             else:
-                                vals.append(float(val))
+                                vals.append(float(val))  # type: ignore
                         data[col] = vals
                     elif type_ in ["DateType", "TimestampType"]:
                         vals = []
@@ -1334,7 +1334,7 @@ def get_test_validator_with_data(
                             if val is None:
                                 vals.append(val)
                             else:
-                                vals.append(parse(val))
+                                vals.append(parse(val))  # type: ignore
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
@@ -1686,7 +1686,7 @@ def build_spark_engine(
         )
 
     if batch_id is None:
-        batch_id = cast(BatchDefinition, batch_definition).id
+        batch_id = cast(BatchDefinition, batch_definition).id  # type: ignore
 
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
