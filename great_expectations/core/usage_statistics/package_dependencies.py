@@ -42,6 +42,7 @@ class GEDependencies:
             "jinja2",
             "jsonpatch",
             "jsonschema",
+            "makefun",
             "mistune",
             "nbformat",
             "notebook",

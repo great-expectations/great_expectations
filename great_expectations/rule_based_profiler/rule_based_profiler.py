@@ -58,7 +58,6 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 )
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (
     RuntimeEnvironmentDomainTypeDirectives,
-    RuntimeEnvironmentDomainTypeDirectivesKeys,
     RuntimeEnvironmentVariablesDirectives,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -989,7 +988,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 for rule in rules
                 if rule.domain_builder.domain_type == domain_type_directives.domain_type
             ]
-            property_key: RuntimeEnvironmentDomainTypeDirectivesKeys
+            property_key: str
             property_value: Any
             existing_property_value: Any
             for rule in domain_rules:
@@ -1000,13 +999,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     try:
                         # Insure that new directives augment (not eliminate) existing directives.
                         existing_property_value = getattr(
-                            rule.domain_builder, property_key.value
+                            rule.domain_builder, property_key
                         )
                         property_value = BaseRuleBasedProfiler._get_effective_domain_builder_property_value(
                             dest_property_value=property_value,
                             source_property_value=existing_property_value,
                         )
-                        setattr(rule.domain_builder, property_key.value, property_value)
+                        setattr(rule.domain_builder, property_key, property_value)
                     except AttributeError:
                         # Skip every directive that is not defined property of "DomainBuilder" object of "domain_type".
                         pass
