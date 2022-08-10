@@ -17,6 +17,10 @@ from great_expectations.rule_based_profiler.estimators.exact_numeric_range_estim
 from great_expectations.rule_based_profiler.estimators.kde_numeric_range_estimator import (
     KdeNumericRangeEstimator,
 )
+from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
+    NumericRangeEstimationResult,
+)
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
 )
@@ -31,10 +35,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricValues,
-)
-from great_expectations.rule_based_profiler.numeric_range_estimation_result import (
-    NUM_HISTOGRAM_BINS,
-    NumericRangeEstimationResult,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,

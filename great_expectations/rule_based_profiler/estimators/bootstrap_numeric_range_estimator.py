@@ -4,6 +4,9 @@ from typing import Dict, Optional
 import numpy as np
 
 from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+    NumericRangeEstimationResult,
+)
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
 )
@@ -12,9 +15,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_false_positive_rate_from_rule_state,
     get_parameter_value_and_validate_return_type,
     get_quantile_statistic_interpolation_method_from_rule_state,
-)
-from great_expectations.rule_based_profiler.numeric_range_estimation_result import (
-    NumericRangeEstimationResult,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
