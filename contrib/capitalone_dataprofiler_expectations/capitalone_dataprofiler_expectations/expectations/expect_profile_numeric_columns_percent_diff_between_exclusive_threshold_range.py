@@ -6,15 +6,15 @@ from typing import Any, Dict, Optional
 
 import dataprofiler as dp
 import pandas as pd
+from capitalone_dataprofiler_expectations.expectations.profile_numeric_columns_diff_expectation import (
+    ProfileNumericColumnsDiffExpectation,
+)
 from capitalone_dataprofiler_expectations.expectations.util import (
     is_value_between_bounds,
     replace_generic_operator_in_report_keys,
 )
 from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
     DataProfilerProfileMetricProvider,
-)
-from capitalone_dataprofiler_expectations.expectations.profile_numeric_columns_diff_expectation import (
-    ProfileNumericColumnsDiffExpectation,
 )
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
