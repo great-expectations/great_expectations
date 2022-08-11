@@ -101,6 +101,9 @@ class DataAssistantRunner:
             Args:
                 batch_request: Explicit batch_request used to supply data at runtime
                 exact_estimation: Global directive for applicable "Rule" objects to use "exact" numeric range estimator.
+                    If set to True (default), all "Rule" objects that use "NumericMetricRangeMultiBatchParameterBuilder"
+                    will have the value of "estimator" property (referred to by "$variables.estimator") equal "exact".
+                    If set to False, then already-defined default in "Rule" variables (e.g., "bootstrap") takes effect.
                 kwargs: placeholder for "makefun.create_function()" to propagate dynamically generated signature
 
             Returns:
