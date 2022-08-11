@@ -115,6 +115,11 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 ).group(1)
                 self._azure = BlobServiceClient(**azure_options)
         except (TypeError, AttributeError):
+            logger.debug(f"The azure_options dict has keys: {sorted(azure_options.keys())}")
+            for k, v in sorted(azure_options.items()):
+                if not v:
+                    logger.debug(f"The value for key {k} is empty")
+                del(v)
             raise ImportError(
                 "Unable to load Azure BlobServiceClient (it is required for ConfiguredAssetAzureDataConnector). \
                 Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
