@@ -1,4 +1,4 @@
-"""Test v3 API datasource serialization."""
+"""Test v3 API data connector serialization."""
 import pytest
 
 from great_expectations.data_context.types.base import (
