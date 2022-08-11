@@ -3550,8 +3550,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 57.8,
-                    "min_value": 37.57,
+                    "max_value": 57.95,
+                    "min_value": 37.52,
                     "column": "trip_distance",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -3748,8 +3748,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": -21.02,
-                    "min_value": -51.7,
+                    "max_value": -21.0,
+                    "min_value": -52.0,
                     "column": "fare_amount",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -3770,8 +3770,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 2976.46,
-                    "min_value": 215.35,
+                    "max_value": 3004.0,
+                    "min_value": 215.0,
                     "column": "fare_amount",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -3793,7 +3793,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "kwargs": {
                     "mostly": 1.0,
                     "max_value": -1.0,
-                    "min_value": -36.35,
+                    "min_value": -36.71,
                     "column": "extra",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -3815,7 +3815,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "kwargs": {
                     "mostly": 1.0,
                     "max_value": 7.0,
-                    "min_value": 4.53,
+                    "min_value": 4.5,
                     "column": "extra",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -3858,7 +3858,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 37.14,
+                    "max_value": 37.51,
                     "min_value": 0.5,
                     "column": "mta_tax",
                 },
@@ -3902,8 +3902,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 74.72,
-                    "min_value": 38.93,
+                    "max_value": 75.0,
+                    "min_value": 38.85,
                     "column": "tip_amount",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -3946,8 +3946,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 495.58,
-                    "min_value": 24.31,
+                    "max_value": 500.05,
+                    "min_value": 24.02,
                     "column": "tolls_amount",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4012,8 +4012,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": -24.32,
-                    "min_value": -52.54,
+                    "max_value": -24.3,
+                    "min_value": -52.8,
                     "column": "total_amount",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4034,8 +4034,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 2980.13,
-                    "min_value": 253.18,
+                    "max_value": 3004.8,
+                    "min_value": 250.3,
                     "column": "total_amount",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4056,7 +4056,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": -0.03,
+                    "max_value": 0.0,
                     "min_value": -2.5,
                     "column": "congestion_surcharge",
                 },
@@ -4079,7 +4079,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "kwargs": {
                     "mostly": 1.0,
                     "max_value": 2.5,
-                    "min_value": 0.02,
+                    "min_value": 0.0,
                     "column": "congestion_surcharge",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
