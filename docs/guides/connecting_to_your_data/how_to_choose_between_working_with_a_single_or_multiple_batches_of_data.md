@@ -1,5 +1,5 @@
 ---
-title: How to choose between working with a single Batch of data, or multiple Batches
+title: How to choose between working with a single or multiple Batches of data
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
@@ -23,7 +23,7 @@ The steps of this guide will allow you to quickly determine if you will want to 
 
 ### 1. Determine if a single Batch or multiple Batches of data will be most beneficial in your future use cases
 
-#### When to work with a single Batch of data
+#### When to work with a single Batch of data:
 
 In some cases, a single Batch of data is all you need (or all that is supported).  In particular:
 - When you are Validating data, you will need to specify a single Batch of data.  If you provide multiple Batches in a Batch Request, Validations will default to operating on the last Batch in the list.
@@ -36,7 +36,7 @@ When Validating data you may include multiple *Batch Requests* in a single Check
 
 :::
 
-#### When to work with multiple Batches of data
+#### When to work with multiple Batches of data:
 
 If you are creating Expectations, you will benefit from ensuring your Data Assets and Batch Requests can return multiple Batches when:
 - You will be using a Data Assistant to generate an Expectation Suite that is populated with Expectations for you.
@@ -56,7 +56,7 @@ If you have determined that your future use case will benefit from being able to
 
 Otherwise, it is sufficient for your Datasource to define Data Assets that are only capable of returning a single Data Asset.
 
-#### Getting more versatility out of a Data Asset that is configured to return multiple Batches
+#### Getting more versatility out of a Data Asset that is configured to return multiple Batches:
 
 However, there is a caveat.  When you create a Batch Request, you may configure it to return a specific Batch from a Data Asset even if that Data Asset returns multiple Batches by default.  This feature means that if you have use cases that would benefit from working with multiple Batches of data and use cases that benefit from working with a single Batch of data you don't necessarily have to define two Data Assets in your Datasource configuration.
 
@@ -68,7 +68,7 @@ No!
 
 As long as the data you want to Validate corresponds to a single Batch in your Data Asset, you can use a Batch Request's ability to limit the returned Batches to specify a single Batch for Validation or any other use.
 
-#### When you *must* configure your Data Asset to only permit single Batch of data to be returned
+#### When you *must* configure your Data Asset to only permit single Batch of data to be returned:
 
 There are only two cases where you *must* configure your Data Asset to correspond to at most a single Batch of data.
 
@@ -96,7 +96,7 @@ In a Sql Datasource:
 
 This means that in a File System Datasource, a Data Asset that permits the return of more than one Batch does so by combining multiple files and treating each file as a separate Batch in the Data Asset.  You can therefore always specify the return of a single file's data in a Batch Request by specifying the return of the Batch that corresponds to that file.
 
-However, in a Sql Datasource, a Data Asset that permits the return of more than one Batch does so by splitting the contents of a single table based on a provided criteria, and having each Batch correspond to a discrete portion of the split up data.  Therefore, if you have use cases for both splitting a table into Batches and working with the entire table as a single Batch the best practice is to define two Data Assets for the table: one that includes the configuration to split the table into Batches, and one that does not.
+However, in a Sql Datasource, a Data Asset that permits the return of more than one Batch does so by splitting the contents of a single table based on a provided criteria and having each Batch correspond to a discrete portion of the split up data.  Therefore, if you have use cases for both splitting a table into Batches and working with the entire table as a single Batch the best practice is to define two Data Assets for the table: one that includes the configuration to split the table into Batches, and one that does not.
 
 ### 3. Next Steps
 
