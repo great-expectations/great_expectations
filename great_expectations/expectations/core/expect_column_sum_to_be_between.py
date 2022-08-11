@@ -136,7 +136,7 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
                     "strict_min": False,
                     "strict_max": False,
                     "false_positive_rate": 0.05,
-                    "estimator": "bootstrap",
+                    "estimator": "oneshot",
                     "n_resamples": 9999,
                     "random_seed": None,
                     "quantile_statistic_interpolation_method": "nearest",
