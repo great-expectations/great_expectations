@@ -7,6 +7,7 @@ from great_expectations.data_context.types.base import (
 )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "data_connector_config,expected_serialized_data_connector_config",
     [

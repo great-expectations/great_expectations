@@ -7,6 +7,7 @@ from great_expectations.data_context.types.base import (
 )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "datasource_config,expected_serialized_datasource_config",
     [
