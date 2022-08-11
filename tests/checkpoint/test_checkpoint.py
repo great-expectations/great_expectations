@@ -2,7 +2,7 @@ import logging
 import os
 import pickle
 import unittest
-from typing import List, Union
+from typing import List, Optional, Union
 from unittest import mock
 
 import pandas as pd
@@ -17,9 +17,16 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
+from great_expectations.core.expectation_validation_result import (
+    ExpectationValidationResult,
+)
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    CheckpointValidationConfig,
+    checkpointConfigSchema,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ValidationResultIdentifier,
@@ -4665,7 +4672,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     result = checkpoint.run()
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 1
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -4681,7 +4688,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 2
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -4769,7 +4776,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     context.add_checkpoint(**checkpoint_config)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
-    assert result["success"] == False
+    assert result["success"] is False
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
@@ -4862,7 +4869,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     context.add_checkpoint(**checkpoint_config)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 1
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -4881,7 +4888,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         checkpoint_name="my_checkpoint",
         validations=[{"batch_request": runtime_batch_request}],
     )
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 2
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -5134,3 +5141,142 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
         .rendered_content
         is not None
     )
+
+
+@pytest.mark.integration
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "checkpoint_config,expected_validation_id",
+    [
+        pytest.param(
+            CheckpointConfig(
+                name="my_checkpoint",
+                config_version=1,
+                run_name_template="%Y-%M-foo-bar-template",
+                expectation_suite_name="my_expectation_suite",
+                action_list=[
+                    {
+                        "name": "store_validation_result",
+                        "action": {
+                            "class_name": "StoreValidationResultAction",
+                        },
+                    },
+                ],
+                validations=[
+                    CheckpointValidationConfig(
+                        batch_request={
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_basic_data_connector",
+                            "data_asset_name": "Titanic_1911",
+                        },
+                    ),
+                ],
+            ),
+            None,
+            id="no ids",
+        ),
+        pytest.param(
+            CheckpointConfig(
+                name="my_checkpoint",
+                config_version=1,
+                default_validation_id="7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
+                run_name_template="%Y-%M-foo-bar-template",
+                expectation_suite_name="my_expectation_suite",
+                batch_request={
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_basic_data_connector",
+                    "data_asset_name": "Titanic_1911",
+                },
+                action_list=[
+                    {
+                        "name": "store_validation_result",
+                        "action": {
+                            "class_name": "StoreValidationResultAction",
+                        },
+                    },
+                ],
+                validations=[],
+            ),
+            "7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
+            id="default validation id",
+        ),
+        pytest.param(
+            CheckpointConfig(
+                name="my_checkpoint",
+                config_version=1,
+                run_name_template="%Y-%M-foo-bar-template",
+                expectation_suite_name="my_expectation_suite",
+                action_list=[
+                    {
+                        "name": "store_validation_result",
+                        "action": {
+                            "class_name": "StoreValidationResultAction",
+                        },
+                    },
+                ],
+                validations=[
+                    CheckpointValidationConfig(
+                        id_="f22601d9-00b7-4d54-beb6-605d87a74e40",
+                        batch_request={
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_basic_data_connector",
+                            "data_asset_name": "Titanic_1911",
+                        },
+                    ),
+                ],
+            ),
+            "f22601d9-00b7-4d54-beb6-605d87a74e40",
+            id="nested validation id",
+        ),
+        pytest.param(
+            CheckpointConfig(
+                name="my_checkpoint",
+                config_version=1,
+                default_validation_id="7e2bb5c9-cdbe-4c7a-9b2b-97192c55c95b",
+                run_name_template="%Y-%M-foo-bar-template",
+                expectation_suite_name="my_expectation_suite",
+                action_list=[
+                    {
+                        "name": "store_validation_result",
+                        "action": {
+                            "class_name": "StoreValidationResultAction",
+                        },
+                    },
+                ],
+                validations=[
+                    CheckpointValidationConfig(
+                        id_="f22601d9-00b7-4d54-beb6-605d87a74e40",
+                        batch_request={
+                            "datasource_name": "my_datasource",
+                            "data_connector_name": "my_basic_data_connector",
+                            "data_asset_name": "Titanic_1911",
+                        },
+                    ),
+                ],
+            ),
+            "f22601d9-00b7-4d54-beb6-605d87a74e40",
+            id="both default and nested validation id",
+        ),
+    ],
+)
+def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_result_meta(
+    checkpoint_config: CheckpointConfig,
+    expected_validation_id: str,
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation: DataContext,
+    sa,
+) -> None:
+    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+
+    checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
+    context.add_checkpoint(**checkpoint_config_dict)
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+
+    result: CheckpointResult = checkpoint.run()
+
+    # Always have a single validation result based on the test's parametrization
+    validation_result: ExpectationValidationResult = tuple(result.run_results.values())[
+        0
+    ]["validation_result"]
+
+    actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
+    assert expected_validation_id == actual_validation_id

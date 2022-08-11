@@ -26,6 +26,10 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationSuiteValidationResultMeta,
+)
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
@@ -105,6 +109,10 @@ class BaseCheckpoint(ConfigPeer):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
 
+        # If no validations are provided, the combination of expectation_suite_name, batch_request,
+        # and action_list are considered the "default" validation.
+        using_default_validation = not self.validations and not validations
+
         run_time = run_time or datetime.datetime.now()
         runtime_configuration = runtime_configuration or {}
         result_format = result_format or runtime_configuration.get("result_format")
@@ -134,7 +142,7 @@ class BaseCheckpoint(ConfigPeer):
         run_name_template = substituted_runtime_config.get("run_name_template")
 
         batch_request = substituted_runtime_config.get("batch_request")
-        validations = substituted_runtime_config.get("validations") or []
+        validations = cast(list, substituted_runtime_config.get("validations") or [])
 
         if len(validations) == 0 and not batch_request:
             raise ge_exceptions.CheckpointError(
@@ -147,6 +155,12 @@ class BaseCheckpoint(ConfigPeer):
             )
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
+
+        # Ensure that validations dicts have the most specific id available
+        # (default to Checkpoint's default_validation_id if no validations were passed in the signature)
+        if using_default_validation:
+            for validation in validations:
+                validation["id_"] = self.config.default_validation_id
 
         # Use AsyncExecutor to speed up I/O bound validations by running them in parallel with multithreading (if
         # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
@@ -179,15 +193,27 @@ class BaseCheckpoint(ConfigPeer):
                     run_id=run_id,
                 )
 
-            run_results: dict = {}
+            checkpoint_run_results: dict = {}
+            async_validation_operator_result: AsyncResult
             for async_validation_operator_result in async_validation_operator_results:
-                run_results.update(
-                    async_validation_operator_result.result().run_results
-                )
+                async_result = async_validation_operator_result.result()
+                run_results = async_result.run_results
+
+                run_result: dict
+                validation_result: Optional[ExpectationSuiteValidationResult]
+                meta: ExpectationSuiteValidationResultMeta
+                for run_result in run_results.values():
+                    validation_result = run_result.get("validation_result")
+                    if validation_result:
+                        meta = validation_result.meta
+                        id_ = str(self.ge_cloud_id) if self.ge_cloud_id else None
+                        meta["checkpoint_id"] = id_
+
+                checkpoint_run_results.update(run_results)
 
         return CheckpointResult(
             run_id=run_id,
-            run_results=run_results,
+            run_results=checkpoint_run_results,
             checkpoint_config=self.config,
         )
 
@@ -294,6 +320,9 @@ class BaseCheckpoint(ConfigPeer):
     ) -> None:
         if validation_dict is None:
             validation_dict = {}
+            validation_dict["id_"] = substituted_runtime_config.get(
+                "default_validation_id"
+            )
 
         try:
             substituted_validation_dict: dict = get_substituted_validation_dict(
@@ -363,20 +392,22 @@ class BaseCheckpoint(ConfigPeer):
             if catch_exceptions_validation is not None:
                 operator_run_kwargs["catch_exceptions"] = catch_exceptions_validation
 
-            async_validation_operator_results.append(
-                async_executor.submit(
-                    action_list_validation_operator.run,
-                    assets_to_validate=[validator],
-                    run_id=run_id,
-                    evaluation_parameters=substituted_validation_dict.get(
-                        "evaluation_parameters"
-                    ),
-                    result_format=result_format,
-                    checkpoint_identifier=checkpoint_identifier,
-                    checkpoint_name=self.name,
-                    **operator_run_kwargs,
-                )
+            validation_id: Optional[str] = substituted_validation_dict.get("id_")
+
+            async_validation_operator_result = async_executor.submit(
+                action_list_validation_operator.run,
+                assets_to_validate=[validator],
+                run_id=run_id,
+                evaluation_parameters=substituted_validation_dict.get(
+                    "evaluation_parameters"
+                ),
+                result_format=result_format,
+                checkpoint_identifier=checkpoint_identifier,
+                checkpoint_name=self.name,
+                validation_id=validation_id,
+                **operator_run_kwargs,
             )
+            async_validation_operator_results.append(async_validation_operator_result)
         except (
             ge_exceptions.CheckpointError,
             ge_exceptions.ExecutionEngineError,
@@ -520,6 +551,7 @@ class Checkpoint(BaseCheckpoint):
         batches: Optional[List[dict]] = None,
         ge_cloud_id: Optional[UUID] = None,
         expectation_suite_ge_cloud_id: Optional[UUID] = None,
+        default_validation_id: Optional[str] = None,
     ) -> None:
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
         if batch_request_contains_batch_data(batch_request=batch_request):
@@ -552,6 +584,7 @@ constructor arguments.
             batches=batches,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            default_validation_id=default_validation_id,
         )
         super().__init__(
             checkpoint_config=checkpoint_config,
@@ -660,6 +693,7 @@ constructor arguments.
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
+        default_validation_id: Optional[str] = None,
     ) -> "Checkpoint":
         checkpoint_config: Union[CheckpointConfig, dict]
 
@@ -704,6 +738,7 @@ constructor arguments.
             "notify_with": notify_with,
             "ge_cloud_id": ge_cloud_id,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+            "default_validation_id": default_validation_id,
         }
 
         checkpoint_config = deep_filter_properties_iterable(
