@@ -18,6 +18,7 @@ title: Changelog
 * [DOCS] Document the ZenML integration for Great Expectations (#5672) (thanks @stefannica)
 * [DOCS] Converts broken ZenML md refs to Technical Tags (#5714)
 * [DOCS] How to create a Custom Query Expectation (#5460)
+* [MAINTENANCE] Pin makefun package to version range for support assurance (#5746)
 * [MAINTENANCE] s3 link for logo (#5731)
 * [MAINTENANCE] Assign `resource_type` in `InlineStoreBackend` constructor (#5671)
 * [MAINTENANCE] Add mysql client to Dockerfile.tests (#5681)
