@@ -637,11 +637,6 @@ def datasource_config() -> DatasourceConfig:
 
 
 @pytest.fixture
-def bearer_test_token() -> str:
-    return "6bb5b6f5c7794892a4ca168c65c2603e"
-
-
-@pytest.fixture
 def shared_called_with_request_kwargs(request_headers) -> dict:
     """
     Standard request kwargs that all GeCloudStoreBackend http calls are made with.
