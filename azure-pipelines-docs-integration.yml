@@ -141,6 +141,14 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
+            printenv | grep -o '^[^=]*' | sort
+          displayName: 'Show env var names'
+
+        - script: |
+            find / -type d -iname "jar*"
+          displayName: 'Find jars'
+
+        - script: |
             pip install pytest pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
             # pytest -v -s --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws --azure tests/integration/test_script_runner.py
             # Temporarily just run those that are failing so we don't need to waste 40 minutes to see if pipeline is working
