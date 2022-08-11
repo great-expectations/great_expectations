@@ -24,7 +24,8 @@ from great_expectations.types.attributes import Attributes
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-DEFAULT_KDE_NUM_RESAMPLES: int = 9999
+DEFAULT_KDE_NUM_RESAMPLES = 9999
+DEFAULT_KDE_QUANTILE_STATISTIC_INTERPOLATION_METHOD = "nearest"
 DEFAULT_KDE_BW_METHOD: Union[str, float, Callable] = "scott"
 
 
@@ -78,6 +79,7 @@ class KdeNumericRangeEstimator(NumericRangeEstimator):
             parameters=parameters,
         )
 
+        # Obtain quantile_statistic_interpolation_method override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
             quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,
             round_decimals=self.configuration.quantile_statistic_interpolation_method,
@@ -85,6 +87,10 @@ class KdeNumericRangeEstimator(NumericRangeEstimator):
             variables=variables,
             parameters=parameters,
         )
+        if quantile_statistic_interpolation_method is None:
+            quantile_statistic_interpolation_method = (
+                DEFAULT_KDE_QUANTILE_STATISTIC_INTERPOLATION_METHOD
+            )
 
         # Obtain bw_method override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         bw_method: Optional[

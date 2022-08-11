@@ -23,6 +23,8 @@ from great_expectations.types.attributes import Attributes
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+DEFAULT_QUANTILES_QUANTILE_STATISTIC_INTERPOLATION_METHOD = "nearest"
+
 
 class QuantilesNumericRangeEstimator(NumericRangeEstimator):
     """
@@ -54,6 +56,7 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
             variables=variables,
             parameters=parameters,
         )
+        # Obtain quantile_statistic_interpolation_method override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
             quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,
             round_decimals=self.configuration.round_decimals,
@@ -61,6 +64,10 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
             variables=variables,
             parameters=parameters,
         )
+        if quantile_statistic_interpolation_method is None:
+            quantile_statistic_interpolation_method = (
+                DEFAULT_QUANTILES_QUANTILE_STATISTIC_INTERPOLATION_METHOD
+            )
 
         return compute_quantiles(
             metric_values=metric_values,
