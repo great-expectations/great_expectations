@@ -139,7 +139,9 @@ class DataAssistantRunner:
             variables_directives_list: List[
                 RuntimeEnvironmentVariablesDirectives
             ] = build_variables_directives(
-                exact_estimation=exact_estimation, **variables_directives_kwargs
+                exact_estimation=exact_estimation,
+                rules=self._profiler.rules,
+                **variables_directives_kwargs,
             )
             domain_type_directives_list: List[
                 RuntimeEnvironmentDomainTypeDirectives

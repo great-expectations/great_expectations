@@ -945,7 +945,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rules_as_dict: Dict[str, Rule] = {rule.name: rule for rule in rules}
 
         variables: Optional[Dict[str, Any]]
-        rule_varables_configs: Optional[Dict[str, Any]]
+        rule_variables_configs: Optional[Dict[str, Any]]
         for variables_directives in variables_directives_list:
             variables = variables_directives.variables or {}
             rule = rules_as_dict[variables_directives.rule_name]
