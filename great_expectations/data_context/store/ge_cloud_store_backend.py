@@ -34,7 +34,8 @@ class GeCloudRESTResource(str, Enum):
 
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     PAYLOAD_ATTRIBUTES_KEYS: Dict[GeCloudRESTResource, str] = {
-        GeCloudRESTResource.CONTRACT: "checkpoint_config",
+        GeCloudRESTResource.CHECKPOINT: "checkpoint_config",
+        GeCloudRESTResource.CONTRACT: "checkpoint_config",  # Deprecated
         GeCloudRESTResource.DATASOURCE: "datasource_config",
         GeCloudRESTResource.DATA_CONTEXT: "data_context_config",
         GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
@@ -48,7 +49,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GeCloudRESTResource.EXPECTATION_SUITE: {"clause_id"},
         GeCloudRESTResource.RENDERED_DATA_DOC: {"source_type", "source_id"},
         GeCloudRESTResource.SUITE_VALIDATION_RESULT: {
-            "contract_id",
+            "checkpoint_id",
             "expectation_suite_id",
         },
     }
@@ -57,7 +58,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         **{
             GeCloudRESTResource.BATCH: "batches",
             GeCloudRESTResource.CHECKPOINT: "checkpoints",
-            GeCloudRESTResource.CONTRACT: "contracts",
+            GeCloudRESTResource.CONTRACT: "contracts",  # Deprecated
             GeCloudRESTResource.DATA_ASSET: "data_assets",
             GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
             GeCloudRESTResource.DATASOURCE: "datasources",
