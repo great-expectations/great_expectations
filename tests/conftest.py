@@ -6738,7 +6738,7 @@ def quentin_columnar_table_multi_batch():
                 ],
                 "fare_amount": [
                     [
-                        5.84438943,
+                        5.9375,
                         6.5,
                     ],
                     [
@@ -6746,7 +6746,7 @@ def quentin_columnar_table_multi_batch():
                         9.5625,
                     ],
                     [
-                        13.344772404,
+                        13.4375,
                         15.625,
                     ],
                 ],
@@ -6756,7 +6756,7 @@ def quentin_columnar_table_multi_batch():
                         0.0,
                     ],
                     [
-                        0.814718104,
+                        0.875,
                         1.965,
                     ],
                     [
