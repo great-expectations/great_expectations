@@ -109,11 +109,11 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
 )
 
 context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
+    expectation_suite_name="test_suite_2", overwrite_existing=True
 )
 with pytest.warns(DeprecationWarning):
     validator: Validator = context.get_validator(
-        batch_request=batch_request, expectation_suite_name="test_suite"
+        batch_request=batch_request, expectation_suite_name="test_suite_2"
     )
 
 # Testing `validator.head()` when using BigQuery without temp tables
