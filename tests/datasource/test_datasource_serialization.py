@@ -34,6 +34,33 @@ from great_expectations.data_context.types.base import (
             },
             id="minimal_with_name_and_id",
         ),
+        pytest.param(
+            DatasourceConfig(
+                name="my_datasource",
+                class_name="Datasource",
+                data_connectors={
+                    "my_data_connector": DatasourceConfig(
+                        class_name="RuntimeDataConnector",
+                        batch_identifiers=["default_identifier_name"],
+                        id_="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                    )
+                },
+            ),
+            {
+                "name": "my_datasource",
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "my_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "module_name": "great_expectations.datasource",
+                        "id": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                        "batch_identifiers": ["default_identifier_name"],
+                    },
+                },
+            },
+            id="nested_data_connector_id",
+        ),
     ],
 )
 def test_datasource_config_is_serialized(
