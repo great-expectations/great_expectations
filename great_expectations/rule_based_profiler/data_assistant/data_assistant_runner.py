@@ -107,8 +107,8 @@ class DataAssistantRunner:
             if batch_request is None:
                 data_assistant_name: str = self._data_assistant_cls.data_assistant_type
                 raise ge_exceptions.DataAssistantExecutionError(
-                    message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be \
-        specified (empty or missing "batch_request" detected)."""
+                    message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be specified \
+(empty or missing "batch_request" detected)."""
                 )
 
             data_assistant: DataAssistant = self._build_data_assistant(
@@ -117,32 +117,29 @@ class DataAssistantRunner:
             directives: dict = deep_filter_properties_iterable(
                 properties=kwargs,
             )
-
             rule_based_profiler_domain_type_attributes: List[
                 str
             ] = self._get_rule_based_profiler_domain_type_attributes()
-
-            variables_directives: dict = dict(
+            variables_directives_kwargs: dict = dict(
                 filter(
                     lambda element: element[0]
                     not in rule_based_profiler_domain_type_attributes,
                     directives.items(),
                 )
             )
-            domain_type_directives: dict = dict(
+            domain_type_directives_kwargs: dict = dict(
                 filter(
                     lambda element: element[0]
                     in rule_based_profiler_domain_type_attributes,
                     directives.items(),
                 )
             )
-
             variables_directives_list: List[
                 RuntimeEnvironmentVariablesDirectives
-            ] = build_variables_directives(**variables_directives)
+            ] = build_variables_directives(**variables_directives_kwargs)
             domain_type_directives_list: List[
                 RuntimeEnvironmentDomainTypeDirectives
-            ] = build_domain_type_directives(**domain_type_directives)
+            ] = build_domain_type_directives(**domain_type_directives_kwargs)
             data_assistant_result: DataAssistantResult = data_assistant.run(
                 variables_directives_list=variables_directives_list,
                 domain_type_directives_list=domain_type_directives_list,
