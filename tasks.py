@@ -128,7 +128,7 @@ DEFAULT_PACKAGES_TO_TYPE_CHECK = [
     "data_asset",  # 0
     # "data_context",  # 242
     # "data_context/data_context",  # 195
-    # "data_context/store", # 83
+    # "data_context/store", # 70
     "data_context/store/ge_cloud_store_backend.py",  # 0
     "data_context/types",  # 0
     # "datasource",  # 98
