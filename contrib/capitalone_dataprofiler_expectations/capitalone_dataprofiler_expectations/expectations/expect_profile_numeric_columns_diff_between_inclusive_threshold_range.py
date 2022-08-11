@@ -11,7 +11,7 @@ from capitalone_dataprofiler_expectations.expectations.util import (
 from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
     DataProfilerProfileMetricProvider,
 )
-from profile_numeric_columns_diff_expectation import (
+from capitalone_dataprofiler_expectations.expectations.profile_numeric_columns_diff_expectation import (
     ProfileNumericColumnsDiffExpectation,
 )
 
