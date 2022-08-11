@@ -44,6 +44,7 @@ class DataConnector:
         name: str,
         datasource_name: str,
         execution_engine: ExecutionEngine,
+        id_: Optional[str] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ) -> None:
         """
@@ -61,6 +62,7 @@ class DataConnector:
             )
 
         self._name = name
+        self._id = id_
         self._datasource_name = datasource_name
         self._execution_engine = execution_engine
 
