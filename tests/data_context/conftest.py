@@ -377,7 +377,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                             "access_token": ge_cloud_access_token,
                             "organization_id": org_id,
                         },
-                        "ge_cloud_resource_type": "suite_validation_result",
+                        "ge_cloud_resource_type": "validation_result",
                         "suppress_store_backend_id": True,
                     },
                 },

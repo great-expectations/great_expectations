@@ -153,7 +153,7 @@ def mocked_get_response(
                                 "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/organization",
                             }
                         },
-                        "suite_validation_results": {
+                        "validation_results": {
                             "links": {
                                 "related": f"/organizations/{organization_id}/contract/{contract_id}/suite-validation-results",
                                 "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/suite-validation-results",

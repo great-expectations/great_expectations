@@ -30,6 +30,7 @@ class GeCloudRESTResource(str, Enum):
     PROFILER = "profiler"
     RENDERED_DATA_DOC = "rendered_data_doc"
     SUITE_VALIDATION_RESULT = "suite_validation_result"
+    VALIDATION_RESULT = "validation_result"
 
 
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
@@ -42,13 +43,18 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GeCloudRESTResource.PROFILER: "profiler",
         GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
         GeCloudRESTResource.SUITE_VALIDATION_RESULT: "result",
+        GeCloudRESTResource.VALIDATION_RESULT: "result",
     }
 
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GeCloudRESTResource, Set[str]] = {
         GeCloudRESTResource.EXPECTATION_SUITE: {"clause_id"},
         GeCloudRESTResource.RENDERED_DATA_DOC: {"source_type", "source_id"},
         GeCloudRESTResource.SUITE_VALIDATION_RESULT: {
-            "contract_id",
+            "checkpoint_id",
+            "expectation_suite_id",
+        },
+        GeCloudRESTResource.VALIDATION_RESULT: {
+            "checkpoint_id",
             "expectation_suite_id",
         },
     }
@@ -67,6 +73,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             GeCloudRESTResource.PROFILER: "profilers",
             GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
             GeCloudRESTResource.SUITE_VALIDATION_RESULT: "suite_validation_results",
+            GeCloudRESTResource.VALIDATION_RESULT: "validation_results",
         }
     )
 

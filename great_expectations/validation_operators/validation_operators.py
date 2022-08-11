@@ -378,7 +378,7 @@ class ActionListValidationOperator(ValidationOperator):
                         ge_cloud_id=batch._expectation_suite.ge_cloud_id,
                     )
                     validation_result_id = GeCloudIdentifier(
-                        resource_type=GeCloudRESTResource.SUITE_VALIDATION_RESULT
+                        resource_type=GeCloudRESTResource.VALIDATION_RESULT
                     )
                 else:
                     expectation_suite_identifier = ExpectationSuiteIdentifier(
