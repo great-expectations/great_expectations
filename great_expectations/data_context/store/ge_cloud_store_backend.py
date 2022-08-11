@@ -82,7 +82,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         },
     }
 
-    RESOURCE_PLURALITY_LOOKUP_DICT: bidict = bidict(  # type: ignore[misc]
+    RESOURCE_PLURALITY_LOOKUP_DICT: bidict = bidict(  # type: ignore[misc] # Keywords must be str
         **{  # type: ignore[arg-type]
             GeCloudRESTResource.BATCH: "batches",
             GeCloudRESTResource.CHECKPOINT: "checkpoints",
