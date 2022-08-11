@@ -3,6 +3,8 @@ title: Changelog
 ---
 
 ### 0.15.18
+* [BUGFIX] Restored sqlite database for tests #5742
+* [MAINTENANCE] s3 link for logo (#5731)
 * [FEATURE] Example notebooks for multi-batch Spark (#5683)
 * [FEATURE] Introduce top-level `default_validation_id` in `CheckpointConfig` (#5693)
 * [FEATURE] Pass down validation ids to `ExpectationSuiteValidationResult.meta` within `Checkpoint.run()` (#5725)
