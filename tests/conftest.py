@@ -3395,7 +3395,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
            alerts for when things change
         3. have a place to add his domain knowledge of the data (that can also be validated against new data)
         4. if all goes well, generalize some of the Profiler to use on his other tables
-    Bobby uses a crude, highly inaccurate deterministic parametric estimator -- for illustrative purposes.
+    Bobby uses a deterministic nonparametric estimator.
     Bobby configures his Profiler using the YAML configurations and data file locations captured in this fixture.
     """
     verbose_profiler_config_file_path: str = file_relative_path(
@@ -3411,7 +3411,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    my_row_count_range_rule_expectation_configurations_oneshot_estimator: List[
+    my_row_count_range_rule_expectation_configurations_quantiles_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -3433,7 +3433,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_ranges_rule_expectation_configurations_oneshot_estimator: List[
+    my_column_ranges_rule_expectation_configurations_quantiles_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -4146,7 +4146,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_timestamps_rule_expectation_configurations_oneshot_estimator: List[
+    my_column_timestamps_rule_expectation_configurations_quantiles_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -4199,7 +4199,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_regex_rule_expectation_configurations_oneshot_estimator: List[
+    my_column_regex_rule_expectation_configurations_quantiles_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -4316,33 +4316,33 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
-        my_row_count_range_rule_expectation_configurations_oneshot_estimator
+        my_row_count_range_rule_expectation_configurations_quantiles_estimator
     )
     expectation_configurations.extend(
-        my_column_ranges_rule_expectation_configurations_oneshot_estimator
+        my_column_ranges_rule_expectation_configurations_quantiles_estimator
     )
     expectation_configurations.extend(
-        my_column_timestamps_rule_expectation_configurations_oneshot_estimator
+        my_column_timestamps_rule_expectation_configurations_quantiles_estimator
     )
 
     expectation_configurations.extend(
-        my_column_regex_rule_expectation_configurations_oneshot_estimator
+        my_column_regex_rule_expectation_configurations_quantiles_estimator
     )
     expectation_configurations.extend(
         my_rule_for_very_few_cardinality_expectation_configurations
     )
-    expectation_suite_name_oneshot_estimator: str = (
-        "bobby_columnar_table_multi_batch_oneshot_estimator"
+    expectation_suite_name_quantiles_estimator: str = (
+        "bobby_columnar_table_multi_batch_quantiles_estimator"
     )
-    expected_expectation_suite_oneshot_estimator: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name_oneshot_estimator,
+    expected_expectation_suite_quantiles_estimator: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name_quantiles_estimator,
         data_context=empty_data_context,
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
-        expected_expectation_suite_oneshot_estimator._add_expectation(
+        expected_expectation_suite_quantiles_estimator._add_expectation(
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
@@ -4350,7 +4350,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         "name": "bobby user workflow",
         "config_version": 1.0,
         "variables": {
-            "estimator": "oneshot",
+            "estimator": "quantiles",
             "false_positive_rate": 0.01,
             "mostly": 1.0,
         },
@@ -4625,12 +4625,12 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
     }
 
-    expected_expectation_suite_oneshot_estimator.add_citation(
+    expected_expectation_suite_quantiles_estimator.add_citation(
         comment="Created by Rule-Based Profiler with the configuration included.",
         profiler_config=expected_effective_profiler_config,
     )
 
-    expected_fixture_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
+    expected_fixture_fully_qualified_parameter_names_by_domain_quantiles_estimator: Dict[
         Domain, List[str]
     ] = {
         Domain(
@@ -5043,7 +5043,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ],
     }
 
-    expected_parameter_values_for_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
+    expected_parameter_values_for_fully_qualified_parameter_names_by_domain_quantiles_estimator: Dict[
         Domain, Dict[str, ParameterNode]
     ] = {
         Domain(
@@ -5053,7 +5053,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5095,7 +5095,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5161,7 +5161,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5227,7 +5227,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5293,7 +5293,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5359,7 +5359,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5425,7 +5425,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5491,7 +5491,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5557,7 +5557,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5623,7 +5623,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5689,7 +5689,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5755,7 +5755,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5821,7 +5821,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5887,7 +5887,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5953,7 +5953,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6019,7 +6019,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6085,7 +6085,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6117,7 +6117,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6149,7 +6149,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6181,7 +6181,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6213,7 +6213,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6245,7 +6245,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6277,7 +6277,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6319,7 +6319,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6352,11 +6352,11 @@ def bobby_columnar_table_multi_batch(empty_data_context):
 
     return {
         "profiler_config": verbose_profiler_config,
-        "test_configuration_oneshot_estimator": {
-            "expectation_suite_name": expectation_suite_name_oneshot_estimator,
-            "expected_expectation_suite": expected_expectation_suite_oneshot_estimator,
-            "expected_fixture_fully_qualified_parameter_names_by_domain": expected_fixture_fully_qualified_parameter_names_by_domain_oneshot_estimator,
-            "expected_parameter_values_for_fully_qualified_parameter_names_by_domain": expected_parameter_values_for_fully_qualified_parameter_names_by_domain_oneshot_estimator,
+        "test_configuration_quantiles_estimator": {
+            "expectation_suite_name": expectation_suite_name_quantiles_estimator,
+            "expected_expectation_suite": expected_expectation_suite_quantiles_estimator,
+            "expected_fixture_fully_qualified_parameter_names_by_domain": expected_fixture_fully_qualified_parameter_names_by_domain_quantiles_estimator,
+            "expected_parameter_values_for_fully_qualified_parameter_names_by_domain": expected_parameter_values_for_fully_qualified_parameter_names_by_domain_quantiles_estimator,
         },
     }
 

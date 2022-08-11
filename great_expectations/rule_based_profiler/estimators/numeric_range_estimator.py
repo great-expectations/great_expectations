@@ -32,9 +32,9 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
     ) -> None:
         """
         Args:
-            name: the name of this estimator, which encodes the choice of the estimation algorithm: "oneshot" (one
-            observation), "bootstrap" (default), "exact" (deterministic, incorporating entire observed value range), or
-            "kde" (kernel density estimation).
+            name: the name of this estimator, which encodes the choice of the estimation algorithm: "quantiles" (default),
+            "bootstrap", "exact" (deterministic, incorporating entire observed value range), or "kde"
+            (kernel density estimation).
             configuration: attributes needed for the estimation algorithm (subject of the inherited class) to operate.
         """
         self._name = name

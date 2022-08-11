@@ -140,7 +140,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
                     "strict_min": False,
                     "strict_max": False,
                     "false_positive_rate": 0.05,
-                    "estimator": "oneshot",
+                    "estimator": "quantiles",
                     "n_resamples": 9999,
                     "random_seed": None,
                     "quantile_statistic_interpolation_method": "nearest",

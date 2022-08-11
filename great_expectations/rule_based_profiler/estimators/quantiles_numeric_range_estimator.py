@@ -24,11 +24,12 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class OneShotNumericRangeEstimator(NumericRangeEstimator):
+class QuantilesNumericRangeEstimator(NumericRangeEstimator):
     """
-    Implements "oneshot" (one observation) computation.
+    Implements "quantiles" computation.
 
-    This parameteric estimator assumes a Normal distribution of data, and thus should be used for testing purposes only.
+    This nonparameteric estimator calculates quantiles given a MetricValues vector of length N, the q-th quantile of
+        the vector is the value q of the way from the minimum to the maximum in a sorted copy of the MetricValues.
     """
 
     def __init__(
@@ -36,7 +37,7 @@ class OneShotNumericRangeEstimator(NumericRangeEstimator):
         configuration: Optional[Attributes] = None,
     ) -> None:
         super().__init__(
-            name="oneshot",
+            name="quantiles",
             configuration=configuration,
         )
 

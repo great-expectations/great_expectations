@@ -596,7 +596,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_estimator(
+def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_quantiles_estimator(
     mock_emit,
     caplog,
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -638,7 +638,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     domain: Domain
 
     fixture_expectation_suite: ExpectationSuite = bobby_columnar_table_multi_batch[
-        "test_configuration_oneshot_estimator"
+        "test_configuration_quantiles_estimator"
     ]["expected_expectation_suite"]
 
     expectation_configuration: ExpectationConfiguration
@@ -656,7 +656,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 
     fixture_fully_qualified_parameter_names_by_domain: Dict[
         Domain, List[str]
-    ] = bobby_columnar_table_multi_batch["test_configuration_oneshot_estimator"][
+    ] = bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
         "expected_fixture_fully_qualified_parameter_names_by_domain"
     ]
 
@@ -676,7 +676,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 
     fixture_fully_qualified_parameter_names_for_domain_id: List[
         str
-    ] = bobby_columnar_table_multi_batch["test_configuration_oneshot_estimator"][
+    ] = bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
         "expected_fixture_fully_qualified_parameter_names_by_domain"
     ][
         domain
@@ -694,7 +694,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
         Domain, Dict[str, ParameterNode]
     ] = bobby_columnar_table_multi_batch[
-        "test_configuration_oneshot_estimator"
+        "test_configuration_quantiles_estimator"
     ][
         "expected_parameter_values_for_fully_qualified_parameter_names_by_domain"
     ]
@@ -725,7 +725,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
         str, ParameterNode
     ] = bobby_columnar_table_multi_batch[
-        "test_configuration_oneshot_estimator"
+        "test_configuration_quantiles_estimator"
     ][
         "expected_parameter_values_for_fully_qualified_parameter_names_by_domain"
     ][
