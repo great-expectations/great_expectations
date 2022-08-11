@@ -11,6 +11,7 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from ..cloud_data_context.conftest import MockResponse
 
 
 @pytest.mark.cloud
@@ -75,13 +76,6 @@ def test_datasource_store_get_by_id(
     )
 
     def mocked_response(*args, **kwargs):
-        class MockResponse:
-            def __init__(self, json_data: dict, status_code: int) -> None:
-                self._json_data = json_data
-                self._status_code = status_code
-
-            def json(self):
-                return self._json_data
 
         return MockResponse(
             {
@@ -122,13 +116,6 @@ def test_datasource_store_get_by_name(
     datasource_name: str = "example_datasource_config_name"
 
     def mocked_response(*args, **kwargs):
-        class MockResponse:
-            def __init__(self, json_data: dict, status_code: int) -> None:
-                self._json_data = json_data
-                self._status_code = status_code
-
-            def json(self):
-                return self._json_data
 
         return MockResponse(
             {
