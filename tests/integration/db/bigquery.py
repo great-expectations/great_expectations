@@ -130,4 +130,5 @@ validator_without_temp_table = context.get_validator(
     expectation_suite_name="test_suite_2",
 )
 
-assert validator.head(n_rows=5, fetch_all=False)
+df = validator_without_temp_table.head(n_rows=5, fetch_all=False)
+assert not df.empty
