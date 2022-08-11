@@ -75,8 +75,6 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
-        if allow_cross_type_comparisons is True:
-            print("hello")
         # Use a vectorized approach for native numpy dtypes
         if column.dtype in [int, float] and allow_cross_type_comparisons is not True:
             return cls._pandas_vectorized(
