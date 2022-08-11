@@ -21,5 +21,5 @@ def test_registry_from_configuration():
 
 
 def test_registry_raises_error_when_invalid_expectation_requested():
-    with pytest.raises(ge_exceptions.MissingExpectationError):
+    with pytest.raises(ge_exceptions.ExpectationNotFoundError):
         get_expectation_impl("expect_something_in_beta")
