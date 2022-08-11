@@ -18,7 +18,7 @@ from great_expectations.data_context.types.resource_identifiers import GeCloudId
 def test_datasource_store_create(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request_headers: dict,
+    shared_called_with_request_kwargs: dict,
     datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
@@ -50,7 +50,7 @@ def test_datasource_store_create(
                     },
                 }
             },
-            headers=request_headers,
+            **shared_called_with_request_kwargs,
         )
 
 
@@ -59,7 +59,7 @@ def test_datasource_store_create(
 def test_datasource_store_get_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request_headers: dict,
+    shared_called_with_request_kwargs: dict,
     datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
@@ -99,8 +99,8 @@ def test_datasource_store_get_by_id(
 
         mock_get.assert_called_once_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id_}",
-            headers=request_headers,
             params=None,
+            **shared_called_with_request_kwargs,
         )
 
 
@@ -109,7 +109,7 @@ def test_datasource_store_get_by_id(
 def test_datasource_store_get_by_name(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request_headers: dict,
+    shared_called_with_request_kwargs: dict,
     datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
@@ -154,8 +154,8 @@ def test_datasource_store_get_by_name(
 
         mock_get.assert_called_once_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
-            headers=request_headers,
             params={"name": datasource_name},
+            **shared_called_with_request_kwargs,
         )
 
 
@@ -164,7 +164,7 @@ def test_datasource_store_get_by_name(
 def test_datasource_store_delete_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request_headers: dict,
+    shared_called_with_request_kwargs: dict,
     datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
@@ -192,5 +192,5 @@ def test_datasource_store_delete_by_id(
                     "attributes": {"deleted": True},
                 }
             },
-            headers=request_headers,
+            **shared_called_with_request_kwargs,
         )
