@@ -121,49 +121,7 @@ def mocked_get_response(
                     "links": {
                         "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}"
                     },
-                    "relationships": {
-                        "assets": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/assets",
-                                "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/relationships/assets",
-                            }
-                        },
-                        "attributes": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/attributes",
-                                "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/relationships/attributes",
-                            }
-                        },
-                        "clauses": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/clauses",
-                                "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/relationships/clauses",
-                            }
-                        },
-                        "created_by": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/created-by",
-                                "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/relationships/created-by",
-                            }
-                        },
-                        "organization": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/organization",
-                                "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/relationships/organization",
-                            }
-                        },
-                        "suite_validation_results": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/checkpoint/{checkpoint_id}/suite-validation-results",
-                                "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}/relationships/suite-validation-results",
-                            }
-                        },
-                    },
                     "type": "checkpoint",
-                },
-                "jsonapi": {"version": "1.0"},
-                "links": {
-                    "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}"
                 },
             },
             200,
