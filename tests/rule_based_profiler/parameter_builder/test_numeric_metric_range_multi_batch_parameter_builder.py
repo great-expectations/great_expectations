@@ -722,8 +722,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     error_message: str = re.escape(
-        f"""You have chosen a false_positive_rate of 1.0, which is too close to 1.
-A false_positive_rate of {1 - NP_EPSILON} has been selected instead."""
+        f"""You have chosen a false_positive_rate of 1.0, which is too close to 1.  A false_positive_rate of \
+{1 - NP_EPSILON} has been selected instead.
+"""
     )
 
     with pytest.warns(UserWarning, match=error_message):
@@ -778,8 +779,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     error_message: str = re.escape(
-        """false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1],
-but -0.05 was provided."""
+        """false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but -0.05 was \
+provided.
+"""
     )
 
     with pytest.raises(ge_exceptions.ProfilerExecutionError, match=error_message):
@@ -834,8 +836,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     warning_message: str = re.escape(
-        f"""You have chosen a false_positive_rate of 0.0, which is too close to 0.
-A false_positive_rate of {NP_EPSILON} has been selected instead."""
+        f"""You have chosen a false_positive_rate of 0.0, which is too close to 0.  A false_positive_rate of \
+{NP_EPSILON} has been selected instead.
+"""
     )
 
     with pytest.warns(UserWarning, match=warning_message):
@@ -897,8 +900,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     warning_message: str = re.escape(
-        f"""You have chosen a false_positive_rate of {smaller_than_np_epsilon_false_positive_rate}, which is too close to 0.
-A false_positive_rate of {NP_EPSILON} has been selected instead."""
+        f"""You have chosen a false_positive_rate of {smaller_than_np_epsilon_false_positive_rate}, which is too close \
+to 0.  A false_positive_rate of {NP_EPSILON} has been selected instead.
+"""
     )
 
     with pytest.warns(UserWarning, match=warning_message):
