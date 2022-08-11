@@ -11,6 +11,7 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+
 from ..cloud_data_context.conftest import MockResponse
 
 
