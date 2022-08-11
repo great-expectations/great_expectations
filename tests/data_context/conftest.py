@@ -642,27 +642,9 @@ def bearer_test_token() -> str:
 
 
 @pytest.fixture
-def shared_called_with_request_kwargs(bearer_test_token) -> dict:
+def shared_called_with_request_kwargs(request_headers) -> dict:
     """
     Standard request kwargs that all GeCloudStoreBackend http calls are made with.
     Use in combination with `assert_called_with()`
     """
-    return dict(
-        timeout=GeCloudStoreBackend.TIMEOUT,
-        headers={
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {bearer_test_token}",
-        },
-    )
-
-
-# @pytest.fixture
-# def gx_cloud_mock() -> responses.RequestsMock:
-#     with responses.RequestsMock() as mock_rsps:
-#         yield mock_rsps
-
-
-@pytest.fixture
-def gx_cloud_mock():
-    with requests_mock.Mocker() as mock_rsps:
-        yield mock_rsps
+    return dict(timeout=GeCloudStoreBackend.TIMEOUT, headers=request_headers)

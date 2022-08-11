@@ -1341,7 +1341,7 @@ def test_TupleS3StoreBackend_list_over_1000_keys():
 
 
 def test_GeCloudStoreBackend(
-    shared_called_with_request_kwargs: dict, bearer_test_token: str
+    shared_called_with_request_kwargs: dict, ge_cloud_access_token: str
 ):
     """
     What does this test test and why?
@@ -1351,7 +1351,7 @@ def test_GeCloudStoreBackend(
     """
     ge_cloud_base_url = "https://app.greatexpectations.io/"
     ge_cloud_credentials = {
-        "access_token": bearer_test_token,
+        "access_token": ge_cloud_access_token,
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
     ge_cloud_resource_type = GeCloudRESTResource.CHECKPOINT
