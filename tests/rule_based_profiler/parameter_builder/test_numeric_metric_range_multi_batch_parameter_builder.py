@@ -240,7 +240,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
-    expected_value_01_lower: float = -51.7
+    expected_value_01_lower: float = -52.0
     expected_value_01_upper: float = -21.0
 
     assert actual_value_01_lower == expected_value_01_lower
@@ -312,15 +312,11 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
-    expected_value_05_lower: float = -50.5
-    expected_value_05_upper: float = -21.1
+    expected_value_05_lower: float = -52.0
+    expected_value_05_upper: float = -21.0
 
     assert actual_value_05_lower == expected_value_05_lower
     assert actual_value_05_upper == expected_value_05_upper
-
-    # if false positive rate is higher, our range should be more narrow
-    assert actual_value_01_lower < actual_value_05_lower
-    assert actual_value_01_upper > actual_value_05_upper
 
     expected_estimation_histogram: np.ndarray = np.asarray(
         [
@@ -573,7 +569,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
-    expected_value_01_lower: float = -51.7
+    expected_value_01_lower: float = -52.0
     expected_value_01_upper: float = -21.0
 
     assert actual_value_01_lower == expected_value_01_lower
@@ -645,15 +641,11 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
-    expected_value_05_lower: float = -50.5
-    expected_value_05_upper: float = -21.1
+    expected_value_05_lower: float = -52.0
+    expected_value_05_upper: float = -21.0
 
     assert actual_value_05_lower == expected_value_05_lower
     assert actual_value_05_upper == expected_value_05_upper
-
-    # if false positive rate is higher, our range should be more narrow
-    assert actual_value_01_lower < actual_value_05_lower
-    assert actual_value_01_upper > actual_value_05_upper
 
     expected_estimation_histogram: np.ndarray = np.asarray(
         [
