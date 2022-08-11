@@ -172,7 +172,7 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
         expectation_type="expect_column_values_to_not_be_null",
         column="$domain.domain_kwargs.column",
     )
-    simple_rule: Rule = Rule(
+    simple_rule = Rule(
         name="rule_with_no_variables_no_parameters",
         variables=None,
         domain_builder=domain_builder,
@@ -226,7 +226,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
             column="$domain.domain_kwargs.column",
         )
     )
-    simple_rule: Rule = Rule(
+    simple_rule = Rule(
         name="rule_with_variables_and_parameters",
         variables=None,
         domain_builder=domain_builder,
@@ -276,7 +276,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
             column="$domain.domain_kwargs.column",
         )
     )
-    simple_variables_rule: Rule = Rule(
+    simple_variables_rule = Rule(
         name="rule_with_no_variables_no_parameters",
         variables=None,
         domain_builder=domain_builder,

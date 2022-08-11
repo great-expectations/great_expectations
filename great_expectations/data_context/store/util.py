@@ -85,7 +85,7 @@ def save_config_to_store_backend(
         store_backend=store_backend,
         overwrite_existing=True,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=configuration_key,
     )
     config_store.set(key=key, value=configuration)
@@ -105,7 +105,7 @@ def load_config_from_store_backend(
         store_backend=store_backend,
         overwrite_existing=False,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=configuration_key,
     )
     return config_store.get(key=key)
@@ -125,7 +125,7 @@ def delete_config_from_store_backend(
         store_backend=store_backend,
         overwrite_existing=True,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=configuration_key,
     )
     config_store.remove_key(key=key)
@@ -142,7 +142,7 @@ def save_checkpoint_config_to_store_backend(
         store_backend=store_backend,
         overwrite_existing=True,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
     )
     config_store.set(key=key, value=checkpoint_configuration)
@@ -157,7 +157,7 @@ def load_checkpoint_config_from_store_backend(
         store_name=store_name,
         store_backend=store_backend,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
     )
     try:
@@ -178,7 +178,7 @@ def delete_checkpoint_config_from_store_backend(
         store_name=store_name,
         store_backend=store_backend,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
     )
     config_store.remove_key(key=key)

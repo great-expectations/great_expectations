@@ -91,7 +91,7 @@ class DataContextVariables(ABC):
         """
         Generates the appropriate Store key to retrieve/store configs.
         """
-        key: ConfigurationIdentifier = ConfigurationIdentifier(
+        key = ConfigurationIdentifier(
             configuration_key=DataContextVariableSchema.ALL_VARIABLES
         )
         return key
@@ -275,7 +275,7 @@ class EphemeralDataContextVariables(DataContextVariables):
             DataContextStore,
         )
 
-        store: DataContextStore = DataContextStore(
+        store = DataContextStore(
             store_name="ephemeral_data_context_store",
             store_backend=None,  # Defaults to InMemoryStoreBackend
             runtime_environment=None,
@@ -310,7 +310,7 @@ class FileDataContextVariables(DataContextVariables):
             "resource_type": DataContextVariableSchema.ALL_VARIABLES,
             "data_context": self.data_context,
         }
-        store: DataContextStore = DataContextStore(
+        store = DataContextStore(
             store_name="file_data_context_store",
             store_backend=store_backend,
             runtime_environment=None,
@@ -362,7 +362,7 @@ class CloudDataContextVariables(DataContextVariables):
             },
             "suppress_store_backend_id": True,
         }
-        store: DataContextStore = DataContextStore(
+        store = DataContextStore(
             store_name="cloud_data_context_store",
             store_backend=store_backend,
             runtime_environment=None,
@@ -377,7 +377,7 @@ class CloudDataContextVariables(DataContextVariables):
             GeCloudRESTResource,
         )
 
-        key: GeCloudIdentifier = GeCloudIdentifier(
+        key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.DATA_CONTEXT_VARIABLES
         )
         return key

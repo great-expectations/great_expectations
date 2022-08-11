@@ -1353,7 +1353,7 @@ def test_GeCloudStoreBackend():
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
     ge_cloud_resource_type = GeCloudRESTResource.CONTRACT
-    my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
+    my_simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
         config_version=1,

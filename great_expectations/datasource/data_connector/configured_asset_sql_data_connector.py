@@ -207,7 +207,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         for batch_identifiers in sub_cache:
-            batch_definition: BatchDefinition = BatchDefinition(
+            batch_definition = BatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,

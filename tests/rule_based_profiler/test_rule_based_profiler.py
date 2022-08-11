@@ -1080,7 +1080,7 @@ def test_serialize_profiler_config(
     mock_data_context: mock.MagicMock,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    profiler: BaseRuleBasedProfiler = BaseRuleBasedProfiler(
+    profiler = BaseRuleBasedProfiler(
         profiler_config=profiler_config_with_placeholder_args,
         data_context=mock_data_context,
     )
@@ -1340,7 +1340,7 @@ def test_add_single_rule(
         config_version=1.0,
         data_context=mock_data_context,
     )
-    first_rule: Rule = Rule(
+    first_rule = Rule(
         name="first_rule",
         variables=None,
         domain_builder=mock_domain_builder,
@@ -1350,7 +1350,7 @@ def test_add_single_rule(
     profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
-    duplicate_of_first_rule: Rule = Rule(
+    duplicate_of_first_rule = Rule(
         name="first_rule",
         variables=None,
         domain_builder=mock_domain_builder,
@@ -1378,7 +1378,7 @@ def test_add_rule_overwrite_first_rule(
         config_version=1.0,
         data_context=mock_data_context,
     )
-    first_rule: Rule = Rule(
+    first_rule = Rule(
         name="first_rule",
         variables=None,
         domain_builder=mock_domain_builder,
@@ -1405,7 +1405,7 @@ def test_add_rule_add_second_rule(
         config_version=1.0,
         data_context=mock_data_context,
     )
-    first_rule: Rule = Rule(
+    first_rule = Rule(
         name="first_rule",
         variables=None,
         domain_builder=mock_domain_builder,
@@ -1415,7 +1415,7 @@ def test_add_rule_add_second_rule(
     profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
-    second_rule: Rule = Rule(
+    second_rule = Rule(
         name="second_rule",
         variables=None,
         domain_builder=mock_domain_builder,

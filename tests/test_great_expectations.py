@@ -187,7 +187,7 @@ def test_validate(empty_data_context):
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
         my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
-        my_expectation_suite: ExpectationSuite = ExpectationSuite(
+        my_expectation_suite = ExpectationSuite(
             **my_expectation_suite_dict, data_context=context
         )
 
@@ -275,7 +275,7 @@ def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context)
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
         my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
-        my_expectation_suite: ExpectationSuite = ExpectationSuite(
+        my_expectation_suite = ExpectationSuite(
             **my_expectation_suite_dict, data_context=context
         )
 
@@ -303,7 +303,7 @@ def test_validate_with_invalid_result(empty_data_context):
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
         my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
-        my_expectation_suite: ExpectationSuite = ExpectationSuite(
+        my_expectation_suite = ExpectationSuite(
             **my_expectation_suite_dict, data_context=context
         )
 

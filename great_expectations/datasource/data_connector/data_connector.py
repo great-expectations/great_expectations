@@ -140,7 +140,7 @@ class DataConnector:
             batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
 
         batch_spec_params.update(batch_spec_passthrough)
-        batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
+        batch_spec = BatchSpec(**batch_spec_params)
         return batch_spec
 
     def _refresh_data_references_cache(
@@ -374,7 +374,7 @@ class DataConnector:
         # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
         # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
         # resolve metrics.
-        validator: Validator = Validator(execution_engine=batch_data.execution_engine)
+        validator = Validator(execution_engine=batch_data.execution_engine)
         data: Any = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.head",

@@ -1064,7 +1064,7 @@ def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> Validator:
-    batch: Batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
         execution_engine=PandasExecutionEngine(),
         batches=[
@@ -1252,7 +1252,7 @@ def build_spark_validator_with_data(
             ],
             df.columns.tolist(),
         )
-    batch: Batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark,
         df=df,
@@ -1269,11 +1269,9 @@ def build_spark_validator_with_data(
 def build_pandas_engine(
     df: pd.DataFrame,
 ) -> PandasExecutionEngine:
-    batch: Batch = Batch(data=df)
+    batch = Batch(data=df)
 
-    execution_engine: PandasExecutionEngine = PandasExecutionEngine(
-        batch_data_dict={batch.id: batch.data}
-    )
+    execution_engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     return execution_engine
 
 
@@ -1301,10 +1299,10 @@ def build_sa_engine(
     execution_engine: SqlAlchemyExecutionEngine
 
     execution_engine = SqlAlchemyExecutionEngine(engine=sqlalchemy_engine)
-    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+    batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
     )
-    batch: Batch = Batch(data=batch_data)
+    batch = Batch(data=batch_data)
 
     execution_engine = SqlAlchemyExecutionEngine(
         engine=sqlalchemy_engine, batch_data_dict={batch.id: batch_data}
@@ -1350,9 +1348,7 @@ def build_spark_engine(
         )
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
-    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
-        spark_config=spark_config
-    )
+    execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
     execution_engine.load_batch_data(batch_id=batch_id, batch_data=df)
     return execution_engine
 

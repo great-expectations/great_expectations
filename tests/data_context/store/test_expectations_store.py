@@ -30,7 +30,7 @@ def test_expectations_store(empty_data_context):
     )
 
     ns_1_dict: dict = my_store.get(ns_1)
-    ns_1_suite: ExpectationSuite = ExpectationSuite(**ns_1_dict, data_context=context)
+    ns_1_suite = ExpectationSuite(**ns_1_dict, data_context=context)
     assert ns_1_suite == ExpectationSuite(
         expectation_suite_name="a.b.c.warning", data_context=context
     )
@@ -41,7 +41,7 @@ def test_expectations_store(empty_data_context):
         ExpectationSuite(expectation_suite_name="a.b.c.failure", data_context=context),
     )
     ns_2_dict: dict = my_store.get(ns_2)
-    ns_2_suite: ExpectationSuite = ExpectationSuite(**ns_2_dict, data_context=context)
+    ns_2_suite = ExpectationSuite(**ns_2_dict, data_context=context)
     assert ns_2_suite == ExpectationSuite(
         expectation_suite_name="a.b.c.failure", data_context=context
     )
@@ -79,7 +79,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     # initial set and check if first suite exists
     my_store.set(ns_1, default_suite)
     ns_1_dict: dict = my_store.get(ns_1)
-    ns_1_suite: ExpectationSuite = ExpectationSuite(**ns_1_dict, data_context=context)
+    ns_1_suite = ExpectationSuite(**ns_1_dict, data_context=context)
     assert ns_1_suite == ExpectationSuite(
         expectation_suite_name="a.b.c.warning",
         meta={"test_meta_key": "test_meta_value"},
@@ -96,7 +96,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     )
     my_store.set(ns_1, updated_suite)
     ns_1_dict: dict = my_store.get(ns_1)
-    ns_1_suite: ExpectationSuite = ExpectationSuite(**ns_1_dict, data_context=context)
+    ns_1_suite = ExpectationSuite(**ns_1_dict, data_context=context)
     assert ns_1_suite == ExpectationSuite(
         expectation_suite_name="a.b.c.warning",
         meta={"test_meta_key": "test_new_meta_value"},
@@ -110,7 +110,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
         ExpectationSuite(expectation_suite_name="a.b.c.failure", data_context=context),
     )
     ns_2_dict: dict = my_store.get(ns_2)
-    ns_2_suite: ExpectationSuite = ExpectationSuite(**ns_2_dict, data_context=context)
+    ns_2_suite = ExpectationSuite(**ns_2_dict, data_context=context)
     assert ns_2_suite == ExpectationSuite(
         expectation_suite_name="a.b.c.failure",
         data_context=context,

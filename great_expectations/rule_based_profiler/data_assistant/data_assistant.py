@@ -90,7 +90,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
     DataAssistant usage (e.g., in Jupyter notebook) adheres to the following pattern:
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name="my_volume_data_assistant",
         validator=validator,
     )
@@ -461,7 +461,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         if batches is None:
             batches = {}
 
-        data_assistant_result: DataAssistantResult = DataAssistantResult(
+        data_assistant_result = DataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
             _usage_statistics_handler=usage_statistics_handler,
@@ -751,7 +751,7 @@ def build_map_metric_rule(
             **column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
         ),
     ]
-    column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations: MeanUnexpectedMapMetricMultiBatchParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
+    column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         name=f"{map_metric_name}.unexpected_value",
         map_metric_name=map_metric_name,
         total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
@@ -769,7 +769,7 @@ def build_map_metric_rule(
             **column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.to_json_dict()
         ),
     ]
-    expect_column_values_to_be_attribute_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    expect_column_values_to_be_attribute_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type=expectation_type,
         validation_parameter_builder_configs=validation_parameter_builder_configs,
         column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -793,7 +793,7 @@ def build_map_metric_rule(
     expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
         expect_column_values_to_be_attribute_expectation_configuration_builder,
     ]
-    rule: Rule = Rule(
+    rule = Rule(
         name=rule_name,
         variables=variables,
         domain_builder=map_metric_column_domain_builder,

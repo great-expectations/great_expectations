@@ -28,7 +28,7 @@ def test_datasource_store_create(
     """
 
     # Note: id will be provided by the backend on create
-    key: GeCloudIdentifier = GeCloudIdentifier(
+    key = GeCloudIdentifier(
         resource_type=GeCloudRESTResource.DATASOURCE,
     )
 
@@ -70,7 +70,7 @@ def test_datasource_store_get_by_id(
 
     id_: str = "example_id_normally_uuid"
 
-    key: GeCloudIdentifier = GeCloudIdentifier(
+    key = GeCloudIdentifier(
         resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
     )
 
@@ -174,7 +174,7 @@ def test_datasource_store_delete_by_id(
     """
     id_: str = "example_id_normally_uuid"
 
-    key: GeCloudIdentifier = GeCloudIdentifier(
+    key = GeCloudIdentifier(
         resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
     )
 

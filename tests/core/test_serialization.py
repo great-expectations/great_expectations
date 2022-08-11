@@ -124,7 +124,7 @@ def test_checkpoint_config_deepcopy(
         }
     )
 
-    nested_checkpoint_config: CheckpointConfig = CheckpointConfig(
+    nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
         template_name="my_nested_checkpoint_template_2",
@@ -257,7 +257,7 @@ def test_checkpoint_config_print(
         }
     )
 
-    nested_checkpoint_config: CheckpointConfig = CheckpointConfig(
+    nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
         template_name="my_nested_checkpoint_template_2",
@@ -352,101 +352,103 @@ def test_checkpoint_config_print(
         }
     )
 
-    expected_nested_checkpoint_config_template_and_runtime_template_name: CheckpointConfig = CheckpointConfig(
-        name="my_nested_checkpoint",
-        config_version=1.0,
-        class_name="Checkpoint",
-        module_name="great_expectations.checkpoint",
-        template_name="my_nested_checkpoint_template_3",
-        run_name_template="runtime_run_template",
-        batch_request=runtime_batch_request.to_dict(),
-        expectation_suite_name="runtime_suite_name",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
+    expected_nested_checkpoint_config_template_and_runtime_template_name = (
+        CheckpointConfig(
+            name="my_nested_checkpoint",
+            config_version=1.0,
+            class_name="Checkpoint",
+            module_name="great_expectations.checkpoint",
+            template_name="my_nested_checkpoint_template_3",
+            run_name_template="runtime_run_template",
+            batch_request=runtime_batch_request.to_dict(),
+            expectation_suite_name="runtime_suite_name",
+            action_list=[
+                {
+                    "name": "store_validation_result",
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
                 },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
+                {
+                    "name": "store_evaluation_params",
+                    "action": {
+                        "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
+                    },
                 },
-            },
-            {
-                "name": "new_action_from_template_2",
-                "action": {"class_name": "Template2SpecialAction"},
-            },
-            {
-                "name": "new_action_from_template_3",
-                "action": {"class_name": "Template3SpecialAction"},
-            },
-            {
-                "name": "update_data_docs_deluxe_runtime",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
+                {
+                    "name": "new_action_from_template_2",
+                    "action": {"class_name": "Template2SpecialAction"},
                 },
+                {
+                    "name": "new_action_from_template_3",
+                    "action": {"class_name": "Template3SpecialAction"},
+                },
+                {
+                    "name": "update_data_docs_deluxe_runtime",
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
+                },
+            ],
+            evaluation_parameters={
+                "environment": "runtime-my_ge_environment",
+                "tolerance": 1.0e-2,
+                "aux_param_0": "runtime-1",
+                "aux_param_1": "1 + 1",
+                "template_1_key": 456,
+                "template_3_key": 123,
+                "new_runtime_eval_param": "bloopy!",
             },
-        ],
-        evaluation_parameters={
-            "environment": "runtime-my_ge_environment",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "runtime-1",
-            "aux_param_1": "1 + 1",
-            "template_1_key": 456,
-            "template_3_key": 123,
-            "new_runtime_eval_param": "bloopy!",
-        },
-        runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 999,
-            "template_1_key": 123,
-            "template_3_key": "bloopy!",
-            "new_runtime_config_key": "bleepy!",
-        },
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource_template_1",
-                    "data_connector_name": "my_special_data_connector_template_1",
-                    "data_asset_name": "users_from_template_1",
-                    "data_connector_query": {"partition_index": -999},
-                }
+            runtime_configuration={
+                "result_format": "BASIC",
+                "partial_unexpected_count": 999,
+                "template_1_key": 123,
+                "template_3_key": "bloopy!",
+                "new_runtime_config_key": "bleepy!",
             },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -1},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -2},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector_2_runtime",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -3},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector_3_runtime",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -4},
-                }
-            },
-        ],
+            validations=[
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource_template_1",
+                        "data_connector_name": "my_special_data_connector_template_1",
+                        "data_asset_name": "users_from_template_1",
+                        "data_connector_query": {"partition_index": -999},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_special_data_connector",
+                        "data_asset_name": "users",
+                        "data_connector_query": {"partition_index": -1},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector",
+                        "data_asset_name": "users",
+                        "data_connector_query": {"partition_index": -2},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_2_runtime",
+                        "data_asset_name": "users",
+                        "data_connector_query": {"partition_index": -3},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_3_runtime",
+                        "data_asset_name": "users",
+                        "data_connector_query": {"partition_index": -4},
+                    }
+                },
+            ],
+        )
     )
 
     assert deep_filter_properties_iterable(

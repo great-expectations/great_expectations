@@ -568,7 +568,7 @@ constructor arguments.
 """
             )
 
-        checkpoint_config: CheckpointConfig = CheckpointConfig(
+        checkpoint_config = CheckpointConfig(
             name=name,
             config_version=config_version,
             template_name=template_name,
