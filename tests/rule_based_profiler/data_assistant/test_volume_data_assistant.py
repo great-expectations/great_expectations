@@ -957,7 +957,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "quantile_statistic_interpolation_method": "nearest",
                         "quantile_bias_correction": False,
                         "quantile_bias_std_error_ratio_threshold": None,
-                        "estimator": "bootstrap",
+                        "estimator": "quantiles",
                         "n_resamples": 9999,
                         "include_estimator_samples_histogram_in_details": False,
                         "truncate_values": {
@@ -1040,7 +1040,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "quantile_statistic_interpolation_method": "nearest",
                         "quantile_bias_correction": False,
                         "quantile_bias_std_error_ratio_threshold": None,
-                        "estimator": "bootstrap",
+                        "estimator": "quantiles",
                         "n_resamples": 9999,
                         "include_estimator_samples_histogram_in_details": False,
                         "truncate_values": {
@@ -1296,7 +1296,7 @@ def quentin_expected_expectation_suite(
                         "max_value": 31,
                         "strict_min": False,
                         "column": "tolls_amount",
-                        "min_value": 18,
+                        "min_value": 19,
                     },
                 }
             ),
