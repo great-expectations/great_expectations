@@ -141,23 +141,8 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            printenv | grep -o '^[^=]*' | sort
-          displayName: 'Show env var names'
-
-        - script: |
-            which java
-            java -version
-          displayName: 'Get java info'
-
-        - script: |
-            find /opt -type d -iname "jars"
-          displayName: 'Find jars'
-
-        - script: |
             pip install pytest pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
-            # pytest -v -s --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws --azure tests/integration/test_script_runner.py
-            # Temporarily just run those that are failing so we don't need to waste 40 minutes to see if pipeline is working
-            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws --azure -k "test_runtime_parameters_bigquery or azure_pandas_configured or azure_pandas_configured_python or azure_pandas_inferred_and_runtime_yaml or azure_pandas_inferred_and_runtime_python" tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws --azure tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
