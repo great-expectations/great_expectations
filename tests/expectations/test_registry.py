@@ -1,3 +1,5 @@
+import pytest
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.expectations.core.expect_column_values_to_be_in_set import (
@@ -19,5 +21,5 @@ def test_registry_from_configuration():
 
 
 def test_registry_raises_error_when_invalid_expectation_requested():
-    with pytest.raises(ge_exceptions.MissingExpectationError)
+    with pytest.raises(ge_exceptions.MissingExpectationError):
         get_expectation_impl("expect_something_in_beta")

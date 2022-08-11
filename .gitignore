@@ -1,3 +1,6 @@
+# venv
+ge_dev/
+
 # Documentation build
 docs/source/_build
 node_modules
