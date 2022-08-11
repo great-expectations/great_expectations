@@ -1,3 +1,4 @@
+import datetime
 import warnings
 
 import numpy as np
@@ -74,13 +75,18 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
+        if allow_cross_type_comparisons is True:
+            print("hello")
         # Use a vectorized approach for native numpy dtypes
-        if column.dtype in [int, float]:
+        if column.dtype in [int, float] and allow_cross_type_comparisons is not True:
             return cls._pandas_vectorized(
                 temp_column, min_value, max_value, strict_min, strict_max
             )
-        elif column.dtype == np.dtype("datetime64[ns]"):
-            if min_value is not None:
+        elif (
+            column.dtype == np.dtype("datetime64[ns]")
+            and allow_cross_type_comparisons is not True
+        ):
+            if min_value is not None and not isinstance(max_value, datetime.datetime):
                 try:
                     min_value = parse(min_value)
                 except TypeError:
