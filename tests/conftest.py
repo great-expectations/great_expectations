@@ -5244,7 +5244,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [37.57, 57.8],
+                "value": [37.52, 57.95],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5268,7 +5268,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [37.57, 57.8],
+                "value": [37.52, 57.95],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5562,7 +5562,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
-                "value": [-51.7, -21.02],
+                "value": [-52.0, -21.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5574,7 +5574,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [215.35, 2976.46],
+                "value": [215.0, 3004.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5586,7 +5586,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.min_range": {
-                "value": [-51.7, -21.02],
+                "value": [-52.0, -21.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5598,7 +5598,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [215.35, 2976.46],
+                "value": [215.0, 3004.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5628,7 +5628,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
-                "value": [-36.35, -1.0],
+                "value": [-36.71, -1.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5640,7 +5640,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [4.53, 7.0],
+                "value": [4.5, 7.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5652,7 +5652,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.min_range": {
-                "value": [-36.35, -1.0],
+                "value": [-36.71, -1.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5664,7 +5664,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [4.53, 7.0],
+                "value": [4.5, 7.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5706,7 +5706,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [0.5, 37.14],
+                "value": [0.5, 37.51],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5730,7 +5730,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [0.5, 37.14],
+                "value": [0.5, 37.51],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5772,7 +5772,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [38.93, 74.72],
+                "value": [38.85, 75.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5796,7 +5796,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [38.93, 74.72],
+                "value": [38.85, 75.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5838,7 +5838,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [24.31, 495.58],
+                "value": [24.02, 500.05],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5862,7 +5862,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [24.31, 495.58],
+                "value": [24.02, 500.05],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5958,7 +5958,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
-                "value": [-52.54, -24.32],
+                "value": [-52.8, -24.3],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5970,7 +5970,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [253.18, 2980.13],
+                "value": [250.3, 3004.8],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5982,7 +5982,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.min_range": {
-                "value": [-52.54, -24.32],
+                "value": [-52.8, -24.3],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5994,7 +5994,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [253.18, 2980.13],
+                "value": [250.3, 3004.8],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -6024,7 +6024,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
-                "value": [-2.5, -0.03],
+                "value": [-2.5, 0.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -6036,7 +6036,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [0.02, 2.5],
+                "value": [0.0, 2.5],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -6048,7 +6048,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.min_range": {
-                "value": [-2.5, -0.03],
+                "value": [-2.5, 0.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -6060,7 +6060,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [0.02, 2.5],
+                "value": [0.00, 2.5],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
