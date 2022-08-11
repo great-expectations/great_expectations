@@ -47,6 +47,7 @@ class RuntimeEnvironmentDomainTypeDirectives(SerializableDictDot):
 
 
 def build_variables_directives(
+    exact_estimation: bool = True,
     **kwargs: dict,
 ) -> List[RuntimeEnvironmentVariablesDirectives]:
     """
@@ -54,15 +55,28 @@ def build_variables_directives(
     components of "Rule" objects, identified by respective "rule_name" property as indicated, and return each of these
     directives as part of dedicated "RuntimeEnvironmentVariablesDirectives" typed object for every "rule_name" (string).
     """
+    runtime_environment_variables_directives_list: List[
+        RuntimeEnvironmentVariablesDirectives
+    ] = []
+
     rule_name: str
     variables: Optional[Dict[str, Any]]
-    return [
-        RuntimeEnvironmentVariablesDirectives(
-            rule_name=rule_name,
-            variables=variables,
+    for rule_name, variables in kwargs.items():
+        if exact_estimation:
+            variables.update(
+                {
+                    "estimator": "exact",
+                }
+            )
+
+        runtime_environment_variables_directives_list.append(
+            RuntimeEnvironmentVariablesDirectives(
+                rule_name=rule_name,
+                variables=variables,
+            )
         )
-        for rule_name, variables in kwargs.items()
-    ]
+
+    return runtime_environment_variables_directives_list
 
 
 def build_domain_type_directives(

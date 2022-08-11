@@ -42,7 +42,8 @@ def bobby_onboarding_data_assistant_result_usage_stats_enabled(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        exact_estimation=False,
     )
 
     return cast(OnboardingDataAssistantResult, data_assistant_result)
@@ -61,7 +62,8 @@ def bobby_onboarding_data_assistant_result(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        exact_estimation=False,
     )
 
     return cast(OnboardingDataAssistantResult, data_assistant_result)
@@ -80,7 +82,8 @@ def quentin_implicit_invocation_result_actual_time(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        exact_estimation=False,
     )
 
     return cast(OnboardingDataAssistantResult, data_assistant_result)
@@ -100,7 +103,8 @@ def quentin_implicit_invocation_result_frozen_time(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        exact_estimation=False,
     )
 
     return cast(OnboardingDataAssistantResult, data_assistant_result)
@@ -318,6 +322,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
         batch_request=batch_request,
+        exact_estimation=False,
         # include_column_names=include_column_names,
         # exclude_column_names=exclude_column_names,
         # include_column_name_suffixes=include_column_name_suffixes,

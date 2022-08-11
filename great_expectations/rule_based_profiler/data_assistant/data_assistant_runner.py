@@ -91,6 +91,7 @@ class DataAssistantRunner:
 
         def run(
             batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+            exact_estimation: bool = True,
             **kwargs,
         ) -> DataAssistantResult:
             """
@@ -99,6 +100,7 @@ class DataAssistantRunner:
 
             Args:
                 batch_request: Explicit batch_request used to supply data at runtime
+                exact_estimation: Global directive for applicable "Rule" objects to use "exact" numeric range estimator.
                 kwargs: placeholder for "makefun.create_function()" to propagate dynamically generated signature
 
             Returns:
@@ -136,7 +138,9 @@ class DataAssistantRunner:
             )
             variables_directives_list: List[
                 RuntimeEnvironmentVariablesDirectives
-            ] = build_variables_directives(**variables_directives_kwargs)
+            ] = build_variables_directives(
+                exact_estimation=exact_estimation, **variables_directives_kwargs
+            )
             domain_type_directives_list: List[
                 RuntimeEnvironmentDomainTypeDirectives
             ] = build_domain_type_directives(**domain_type_directives_kwargs)
@@ -151,6 +155,12 @@ class DataAssistantRunner:
                 name="batch_request",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
                 annotation=Optional[Union[BatchRequestBase, dict]],
+            ),
+            Parameter(
+                name="exact_estimation",
+                kind=Parameter.POSITIONAL_OR_KEYWORD,
+                default=True,
+                annotation=bool,
             ),
         ]
 
