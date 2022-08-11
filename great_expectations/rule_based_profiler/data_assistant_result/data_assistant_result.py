@@ -55,6 +55,7 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
 )
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
+    default_field,
     get_or_create_expectation_suite,
     sanitize_parameter_name,
 )
@@ -69,11 +70,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
 ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
-
-
-def default_field(obj: Dict[Union[str, Tuple[str]], str]) -> field:
-    """Shorthand method of allowing mutable dataclass variables."""
-    return field(default_factory=lambda: copy.copy(obj))
 
 
 @dataclass
@@ -1741,7 +1737,7 @@ class DataAssistantResult(SerializableDictDot):
                     alt.datum.max_value >= alt.datum[metric_plot_component.name]
                 )
 
-                predicates.append(min_value_predicate & max_value_predicate)
+            predicates.append(min_value_predicate & max_value_predicate)
 
         if sequential:
             return DataAssistantResult._get_interactive_expect_column_values_to_be_between_line_chart(

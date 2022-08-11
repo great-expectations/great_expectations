@@ -3,6 +3,7 @@ import itertools
 import logging
 import re
 import uuid
+from dataclasses import field
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -849,3 +850,8 @@ def sanitize_parameter_name(name: str) -> str:
     This method provides display-friendly version of "name" argument.
     """
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
+
+
+def default_field(obj: Dict[Union[str, Tuple[str]], str]) -> field:
+    """Shorthand method of allowing mutable dataclass variables."""
+    return field(default_factory=lambda: copy.copy(obj))

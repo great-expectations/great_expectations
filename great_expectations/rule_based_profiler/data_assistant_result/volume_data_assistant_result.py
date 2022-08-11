@@ -1,16 +1,11 @@
-import copy
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, Tuple, Union
 
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-
-
-def default_field(obj: Dict[Union[str, Tuple[str]], str]) -> field:
-    """Shorthand method of allowing mutable dataclass variables."""
-    return field(default_factory=lambda: copy.copy(obj))
+from great_expectations.rule_based_profiler.helpers.util import default_field
 
 
 @dataclass
