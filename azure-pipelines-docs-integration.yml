@@ -145,7 +145,12 @@ stages:
           displayName: 'Show env var names'
 
         - script: |
-            find / -type d -iname "jar*"
+            which java
+            java -version
+          displayName: 'Get java info'
+
+        - script: |
+            find /opt -type d -iname "jars"
           displayName: 'Find jars'
 
         - script: |
