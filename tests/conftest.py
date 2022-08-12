@@ -1,3 +1,4 @@
+import copy
 import datetime
 import locale
 import logging
