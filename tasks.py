@@ -9,6 +9,7 @@ To show all available tasks `invoke --list`
 To show task help page `invoke <NAME> --help`
 """
 import json
+import os
 import pathlib
 import shutil
 
@@ -240,3 +241,50 @@ def mv_usage_stats_json(ctx):
     cmd = cmd.format(outfile)
     ctx.run(cmd)
     print(f"'{outfile}' copied to dbfs.")
+
+
+@invoke.task(
+    help={
+        "name": "Docker image name.",
+        "tag": "Docker image tag.",
+        "build": "If True build the image, otherwise run it. Defaults to False.",
+        "cmd": "Command for docker image. Default is bash.",
+    }
+)
+def docker(ctx, name="gx38local", tag="latest", build=False, cmd="bash"):
+    """
+    Build or run gx docker image.
+    """
+    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    curdir = os.path.realpath(os.getcwd())
+    if filedir != curdir:
+        raise invoke.Exit(
+            "The docker task must be invoked from the same directory as the task.py file at the top of the repo.",
+            code=1,
+        )
+    if build:
+        cmds = [
+            "docker",
+            "buildx",
+            "build",
+            "-f",
+            "docker/Dockerfile.tests",
+            f"--tag {name}:{tag}",
+            *[f"--build-arg {arg}" for arg in ["SOURCE=local", "PYTHON_VERSION=3.8"]],
+            ".",
+        ]
+
+    else:
+        cmds = [
+            "docker",
+            "run",
+            "-it",
+            "--rm",
+            "--mount",
+            f"type=bind,source={filedir},target=/great_expectations",
+            "-w",
+            "/great_expectations",
+            f"{name}:{tag}",
+            f"{cmd}",
+        ]
+    ctx.run(" ".join(cmds), echo=True, pty=True)
