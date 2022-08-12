@@ -368,7 +368,7 @@ class SorterConfigSchema(Schema):
 
 
 class DataConnectorConfig(AbstractConfig):
-    def __init__(
+    def __init__(  # noqa: C901 - 20
         self,
         class_name,
         id_: Optional[str] = None,
@@ -843,7 +843,7 @@ configuration to continue.
 
 
 class DatasourceConfig(AbstractConfig):
-    def __init__(
+    def __init__(  # noqa: C901 - 21
         self,
         name: Optional[
             str
@@ -2092,7 +2092,7 @@ class DataContextConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = DataContextConfigSchema
 
-    def __init__(
+    def __init__(  # noqa: C901 - 21
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
