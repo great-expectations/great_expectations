@@ -1083,7 +1083,7 @@ class AbstractDataContext(ABC):
             expectation_suite_name=expectation_suite_name
         )
 
-        if self.expectations_store.has_key(key):
+        if self.expectations_store.has_key(key):  # noqa: W601
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
             )
