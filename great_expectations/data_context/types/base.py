@@ -2817,8 +2817,8 @@ class CheckpointConfig(BaseYamlConfig):
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
             )
-            validation_batch_request: BatchRequestBase = substituted_validation_dict.get(
-                "batch_request"  # type: ignore[assignment]
+            validation_batch_request: BatchRequestBase = substituted_validation_dict.get(  # type: ignore[assignment]
+                "batch_request"
             )
             validation_dict["batch_request"] = validation_batch_request
             validation_expectation_suite_name: str = substituted_validation_dict.get(  # type: ignore[assignment]
@@ -2827,14 +2827,14 @@ class CheckpointConfig(BaseYamlConfig):
             validation_dict[
                 "expectation_suite_name"
             ] = validation_expectation_suite_name
-            validation_expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
-                "expectation_suite_ge_cloud_id"  # type: ignore[assignment]
+            validation_expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(  # type: ignore[assignment]
+                "expectation_suite_ge_cloud_id"
             )
             validation_dict[
                 "expectation_suite_ge_cloud_id"
             ] = validation_expectation_suite_ge_cloud_id
-            validation_action_list: list = substituted_validation_dict.get(
-                "action_list"  # type: ignore[assignment]
+            validation_action_list: list = substituted_validation_dict.get(  # type: ignore[assignment]
+                "action_list"
             )
             validation_dict["action_list"] = validation_action_list
 
