@@ -114,11 +114,11 @@ class ParameterBuilder(ABC, Builder):
     ) -> None:
         """
         Args:
-            domain: Domain object that is context for execution of this ParameterBuilder object.
+            domain: "Domain" object that is context for execution of this "ParameterBuilder" object.
             variables: attribute name/value pairs
-            parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
-            parameter_computation_impl: Object containing desired ParameterBuilder implementation.
-            batch_list: Explicit list of Batch objects to supply data at runtime.
+            parameters: Dictionary of "ParameterContainer" objects corresponding to all "Domain" objects in memory.
+            parameter_computation_impl: Object containing desired "ParameterBuilder" implementation.
+            batch_list: Explicit list of "Batch" objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
         """
@@ -275,11 +275,11 @@ class ParameterBuilder(ABC, Builder):
         :param metric_value_kwargs: Metric Value Kwargs is an essential parameter of the MetricConfiguration object.
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
-        :param domain: Domain object scoping "$variable"/"$parameter"-style references in configuration and runtime.
+        :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.
-        :return: MetricComputationResult object, containing both: data samples in the format "N x R^m", where "N" (most
-        significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
+        :return: "MetricComputationResult" object, containing both: data samples in the format "N x R^m", where "N"
+        (most significant dimension) is the number of measurements (e.g., one per "Batch" of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
         if not metric_name:

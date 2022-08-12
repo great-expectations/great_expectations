@@ -1,36 +1,31 @@
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Optional, Set, Union
 
 import altair as alt
 
 
 @dataclass(frozen=True)
 class PlotComponent:
+    alt_type: alt.StandardType
     name: Optional[str] = None
-    alt_type: Optional[alt.StandardType] = None
+    axis_title: Optional[str] = None
 
     @property
     def title(self) -> Optional[str]:
-        if self.name is not None:
+        if self.axis_title is not None:
+            return self.axis_title
+        elif self.name is not None:
             return self.name.replace("_", " ").title()
         else:
             return None
 
-    def generate_tooltip(self, format: str = "") -> alt.Tooltip:
-        """Wrapper around alt.Tooltip creation.
-
-        Args:
-            format (str): Desired format within tooltip
+    def plot_on_axis(self) -> Union[alt.X, alt.Y]:
+        """Wrapper around alt.X/alt.Y plotting utility.
 
         Returns:
-            An instance of alt.Tooltip containing relevant information from the PlotComponent class.
+            Either an alt.X or alt.Y instance based on desired axis.
         """
-        return alt.Tooltip(
-            field=self.name,
-            type=self.alt_type,
-            title=self.title,
-            format=format,
-        )
+        raise NotImplementedError
 
     def plot_on_x_axis(self) -> alt.X:
         """
@@ -43,7 +38,6 @@ class PlotComponent:
             self.name,
             type=self.alt_type,
             title=self.title,
-            scale=alt.Scale(align=0.05),
         )
 
     def plot_on_y_axis(self) -> alt.Y:
@@ -59,13 +53,21 @@ class PlotComponent:
             title=self.title,
         )
 
-    def plot_on_axis(self) -> Union[alt.X, alt.Y]:
-        """Wrapper around alt.X/alt.Y plotting utility.
+    def generate_tooltip(self, format: str = "") -> alt.Tooltip:
+        """Wrapper around alt.Tooltip creation.
+
+        Args:
+            format (str): Desired format within tooltip
 
         Returns:
-            Either an alt.X or alt.Y instance based on desired axis.
+            An instance of alt.Tooltip containing relevant information from the PlotComponent class.
         """
-        raise NotImplementedError
+        return alt.Tooltip(
+            field=self.name,
+            type=self.alt_type,
+            title=self.name.replace("_", " ").title(),
+            format=format,
+        )
 
 
 @dataclass(frozen=True)
@@ -80,17 +82,34 @@ class MetricPlotComponent(PlotComponent):
             title=self.title,
         )
 
+    def generate_tooltip(self, format: str = "") -> alt.Tooltip:
+        """Wrapper around alt.Tooltip creation.
+
+        Args:
+            format (str): Desired format within tooltip
+
+        Returns:
+            An instance of alt.Tooltip containing relevant information from the PlotComponent class.
+        """
+        if self.name.endswith("s"):
+            return alt.Tooltip(
+                field=self.name,
+                type=self.alt_type,
+                title=self.name.replace("_", " ")[:-1].title(),
+                format=format,
+            )
+        else:
+            return alt.Tooltip(
+                field=self.name,
+                type=self.alt_type,
+                title=self.name.replace("_", " ").title(),
+                format=format,
+            )
+
 
 @dataclass(frozen=True)
 class DomainPlotComponent(PlotComponent):
     subtitle: Optional[str] = None
-
-    @property
-    def title(self) -> Optional[str]:
-        if self.name is not None:
-            return self.name.title()
-        else:
-            return None
 
     def plot_on_axis(self) -> alt.X:
         """
@@ -122,7 +141,6 @@ class BatchPlotComponent(PlotComponent):
             self.name,
             type=self.alt_type,
             title=self.title,
-            scale=alt.Scale(align=0.05),
         )
 
     def generate_tooltip(self, format: str = "") -> List[alt.Tooltip]:
@@ -149,8 +167,6 @@ class BatchPlotComponent(PlotComponent):
 
 @dataclass(frozen=True)
 class ExpectationKwargPlotComponent(PlotComponent):
-    metric_plot_component: Optional[MetricPlotComponent] = None
-
     def plot_on_axis(self) -> alt.Y:
         """
         Plots metric on Y axis - see parent `PlotComponent` for more details.
@@ -158,12 +174,36 @@ class ExpectationKwargPlotComponent(PlotComponent):
         return alt.Y(
             self.name,
             type=self.alt_type,
-            title=self.metric_plot_component.title,
+            title=self.title,
         )
+
+    def generate_tooltip(self, format: str = "") -> alt.Tooltip:
+        """Wrapper around alt.Tooltip creation.
+
+        Args:
+            format (str): Desired format within tooltip
+
+        Returns:
+            An instance of alt.Tooltip containing relevant information from the PlotComponent class.
+        """
+        if self.name.endswith("s"):
+            return alt.Tooltip(
+                field=self.name,
+                type=self.alt_type,
+                title=self.name.replace("_", " ")[:-1].title(),
+                format=format,
+            )
+        else:
+            return alt.Tooltip(
+                field=self.name,
+                type=self.alt_type,
+                title=self.name.replace("_", " ").title(),
+                format=format,
+            )
 
 
 def determine_plot_title(
-    metric_plot_component: MetricPlotComponent,
+    metric_plot_components: List[MetricPlotComponent],
     batch_plot_component: BatchPlotComponent,
     domain_plot_component: DomainPlotComponent,
     expectation_type: Optional[str] = None,
@@ -173,27 +213,35 @@ def determine_plot_title(
     Conditionally renders a subtitle if relevant (specifically with column domain)
 
     Args:
-        metric_plot_component: Plot utility corresponding to a given metric.
+        metric_plot_components: A list of plot utilities corresponding to each metric.
         batch_plot_component: Plot utility corresponding to a given batch.
         domain_plot_component: Plot utility corresponding to a given domain.
+        expectation_type: The name of the expectation.
 
     Returns:
         An Altair TitleParam object
 
     """
+    metric_plot_component_titles: Set[str] = set()
+    for metric_plot_component in metric_plot_components:
+        metric_plot_component_titles.add(metric_plot_component.title)
+
     contents: str
     if expectation_type:
         contents = expectation_type
-    else:
+    elif len(metric_plot_component_titles) == 1:
         contents: str = (
-            f"{metric_plot_component.title} per {batch_plot_component.title}"
+            f"{list(metric_plot_component_titles)[0]} per {batch_plot_component.title}"
         )
+    else:
+        contents: str = f"Column Values per {batch_plot_component.title}"
+
     subtitle: Optional[str] = domain_plot_component.subtitle
     domain_selector: Optional[str] = domain_plot_component.name
 
     title: alt.TitleParams
     if subtitle:
-        title = alt.TitleParams(contents, subtitle=[subtitle])
+        title = alt.TitleParams(contents, subtitle=[subtitle], dy=-5)
     elif domain_selector:
         title = alt.TitleParams(contents, dy=-35)
     else:

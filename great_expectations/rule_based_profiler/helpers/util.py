@@ -3,6 +3,8 @@ import itertools
 import logging
 import re
 import uuid
+import warnings
+from dataclasses import field
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -23,7 +25,7 @@ from great_expectations.rule_based_profiler.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     SemanticDomainTypes,
 )
-from great_expectations.rule_based_profiler.numeric_range_estimation_result import (
+from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
     NumericRangeEstimationResult,
 )
@@ -50,6 +52,12 @@ TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
 TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN: re.Pattern = re.compile(
     rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\.\w{8}"
 )
+
+RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
+    "auto",
+    "nearest",
+    "linear",
+}
 
 
 def get_validator(
@@ -471,6 +479,90 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
     )
 
 
+def get_false_positive_rate_from_rule_state(
+    false_positive_rate: Union[str, float],
+    domain: Domain,
+    variables: Optional[ParameterContainer] = None,
+    parameters: Optional[Dict[str, ParameterContainer]] = None,
+) -> Union[float, np.float64]:
+    """
+    This method obtains false_positive_rate from "rule state" (i.e., variables and parameters) and validates the result.
+    """
+    if false_positive_rate is None:
+        return 5.0e-2
+
+    # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+    false_positive_rate = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=false_positive_rate,
+        expected_return_type=(float, np.float64),
+        variables=variables,
+        parameters=parameters,
+    )
+    if not (0.0 <= false_positive_rate <= 1.0):
+        raise ge_exceptions.ProfilerExecutionError(
+            f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
+{false_positive_rate} was provided.
+"""
+        )
+    elif false_positive_rate <= NP_EPSILON:
+        warnings.warn(
+            f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 0.  A \
+false_positive_rate of {NP_EPSILON} has been selected instead.
+"""
+        )
+        false_positive_rate = np.float64(NP_EPSILON)
+    elif false_positive_rate >= (1.0 - NP_EPSILON):
+        warnings.warn(
+            f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 1.  A \
+false_positive_rate of {1.0 - NP_EPSILON} has been selected instead.
+"""
+        )
+        false_positive_rate = np.float64(1.0 - NP_EPSILON)
+
+    return false_positive_rate
+
+
+def get_quantile_statistic_interpolation_method_from_rule_state(
+    quantile_statistic_interpolation_method: str,
+    round_decimals: int,
+    domain: Domain,
+    variables: Optional[ParameterContainer] = None,
+    parameters: Optional[Dict[str, ParameterContainer]] = None,
+) -> str:
+    """
+    This method obtains quantile_statistic_interpolation_method from "rule state" (i.e., variables and parameters) and
+    validates the result.
+    """
+    # Obtain quantile_statistic_interpolation_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+    quantile_statistic_interpolation_method = (
+        get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=quantile_statistic_interpolation_method,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
+        )
+    )
+    if (
+        quantile_statistic_interpolation_method
+        not in RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS
+    ):
+        raise ge_exceptions.ProfilerExecutionError(
+            message=f"""The directive "quantile_statistic_interpolation_method" can be only one of \
+{RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS} ("{quantile_statistic_interpolation_method}" was detected).
+"""
+        )
+
+    if quantile_statistic_interpolation_method == "auto":
+        if round_decimals == 0:
+            quantile_statistic_interpolation_method = "nearest"
+        else:
+            quantile_statistic_interpolation_method = "linear"
+
+    return quantile_statistic_interpolation_method
+
+
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
@@ -851,3 +943,8 @@ def sanitize_parameter_name(name: str) -> str:
     This method provides display-friendly version of "name" argument.
     """
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
+
+
+def default_field(obj: Dict[Union[str, Tuple[str]], str]) -> field:
+    """Shorthand method of allowing mutable dataclass variables."""
+    return field(default_factory=lambda: copy.copy(obj))

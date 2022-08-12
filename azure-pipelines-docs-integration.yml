@@ -101,13 +101,8 @@ stages:
           displayName: 'Update pip'
 
         - script: |
-            pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-            pip install --requirement requirements.txt
-            pip install .
+            pip install --requirement requirements-dev.txt --constraint constraints-dev.txt .
           displayName: 'Install dependencies'
-        - script: |
-            pip install "pyathena[SQLAlchemy]"
-          displayName: 'Install awsathena dependency'
         - task: DownloadSecureFile@1
           name: gcp_authkey
           displayName: 'Download GCS Credentials'
