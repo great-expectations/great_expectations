@@ -1,7 +1,7 @@
-from typing import Callable, Optional
+from typing import Callable, Union
 
 import pytest
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, Timeout
 
 
 class MockResponse:
@@ -9,11 +9,11 @@ class MockResponse:
         self,
         json_data: dict,
         status_code: int,
-        _exc_to_raise: Optional[HTTPError] = None,
+        exc_to_raise: Union[HTTPError, Timeout, None] = None,
     ) -> None:
         self._json_data = json_data
         self._status_code = status_code
-        self._exc_to_raise: Optional[HTTPError] = _exc_to_raise
+        self._exc_to_raise = exc_to_raise
 
     def json(self):
         return self._json_data
@@ -21,6 +21,8 @@ class MockResponse:
     def raise_for_status(self):
         if self._exc_to_raise:
             raise self._exc_to_raise
+        if self._status_code >= 400:
+            raise HTTPError(response=self)
         return None
 
 
