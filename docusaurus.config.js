@@ -28,6 +28,8 @@ module.exports = {
 
       indexName: 'docs-greatexpectations',
 
+      searchPagePath: 'search',
+
       // Optional: see doc section below
       // contextualSearch: true,
 
