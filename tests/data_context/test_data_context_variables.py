@@ -400,6 +400,7 @@ def test_data_context_variables_save_config(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
+    shared_called_with_request_kwargs: dict,
     # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -455,10 +456,7 @@ def test_data_context_variables_save_config(
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": f"Bearer {ge_cloud_access_token}",
-            },
+            **shared_called_with_request_kwargs,
         )
 
 
