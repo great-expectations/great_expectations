@@ -3,7 +3,7 @@ import logging
 import os
 import random
 import uuid
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, TYPE_CHECKING
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import DataContextKey
@@ -24,6 +24,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.marshmallow__shade import ValidationError
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -78,8 +81,8 @@ class CheckpointStore(ConfigurationStore):
             print(
                 f"Attempting to retrieve the test value associated with key {test_key} from Checkpoint store..."
             )
-        # noinspection PyUnusedLocal
-        test_value: CheckpointConfig = self.get(key=test_key)
+
+        self.get(key=test_key)
         if pretty_print:
             print("\tTest value successfully retrieved from Checkpoint store.")
             print()
@@ -87,8 +90,7 @@ class CheckpointStore(ConfigurationStore):
         if pretty_print:
             print(f"Cleaning up test key {test_key} and value from Checkpoint store...")
 
-        # noinspection PyUnusedLocal
-        test_value: CheckpointConfig = self.remove_key(key=test_key)
+        self.remove_key(key=test_key)
         if pretty_print:
             print("\tTest key and value successfully removed from Checkpoint store.")
             print()
@@ -149,7 +151,7 @@ class CheckpointStore(ConfigurationStore):
                 batches is not None
                 and (
                     len(batches) == 0
-                    or {"batch_kwargs", "expectation_suite_names",}.issubset(
+                    or {"batch_kwargs", "expectation_suite_names"}.issubset(
                         set(
                             itertools.chain.from_iterable(
                                 item.keys() for item in batches
