@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseStoreBackend(StoreBackend):
-    def __init__(
+    def __init__(  # noqa: C901 - 16
         self,
         table_name,
         key_columns,
@@ -255,7 +255,7 @@ class DatabaseStoreBackend(StoreBackend):
         cols["value"] = value
 
         if allow_update:
-            if self.has_key(key):
+            if self.has_key(key):  # noqa: W601
                 ins = (
                     self._table.update()
                     .where(getattr(self._table.columns, self.key_columns[0]) == key[0])
@@ -352,4 +352,4 @@ class DatabaseStoreBackend(StoreBackend):
     def config(self) -> dict:
         return self._config
 
-    _move = None
+    _move = None  # noqa: F811
