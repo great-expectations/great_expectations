@@ -165,7 +165,7 @@ class ConfigurationStore(Store):
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.CONTRACT, ge_cloud_id=ge_cloud_id
+                resource_type=GeCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)

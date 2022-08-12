@@ -2348,7 +2348,7 @@ stores:
     store_backend:
       class_name: GeCloudStoreBackend
       ge_cloud_base_url: {ge_cloud_base_url}
-      ge_cloud_resource_type: contract
+      ge_cloud_resource_type: checkpoint
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
         organization_id: {ge_cloud_organization_id}

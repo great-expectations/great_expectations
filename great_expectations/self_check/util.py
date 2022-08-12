@@ -94,13 +94,13 @@ try:
     from pyspark.sql import DataFrame as SparkDataFrame
     from pyspark.sql import SparkSession
 except ImportError:
-    SparkSession = None
-    SparkDataFrame = type(None)
+    SparkSession = None  # type: ignore
+    SparkDataFrame = type(None)  # type: ignore
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
 except ImportError:
-    spark_DataFrame = type(None)
+    spark_DataFrame = type(None)  # type: ignore
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes

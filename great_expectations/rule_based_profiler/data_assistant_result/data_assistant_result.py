@@ -5,7 +5,18 @@ import os
 import warnings
 from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass, field
-from typing import Any, Callable, Dict, KeysView, List, Optional, Set, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    KeysView,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import altair as alt
 import ipywidgets as widgets
@@ -44,6 +55,7 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
 )
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
+    default_field,
     get_or_create_expectation_suite,
     sanitize_parameter_name,
 )
@@ -100,16 +112,20 @@ class DataAssistantResult(SerializableDictDot):
     """
 
     # A mapping is defined for which metrics to plot and their associated expectations
-    METRIC_EXPECTATION_MAP = {
-        "table.columns": "expect_table_columns_to_match_set",
-        "table.row_count": "expect_table_row_count_to_be_between",
-        "column.distinct_values.count": "expect_column_unique_value_count_to_be_between",
-        "column.min": "expect_column_min_to_be_between",
-        "column.max": "expect_column_max_to_be_between",
-        "column.mean": "expect_column_mean_to_be_between",
-        "column.median": "expect_column_median_to_be_between",
-        "column.standard_deviation": "expect_column_stdev_to_be_between",
-    }
+    METRIC_EXPECTATION_MAP: Dict[Union[str, Tuple[str]], str] = default_field(
+        {
+            "table.columns": "expect_table_columns_to_match_set",
+            "table.row_count": "expect_table_row_count_to_be_between",
+            "column.distinct_values.count": "expect_column_unique_value_count_to_be_between",
+            "column.min": "expect_column_min_to_be_between",
+            "column.max": "expect_column_max_to_be_between",
+            "column.mean": "expect_column_mean_to_be_between",
+            "column.median": "expect_column_median_to_be_between",
+            "column.standard_deviation": "expect_column_stdev_to_be_between",
+            "column.quantile_values": "expect_column_quantile_values_to_be_between",
+            ("column.min", "column.max"): "expect_column_values_to_be_between",
+        }
+    )
 
     # A mapping is defined for the Altair data type associated with each metric
     # Altair data types can be one of:
@@ -117,16 +133,19 @@ class DataAssistantResult(SerializableDictDot):
     #     - Ordinal: Metric is a discrete ordered quantity
     #     - Quantitative: Metric is a continuous real-valued quantity
     #     - Temporal: Metric is a time or date value
-    METRIC_TYPES = {
-        "table.columns": AltairDataTypes.NOMINAL,
-        "table.row_count": AltairDataTypes.QUANTITATIVE,
-        "column.distinct_values.count": AltairDataTypes.QUANTITATIVE,
-        "column.min": AltairDataTypes.QUANTITATIVE,
-        "column.max": AltairDataTypes.QUANTITATIVE,
-        "column.mean": AltairDataTypes.QUANTITATIVE,
-        "column.median": AltairDataTypes.QUANTITATIVE,
-        "column.standard_deviation": AltairDataTypes.QUANTITATIVE,
-    }
+    METRIC_TYPES: Dict[str, AltairDataTypes] = default_field(
+        {
+            "table.columns": AltairDataTypes.NOMINAL,
+            "table.row_count": AltairDataTypes.QUANTITATIVE,
+            "column.distinct_values.count": AltairDataTypes.QUANTITATIVE,
+            "column.min": AltairDataTypes.QUANTITATIVE,
+            "column.max": AltairDataTypes.QUANTITATIVE,
+            "column.mean": AltairDataTypes.QUANTITATIVE,
+            "column.median": AltairDataTypes.QUANTITATIVE,
+            "column.standard_deviation": AltairDataTypes.QUANTITATIVE,
+            "column.quantile_values": AltairDataTypes.QUANTITATIVE,
+        }
+    )
 
     ALLOWED_KEYS = {
         "_batch_id_to_batch_identifier_display_name_map",
@@ -264,6 +283,8 @@ class DataAssistantResult(SerializableDictDot):
             DataAssistantResult.ALLOWED_KEYS
             | {
                 "get_expectation_suite",
+                "show_expectations_by_domain_type",
+                "show_expectations_by_expectation_type",
                 "plot_metrics",
                 "plot_expectations_and_metrics",
             }
@@ -312,6 +333,22 @@ class DataAssistantResult(SerializableDictDot):
         )
         json_dict.update(auxiliary_profiler_execution_details)
         return json.dumps(json_dict, indent=2)
+
+    def _get_metric_expectation_map(self) -> Dict[Tuple[str], str]:
+        if not all(
+            [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
+            for metric_names in self.METRIC_EXPECTATION_MAP.keys()
+        ):
+            raise ge_exceptions.DataAssistantResultExecutionError(
+                "All METRIC_EXPECTATION_MAP keys must be of type str or tuple."
+            )
+
+        return {
+            (
+                (metric_names,) if isinstance(metric_names, str) else metric_names
+            ): expectation_name
+            for metric_names, expectation_name in self.METRIC_EXPECTATION_MAP.items()
+        }
 
     def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:
         auxiliary_info: dict = {
@@ -500,7 +537,7 @@ class DataAssistantResult(SerializableDictDot):
             PlotResult wrapper object around Altair charts.
         """
         return self._plot(
-            plot_mode=PlotMode.PRESCRIPTIVE,
+            plot_mode=PlotMode.DIAGNOSTIC,
             sequential=sequential,
             theme=theme,
             include_column_names=include_column_names,
@@ -524,7 +561,7 @@ class DataAssistantResult(SerializableDictDot):
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            plot_mode: Type of plot to generate, prescriptive or descriptive
+            plot_mode: Type of plot to generate, diagnostic or descriptive
             sequential: Whether batches are sequential in nature
             theme: Altair top-level chart configuration dictionary
             include_column_names: A list of columns to chart
@@ -664,7 +701,7 @@ class DataAssistantResult(SerializableDictDot):
 
         dropdown_selection: widgets.Dropdown = widgets.Dropdown(
             options=chart_titles,
-            description="Select Plot: ",
+            description="Select Plot Type: ",
             style={"description_width": "initial"},
             layout={"width": "max-content", "margin": "0px"},
         )
@@ -690,21 +727,35 @@ class DataAssistantResult(SerializableDictDot):
         display_chart_dict[chart_title].display()
 
     @staticmethod
-    def _get_chart_titles(charts: List[alt.Chart]) -> List[str]:
+    def _get_chart_layer_title(
+        layer: Union[alt.Chart, alt.LayerChart]
+    ) -> Optional[str]:
+        """Recursively searches through the chart layers for a title and returns one if it exists."""
+        chart_title: Optional[str] = None
+        if isinstance(layer.title, str):
+            chart_title = layer.title
+        else:
+            try:
+                chart_title = layer.title.text
+            except AttributeError:
+                try:
+                    for chart_layer in layer.layer:
+                        chart_title = DataAssistantResult._get_chart_layer_title(
+                            layer=chart_layer
+                        )
+                        if chart_title is not None:
+                            return chart_title
+                except AttributeError:
+                    return None
+        return chart_title
+
+    @staticmethod
+    def _get_chart_titles(charts: List[Union[alt.Chart, alt.LayerChart]]) -> List[str]:
+        """Recursively searches through each chart layer for a title and returns a list of titles."""
         chart_titles: List[str] = []
         chart_title: Optional[str]
         for chart in charts:
-            chart_title = None
-            try:
-                chart_title = chart.title.text
-            except AttributeError:
-                for layer in chart.layer:
-                    try:
-                        chart_title = layer.title.text
-                        break
-                    except AttributeError:
-                        continue
-
+            chart_title = DataAssistantResult._get_chart_layer_title(layer=chart)
             if chart_title is None:
                 raise ge_exceptions.DataAssistantResultExecutionError(
                     "All DataAssistantResult charts must have a title."
@@ -736,31 +787,62 @@ class DataAssistantResult(SerializableDictDot):
         return [chart.configure(**theme) for chart in charts]
 
     @staticmethod
-    def _transform_table_column_list_to_rows(
-        df: pd.DataFrame, metric_name: str
+    def _transform_column_lists_to_rows(
+        df: pd.DataFrame,
     ) -> pd.DataFrame:
-        # explode list of column names into separate rows for each name in list
-        # flatten columns of lists
-        col_flat: List[str] = [item for sublist in df[metric_name] for item in sublist]
-        # row numbers to repeat
-        ilocations: np.ndarray = np.repeat(
-            range(df.shape[0]), df[metric_name].apply(len)
+        col_has_list: pd.DataFrame = pd.DataFrame(
+            {"column_name": df.columns, "has_list": (df.applymap(type) == list).any()}
         )
-        # replicate rows and add flattened column of lists
-        cols: List[int] = [i for i, c in enumerate(df.columns) if c != metric_name]
-        df = df.iloc[ilocations, cols]
-        df[metric_name] = col_flat
+        list_column_names: List[str] = list(
+            col_has_list[col_has_list["has_list"]]["column_name"]
+        )
 
-        # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
-        df["column_number"] = pd.factorize(df[metric_name])[0] + 1
+        if (
+            "table_columns" in list_column_names
+            and len(np.unique(df["table_columns"])) == 1
+        ):
+            df_transformed = df.iloc[:1]
+        else:
+            column_name: str
+            cols_flat: List[List[str]] = []
+            for idx, column_name in enumerate(list_column_names):
+                # explode list of column names into separate rows for each name in list
+                # flatten columns of lists
+                cols_flat.append(
+                    [item for sublist in df[column_name] for item in sublist]
+                )
 
-        # rename table_columns to table_column
-        df_columns = [
-            "table_column" if column == "table_columns" else column
-            for column in list(df.columns)
-        ]
-        df.columns = df_columns
-        return df
+            # row numbers to repeat
+            ilocations: List[int] = list(
+                np.repeat(range(df.shape[0]), df[list_column_names[0]].apply(len))
+            )
+            # replicate rows and add flattened column of lists
+            columns: List[int] = [
+                idx
+                for idx, col in enumerate(df.columns)
+                if col not in list_column_names
+            ]
+            df_new_shape = df.iloc[ilocations, columns].reset_index(drop=True)
+            cols_flat_df: pd.DataFrame = pd.DataFrame(cols_flat).T
+            cols_flat_df.columns = list_column_names
+            df_transformed = pd.concat([df_new_shape, cols_flat_df], axis=1)
+
+            if "table_columns" in list_column_names:
+                # create column number by encoding the categorical column name and adding 1 since encoding starts at 0
+                df_transformed["column_number"] = (
+                    pd.factorize(df_transformed["table_columns"])[0] + 1
+                )
+
+            if "value_ranges" in list_column_names:
+                # split value ranges into two columns
+                df_transformed["min_value"] = 0
+                df_transformed["max_value"] = 0
+                df_transformed[["min_value", "max_value"]] = df_transformed[
+                    "value_ranges"
+                ].values.tolist()
+                df_transformed = df_transformed.drop(columns=["value_ranges"], axis=1)
+
+        return df_transformed
 
     @staticmethod
     def _get_column_set_text(column_set: List[str]) -> Tuple[str, int]:
@@ -783,16 +865,16 @@ class DataAssistantResult(SerializableDictDot):
         return text, dy
 
     @staticmethod
-    def _get_nominal_metric_chart(
+    def _get_nominal_metrics_chart(
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str] = None,
     ) -> alt.Chart:
         """
         Args:
             df: A pandas dataframe containing the data to be plotted
-            metric_name: The name of the metric as it exists in the pandas dataframe
+            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
             sequential: Whether batches are sequential in nature
             subtitle: The subtitle, if applicable
 
@@ -801,65 +883,44 @@ class DataAssistantResult(SerializableDictDot):
         """
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
-            column for column in df.columns if column not in [metric_name, batch_name]
+            column
+            for column in df.columns
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component = BatchPlotComponent(
+        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
 
-        column_number: str = "column_number"
-
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
         metric_plot_component: MetricPlotComponent
-        if metric_name == "table_columns":
-            table_column: str = "table_column"
-            unique_column_sets: np.ndarray = np.unique(df[metric_name])
-            if len(unique_column_sets) == 1:
-                column_set = df[metric_name].iloc[0]
-                # we need at least one record to plot the column_set as text
-                df = df.iloc[:1]
-            else:
-                # filter only on batches that do not contain every possible column
-                unique_columns: Set[str] = {
-                    column for column_list in df[metric_name] for column in column_list
-                }
-                df = df[df[metric_name].apply(set) != unique_columns]
-                # record containing all columns to be compared against
-                empty_columns: List[None] = [None] * (len(batch_identifiers) + 1)
-                # noinspection PyTypeChecker
-                all_columns_record: pd.DataFrame = pd.DataFrame(
-                    data=[[unique_columns] + empty_columns], columns=df.columns
-                )
-                df = pd.concat([all_columns_record, df], axis=0)
-                df[batch_name] = df[batch_name].fillna(value="All Columns")
-                df = DataAssistantResult._transform_table_column_list_to_rows(
-                    df=df, metric_name=metric_name
-                )
+        metric_plot_components: List[MetricPlotComponent] = []
+        for sanitized_metric_name in sanitized_metric_names:
+            if sanitized_metric_name == "table_columns" and len(df.index) == 1:
+                column_set = df[sanitized_metric_name].iloc[0]
 
             metric_plot_component = MetricPlotComponent(
-                name=table_column,
-                alt_type=metric_type,
-            )
-        else:
-            metric_plot_component = MetricPlotComponent(
-                name=metric_name,
+                name=sanitized_metric_name,
                 alt_type=metric_type,
             )
 
-        column_number_plot_component = PlotComponent(
+            metric_plot_components.append(metric_plot_component)
+
+        column_number: str = "column_number"
+
+        column_number_plot_component: PlotComponent = PlotComponent(
             name=column_number,
             alt_type=AltairDataTypes.ORDINAL.value,
         )
 
-        domain_plot_component = DomainPlotComponent(
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name=None,
             alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
@@ -868,7 +929,7 @@ class DataAssistantResult(SerializableDictDot):
         if sequential:
             return DataAssistantResult._get_sequential_isotype_chart(
                 df=df,
-                metric_plot_component=metric_plot_component,
+                metric_plot_components=metric_plot_components,
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
                 column_number_plot_component=column_number_plot_component,
@@ -877,7 +938,7 @@ class DataAssistantResult(SerializableDictDot):
         else:
             return DataAssistantResult._get_nonsequential_isotype_chart(
                 df=df,
-                metric_plot_component=metric_plot_component,
+                metric_plot_components=metric_plot_components,
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
                 column_number_plot_component=column_number_plot_component,
@@ -888,7 +949,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_expect_domain_values_to_match_set_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str] = None,
     ) -> alt.Chart:
@@ -896,7 +957,7 @@ class DataAssistantResult(SerializableDictDot):
         Args:
             expectation_type: The name of the expectation
             df: A pandas dataframe containing the data to be plotted
-            metric_name: The name of the metric as it exists in the pandas dataframe
+            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
             sequential: Whether batches are sequential in nature
             subtitle: The subtitle, if applicable
 
@@ -905,54 +966,44 @@ class DataAssistantResult(SerializableDictDot):
         """
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
-            column for column in df.columns if column not in [metric_name, batch_name]
+            column
+            for column in df.columns
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component = BatchPlotComponent(
+        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
 
-        column_number: str = "column_number"
-
         metric_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         column_set: Optional[List[str]] = None
         metric_plot_component: MetricPlotComponent
-        if metric_name == "table_columns":
-            table_column: str = "table_column"
-            unique_column_sets: np.ndarray = np.unique(df[metric_name])
-            if len(unique_column_sets) == 1:
-                column_set = df[metric_name].iloc[0]
-
-            df = DataAssistantResult._transform_table_column_list_to_rows(
-                df=df, metric_name=metric_name
-            )
+        metric_plot_components: List[MetricPlotComponent] = []
+        for sanitized_metric_name in sanitized_metric_names:
+            if sanitized_metric_name == "table_columns" and len(df.index) == 1:
+                column_set = df[sanitized_metric_name].iloc[0]
 
             metric_plot_component = MetricPlotComponent(
-                name=table_column,
-                alt_type=metric_type,
-            )
-        else:
-            metric_plot_component = MetricPlotComponent(
-                name=metric_name,
+                name=sanitized_metric_name,
                 alt_type=metric_type,
             )
 
-        # we need at least one record to plot the column_set as text
-        if column_set is not None:
-            df = df.iloc[:1]
+            metric_plot_components.append(metric_plot_component)
 
-        column_number_plot_component = PlotComponent(
+        column_number: str = "column_number"
+
+        column_number_plot_component: PlotComponent = PlotComponent(
             name=column_number,
             alt_type=AltairDataTypes.ORDINAL.value,
         )
 
-        domain_plot_component = DomainPlotComponent(
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name=None,
             alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
@@ -962,7 +1013,7 @@ class DataAssistantResult(SerializableDictDot):
             return DataAssistantResult._get_sequential_expect_domain_values_to_match_set_isotype_chart(
                 expectation_type=expectation_type,
                 df=df,
-                metric_plot_component=metric_plot_component,
+                metric_plot_components=metric_plot_components,
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
                 column_number_plot_component=column_number_plot_component,
@@ -972,7 +1023,7 @@ class DataAssistantResult(SerializableDictDot):
             return DataAssistantResult._get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
                 expectation_type=expectation_type,
                 df=df,
-                metric_plot_component=metric_plot_component,
+                metric_plot_components=metric_plot_components,
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
                 column_number_plot_component=column_number_plot_component,
@@ -982,20 +1033,21 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_sequential_isotype_chart(
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
         tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
-            metric_plot_component.generate_tooltip(),
+            metric_plot_component.generate_tooltip()
+            for metric_plot_component in metric_plot_components
         ]
 
         chart: Union[alt.Chart, alt.LayerChart]
@@ -1052,20 +1104,21 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _get_nonsequential_isotype_chart(
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
         column_set: Optional[List[str]],
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
         tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
-            metric_plot_component.generate_tooltip(),
+            metric_plot_component.generate_tooltip()
+            for metric_plot_component in metric_plot_components
         ]
 
         chart: alt.Chart
@@ -1123,7 +1176,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_sequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
@@ -1131,14 +1184,14 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
         chart: alt.Chart = DataAssistantResult._get_sequential_isotype_chart(
             df=df,
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
             column_number_plot_component=column_number_plot_component,
@@ -1151,7 +1204,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
         column_number_plot_component: PlotComponent,
@@ -1159,14 +1212,14 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.Chart:
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
         chart: alt.Chart = DataAssistantResult._get_nonsequential_isotype_chart(
             df=df,
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
             column_number_plot_component=column_number_plot_component,
@@ -1176,16 +1229,16 @@ class DataAssistantResult(SerializableDictDot):
         return chart
 
     @staticmethod
-    def _get_quantitative_metric_chart(
+    def _get_quantitative_metrics_chart(
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str] = None,
-    ) -> alt.Chart:
+    ) -> alt.LayerChart:
         """
         Args:
             df: A pandas dataframe containing the data to be plotted
-            metric_name: The name of the metric as it exists in the pandas dataframe
+            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
             sequential: Whether batches are sequential in nature
             subtitle: The subtitle, if applicable
 
@@ -1193,59 +1246,73 @@ class DataAssistantResult(SerializableDictDot):
             An altair line chart
         """
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        metric_plot_component = MetricPlotComponent(
-            name=metric_name, alt_type=metric_type
-        )
+        metric_plot_component: MetricPlotComponent
+        metric_plot_components: List[MetricPlotComponent] = []
+        for sanitized_metric_name in sanitized_metric_names:
+            metric_plot_component = MetricPlotComponent(
+                name=sanitized_metric_name, alt_type=metric_type
+            )
+            metric_plot_components.append(metric_plot_component)
 
         batch_name: str = "batch"
         batch_identifiers: List[str] = [
-            column for column in df.columns if column not in {metric_name, batch_name}
+            column
+            for column in df.columns
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component = BatchPlotComponent(
+        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
 
-        domain_plot_component = DomainPlotComponent(
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name=None,
-            alt_type=None,
+            alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
         )
 
         if sequential:
             return DataAssistantResult._get_line_chart(
                 df=df,
-                metric_plot_component=metric_plot_component,
+                metric_plot_components=metric_plot_components,
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
             )
         else:
-            return DataAssistantResult._get_bar_chart(
-                df=df,
-                metric_plot_component=metric_plot_component,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
+            if "column_quantile_values" in df.columns:
+                return DataAssistantResult._get_range_chart(
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                )
+            else:
+                return DataAssistantResult._get_bar_chart(
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                )
 
     @staticmethod
     def _get_expect_domain_values_to_be_between_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
-    ) -> alt.Chart:
+    ) -> Union[alt.Chart, alt.LayerChart]:
         """
         Args:
             expectation_type: The name of the expectation
             df: A pandas dataframe containing the data to be plotted
-            metric_name: The name of the metric as it exists in the pandas dataframe
+            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
             sequential: Whether batches are sequential in nature
             subtitle: The subtitle, if applicable
 
@@ -1264,19 +1331,25 @@ class DataAssistantResult(SerializableDictDot):
         min_value: str = "min_value"
         strict_max: str = "strict_max"
         strict_min: str = "strict_min"
+        quantiles: str = "quantiles"
+        allow_relative_error: str = "allow_relative_error"
         batch_identifiers: List[str] = [
             column
             for column in df.columns
             if column
-            not in {
-                metric_name,
-                batch_name,
-                column_name,
-                max_value,
-                min_value,
-                strict_min,
-                strict_max,
-            }
+            not in (
+                sanitized_metric_names
+                | {
+                    batch_name,
+                    column_name,
+                    max_value,
+                    min_value,
+                    strict_min,
+                    strict_max,
+                    quantiles,
+                    allow_relative_error,
+                }
+            )
         ]
 
         batch_type: alt.StandardType
@@ -1284,26 +1357,42 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component = BatchPlotComponent(
+        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
-        metric_plot_component = MetricPlotComponent(
-            name=metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
-        )
-        min_value_plot_component: ExpectationKwargPlotComponent = (
+
+        y_axis_title: str
+        if len(sanitized_metric_names) > 1:
+            y_axis_title = "Column Values"
+        else:
+            y_axis_title = list(sanitized_metric_names)[0].replace("_", " ").title()
+
+        metric_plot_component: MetricPlotComponent
+        metric_plot_components: List[MetricPlotComponent] = []
+        for sanitized_metric_name in sanitized_metric_names:
+            metric_plot_component = MetricPlotComponent(
+                name=sanitized_metric_name,
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
+            )
+            metric_plot_components.append(metric_plot_component)
+
+        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent] = []
+
+        expectation_kwarg_plot_components.append(
             ExpectationKwargPlotComponent(
                 name=min_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
-                metric_plot_component=metric_plot_component,
+                axis_title=y_axis_title,
             )
         )
-        max_value_plot_component: ExpectationKwargPlotComponent = (
+        expectation_kwarg_plot_components.append(
             ExpectationKwargPlotComponent(
                 name=max_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
-                metric_plot_component=metric_plot_component,
+                axis_title=y_axis_title,
             )
         )
 
@@ -1315,218 +1404,181 @@ class DataAssistantResult(SerializableDictDot):
                 alt_type=AltairDataTypes.NOMINAL.value,
                 subtitle=subtitle,
             )
-            strict_min_plot_component: ExpectationKwargPlotComponent = (
-                ExpectationKwargPlotComponent(
-                    name=strict_min,
-                    alt_type=AltairDataTypes.NOMINAL.value,
-                    metric_plot_component=metric_plot_component,
+            if strict_min in df.columns:
+                expectation_kwarg_plot_components.append(
+                    ExpectationKwargPlotComponent(
+                        name=strict_min,
+                        alt_type=AltairDataTypes.NOMINAL.value,
+                        axis_title=y_axis_title,
+                    )
                 )
-            )
-            strict_max_plot_component: ExpectationKwargPlotComponent = (
-                ExpectationKwargPlotComponent(
-                    name=strict_max,
-                    alt_type=AltairDataTypes.NOMINAL.value,
-                    metric_plot_component=metric_plot_component,
+            if strict_max in df.columns:
+                expectation_kwarg_plot_components.append(
+                    ExpectationKwargPlotComponent(
+                        name=strict_max,
+                        alt_type=AltairDataTypes.NOMINAL.value,
+                        axis_title=y_axis_title,
+                    )
                 )
-            )
-            tooltip = (
-                [domain_plot_component.generate_tooltip()]
-                + batch_plot_component.generate_tooltip()
-                + [
-                    min_value_plot_component.generate_tooltip(format=","),
-                    max_value_plot_component.generate_tooltip(format=","),
-                    strict_min_plot_component.generate_tooltip(),
-                    strict_max_plot_component.generate_tooltip(),
-                    metric_plot_component.generate_tooltip(format=","),
-                ]
-            )
+            if quantiles in df.columns:
+                expectation_kwarg_plot_components.append(
+                    ExpectationKwargPlotComponent(
+                        name=quantiles,
+                        alt_type=AltairDataTypes.QUANTITATIVE.value,
+                        axis_title=y_axis_title,
+                    )
+                )
+            if allow_relative_error in df.columns:
+                expectation_kwarg_plot_components.append(
+                    ExpectationKwargPlotComponent(
+                        name=allow_relative_error,
+                        alt_type=AltairDataTypes.NOMINAL.value,
+                        axis_title=y_axis_title,
+                    )
+                )
         else:
             domain_plot_component = DomainPlotComponent(
                 name=None,
-                alt_type=None,
+                alt_type=AltairDataTypes.NOMINAL.value,
                 subtitle=subtitle,
             )
-            tooltip = batch_plot_component.generate_tooltip() + [
-                min_value_plot_component.generate_tooltip(format=","),
-                max_value_plot_component.generate_tooltip(format=","),
-                metric_plot_component.generate_tooltip(format=","),
-            ]
 
         if sequential:
             return (
                 DataAssistantResult._get_expect_domain_values_to_be_between_line_chart(
                     expectation_type=expectation_type,
                     df=df,
-                    metric_plot_component=metric_plot_component,
+                    metric_plot_components=metric_plot_components,
                     batch_plot_component=batch_plot_component,
                     domain_plot_component=domain_plot_component,
-                    min_value_plot_component=min_value_plot_component,
-                    max_value_plot_component=max_value_plot_component,
-                    tooltip=tooltip,
+                    expectation_kwarg_plot_components=expectation_kwarg_plot_components,
                 )
             )
         else:
-            return (
-                DataAssistantResult._get_expect_domain_values_to_be_between_bar_chart(
+            if "column_quantile_values" in df.columns:
+                return DataAssistantResult._get_expect_domain_values_to_be_between_range_chart(
                     expectation_type=expectation_type,
                     df=df,
-                    metric_plot_component=metric_plot_component,
+                    metric_plot_components=metric_plot_components,
                     batch_plot_component=batch_plot_component,
                     domain_plot_component=domain_plot_component,
-                    min_value_plot_component=min_value_plot_component,
-                    max_value_plot_component=max_value_plot_component,
-                    tooltip=tooltip,
+                    expectation_kwarg_plot_components=expectation_kwarg_plot_components,
                 )
-            )
+            else:
+                return DataAssistantResult._get_expect_domain_values_to_be_between_bar_chart(
+                    expectation_type=expectation_type,
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                    expectation_kwarg_plot_components=expectation_kwarg_plot_components,
+                )
 
     @staticmethod
-    def _get_interactive_metric_chart(
+    def _get_interactive_metrics_chart(
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> Union[alt.Chart, alt.LayerChart]:
         """
         Args:
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
+            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
             sequential: Whether batches are sequential in nature
 
         Returns:
-            A interactive detail altair multi-chart
+            An interactive chart
         """
         batch_name: str = "batch"
         all_columns: List[str] = list(column_dfs[0].df.columns)
         batch_identifiers: List[str] = [
-            column for column in all_columns if column not in {metric_name, batch_name}
+            column
+            for column in all_columns
+            if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
         if sequential:
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component = BatchPlotComponent(
+        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        metric_plot_component = MetricPlotComponent(
-            name=metric_name, alt_type=metric_type
-        )
+        metric_plot_component: MetricPlotComponent
+        metric_plot_components: List[MetricPlotComponent] = []
+        for sanitized_metric_name in sanitized_metric_names:
+            metric_plot_component = MetricPlotComponent(
+                name=sanitized_metric_name, alt_type=metric_type
+            )
+            metric_plot_components.append(metric_plot_component)
 
         domain_name: str = "column"
-        domain_plot_component = DomainPlotComponent(
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name=domain_name,
             alt_type=AltairDataTypes.NOMINAL.value,
         )
 
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[batch_name, domain_name, metric_name] + batch_identifiers
+        df_columns: List[str] = (
+            [batch_name, domain_name] + list(sanitized_metric_names) + batch_identifiers
         )
-        for column_df in column_dfs:
-            column_df.df[domain_name] = column_df.column
-            df = pd.concat([df, column_df.df], axis=0)
+
+        df: pd.DataFrame = pd.DataFrame(columns=df_columns)
+        for column, column_df in column_dfs:
+            column_df[domain_name] = column
+            df = pd.concat(
+                [df, column_df[column_df.columns.intersection(df_columns)]], axis=0
+            )
 
         if sequential:
             return DataAssistantResult._get_interactive_line_chart(
                 df=df,
-                metric_plot_component=metric_plot_component,
+                metric_plot_components=metric_plot_components,
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
             )
         else:
-            return DataAssistantResult._get_interactive_bar_chart(
-                df=df,
-                metric_plot_component=metric_plot_component,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
+            if "column_quantile_values" in df.columns:
+                return DataAssistantResult._get_interactive_range_chart(
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                )
+            else:
+                return DataAssistantResult._get_interactive_bar_chart(
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                )
 
-    @staticmethod
-    def _get_interactive_detail_multi_chart(
-        column_dfs: List[ColumnDataFrame],
-        metric_name: str,
-        sequential: bool,
-    ) -> Union[alt.Chart, alt.VConcatChart]:
-        """
-        Args:
-            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
-            sequential: Whether batches are sequential in nature
-
-        Returns:
-            A interactive detail altair multi-chart
-        """
-        batch_name: str = "batch"
-        all_columns: List[str] = list(column_dfs[0].df.columns)
-        batch_identifiers: List[str] = [
-            column for column in all_columns if column not in {metric_name, batch_name}
-        ]
-        batch_type: alt.StandardType
-        if sequential:
-            batch_type = AltairDataTypes.ORDINAL.value
-        else:
-            batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component = BatchPlotComponent(
-            name=batch_name,
-            alt_type=batch_type,
-            batch_identifiers=batch_identifiers,
-        )
-        metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
-        metric_plot_component = MetricPlotComponent(
-            name=metric_name, alt_type=metric_type
-        )
-
-        domain_name: str = "column"
-        domain_plot_component = DomainPlotComponent(
-            name=domain_name,
-            alt_type=AltairDataTypes.NOMINAL.value,
-        )
-
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[batch_name, domain_name, metric_name] + batch_identifiers
-        )
-        for column_df in column_dfs:
-            column_df.df[domain_name] = column_df.column
-            df = pd.concat([df, column_df.df], axis=0)
-
-        if sequential:
-            return DataAssistantResult._get_interactive_detail_multi_line_chart(
-                df=df,
-                metric_plot_component=metric_plot_component,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
-        else:
-            return DataAssistantResult._get_interactive_bar_chart(
-                df=df,
-                metric_plot_component=metric_plot_component,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
-
-    @staticmethod
+    @staticmethod  # noqa: C901 - complexity 16
     def _get_interactive_expect_column_values_to_be_between_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
-    ) -> alt.VConcatChart:
+    ) -> Union[alt.LayerChart, alt.VConcatChart]:
         """
         Args:
             expectation_type: The name of the expectation
             column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
+            sanitized_metric_names: A set containing the names of the metrics as they exist in the pandas dataframe
             sequential: Whether batches are sequential in nature
 
         Returns:
-            An interactive detail multi line expect_column_values_to_be_between chart
+            An interactive expect_column_values_to_be_between chart
         """
         column_name: str = "column"
         min_value: str = "min_value"
         max_value: str = "max_value"
         strict_min: str = "strict_min"
         strict_max: str = "strict_max"
+        quantiles: str = "quantiles"
+        allow_relative_error: str = "allow_relative_error"
 
         batch_name: str = "batch"
         all_columns: List[str] = list(column_dfs[0].df.columns)
@@ -1534,393 +1586,352 @@ class DataAssistantResult(SerializableDictDot):
             column
             for column in all_columns
             if column
-            not in {
-                metric_name,
-                batch_name,
-                column_name,
-                min_value,
-                max_value,
-                strict_min,
-                strict_max,
-            }
+            not in (
+                sanitized_metric_names
+                | {
+                    batch_name,
+                    column_name,
+                    min_value,
+                    max_value,
+                    strict_min,
+                    strict_max,
+                    quantiles,
+                    allow_relative_error,
+                }
+            )
         ]
         batch_type: alt.StandardType
         if sequential:
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component = BatchPlotComponent(
+        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
-        metric_plot_component = MetricPlotComponent(
-            name=metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
-        )
 
-        domain_plot_component = DomainPlotComponent(
+        y_axis_title: Optional[str]
+        if len(sanitized_metric_names) > 1:
+            y_axis_title = "Column Values"
+        else:
+            y_axis_title = None
+
+        metric_plot_component: MetricPlotComponent
+        metric_plot_components: List[MetricPlotComponent] = []
+        for sanitized_metric_name in sanitized_metric_names:
+            metric_plot_component: MetricPlotComponent = MetricPlotComponent(
+                name=sanitized_metric_name,
+                alt_type=AltairDataTypes.QUANTITATIVE.value,
+                axis_title=y_axis_title,
+            )
+            metric_plot_components.append(metric_plot_component)
+
+        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
             name="column",
             alt_type=AltairDataTypes.NOMINAL.value,
         )
 
-        min_value_plot_component: ExpectationKwargPlotComponent = (
+        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent] = []
+
+        expectation_kwarg_plot_components.append(
             ExpectationKwargPlotComponent(
                 name=min_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
-                metric_plot_component=metric_plot_component,
+                axis_title=y_axis_title,
             )
         )
-        max_value_plot_component: ExpectationKwargPlotComponent = (
+        expectation_kwarg_plot_components.append(
             ExpectationKwargPlotComponent(
                 name=max_value,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
-                metric_plot_component=metric_plot_component,
-            )
-        )
-        strict_min_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=strict_min,
-                alt_type=AltairDataTypes.NOMINAL.value,
-                metric_plot_component=metric_plot_component,
-            )
-        )
-        strict_max_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=strict_max,
-                alt_type=AltairDataTypes.NOMINAL.value,
-                metric_plot_component=metric_plot_component,
+                axis_title=y_axis_title,
             )
         )
 
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[
+        possible_df_columns: List[str] = (
+            [
                 batch_name,
             ]
             + batch_identifiers
+            + list(sanitized_metric_names)
             + [
-                metric_name,
                 column_name,
                 min_value,
                 max_value,
                 strict_min,
                 strict_max,
+                quantiles,
+                allow_relative_error,
             ]
         )
 
+        df_columns: pd.Index
+        df: Optional[pd.DataFrame] = None
         for _, column_df in column_dfs:
-            df = pd.concat([df, column_df], axis=0)
+            df_columns = column_df.columns.intersection(possible_df_columns)
+
+            if df is None:
+                df = pd.DataFrame(columns=df_columns)
+
+            df = pd.concat([df, column_df[df_columns]], axis=0)
+
+        strict_min_predicate: bool = False
+        if strict_min in df.columns:
+            strict_min_predicate = bool(df[strict_min].all())
+            expectation_kwarg_plot_components.append(
+                ExpectationKwargPlotComponent(
+                    name=strict_min,
+                    alt_type=AltairDataTypes.NOMINAL.value,
+                    axis_title=y_axis_title,
+                )
+            )
+
+        strict_max_predicate: bool = False
+        if strict_max in df.columns:
+            strict_max_predicate = bool(df[strict_max].all())
+            expectation_kwarg_plot_components.append(
+                ExpectationKwargPlotComponent(
+                    name=strict_max,
+                    alt_type=AltairDataTypes.NOMINAL.value,
+                    axis_title=y_axis_title,
+                )
+            )
+
+        if quantiles in df.columns:
+            expectation_kwarg_plot_components.append(
+                ExpectationKwargPlotComponent(
+                    name=quantiles,
+                    alt_type=AltairDataTypes.QUANTITATIVE.value,
+                    axis_title=y_axis_title,
+                )
+            )
+
+        if allow_relative_error in df.columns:
+            expectation_kwarg_plot_components.append(
+                ExpectationKwargPlotComponent(
+                    name=allow_relative_error,
+                    alt_type=AltairDataTypes.NOMINAL.value,
+                    axis_title=y_axis_title,
+                )
+            )
 
         # encode point color based on anomalies
-        predicate: Union[bool, int]
-        if strict_min and strict_max:
-            predicate = (
-                (alt.datum.min_value > alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value > alt.datum[metric_plot_component.name])
-            ) | (
-                (alt.datum.min_value < alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value < alt.datum[metric_plot_component.name])
-            )
-        elif strict_min:
-            predicate = (
-                (alt.datum.min_value > alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
-            ) | (
-                (alt.datum.min_value < alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
-            )
-        elif strict_max:
-            predicate = (
-                (alt.datum.min_value >= alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value > alt.datum[metric_plot_component.name])
-            ) | (
-                (alt.datum.min_value <= alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value < alt.datum[metric_plot_component.name])
-            )
-        else:
-            predicate = (
-                (alt.datum.min_value >= alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
-            ) | (
-                (alt.datum.min_value <= alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
-            )
+        min_value_predicate: Union[bool, int]
+        max_value_predicate: Union[bool, int]
+        predicates: List[Union[bool, int]] = []
+        for metric_plot_component in metric_plot_components:
+            if strict_min_predicate:
+                min_value_predicate = (
+                    alt.datum.min_value < alt.datum[metric_plot_component.name]
+                )
+            else:
+                min_value_predicate = (
+                    alt.datum.min_value <= alt.datum[metric_plot_component.name]
+                )
+
+            if strict_max_predicate:
+                max_value_predicate = (
+                    alt.datum.max_value > alt.datum[metric_plot_component.name]
+                )
+            else:
+                max_value_predicate = (
+                    alt.datum.max_value >= alt.datum[metric_plot_component.name]
+                )
+
+            predicates.append(min_value_predicate & max_value_predicate)
 
         if sequential:
             return DataAssistantResult._get_interactive_expect_column_values_to_be_between_line_chart(
                 expectation_type=expectation_type,
                 df=df,
-                metric_plot_component=metric_plot_component,
+                metric_plot_components=metric_plot_components,
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
-                min_value_plot_component=min_value_plot_component,
-                max_value_plot_component=max_value_plot_component,
-                strict_min_plot_component=strict_min_plot_component,
-                strict_max_plot_component=strict_max_plot_component,
-                predicate=predicate,
+                expectation_kwarg_plot_components=expectation_kwarg_plot_components,
+                predicates=predicates,
             )
         else:
-            return DataAssistantResult._get_interactive_expect_column_values_to_be_between_bar_chart(
-                expectation_type=expectation_type,
-                df=df,
-                metric_plot_component=metric_plot_component,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-                min_value_plot_component=min_value_plot_component,
-                max_value_plot_component=max_value_plot_component,
-                strict_min_plot_component=strict_min_plot_component,
-                strict_max_plot_component=strict_max_plot_component,
-                predicate=predicate,
-            )
-
-    @staticmethod
-    def _get_interactive_detail_expect_column_values_to_be_between_chart(
-        expectation_type: str,
-        column_dfs: List[ColumnDataFrame],
-        metric_name: str,
-        sequential: bool,
-    ) -> alt.VConcatChart:
-        """
-        Args:
-            expectation_type: The name of the expectation
-            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
-            sequential: Whether batches are sequential in nature
-
-        Returns:
-            An interactive detail multi line expect_column_values_to_be_between chart
-        """
-        column_name: str = "column"
-        min_value: str = "min_value"
-        max_value: str = "max_value"
-        strict_min: str = "strict_min"
-        strict_max: str = "strict_max"
-
-        batch_name: str = "batch"
-        all_columns: List[str] = list(column_dfs[0].df.columns)
-        batch_identifiers: List[str] = [
-            column
-            for column in all_columns
-            if column
-            not in {
-                metric_name,
-                batch_name,
-                column_name,
-                min_value,
-                max_value,
-                strict_min,
-                strict_max,
-            }
-        ]
-        batch_type: alt.StandardType
-        if sequential:
-            batch_type = AltairDataTypes.ORDINAL.value
-        else:
-            batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component = BatchPlotComponent(
-            name=batch_name,
-            alt_type=batch_type,
-            batch_identifiers=batch_identifiers,
-        )
-        metric_plot_component = MetricPlotComponent(
-            name=metric_name, alt_type=AltairDataTypes.QUANTITATIVE.value
-        )
-
-        domain_plot_component = DomainPlotComponent(
-            name="column",
-            alt_type=AltairDataTypes.NOMINAL.value,
-        )
-
-        min_value_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=min_value,
-                alt_type=AltairDataTypes.QUANTITATIVE.value,
-                metric_plot_component=metric_plot_component,
-            )
-        )
-        max_value_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=max_value,
-                alt_type=AltairDataTypes.QUANTITATIVE.value,
-                metric_plot_component=metric_plot_component,
-            )
-        )
-        strict_min_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=strict_min,
-                alt_type=AltairDataTypes.NOMINAL.value,
-                metric_plot_component=metric_plot_component,
-            )
-        )
-        strict_max_plot_component: ExpectationKwargPlotComponent = (
-            ExpectationKwargPlotComponent(
-                name=strict_max,
-                alt_type=AltairDataTypes.NOMINAL.value,
-                metric_plot_component=metric_plot_component,
-            )
-        )
-
-        df: pd.DataFrame = pd.DataFrame(
-            columns=[
-                batch_name,
-            ]
-            + batch_identifiers
-            + [
-                metric_name,
-                column_name,
-                min_value,
-                max_value,
-                strict_min,
-                strict_max,
-            ]
-        )
-
-        for _, column_df in column_dfs:
-            df = pd.concat([df, column_df], axis=0)
-
-        # encode point color based on anomalies
-        predicate: Union[bool, int]
-        if strict_min and strict_max:
-            predicate = (
-                (alt.datum.min_value > alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value > alt.datum[metric_plot_component.name])
-            ) | (
-                (alt.datum.min_value < alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value < alt.datum[metric_plot_component.name])
-            )
-        elif strict_min:
-            predicate = (
-                (alt.datum.min_value > alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
-            ) | (
-                (alt.datum.min_value < alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
-            )
-        elif strict_max:
-            predicate = (
-                (alt.datum.min_value >= alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value > alt.datum[metric_plot_component.name])
-            ) | (
-                (alt.datum.min_value <= alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value < alt.datum[metric_plot_component.name])
-            )
-        else:
-            predicate = (
-                (alt.datum.min_value >= alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value >= alt.datum[metric_plot_component.name])
-            ) | (
-                (alt.datum.min_value <= alt.datum[metric_plot_component.name])
-                & (alt.datum.max_value <= alt.datum[metric_plot_component.name])
-            )
-
-        if sequential:
-            return DataAssistantResult._get_interactive_detail_expect_column_values_to_be_between_line_chart(
-                expectation_type=expectation_type,
-                df=df,
-                metric_plot_component=metric_plot_component,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-                min_value_plot_component=min_value_plot_component,
-                max_value_plot_component=max_value_plot_component,
-                strict_min_plot_component=strict_min_plot_component,
-                strict_max_plot_component=strict_max_plot_component,
-                predicate=predicate,
-            )
-        else:
-            return DataAssistantResult._get_interactive_expect_column_values_to_be_between_bar_chart(
-                expectation_type=expectation_type,
-                df=df,
-                metric_plot_component=metric_plot_component,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-                min_value_plot_component=min_value_plot_component,
-                max_value_plot_component=max_value_plot_component,
-                strict_min_plot_component=strict_min_plot_component,
-                strict_max_plot_component=strict_max_plot_component,
-                predicate=predicate,
-            )
+            if "column_quantile_values" in df.columns:
+                return DataAssistantResult._get_interactive_expect_column_values_to_be_between_range_chart(
+                    expectation_type=expectation_type,
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                    expectation_kwarg_plot_components=expectation_kwarg_plot_components,
+                    predicates=predicates,
+                )
+            else:
+                return DataAssistantResult._get_interactive_expect_column_values_to_be_between_bar_chart(
+                    expectation_type=expectation_type,
+                    df=df,
+                    metric_plot_components=metric_plot_components,
+                    batch_plot_component=batch_plot_component,
+                    domain_plot_component=domain_plot_component,
+                    expectation_kwarg_plot_components=expectation_kwarg_plot_components,
+                    predicates=predicates,
+                )
 
     @staticmethod
     def _get_line_chart(
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-    ) -> alt.Chart:
+    ) -> alt.LayerChart:
         title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
         tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
-            metric_plot_component.generate_tooltip(format=","),
+            metric_plot_component.generate_tooltip(format=",")
+            for metric_plot_component in metric_plot_components
         ]
 
-        line: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_line()
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=metric_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-        )
+        quantiles: str = "quantiles"
+        lines_and_points_list: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            if quantiles in df.columns:
+                line: alt.Chart = (
+                    alt.Chart(data=df, title=title)
+                    .mark_line()
+                    .encode(
+                        x=batch_plot_component.plot_on_axis(),
+                        y=metric_plot_component.plot_on_axis(),
+                        tooltip=tooltip,
+                        detail=quantiles,
+                    )
+                )
+            else:
+                line: alt.Chart = (
+                    alt.Chart(data=df, title=title)
+                    .mark_line()
+                    .encode(
+                        x=batch_plot_component.plot_on_axis(),
+                        y=metric_plot_component.plot_on_axis(),
+                        tooltip=tooltip,
+                    )
+                )
 
-        points: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_point()
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=metric_plot_component.plot_on_axis(),
-                tooltip=tooltip,
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point()
+                .encode(
+                    x=batch_plot_component.plot_on_axis(),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
             )
-        )
 
-        return line + points
+            lines_and_points_list.append(line + points)
+
+        return alt.layer(*lines_and_points_list)
 
     @staticmethod
     def _get_bar_chart(
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-    ) -> alt.Chart:
+    ) -> alt.LayerChart:
         title: alt.TitleParams = determine_plot_title(
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
         tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
-            metric_plot_component.generate_tooltip(format=","),
+            metric_plot_component.generate_tooltip(format=",")
+            for metric_plot_component in metric_plot_components
         ]
 
-        bars: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_bar()
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=metric_plot_component.plot_on_axis(),
-                tooltip=tooltip,
+        bars: alt.Chart
+        bars_list: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            bars = (
+                alt.Chart(data=df, title=title)
+                .mark_bar()
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
             )
+
+            bars_list.append(bars)
+
+        return alt.layer(*bars_list)
+
+    @staticmethod
+    def _get_range_chart(
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+    ) -> alt.LayerChart:
+        title: alt.TitleParams = determine_plot_title(
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
-        return bars
+        tooltip: List[alt.Tooltip] = batch_plot_component.generate_tooltip() + [
+            metric_plot_component.generate_tooltip(format=",")
+            for metric_plot_component in metric_plot_components
+        ]
+
+        lines_and_points_list: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            line: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_line()
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                    detail="batch",
+                )
+            )
+
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point()
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+            )
+
+            lines_and_points_list.append(line + points)
+
+        return alt.layer(*lines_and_points_list)
 
     @staticmethod
     def _get_expect_domain_values_to_be_between_line_chart(
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        min_value_plot_component: PlotComponent,
-        max_value_plot_component: PlotComponent,
-        tooltip: List[alt.Tooltip],
+        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
@@ -1930,664 +1941,57 @@ class DataAssistantResult(SerializableDictDot):
 
         title: alt.TitleParams = determine_plot_title(
             expectation_type=expectation_type,
-            metric_plot_component=metric_plot_component,
+            metric_plot_components=metric_plot_components,
             batch_plot_component=batch_plot_component,
             domain_plot_component=domain_plot_component,
         )
 
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
+        expectation_kwarg_tooltips: List[alt.Tooltip] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
+            expectation_kwarg_tooltips.append(
+                expectation_kwarg_plot_component.generate_tooltip()
             )
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=min_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(title=title)
-        )
 
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=max_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(title=title)
-        )
+            if expectation_kwarg_plot_component.name == "min_value":
+                min_value_plot_component = expectation_kwarg_plot_component
+            elif expectation_kwarg_plot_component.name == "max_value":
+                max_value_plot_component = expectation_kwarg_plot_component
 
-        band: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_area()
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=min_value_plot_component.plot_on_axis(),
-                y2=alt.Y2(
-                    max_value_plot_component.name, title=metric_plot_component.title
-                ),
-            )
-            .properties(title=title)
-        )
+        tooltip: List[alt.Tooltip] = []
+        if domain_plot_component.name is not None:
+            tooltip.append(domain_plot_component.generate_tooltip())
 
-        line: alt.Chart = DataAssistantResult._get_line_chart(
-            df=df,
-            metric_plot_component=metric_plot_component,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
-        )
-
-        # encode point color based on anomalies
-        metric_name: str = metric_plot_component.name
-        predicate: Union[bool, int] = (
-            (alt.datum.min_value > alt.datum[metric_name])
-            & (alt.datum.max_value > alt.datum[metric_name])
-        ) | (
-            (alt.datum.min_value < alt.datum[metric_name])
-            & (alt.datum.max_value < alt.datum[metric_name])
-        )
-        point_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
-        )
-
-        anomaly_coded_points = line.layer[1].encode(
-            color=point_color_condition,
-            tooltip=tooltip,
-        )
-        anomaly_coded_line = alt.layer(
-            line.layer[0].encode(tooltip=tooltip), anomaly_coded_points
-        )
-
-        return band + lower_limit + upper_limit + anomaly_coded_line
-
-    @staticmethod
-    def _get_expect_domain_values_to_be_between_bar_chart(
-        df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
-        batch_plot_component: BatchPlotComponent,
-        domain_plot_component: DomainPlotComponent,
-        min_value_plot_component: ExpectationKwargPlotComponent,
-        max_value_plot_component: ExpectationKwargPlotComponent,
-        tooltip: List[alt.Tooltip],
-        expectation_type: Optional[str] = None,
-    ) -> alt.Chart:
-        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
-        )
-        expectation_kwarg_line_stroke_width: int = 5
-
-        title: alt.TitleParams = determine_plot_title(
-            expectation_type=expectation_type,
-            metric_plot_component=metric_plot_component,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
-        )
-
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False),
-                ),
-                y=min_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(title=title)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False),
-                ),
-                y=max_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(title=title)
-        )
-
-        band: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_area()
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False),
-                ),
-                y=min_value_plot_component.plot_on_axis(),
-                y2=alt.Y2(
-                    max_value_plot_component.name, title=metric_plot_component.title
-                ),
-            )
-            .properties(title=title)
-        )
-
-        bars: alt.Chart = DataAssistantResult._get_bar_chart(
-            df=df,
-            metric_plot_component=metric_plot_component,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
-        )
-
-        # encode point color based on anomalies
-        metric_name: str = metric_plot_component.name
-        predicate: Union[bool, int] = (
-            (alt.datum.min_value > alt.datum[metric_name])
-            & (alt.datum.max_value > alt.datum[metric_name])
-        ) | (
-            (alt.datum.min_value < alt.datum[metric_name])
-            & (alt.datum.max_value < alt.datum[metric_name])
-        )
-        bar_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
-        )
-
-        anomaly_coded_bars = bars.encode(color=bar_color_condition, tooltip=tooltip)
-
-        return band + lower_limit + upper_limit + anomaly_coded_bars
-
-    @staticmethod
-    def _get_interactive_detail_multi_line_chart(
-        df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
-        batch_plot_component: BatchPlotComponent,
-        domain_plot_component: DomainPlotComponent,
-        expectation_type: Optional[str] = None,
-    ) -> alt.VConcatChart:
-        detail_title_font_size: int = 14
-        detail_title_font_weight: str = "bold"
-
-        line_chart_height: int = 150
-        detail_line_chart_height: int = 75
-
-        point_size: int = 50
-
-        unselected_color: alt.value = alt.value("lightgray")
-
-        selected_opacity: float = 1.0
-        unselected_opacity: float = 0.4
-
-        title: alt.TitleParams = determine_plot_title(
-            expectation_type=expectation_type,
-            metric_plot_component=metric_plot_component,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
-        )
-
-        tooltip: List[alt.Tooltip] = (
-            [domain_plot_component.generate_tooltip()]
-            + batch_plot_component.generate_tooltip()
-            + [
-                metric_plot_component.generate_tooltip(format=","),
+        tooltip.extend(batch_plot_component.generate_tooltip())
+        tooltip.extend(expectation_kwarg_tooltips)
+        tooltip.extend(
+            [
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
             ]
         )
 
-        columns: List[str] = [" "] + pd.unique(df[domain_plot_component.name]).tolist()
-        input_dropdown: alt.binding_select = alt.binding_select(
-            options=columns, name="Select Column: "
-        )
-        selection: alt.selection_single = alt.selection_single(
-            empty="none",
-            bind=input_dropdown,
-            fields=[domain_plot_component.name],
-        )
-
-        line: alt.Chart = (
-            alt.Chart(df)
-            .mark_line()
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                    scale=alt.Scale(align=0.05),
-                ),
-                y=alt.Y(
-                    metric_plot_component.name,
-                    type=metric_plot_component.alt_type,
-                    title=None,
-                ),
-                color=alt.condition(
-                    selection,
-                    alt.Color(
-                        domain_plot_component.name,
-                        type=domain_plot_component.alt_type,
-                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                        legend=None,
-                    ),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
-                ),
-                tooltip=tooltip,
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=batch_plot_component.plot_on_axis(),
+                    y=expectation_kwarg_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+                .properties(title=title)
             )
-            .properties(height=line_chart_height, title=title)
-        )
-
-        points: alt.Chart = (
-            alt.Chart(df)
-            .mark_point(size=point_size)
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                    scale=alt.Scale(align=0.05),
-                ),
-                y=alt.Y(
-                    metric_plot_component.name,
-                    type=metric_plot_component.alt_type,
-                    title=None,
-                ),
-                color=alt.condition(
-                    selection,
-                    alt.value(Colors.GREEN.value),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
-                ),
-                tooltip=tooltip,
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
             )
-            .properties(height=line_chart_height, title=title)
-        )
-
-        highlight_line: alt.Chart = (
-            alt.Chart(df)
-            .mark_line(strokeWidth=2.5)
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                    scale=alt.Scale(align=0.05),
-                ),
-                y=alt.Y(
-                    metric_plot_component.name,
-                    type=metric_plot_component.alt_type,
-                    title=None,
-                ),
-                color=alt.condition(
-                    selection,
-                    alt.Color(
-                        domain_plot_component.name,
-                        type=domain_plot_component.alt_type,
-                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                        legend=None,
-                    ),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=line_chart_height, title=title)
-            .transform_filter(selection)
-        )
-
-        highlight_points: alt.Chart = (
-            alt.Chart(df)
-            .mark_point(size=40)
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                ),
-                y=alt.Y(
-                    metric_plot_component.name,
-                    type=metric_plot_component.alt_type,
-                    title=None,
-                ),
-                color=alt.condition(
-                    selection,
-                    alt.value(Colors.GREEN.value),
-                    unselected_color,
-                ),
-                opacity=alt.condition(
-                    selection,
-                    alt.value(selected_opacity),
-                    alt.value(unselected_opacity),
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=line_chart_height, title=title)
-            .transform_filter(selection)
-        )
-
-        detail_line: alt.Chart = (
-            alt.Chart(
-                df,
-            )
-            .mark_line(opacity=selected_opacity)
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=alt.Y(
-                    metric_plot_component.name,
-                    type=metric_plot_component.alt_type,
-                    title=None,
-                ),
-                color=alt.Color(
-                    domain_plot_component.name,
-                    type=domain_plot_component.alt_type,
-                    scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=detail_line_chart_height)
-            .transform_filter(selection)
-        )
-
-        detail_points: alt.Chart = (
-            alt.Chart(
-                df,
-            )
-            .mark_point(
-                size=point_size, color=Colors.GREEN.value, opacity=selected_opacity
-            )
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=alt.Y(
-                    metric_plot_component.name,
-                    type=metric_plot_component.alt_type,
-                    title=None,
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=detail_line_chart_height)
-            .transform_filter(selection)
-        )
-
-        detail_title_column_names: pd.DataFrame = pd.DataFrame(
-            {domain_plot_component.name: pd.unique(df[domain_plot_component.name])}
-        )
-        detail_title_column_titles: str = "column_title"
-        detail_title_column_names[
-            detail_title_column_titles
-        ] = detail_title_column_names[domain_plot_component.name].apply(
-            lambda x: f"Column ({x}) Selection Detail"
-        )
-        detail_title_text: alt.condition = alt.condition(
-            selection, detail_title_column_titles, alt.value("")
-        )
-
-        detail_title = (
-            alt.Chart(detail_title_column_names)
-            .mark_text(
-                color=Colors.PURPLE.value,
-                fontSize=detail_title_font_size,
-                fontWeight=detail_title_font_weight,
-            )
-            .encode(text=detail_title_text)
-            .transform_filter(selection)
-            .properties(height=35)
-        )
-
-        # special title for combined y-axis across two charts
-        y_axis_title = alt.TitleParams(
-            metric_plot_component.title,
-            color=Colors.PURPLE.value,
-            orient="left",
-            angle=270,
-            fontSize=14,
-            dx=70,
-            dy=-5,
-        )
-
-        return (
-            alt.VConcatChart(
-                vconcat=[
-                    line + points + highlight_line + highlight_points,
-                    detail_title,
-                    detail_line + detail_points,
-                ],
-            )
-            .properties(title=y_axis_title)
-            .add_selection(selection)
-        )
-
-    @staticmethod
-    def _get_interactive_line_chart(
-        df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
-        batch_plot_component: BatchPlotComponent,
-        domain_plot_component: DomainPlotComponent,
-        expectation_type: Optional[str] = None,
-    ) -> alt.LayerChart:
-        title: alt.TitleParams = determine_plot_title(
-            expectation_type=expectation_type,
-            metric_plot_component=metric_plot_component,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
-        )
-
-        tooltip: List[alt.Tooltip] = (
-            [domain_plot_component.generate_tooltip()]
-            + batch_plot_component.generate_tooltip()
-            + [
-                metric_plot_component.generate_tooltip(format=","),
-            ]
-        )
-
-        input_dropdown_initial_state: pd.DataFrame = (
-            df.groupby([batch_plot_component.name]).max().reset_index()
-        )
-        input_dropdown_initial_state[
-            batch_plot_component.batch_identifiers + [domain_plot_component.name]
-        ] = " "
-        df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
-        input_dropdown: alt.binding_select = alt.binding_select(
-            options=columns, name="Select Column: "
-        )
-        selection: alt.selection_single = alt.selection_single(
-            empty="none",
-            bind=input_dropdown,
-            fields=[domain_plot_component.name],
-        )
-
-        line: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_line()
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=metric_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-        )
-
-        points: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_point()
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=metric_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-        )
-
-        return (
-            alt.layer(line, points).add_selection(selection).transform_filter(selection)
-        )
-
-    @staticmethod
-    def _get_interactive_bar_chart(
-        df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
-        batch_plot_component: BatchPlotComponent,
-        domain_plot_component: DomainPlotComponent,
-        expectation_type: Optional[str] = None,
-    ) -> alt.Chart:
-        title: alt.TitleParams = determine_plot_title(
-            expectation_type=expectation_type,
-            metric_plot_component=metric_plot_component,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
-        )
-
-        tooltip: List[alt.Tooltip] = (
-            [domain_plot_component.generate_tooltip()]
-            + batch_plot_component.generate_tooltip()
-            + [
-                metric_plot_component.generate_tooltip(format=","),
-            ]
-        )
-
-        input_dropdown_initial_state: pd.DataFrame = (
-            df.groupby([batch_plot_component.name]).max().reset_index()
-        )
-        input_dropdown_initial_state[
-            batch_plot_component.batch_identifiers + [domain_plot_component.name]
-        ] = " "
-        df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
-        input_dropdown: alt.binding_select = alt.binding_select(
-            options=columns, name="Select Column: "
-        )
-        selection: alt.selection_single = alt.selection_single(
-            empty="none",
-            bind=input_dropdown,
-            fields=[domain_plot_component.name],
-        )
-
-        bars: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_bar()
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=metric_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .add_selection(selection)
-            .transform_filter(selection)
-        )
-
-        return bars
-
-    @staticmethod
-    def _get_interactive_detail_expect_column_values_to_be_between_line_chart(
-        expectation_type: str,
-        df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
-        batch_plot_component: BatchPlotComponent,
-        domain_plot_component: DomainPlotComponent,
-        min_value_plot_component: PlotComponent,
-        max_value_plot_component: PlotComponent,
-        strict_min_plot_component: PlotComponent,
-        strict_max_plot_component: PlotComponent,
-        predicate: Union[bool, int],
-    ) -> alt.VConcatChart:
-        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
-        )
-        expectation_kwarg_line_stroke_width: int = 5
-
-        tooltip: List[alt.Tooltip] = (
-            [domain_plot_component.generate_tooltip()]
-            + batch_plot_component.generate_tooltip()
-            + [
-                min_value_plot_component.generate_tooltip(format=","),
-                max_value_plot_component.generate_tooltip(format=","),
-                strict_min_plot_component.generate_tooltip(),
-                strict_max_plot_component.generate_tooltip(),
-                metric_plot_component.generate_tooltip(format=","),
-            ]
-        )
-        detail_line_chart_height: int = 75
-
-        interactive_detail_multi_line_chart: alt.VConcatChart = (
-            DataAssistantResult._get_interactive_detail_multi_line_chart(
-                expectation_type=expectation_type,
-                df=df,
-                metric_plot_component=metric_plot_component,
-                batch_plot_component=batch_plot_component,
-                domain_plot_component=domain_plot_component,
-            )
-        )
-
-        # use existing selection
-        selection_name: str = list(
-            interactive_detail_multi_line_chart.vconcat[2].layer[0].selection.keys()
-        )[0]
-        selection_def: alt.SelectionDef = (
-            interactive_detail_multi_line_chart.vconcat[2]
-            .layer[0]
-            .selection[selection_name]
-        )
-        selection: alt.selection = alt.selection(
-            name=selection_name, **selection_def.to_dict()
-        )
-
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=min_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(height=detail_line_chart_height)
-            .transform_filter(selection)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=batch_plot_component.plot_on_axis(),
-                y=max_value_plot_component.plot_on_axis(),
-                tooltip=tooltip,
-            )
-            .properties(height=detail_line_chart_height)
-            .transform_filter(selection)
         )
 
         band: alt.Chart = (
@@ -2600,242 +2004,789 @@ class DataAssistantResult(SerializableDictDot):
                     max_value_plot_component.name, title=max_value_plot_component.title
                 ),
             )
-            .properties(height=detail_line_chart_height)
+            .properties(title=title)
+        )
+
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
+
+        metric_name: str
+        predicate: Union[bool, int]
+        anomaly_coded_line: alt.Chart
+        anomaly_coded_lines: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            # encode point color based on anomalies
+            metric_name = metric_plot_component.name
+            predicate = (
+                (alt.datum.min_value > alt.datum[metric_name])
+                & (alt.datum.max_value > alt.datum[metric_name])
+            ) | (
+                (alt.datum.min_value < alt.datum[metric_name])
+                & (alt.datum.max_value < alt.datum[metric_name])
+            )
+            point_color_condition = alt.condition(
+                predicate=predicate,
+                if_false=alt.value(Colors.GREEN.value),
+                if_true=alt.value(Colors.PINK.value),
+            )
+
+            anomaly_coded_base = alt.Chart(data=df, title=title)
+
+            anomaly_coded_line = anomaly_coded_base.mark_line().encode(
+                x=batch_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(),
+                tooltip=tooltip,
+            )
+
+            if "quantiles" in df.columns:
+                anomaly_coded_line = anomaly_coded_line.encode(detail="quantiles")
+
+            anomaly_coded_points = anomaly_coded_base.mark_point().encode(
+                x=batch_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(),
+                tooltip=tooltip,
+                color=point_color_condition,
+            )
+            anomaly_coded_lines.append(anomaly_coded_line + anomaly_coded_points)
+
+        return alt.layer(band, lower_limit, upper_limit, *anomaly_coded_lines)
+
+    @staticmethod
+    def _get_expect_domain_values_to_be_between_bar_chart(
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
+        expectation_type: Optional[str] = None,
+    ) -> alt.LayerChart:
+        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
+            ColorPalettes.HEATMAP_6.value[4]
+        )
+        expectation_kwarg_line_stroke_width: int = 5
+
+        title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+        )
+
+        expectation_kwarg_tooltips: List[alt.Tooltip] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
+            expectation_kwarg_tooltips.append(
+                expectation_kwarg_plot_component.generate_tooltip()
+            )
+
+            if expectation_kwarg_plot_component.name == "min_value":
+                min_value_plot_component = expectation_kwarg_plot_component
+            elif expectation_kwarg_plot_component.name == "max_value":
+                max_value_plot_component = expectation_kwarg_plot_component
+
+        tooltip: List[alt.Tooltip] = []
+        if domain_plot_component.name is not None:
+            tooltip.append(domain_plot_component.generate_tooltip())
+
+        tooltip.extend(batch_plot_component.generate_tooltip())
+        tooltip.extend(expectation_kwarg_tooltips)
+        tooltip.extend(
+            [
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
+            ]
+        )
+
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False),
+                    ),
+                    y=expectation_kwarg_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+                .properties(title=title)
+            )
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
+            )
+        )
+
+        band: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_area()
+            .encode(
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False),
+                ),
+                y=min_value_plot_component.plot_on_axis(),
+                y2=alt.Y2(
+                    max_value_plot_component.name, title=max_value_plot_component.title
+                ),
+            )
+            .properties(title=title)
+        )
+
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
+
+        metric_name: str
+        predicate: Union[bool, int]
+        anomaly_coded_bar: alt.Chart
+        anomaly_coded_bars: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            # encode bar color based on anomalies
+            metric_name = metric_plot_component.name
+            predicate = (
+                (alt.datum.min_value > alt.datum[metric_name])
+                & (alt.datum.max_value > alt.datum[metric_name])
+            ) | (
+                (alt.datum.min_value < alt.datum[metric_name])
+                & (alt.datum.max_value < alt.datum[metric_name])
+            )
+            bar_color_condition: alt.condition = alt.condition(
+                predicate=predicate,
+                if_false=alt.value(Colors.GREEN.value),
+                if_true=alt.value(Colors.PINK.value),
+            )
+
+            anomaly_coded_base = alt.Chart(data=df, title=title)
+
+            anomaly_coded_bar = anomaly_coded_base.mark_bar().encode(
+                x=batch_plot_component.plot_on_axis(),
+                y=metric_plot_component.plot_on_axis(),
+                tooltip=tooltip,
+                color=bar_color_condition,
+            )
+            anomaly_coded_bars.append(anomaly_coded_bar)
+
+        return alt.layer(band, lower_limit, upper_limit, *anomaly_coded_bars)
+
+    @staticmethod
+    def _get_expect_domain_values_to_be_between_range_chart(
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
+        expectation_type: Optional[str] = None,
+    ) -> alt.Chart:
+        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
+            ColorPalettes.HEATMAP_6.value[4]
+        )
+        expectation_kwarg_line_stroke_width: int = 5
+
+        title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+        )
+
+        expectation_kwarg_tooltips: List[alt.Tooltip] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
+            expectation_kwarg_tooltips.append(
+                expectation_kwarg_plot_component.generate_tooltip()
+            )
+
+            if expectation_kwarg_plot_component.name == "min_value":
+                min_value_plot_component = expectation_kwarg_plot_component
+            elif expectation_kwarg_plot_component.name == "max_value":
+                max_value_plot_component = expectation_kwarg_plot_component
+
+        tooltip: List[alt.Tooltip] = []
+        if domain_plot_component.name is not None:
+            tooltip.append(domain_plot_component.generate_tooltip())
+
+        tooltip.extend(batch_plot_component.generate_tooltip())
+        tooltip.extend(expectation_kwarg_tooltips)
+        tooltip.extend(
+            [
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
+            ]
+        )
+
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=expectation_kwarg_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+                .properties(title=title)
+            )
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
+            )
+        )
+
+        band: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_area()
+            .encode(
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
+                ),
+                y=min_value_plot_component.plot_on_axis(),
+                y2=alt.Y2(
+                    max_value_plot_component.name, title=max_value_plot_component.title
+                ),
+            )
+            .properties(title=title)
+        )
+
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
+
+        metric_name: str
+        predicate: Union[bool, int]
+        anomaly_coded_line: alt.Chart
+        anomaly_coded_lines: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            # encode point color based on anomalies
+            metric_name = metric_plot_component.name
+            predicate = (
+                (alt.datum.min_value > alt.datum[metric_name])
+                & (alt.datum.max_value > alt.datum[metric_name])
+            ) | (
+                (alt.datum.min_value < alt.datum[metric_name])
+                & (alt.datum.max_value < alt.datum[metric_name])
+            )
+            point_color_condition = alt.condition(
+                predicate=predicate,
+                if_false=alt.value(Colors.GREEN.value),
+                if_true=alt.value(Colors.PINK.value),
+            )
+
+            anomaly_coded_base = alt.Chart(data=df, title=title)
+
+            anomaly_coded_line = anomaly_coded_base.mark_line().encode(
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
+                ),
+                y=metric_plot_component.plot_on_axis(),
+                tooltip=tooltip,
+                detail="batch",
+            )
+
+            anomaly_coded_points = anomaly_coded_base.mark_point().encode(
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
+                ),
+                y=metric_plot_component.plot_on_axis(),
+                tooltip=tooltip,
+                color=point_color_condition,
+            )
+            anomaly_coded_lines.append(anomaly_coded_line + anomaly_coded_points)
+
+        return alt.layer(band, lower_limit, upper_limit, *anomaly_coded_lines)
+
+    @staticmethod
+    def _get_interactive_line_chart(
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        expectation_type: Optional[str] = None,
+    ) -> alt.LayerChart:
+        title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+        )
+
+        tooltip: List[alt.Tooltip] = (
+            [domain_plot_component.generate_tooltip()]
+            + batch_plot_component.generate_tooltip()
+            + [
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
+            ]
+        )
+
+        if expectation_type is None:
+            input_dropdown_initial_state: pd.DataFrame = df.groupby(
+                [batch_plot_component.name], as_index=False
+            ).max()
+            input_dropdown_initial_state[
+                batch_plot_component.batch_identifiers + [domain_plot_component.name]
+            ] = " "
+            df = pd.concat([input_dropdown_initial_state, df], axis=0)
+
+        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        input_dropdown: alt.binding_select = alt.binding_select(
+            options=columns, name="Select Column: "
+        )
+        selection: alt.selection_single = alt.selection_single(
+            empty="none",
+            bind=input_dropdown,
+            fields=[domain_plot_component.name],
+        )
+
+        quantiles: str = "quantiles"
+        line_and_points_list: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            if quantiles in df.columns:
+                line: alt.Chart = (
+                    alt.Chart(data=df, title=title)
+                    .mark_line()
+                    .encode(
+                        x=batch_plot_component.plot_on_axis(),
+                        y=metric_plot_component.plot_on_axis(),
+                        tooltip=tooltip,
+                        detail=quantiles,
+                    )
+                )
+            else:
+                line: alt.Chart = (
+                    alt.Chart(data=df, title=title)
+                    .mark_line()
+                    .encode(
+                        x=batch_plot_component.plot_on_axis(),
+                        y=metric_plot_component.plot_on_axis(),
+                        tooltip=tooltip,
+                    )
+                )
+
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point()
+                .encode(
+                    x=batch_plot_component.plot_on_axis(),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+            )
+
+            line_and_points_list.append(
+                alt.layer(line, points)
+                .add_selection(selection)
+                .transform_filter(selection)
+            )
+
+        return (
+            alt.layer(*line_and_points_list)
+            .add_selection(selection)
             .transform_filter(selection)
         )
 
-        point_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
+    @staticmethod
+    def _get_interactive_bar_chart(
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        expectation_type: Optional[str] = None,
+    ) -> alt.LayerChart:
+        title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
-        interactive_detail_multi_line_chart.vconcat[0].layer[3] = (
-            interactive_detail_multi_line_chart.vconcat[0]
-            .layer[3]
-            .encode(color=point_color_condition, tooltip=tooltip)
+        tooltip: List[alt.Tooltip] = (
+            [domain_plot_component.generate_tooltip()]
+            + batch_plot_component.generate_tooltip()
+            + [
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
+            ]
         )
 
-        interactive_detail_multi_line_chart.vconcat[2].layer[1] = (
-            interactive_detail_multi_line_chart.vconcat[2]
-            .layer[1]
-            .encode(color=point_color_condition, tooltip=tooltip)
+        if expectation_type is None:
+            input_dropdown_initial_state: pd.DataFrame = df.groupby(
+                [batch_plot_component.name], as_index=False
+            ).max()
+            input_dropdown_initial_state[
+                batch_plot_component.batch_identifiers + [domain_plot_component.name]
+            ] = " "
+            df = pd.concat([input_dropdown_initial_state, df], axis=0)
+
+        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        input_dropdown: alt.binding_select = alt.binding_select(
+            options=columns, name="Select Column: "
+        )
+        selection: alt.selection_single = alt.selection_single(
+            empty="none",
+            bind=input_dropdown,
+            fields=[domain_plot_component.name],
         )
 
-        # add expectation kwargs
-        detail_chart: alt.LayerChart = interactive_detail_multi_line_chart.vconcat[2]
-        detail_chart_layers: list[alt.Chart] = [
-            band,
-            lower_limit,
-            upper_limit,
-            detail_chart.layer[0].encode(tooltip=tooltip),
-            detail_chart.layer[1].encode(tooltip=tooltip),
-        ]
-        interactive_detail_multi_line_chart.vconcat[2].layer = detail_chart_layers
+        bars: alt.Chart
+        bars_list: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            bars: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_bar()
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+                .add_selection(selection)
+                .transform_filter(selection)
+            )
 
-        return interactive_detail_multi_line_chart
+            bars_list.append(bars)
+
+        return alt.layer(*bars_list)
+
+    @staticmethod
+    def _get_interactive_range_chart(
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        expectation_type: Optional[str] = None,
+    ) -> alt.LayerChart:
+        title: alt.TitleParams = determine_plot_title(
+            expectation_type=expectation_type,
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
+        )
+
+        tooltip: List[alt.Tooltip] = (
+            [domain_plot_component.generate_tooltip()]
+            + batch_plot_component.generate_tooltip()
+            + [
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
+            ]
+        )
+
+        if expectation_type is None:
+            input_dropdown_initial_state: pd.DataFrame = df.groupby(
+                [batch_plot_component.name], as_index=False
+            ).max()
+            input_dropdown_initial_state[
+                batch_plot_component.batch_identifiers + [domain_plot_component.name]
+            ] = " "
+            df = pd.concat([input_dropdown_initial_state, df], axis=0)
+
+        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        input_dropdown: alt.binding_select = alt.binding_select(
+            options=columns, name="Select Column: "
+        )
+        selection: alt.selection_single = alt.selection_single(
+            empty="none",
+            bind=input_dropdown,
+            fields=[domain_plot_component.name],
+        )
+
+        line_and_points_list: List[alt.Chart] = []
+        for metric_plot_component in metric_plot_components:
+            line: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_line()
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                    detail="batch",
+                )
+            )
+
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point()
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=metric_plot_component.plot_on_axis(),
+                    tooltip=tooltip,
+                )
+            )
+
+            line_and_points_list.append(
+                alt.layer(line, points)
+                .add_selection(selection)
+                .transform_filter(selection)
+            )
+
+        return (
+            alt.layer(*line_and_points_list)
+            .add_selection(selection)
+            .transform_filter(selection)
+        )
 
     @staticmethod
     def _get_interactive_expect_column_values_to_be_between_line_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        min_value_plot_component: PlotComponent,
-        max_value_plot_component: PlotComponent,
-        strict_min_plot_component: PlotComponent,
-        strict_max_plot_component: PlotComponent,
-        predicate: Union[bool, int],
-    ) -> alt.VConcatChart:
+        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
+        predicates: List[Union[bool, int]],
+    ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
             ColorPalettes.HEATMAP_6.value[4]
         )
         expectation_kwarg_line_stroke_width: int = 5
 
+        expectation_kwargs_tooltip: List[alt.Tooltip] = []
+        expectation_kwargs_initial_dropdown_state: List[str] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
+            expectation_kwargs_tooltip.append(
+                expectation_kwarg_plot_component.generate_tooltip(),
+            )
+            expectation_kwargs_initial_dropdown_state.append(
+                expectation_kwarg_plot_component.name,
+            )
+
+            if expectation_kwarg_plot_component.name == "min_value":
+                min_value_plot_component = expectation_kwarg_plot_component
+            elif expectation_kwarg_plot_component.name == "max_value":
+                max_value_plot_component = expectation_kwarg_plot_component
+
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
             + batch_plot_component.generate_tooltip()
+            + expectation_kwargs_tooltip
             + [
-                min_value_plot_component.generate_tooltip(format=","),
-                max_value_plot_component.generate_tooltip(format=","),
-                strict_min_plot_component.generate_tooltip(),
-                strict_max_plot_component.generate_tooltip(),
-                metric_plot_component.generate_tooltip(format=","),
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
             ]
         )
 
-        line_and_points: alt.LayerChart = (
+        input_dropdown_initial_state: pd.DataFrame = df.groupby(
+            [batch_plot_component.name], as_index=False
+        ).max()
+        input_dropdown_initial_state[
+            batch_plot_component.batch_identifiers
+            + [
+                domain_plot_component.name,
+            ]
+            + expectation_kwargs_initial_dropdown_state
+        ] = " "
+        df = pd.concat([input_dropdown_initial_state, df], axis=0)
+
+        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        input_dropdown: alt.binding_select = alt.binding_select(
+            options=columns, name="Select Column: "
+        )
+        selection: alt.selection_single = alt.selection_single(
+            empty="none",
+            bind=input_dropdown,
+            fields=[domain_plot_component.name],
+        )
+
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                    ),
+                    y=alt.Y(
+                        expectation_kwarg_plot_component.name,
+                        type=expectation_kwarg_plot_component.alt_type,
+                    ),
+                    tooltip=tooltip,
+                )
+                .transform_filter(selection)
+            )
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
+            )
+        )
+
+        band: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_area()
+            .encode(
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                ),
+                y=alt.Y(
+                    min_value_plot_component.name,
+                    type=min_value_plot_component.alt_type,
+                ),
+                y2=alt.Y2(max_value_plot_component.name),
+            )
+            .transform_filter(selection)
+        )
+
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
+
+        lines_and_points: alt.LayerChart = (
             DataAssistantResult._get_interactive_line_chart(
                 expectation_type=expectation_type,
                 df=df,
-                metric_plot_component=metric_plot_component,
+                metric_plot_components=metric_plot_components,
                 batch_plot_component=batch_plot_component,
                 domain_plot_component=domain_plot_component,
             )
         )
 
-        line: alt.Chart = line_and_points.layer[0]
-        points: alt.Chart = line_and_points.layer[1]
+        line: alt.Chart
+        points: alt.Chart
+        anomaly_coded_points: alt.Chart
+        for idx, line_layer in enumerate(lines_and_points.layer):
+            line = line_layer.layer[0]
+            points = line_layer.layer[1]
 
-        line_and_points.transform = alt.Undefined
-        line.selection = alt.Undefined
-        points.selection = alt.Undefined
+            line_layer.selection = alt.Undefined
+            line_layer.transform = alt.Undefined
+            line.selection = alt.Undefined
+            line.transform = alt.Undefined
+            points.selection = alt.Undefined
+            points.transform = alt.Undefined
 
-        input_dropdown_initial_state: pd.DataFrame = (
-            df.groupby([batch_plot_component.name]).max().reset_index()
-        )
-        input_dropdown_initial_state[
-            batch_plot_component.batch_identifiers
-            + [
-                domain_plot_component.name,
-                min_value_plot_component.name,
-                max_value_plot_component.name,
-                strict_min_plot_component.name,
-                strict_max_plot_component.name,
-            ]
-        ] = " "
-        df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
-        input_dropdown: alt.binding_select = alt.binding_select(
-            options=columns, name="Select Column: "
-        )
-        selection: alt.selection_single = alt.selection_single(
-            empty="none",
-            bind=input_dropdown,
-            fields=[domain_plot_component.name],
-        )
-
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
+            point_color_condition = alt.condition(
+                predicate=predicates[idx],
+                if_false=alt.value(Colors.PINK.value),
+                if_true=alt.value(Colors.GREEN.value),
             )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                ),
-                y=alt.Y(
-                    min_value_plot_component.name,
-                    type=min_value_plot_component.alt_type,
-                ),
-                tooltip=tooltip,
-            )
-            .transform_filter(selection)
-        )
 
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                ),
-                y=alt.Y(
-                    max_value_plot_component.name,
-                    type=max_value_plot_component.alt_type,
-                ),
-                tooltip=tooltip,
-            )
-            .transform_filter(selection)
-        )
+            anomaly_coded_points = points.encode(
+                color=point_color_condition, tooltip=tooltip
+            ).transform_filter(selection)
 
-        band: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_area()
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                ),
-                y=alt.Y(
-                    min_value_plot_component.name,
-                    type=min_value_plot_component.alt_type,
-                ),
-                y2=alt.Y2(max_value_plot_component.name),
-            )
-            .transform_filter(selection)
-        )
+            line = line.transform_filter(selection)
 
-        point_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
-        )
+            line_layer.layer[0] = line
+            line_layer.layer[1] = anomaly_coded_points
 
-        anomaly_coded_points: alt.Chart = (
-            points.encode(color=point_color_condition, tooltip=tooltip)
-            .add_selection(selection)
-            .transform_filter(selection)
-        )
+        lines_and_points.selection = alt.Undefined
+        lines_and_points.transform = alt.Undefined
+        lines_and_points = lines_and_points.transform_filter(selection)
 
-        line = line.transform_filter(selection)
-
-        return band + lower_limit + upper_limit + line + anomaly_coded_points
+        return (
+            alt.layer(band, lower_limit, upper_limit, lines_and_points)
+        ).add_selection(selection)
 
     @staticmethod
     def _get_interactive_expect_column_values_to_be_between_bar_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_plot_component: MetricPlotComponent,
+        metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
         domain_plot_component: DomainPlotComponent,
-        min_value_plot_component: PlotComponent,
-        max_value_plot_component: PlotComponent,
-        strict_min_plot_component: PlotComponent,
-        strict_max_plot_component: PlotComponent,
-        predicate: Union[bool, int],
+        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
+        predicates: List[Union[bool, int]],
     ) -> alt.VConcatChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
             ColorPalettes.HEATMAP_6.value[4]
         )
         expectation_kwarg_line_stroke_width: int = 5
 
+        expectation_kwargs_tooltip: List[alt.Tooltip] = []
+        expectation_kwargs_initial_dropdown_state: List[str] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
+            expectation_kwargs_tooltip.append(
+                expectation_kwarg_plot_component.generate_tooltip(),
+            )
+            expectation_kwargs_initial_dropdown_state.append(
+                expectation_kwarg_plot_component.name,
+            )
+
+            if expectation_kwarg_plot_component.name == "min_value":
+                min_value_plot_component = expectation_kwarg_plot_component
+            elif expectation_kwarg_plot_component.name == "max_value":
+                max_value_plot_component = expectation_kwarg_plot_component
+
         tooltip: List[alt.Tooltip] = (
             [domain_plot_component.generate_tooltip()]
             + batch_plot_component.generate_tooltip()
+            + expectation_kwargs_tooltip
             + [
-                min_value_plot_component.generate_tooltip(format=","),
-                max_value_plot_component.generate_tooltip(format=","),
-                strict_min_plot_component.generate_tooltip(),
-                strict_max_plot_component.generate_tooltip(),
-                metric_plot_component.generate_tooltip(format=","),
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
             ]
         )
 
-        bars: alt.Chart = DataAssistantResult._get_interactive_bar_chart(
-            expectation_type=expectation_type,
-            df=df,
-            metric_plot_component=metric_plot_component,
-            batch_plot_component=batch_plot_component,
-            domain_plot_component=domain_plot_component,
-        )
-
-        bars.selection = alt.Undefined
-        bars.transform = alt.Undefined
-
-        input_dropdown_initial_state: pd.DataFrame = (
-            df.groupby([batch_plot_component.name]).max().reset_index()
-        )
+        input_dropdown_initial_state: pd.DataFrame = df.groupby(
+            [batch_plot_component.name], as_index=False
+        ).max()
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers
             + [
                 domain_plot_component.name,
-                min_value_plot_component.name,
-                max_value_plot_component.name,
-                strict_min_plot_component.name,
-                strict_max_plot_component.name,
             ]
+            + expectation_kwargs_initial_dropdown_state
         ] = " "
         df = pd.concat([input_dropdown_initial_state, df], axis=0)
 
@@ -2849,48 +2800,34 @@ class DataAssistantResult(SerializableDictDot):
             fields=[domain_plot_component.name],
         )
 
-        lower_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=alt.Y(
+                        expectation_kwarg_plot_component.name,
+                        type=expectation_kwarg_plot_component.alt_type,
+                    ),
+                    tooltip=tooltip,
+                )
+                .transform_filter(selection)
             )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=alt.Y(
-                    min_value_plot_component.name,
-                    type=min_value_plot_component.alt_type,
-                ),
-                tooltip=tooltip,
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
             )
-            .transform_filter(selection)
-        )
-
-        upper_limit: alt.Chart = (
-            alt.Chart(data=df)
-            .mark_line(
-                color=expectation_kwarg_line_color,
-                strokeWidth=expectation_kwarg_line_stroke_width,
-            )
-            .encode(
-                x=alt.X(
-                    batch_plot_component.name,
-                    type=batch_plot_component.alt_type,
-                    title=batch_plot_component.title,
-                    axis=alt.Axis(labels=False, grid=False),
-                ),
-                y=alt.Y(
-                    max_value_plot_component.name,
-                    type=max_value_plot_component.alt_type,
-                ),
-                tooltip=tooltip,
-            )
-            .transform_filter(selection)
         )
 
         band: alt.Chart = (
@@ -2912,19 +2849,207 @@ class DataAssistantResult(SerializableDictDot):
             .transform_filter(selection)
         )
 
-        bar_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
+
+        bars: alt.LayerChart = DataAssistantResult._get_interactive_bar_chart(
+            expectation_type=expectation_type,
+            df=df,
+            metric_plot_components=metric_plot_components,
+            batch_plot_component=batch_plot_component,
+            domain_plot_component=domain_plot_component,
         )
 
-        anomaly_coded_bars = (
-            bars.encode(color=bar_color_condition, tooltip=tooltip)
-            .add_selection(selection)
+        bar: alt.Chart
+        bar_color_condition: alt.condition
+        for idx, bar_layer in enumerate(bars.layer):
+            bar_layer.selection = alt.Undefined
+            bar_layer.transform = alt.Undefined
+
+            bar_color_condition: alt.condition = alt.condition(
+                predicate=predicates[idx],
+                if_false=alt.value(Colors.PINK.value),
+                if_true=alt.value(Colors.GREEN.value),
+            )
+
+            bars.layer[idx] = bar_layer.encode(
+                color=bar_color_condition, tooltip=tooltip
+            ).transform_filter(selection)
+
+        bars.selection = alt.Undefined
+        bars.transform = alt.Undefined
+        bars = bars.transform_filter(selection)
+
+        return (alt.layer(band, lower_limit, upper_limit, bars)).add_selection(
+            selection
+        )
+
+    @staticmethod
+    def _get_interactive_expect_column_values_to_be_between_range_chart(
+        expectation_type: str,
+        df: pd.DataFrame,
+        metric_plot_components: List[MetricPlotComponent],
+        batch_plot_component: BatchPlotComponent,
+        domain_plot_component: DomainPlotComponent,
+        expectation_kwarg_plot_components: List[ExpectationKwargPlotComponent],
+        predicates: List[Union[bool, int]],
+    ) -> alt.LayerChart:
+        expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
+            ColorPalettes.HEATMAP_6.value[4]
+        )
+        expectation_kwarg_line_stroke_width: int = 5
+
+        expectation_kwargs_tooltip: List[alt.Tooltip] = []
+        expectation_kwargs_initial_dropdown_state: List[str] = []
+        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
+            expectation_kwargs_tooltip.append(
+                expectation_kwarg_plot_component.generate_tooltip()
+            )
+            expectation_kwargs_initial_dropdown_state.append(
+                expectation_kwarg_plot_component.name
+            )
+
+            if expectation_kwarg_plot_component.name == "min_value":
+                min_value_plot_component = expectation_kwarg_plot_component
+            elif expectation_kwarg_plot_component.name == "max_value":
+                max_value_plot_component = expectation_kwarg_plot_component
+
+        tooltip: List[alt.Tooltip] = (
+            [domain_plot_component.generate_tooltip()]
+            + batch_plot_component.generate_tooltip()
+            + expectation_kwargs_tooltip
+            + [
+                metric_plot_component.generate_tooltip(format=",")
+                for metric_plot_component in metric_plot_components
+            ]
+        )
+
+        input_dropdown_initial_state: pd.DataFrame = df.groupby(
+            [batch_plot_component.name], as_index=False
+        ).max()
+        input_dropdown_initial_state[
+            batch_plot_component.batch_identifiers
+            + [
+                domain_plot_component.name,
+            ]
+            + expectation_kwargs_initial_dropdown_state
+        ] = " "
+        df = pd.concat([input_dropdown_initial_state, df], axis=0)
+
+        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        input_dropdown: alt.binding_select = alt.binding_select(
+            options=columns, name="Select Column: "
+        )
+        selection: alt.selection_single = alt.selection_single(
+            empty="none",
+            bind=input_dropdown,
+            fields=[domain_plot_component.name],
+        )
+
+        lower_limit: alt.Chart
+        upper_limit: alt.Chart
+        lower_limit, upper_limit = (
+            (
+                alt.Chart(data=df)
+                .mark_line(
+                    color=expectation_kwarg_line_color,
+                    strokeWidth=expectation_kwarg_line_stroke_width,
+                )
+                .encode(
+                    x=alt.X(
+                        batch_plot_component.name,
+                        type=batch_plot_component.alt_type,
+                        title=batch_plot_component.title,
+                        axis=alt.Axis(labels=False, grid=False),
+                    ),
+                    y=alt.Y(
+                        expectation_kwarg_plot_component.name,
+                        type=expectation_kwarg_plot_component.alt_type,
+                    ),
+                    tooltip=tooltip,
+                )
+                .transform_filter(selection)
+            )
+            for expectation_kwarg_plot_component in (
+                min_value_plot_component,
+                max_value_plot_component,
+            )
+        )
+
+        band: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_area()
+            .encode(
+                x=alt.X(
+                    batch_plot_component.name,
+                    type=batch_plot_component.alt_type,
+                    title=batch_plot_component.title,
+                    axis=alt.Axis(labels=False, grid=False),
+                ),
+                y=alt.Y(
+                    min_value_plot_component.name,
+                    type=min_value_plot_component.alt_type,
+                ),
+                y2=alt.Y2(max_value_plot_component.name),
+            )
             .transform_filter(selection)
         )
 
-        return band + lower_limit + upper_limit + anomaly_coded_bars
+        if "quantiles" in df.columns:
+            lower_limit = lower_limit.encode(detail="quantiles")
+            upper_limit = upper_limit.encode(detail="quantiles")
+            band = band.encode(detail="quantiles")
+
+        lines_and_points: alt.LayerChart = (
+            DataAssistantResult._get_interactive_range_chart(
+                expectation_type=expectation_type,
+                df=df,
+                metric_plot_components=metric_plot_components,
+                batch_plot_component=batch_plot_component,
+                domain_plot_component=domain_plot_component,
+            )
+        )
+
+        line: alt.Chart
+        points: alt.Chart
+        anomaly_coded_points: alt.Chart
+        for idx, line_layer in enumerate(lines_and_points.layer):
+            line = line_layer.layer[0]
+            points = line_layer.layer[1]
+
+            line_layer.selection = alt.Undefined
+            line_layer.transform = alt.Undefined
+            line.selection = alt.Undefined
+            line.transform = alt.Undefined
+            points.selection = alt.Undefined
+            points.transform = alt.Undefined
+
+            point_color_condition = alt.condition(
+                predicate=predicates[idx],
+                if_false=alt.value(Colors.PINK.value),
+                if_true=alt.value(Colors.GREEN.value),
+            )
+
+            anomaly_coded_points = points.encode(
+                color=point_color_condition, tooltip=tooltip
+            ).transform_filter(selection)
+
+            line = line.transform_filter(selection)
+
+            line_layer.layer[0] = line
+            line_layer.layer[1] = anomaly_coded_points
+
+        lines_and_points.selection = alt.Undefined
+        lines_and_points.transform = alt.Undefined
+        lines_and_points = lines_and_points.transform_filter(selection)
+
+        return (
+            alt.layer(band, lower_limit, upper_limit, lines_and_points)
+        ).add_selection(selection)
 
     @staticmethod
     def _get_theme(theme: Optional[Dict[str, Any]]) -> Dict[str, Any]:
@@ -2942,7 +3067,9 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Union[alt.Chart, alt.LayerChart]]:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
+        metric_expectation_map: Dict[
+            Tuple[str], str
+        ] = self._get_metric_expectation_map()
 
         table_based_expectations: List[str] = [
             expectation
@@ -2956,36 +3083,42 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        attributed_metrics_by_domain: Dict[
-            Domain, Dict[str, ParameterNode]
+        attributed_metrics_by_table_domain: Dict[
+            Domain, Dict[str, List[ParameterNode]]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.TABLE)
-        table_domain = Domain(
+
+        table_domain: Domain = Domain(
             domain_type=MetricDomainTypes.TABLE, rule_name="table_rule"
         )
-        attributed_metrics_by_table_domain: Dict[
-            str, ParameterNode
-        ] = attributed_metrics_by_domain[table_domain]
+        attributed_metrics: Dict[
+            str, List[ParameterNode]
+        ] = attributed_metrics_by_table_domain[table_domain]
+
+        table_based_metric_names: Set[Union[Tuple[str], str]] = set()
+        for metrics in metric_expectation_map.keys():
+            if all([metric.startswith("table") for metric in metrics]):
+                table_based_metric_names.add(metrics)
 
         charts: List[alt.Chart] = []
-
-        metric_name: str
-        attributed_values: ParameterNode
+        metric_names: Tuple[str]
+        attributed_values: List[List[ParameterNode]]
         expectation_type: str
         expectation_configuration: ExpectationConfiguration
-        for (
-            metric_name,
-            attributed_values,
-        ) in attributed_metrics_by_table_domain.items():
-            expectation_type = metric_expectation_map[metric_name]
+        for metric_names in table_based_metric_names:
+            expectation_type = metric_expectation_map[metric_names]
 
-            if plot_mode == PlotMode.PRESCRIPTIVE:
+            attributed_values = [
+                attributed_metrics[metric_name] for metric_name in metric_names
+            ]
+
+            if plot_mode == PlotMode.DIAGNOSTIC:
                 for expectation_configuration in table_based_expectation_configurations:
                     if expectation_configuration.expectation_type == expectation_type:
                         table_domain_chart: alt.Chart = (
                             self._create_chart_for_table_domain_expectation(
                                 expectation_type=expectation_type,
                                 expectation_configuration=expectation_configuration,
-                                metric_name=metric_name,
+                                metric_names=metric_names,
                                 attributed_values=attributed_values,
                                 include_column_names=include_column_names,
                                 exclude_column_names=exclude_column_names,
@@ -2999,7 +3132,7 @@ class DataAssistantResult(SerializableDictDot):
                     self._create_chart_for_table_domain_expectation(
                         expectation_type=expectation_type,
                         expectation_configuration=None,
-                        metric_name=metric_name,
+                        metric_names=metric_names,
                         attributed_values=attributed_values,
                         include_column_names=include_column_names,
                         exclude_column_names=exclude_column_names,
@@ -3009,7 +3142,23 @@ class DataAssistantResult(SerializableDictDot):
                 )
                 charts.append(table_domain_chart)
 
-        return [chart for chart in charts if chart is not None]
+        # we want the table row count chart to be displayed first if it exists
+        chart_titles: List[str] = self._get_chart_titles(charts=charts)
+        first_chart_idx: int = 0
+        for idx, chart_title in enumerate(chart_titles):
+            if (
+                chart_title == "Table Row Count per Batch"
+                or chart_title == "expect_table_row_count_to_be_between"
+            ):
+                first_chart_idx = idx
+
+        sorted_charts: List[alt.Chart] = [charts[first_chart_idx]] + [
+            chart
+            for idx, chart in enumerate(charts)
+            if chart is not None and idx != first_chart_idx
+        ]
+
+        return sorted_charts
 
     def _plot_column_domain_charts(
         self,
@@ -3019,12 +3168,9 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
-        column_based_metrics: List[str] = [
-            metric
-            for metric in metric_expectation_map.keys()
-            if metric.startswith("column")
-        ]
+        metric_expectation_map: Dict[
+            Tuple[str], str
+        ] = self._get_metric_expectation_map()
 
         column_based_expectation_configurations_by_type: Dict[
             str, List[ExpectationConfiguration]
@@ -3032,58 +3178,68 @@ class DataAssistantResult(SerializableDictDot):
             expectation_configurations, include_column_names, exclude_column_names
         )
 
-        attributed_metrics_by_column_domain: Dict[
-            Domain, Dict[str, ParameterNode]
+        attributed_metrics_by_domain: Dict[
+            Domain, Dict[str, List[ParameterNode]]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
 
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]]
-        attributed_metrics_by_domain = self._filter_attributed_metrics_by_column_names(
-            attributed_metrics_by_column_domain,
+        attributed_metrics_by_column_domain: Dict[
+            Domain, Dict[str, List[ParameterNode]]
+        ] = self._filter_attributed_metrics_by_column_names(
+            attributed_metrics_by_domain,
             include_column_names,
             exclude_column_names,
         )
 
+        column_based_metric_names: Set[Union[Tuple[str], str]] = set()
+        for metrics in metric_expectation_map.keys():
+            if all([metric.startswith("column") for metric in metrics]):
+                if plot_mode == PlotMode.DIAGNOSTIC:
+                    column_based_metric_names.add(metrics)
+                if plot_mode == PlotMode.DESCRIPTIVE:
+                    for metric in metrics:
+                        column_based_metric_names.add((metric,))
+
+        filtered_attributed_metrics_by_column_domain: Dict[
+            Domain, Dict[str, List[ParameterNode]]
+        ]
         column_based_expectation_configurations: List[ExpectationConfiguration]
-        metric_display_charts: List[alt.VConcatChart]
         display_charts: List[alt.VConcatChart] = []
-        metric_return_charts: List[alt.Chart]
         return_charts: List[Optional[alt.Chart]] = []
-        expectation_type: str
-        for metric_name in column_based_metrics:
-            expectation_type = metric_expectation_map[metric_name]
+        expectation_type: Optional[str]
+        for metric_names in column_based_metric_names:
+            expectation_type = metric_expectation_map[metric_names]
             column_based_expectation_configurations = (
                 column_based_expectation_configurations_by_type[expectation_type]
             )
-            filtered_attributed_metrics_by_domain = (
-                self._filter_attributed_metrics_by_metric_name(
-                    attributed_metrics_by_domain,
-                    metric_name,
+
+            filtered_attributed_metrics_by_column_domain = (
+                self._filter_attributed_metrics_by_metric_names(
+                    attributed_metrics_by_column_domain,
+                    metric_names,
                 )
             )
 
-            metric_display_charts = (
+            display_charts.extend(
                 self._create_display_chart_for_column_domain_expectation(
                     expectation_type=expectation_type,
                     expectation_configurations=column_based_expectation_configurations,
-                    metric_name=metric_name,
-                    attributed_metrics_by_domain=filtered_attributed_metrics_by_domain,
+                    metric_names=metric_names,
+                    attributed_metrics_by_domain=filtered_attributed_metrics_by_column_domain,
                     plot_mode=plot_mode,
                     sequential=sequential,
                 )
             )
-            display_charts.extend(metric_display_charts)
 
-            metric_return_charts = (
+            return_charts.extend(
                 self._create_return_charts_for_column_domain_expectation(
                     expectation_type=expectation_type,
                     expectation_configurations=column_based_expectation_configurations,
-                    metric_name=metric_name,
-                    attributed_metrics_by_domain=filtered_attributed_metrics_by_domain,
+                    metric_names=metric_names,
+                    attributed_metrics_by_domain=filtered_attributed_metrics_by_column_domain,
                     plot_mode=plot_mode,
                     sequential=sequential,
                 )
             )
-            return_charts.extend(metric_return_charts)
 
         display_charts = list(filter(None, display_charts))
         return_charts = list(filter(None, return_charts))
@@ -3096,7 +3252,9 @@ class DataAssistantResult(SerializableDictDot):
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
     ) -> Dict[str, List[ExpectationConfiguration]]:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
+        metric_expectation_map: Dict[
+            Tuple[str], str
+        ] = self._get_metric_expectation_map()
 
         column_based_expectations: Set[str] = {
             expectation
@@ -3104,10 +3262,8 @@ class DataAssistantResult(SerializableDictDot):
             if expectation.startswith("expect_column_")
         }
 
-        def _filter(
-            e: ExpectationConfiguration, column_based_expectations: Set[str]
-        ) -> bool:
-            if e.expectation_type not in column_based_expectations:
+        def _filter(e: ExpectationConfiguration, expectations: Set[str]) -> bool:
+            if e.expectation_type not in expectations:
                 return False
 
             column_name: str = e.kwargs["column"]
@@ -3139,10 +3295,10 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def _filter_attributed_metrics_by_column_names(
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]],
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         def _filter(domain: Domain) -> bool:
             column_name: str = domain.domain_kwargs.column
             if exclude_column_names and column_name in exclude_column_names:
@@ -3156,24 +3312,28 @@ class DataAssistantResult(SerializableDictDot):
         domains: Set[Domain] = set(
             filter(lambda m: _filter(m), list(attributed_metrics.keys()))
         )
-        filtered_attributed_metrics: Dict[Domain, Dict[str, ParameterNode]] = {
+        filtered_attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]] = {
             domain: attributed_metrics[domain] for domain in domains
         }
 
         return filtered_attributed_metrics
 
     @staticmethod
-    def _filter_attributed_metrics_by_metric_name(
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
-        metric_name: str,
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+    def _filter_attributed_metrics_by_metric_names(
+        attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]],
+        metric_names: Tuple[str],
+    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         domain: Domain
-        filtered_attributed_metrics: Dict[Domain, Dict[str, ParameterNode]] = {}
+        filtered_attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]] = {}
         for domain, attributed_metric_values in attributed_metrics.items():
-            if metric_name in attributed_metric_values.keys():
-                filtered_attributed_metrics[domain] = {
-                    metric_name: attributed_metric_values[metric_name]
-                }
+            filtered_attributed_metrics[domain] = {}
+            for metric_name in metric_names:
+                if metric_name in attributed_metric_values.keys():
+                    filtered_attributed_metrics[domain][
+                        metric_name
+                    ] = attributed_metric_values[metric_name]
+            if filtered_attributed_metrics[domain] == {}:
+                filtered_attributed_metrics.pop(domain)
 
         return filtered_attributed_metrics
 
@@ -3181,79 +3341,111 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         df: pd.DataFrame,
-        metric_name: str,
+        metric_names: Tuple[str],
         plot_mode: PlotMode,
         sequential: bool,
         subtitle: Optional[str],
     ) -> Optional[alt.Chart]:
-        nominal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        sanitized_metric_names: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_metric_names(
+            metric_names=metric_names
+        )
+
+        nominal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.NOMINAL
         )
-        ordinal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        ordinal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
-        quantitative_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        quantitative_metrics: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.QUANTITATIVE
         )
-        temporal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        temporal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
 
-        if plot_mode is PlotMode.PRESCRIPTIVE:
-            plot_impl: Optional[
-                Callable[
-                    [
-                        str,
-                        pd.DataFrame,
-                        str,
-                        bool,
-                        Optional[str],
-                    ],
-                    alt.Chart,
-                ]
-            ] = None
+        if plot_mode is PlotMode.DIAGNOSTIC:
+            expectation_plot_impl: Callable[
+                [
+                    str,
+                    pd.DataFrame,
+                    Set[str],
+                    bool,
+                    Optional[str],
+                ],
+                Union[alt.Chart, alt.LayerChart],
+            ]
 
-            if metric_name in nominal_metrics:
-                plot_impl = self._get_expect_domain_values_to_match_set_chart
-            elif metric_name in ordinal_metrics:
-                plot_impl = self._get_expect_domain_values_ordinal_chart
-            elif metric_name in quantitative_metrics:
-                plot_impl = self._get_expect_domain_values_to_be_between_chart
-            elif metric_name in temporal_metrics:
-                plot_impl = self._get_expect_domain_values_temporal_chart
+            if DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=nominal_metrics
+            ):
+                expectation_plot_impl = (
+                    self._get_expect_domain_values_to_match_set_chart
+                )
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=ordinal_metrics
+            ):
+                expectation_plot_impl = self._get_expect_domain_values_ordinal_chart
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=quantitative_metrics
+            ):
+                expectation_plot_impl = (
+                    self._get_expect_domain_values_to_be_between_chart
+                )
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=temporal_metrics
+            ):
+                expectation_plot_impl = self._get_expect_domain_values_temporal_chart
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                )
 
-            return plot_impl(
+            return expectation_plot_impl(
                 expectation_type=expectation_type,
                 df=df,
-                metric_name=metric_name,
+                sanitized_metric_names=sanitized_metric_names,
                 sequential=sequential,
                 subtitle=subtitle,
             )
         else:
-            plot_impl: Optional[
-                Callable[
-                    [
-                        pd.DataFrame,
-                        str,
-                        bool,
-                        Optional[str],
-                    ],
-                    alt.Chart,
-                ]
-            ] = None
+            metric_plot_impl: Callable[
+                [
+                    pd.DataFrame,
+                    Set[str],
+                    bool,
+                    Optional[str],
+                ],
+                Union[alt.Chart, alt.LayerChart],
+            ]
 
-            if metric_name in nominal_metrics:
-                plot_impl = self._get_nominal_metric_chart
-            elif metric_name in ordinal_metrics:
-                plot_impl = self._get_ordinal_metric_chart
-            elif metric_name in quantitative_metrics:
-                plot_impl = self._get_quantitative_metric_chart
-            elif metric_name in temporal_metrics:
-                plot_impl = self._get_temporal_metric_chart
+            if DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=nominal_metrics
+            ):
+                metric_plot_impl = self._get_nominal_metrics_chart
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=ordinal_metrics
+            ):
+                metric_plot_impl = self._get_ordinal_metrics_chart
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=quantitative_metrics
+            ):
+                metric_plot_impl = self._get_quantitative_metrics_chart
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=temporal_metrics
+            ):
+                metric_plot_impl = self._get_temporal_metrics_chart
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                )
 
-            return plot_impl(
+            return metric_plot_impl(
                 df=df,
-                metric_name=metric_name,
+                sanitized_metric_names=sanitized_metric_names,
                 sequential=sequential,
                 subtitle=subtitle,
             )
@@ -3262,13 +3454,13 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
-        metric_name: str,
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
+        metric_names: Tuple[str],
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
         column_dfs: List[ColumnDataFrame] = self._create_column_dfs_for_charting(
-            metric_name=metric_name,
+            metric_names=metric_names,
             attributed_metrics_by_domain=attributed_metrics_by_domain,
             expectation_configurations=expectation_configurations,
             plot_mode=plot_mode,
@@ -3277,7 +3469,7 @@ class DataAssistantResult(SerializableDictDot):
         return self._chart_column_values(
             expectation_type=expectation_type,
             column_dfs=column_dfs,
-            metric_name=metric_name,
+            metric_names=metric_names,
             plot_mode=plot_mode,
             sequential=sequential,
         )
@@ -3286,53 +3478,70 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
-        metric_name: str,
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
+        metric_names: Tuple[str],
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[alt.Chart]:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
+        metric_expectation_map: Dict[
+            Tuple[str], str
+        ] = self._get_metric_expectation_map()
+
+        sanitized_metric_names: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_metric_names(
+            metric_names=metric_names
+        )
 
         expectation_configuration: ExpectationConfiguration
-        attributed_metrics: Dict[str, ParameterNode]
-        attributed_values: ParameterNode
+        attributed_metrics: Dict[str, List[ParameterNode]]
+        df: pd.DataFrame
+        attributed_values: List[ParameterNode]
+        metric_df: pd.DataFrame
         return_charts: List[alt.Chart] = []
         for domain, attributed_metrics in attributed_metrics_by_domain.items():
-            if (
-                metric_name in attributed_metrics.keys()
-                and metric_expectation_map[metric_name] == expectation_type
-            ):
-                attributed_values = attributed_metrics[metric_name]
-
-                for expectation_configuration in expectation_configurations:
-                    if (
-                        expectation_configuration.kwargs["column"]
-                        == domain.domain_kwargs.column
-                    ):
-                        df: pd.DataFrame = self._create_df_for_charting(
+            for expectation_configuration in expectation_configurations:
+                if (
+                    expectation_configuration.kwargs["column"]
+                    == domain.domain_kwargs.column
+                ) and (
+                    metric_expectation_map.get(metric_names)
+                    == expectation_configuration.expectation_type
+                ):
+                    df = pd.DataFrame()
+                    for metric_name in metric_names:
+                        attributed_values = attributed_metrics[metric_name]
+                        metric_df = self._create_df_for_charting(
                             metric_name=metric_name,
                             attributed_values=attributed_values,
                             expectation_configuration=expectation_configuration,
                             plot_mode=plot_mode,
                         )
+                        if len(df.index) == 0:
+                            df = metric_df.copy()
+                        else:
+                            join_keys = [
+                                column
+                                for column in metric_df.columns
+                                if column not in sanitized_metric_names
+                            ]
+                            df = df.merge(metric_df, on=join_keys).reset_index(
+                                drop=True
+                            )
 
-                        sanitized_metric_name: str = sanitize_parameter_name(
-                            name=metric_name
-                        )
+                    column_name: str = domain.domain_kwargs.column
+                    subtitle = f"Column: {column_name}"
 
-                        column_name: str = domain.domain_kwargs.column
-                        subtitle = f"Column: {column_name}"
+                    return_chart = self._chart_domain_values(
+                        expectation_type=expectation_type,
+                        df=df,
+                        metric_names=metric_names,
+                        plot_mode=plot_mode,
+                        sequential=sequential,
+                        subtitle=subtitle,
+                    )
 
-                        return_chart = self._chart_domain_values(
-                            expectation_type=expectation_type,
-                            df=df,
-                            metric_name=sanitized_metric_name,
-                            plot_mode=plot_mode,
-                            sequential=sequential,
-                            subtitle=subtitle,
-                        )
-
-                        return_charts.append(return_chart)
+                    return_charts.append(return_chart)
 
         return return_charts
 
@@ -3340,82 +3549,114 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        metric_names: Tuple[str],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
-        metric_name = sanitize_parameter_name(metric_name)
+        sanitized_metric_names: Set[
+            str
+        ] = DataAssistantResult._get_sanitized_metric_names_from_metric_names(
+            metric_names=metric_names
+        )
 
-        nominal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        nominal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.NOMINAL
         )
-        ordinal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        ordinal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
-        quantitative_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        quantitative_metrics: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.QUANTITATIVE
         )
-        temporal_metrics: Set[str] = self._get_metric_types_from_altair_type(
+        temporal_metrics: Set[str] = self._get_sanitized_metric_names_from_altair_type(
             altair_type=AltairDataTypes.ORDINAL
         )
 
-        if plot_mode is PlotMode.PRESCRIPTIVE:
-            plot_impl: Optional[
-                Callable[
-                    [
-                        str,
-                        List[ColumnDataFrame],
-                        str,
-                        bool,
-                    ],
-                    alt.VConcatChart,
-                ]
-            ] = None
+        if plot_mode is PlotMode.DIAGNOSTIC:
+            expectation_plot_impl: Callable[
+                [
+                    str,
+                    List[ColumnDataFrame],
+                    Set[str],
+                    bool,
+                ],
+                alt.VConcatChart,
+            ]
 
-            if metric_name in nominal_metrics:
-                plot_impl = self._get_interactive_expect_column_values_nominal_chart
-            elif metric_name in ordinal_metrics:
-                plot_impl = self._get_interactive_expect_column_values_ordinal_chart
-            elif metric_name in quantitative_metrics:
-                plot_impl = (
+            if DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=nominal_metrics
+            ):
+                expectation_plot_impl = (
+                    self._get_interactive_expect_column_values_nominal_chart
+                )
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=ordinal_metrics
+            ):
+                expectation_plot_impl = (
+                    self._get_interactive_expect_column_values_ordinal_chart
+                )
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=quantitative_metrics
+            ):
+                expectation_plot_impl = (
                     self._get_interactive_expect_column_values_to_be_between_chart
                 )
-            elif metric_name in temporal_metrics:
-                plot_impl = self._get_interactive_expect_column_values_temporal_chart
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=temporal_metrics
+            ):
+                expectation_plot_impl = (
+                    self._get_interactive_expect_column_values_temporal_chart
+                )
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                )
 
             return [
-                plot_impl(
+                expectation_plot_impl(
                     expectation_type=expectation_type,
                     column_dfs=column_dfs,
-                    metric_name=metric_name,
+                    sanitized_metric_names=sanitized_metric_names,
                     sequential=sequential,
                 )
             ]
         else:
-            plot_impl: Optional[
-                Callable[
-                    [
-                        List[ColumnDataFrame],
-                        str,
-                        bool,
-                    ],
-                    alt.Chart,
-                ]
-            ] = None
+            plot_impl: Callable[
+                [
+                    List[ColumnDataFrame],
+                    Set[str],
+                    bool,
+                ],
+                Union[alt.LayerChart, alt.VConcatChart],
+            ]
 
-            if metric_name in nominal_metrics:
-                plot_impl = self._get_interactive_nominal_metric_chart
-            elif metric_name in ordinal_metrics:
-                plot_impl = self._get_interactive_ordinal_metric_chart
-            elif metric_name in quantitative_metrics:
-                plot_impl = self._get_interactive_metric_chart
-            elif metric_name in temporal_metrics:
-                plot_impl = self._get_interactive_temporal_metric_chart
+            if DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=nominal_metrics
+            ):
+                plot_impl = self._get_interactive_nominal_metrics_chart
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=ordinal_metrics
+            ):
+                plot_impl = self._get_interactive_ordinal_metrics_chart
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=quantitative_metrics
+            ):
+                plot_impl = self._get_interactive_metrics_chart
+            elif DataAssistantResult._all_metric_names_in_iterable(
+                metric_names=sanitized_metric_names, iterable=temporal_metrics
+            ):
+                plot_impl = self._get_interactive_temporal_metrics_chart
+            else:
+                raise ge_exceptions.DataAssistantResultExecutionError(
+                    f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
+                )
 
             return [
                 plot_impl(
                     column_dfs=column_dfs,
-                    metric_name=metric_name,
+                    sanitized_metric_names=sanitized_metric_names,
                     sequential=sequential,
                 )
             ]
@@ -3423,19 +3664,30 @@ class DataAssistantResult(SerializableDictDot):
     def _create_df_for_charting(
         self,
         metric_name: str,
-        attributed_values: ParameterNode,
+        attributed_values: List[ParameterNode],
         expectation_configuration: ExpectationConfiguration,
         plot_mode: PlotMode,
     ) -> pd.DataFrame:
-        batch_ids: KeysView[str] = attributed_values.keys()
+        batch_ids: KeysView[str] = attributed_values[0].keys()
         metric_values: MetricValues = [
             value[0] if len(value) == 1 else value
-            for value in attributed_values.values()
+            for value in attributed_values[0].values()
         ]
 
-        df: pd.DataFrame = pd.DataFrame(
-            {sanitize_parameter_name(name=metric_name): metric_values}
-        )
+        sanitized_metric_name: str = sanitize_parameter_name(name=metric_name)
+
+        df: pd.DataFrame = pd.DataFrame({sanitized_metric_name: metric_values})
+
+        if (
+            metric_name == "column.quantile_values"
+            and plot_mode == PlotMode.DESCRIPTIVE
+        ):
+            quantiles: Union[List[float], float] = attributed_values[
+                1
+            ].metric_configuration.metric_value_kwargs.quantiles
+            if len(quantiles) == 1:
+                quantiles = quantiles[0]
+            df["quantiles"] = [quantiles for idx in df.index]
 
         batch_identifier_list: List[Set[Tuple[str, str]]] = [
             self._batch_id_to_batch_identifier_display_name_map[batch_id]
@@ -3446,7 +3698,6 @@ class DataAssistantResult(SerializableDictDot):
         # e.g. prevent batch 1 from having keys "month", "year" and batch 2 from having keys "year", "month"
         batch_identifier_set: Set
         batch_identifier_list_sorted: List
-        batch_identifier_tuple: Tuple
         batch_identifier_key: str
         batch_identifier_value: str
         batch_identifier_keys: Set[str] = set()
@@ -3468,74 +3719,104 @@ class DataAssistantResult(SerializableDictDot):
             batch_identifier_records.append(batch_identifier_record)
 
         batch_identifier_keys_sorted: List[str] = sorted(batch_identifier_keys)
-        batch_identifiers: pd.DataFrame = pd.DataFrame(
+        batch_identifier_df: pd.DataFrame = pd.DataFrame(
             batch_identifier_records, columns=batch_identifier_keys_sorted
         )
 
         idx: int
-        batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_identifiers))]
+        batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_identifier_df))]
         df["batch"] = batch_numbers
 
-        df = pd.concat([df, batch_identifiers], axis=1)
+        df = pd.concat([df, batch_identifier_df], axis=1)
 
-        if plot_mode is PlotMode.PRESCRIPTIVE:
+        if plot_mode == PlotMode.DIAGNOSTIC:
             for kwarg_name in expectation_configuration.kwargs:
-                if isinstance(expectation_configuration.kwargs[kwarg_name], list):
+                # column name was already retrieved from the domain
+                if isinstance(expectation_configuration.kwargs[kwarg_name], dict):
+                    for key, value in expectation_configuration.kwargs[
+                        kwarg_name
+                    ].items():
+                        if isinstance(value, list):
+                            df[key] = [value for _ in df.index]
+                        else:
+                            df[key] = value
+
+                elif isinstance(expectation_configuration.kwargs[kwarg_name], list):
                     df[kwarg_name] = [
                         expectation_configuration.kwargs[kwarg_name] for _ in df.index
                     ]
                 else:
                     df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
 
+        # if there are any lists in the dataframe
+        if (df.applymap(type) == list).any().any():
+            df = DataAssistantResult._transform_column_lists_to_rows(
+                df=df,
+            )
+
+        df = df.reset_index(drop=True)
+
         return df
 
     def _create_column_dfs_for_charting(
         self,
-        metric_name: str,
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
+        metric_names: Tuple[str],
+        attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> List[ColumnDataFrame]:
-        metric_expectation_map: Dict[str, str] = self.METRIC_EXPECTATION_MAP
+        metric_expectation_map: Dict[
+            Tuple[str], str
+        ] = self._get_metric_expectation_map()
+
+        sanitized_metric_names: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_metric_names(
+            metric_names=metric_names
+        )
 
         metric_domains: Set[Domain] = set(attributed_metrics_by_domain.keys())
 
-        profiler_details: dict
-        metric_configuration: dict
-        domain_kwargs: dict
         column_name: str
         column_domain: Domain
+        metric_df: pd.DataFrame
+        join_keys: List[str]
+        df: pd.DataFrame
+        column_df: ColumnDataFrame
         column_dfs: List[ColumnDataFrame] = []
         for expectation_configuration in expectation_configurations:
-            profiler_details = expectation_configuration.meta["profiler_details"]
-            metric_configuration = profiler_details["metric_configuration"]
-            domain_kwargs = metric_configuration["domain_kwargs"]
-            column_name = domain_kwargs["column"]
+            column_name = expectation_configuration.kwargs["column"]
 
             column_domain = [
                 d for d in metric_domains if d.domain_kwargs.column == column_name
             ][0]
 
             attributed_values_by_metric_name: Dict[
-                str, ParameterNode
+                str, List[ParameterNode]
             ] = attributed_metrics_by_domain[column_domain]
 
             if (
-                metric_expectation_map.get(metric_name)
+                metric_expectation_map.get(metric_names)
                 == expectation_configuration.expectation_type
             ):
-                attributed_values: ParameterNode = attributed_values_by_metric_name[
-                    metric_name
-                ]
+                df = pd.DataFrame()
+                for metric_name in metric_names:
+                    metric_df = self._create_df_for_charting(
+                        metric_name=metric_name,
+                        attributed_values=attributed_values_by_metric_name[metric_name],
+                        expectation_configuration=expectation_configuration,
+                        plot_mode=plot_mode,
+                    )
+                    if len(df.index) == 0:
+                        df = metric_df.copy()
+                    else:
+                        join_keys = [
+                            column
+                            for column in metric_df.columns
+                            if column not in sanitized_metric_names
+                        ]
+                        df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
 
-                df: pd.DataFrame = self._create_df_for_charting(
-                    metric_name=metric_name,
-                    attributed_values=attributed_values,
-                    expectation_configuration=expectation_configuration,
-                    plot_mode=plot_mode,
-                )
-
-                column_name: str = expectation_configuration.kwargs["column"]
                 column_df = ColumnDataFrame(column_name, df)
                 column_dfs.append(column_df)
 
@@ -3545,48 +3826,69 @@ class DataAssistantResult(SerializableDictDot):
         self,
         expectation_type: str,
         expectation_configuration: Optional[ExpectationConfiguration],
-        metric_name: str,
-        attributed_values: ParameterNode,
+        metric_names: Tuple[str],
+        attributed_values: List[List[ParameterNode]],
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> alt.Chart:
-
-        df: pd.DataFrame = self._create_df_for_charting(
-            metric_name=metric_name,
-            attributed_values=attributed_values,
-            expectation_configuration=expectation_configuration,
-            plot_mode=plot_mode,
+        sanitized_metric_names: Set[
+            str
+        ] = self._get_sanitized_metric_names_from_metric_names(
+            metric_names=metric_names
         )
 
-        metric_name: str = sanitize_parameter_name(metric_name)
+        metric_df: pd.DataFrame
+        df: pd.DataFrame = pd.DataFrame()
+        for metric_name in metric_names:
+            metric_df = self._create_df_for_charting(
+                metric_name=metric_name,
+                attributed_values=attributed_values[0],
+                expectation_configuration=expectation_configuration,
+                plot_mode=plot_mode,
+            )
+            if len(df.index) == 0:
+                df = metric_df.copy()
+            else:
+                join_keys = [
+                    column
+                    for column in metric_df.columns
+                    if column not in sanitized_metric_names
+                ]
+                df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
 
         # If columns are included/excluded we need to filter them out for table level metrics here
         table_column_metrics: List[str] = ["table_columns"]
         new_column_list: List[str]
         new_record_list: List[List[str]] = []
-        if metric_name in table_column_metrics:
+        if all(
+            sanitized_metric_name in table_column_metrics
+            for sanitized_metric_name in sanitized_metric_names
+        ):
             if (include_column_names is not None) or (exclude_column_names is not None):
-                all_columns = df[metric_name].apply(pd.Series).values.tolist()
-                for record in all_columns:
-                    new_column_list = []
-                    for column in record:
-                        if (
-                            include_column_names is not None
-                            and column in include_column_names
-                        ) or (
-                            exclude_column_names is not None
-                            and column not in exclude_column_names
-                        ):
-                            new_column_list.append(column)
-                    new_record_list.append(new_column_list)
-                df[metric_name] = new_record_list
+                for sanitized_metric_name in sanitized_metric_names:
+                    all_columns = (
+                        df[sanitized_metric_name].apply(pd.Series).values.tolist()
+                    )
+                    for record in all_columns:
+                        new_column_list = []
+                        for column in record:
+                            if (
+                                include_column_names is not None
+                                and column in include_column_names
+                            ) or (
+                                exclude_column_names is not None
+                                and column not in exclude_column_names
+                            ):
+                                new_column_list.append(column)
+                        new_record_list.append(new_column_list)
+                    df[sanitized_metric_name] = new_record_list
 
         return self._chart_domain_values(
             expectation_type=expectation_type,
             df=df,
-            metric_name=metric_name,
+            metric_names=metric_names,
             plot_mode=plot_mode,
             sequential=sequential,
             subtitle=None,
@@ -3594,31 +3896,67 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_attributed_metrics_by_domain(
         self,
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         domain: Domain
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         fully_qualified_parameter_name: str
         parameter_node: ParameterNode
-        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
-            domain: {
-                parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ].metric_configuration.metric_name: parameter_node[
+        metrics_attributed_values_by_domain: Dict[
+            Domain, Dict[str, List[ParameterNode]]
+        ] = {}
+        for (
+            domain,
+            parameter_values_for_fully_qualified_parameter_names,
+        ) in self.metrics_by_domain.items():
+            metrics_attributed_values_by_domain[domain] = {}
+            for (
+                fully_qualified_parameter_name,
+                parameter_node,
+            ) in parameter_values_for_fully_qualified_parameter_names.items():
+                if (
                     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-                for fully_qualified_parameter_name, parameter_node in parameter_values_for_fully_qualified_parameter_names.items()
-                if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
-            }
-            for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-        }
+                    in parameter_node
+                    and FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY in parameter_node
+                ):
+                    metrics_attributed_values_by_domain[domain].update(
+                        {
+                            parameter_node[
+                                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                            ].metric_configuration.metric_name: [
+                                parameter_node[
+                                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                                ],
+                                parameter_node[
+                                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                                ],
+                            ]
+                        }
+                    )
+                elif (
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                    in parameter_node
+                ):
+                    metrics_attributed_values_by_domain[domain].update(
+                        {
+                            parameter_node[
+                                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                            ].metric_configuration.metric_name: [
+                                parameter_node[
+                                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                                ]
+                            ]
+                        }
+                    )
 
         return metrics_attributed_values_by_domain
 
     def _determine_attributed_metrics_by_domain_type(
         self, metric_domain_type: MetricDomainTypes
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+    ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         # noinspection PyTypeChecker
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
+        attributed_metrics_by_domain: Dict[
+            Domain, Dict[str, List[ParameterNode]]
+        ] = dict(
             filter(
                 lambda element: element[0].domain_type == metric_domain_type,
                 self._get_attributed_metrics_by_domain().items(),
@@ -3626,7 +3964,7 @@ class DataAssistantResult(SerializableDictDot):
         )
         return attributed_metrics_by_domain
 
-    def _get_metric_types_from_altair_type(
+    def _get_sanitized_metric_names_from_altair_type(
         self, altair_type: AltairDataTypes
     ) -> Set[str]:
         metric_types: Dict[str, AltairDataTypes] = self.METRIC_TYPES
@@ -3637,17 +3975,31 @@ class DataAssistantResult(SerializableDictDot):
         }
 
     @staticmethod
+    def _get_sanitized_metric_names_from_metric_names(
+        metric_names: Tuple[str],
+    ) -> Set[str]:
+        return {
+            sanitize_parameter_name(name=metric_name) for metric_name in metric_names
+        }
+
+    @staticmethod
+    def _all_metric_names_in_iterable(
+        metric_names: Set[str], iterable: Iterable[str]
+    ) -> bool:
+        return all([metric_name in iterable for metric_name in metric_names])
+
+    @staticmethod
     def _get_expect_domain_values_ordinal_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
         return DataAssistantResult._get_expect_domain_values_to_be_between_chart(
             expectation_type=expectation_type,
             df=df,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
             subtitle=subtitle,
         )
@@ -3656,42 +4008,42 @@ class DataAssistantResult(SerializableDictDot):
     def _get_expect_domain_values_temporal_chart(
         expectation_type: str,
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
     ) -> alt.Chart:
         return DataAssistantResult._get_expect_domain_values_to_be_between_chart(
             expectation_type=expectation_type,
             df=df,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
             subtitle=subtitle,
         )
 
     @staticmethod
-    def _get_ordinal_metric_chart(
+    def _get_ordinal_metrics_chart(
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
-    ) -> alt.Chart:
-        return DataAssistantResult._get_quantitative_metric_chart(
+    ) -> alt.LayerChart:
+        return DataAssistantResult._get_quantitative_metrics_chart(
             df=df,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
             subtitle=subtitle,
         )
 
     @staticmethod
-    def _get_temporal_metric_chart(
+    def _get_temporal_metrics_chart(
         df: pd.DataFrame,
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
         subtitle: Optional[str],
-    ) -> alt.Chart:
-        return DataAssistantResult._get_quantitative_metric_chart(
+    ) -> alt.LayerChart:
+        return DataAssistantResult._get_quantitative_metrics_chart(
             df=df,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
             subtitle=subtitle,
         )
@@ -3700,7 +4052,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_nominal_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
         raise NotImplementedError(
@@ -3711,13 +4063,13 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_ordinal_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
         return DataAssistantResult._get_interactive_expect_column_values_to_be_between_chart(
             expectation_type=expectation_type,
             column_dfs=column_dfs,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
         )
 
@@ -3725,20 +4077,20 @@ class DataAssistantResult(SerializableDictDot):
     def _get_interactive_expect_column_values_temporal_chart(
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
         return DataAssistantResult._get_interactive_expect_column_values_to_be_between_chart(
             expectation_type=expectation_type,
             column_dfs=column_dfs,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
         )
 
     @staticmethod
-    def _get_interactive_nominal_metric_chart(
+    def _get_interactive_nominal_metrics_chart(
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.VConcatChart:
         raise NotImplementedError(
@@ -3746,25 +4098,25 @@ class DataAssistantResult(SerializableDictDot):
         )
 
     @staticmethod
-    def _get_interactive_ordinal_metric_chart(
+    def _get_interactive_ordinal_metrics_chart(
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.LayerChart:
-        return DataAssistantResult._get_interactive_metric_chart(
+        return DataAssistantResult._get_interactive_metrics_chart(
             column_dfs=column_dfs,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
         )
 
     @staticmethod
-    def _get_interactive_temporal_metric_chart(
+    def _get_interactive_temporal_metrics_chart(
         column_dfs: List[ColumnDataFrame],
-        metric_name: str,
+        sanitized_metric_names: Set[str],
         sequential: bool,
     ) -> alt.LayerChart:
-        return DataAssistantResult._get_interactive_metric_chart(
+        return DataAssistantResult._get_interactive_metrics_chart(
             column_dfs=column_dfs,
-            metric_name=metric_name,
+            sanitized_metric_names=sanitized_metric_names,
             sequential=sequential,
         )
