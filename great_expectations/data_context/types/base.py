@@ -367,10 +367,11 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class DataConnectorConfig(SerializableDictDot):
+class DataConnectorConfig(AbstractConfig):
     def __init__(
         self,
         class_name,
+        id_: Optional[str] = None,
         module_name=None,
         credentials=None,
         assets=None,
@@ -446,6 +447,8 @@ class DataConnectorConfig(SerializableDictDot):
         if delimiter is not None:
             self.delimiter = delimiter
 
+        super().__init__(id_=id_)
+
         # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -471,9 +474,15 @@ class DataConnectorConfig(SerializableDictDot):
         return serializeable_dict
 
 
-class DataConnectorConfigSchema(Schema):
+class DataConnectorConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
+
+    id_ = fields.String(
+        required=False,
+        allow_none=True,
+        data_key="id",
+    )
 
     class_name = fields.String(
         required=True,
