@@ -114,7 +114,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         regex_pattern_string_parameter_builder_config
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_not_match_regex",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},

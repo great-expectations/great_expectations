@@ -125,7 +125,7 @@ def yellow_trip_pandas_data_context(
         ),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
@@ -726,7 +726,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     context: DataContext = yellow_trip_pandas_data_context
     context._ge_cloud_mode = True
 
-    suite: ExpectationSuite = ExpectationSuite(
+    suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",
         expectations=[
             ExpectationConfiguration(

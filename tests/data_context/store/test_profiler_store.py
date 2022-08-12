@@ -58,9 +58,7 @@ def test_profiler_store_integration(
 """
     )
 
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=profiler_name
-    )
+    key = ConfigurationIdentifier(configuration_key=profiler_name)
     profiler_store.set(key=key, value=profiler_config_with_placeholder_args)
 
     dir_tree = gen_directory_tree_str(startpath=base_directory)

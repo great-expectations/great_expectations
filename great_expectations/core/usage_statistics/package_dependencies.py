@@ -4,7 +4,7 @@ This module contains static lists of GE dependencies, along with a utility for
 checking and updating these static lists.
 
     Typical usage example:
-        ge_dependencies: GEDependencies = GEDependencies()
+        ge_dependencies = GEDependencies()
         print(ge_dependencies.get_required_dependency_names())
         print(ge_dependencies.get_dev_dependency_names())
 
@@ -257,7 +257,7 @@ class GEDependencies:
 
 def main() -> None:
     """Run this module to generate a list of packages from requirements files to update our static lists"""
-    ge_dependencies: GEDependencies = GEDependencies()
+    ge_dependencies = GEDependencies()
     print("\n\nRequired Dependencies:\n\n")
     print(ge_dependencies.get_required_dependency_names_from_requirements_file())
     print("\n\nDev Dependencies:\n\n")

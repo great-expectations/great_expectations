@@ -892,7 +892,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
+        batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
@@ -915,12 +915,12 @@ class DataAssistantResult(SerializableDictDot):
 
         column_number: str = "column_number"
 
-        column_number_plot_component: PlotComponent = PlotComponent(
+        column_number_plot_component = PlotComponent(
             name=column_number,
             alt_type=AltairDataTypes.ORDINAL.value,
         )
 
-        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
+        domain_plot_component = DomainPlotComponent(
             name=None,
             alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
@@ -975,7 +975,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
+        batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
@@ -998,12 +998,12 @@ class DataAssistantResult(SerializableDictDot):
 
         column_number: str = "column_number"
 
-        column_number_plot_component: PlotComponent = PlotComponent(
+        column_number_plot_component = PlotComponent(
             name=column_number,
             alt_type=AltairDataTypes.ORDINAL.value,
         )
 
-        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
+        domain_plot_component = DomainPlotComponent(
             name=None,
             alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
@@ -1265,13 +1265,13 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
+        batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
         )
 
-        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
+        domain_plot_component = DomainPlotComponent(
             name=None,
             alt_type=AltairDataTypes.NOMINAL.value,
             subtitle=subtitle,
@@ -1357,7 +1357,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
+        batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
@@ -1501,7 +1501,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
+        batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
@@ -1516,7 +1516,7 @@ class DataAssistantResult(SerializableDictDot):
             metric_plot_components.append(metric_plot_component)
 
         domain_name: str = "column"
-        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
+        domain_plot_component = DomainPlotComponent(
             name=domain_name,
             alt_type=AltairDataTypes.NOMINAL.value,
         )
@@ -1605,7 +1605,7 @@ class DataAssistantResult(SerializableDictDot):
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
-        batch_plot_component: BatchPlotComponent = BatchPlotComponent(
+        batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
             batch_identifiers=batch_identifiers,
@@ -1620,14 +1620,14 @@ class DataAssistantResult(SerializableDictDot):
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
         for sanitized_metric_name in sanitized_metric_names:
-            metric_plot_component: MetricPlotComponent = MetricPlotComponent(
+            metric_plot_component = MetricPlotComponent(
                 name=sanitized_metric_name,
                 alt_type=AltairDataTypes.QUANTITATIVE.value,
                 axis_title=y_axis_title,
             )
             metric_plot_components.append(metric_plot_component)
 
-        domain_plot_component: DomainPlotComponent = DomainPlotComponent(
+        domain_plot_component = DomainPlotComponent(
             name="column",
             alt_type=AltairDataTypes.NOMINAL.value,
         )
@@ -3087,7 +3087,7 @@ class DataAssistantResult(SerializableDictDot):
             Domain, Dict[str, List[ParameterNode]]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.TABLE)
 
-        table_domain: Domain = Domain(
+        table_domain = Domain(
             domain_type=MetricDomainTypes.TABLE, rule_name="table_rule"
         )
         attributed_metrics: Dict[
