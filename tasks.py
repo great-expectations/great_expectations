@@ -259,8 +259,8 @@ def docker(ctx, name="gx38local", tag="latest", build=False, cmd="bash"):
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
     curdir = os.path.realpath(os.getcwd())
     if filedir != curdir:
-        sys.exit(
-            "The docker task must be invoked from the same directory as the task.py file at the top of the repo."
+        raise invoke.Exit(
+            "The docker task must be invoked from the same directory as the task.py file at the top of the repo.", code=1
         )
     if build:
         cmds = [
