@@ -490,7 +490,7 @@ class ExecutionEngine(ABC):
             column = column_name
         else:
             column = domain_kwargs["column"]
-        row_condition: RowCondition = RowCondition(
+        row_condition = RowCondition(
             condition=f'col("{column}").notnull()',
             condition_type=RowConditionParserType.GE,
         )

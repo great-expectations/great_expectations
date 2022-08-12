@@ -1290,7 +1290,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             save_changes: do I save changes to disk?
         """
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
-        datasource_config: DatasourceConfig = DatasourceConfig(**datasource_config_dict)
+        datasource_config = DatasourceConfig(**datasource_config_dict)
         datasource_name: str = datasource.name
 
         if save_changes:
@@ -2227,7 +2227,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiler_config.pop("class_name")
         profiler_config.pop("module_name")
 
-        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
+        config = RuleBasedProfilerConfig(**profiler_config)
 
         return RuleBasedProfiler.add_profiler(
             config=config,
@@ -2669,7 +2669,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
-        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self.data_context_id)
 
         usage_stats_event_payload = anonymizer.anonymize(
             obj=instantiated_class, name=checkpoint_name, config=checkpoint_config
@@ -2736,7 +2736,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             },
         )
 
-        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self.data_context_id)
 
         usage_stats_event_payload: dict = anonymizer.anonymize(
             obj=instantiated_class, name=profiler_name, config=profiler_config
@@ -2771,7 +2771,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
 
         # If a subclass of a supported type, find the parent class and anonymize
-        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self.data_context_id)
 
         parent_class_from_object = anonymizer.get_parent_class(
             object_=instantiated_class

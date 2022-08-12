@@ -114,7 +114,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "profiler_config",
     )
 
-    column_min_length_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    column_min_length_range_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="column_min_length_range_estimator",
@@ -137,7 +137,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         round_decimals=f"{VARIABLES_KEY}round_decimals",
         evaluation_parameter_builder_configs=None,
     )
-    column_max_length_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    column_max_length_range_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="column_max_length_range_estimator",
@@ -164,7 +164,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         column_min_length_range_estimator_parameter_builder_config,
         column_max_length_range_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_value_lengths_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},

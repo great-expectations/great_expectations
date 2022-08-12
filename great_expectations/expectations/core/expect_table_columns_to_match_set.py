@@ -76,18 +76,20 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         "profiler_config",
     )
 
-    mean_table_columns_set_match_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
-        class_name="MeanTableColumnsSetMatchMultiBatchParameterBuilder",
-        name="column_names_set_estimator",
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        evaluation_parameter_builder_configs=None,
+    mean_table_columns_set_match_multi_batch_parameter_builder_config = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MeanTableColumnsSetMatchMultiBatchParameterBuilder",
+            name="column_names_set_estimator",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            evaluation_parameter_builder_configs=None,
+        )
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         mean_table_columns_set_match_multi_batch_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_table_columns_to_match_set",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
