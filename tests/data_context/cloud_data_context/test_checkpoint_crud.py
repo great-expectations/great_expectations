@@ -158,7 +158,7 @@ def test_cloud_backed_data_context_add_checkpoint(
     checkpoint_config: dict,
     mocked_post_response: Callable[[], MockResponse],
     mocked_get_response: Callable[[], MockResponse],
-    request_headers: Dict[str, str],
+    shared_called_with_request_kwargs: dict,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     request,
@@ -198,13 +198,13 @@ def test_cloud_backed_data_context_add_checkpoint(
                     },
                 },
             },
-            headers=request_headers,
+            **shared_called_with_request_kwargs,
         )
 
         mock_get.assert_called_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
             params={"name": checkpoint_config["name"]},
-            headers=request_headers,
+            **shared_called_with_request_kwargs,
         )
 
     assert checkpoint.ge_cloud_id == checkpoint_id

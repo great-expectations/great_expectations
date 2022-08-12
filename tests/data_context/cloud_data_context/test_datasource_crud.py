@@ -43,7 +43,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     datasource_name: str,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request_headers: dict,
+    shared_called_with_request_kwargs: dict,
     mock_response_factory: Callable,
 ):
     """A BaseDataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource
@@ -114,7 +114,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
                         },
                     }
                 },
-                headers=request_headers,
+                **shared_called_with_request_kwargs,
             )
         else:
             assert not mock_post.called
@@ -155,7 +155,7 @@ def test_data_context_in_cloud_mode_add_datasource(
     datasource_name: str,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request_headers: dict,
+    shared_called_with_request_kwargs: dict,
     mock_response_factory: Callable,
 ):
     """A DataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
@@ -221,7 +221,7 @@ def test_data_context_in_cloud_mode_add_datasource(
                     },
                 }
             },
-            headers=request_headers,
+            **shared_called_with_request_kwargs,
         )
 
         # Make sure the id was populated correctly into the created datasource object and config
@@ -255,7 +255,7 @@ def test_cloud_data_context_add_datasource(
     datasource_name: str,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request_headers: dict,
+    shared_called_with_request_kwargs: dict,
     mock_response_factory: Callable,
 ):
     """A CloudDataContext should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
@@ -324,7 +324,7 @@ def test_cloud_data_context_add_datasource(
                     },
                 }
             },
-            headers=request_headers,
+            **shared_called_with_request_kwargs,
         )
 
         # Make sure the id was populated correctly into the created datasource object and config
