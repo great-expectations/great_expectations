@@ -29,8 +29,6 @@ class PayloadDataField(TypedDict):
 
 class ResponsePayload(TypedDict):
     data: PayloadDataField
-    jsonapi: dict
-    links: dict
 
 
 class GeCloudRESTResource(str, Enum):
