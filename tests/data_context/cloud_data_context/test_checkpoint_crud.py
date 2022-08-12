@@ -102,7 +102,6 @@ def mocked_get_response(
     def _mocked_get_response(*args, **kwargs):
         created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
         organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
-        contract_id = checkpoint_id
 
         return mock_response_factory(
             {
@@ -118,53 +117,11 @@ def mocked_get_response(
                         "organization_id": f"{organization_id}",
                         "updated_at": "2022-08-02T17:55:45.107550",
                     },
-                    "id": contract_id,
+                    "id": checkpoint_id,
                     "links": {
-                        "self": f"/organizations/{organization_id}/contracts/{contract_id}"
+                        "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}"
                     },
-                    "relationships": {
-                        "assets": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/contracts/{contract_id}/assets",
-                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/assets",
-                            }
-                        },
-                        "attributes": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/contracts/{contract_id}/attributes",
-                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/attributes",
-                            }
-                        },
-                        "clauses": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/contracts/{contract_id}/clauses",
-                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/clauses",
-                            }
-                        },
-                        "created_by": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/contracts/{contract_id}/created-by",
-                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/created-by",
-                            }
-                        },
-                        "organization": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/contracts/{contract_id}/organization",
-                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/organization",
-                            }
-                        },
-                        "validation_results": {
-                            "links": {
-                                "related": f"/organizations/{organization_id}/contract/{contract_id}/suite-validation-results",
-                                "self": f"/organizations/{organization_id}/contracts/{contract_id}/relationships/suite-validation-results",
-                            }
-                        },
-                    },
-                    "type": "contract",
-                },
-                "jsonapi": {"version": "1.0"},
-                "links": {
-                    "self": f"/organizations/{organization_id}/contracts/{contract_id}"
+                    "type": "checkpoint",
                 },
             },
             200,
@@ -231,10 +188,10 @@ def test_cloud_backed_data_context_add_checkpoint(
         )
 
         mock_post.assert_called_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/contracts",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
             json={
                 "data": {
-                    "type": "contract",
+                    "type": "checkpoint",
                     "attributes": {
                         "checkpoint_config": expected_checkpoint_config,
                         "organization_id": ge_cloud_organization_id,
@@ -245,7 +202,7 @@ def test_cloud_backed_data_context_add_checkpoint(
         )
 
         mock_get.assert_called_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/contracts/{checkpoint_id}",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
             params={"name": checkpoint_config["name"]},
             headers=request_headers,
         )

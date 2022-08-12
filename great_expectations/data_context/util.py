@@ -71,6 +71,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("module_name", None)
 
+    logger.debug(f"(instantiate_class_from_config) module_name -> {module_name}")
     verify_dynamic_loading_support(module_name=module_name)
 
     class_name = config.pop("class_name", None)
