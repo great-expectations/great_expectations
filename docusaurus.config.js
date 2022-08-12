@@ -21,7 +21,7 @@ module.exports = {
   themeConfig: {
     algolia: {
       // If Algolia did not provide you any appId, use 'BH4D9OD16A'
-      appId: ALGOLIA_ID,
+      appId: 'B4HD9FJQCB',
 
       // Public API key: it is safe to commit it
       apiKey: '16dae2c1fabc515311cada8ace06060a',
