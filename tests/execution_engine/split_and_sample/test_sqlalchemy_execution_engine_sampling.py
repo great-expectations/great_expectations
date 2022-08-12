@@ -197,7 +197,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
 
     # 2. Create query using sampler
     table_name: str = "test_table"
-    batch_spec: BatchSpec = BatchSpec(
+    batch_spec = BatchSpec(
         table_name=table_name,
         schema_name="test_schema_name",
         sampling_method="sample_using_limit",

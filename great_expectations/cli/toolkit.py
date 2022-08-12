@@ -557,7 +557,7 @@ To learn more about the upgrade process, visit \
 
     # noinspection PyBroadException
     try:
-        data_context: DataContext = DataContext(context_root_dir=context_root_dir)
+        data_context = DataContext(context_root_dir=context_root_dir)
         send_usage_message(
             data_context=data_context,
             event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,

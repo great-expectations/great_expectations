@@ -15,7 +15,7 @@ yaml = YAML()
 def datasource_anonymizer() -> DatasourceAnonymizer:
     # Standardize the salt so our tests are deterimistic
     salt: str = "00000000-0000-0000-0000-00000000a004"
-    aggregate_anonymizer: Anonymizer = Anonymizer(salt=salt)
+    aggregate_anonymizer = Anonymizer(salt=salt)
     anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
         salt=salt, aggregate_anonymizer=aggregate_anonymizer
     )
