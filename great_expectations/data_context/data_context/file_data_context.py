@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import Any, Dict, Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -104,7 +103,10 @@ class FileDataContext(AbstractDataContext):
             key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
-        if self.expectations_store.has_key(key) and not overwrite_existing:
+        if (
+            self.expectations_store.has_key(key)  # noqa: W601
+            and not overwrite_existing
+        ):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
