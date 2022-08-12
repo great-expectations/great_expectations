@@ -176,8 +176,8 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
         expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
 
         # To ensure we don't accidentally impact parallel test runs in Azure, we randomly generate a suite name in this E2E test.
-        # To limit the number of generated suites, we limit the randomization to 5 numbers.
-        rand_suffix = random.randint(1, 5)
+        # To limit the number of generated suites, we limit the randomization to 10 numbers.
+        rand_suffix = random.randint(1, 10)
         suite_name = f"oss_e2e_test_suite_{rand_suffix}"
 
         # Start off each test run with a clean slate
