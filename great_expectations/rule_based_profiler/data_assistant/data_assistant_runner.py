@@ -43,11 +43,6 @@ class DataAssistantRunner:
     specified by "batch_request", loaded into memory.  Then, "DataAssistant.run()" is issued with given directives.
     """
 
-    NUMERIC_RANGE_ESTIMATOR_TYPE_TO_NAME_MAP: Dict[NumericRangeEstimatorType, str] = {
-        NumericRangeEstimatorType.EXACT: "exact",
-        NumericRangeEstimatorType.FLAG_OUTLIERS: "bootstrap",
-    }
-
     def __init__(
         self,
         data_assistant_cls: Type["DataAssistant"],  # noqa: F821
@@ -133,10 +128,6 @@ class DataAssistantRunner:
             if isinstance(estimation, str):
                 estimation = estimation.lower()
                 estimation = NumericRangeEstimatorType(estimation)
-
-            estimator: str = (
-                DataAssistantRunner.NUMERIC_RANGE_ESTIMATOR_TYPE_TO_NAME_MAP[estimation]
-            )
 
             data_assistant: DataAssistant = self._build_data_assistant(
                 batch_request=batch_request
