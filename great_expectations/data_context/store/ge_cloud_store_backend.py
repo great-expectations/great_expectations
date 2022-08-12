@@ -25,8 +25,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-from typing_extensions import TypedDict
-
 
 class PayloadDataField(TypedDict):
     attributes: dict
@@ -272,15 +270,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
 
             response.raise_for_status()
-
             return self.get(key=key)
 
-        except requests.HTTPError as httperror:
-            logger.warning(str(httperror))
+        except (requests.HTTPError, requests.Timeout) as http_exc:
             raise StoreBackendError(
-                f"Unable to update object in GE Cloud Store Backend: HttpError: {response}"
+                f"Unable to update object in GE Cloud Store Backend {http_exc}"
             )
-
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
