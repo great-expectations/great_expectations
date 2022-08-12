@@ -1352,7 +1352,7 @@ def test_GeCloudStoreBackend():
         "access_token": "1234",
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
-    ge_cloud_resource_type = GeCloudRESTResource.CONTRACT
+    ge_cloud_resource_type = GeCloudRESTResource.CHECKPOINT
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
@@ -1371,12 +1371,12 @@ def test_GeCloudStoreBackend():
             ge_cloud_credentials=ge_cloud_credentials,
             ge_cloud_resource_type=ge_cloud_resource_type,
         )
-        my_store_backend.set(("contract", ""), my_simple_checkpoint_config_serialized)
+        my_store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             json={
                 "data": {
-                    "type": "contract",
+                    "type": "checkpoint",
                     "attributes": {
                         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
                         "checkpoint_config": OrderedDict(
@@ -1416,12 +1416,12 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.get(
             (
-                "contract",
+                "checkpoint",
                 "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             )
         )
         mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd-8a42-3c35cce574c6",
             headers={
                 "Content-Type": "application/vnd.api+json",
@@ -1439,7 +1439,7 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.list_keys()
         mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             headers={
                 "Content-Type": "application/vnd.api+json",
                 "Authorization": "Bearer 1234",
@@ -1458,17 +1458,17 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.remove_key(
             (
-                "contract",
+                "checkpoint",
                 "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             )
         )
         mock_delete.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
             json={
                 "data": {
-                    "type": "contract",
+                    "type": "checkpoint",
                     "id_": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
@@ -1584,7 +1584,7 @@ def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() ->
         "access_token": "1234",
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
-    ge_cloud_resource_type = "contract"  # Instead of using enum
+    ge_cloud_resource_type = "checkpoint"  # Instead of using enum
 
     my_store_backend = GeCloudStoreBackend(
         ge_cloud_base_url=ge_cloud_base_url,
@@ -1592,7 +1592,7 @@ def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() ->
         ge_cloud_resource_type=ge_cloud_resource_type,
     )
 
-    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CONTRACT
+    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
 
 
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
