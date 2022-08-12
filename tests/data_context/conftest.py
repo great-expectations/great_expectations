@@ -6,6 +6,7 @@ from unittest.mock import PropertyMock, patch
 import pytest
 
 import great_expectations as ge
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
@@ -633,3 +634,12 @@ def datasource_config() -> DatasourceConfig:
             }
         },
     )
+
+
+@pytest.fixture
+def shared_called_with_request_kwargs(request_headers) -> dict:
+    """
+    Standard request kwargs that all GeCloudStoreBackend http calls are made with.
+    Use in combination with `assert_called_with()`
+    """
+    return dict(timeout=GeCloudStoreBackend.TIMEOUT, headers=request_headers)
