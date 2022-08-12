@@ -3,7 +3,7 @@ import logging
 import os
 import random
 import uuid
-from typing import Dict, List, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import DataContextKey
@@ -188,11 +188,13 @@ class CheckpointStore(ConfigurationStore):
             None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
             which was used to create the config in the backend.
         """
-        key: DataContextKey = self._build_key_from_config(checkpoint_config)
+        # CheckpointConfig not an AbstractConfig??
+        # mypy error: incompatible type "CheckpointConfig"; expected "AbstractConfig"
+        key: DataContextKey = self._build_key_from_config(checkpoint_config)  # type: ignore[arg-type]
 
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[GeCloudResourceRef] = self.set(key, checkpoint_config)
+        ref: Optional[GeCloudResourceRef] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
         if ref:
             assert isinstance(key, GeCloudIdentifier)
             key.ge_cloud_id = ref.ge_cloud_id
