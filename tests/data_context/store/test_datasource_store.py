@@ -74,6 +74,7 @@ def test_datasource_store_retrieval_cloud_mode(
     ge_cloud_base_url: str,
     ge_cloud_access_token: str,
     ge_cloud_organization_id: str,
+    shared_called_with_request_kwargs: dict,
 ) -> None:
     ge_cloud_store_backend_config: dict = {
         "class_name": "GeCloudStoreBackend",
@@ -114,10 +115,7 @@ def test_datasource_store_retrieval_cloud_mode(
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 6bb5b6f5c7794892a4ca168c65c2603e",
-            },
+            **shared_called_with_request_kwargs,
         )
 
 
