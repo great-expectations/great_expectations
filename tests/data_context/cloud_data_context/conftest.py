@@ -1,7 +1,9 @@
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 import pytest
 from requests.exceptions import HTTPError, Timeout
+
+RequestError = Union[HTTPError, Timeout]
 
 
 class MockResponse:
@@ -9,7 +11,7 @@ class MockResponse:
         self,
         json_data: dict,
         status_code: int,
-        exc_to_raise: Union[HTTPError, Timeout, None] = None,
+        exc_to_raise: Optional[RequestError] = None,
     ) -> None:
         self._json_data = json_data
         # status code should be publicly accesable
@@ -28,8 +30,16 @@ class MockResponse:
 
 
 @pytest.fixture
-def mock_response_factory() -> Callable[[dict, int], MockResponse]:
-    def _make_mock_response(json_data: dict, status_code: int) -> MockResponse:
-        return MockResponse(json_data=json_data, status_code=status_code)
+def mock_response_factory() -> Callable[
+    [dict, int, Optional[RequestError]], MockResponse
+]:
+    def _make_mock_response(
+        json_data: dict,
+        status_code: int,
+        exc_to_raise: Optional[RequestError] = None,
+    ) -> MockResponse:
+        return MockResponse(
+            json_data=json_data, status_code=status_code, exc_to_raise=exc_to_raise
+        )
 
     return _make_mock_response
