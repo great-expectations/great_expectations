@@ -19,6 +19,9 @@ from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
+    NumericRangeEstimatorType,
+)
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
     VolumeDataAssistantResult,
@@ -1401,7 +1404,7 @@ def bobby_volume_data_assistant_result(
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1421,7 +1424,7 @@ def bobby_volume_data_assistant_result_usage_stats_enabled(
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1515,7 +1518,7 @@ def quentin_implicit_invocation_result_actual_time(
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1537,7 +1540,7 @@ def quentin_implicit_invocation_result_frozen_time(
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1880,7 +1883,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     ]
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation=NumericRangeEstimatorType.FLAG_OUTLIERS,
         exclude_column_names=exclude_column_names,
     )
 
@@ -2001,7 +2004,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 @pytest.mark.unit
 @freeze_time("09/26/2019 13:42:41")
-def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_exact_estimation_directive(
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
@@ -2040,7 +2043,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation=NumericRangeEstimatorType.FLAG_OUTLIERS,
         categorical_columns_rule={
             "false_positive_rate": 0.1,
         },

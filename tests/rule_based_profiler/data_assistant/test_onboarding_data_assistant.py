@@ -43,7 +43,7 @@ def bobby_onboarding_data_assistant_result_usage_stats_enabled(
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation="flag_outliers",
     )
 
     return cast(OnboardingDataAssistantResult, data_assistant_result)
@@ -63,7 +63,7 @@ def bobby_onboarding_data_assistant_result(
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation="flag_outliers",
     )
 
     return cast(OnboardingDataAssistantResult, data_assistant_result)
@@ -83,7 +83,7 @@ def quentin_implicit_invocation_result_actual_time(
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation="flag_outliers",
     )
 
     return cast(OnboardingDataAssistantResult, data_assistant_result)
@@ -104,7 +104,7 @@ def quentin_implicit_invocation_result_frozen_time(
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation="flag_outliers",
     )
 
     return cast(OnboardingDataAssistantResult, data_assistant_result)
@@ -327,7 +327,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
 
     data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
         batch_request=batch_request,
-        exact_estimation=False,
+        estimation="flag_outliers",
         numeric_columns_rule={
             "round_decimals": 15,
             "false_positive_rate": 0.1,
@@ -395,7 +395,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
 
 
 @pytest.mark.unit
-def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_exact_estimation_directive(
+def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context

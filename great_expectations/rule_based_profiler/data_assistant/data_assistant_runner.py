@@ -1,3 +1,4 @@
+from enum import Enum
 from inspect import Parameter, Signature, getattr_static, signature
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
@@ -29,6 +30,11 @@ from great_expectations.rule_based_profiler.helpers.runtime_environment import (
 )
 
 
+class NumericRangeEstimatorType(Enum):
+    EXACT = "exact"
+    FLAG_OUTLIERS = "flag_outliers"
+
+
 class DataAssistantRunner:
     """
     DataAssistantRunner processes invocations of calls to "run()" methods of registered "DataAssistant" classes.
@@ -36,6 +42,11 @@ class DataAssistantRunner:
     The approach is to instantiate "DataAssistant" class of specified type with "Validator", containing "Batch" objects,
     specified by "batch_request", loaded into memory.  Then, "DataAssistant.run()" is issued with given directives.
     """
+
+    NUMERIC_RANGE_ESTIMATOR_TYPE_TO_NAME_MAP: Dict[NumericRangeEstimatorType, str] = {
+        NumericRangeEstimatorType.EXACT: "exact",
+        NumericRangeEstimatorType.FLAG_OUTLIERS: "bootstrap",
+    }
 
     def __init__(
         self,
@@ -91,7 +102,7 @@ class DataAssistantRunner:
 
         def run(
             batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-            exact_estimation: bool = True,
+            estimation: Optional[Union[str, NumericRangeEstimatorType]] = None,
             **kwargs,
         ) -> DataAssistantResult:
             """
@@ -100,10 +111,10 @@ class DataAssistantRunner:
 
             Args:
                 batch_request: Explicit batch_request used to supply data at runtime
-                exact_estimation: Global directive for applicable "Rule" objects to use "exact" numeric range estimator.
-                    If set to True (default), all "Rule" objects that use "NumericMetricRangeMultiBatchParameterBuilder"
+                estimation: Global type directive for applicable "Rule" objects that utilize numeric range estimation.
+                    If set to "exact" (default), all "Rule" objects using "NumericMetricRangeMultiBatchParameterBuilder"
                     will have the value of "estimator" property (referred to by "$variables.estimator") equal "exact".
-                    If set to False, then already-defined default in "Rule" variables (e.g., "bootstrap") takes effect.
+                    If set to "flag_outliers", then "bootstrap" estimator (default in "Rule" variables) takes effect.
                 kwargs: placeholder for "makefun.create_function()" to propagate dynamically generated signature
 
             Returns:
@@ -115,6 +126,17 @@ class DataAssistantRunner:
                     message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be specified \
 (empty or missing "batch_request" detected)."""
                 )
+
+            if estimation is None:
+                estimation = NumericRangeEstimatorType.EXACT
+
+            if isinstance(estimation, str):
+                estimation = estimation.lower()
+                estimation = NumericRangeEstimatorType(estimation)
+
+            estimator: str = (
+                DataAssistantRunner.NUMERIC_RANGE_ESTIMATOR_TYPE_TO_NAME_MAP[estimation]
+            )
 
             data_assistant: DataAssistant = self._build_data_assistant(
                 batch_request=batch_request
@@ -142,7 +164,7 @@ class DataAssistantRunner:
             variables_directives_list: List[
                 RuntimeEnvironmentVariablesDirectives
             ] = build_variables_directives(
-                exact_estimation=exact_estimation,
+                exact_estimation=(estimation == NumericRangeEstimatorType.EXACT),
                 rules=self._profiler.rules,
                 **variables_directives_kwargs,
             )
@@ -159,13 +181,13 @@ class DataAssistantRunner:
             Parameter(
                 name="batch_request",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
-                annotation=Optional[Union[BatchRequestBase, dict]],
+                annotation=Union[BatchRequestBase, dict],
             ),
             Parameter(
-                name="exact_estimation",
+                name="estimation",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
-                default=True,
-                annotation=bool,
+                default=Parameter.empty,
+                annotation=Optional[Union[str, NumericRangeEstimatorType]],
             ),
         ]
 
@@ -313,9 +335,8 @@ class DataAssistantRunner:
 
     @staticmethod
     def _get_rule_domain_type_attributes(rule: Rule) -> List[str]:
-        return list(
-            filter(
-                lambda key: key not in ["class_name", "module_name"],
-                rule.domain_builder.to_json_dict().keys(),
-            )
-        )
+        klass: type = rule.domain_builder.__class__
+        sig: Signature = signature(obj=klass.__init__)
+        parameters: Dict[str, Parameter] = dict(sig.parameters)
+        attribute_names: List[str] = list(parameters.keys())[1:]
+        return attribute_names
