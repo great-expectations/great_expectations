@@ -64,6 +64,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+src/dgtest/
 
 # Translations
 *.mo
@@ -118,6 +119,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+.dmypy.json
 
 # vim backup files
 *~

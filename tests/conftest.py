@@ -59,15 +59,15 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
-    ParameterNode,
-    SemanticDomainTypes,
-)
+from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -2336,7 +2336,7 @@ stores:
     store_backend:
       class_name: GeCloudStoreBackend
       ge_cloud_base_url: {ge_cloud_base_url}
-      ge_cloud_resource_type: suite_validation_result
+      ge_cloud_resource_type: validation_result
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
         organization_id: {ge_cloud_organization_id}
@@ -2347,7 +2347,7 @@ stores:
     store_backend:
       class_name: GeCloudStoreBackend
       ge_cloud_base_url: {ge_cloud_base_url}
-      ge_cloud_resource_type: contract
+      ge_cloud_resource_type: checkpoint
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
         organization_id: {ge_cloud_organization_id}

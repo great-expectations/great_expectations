@@ -5,7 +5,7 @@ import itertools
 import json
 import logging
 import uuid
-from typing import Any, Dict, List, MutableMapping, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
 from ruamel.yaml import YAML
@@ -14,7 +14,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
-from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -34,6 +34,9 @@ from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -164,6 +167,7 @@ class AssetConfig(SerializableDictDot):
         splitter_kwargs: Optional[Dict[str, str]] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
+        reader_options: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         if name is not None:
@@ -192,6 +196,8 @@ class AssetConfig(SerializableDictDot):
             self.sampling_method = sampling_method
         if sampling_kwargs is not None:
             self.sampling_kwargs = sampling_kwargs
+        if reader_options is not None:
+            self.reader_options = reader_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -256,6 +262,8 @@ class AssetConfigSchema(Schema):
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
+
+    reader_options = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
@@ -359,10 +367,11 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class DataConnectorConfig(SerializableDictDot):
+class DataConnectorConfig(AbstractConfig):
     def __init__(
         self,
         class_name,
+        id_: Optional[str] = None,
         module_name=None,
         credentials=None,
         assets=None,
@@ -438,6 +447,8 @@ class DataConnectorConfig(SerializableDictDot):
         if delimiter is not None:
             self.delimiter = delimiter
 
+        super().__init__(id_=id_)
+
         # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -463,9 +474,15 @@ class DataConnectorConfig(SerializableDictDot):
         return serializeable_dict
 
 
-class DataConnectorConfigSchema(Schema):
+class DataConnectorConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
+
+    id_ = fields.String(
+        required=False,
+        allow_none=True,
+        data_key="id",
+    )
 
     class_name = fields.String(
         required=True,
@@ -929,7 +946,7 @@ class DatasourceConfig(AbstractConfig):
         return serializeable_dict
 
 
-class DatasourceConfigSchema(Schema):
+class DatasourceConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
@@ -942,6 +959,7 @@ class DatasourceConfigSchema(Schema):
     id_ = fields.String(
         required=False,
         allow_none=True,
+        data_key="id",
     )
 
     class_name = fields.String(
@@ -1409,7 +1427,7 @@ class DataContextConfigSchema(Schema):
                 data.pop(key)
         return data
 
-    def handle_error(self, exc, data, **kwargs) -> None:
+    def handle_error(self, exc, data, **kwargs) -> None:  # type: ignore[override]
         """Log and raise our custom exception when (de)serialization fails."""
         if (
             exc
@@ -1784,19 +1802,19 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             )
         self.plugins_directory = plugins_directory
         if root_directory is not None:
-            self.stores[self.expectations_store_name]["store_backend"][
+            self.stores[self.expectations_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
-            self.stores[self.validations_store_name]["store_backend"][
+            self.stores[self.validations_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
-            self.stores[self.checkpoint_store_name]["store_backend"][
+            self.stores[self.checkpoint_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
-            self.stores[self.profiler_store_name]["store_backend"][
+            self.stores[self.profiler_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
-            self.data_docs_sites[self.data_docs_site_name]["store_backend"][
+            self.data_docs_sites[self.data_docs_site_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
 
@@ -2126,7 +2144,7 @@ class DataContextConfig(BaseYamlConfig):
 
         self._config_version = config_version
         if datasources is None:
-            datasources = {}
+            datasources = {}  # type: ignore[assignment]
         self.datasources = datasources
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
@@ -2227,6 +2245,45 @@ class DataContextConfig(BaseYamlConfig):
         return self.__repr__()
 
 
+class CheckpointValidationConfig(AbstractConfig):
+    def __init__(self, id_: Optional[str] = None, **kwargs: dict) -> None:
+        super().__init__(id_=id_)
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+
+class CheckpointValidationConfigSchema(AbstractConfigSchema):
+    class Meta:
+        unknown = INCLUDE
+
+    id_ = fields.String(required=False, allow_none=False, data_key="id")
+
+    def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:  # type: ignore[override]
+        """
+        Chetan - 20220803 - By design, Marshmallow accepts unknown fields through the
+        `unknown = INCLUDE` directive but only upon load. When dumping, it validates
+        each item against the declared fields and only includes explicitly named values.
+
+        As such, this override of parent behavior is meant to keep ALL values provided
+        to the config in the output dict. To get rid of this function, we need to
+        explicitly name all possible values in CheckpoingValidationConfigSchema as
+        schema fields.
+        """
+        data = super().dump(obj, many=many)
+
+        for key, value in obj.items():
+            if (
+                key not in data
+                and key not in self.declared_fields
+                and value is not None
+            ):
+                data[key] = value
+
+        sorted_data = dict(sorted(data.items()))
+        return sorted_data
+
+
 class CheckpointConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
@@ -2243,6 +2300,7 @@ class CheckpointConfigSchema(Schema):
             "evaluation_parameters",
             "runtime_configuration",
             "validations",
+            "default_validation_id",
             "profilers",
             # Next two fields are for LegacyCheckpoint configuration
             "validation_operator_name",
@@ -2265,6 +2323,7 @@ class CheckpointConfigSchema(Schema):
         "notify_with",
         "validation_operator_name",
         "batches",
+        "default_validation_id",
     ]
 
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
@@ -2295,8 +2354,12 @@ class CheckpointConfigSchema(Schema):
     evaluation_parameters = fields.Dict(required=False, allow_none=True)
     runtime_configuration = fields.Dict(required=False, allow_none=True)
     validations = fields.List(
-        cls_or_instance=fields.Dict(), required=False, allow_none=True
+        cls_or_instance=fields.Nested(CheckpointValidationConfigSchema),
+        required=False,
+        allow_none=True,
     )
+    default_validation_id = fields.String(required=False, allow_none=True)
+
     profilers = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
     )
@@ -2376,7 +2439,8 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[List[CheckpointValidationConfig]] = None,
+        default_validation_id: Optional[str] = None,
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
@@ -2407,6 +2471,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
+            self._default_validation_id = default_validation_id
             self._profilers = profilers or []
             self._ge_cloud_id = ge_cloud_id
             # the following attributes are used by SimpleCheckpoint
@@ -2431,19 +2496,19 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def validation_operator_name(self) -> str:
-        return self._validation_operator_name
+        return self._validation_operator_name  # type: ignore[has-type]
 
     @validation_operator_name.setter
     def validation_operator_name(self, value: str) -> None:
-        self._validation_operator_name = value
+        self._validation_operator_name = value  # type: ignore[has-type]
 
     @property
     def batches(self) -> List[dict]:
-        return self._batches
+        return self._batches  # type: ignore[has-type]
 
     @batches.setter
     def batches(self, value: List[dict]) -> None:
-        self._batches = value
+        self._batches = value  # type: ignore[has-type]
 
     @property
     def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
@@ -2463,7 +2528,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def name(self) -> str:
-        return self._name
+        return self._name  # type: ignore[return-value]
 
     @name.setter
     def name(self, value: str) -> None:
@@ -2471,7 +2536,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def template_name(self) -> str:
-        return self._template_name
+        return self._template_name  # type: ignore[return-value]
 
     @template_name.setter
     def template_name(self, value: str) -> None:
@@ -2479,19 +2544,27 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def config_version(self) -> float:
-        return self._config_version
+        return self._config_version  # type: ignore[return-value]
 
     @config_version.setter
     def config_version(self, value: float) -> None:
         self._config_version = value
 
     @property
-    def validations(self) -> List[dict]:
+    def validations(self) -> List[CheckpointValidationConfig]:
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[dict]) -> None:
+    def validations(self, value: List[CheckpointValidationConfig]) -> None:
         self._validations = value
+
+    @property
+    def default_validation_id(self) -> Optional[str]:
+        return self._default_validation_id
+
+    @default_validation_id.setter
+    def default_validation_id(self, validation_id: str) -> None:
+        self._default_validation_id = validation_id
 
     @property
     def profilers(self) -> List[dict]:
@@ -2519,7 +2592,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def run_name_template(self) -> str:
-        return self._run_name_template
+        return self._run_name_template  # type: ignore[return-value]
 
     @run_name_template.setter
     def run_name_template(self, value: str) -> None:
@@ -2535,7 +2608,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def expectation_suite_name(self) -> str:
-        return self._expectation_suite_name
+        return self._expectation_suite_name  # type: ignore[return-value]
 
     @expectation_suite_name.setter
     def expectation_suite_name(self, value: str) -> None:
@@ -2551,7 +2624,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def site_names(self) -> List[str]:
-        return self._site_names
+        return self._site_names  # type: ignore[return-value]
 
     @site_names.setter
     def site_names(self, value: List[str]) -> None:
@@ -2559,7 +2632,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def slack_webhook(self) -> str:
-        return self._slack_webhook
+        return self._slack_webhook  # type: ignore[return-value]
 
     @slack_webhook.setter
     def slack_webhook(self, value: str) -> None:
@@ -2567,7 +2640,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def notify_on(self) -> str:
-        return self._notify_on
+        return self._notify_on  # type: ignore[return-value]
 
     @notify_on.setter
     def notify_on(self, value: str) -> None:
@@ -2575,7 +2648,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def notify_with(self) -> str:
-        return self._notify_with
+        return self._notify_with  # type: ignore[return-value]
 
     @notify_with.setter
     def notify_with(self, value: str) -> None:
@@ -2668,7 +2741,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[List[CheckpointValidationConfig]] = None,
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
@@ -2699,6 +2772,10 @@ class CheckpointConfig(BaseYamlConfig):
         )
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
+
+        if validations is None:
+            validations = []
+
         validations = get_validations_with_batch_request_as_dict(
             validations=validations
         )
@@ -2728,48 +2805,40 @@ class CheckpointConfig(BaseYamlConfig):
 
         if run_name is None and run_name_template is not None:
             run_name = get_datetime_string_from_strftime_format(
-                format_str=run_name_template, datetime_obj=run_time
+                format_str=run_name_template, datetime_obj=run_time  # type: ignore[arg-type]
             )
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
         validation_dict: dict
 
-        for validation_dict in validations:
+        for validation_dict in validations:  # type: ignore[assignment]
             substituted_validation_dict: dict = get_substituted_validation_dict(
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
             )
-            validation_batch_request: BatchRequestBase = (
-                substituted_validation_dict.get("batch_request")
+            validation_batch_request: BatchRequestBase = substituted_validation_dict.get(
+                "batch_request"  # type: ignore[assignment]
             )
             validation_dict["batch_request"] = validation_batch_request
-            validation_expectation_suite_name: str = substituted_validation_dict.get(
+            validation_expectation_suite_name: str = substituted_validation_dict.get(  # type: ignore[assignment]
                 "expectation_suite_name"
             )
             validation_dict[
                 "expectation_suite_name"
             ] = validation_expectation_suite_name
-            validation_expectation_suite_ge_cloud_id: str = (
-                substituted_validation_dict.get("expectation_suite_ge_cloud_id")
+            validation_expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
+                "expectation_suite_ge_cloud_id"  # type: ignore[assignment]
             )
             validation_dict[
                 "expectation_suite_ge_cloud_id"
             ] = validation_expectation_suite_ge_cloud_id
             validation_action_list: list = substituted_validation_dict.get(
-                "action_list"
+                "action_list"  # type: ignore[assignment]
             )
             validation_dict["action_list"] = validation_action_list
 
         return substituted_runtime_config
-
-
-class CheckpointValidationConfig(DictDot):
-    pass
-
-
-class CheckpointValidationConfigSchema(Schema):
-    pass
 
 
 dataContextConfigSchema = DataContextConfigSchema()

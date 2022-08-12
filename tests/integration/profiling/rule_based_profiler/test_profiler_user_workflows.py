@@ -27,16 +27,16 @@ from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
+from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.types import (
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
-    ParameterNode,
-    SemanticDomainTypes,
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.core.usage_statistics.util import (
@@ -890,8 +890,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.success
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
-        "min_value": -50.5,
-        "max_value": 2121.9,
+        "min_value": -52.0,
+        "max_value": 2183.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 1.0,
@@ -914,7 +914,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": 0.0,
-        "max_value": 2121.9,
+        "max_value": 2183.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 1.0,
@@ -938,7 +938,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": 0.0,
-        "max_value": 2121.9,
+        "max_value": 2183.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 8.75e-1,
@@ -1843,6 +1843,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             "random_seed": 43792,
             "false_positive_rate": 5.0e-2,
             "quantile_statistic_interpolation_method": "auto",
+            "quantile_bias_correction": True,
             "quantile_bias_std_error_ratio_threshold": 0.25,
         },
         rules={
@@ -1866,6 +1867,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "random_seed": "$variables.random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                        "quantile_bias_correction": "$variables.quantile_bias_correction",
                         "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
                         "round_decimals": 2,
                     }
@@ -1901,7 +1903,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
 
     value_ranges_expected = [
         [
-            5.85,
+            5.94,
             6.5,
         ],
         [
@@ -1909,7 +1911,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             9.56,
         ],
         [
-            13.35,
+            13.44,
             15.62,
         ],
     ]
@@ -1944,6 +1946,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             "random_seed": 43792,
             "false_positive_rate": 5.0e-2,
             "quantile_statistic_interpolation_method": "auto",
+            "quantile_bias_correction": True,
             "quantile_bias_std_error_ratio_threshold": 0.25,
         },
         rules={
@@ -1967,6 +1970,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "random_seed": "$variables.random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                        "quantile_bias_correction": "$variables.quantile_bias_correction",
                         "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
                         "round_decimals": "$variables.round_decimals",
                     }
@@ -2137,7 +2141,7 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
     )
 
     max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
-    max_value_expected: float = 56314.8
+    max_value_expected: float = 3004.0
     np.testing.assert_allclose(
         actual=float(max_value_actual),
         desired=float(max_value_expected),
@@ -2323,7 +2327,7 @@ def test_quentin_expect_column_stdev_to_be_between_auto_yes_default_profiler_con
     validator: Validator = quentin_validator
 
     test_cases: Tuple[Tuple[str, float, float], ...] = (
-        ("fare_amount", 10.0, 565.0),
+        ("fare_amount", 10.0, 32.57),
         ("passenger_count", 1.0, 2.0),
     )
 

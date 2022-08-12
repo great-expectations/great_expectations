@@ -10,7 +10,14 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,
+    MetricValue,
+    MetricValues,
+)
+from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
 )
@@ -23,15 +30,12 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricComputationResult,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
     PARAMETER_KEY,
     RAW_PARAMETER_KEY,
-    AttributedResolvedMetrics,
-    Builder,
-    Domain,
-    MetricComputationResult,
-    MetricValue,
-    MetricValues,
     ParameterContainer,
     build_parameter_container,
     get_fully_qualified_parameter_names,
@@ -110,11 +114,11 @@ class ParameterBuilder(ABC, Builder):
     ) -> None:
         """
         Args:
-            domain: Domain object that is context for execution of this ParameterBuilder object.
+            domain: "Domain" object that is context for execution of this "ParameterBuilder" object.
             variables: attribute name/value pairs
-            parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
-            parameter_computation_impl: Object containing desired ParameterBuilder implementation.
-            batch_list: Explicit list of Batch objects to supply data at runtime.
+            parameters: Dictionary of "ParameterContainer" objects corresponding to all "Domain" objects in memory.
+            parameter_computation_impl: Object containing desired "ParameterBuilder" implementation.
+            batch_list: Explicit list of "Batch" objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
         """
@@ -270,11 +274,11 @@ class ParameterBuilder(ABC, Builder):
         :param metric_value_kwargs: Metric Value Kwargs is an essential parameter of the MetricConfiguration object.
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
-        :param domain: Domain object scoping "$variable"/"$parameter"-style references in configuration and runtime.
+        :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.
-        :return: MetricComputationResult object, containing both: data samples in the format "N x R^m", where "N" (most
-        significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
+        :return: "MetricComputationResult" object, containing both: data samples in the format "N x R^m", where "N"
+        (most significant dimension) is the number of measurements (e.g., one per "Batch" of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
         if not metric_name:

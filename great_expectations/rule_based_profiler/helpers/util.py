@@ -3,6 +3,8 @@ import itertools
 import logging
 import re
 import uuid
+import warnings
+from dataclasses import field
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -19,20 +21,22 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.types import (
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+from great_expectations.rule_based_profiler.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
+    SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
+    NumericRangeEstimationResult,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     VARIABLES_PREFIX,
     Domain,
-    NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
-    SemanticDomainTypes,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
-)
-from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
-    NUM_HISTOGRAM_BINS,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import numpy_quantile
@@ -48,6 +52,12 @@ TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
 TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN: re.Pattern = re.compile(
     rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\.\w{8}"
 )
+
+RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
+    "auto",
+    "nearest",
+    "linear",
+}
 
 
 def get_validator(
@@ -467,6 +477,90 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
     )
 
 
+def get_false_positive_rate_from_rule_state(
+    false_positive_rate: Union[str, float],
+    domain: Domain,
+    variables: Optional[ParameterContainer] = None,
+    parameters: Optional[Dict[str, ParameterContainer]] = None,
+) -> Union[float, np.float64]:
+    """
+    This method obtains false_positive_rate from "rule state" (i.e., variables and parameters) and validates the result.
+    """
+    if false_positive_rate is None:
+        return 5.0e-2
+
+    # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+    false_positive_rate = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=false_positive_rate,
+        expected_return_type=(float, np.float64),
+        variables=variables,
+        parameters=parameters,
+    )
+    if not (0.0 <= false_positive_rate <= 1.0):
+        raise ge_exceptions.ProfilerExecutionError(
+            f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
+{false_positive_rate} was provided.
+"""
+        )
+    elif false_positive_rate <= NP_EPSILON:
+        warnings.warn(
+            f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 0.  A \
+false_positive_rate of {NP_EPSILON} has been selected instead.
+"""
+        )
+        false_positive_rate = np.float64(NP_EPSILON)
+    elif false_positive_rate >= (1.0 - NP_EPSILON):
+        warnings.warn(
+            f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 1.  A \
+false_positive_rate of {1.0 - NP_EPSILON} has been selected instead.
+"""
+        )
+        false_positive_rate = np.float64(1.0 - NP_EPSILON)
+
+    return false_positive_rate
+
+
+def get_quantile_statistic_interpolation_method_from_rule_state(
+    quantile_statistic_interpolation_method: str,
+    round_decimals: int,
+    domain: Domain,
+    variables: Optional[ParameterContainer] = None,
+    parameters: Optional[Dict[str, ParameterContainer]] = None,
+) -> str:
+    """
+    This method obtains quantile_statistic_interpolation_method from "rule state" (i.e., variables and parameters) and
+    validates the result.
+    """
+    # Obtain quantile_statistic_interpolation_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+    quantile_statistic_interpolation_method = (
+        get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=quantile_statistic_interpolation_method,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
+        )
+    )
+    if (
+        quantile_statistic_interpolation_method
+        not in RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS
+    ):
+        raise ge_exceptions.ProfilerExecutionError(
+            message=f"""The directive "quantile_statistic_interpolation_method" can be only one of \
+{RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS} ("{quantile_statistic_interpolation_method}" was detected).
+"""
+        )
+
+    if quantile_statistic_interpolation_method == "auto":
+        if round_decimals == 0:
+            quantile_statistic_interpolation_method = "nearest"
+        else:
+            quantile_statistic_interpolation_method = "linear"
+
+    return quantile_statistic_interpolation_method
+
+
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
@@ -484,9 +578,11 @@ def compute_quantiles(
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
-    return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
-        value_range=np.asarray([lower_quantile, upper_quantile]),
+
+    return build_numeric_range_estimation_result(
+        metric_values=metric_values,
+        min_value=lower_quantile,
+        max_value=upper_quantile,
     )
 
 
@@ -510,6 +606,7 @@ def compute_kde_quantiles_point_estimate(
     Bandwidth Method: https://stats.stackexchange.com/questions/90656/kernel-bandwidth-scotts-vs-silvermans-rules
 
     Args:
+        metric_values: "numpy.ndarray" of "dtype.float" values with elements corresponding to "Batch" data samples.
         false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
             identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
         n_resamples: A positive integer indicating the sample size resulting from the sampling with replacement
@@ -549,14 +646,10 @@ def compute_kde_quantiles_point_estimate(
         method=quantile_statistic_interpolation_method,
     )
 
-    return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(
-            a=metric_values_gaussian_sample, bins=NUM_HISTOGRAM_BINS
-        )[0],
-        value_range=[
-            lower_quantile_point_estimate,
-            upper_quantile_point_estimate,
-        ],
+    return build_numeric_range_estimation_result(
+        metric_values=metric_values,
+        min_value=lower_quantile_point_estimate,
+        max_value=upper_quantile_point_estimate,
     )
 
 
@@ -565,6 +658,7 @@ def compute_bootstrap_quantiles_point_estimate(
     false_positive_rate: np.float64,
     n_resamples: int,
     quantile_statistic_interpolation_method: str,
+    quantile_bias_correction: bool,
     quantile_bias_std_error_ratio_threshold: float,
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
@@ -653,6 +747,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=lower_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_correction=quantile_bias_correction,
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_lower_quantile,
     )
@@ -661,18 +756,15 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_correction=quantile_bias_correction,
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_upper_quantile,
     )
 
-    return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(
-            a=bootstraps.flatten(), bins=NUM_HISTOGRAM_BINS
-        )[0],
-        value_range=[
-            lower_quantile_bias_corrected_point_estimate,
-            upper_quantile_bias_corrected_point_estimate,
-        ],
+    return build_numeric_range_estimation_result(
+        metric_values=metric_values,
+        min_value=lower_quantile_bias_corrected_point_estimate,
+        max_value=upper_quantile_bias_corrected_point_estimate,
     )
 
 
@@ -680,6 +772,7 @@ def _determine_quantile_bias_corrected_point_estimate(
     bootstraps: np.ndarray,
     quantile_pct: float,
     quantile_statistic_interpolation_method: str,
+    quantile_bias_correction: bool,
     quantile_bias_std_error_ratio_threshold: float,
     sample_quantile: np.ndarray,
 ) -> np.float64:
@@ -700,7 +793,8 @@ def _determine_quantile_bias_corrected_point_estimate(
     quantile_bias_corrected_point_estimate: np.float64
 
     if (
-        bootstrap_quantile_standard_error > 0.0
+        not quantile_bias_correction
+        and bootstrap_quantile_standard_error > 0.0
         and bootstrap_quantile_bias / bootstrap_quantile_standard_error
         <= quantile_bias_std_error_ratio_threshold
     ):
@@ -711,6 +805,41 @@ def _determine_quantile_bias_corrected_point_estimate(
         )
 
     return quantile_bias_corrected_point_estimate
+
+
+def build_numeric_range_estimation_result(
+    metric_values: np.ndarray,
+    min_value: Number,
+    max_value: Number,
+) -> NumericRangeEstimationResult:
+    """
+    Computes histogram of 1-dimensional set of data points and packages it together with value range as returned output.
+
+    Args:
+        metric_values: "numpy.ndarray" of "dtype.float" values with elements corresponding to "Batch" data samples.
+        min_value: pre-computed supremum of "metric_values" (properly conditioned for output).
+        max_value: pre-computed infimum of "metric_values" (properly conditioned for output).
+
+    Returns:
+        Structured "NumericRangeEstimationResult" object, containing histogram and value_range attributes.
+    """
+    histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
+        a=metric_values, bins=NUM_HISTOGRAM_BINS
+    )
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.vstack(
+            (
+                np.pad(
+                    array=histogram[0],
+                    pad_width=(0, 1),
+                    mode="constant",
+                    constant_values=0,
+                ),
+                histogram[1],
+            )
+        ),
+        value_range=np.asarray([min_value, max_value]),
+    )
 
 
 def get_validator_with_expectation_suite(
@@ -812,3 +941,8 @@ def sanitize_parameter_name(name: str) -> str:
     This method provides display-friendly version of "name" argument.
     """
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
+
+
+def default_field(obj: Dict[Union[str, Tuple[str]], str]) -> field:
+    """Shorthand method of allowing mutable dataclass variables."""
+    return field(default_factory=lambda: copy.copy(obj))

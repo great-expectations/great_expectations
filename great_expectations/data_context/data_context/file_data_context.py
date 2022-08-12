@@ -8,6 +8,7 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
     FileDataContextVariables,
 )
 from great_expectations.data_context.types.base import DataContextConfig
@@ -57,7 +58,10 @@ class FileDataContext(AbstractDataContext):
 
         store_name: str = "datasource_store"  # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
-        store_backend: dict = {"class_name": "InlineStoreBackend"}
+        store_backend: dict = {
+            "class_name": "InlineStoreBackend",
+            "resource_type": DataContextVariableSchema.DATASOURCES,
+        }
         runtime_environment: dict = {
             "root_directory": self.root_directory,
             "data_context": self,
@@ -126,14 +130,3 @@ class FileDataContext(AbstractDataContext):
             data_context=self,
         )
         return variables
-
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug("Starting DataContext._save_project_config")
-        self._save_project_config_to_disk()
-
-    def _save_project_config_to_disk(self) -> None:
-        """Helper method to make save_project_config more explicit"""
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)

@@ -8,6 +8,10 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+)
+from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     MapMetricColumnDomainBuilder,
 )
@@ -33,23 +37,18 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
     RegexPatternStringParameterBuilder,
 )
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.rule_based_profiler import (
-    BaseRuleBasedProfiler,
-    RuleBasedProfiler,
-)
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     VARIABLES_KEY,
-    Domain,
     ParameterNode,
-    SemanticDomainTypes,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
+from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.rule_based_profiler import (
+    BaseRuleBasedProfiler,
+    RuleBasedProfiler,
 )
 from great_expectations.util import camel_to_snake, measure_execution_time
 from great_expectations.validator.validator import Validator
@@ -331,6 +330,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 n_resamples=f"{VARIABLES_KEY}n_resamples",
                 random_seed=f"{VARIABLES_KEY}random_seed",
                 quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+                quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
                 quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
                 include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
                 truncate_values=f"{VARIABLES_KEY}truncate_values",

@@ -12,18 +12,18 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.rule_based_profiler.types import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    Domain,
-    ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
+from great_expectations.rule_based_profiler.altair import AltairDataTypes
+from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
     OnboardingDataAssistantResult,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
+from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotResult,
+)
+from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    ParameterNode,
 )
 from tests.render.test_util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
@@ -144,7 +144,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
         DataAssistant,
         OnboardingDataAssistant,
     )
-    from great_expectations.rule_based_profiler.types.data_assistant_result import DataAssistantResult
+    from great_expectations.rule_based_profiler.data_assistant_result import DataAssistantResult
     from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
     import great_expectations.exceptions as ge_exceptions
 
@@ -207,6 +207,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_result_serialization(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -224,6 +225,7 @@ def test_onboarding_data_assistant_result_serialization(
     assert len(bobby_onboarding_data_assistant_result.profiler_config.rules) == 8
 
 
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -249,6 +251,7 @@ def test_onboarding_data_assistant_result_get_expectation_suite(
     )
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_metrics_count(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -280,6 +283,7 @@ def test_onboarding_data_assistant_metrics_count(
     assert num_metrics == 184
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ):
@@ -305,6 +309,7 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
     )
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -338,7 +343,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         # column_value_nonnullity_rule={
         # },
         numeric_columns_rule={
-            "round_decimals": 12,
+            "round_decimals": 15,
             "false_positive_rate": 0.1,
             "random_seed": 43792,
         },
@@ -363,7 +368,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
         data_assistant_result.profiler_config.rules["numeric_columns_rule"][
             "variables"
         ]["round_decimals"]
-        == 12
+        == 15
     )
     assert (
         data_assistant_result.profiler_config.rules["numeric_columns_rule"][
@@ -403,6 +408,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
     )
 
 
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -427,6 +433,7 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
         )
 
 
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -447,6 +454,7 @@ def test_onboarding_data_assistant_plot_descriptive_notebook_execution(
     )
 
 
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -467,6 +475,7 @@ def test_onboarding_data_assistant_plot_prescriptive_notebook_execution(
     )
 
 
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -489,6 +498,7 @@ def test_onboarding_data_assistant_plot_descriptive_theme_notebook_execution(
     )
 
 
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -513,6 +523,7 @@ def test_onboarding_data_assistant_plot_prescriptive_theme_notebook_execution(
     )
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -522,13 +533,14 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_table_domain
     assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics()
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 85
+    assert len(column_domain_charts) == 100
 
     columns: List[str] = [
         "VendorID",
@@ -545,6 +557,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     assert find_strings_in_nested_obj(column_domain_charts, columns)
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_metrics_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -554,23 +567,26 @@ def test_onboarding_data_assistant_plot_metrics_include_column_names_filters_out
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 11  # Normally 85 without filtering
+    assert len(column_domain_charts) == 13
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_metrics_exclude_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
     exclude_column_names: List[str] = ["VendorID", "passenger_count"]
     plot_result: PlotResult = bobby_onboarding_data_assistant_result.plot_metrics(
-        exclude_column_names=exclude_column_names
+        exclude_column_names=exclude_column_names,
+        sequential=False,
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 73
+    assert len(column_domain_charts) == 86
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_expectations_and_metrics_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -582,10 +598,11 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_include_column_
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 11  # Normally 85 without filtering
+    assert len(column_domain_charts) == 15
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_expectations_and_metrics_exclude_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -597,10 +614,11 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_exclude_column_
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 73
+    assert len(column_domain_charts) == 99
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_include_and_exclude_column_names_raises_error(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -612,6 +630,7 @@ def test_onboarding_data_assistant_plot_include_and_exclude_column_names_raises_
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_custom_theme_overrides(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -672,6 +691,7 @@ def test_onboarding_data_assistant_plot_custom_theme_overrides(
     )
 
 
+@pytest.mark.unit
 def test_onboarding_data_assistant_plot_return_tooltip(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -715,7 +735,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         alt.Tooltip(
             **{
                 "field": "min_value",
-                "format": ",",
+                "format": "",
                 "title": "Min Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
@@ -723,7 +743,7 @@ def test_onboarding_data_assistant_plot_return_tooltip(
         alt.Tooltip(
             **{
                 "field": "max_value",
-                "format": ",",
+                "format": "",
                 "title": "Max Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
@@ -744,23 +764,20 @@ def test_onboarding_data_assistant_plot_return_tooltip(
                 "type": AltairDataTypes.NOMINAL.value,
             }
         ),
-        alt.Tooltip(
-            **{
-                "field": "column_distinct_values_count",
-                "format": ",",
-                "title": "Column Distinct Values Count",
-                "type": AltairDataTypes.QUANTITATIVE.value,
-            }
-        ),
     ]
 
-    single_column_return_chart: alt.LayerChart = plot_result.charts[3]
+    for chart in plot_result.charts:
+        chart_title: str = DataAssistantResult._get_chart_layer_title(layer=chart)
+        if chart_title == "expect_column_min_to_be_between":
+            single_column_return_chart: alt.LayerChart = chart
     layer_1: alt.Chart = single_column_return_chart.layer[1]
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
-    assert actual_tooltip == expected_tooltip
+    for tooltip in expected_tooltip:
+        assert tooltip in actual_tooltip
 
 
+@pytest.mark.integration
 def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -781,6 +798,7 @@ def test_onboarding_data_assistant_metrics_plot_descriptive_non_sequential_noteb
     )
 
 
+@pytest.mark.integration
 def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):

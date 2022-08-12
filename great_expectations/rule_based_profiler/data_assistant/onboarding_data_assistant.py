@@ -5,6 +5,11 @@ from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
     build_map_metric_rule,
 )
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+    OnboardingDataAssistantResult,
+)
+from great_expectations.rule_based_profiler.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
     ColumnDomainBuilder,
@@ -24,19 +29,14 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     ValueSetMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     VARIABLES_KEY,
-    SemanticDomainTypes,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
-    OnboardingDataAssistantResult,
-)
+from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.validator.validator import Validator
 
 
@@ -239,8 +239,9 @@ class OnboardingDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_std_error_ratio_threshold": 0.25,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": 0,
@@ -546,14 +547,15 @@ class OnboardingDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_std_error_ratio_threshold": 0.25,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": None,
                 "upper_bound": None,
             },
-            "round_decimals": 12,
+            "round_decimals": 15,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_partition_parameter_builder_for_metrics,
@@ -734,8 +736,9 @@ class OnboardingDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_std_error_ratio_threshold": 0.25,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": None,
@@ -884,8 +887,9 @@ class OnboardingDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_std_error_ratio_threshold": 0.25,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": 0,
@@ -1056,14 +1060,15 @@ class OnboardingDataAssistant(DataAssistant):
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
-            "quantile_statistic_interpolation_method": "auto",
-            "quantile_bias_std_error_ratio_threshold": 0.25,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": 0.0,
                 "upper_bound": None,
             },
-            "round_decimals": 12,
+            "round_decimals": 15,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,

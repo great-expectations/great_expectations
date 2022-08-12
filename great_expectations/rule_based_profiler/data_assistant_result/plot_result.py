@@ -8,6 +8,7 @@ import altair as alt
 class PlotMode(Enum):
     DESCRIPTIVE = "descriptive"
     PRESCRIPTIVE = "prescriptive"
+    DIAGNOSTIC = "diagnostic"
 
 
 @dataclass(frozen=True)

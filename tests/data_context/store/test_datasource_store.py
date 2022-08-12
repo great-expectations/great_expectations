@@ -13,7 +13,10 @@ from great_expectations.data_context.store.datasource_store import DatasourceSto
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
-from great_expectations.data_context.types.base import DatasourceConfig
+from great_expectations.data_context.types.base import (
+    DatasourceConfig,
+    datasourceConfigSchema,
+)
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 
 
@@ -29,7 +32,6 @@ def datasource_store_with_single_datasource(
     empty_datasource_store: DatasourceStore,
 ) -> DatasourceStore:
     key: DataContextVariableKey = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name=datasource_name,
     )
     empty_datasource_store.set(key=key, value=datasource_config)
@@ -58,7 +60,6 @@ def test_datasource_store_retrieval(
     store: DatasourceStore = empty_datasource_store
 
     key: DataContextVariableKey = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name="my_datasource",
     )
     store.set(key=key, value=datasource_config)
@@ -73,6 +74,7 @@ def test_datasource_store_retrieval_cloud_mode(
     ge_cloud_base_url: str,
     ge_cloud_access_token: str,
     ge_cloud_organization_id: str,
+    shared_called_with_request_kwargs: dict,
 ) -> None:
     ge_cloud_store_backend_config: dict = {
         "class_name": "GeCloudStoreBackend",
@@ -99,6 +101,8 @@ def test_datasource_store_retrieval_cloud_mode(
 
         store.set(key=key, value=datasource_config)
 
+        expected_datasource_config = datasourceConfigSchema.dump(datasource_config)
+
         mock_put.assert_called_with(
             "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/datasources/foobarbaz",
             json={
@@ -106,15 +110,12 @@ def test_datasource_store_retrieval_cloud_mode(
                     "type": "datasource",
                     "id": "foobarbaz",
                     "attributes": {
-                        "datasource_config": datasource_config.to_dict(),
+                        "datasource_config": expected_datasource_config,
                         "organization_id": ge_cloud_organization_id,
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 6bb5b6f5c7794892a4ca168c65c2603e",
-            },
+            **shared_called_with_request_kwargs,
         )
 
 
@@ -123,6 +124,7 @@ def test_datasource_store_with_inline_store_backend(
 ) -> None:
     inline_store_backend_config: dict = {
         "class_name": "InlineStoreBackend",
+        "resource_type": DataContextVariableSchema.DATASOURCES,
         "data_context": empty_data_context,
         "suppress_store_backend_id": True,
     }
@@ -133,7 +135,6 @@ def test_datasource_store_with_inline_store_backend(
     )
 
     key: DataContextVariableKey = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name="my_datasource",
     )
 
@@ -201,7 +202,6 @@ def test_datasource_store_update_by_name(
     )
 
     key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name=datasource_name,
     )
     actual_config = cast(

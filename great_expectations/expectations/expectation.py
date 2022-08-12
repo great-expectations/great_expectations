@@ -88,6 +88,7 @@ from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
+
 _TEST_DEFS_DIR = os.path.join(
     os.path.dirname(__file__),
     "..",
@@ -1699,20 +1700,28 @@ class TableExpectation(Expectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        metric_value = metrics.get(metric_name)
+        metric_value: Optional[Any] = metrics.get(metric_name)
 
         if metric_value is None:
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
-
-        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
-            "parse_strings_as_datetimes"
+        min_value: Optional[Any] = self.get_success_kwargs(configuration).get(
+            "min_value"
         )
+        strict_min: Optional[bool] = self.get_success_kwargs(configuration).get(
+            "strict_min"
+        )
+        max_value: Optional[Any] = self.get_success_kwargs(configuration).get(
+            "max_value"
+        )
+        strict_max: Optional[bool] = self.get_success_kwargs(configuration).get(
+            "strict_max"
+        )
+
+        parse_strings_as_datetimes: Optional[bool] = self.get_success_kwargs(
+            configuration
+        ).get("parse_strings_as_datetimes")
 
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
@@ -1738,6 +1747,25 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
 
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
+
+        if isinstance(metric_value, datetime.datetime):
+            if isinstance(min_value, str):
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    raise ValueError(
+                        f"""Could not parse "min_value" of {min_value} (of type "{str(type(min_value))}) into datetime \
+representation."""
+                    )
+
+            if isinstance(max_value, str):
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    raise ValueError(
+                        f"""Could not parse "max_value" of {max_value} (of type "{str(type(max_value))}) into datetime \
+representation."""
+                    )
 
         # Checking if mean lies between thresholds
         if min_value is not None:
@@ -2616,7 +2644,9 @@ def _mostly_success(
     unexpected_cnt: int,
     mostly: float,
 ) -> bool:
+    rows_considered_cnt_as_float: float = float(rows_considered_cnt)
+    unexpected_cnt_as_float: float = float(unexpected_cnt)
     success_ratio: float = (
-        float(rows_considered_cnt - unexpected_cnt) / rows_considered_cnt
-    )
+        rows_considered_cnt_as_float - unexpected_cnt_as_float
+    ) / rows_considered_cnt_as_float
     return success_ratio >= mostly

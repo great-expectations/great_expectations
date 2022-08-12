@@ -9,14 +9,14 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import NP_EPSILON
 from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    Domain,
     ParameterContainer,
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
@@ -109,7 +109,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     assert parameter_node == expected_value_dict
 
-    expected_value: np.ndarray = np.array([7510, 8806])
+    expected_value: np.ndarray = np.asarray([7510, 8806])
 
     # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
     # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
@@ -125,24 +125,25 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",
     )
 
-    expected_estimation_histogram: np.ndarray = np.array(
+    expected_estimation_histogram: np.ndarray = np.asarray(
         [
-            10100.0,
+            1.0,
             0.0,
             0.0,
             0.0,
             0.0,
             0.0,
-            9889.0,
+            1.0,
             0.0,
             0.0,
-            10008.0,
+            1.0,
+            0.0,
         ]
     )
 
     # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
     ks_result: tuple = stats.ks_2samp(
-        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+        data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
@@ -245,7 +246,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert actual_value_01_lower == expected_value_01_lower
     assert actual_value_01_upper == expected_value_01_upper
 
-    expected_estimation_histogram: np.ndarray = np.array(
+    expected_estimation_histogram: np.ndarray = np.asarray(
         [
             1.0,
             0.0,
@@ -257,12 +258,13 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             0.0,
             0.0,
             2.0,
+            0.0,
         ]
     )
 
     # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
     ks_result: tuple = stats.ks_2samp(
-        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+        data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
@@ -320,7 +322,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert actual_value_01_lower < actual_value_05_lower
     assert actual_value_01_upper > actual_value_05_upper
 
-    expected_estimation_histogram: np.ndarray = np.array(
+    expected_estimation_histogram: np.ndarray = np.asarray(
         [
             1.0,
             0.0,
@@ -332,12 +334,13 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             0.0,
             0.0,
             2.0,
+            0.0,
         ]
     )
 
     # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
     ks_result = stats.ks_2samp(
-        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+        data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
@@ -440,7 +443,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert actual_value_01_lower == expected_value_01_lower
     assert actual_value_01_upper == expected_value_01_upper
 
-    expected_estimation_histogram: np.ndarray = np.array(
+    expected_estimation_histogram: np.ndarray = np.asarray(
         [
             1.0,
             0.0,
@@ -452,12 +455,13 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
             0.0,
             0.0,
             2.0,
-        ]
+            0.0,
+        ],
     )
 
     # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
     ks_result: tuple = stats.ks_2samp(
-        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+        data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
@@ -575,7 +579,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
     assert actual_value_01_lower == expected_value_01_lower
     assert actual_value_01_upper == expected_value_01_upper
 
-    expected_estimation_histogram: np.ndarray = np.array(
+    expected_estimation_histogram: np.ndarray = np.asarray(
         [
             1.0,
             0.0,
@@ -587,12 +591,13 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
             0.0,
             0.0,
             2.0,
+            0.0,
         ]
     )
 
     # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
     ks_result: tuple = stats.ks_2samp(
-        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+        data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
@@ -650,7 +655,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
     assert actual_value_01_lower < actual_value_05_lower
     assert actual_value_01_upper > actual_value_05_upper
 
-    expected_estimation_histogram: np.ndarray = np.array(
+    expected_estimation_histogram: np.ndarray = np.asarray(
         [
             1.0,
             0.0,
@@ -662,12 +667,13 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
             0.0,
             0.0,
             2.0,
+            0.0,
         ]
     )
 
     # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
     ks_result = stats.ks_2samp(
-        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+        data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
@@ -716,8 +722,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     error_message: str = re.escape(
-        f"""You have chosen a false_positive_rate of 1.0, which is too close to 1.
-A false_positive_rate of {1 - NP_EPSILON} has been selected instead."""
+        f"""You have chosen a false_positive_rate of 1.0, which is too close to 1.  A false_positive_rate of \
+{1 - NP_EPSILON} has been selected instead.
+"""
     )
 
     with pytest.warns(UserWarning, match=error_message):
@@ -772,8 +779,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     error_message: str = re.escape(
-        """false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1],
-but -0.05 was provided."""
+        """false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but -0.05 was \
+provided.
+"""
     )
 
     with pytest.raises(ge_exceptions.ProfilerExecutionError, match=error_message):
@@ -828,8 +836,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     warning_message: str = re.escape(
-        f"""You have chosen a false_positive_rate of 0.0, which is too close to 0.
-A false_positive_rate of {NP_EPSILON} has been selected instead."""
+        f"""You have chosen a false_positive_rate of 0.0, which is too close to 0.  A false_positive_rate of \
+{NP_EPSILON} has been selected instead.
+"""
     )
 
     with pytest.warns(UserWarning, match=warning_message):
@@ -891,8 +900,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     warning_message: str = re.escape(
-        f"""You have chosen a false_positive_rate of {smaller_than_np_epsilon_false_positive_rate}, which is too close to 0.
-A false_positive_rate of {NP_EPSILON} has been selected instead."""
+        f"""You have chosen a false_positive_rate of {smaller_than_np_epsilon_false_positive_rate}, which is too close \
+to 0.  A false_positive_rate of {NP_EPSILON} has been selected instead.
+"""
     )
 
     with pytest.warns(UserWarning, match=warning_message):
@@ -990,7 +1000,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     assert parameter_node == expected_value_dict
 
-    expected_value: np.ndarray = np.array([6180, 10277])
+    expected_value: np.ndarray = np.asarray([6180, 10277])
 
     # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
     # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
@@ -1006,24 +1016,25 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",
     )
 
-    expected_estimation_histogram: np.ndarray = np.array(
+    expected_estimation_histogram: np.ndarray = np.asarray(
         [
-            13.0,
-            155.0,
-            719.0,
-            1546.0,
-            2221.0,
-            2570.0,
-            1946.0,
-            683.0,
-            137.0,
-            9.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
         ]
     )
 
     # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
     ks_result: tuple = stats.ks_2samp(
-        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+        data1=actual_estimation_histogram[0], data2=expected_estimation_histogram
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
