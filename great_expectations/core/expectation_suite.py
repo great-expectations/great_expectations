@@ -142,7 +142,7 @@ class ExpectationSuite(SerializableDictDot):
                 try:
                     # noinspection PyNoneFunctionAssignment,PyTypeChecker
                     other_dict: dict = expectationSuiteSchema.load(other)
-                    other: ExpectationSuite = ExpectationSuite(
+                    other = ExpectationSuite(
                         **other_dict, data_context=self._data_context
                     )
                 except ValidationError:

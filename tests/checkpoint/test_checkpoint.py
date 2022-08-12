@@ -1334,7 +1334,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     # add checkpoint config
-    checkpoint_config: CheckpointConfig = CheckpointConfig(
+    checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
@@ -1396,7 +1396,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     checkpoint_name: str = "test_checkpoint_name"
     # add checkpoint config
-    checkpoint_config: CheckpointConfig = CheckpointConfig(
+    checkpoint_config = CheckpointConfig(
         name=checkpoint_name,
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
@@ -2597,7 +2597,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
 
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
-    simplified_checkpoint_config: CheckpointConfig = CheckpointConfig(
+    simplified_checkpoint_config = CheckpointConfig(
         name="my_simplified_checkpoint",
         config_version=1,
         template_name="my_simple_template_checkpoint",

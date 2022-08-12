@@ -394,7 +394,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         for rule_state in self.rule_states:
             domain: Domain = rule_state.get_domains_as_dict().get(domain_id)
             if domain is not None:
-                rule_output: RuleOutput = RuleOutput(rule_state=rule_state)
+                rule_output = RuleOutput(rule_state=rule_state)
                 return rule_output.get_fully_qualified_parameter_names_for_domain_id(
                     domain_id=domain_id
                 )
@@ -434,7 +434,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         for rule_state in self.rule_states:
             domain: Domain = rule_state.get_domains_as_dict().get(domain_id)
             if domain is not None:
-                rule_output: RuleOutput = RuleOutput(rule_state=rule_state)
+                rule_output = RuleOutput(rule_state=rule_state)
                 return rule_output.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
                     domain_id=domain_id
                 )
@@ -1430,7 +1430,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             expectation_configuration_builders configuration components
             data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
         """
-        profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        profiler_config = RuleBasedProfilerConfig(
             name=name,
             id_=id_,
             config_version=config_version,

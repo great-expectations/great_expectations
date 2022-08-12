@@ -949,7 +949,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
         name: str, exclude_column_names: Optional[List[str]] = None
     ) -> RuleBasedProfilerConfig:
         exclude_column_names = exclude_column_names or []
-        expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        expected_rule_based_profiler_config = RuleBasedProfilerConfig(
             config_version=1.0,
             name=name,
             variables={"random_seed": None},
@@ -1360,7 +1360,7 @@ def quentin_expected_expectation_suite(
 
         expectation_suite_name: str = "my_suite"
 
-        expected_expectation_suite: ExpectationSuite = ExpectationSuite(
+        expected_expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name,
         )
 
@@ -1456,7 +1456,7 @@ def quentin_explicit_instantiation_result_actual_time(
 
     data_assistant_name: str = "test_volume_data_assistant"
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name=data_assistant_name,
         validator=validator,
     )
@@ -1493,7 +1493,7 @@ def quentin_explicit_instantiation_result_frozen_time(
 
     data_assistant_name: str = "test_volume_data_assistant"
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name=data_assistant_name,
         validator=validator,
     )
@@ -1609,7 +1609,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         persist=False,
     )
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
         validator=validator,
     )
