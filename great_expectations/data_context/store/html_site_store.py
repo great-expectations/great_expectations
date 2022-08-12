@@ -302,7 +302,7 @@ class HtmlSiteStore:
             if only_if_exists:
                 return (
                     store_backend.get_public_url_for_key(key)
-                    if store_backend.has_key(key)
+                    if store_backend.has_key(key)  # noqa: W601
                     else None
                 )
             else:
@@ -311,7 +311,7 @@ class HtmlSiteStore:
             if only_if_exists:
                 return (
                     store_backend.get_url_for_key(key)
-                    if store_backend.has_key(key)
+                    if store_backend.has_key(key)  # noqa: W601
                     else None
                 )
             else:
