@@ -21,7 +21,7 @@ from great_expectations.data_context.store import (  # isort:skip
     EvaluationParameterStore,
 )
 
-yaml: YAMLHandler = YAMLHandler()
+yaml = YAMLHandler()
 
 
 @pytest.fixture()

@@ -93,7 +93,7 @@ class BaseDatasource:
             ) = data_connector.get_batch_data_and_metadata(
                 batch_definition=batch_definition
             )
-        new_batch: Batch = Batch(
+        new_batch = Batch(
             data=batch_data,
             batch_request=None,
             batch_definition=batch_definition,
@@ -174,7 +174,7 @@ class BaseDatasource:
                 runtime_parameters=runtime_parameters,
             )
 
-            new_batch: Batch = Batch(
+            new_batch = Batch(
                 data=batch_data,
                 batch_request=batch_request,
                 batch_definition=batch_definition,
@@ -199,7 +199,7 @@ class BaseDatasource:
                 ) = data_connector.get_batch_data_and_metadata(
                     batch_definition=batch_definition
                 )
-                new_batch: Batch = Batch(
+                new_batch = Batch(
                     data=batch_data,
                     batch_request=batch_request,
                     batch_definition=batch_definition,

@@ -259,7 +259,7 @@ def test_onboarding_data_assistant_metrics_count(
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     num_metrics: int
 
-    domain_key: Domain = Domain(
+    domain_key = Domain(
         domain_type=MetricDomainTypes.TABLE,
     )
 

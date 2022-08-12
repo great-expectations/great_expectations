@@ -110,7 +110,7 @@ def test_get_batch_with_split_on_year(
     num_values_in_df,
     simple_multi_year_pandas_df: pd.DataFrame,
 ):
-    engine: PandasExecutionEngine = PandasExecutionEngine()
+    engine = PandasExecutionEngine()
 
     split_df: pd.DataFrame = engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -144,7 +144,7 @@ def test_get_batch_with_split_on_date_parts_day(
     num_values_in_df,
     simple_multi_year_pandas_df: pd.DataFrame,
 ):
-    engine: PandasExecutionEngine = PandasExecutionEngine()
+    engine = PandasExecutionEngine()
 
     split_df: pd.DataFrame = engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -348,7 +348,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             "group_names": ["index"],
         },
     )
-    batch_def: BatchDefinition = BatchDefinition(
+    batch_def = BatchDefinition(
         datasource_name="FAKE_DATASOURCE_NAME",
         data_connector_name="my_data_connector",
         data_asset_name="alpha",

@@ -75,7 +75,7 @@ class CloudDataContext(AbstractDataContext):
             "ge_cloud_base_url": self.ge_cloud_config.base_url,
         }
 
-        datasource_store: DatasourceStore = DatasourceStore(
+        datasource_store = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
@@ -102,7 +102,7 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_organization_id: str = self._ge_cloud_config.organization_id
         ge_cloud_access_token: str = self._ge_cloud_config.access_token
 
-        variables: CloudDataContextVariables = CloudDataContextVariables(
+        variables = CloudDataContextVariables(
             config=self._project_config,
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_organization_id=ge_cloud_organization_id,
@@ -179,7 +179,7 @@ class CloudDataContext(AbstractDataContext):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
-        expectation_suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
         key = GeCloudIdentifier(
@@ -267,7 +267,7 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             None
         """
-        key: GeCloudIdentifier = GeCloudIdentifier(
+        key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id
             if ge_cloud_id is not None

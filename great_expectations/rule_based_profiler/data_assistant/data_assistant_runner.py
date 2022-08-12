@@ -162,7 +162,7 @@ class DataAssistantRunner:
             self._get_method_signature_parameters_for_variables_directives()
         )
 
-        func_sig: Signature = Signature(
+        func_sig = Signature(
             parameters=parameters, return_annotation=DataAssistantResult
         )
         gen_func: Callable = create_function(func_signature=func_sig, func_impl=run)

@@ -53,7 +53,7 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
-yaml_handler: YAMLHandler = YAMLHandler()
+yaml_handler = YAMLHandler()
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal

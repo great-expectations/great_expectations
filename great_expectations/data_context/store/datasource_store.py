@@ -214,7 +214,7 @@ class DatasourceStore(Store):
         )
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
-        datasource_key: DataContextVariableKey = DataContextVariableKey(
+        datasource_key = DataContextVariableKey(
             resource_name=datasource_name,
         )
         return datasource_key
