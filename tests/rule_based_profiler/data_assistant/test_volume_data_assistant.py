@@ -1881,22 +1881,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
         exact_estimation=False,
-        # include_column_names=include_column_names,
         exclude_column_names=exclude_column_names,
-        # include_column_name_suffixes=include_column_name_suffixes,
-        # exclude_column_name_suffixes=exclude_column_name_suffixes,
-        # semantic_type_filter_module_name=semantic_type_filter_module_name,
-        # semantic_type_filter_class_name=semantic_type_filter_class_name,
-        # include_semantic_types=include_semantic_types,
-        # exclude_semantic_types=exclude_semantic_types,
-        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        # cardinality_limit_mode=CardinalityLimitMode.FEW,
-        # max_unique_values=max_unique_values,
-        # max_proportion_unique=max_proportion_unique,
-        # categorical_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "round_decimals": 3,
-        # },
     )
 
     column_name: str
@@ -2029,23 +2014,6 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        # exact_estimation=True,
-        # include_column_names=include_column_names,
-        # exclude_column_names=exclude_column_names,
-        # include_column_name_suffixes=include_column_name_suffixes,
-        # exclude_column_name_suffixes=exclude_column_name_suffixes,
-        # semantic_type_filter_module_name=semantic_type_filter_module_name,
-        # semantic_type_filter_class_name=semantic_type_filter_class_name,
-        # include_semantic_types=include_semantic_types,
-        # exclude_semantic_types=exclude_semantic_types,
-        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        # cardinality_limit_mode=CardinalityLimitMode.FEW,
-        # max_unique_values=max_unique_values,
-        # max_proportion_unique=max_proportion_unique,
-        # categorical_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "round_decimals": 3,
-        # },
     )
 
     rule_config: dict
@@ -2073,21 +2041,8 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
         exact_estimation=False,
-        # include_column_names=include_column_names,
-        # exclude_column_names=exclude_column_names,
-        # include_column_name_suffixes=include_column_name_suffixes,
-        # exclude_column_name_suffixes=exclude_column_name_suffixes,
-        # semantic_type_filter_module_name=semantic_type_filter_module_name,
-        # semantic_type_filter_class_name=semantic_type_filter_class_name,
-        # include_semantic_types=include_semantic_types,
-        # exclude_semantic_types=exclude_semantic_types,
-        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        # cardinality_limit_mode=CardinalityLimitMode.REL_100,
-        # max_unique_values=max_unique_values,
-        # max_proportion_unique=max_proportion_unique,
         categorical_columns_rule={
             "false_positive_rate": 0.1,
-            # "round_decimals": 3,
         },
     )
     assert (
