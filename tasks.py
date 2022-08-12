@@ -9,6 +9,7 @@ To show all available tasks `invoke --list`
 To show task help page `invoke <NAME> --help`
 """
 import json
+import os
 import pathlib
 import shutil
 
@@ -243,7 +244,11 @@ def mv_usage_stats_json(ctx):
 
 
 @invoke.task
-def docker(ctx, name="gx38", tag="dev", source=pathlib.Path.cwd(), build=False):
+def docker(ctx, name="gx38local", tag="latest", build=False):
+    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    curdir = os.path.realpath(os.getcwd())
+    if filedir != curdir:
+        pass
     if build:
         cmds = [
             "docker",
@@ -252,7 +257,6 @@ def docker(ctx, name="gx38", tag="dev", source=pathlib.Path.cwd(), build=False):
             "-f",
             "docker/Dockerfile.tests",
             f"--tag {name}:{tag}",
-            *[f"--build-arg {arg}" for arg in ["SOURCE=local", "PYTHON_VERSION=3.8"]],
             ".",
         ]
 
@@ -263,7 +267,7 @@ def docker(ctx, name="gx38", tag="dev", source=pathlib.Path.cwd(), build=False):
             "-it",
             "--rm",
             "--mount",
-            f"type=bind,source={source},target=/great_expectations",
+            f"type=bind,source={curdir},target=/great_expectations",
             "-w",
             "/great_expectations",
             f"{name}:{tag}",
