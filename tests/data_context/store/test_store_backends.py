@@ -1340,7 +1340,9 @@ def test_TupleS3StoreBackend_list_over_1000_keys():
     assert len(keys) == num_keys_to_add + 1
 
 
-def test_GeCloudStoreBackend():
+def test_GeCloudStoreBackend(
+    shared_called_with_request_kwargs: dict, ge_cloud_access_token: str
+):
     """
     What does this test test and why?
 
@@ -1349,10 +1351,10 @@ def test_GeCloudStoreBackend():
     """
     ge_cloud_base_url = "https://app.greatexpectations.io/"
     ge_cloud_credentials = {
-        "access_token": "1234",
+        "access_token": ge_cloud_access_token,
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
-    ge_cloud_resource_type = GeCloudRESTResource.CONTRACT
+    ge_cloud_resource_type = GeCloudRESTResource.CHECKPOINT
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
@@ -1371,12 +1373,12 @@ def test_GeCloudStoreBackend():
             ge_cloud_credentials=ge_cloud_credentials,
             ge_cloud_resource_type=ge_cloud_resource_type,
         )
-        my_store_backend.set(("contract", ""), my_simple_checkpoint_config_serialized)
+        my_store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             json={
                 "data": {
-                    "type": "contract",
+                    "type": "checkpoint",
                     "attributes": {
                         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
                         "checkpoint_config": OrderedDict(
@@ -1401,10 +1403,7 @@ def test_GeCloudStoreBackend():
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **shared_called_with_request_kwargs,
         )
 
     # test .get
@@ -1416,18 +1415,15 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.get(
             (
-                "contract",
+                "checkpoint",
                 "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             )
         )
         mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd-8a42-3c35cce574c6",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
             params=None,
+            **shared_called_with_request_kwargs,
         )
 
     # test .list_keys
@@ -1439,11 +1435,8 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.list_keys()
         mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            **shared_called_with_request_kwargs,
         )
 
     # test .remove_key
@@ -1458,25 +1451,22 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.remove_key(
             (
-                "contract",
+                "checkpoint",
                 "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             )
         )
         mock_delete.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
             json={
                 "data": {
-                    "type": "contract",
+                    "type": "checkpoint",
                     "id_": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **shared_called_with_request_kwargs,
         )
 
     # test .set
@@ -1498,10 +1488,7 @@ def test_GeCloudStoreBackend():
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **shared_called_with_request_kwargs,
         )
 
     # test .get
@@ -1520,11 +1507,8 @@ def test_GeCloudStoreBackend():
         mock_get.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
             "-4bdd-8a42-3c35cce574c6",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
             params=None,
+            **shared_called_with_request_kwargs,
         )
 
     # test .list_keys
@@ -1537,10 +1521,7 @@ def test_GeCloudStoreBackend():
         my_store_backend.list_keys()
         mock_get.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **shared_called_with_request_kwargs,
         )
 
     # test .remove_key
@@ -1570,10 +1551,7 @@ def test_GeCloudStoreBackend():
                     "attributes": {"deleted": True},
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **shared_called_with_request_kwargs,
         )
 
 
@@ -1584,7 +1562,7 @@ def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() ->
         "access_token": "1234",
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
-    ge_cloud_resource_type = "contract"  # Instead of using enum
+    ge_cloud_resource_type = "checkpoint"  # Instead of using enum
 
     my_store_backend = GeCloudStoreBackend(
         ge_cloud_base_url=ge_cloud_base_url,
@@ -1592,7 +1570,7 @@ def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() ->
         ge_cloud_resource_type=ge_cloud_resource_type,
     )
 
-    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CONTRACT
+    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
 
 
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:

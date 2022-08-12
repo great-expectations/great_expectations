@@ -109,6 +109,10 @@ class BaseCheckpoint(ConfigPeer):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
 
+        # If no validations are provided, the combination of expectation_suite_name, batch_request,
+        # and action_list are considered the "default" validation.
+        using_default_validation = not self.validations and not validations
+
         run_time = run_time or datetime.datetime.now()
         runtime_configuration = runtime_configuration or {}
         result_format = result_format or runtime_configuration.get("result_format")
@@ -138,7 +142,7 @@ class BaseCheckpoint(ConfigPeer):
         run_name_template = substituted_runtime_config.get("run_name_template")
 
         batch_request = substituted_runtime_config.get("batch_request")
-        validations = substituted_runtime_config.get("validations") or []
+        validations = cast(list, substituted_runtime_config.get("validations") or [])
 
         if len(validations) == 0 and not batch_request:
             raise ge_exceptions.CheckpointError(
@@ -151,6 +155,12 @@ class BaseCheckpoint(ConfigPeer):
             )
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
+
+        # Ensure that validations dicts have the most specific id available
+        # (default to Checkpoint's default_validation_id if no validations were passed in the signature)
+        if using_default_validation:
+            for validation in validations:
+                validation["id_"] = self.config.default_validation_id
 
         # Use AsyncExecutor to speed up I/O bound validations by running them in parallel with multithreading (if
         # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
@@ -310,6 +320,9 @@ class BaseCheckpoint(ConfigPeer):
     ) -> None:
         if validation_dict is None:
             validation_dict = {}
+            validation_dict["id_"] = substituted_runtime_config.get(
+                "default_validation_id"
+            )
 
         try:
             substituted_validation_dict: dict = get_substituted_validation_dict(
@@ -370,7 +383,7 @@ class BaseCheckpoint(ConfigPeer):
             checkpoint_identifier = None
             if self.data_context.ge_cloud_mode:
                 checkpoint_identifier = GeCloudIdentifier(
-                    resource_type=GeCloudRESTResource.CONTRACT,
+                    resource_type=GeCloudRESTResource.CHECKPOINT,
                     ge_cloud_id=str(self.ge_cloud_id),
                 )
 
@@ -379,20 +392,22 @@ class BaseCheckpoint(ConfigPeer):
             if catch_exceptions_validation is not None:
                 operator_run_kwargs["catch_exceptions"] = catch_exceptions_validation
 
-            async_validation_operator_results.append(
-                async_executor.submit(
-                    action_list_validation_operator.run,
-                    assets_to_validate=[validator],
-                    run_id=run_id,
-                    evaluation_parameters=substituted_validation_dict.get(
-                        "evaluation_parameters"
-                    ),
-                    result_format=result_format,
-                    checkpoint_identifier=checkpoint_identifier,
-                    checkpoint_name=self.name,
-                    **operator_run_kwargs,
-                )
+            validation_id: Optional[str] = substituted_validation_dict.get("id_")
+
+            async_validation_operator_result = async_executor.submit(
+                action_list_validation_operator.run,
+                assets_to_validate=[validator],
+                run_id=run_id,
+                evaluation_parameters=substituted_validation_dict.get(
+                    "evaluation_parameters"
+                ),
+                result_format=result_format,
+                checkpoint_identifier=checkpoint_identifier,
+                checkpoint_name=self.name,
+                validation_id=validation_id,
+                **operator_run_kwargs,
             )
+            async_validation_operator_results.append(async_validation_operator_result)
         except (
             ge_exceptions.CheckpointError,
             ge_exceptions.ExecutionEngineError,

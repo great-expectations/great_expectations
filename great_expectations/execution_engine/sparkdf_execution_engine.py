@@ -351,7 +351,9 @@ Please check your config."""
         """
         if path.endswith(".csv") or path.endswith(".tsv"):
             return "csv"
-        elif path.endswith(".parquet"):
+        elif (
+            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
+        ):
             return "parquet"
 
         raise ExecutionEngineError(

@@ -194,7 +194,7 @@ def test_cloud_backed_data_context_add_datasource(
     datasource_id: str,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request_headers: dict,
+    shared_called_with_request_kwargs: dict,
     mock_response_factory: Callable,
     mocked_get_response: Callable[[], MockResponse],
     request,
@@ -256,8 +256,7 @@ def test_cloud_backed_data_context_add_datasource(
                         },
                     }
                 },
-                headers=request_headers,
-                timeout=GeCloudStoreBackend.TIMEOUT,
+                **shared_called_with_request_kwargs,
             )
             mock_get.assert_called_once()
             # TODO: AJB 20220803 Assert that mock_get is called also, make sure that the same id is used in both calls
@@ -302,7 +301,7 @@ def test_data_context_in_cloud_mode_add_datasource(
     datasource_name: str,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request_headers: dict,
+    shared_called_with_request_kwargs: dict,
     mock_response_factory: Callable,
 ):
     """A DataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
@@ -368,7 +367,7 @@ def test_data_context_in_cloud_mode_add_datasource(
                     },
                 }
             },
-            headers=request_headers,
+            **shared_called_with_request_kwargs,
         )
 
         # Make sure the id was populated correctly into the created datasource object and config
@@ -403,7 +402,7 @@ def test_cloud_data_context_add_datasource(
     datasource_name: str,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request_headers: dict,
+    shared_called_with_request_kwargs: dict,
     mock_response_factory: Callable,
 ):
     """A CloudDataContext should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
@@ -472,7 +471,7 @@ def test_cloud_data_context_add_datasource(
                     },
                 }
             },
-            headers=request_headers,
+            **shared_called_with_request_kwargs,
         )
 
         # Make sure the id was populated correctly into the created datasource object and config
