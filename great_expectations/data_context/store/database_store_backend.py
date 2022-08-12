@@ -86,12 +86,12 @@ class DatabaseStoreBackend(StoreBackend):
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
         cols = []
-        for column in key_columns:
-            if column == "value":
+        for column_ in key_columns:
+            if column_ == "value":
                 raise ge_exceptions.InvalidConfigError(
                     "'value' cannot be used as a key_element name"
                 )
-            cols.append(Column(column, String, primary_key=True))
+            cols.append(Column(column_, String, primary_key=True))
         cols.append(Column("value", String))
         try:
             table = Table(table_name, meta, autoload=True, autoload_with=self.engine)
