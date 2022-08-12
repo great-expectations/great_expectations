@@ -186,7 +186,7 @@ class DataAssistantRunner:
             Parameter(
                 name="estimation",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
-                default=Parameter.empty,
+                default=None,
                 annotation=Optional[Union[str, NumericRangeEstimatorType]],
             ),
         ]
