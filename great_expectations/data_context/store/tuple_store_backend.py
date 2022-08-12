@@ -694,7 +694,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         s3_object_key = self._build_s3_object_key(key)
 
         # Check if the object exists
-        if self.has_key(key):
+        if self.has_key(key):  # noqa: W601
             # This implementation deletes the object if non-versioned or adds a delete marker if versioned
             s3.Object(self.bucket, s3_object_key).delete()
             return True

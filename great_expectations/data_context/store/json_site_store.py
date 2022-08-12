@@ -28,9 +28,9 @@ class JsonSiteStore(Store):
                 "class_name", "InMemoryStoreBackend"
             )
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            store_backend_class = load_class(
-                store_backend_class_name, store_backend_module_name
-            )
+            # store_backend_class = load_class(
+            #     store_backend_class_name, store_backend_module_name
+            # )
 
         super().__init__(
             store_backend=store_backend,
