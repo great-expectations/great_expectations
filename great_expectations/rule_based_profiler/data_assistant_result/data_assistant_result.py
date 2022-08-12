@@ -283,6 +283,8 @@ class DataAssistantResult(SerializableDictDot):
             DataAssistantResult.ALLOWED_KEYS
             | {
                 "get_expectation_suite",
+                "show_expectations_by_domain_type",
+                "show_expectations_by_expectation_type",
                 "plot_metrics",
                 "plot_expectations_and_metrics",
             }
