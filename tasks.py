@@ -12,7 +12,6 @@ import json
 import os
 import pathlib
 import shutil
-import sys
 
 import invoke
 
@@ -260,7 +259,8 @@ def docker(ctx, name="gx38local", tag="latest", build=False, cmd="bash"):
     curdir = os.path.realpath(os.getcwd())
     if filedir != curdir:
         raise invoke.Exit(
-            "The docker task must be invoked from the same directory as the task.py file at the top of the repo.", code=1
+            "The docker task must be invoked from the same directory as the task.py file at the top of the repo.",
+            code=1,
         )
     if build:
         cmds = [
