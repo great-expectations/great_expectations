@@ -3416,7 +3416,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     ] = [
         ExpectationConfiguration(
             **{
-                "kwargs": {"min_value": 7500, "max_value": 9000},
+                "kwargs": {"min_value": 7510, "max_value": 8995},
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3550,8 +3550,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 57.95,
-                    "min_value": 37.52,
+                    "max_value": 57.8,
+                    "min_value": 37.57,
                     "column": "trip_distance",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -3748,8 +3748,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": -21.0,
-                    "min_value": -52.0,
+                    "max_value": -21.02,
+                    "min_value": -51.7,
                     "column": "fare_amount",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -3770,8 +3770,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 3004.0,
-                    "min_value": 215.0,
+                    "max_value": 2976.46,
+                    "min_value": 215.35,
                     "column": "fare_amount",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -3793,7 +3793,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "kwargs": {
                     "mostly": 1.0,
                     "max_value": -1.0,
-                    "min_value": -36.71,
+                    "min_value": -36.35,
                     "column": "extra",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -3815,7 +3815,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "kwargs": {
                     "mostly": 1.0,
                     "max_value": 7.0,
-                    "min_value": 4.5,
+                    "min_value": 4.53,
                     "column": "extra",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -3858,7 +3858,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 37.51,
+                    "max_value": 37.14,
                     "min_value": 0.5,
                     "column": "mta_tax",
                 },
@@ -3902,8 +3902,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 75.0,
-                    "min_value": 38.85,
+                    "max_value": 74.72,
+                    "min_value": 38.93,
                     "column": "tip_amount",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -3946,8 +3946,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 500.05,
-                    "min_value": 24.02,
+                    "max_value": 495.58,
+                    "min_value": 24.31,
                     "column": "tolls_amount",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4012,8 +4012,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": -24.3,
-                    "min_value": -52.8,
+                    "max_value": -24.32,
+                    "min_value": -52.54,
                     "column": "total_amount",
                 },
                 "expectation_type": "expect_column_min_to_be_between",
@@ -4034,8 +4034,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 3004.8,
-                    "min_value": 250.3,
+                    "max_value": 2980.13,
+                    "min_value": 253.18,
                     "column": "total_amount",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -4056,7 +4056,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "kwargs": {
                     "mostly": 1.0,
-                    "max_value": 0.0,
+                    "max_value": -0.03,
                     "min_value": -2.5,
                     "column": "congestion_surcharge",
                 },
@@ -4079,7 +4079,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "kwargs": {
                     "mostly": 1.0,
                     "max_value": 2.5,
-                    "min_value": 0.0,
+                    "min_value": 0.02,
                     "column": "congestion_surcharge",
                 },
                 "expectation_type": "expect_column_max_to_be_between",
@@ -5058,7 +5058,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "mostly": 1.0,
             },
             "$parameter.raw.row_count_range": {
-                "value": [7500, 9000],
+                "value": [7510, 8995],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "table.row_count",
@@ -5070,7 +5070,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.row_count_range": {
-                "value": [7500, 9000],
+                "value": [7510, 8995],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "table.row_count",
@@ -5244,7 +5244,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [37.52, 57.95],
+                "value": [37.57, 57.8],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5268,7 +5268,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [37.52, 57.95],
+                "value": [37.57, 57.8],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5562,7 +5562,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
-                "value": [-52.0, -21.0],
+                "value": [-51.7, -21.02],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5574,7 +5574,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [215.0, 3004.0],
+                "value": [215.35, 2976.46],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5586,7 +5586,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.min_range": {
-                "value": [-52.0, -21.0],
+                "value": [-51.7, -21.02],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5598,7 +5598,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [215.0, 3004.0],
+                "value": [215.35, 2976.46],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5628,7 +5628,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
-                "value": [-36.71, -1.0],
+                "value": [-36.35, -1.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5640,7 +5640,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [4.5, 7.0],
+                "value": [4.53, 7.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5652,7 +5652,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.min_range": {
-                "value": [-36.71, -1.0],
+                "value": [-36.35, -1.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5664,7 +5664,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [4.5, 7.0],
+                "value": [4.53, 7.0],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5706,7 +5706,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [0.5, 37.51],
+                "value": [0.5, 37.14],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5730,7 +5730,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [0.5, 37.51],
+                "value": [0.5, 37.14],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5772,7 +5772,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [38.85, 75.0],
+                "value": [38.93, 74.72],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5796,7 +5796,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [38.85, 75.0],
+                "value": [38.93, 74.72],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5838,7 +5838,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [24.02, 500.05],
+                "value": [24.31, 495.58],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5862,7 +5862,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [24.02, 500.05],
+                "value": [24.31, 495.58],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5958,7 +5958,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
-                "value": [-52.8, -24.3],
+                "value": [-52.54, -24.32],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5970,7 +5970,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [250.3, 3004.8],
+                "value": [253.18, 2980.13],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -5982,7 +5982,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.min_range": {
-                "value": [-52.8, -24.3],
+                "value": [-52.54, -24.32],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -5994,7 +5994,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [250.3, 3004.8],
+                "value": [253.18, 2980.13],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -6024,7 +6024,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
-                "value": [-2.5, 0.0],
+                "value": [-2.5, -0.03],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -6036,7 +6036,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.raw.max_range": {
-                "value": [0.0, 2.5],
+                "value": [0.02, 2.5],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -6048,7 +6048,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.min_range": {
-                "value": [-2.5, 0.0],
+                "value": [-2.5, -0.03],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.min",
@@ -6060,7 +6060,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.max_range": {
-                "value": [0.00, 2.5],
+                "value": [0.02, 2.5],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "column.max",
@@ -6738,7 +6738,7 @@ def quentin_columnar_table_multi_batch():
                 ],
                 "fare_amount": [
                     [
-                        5.9375,
+                        5.8486295,
                         6.5,
                     ],
                     [
@@ -6746,7 +6746,7 @@ def quentin_columnar_table_multi_batch():
                         9.5625,
                     ],
                     [
-                        13.4375,
+                        13.348875698,
                         15.625,
                     ],
                 ],
@@ -6756,7 +6756,7 @@ def quentin_columnar_table_multi_batch():
                         0.0,
                     ],
                     [
-                        0.875,
+                        0.814330616,
                         1.965,
                     ],
                     [
