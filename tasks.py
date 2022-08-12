@@ -12,6 +12,7 @@ import json
 import os
 import pathlib
 import shutil
+import sys
 
 import invoke
 
@@ -243,12 +244,24 @@ def mv_usage_stats_json(ctx):
     print(f"'{outfile}' copied to dbfs.")
 
 
-@invoke.task
-def docker(ctx, name="gx38local", tag="latest", build=False):
+@invoke.task(
+    help={
+        "name": "Docker image name.",
+        "tag": "Docker image tag.",
+        "build": "If True build the image, otherwise run it. Defaults to False.",
+        "cmd": "Command for docker image. Default is bash.",
+    }
+)
+def docker(ctx, name="gx38local", tag="latest", build=False, cmd="bash"):
+    """
+    Build or run gx docker image.
+    """
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
     curdir = os.path.realpath(os.getcwd())
     if filedir != curdir:
-        pass
+        sys.exit(
+            "The docker task must be invoked from the same directory as the task.py file at the top of the repo."
+        )
     if build:
         cmds = [
             "docker",
@@ -257,6 +270,7 @@ def docker(ctx, name="gx38local", tag="latest", build=False):
             "-f",
             "docker/Dockerfile.tests",
             f"--tag {name}:{tag}",
+            *[f"--build-arg {arg}" for arg in ["SOURCE=local", "PYTHON_VERSION=3.8"]],
             ".",
         ]
 
@@ -267,11 +281,10 @@ def docker(ctx, name="gx38local", tag="latest", build=False):
             "-it",
             "--rm",
             "--mount",
-            f"type=bind,source={curdir},target=/great_expectations",
+            f"type=bind,source={filedir},target=/great_expectations",
             "-w",
             "/great_expectations",
             f"{name}:{tag}",
-            "bash",
+            f"{cmd}",
         ]
-    # print(cmds)
     ctx.run(" ".join(cmds), echo=True, pty=True)
