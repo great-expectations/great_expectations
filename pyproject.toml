@@ -36,7 +36,6 @@ exclude = [
     'datasource', # 93
     'dataset',  # 19
     'data_context/data_context', # 199
-    'data_context/store', # 39
     'execution_engine', # 100
     'marshmallow__shade', # 19
     '.*render', # 72
