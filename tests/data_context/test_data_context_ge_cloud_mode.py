@@ -66,7 +66,7 @@ def ge_cloud_data_context_config(
         store_backend:
           class_name: GeCloudStoreBackend
           ge_cloud_base_url: {ge_cloud_runtime_base_url}
-          ge_cloud_resource_type: suite_validation_result
+          ge_cloud_resource_type: validation_result
           ge_cloud_credentials:
             access_token: {ge_cloud_runtime_access_token}
             organization_id: {ge_cloud_runtime_organization_id}
