@@ -69,7 +69,7 @@ class FileDataContext(AbstractDataContext):
             # we ensure that the same exact context (memory address and all) is supplied to the Store backend
         }
 
-        datasource_store: DatasourceStore = DatasourceStore(
+        datasource_store = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
@@ -96,12 +96,12 @@ class FileDataContext(AbstractDataContext):
             None
         """
         if expectation_suite_name is None:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite.expectation_suite_name
             )
         else:
             expectation_suite.expectation_suite_name = expectation_suite_name
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
         if self.expectations_store.has_key(key) and not overwrite_existing:
@@ -125,7 +125,7 @@ class FileDataContext(AbstractDataContext):
         return self._context_root_directory
 
     def _init_variables(self) -> FileDataContextVariables:
-        variables: FileDataContextVariables = FileDataContextVariables(
+        variables = FileDataContextVariables(
             config=self._project_config,
             data_context=self,
         )

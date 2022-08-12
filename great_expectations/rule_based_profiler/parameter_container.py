@@ -287,7 +287,7 @@ def build_parameter_container_for_variables(
         variable_config_key = f"{VARIABLES_KEY}{variable_config_key}"
         parameter_values[variable_config_key] = variable_config_value
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     build_parameter_container(
         parameter_container=parameter_container, parameter_values=parameter_values
     )

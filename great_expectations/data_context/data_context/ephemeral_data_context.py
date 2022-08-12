@@ -46,7 +46,7 @@ class EphemeralDataContext(AbstractDataContext):
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_variables(self) -> EphemeralDataContextVariables:
-        variables: EphemeralDataContextVariables = EphemeralDataContextVariables(
+        variables = EphemeralDataContextVariables(
             config=self._project_config,
         )
         return variables
@@ -60,7 +60,7 @@ class EphemeralDataContext(AbstractDataContext):
         # to the convention set by other internal Stores
         store_backend: dict = {"class_name": "InMemoryStoreBackend"}
 
-        datasource_store: DatasourceStore = DatasourceStore(
+        datasource_store = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,
         )
@@ -86,12 +86,12 @@ class EphemeralDataContext(AbstractDataContext):
             None
         """
         if expectation_suite_name is None:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite.expectation_suite_name
             )
         else:
             expectation_suite.expectation_suite_name = expectation_suite_name
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
         if self.expectations_store.has_key(key) and not overwrite_existing:

@@ -84,7 +84,7 @@ def test_checkpoint_store(empty_data_context):
             "partial_unexpected_count": 20,
         },
     }
-    my_checkpoint_config_0: CheckpointConfig = CheckpointConfig(
+    my_checkpoint_config_0 = CheckpointConfig(
         name=checkpoint_name_0,
         run_name_template=run_name_template_0,
         expectation_suite_name=expectation_suite_name_0,
@@ -93,7 +93,7 @@ def test_checkpoint_store(empty_data_context):
         validations=validations_0,
     )
 
-    key_0: ConfigurationIdentifier = ConfigurationIdentifier(
+    key_0 = ConfigurationIdentifier(
         configuration_key=checkpoint_name_0,
     )
     checkpoint_store.set(key=key_0, value=my_checkpoint_config_0)
@@ -161,7 +161,7 @@ def test_checkpoint_store(empty_data_context):
             "partial_unexpected_count": 20,
         },
     }
-    my_checkpoint_config_1: CheckpointConfig = CheckpointConfig(
+    my_checkpoint_config_1 = CheckpointConfig(
         name=checkpoint_name_1,
         run_name_template=run_name_template_1,
         expectation_suite_name=expectation_suite_name_1,
@@ -171,7 +171,7 @@ def test_checkpoint_store(empty_data_context):
         validations=validations_1,
     )
 
-    key_1: ConfigurationIdentifier = ConfigurationIdentifier(
+    key_1 = ConfigurationIdentifier(
         configuration_key=checkpoint_name_1,
     )
     checkpoint_store.set(key=key_1, value=my_checkpoint_config_1)

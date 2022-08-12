@@ -900,7 +900,7 @@ class AbstractDataContext(ABC):
         execution_engine: ExecutionEngine = self.datasources[
             batch_definition.datasource_name
         ].execution_engine
-        validator: Validator = Validator(
+        validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
@@ -1030,12 +1030,10 @@ class AbstractDataContext(ABC):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
-        expectation_suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
-        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite_name
-        )
+        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
         if self.expectations_store.has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
@@ -1059,9 +1057,7 @@ class AbstractDataContext(ABC):
         Returns:
             True for Success and False for Failure.
         """
-        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-            expectation_suite_name
-        )
+        key = ExpectationSuiteIdentifier(expectation_suite_name)
         if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
@@ -1685,7 +1681,7 @@ class AbstractDataContext(ABC):
             expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
             if not expectation_suite_dict:
                 continue
-            expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite = ExpectationSuite(
                 **expectation_suite_dict, data_context=self
             )
 
