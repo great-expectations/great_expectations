@@ -12,7 +12,8 @@ class MockResponse:
         exc_to_raise: Union[HTTPError, Timeout, None] = None,
     ) -> None:
         self._json_data = json_data
-        self._status_code = status_code
+        # status code should be publicly accesable
+        self.status_code = status_code
         self._exc_to_raise = exc_to_raise
 
     def json(self):
@@ -21,7 +22,7 @@ class MockResponse:
     def raise_for_status(self):
         if self._exc_to_raise:
             raise self._exc_to_raise
-        if self._status_code >= 400:
+        if self.status_code >= 400:
             raise HTTPError(response=self)
         return None
 
