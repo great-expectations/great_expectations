@@ -67,18 +67,10 @@ pyupgrade <PATH/TO/YOUR/CHANGES> --py3-plus
 
 ### Type Checking
 
-Our CI system will perform static type-checking using [mypy](https://mypy.readthedocs.io/en/stable/index.html#) on select modules & packages.
+Our CI system will perform static type-checking using [mypy](https://mypy.readthedocs.io/en/stable/index.html#).
 
-Type-checked modules.
-
-```
-data_asset
-exceptions
-jupyter_ux
-profile
-self_check
-types
-```
+`contrib` and other select `great_expectations/` packages are excluded from type-checking.
+See the `mypy` section in [`pyproject.toml`](https://github.com/great-expectations/great_expectations/blob/develop/pyproject.toml) for more details.
 
 To verify your code will pass the CI type-checker, run `invoke type-check --install-types`.
 Or [run `mypy`](https://mypy.readthedocs.io/en/stable/running_mypy.html) directly against the packages listed above.
