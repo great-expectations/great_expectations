@@ -121,7 +121,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "default_expect_table_row_count_to_be_between_rule": {
                 "variables": {
                     "false_positive_rate": 0.05,
-                    "estimator": "quantiles",
+                    "estimator": "exact",
                     "n_resamples": 9999,
                     "random_seed": None,
                     "quantile_statistic_interpolation_method": "nearest",
