@@ -1034,7 +1034,10 @@ class AbstractDataContext(ABC):
             expectation_suite_name=expectation_suite_name, data_context=self
         )
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
-        if self.expectations_store.has_key(key) and not overwrite_existing:
+        if (
+            self.expectations_store.has_key(key)  # noqa: W601
+            and not overwrite_existing
+        ):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
@@ -1058,7 +1061,7 @@ class AbstractDataContext(ABC):
             True for Success and False for Failure.
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name)
-        if not self.expectations_store.has_key(key):
+        if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
             )
