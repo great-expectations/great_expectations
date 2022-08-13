@@ -351,5 +351,3 @@ class DatabaseStoreBackend(StoreBackend):
     @property
     def config(self) -> dict:
         return self._config
-
-    _move = None  # noqa: F811
