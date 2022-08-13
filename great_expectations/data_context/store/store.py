@@ -133,7 +133,7 @@ class Store:
 
     def tuple_to_key(self, tuple_: Tuple[str, ...]) -> DataContextKey:
         if tuple_ == StoreBackend.STORE_BACKEND_ID_KEY:
-            return StoreBackend.STORE_BACKEND_ID_KEY[0]
+            return StoreBackend.STORE_BACKEND_ID_KEY[0]  # type: ignore[return-value]
         if self._use_fixed_length_key:
             return self.key_class.from_fixed_length_tuple(tuple_)
         return self.key_class.from_tuple(tuple_)

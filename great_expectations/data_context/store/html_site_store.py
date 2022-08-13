@@ -237,7 +237,7 @@ class HtmlSiteStore:
         # backends that write to the same directory structure.
         # It's a pretty reasonable way for HtmlSiteStore to do its job---you just have to remember that it
         # can't necessarily set and list_keys like most other Stores.
-        self.keys = set()
+        self.keys = set()  # type: ignore[var-annotated]
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.

@@ -276,7 +276,7 @@ class DatabaseStoreBackend(StoreBackend):
                     f"Integrity error {str(e)} while trying to store key"
                 )
 
-    def _move(self) -> None:
+    def _move(self) -> None:  # type: ignore[override]
         raise NotImplementedError
 
     def get_url_for_key(self, key):
