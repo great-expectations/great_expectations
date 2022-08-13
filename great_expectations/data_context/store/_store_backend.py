@@ -1,7 +1,7 @@
 import logging
 import uuid
 from abc import ABCMeta, abstractmethod
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import pyparsing as pp
 
@@ -182,7 +182,7 @@ class StoreBackend(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def list_keys(self, prefix=()) -> List[str]:
+    def list_keys(self, prefix=()) -> Union[List[str], List[tuple]]:
         raise NotImplementedError
 
     @abstractmethod
