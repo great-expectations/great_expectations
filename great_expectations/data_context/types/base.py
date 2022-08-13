@@ -98,9 +98,11 @@ class BaseYamlConfig(SerializableDictDot):
             return cls.get_config_class().schema_instance
 
     @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
+    def from_commented_map(
+        cls, commented_map: Union[CommentedMap, Dict]
+    ) -> "BaseYamlConfig":
         try:
-            schema_instance: Any = cls._get_schema_instance()
+            schema_instance: Schema = cls._get_schema_instance()
             config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
