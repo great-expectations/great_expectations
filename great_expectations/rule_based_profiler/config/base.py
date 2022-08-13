@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
@@ -19,7 +19,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_PREFIX,
     ParameterContainer,
 )
@@ -665,7 +665,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         return rule_dict
 
 
-class RuleBasedProfilerConfigSchema(Schema):
+class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     """
     Schema classes for configurations which extend from BaseYamlConfig must extend top-level Marshmallow Schema class.
     Schema classes for their constituent configurations which extend DictDot leve must extend NotNullSchema class.
@@ -691,6 +691,7 @@ class RuleBasedProfilerConfigSchema(Schema):
     id_ = fields.String(
         required=False,
         allow_none=False,
+        data_key="id",
     )
     config_version = fields.Float(
         required=True,

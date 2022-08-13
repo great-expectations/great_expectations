@@ -17,7 +17,7 @@ from great_expectations.rule_based_profiler.config.base import (
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
 )
-from great_expectations.rule_based_profiler.types.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
@@ -114,7 +114,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         regex_pattern_string_parameter_builder_config
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_not_match_regex",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},

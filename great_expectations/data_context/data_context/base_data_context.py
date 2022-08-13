@@ -6,7 +6,23 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.validation_operators.validation_operators import (
+        ValidationOperator,
+    )
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML
@@ -1322,7 +1338,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             save_changes: do I save changes to disk?
         """
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
-        datasource_config: DatasourceConfig = DatasourceConfig(**datasource_config_dict)
+        datasource_config = DatasourceConfig(**datasource_config_dict)
         datasource_name: str = datasource.name
 
         if save_changes:
@@ -1669,7 +1685,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         site_builder.clean_site()
         return True
 
-    def profile_datasource(
+    def profile_datasource(  # noqa: C901 - complexity 25
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -1711,6 +1727,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # We don't need the datasource object, but this line serves to check if the datasource by the name passed as
         # an arg exists and raise an error if it does not.
         datasource = self.get_datasource(datasource_name)
+        assert datasource
 
         if not dry_run:
             logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
@@ -1890,7 +1907,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         profiling_results["success"] = True
         return profiling_results
 
-    def profile_data_asset(
+    def profile_data_asset(  # noqa: C901 - complexity 16
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -1979,7 +1996,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         profiling_results = {"success": False, "results": []}
 
-        total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
+        total_columns, total_expectations, total_rows = 0, 0, 0
         total_start_time = datetime.datetime.now()
 
         name = data_asset_name
@@ -2105,11 +2122,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
+        default_validation_id: Optional[str] = None,
     ) -> Checkpoint:
-
-        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
-            data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,
+        """
+        See parent 'AbstractDataContext.add_checkpoint()' for more information
+        """
+        checkpoint = self._data_context.add_checkpoint(
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -2123,19 +2141,22 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            # Next two fields are for LegacyCheckpoint configuration
             validation_operator_name=validation_operator_name,
             batches=batches,
-            # the following four arguments are used by SimpleCheckpoint
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            default_validation_id=default_validation_id,
         )
+        # <TODO> Remove this after BaseDataContext refactor is complete.
+        # currently this can cause problems if the Checkpoint is instantiated with
+        # EphemeralDataContext, which does not (yet) have full functionality.
+        checkpoint._data_context = self
 
-        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
+        self._synchronize_self_with_underlying_data_context()
         return checkpoint
 
     def get_checkpoint(
@@ -2254,7 +2275,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiler_config.pop("class_name")
         profiler_config.pop("module_name")
 
-        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
+        config = RuleBasedProfilerConfig(**profiler_config)
 
         return RuleBasedProfiler.add_profiler(
             config=config,
@@ -2387,7 +2408,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ge_cloud_id=ge_cloud_id,
         )
 
-    def test_yaml_config(
+    def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,
         name: Optional[str] = None,
@@ -2696,7 +2717,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
-        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self.data_context_id)
 
         usage_stats_event_payload = anonymizer.anonymize(
             obj=instantiated_class, name=checkpoint_name, config=checkpoint_config
@@ -2763,7 +2784,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             },
         )
 
-        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self.data_context_id)
 
         usage_stats_event_payload: dict = anonymizer.anonymize(
             obj=instantiated_class, name=profiler_name, config=profiler_config
@@ -2798,7 +2819,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
 
         # If a subclass of a supported type, find the parent class and anonymize
-        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self.data_context_id)
 
         parent_class_from_object = anonymizer.get_parent_class(
             object_=instantiated_class

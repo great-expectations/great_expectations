@@ -8,6 +8,10 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+)
+from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     MapMetricColumnDomainBuilder,
 )
@@ -33,23 +37,18 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
     RegexPatternStringParameterBuilder,
 )
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.rule_based_profiler import (
-    BaseRuleBasedProfiler,
-    RuleBasedProfiler,
-)
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     VARIABLES_KEY,
-    Domain,
     ParameterNode,
-    SemanticDomainTypes,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
+from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.rule_based_profiler import (
+    BaseRuleBasedProfiler,
+    RuleBasedProfiler,
 )
 from great_expectations.util import camel_to_snake, measure_execution_time
 from great_expectations.validator.validator import Validator
@@ -91,7 +90,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
     DataAssistant usage (e.g., in Jupyter notebook) adheres to the following pattern:
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name="my_volume_data_assistant",
         validator=validator,
     )
@@ -331,6 +330,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 n_resamples=f"{VARIABLES_KEY}n_resamples",
                 random_seed=f"{VARIABLES_KEY}random_seed",
                 quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+                quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
                 quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
                 include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
                 truncate_values=f"{VARIABLES_KEY}truncate_values",
@@ -461,7 +461,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         if batches is None:
             batches = {}
 
-        data_assistant_result: DataAssistantResult = DataAssistantResult(
+        data_assistant_result = DataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
             execution_time=0.0,
             _usage_statistics_handler=usage_statistics_handler,
@@ -751,7 +751,7 @@ def build_map_metric_rule(
             **column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
         ),
     ]
-    column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations: MeanUnexpectedMapMetricMultiBatchParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
+    column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         name=f"{map_metric_name}.unexpected_value",
         map_metric_name=map_metric_name,
         total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
@@ -769,7 +769,7 @@ def build_map_metric_rule(
             **column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations.to_json_dict()
         ),
     ]
-    expect_column_values_to_be_attribute_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    expect_column_values_to_be_attribute_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type=expectation_type,
         validation_parameter_builder_configs=validation_parameter_builder_configs,
         column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -793,7 +793,7 @@ def build_map_metric_rule(
     expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
         expect_column_values_to_be_attribute_expectation_configuration_builder,
     ]
-    rule: Rule = Rule(
+    rule = Rule(
         name=rule_name,
         variables=variables,
         domain_builder=map_metric_column_domain_builder,

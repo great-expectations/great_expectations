@@ -202,15 +202,14 @@ class AbstractDataContext(ABC):
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
-    @abstractmethod
     def _save_project_config(self) -> None:
         """
-        Each DataContext will define how its project_config will be saved.
+        Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
         """
-        raise NotImplementedError
+        self.variables.save_config()
 
     @abstractmethod
     def save_expectation_suite(
@@ -575,6 +574,11 @@ class AbstractDataContext(ABC):
         Returns:
             datasource (Datasource)
         """
+        if datasource_name is None:
+            raise ValueError(
+                "Must provide a datasource_name to retrieve an existing Datasource"
+            )
+
         if datasource_name in self._cached_datasources:
             return self._cached_datasources[datasource_name]
 
@@ -609,7 +613,9 @@ class AbstractDataContext(ABC):
         datasource_name: str
         datasource_config: DatasourceConfig
         for datasource_name, datasource_config in self.config.datasources.items():
-            datasource_dict: dict = datasource_config.to_json_dict()
+            datasource_dict: dict = cast(
+                dict, datasourceConfigSchema.dump(datasource_config)
+            )
             datasource_dict["name"] = datasource_name
             substituted_config: dict = cast(
                 dict,
@@ -642,6 +648,69 @@ class AbstractDataContext(ABC):
         if save_changes:
             self._datasource_store.delete_by_name(datasource_name)
         self._cached_datasources.pop(datasource_name, None)
+        self.config.datasources.pop(datasource_name, None)
+
+    def add_checkpoint(
+        self,
+        name: str,
+        config_version: Optional[Union[int, float]] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[dict] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: Optional[Union[str, List[str]]] = None,
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = None,
+        notify_with: Optional[Union[str, List[str]]] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+        default_validation_id: Optional[str] = None,
+    ) -> "Checkpoint":  # noqa: F821
+
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
+            data_context=self,
+            checkpoint_store_name=self.checkpoint_store_name,
+            name=name,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            # Next two fields are for LegacyCheckpoint configuration
+            validation_operator_name=validation_operator_name,
+            batches=batches,
+            # the following four arguments are used by SimpleCheckpoint
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+            ge_cloud_id=ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            default_validation_id=default_validation_id,
+        )
+
+        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
+        return checkpoint
 
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None
@@ -831,7 +900,7 @@ class AbstractDataContext(ABC):
         execution_engine: ExecutionEngine = self.datasources[
             batch_definition.datasource_name
         ].execution_engine
-        validator: Validator = Validator(
+        validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
@@ -961,12 +1030,10 @@ class AbstractDataContext(ABC):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
-        expectation_suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
-        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite_name
-        )
+        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
         if self.expectations_store.has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
@@ -990,9 +1057,7 @@ class AbstractDataContext(ABC):
         Returns:
             True for Success and False for Failure.
         """
-        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-            expectation_suite_name
-        )
+        key = ExpectationSuiteIdentifier(expectation_suite_name)
         if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
@@ -1616,7 +1681,7 @@ class AbstractDataContext(ABC):
             expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
             if not expectation_suite_dict:
                 continue
-            expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite = ExpectationSuite(
                 **expectation_suite_dict, data_context=self
             )
 

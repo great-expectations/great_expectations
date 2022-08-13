@@ -1,6 +1,7 @@
 import copy
 import cProfile
 import datetime
+import decimal
 import importlib
 import io
 import json
@@ -8,6 +9,7 @@ import logging
 import os
 import pstats
 import re
+import sys
 import time
 import uuid
 from collections import OrderedDict
@@ -892,7 +894,7 @@ def validate(
             expectation_suite_dict: dict = expectationSuiteSchema.load(
                 expectation_suite
             )
-            expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite = ExpectationSuite(
                 **expectation_suite_dict, data_context=data_context
             )
 
@@ -1283,8 +1285,7 @@ def is_numeric(value: Any) -> bool:
 
 def is_int(value: Any) -> bool:
     try:
-        # noinspection PyUnusedLocal
-        num: int = int(value)
+        int(value)
     except (TypeError, ValueError):
         return False
     return True
@@ -1292,8 +1293,7 @@ def is_int(value: Any) -> bool:
 
 def is_float(value: Any) -> bool:
     try:
-        # noinspection PyUnusedLocal
-        num: float = float(value)
+        float(value)
     except (TypeError, ValueError):
         return False
     return True
@@ -1315,6 +1315,26 @@ def is_nan(value: Any) -> bool:
         return np.isnan(value)
     except TypeError:
         return True
+
+
+def convert_decimal_to_float(d: decimal.Decimal) -> float:
+    """
+    This method convers "decimal.Decimal" to standard "float" type.
+    """
+    if requires_lossy_conversion(d=d):
+        logger.warning(
+            f"Using lossy conversion for decimal {d} to float object to support serialization."
+        )
+
+    # noinspection PyTypeChecker
+    return float(d)
+
+
+def requires_lossy_conversion(d: decimal.Decimal) -> bool:
+    """
+    This method determines whether or not conversion from "decimal.Decimal" to standard "float" type cannot be lossless.
+    """
+    return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
 
 
 def isclose(
@@ -1386,8 +1406,7 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
-        # noinspection PyUnusedLocal
-        parsed_date: datetime.datetime = parse(value, fuzzy=fuzzy)
+        parse(value, fuzzy=fuzzy)
     except (TypeError, ValueError):
         return False
     return True

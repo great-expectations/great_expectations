@@ -8,6 +8,7 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
     FileDataContextVariables,
 )
 from great_expectations.data_context.types.base import DataContextConfig
@@ -57,7 +58,10 @@ class FileDataContext(AbstractDataContext):
 
         store_name: str = "datasource_store"  # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
-        store_backend: dict = {"class_name": "InlineStoreBackend"}
+        store_backend: dict = {
+            "class_name": "InlineStoreBackend",
+            "resource_type": DataContextVariableSchema.DATASOURCES,
+        }
         runtime_environment: dict = {
             "root_directory": self.root_directory,
             "data_context": self,
@@ -65,7 +69,7 @@ class FileDataContext(AbstractDataContext):
             # we ensure that the same exact context (memory address and all) is supplied to the Store backend
         }
 
-        datasource_store: DatasourceStore = DatasourceStore(
+        datasource_store = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
@@ -92,12 +96,12 @@ class FileDataContext(AbstractDataContext):
             None
         """
         if expectation_suite_name is None:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite.expectation_suite_name
             )
         else:
             expectation_suite.expectation_suite_name = expectation_suite_name
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
         if self.expectations_store.has_key(key) and not overwrite_existing:
@@ -121,19 +125,8 @@ class FileDataContext(AbstractDataContext):
         return self._context_root_directory
 
     def _init_variables(self) -> FileDataContextVariables:
-        variables: FileDataContextVariables = FileDataContextVariables(
+        variables = FileDataContextVariables(
             config=self._project_config,
             data_context=self,
         )
         return variables
-
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug("Starting DataContext._save_project_config")
-        self._save_project_config_to_disk()
-
-    def _save_project_config_to_disk(self) -> None:
-        """Helper method to make save_project_config more explicit"""
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)

@@ -10,7 +10,7 @@ import warnings
 from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
-from typing import List
+from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
 
@@ -143,8 +143,8 @@ class DataAsset:
             self
         )
 
-    @classmethod
-    def expectation(cls, method_arg_names):
+    @classmethod  # noqa: C901 - complexity 24
+    def expectation(cls, method_arg_names):  # noqa: C901
         """Manages configuration and running of expectation objects.
 
         Expectation builds and saves a new expectation configuration to the DataAsset object. It is the core decorator \
@@ -343,7 +343,9 @@ class DataAsset:
         return outer_wrapper
 
     def _initialize_expectations(
-        self, expectation_suite=None, expectation_suite_name=None
+        self,
+        expectation_suite: Union[Dict, ExpectationSuite, None] = None,
+        expectation_suite_name: Optional[str] = None,
     ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
@@ -372,7 +374,7 @@ class DataAsset:
                 expectation_suite_dict: dict = expectationSuiteSchema.load(
                     expectation_suite
                 )
-                expectation_suite: ExpectationSuite = ExpectationSuite(
+                expectation_suite = ExpectationSuite(
                     **expectation_suite_dict, data_context=self._data_context
                 )
             else:
@@ -559,7 +561,7 @@ class DataAsset:
             suppress_warnings,
         )
 
-    def get_expectation_suite(
+    def get_expectation_suite(  # noqa: C901 - complexity 17
         self,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
@@ -719,7 +721,7 @@ class DataAsset:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    def validate(
+    def validate(  # noqa: C901 - complexity 36
         self,
         expectation_suite=None,
         run_id=None,
@@ -848,7 +850,7 @@ class DataAsset:
                         expectation_suite_dict: dict = expectationSuiteSchema.loads(
                             infile.read()
                         )
-                        expectation_suite: ExpectationSuite = ExpectationSuite(
+                        expectation_suite = ExpectationSuite(
                             **expectation_suite_dict, data_context=self._data_context
                         )
                 except ValidationError:
@@ -859,7 +861,7 @@ class DataAsset:
                     )
             elif isinstance(expectation_suite, dict):
                 expectation_suite_dict: dict = expectation_suite
-                expectation_suite: ExpectationSuite = ExpectationSuite(
+                expectation_suite = ExpectationSuite(
                     **expectation_suite_dict, data_context=None
                 )
             elif not isinstance(expectation_suite, ExpectationSuite):
@@ -903,9 +905,6 @@ class DataAsset:
 
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
-            suite_ge_version = expectation_suite.meta.get(
-                "great_expectations_version"
-            ) or expectation_suite.meta.get("great_expectations.__version__")
 
             ###
             # This is an early example of what will become part of the ValidationOperator

@@ -6,7 +6,9 @@ from great_expectations.core.util import convert_to_json_serializable, nested_up
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
-from great_expectations.rule_based_profiler.types import ParameterContainer
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -35,7 +37,7 @@ class ReconciliationDirectives(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-DEFAULT_RECONCILATION_DIRECTIVES: ReconciliationDirectives = ReconciliationDirectives(
+DEFAULT_RECONCILATION_DIRECTIVES = ReconciliationDirectives(
     variables=ReconciliationStrategy.UPDATE,
     domain_builder=ReconciliationStrategy.UPDATE,
     parameter_builder=ReconciliationStrategy.UPDATE,

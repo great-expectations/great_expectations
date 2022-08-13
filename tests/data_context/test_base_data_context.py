@@ -21,7 +21,7 @@ from great_expectations.data_context.store import (  # isort:skip
     EvaluationParameterStore,
 )
 
-yaml: YAMLHandler = YAMLHandler()
+yaml = YAMLHandler()
 
 
 @pytest.fixture()
@@ -174,7 +174,11 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
         # Create a suite to be used in Validator instantiation
         suites = context.list_expectation_suites()
         expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
-        suite_name = "oss_e2e_test_suite"
+
+        # To ensure we don't accidentally impact parallel test runs in Azure, we randomly generate a suite name in this E2E test.
+        # To limit the number of generated suites, we limit the randomization to 20 numbers.
+        rand_suffix = random.randint(1, 20)
+        suite_name = f"oss_e2e_test_suite_{rand_suffix}"
 
         # Start off each test run with a clean slate
         if expectation_suite_ge_cloud_id in context.list_expectation_suite_names():
@@ -248,7 +252,7 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
+@pytest.mark.e2e
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
     mock_save_project_config: mock.MagicMock,
@@ -277,7 +281,7 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
+@pytest.mark.e2e
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_validator_e2e_workflow_with_cloud_enabled_context(
     mock_save_project_config: mock.MagicMock,

@@ -27,6 +27,9 @@ from great_expectations.exceptions import (
 )
 from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.bundled_metric_configuration import (
+    BundledMetricConfiguration,
+)
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
     SparkDataSampler,
@@ -50,12 +53,13 @@ try:
     # noinspection SpellCheckingInspection
     import pyspark.sql.types as sparktypes
     from pyspark import SparkContext
-    from pyspark.sql import DataFrame, SparkSession
+    from pyspark.sql import DataFrame, Row, SparkSession
     from pyspark.sql.readwriter import DataFrameReader
 except ImportError:
     pyspark = None
     SparkContext = None
     SparkSession = None
+    Row = None
     DataFrame = None
     DataFrameReader = None
     F = None
@@ -221,7 +225,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
-        batch_markers: BatchMarkers = BatchMarkers(
+        batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"
@@ -371,7 +375,9 @@ Please check your config."""
         """
         if path.endswith(".csv") or path.endswith(".tsv"):
             return "csv"
-        elif path.endswith(".parquet"):
+        elif (
+            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
+        ):
             return "parquet"
 
         raise ExecutionEngineError(
@@ -532,9 +538,8 @@ Please check your config."""
 
         return data
 
-    def _combine_row_conditions(
-        self, row_conditions: List[RowCondition]
-    ) -> RowCondition:
+    @staticmethod
+    def _combine_row_conditions(row_conditions: List[RowCondition]) -> RowCondition:
         """Combine row conditions using AND if condition_type is SPARK_SQL
 
         Note, although this method does not currently use `self` internally we
@@ -637,28 +642,45 @@ Please check your config."""
 
     def resolve_metric_bundle(
         self,
-        metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
+        metric_fn_bundle: Iterable[BundledMetricConfiguration],
     ) -> Dict[Tuple[str, str, str], Any]:
-        """For each metric name in the given metric_fn_bundle, finds the domain of the metric and calculates it using a
-        metric function from the given provider class.
+        """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
+        bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
+        if bundling the metrics together is not possible.
 
-                Args:
-                    metric_fn_bundle - A batch containing MetricEdgeKeys and their corresponding functions
+            Args:
+                metric_fn_bundle (Iterable[BundledMetricConfiguration]): \
+                    "BundledMetricConfiguration" contains MetricProvider's MetricConfiguration (its unique identifier),
+                    its metric provider function (the function that actually executes the metric), and arguments to pass
+                    to metric provider function (dictionary of metrics defined in registry and corresponding arguments).
 
-                Returns:
-                    A dictionary of the collected metrics over their respective domains
+            Returns:
+                A dictionary of "MetricConfiguration" IDs and their corresponding fully resolved values for domains.
         """
-        resolved_metrics = {}
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+
+        res: List[Row]
+
         aggregates: Dict[Tuple, dict] = {}
-        for (
-            metric_to_resolve,
-            engine_fn,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-            metric_provider_kwargs,
-        ) in metric_fn_bundle:
+
+        aggregate: dict
+
+        domain_id: Tuple[str, str, str]
+
+        bundled_metric_configuration: BundledMetricConfiguration
+        for bundled_metric_configuration in metric_fn_bundle:
+            bundled_metric_configuration: BundledMetricConfiguration
+            metric_to_resolve: MetricConfiguration = (
+                bundled_metric_configuration.metric_configuration
+            )
+            metric_fn: Any = bundled_metric_configuration.metric_fn
+            compute_domain_kwargs: dict = (
+                bundled_metric_configuration.compute_domain_kwargs
+            )
+
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
+
             domain_id = compute_domain_kwargs.to_id()
             if domain_id not in aggregates:
                 aggregates[domain_id] = {
@@ -666,33 +688,45 @@ Please check your config."""
                     "ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
-            aggregates[domain_id]["column_aggregates"].append(engine_fn)
+
+            aggregates[domain_id]["column_aggregates"].append(metric_fn)
             aggregates[domain_id]["ids"].append(metric_to_resolve.id)
+
         for aggregate in aggregates.values():
-            compute_domain_kwargs = aggregate["domain_kwargs"]
-            df = self.get_domain_records(
-                domain_kwargs=compute_domain_kwargs,
+            domain_kwargs: dict = aggregate["domain_kwargs"]
+            df: Optional[DataFrame] = self.get_domain_records(
+                domain_kwargs=domain_kwargs,
             )
+
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
-            condition_ids = []
-            aggregate_cols = []
+
+            condition_ids: List[str] = []
+            aggregate_cols: List[str] = []
+
+            idx: int
             for idx in range(len(aggregate["column_aggregates"])):
-                column_aggregate = aggregate["column_aggregates"][idx]
-                aggregate_id = str(uuid.uuid4())
+                column_aggregate: Any = aggregate["column_aggregates"][idx]
+                aggregate_id: str = str(uuid.uuid4())
                 condition_ids.append(aggregate_id)
                 aggregate_cols.append(column_aggregate)
+
             res = df.agg(*aggregate_cols).collect()
+
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
             assert len(aggregate["ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
+
             logger.debug(
-                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
             )
-            for idx, id in enumerate(aggregate["ids"]):
-                resolved_metrics[id] = res[0][idx]
+
+            idx: int
+            metric_id: Tuple[str, str, str]
+            for idx, metric_id in enumerate(aggregate["ids"]):
+                resolved_metrics[metric_id] = res[0][idx]
 
         return resolved_metrics
 

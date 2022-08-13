@@ -16,7 +16,7 @@ from pyparsing import (
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.types import Domain
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.types import SerializableDictDot, SerializableDotDict
 
 FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER: str = "$"
@@ -287,7 +287,7 @@ def build_parameter_container_for_variables(
         variable_config_key = f"{VARIABLES_KEY}{variable_config_key}"
         parameter_values[variable_config_key] = variable_config_value
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     build_parameter_container(
         parameter_container=parameter_container, parameter_values=parameter_values
     )

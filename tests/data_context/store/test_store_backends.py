@@ -2,7 +2,7 @@ import datetime
 import json
 import os
 from collections import OrderedDict
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import boto3
 import pyparsing as pp
@@ -1340,7 +1340,9 @@ def test_TupleS3StoreBackend_list_over_1000_keys():
     assert len(keys) == num_keys_to_add + 1
 
 
-def test_GeCloudStoreBackend():
+def test_GeCloudStoreBackend(
+    shared_called_with_request_kwargs: dict, ge_cloud_access_token: str
+):
     """
     What does this test test and why?
 
@@ -1349,10 +1351,10 @@ def test_GeCloudStoreBackend():
     """
     ge_cloud_base_url = "https://app.greatexpectations.io/"
     ge_cloud_credentials = {
-        "access_token": "1234",
+        "access_token": ge_cloud_access_token,
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
-    ge_cloud_resource_type = GeCloudRESTResource.CONTRACT
+    ge_cloud_resource_type = GeCloudRESTResource.CHECKPOINT
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
@@ -1371,12 +1373,12 @@ def test_GeCloudStoreBackend():
             ge_cloud_credentials=ge_cloud_credentials,
             ge_cloud_resource_type=ge_cloud_resource_type,
         )
-        my_store_backend.set(("contract", ""), my_simple_checkpoint_config_serialized)
+        my_store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             json={
                 "data": {
-                    "type": "contract",
+                    "type": "checkpoint",
                     "attributes": {
                         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
                         "checkpoint_config": OrderedDict(
@@ -1401,10 +1403,7 @@ def test_GeCloudStoreBackend():
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **shared_called_with_request_kwargs,
         )
 
     # test .get
@@ -1416,17 +1415,15 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.get(
             (
-                "contract",
+                "checkpoint",
                 "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             )
         )
         mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd-8a42-3c35cce574c6",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            params=None,
+            **shared_called_with_request_kwargs,
         )
 
     # test .list_keys
@@ -1438,11 +1435,8 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.list_keys()
         mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            **shared_called_with_request_kwargs,
         )
 
     # test .remove_key
@@ -1457,25 +1451,22 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.remove_key(
             (
-                "contract",
+                "checkpoint",
                 "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
             )
         )
         mock_delete.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
             json={
                 "data": {
-                    "type": "contract",
-                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "type": "checkpoint",
+                    "id_": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **shared_called_with_request_kwargs,
         )
 
     # test .set
@@ -1497,10 +1488,7 @@ def test_GeCloudStoreBackend():
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **shared_called_with_request_kwargs,
         )
 
     # test .get
@@ -1519,10 +1507,8 @@ def test_GeCloudStoreBackend():
         mock_get.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
             "-4bdd-8a42-3c35cce574c6",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            params=None,
+            **shared_called_with_request_kwargs,
         )
 
     # test .list_keys
@@ -1535,10 +1521,7 @@ def test_GeCloudStoreBackend():
         my_store_backend.list_keys()
         mock_get.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **shared_called_with_request_kwargs,
         )
 
     # test .remove_key
@@ -1564,14 +1547,11 @@ def test_GeCloudStoreBackend():
             json={
                 "data": {
                     "type": "rendered_data_doc",
-                    "id": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "id_": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 1234",
-            },
+            **shared_called_with_request_kwargs,
         )
 
 
@@ -1582,7 +1562,7 @@ def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() ->
         "access_token": "1234",
         "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
-    ge_cloud_resource_type = "contract"  # Instead of using enum
+    ge_cloud_resource_type = "checkpoint"  # Instead of using enum
 
     my_store_backend = GeCloudStoreBackend(
         ge_cloud_base_url=ge_cloud_base_url,
@@ -1590,28 +1570,29 @@ def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() ->
         ge_cloud_resource_type=ge_cloud_resource_type,
     )
 
-    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CONTRACT
+    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
 
 
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.CONFIG_VERSION,
     )
     new_config_version: float = 5.0
 
     # test invalid .set
-    key = DataContextVariableKey(resource_type="my_fake_variable")
+    key = DataContextVariableKey()
     tuple_ = key.to_tuple()
-    with pytest.raises(ValueError) as e:
-        inline_store_backend.set(tuple_, "a_random_string_value")
+    with pytest.raises(StoreBackendError) as e:
+        inline_store_backend.set(tuple_, "a_random_string_value")  # Invalid type
 
-    assert "'my_fake_variable' is not a valid DataContextVariableSchema" in str(e.value)
+    assert "ValueError while calling _set on store backend" in str(e.value)
 
     # test valid .set
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+    key = DataContextVariableKey()
     tuple_ = key.to_tuple()
     with patch(
-        "great_expectations.data_context.DataContext._save_project_config"
+        "great_expectations.data_context.store.InlineStoreBackend._save_changes"
     ) as mock_save:
         inline_store_backend.set(tuple_, new_config_version)
 
@@ -1619,7 +1600,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     assert mock_save.call_count == 1
 
     # test .get
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+    key = DataContextVariableKey()
     tuple_ = key.to_tuple()
     ret = inline_store_backend.get(tuple_)
     assert ret == new_config_version
@@ -1643,12 +1624,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     ]
 
     # test .move
-    key1 = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.CONFIG_VERSION
-    )
+    key1 = DataContextVariableKey()
     tuple1 = key1.to_tuple()
 
-    key2 = DataContextVariableKey(resource_type=DataContextVariableSchema.STORES)
+    key2 = DataContextVariableKey()
     tuple2 = key2.to_tuple()
 
     with pytest.raises(StoreBackendError) as e:
@@ -1657,16 +1636,18 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     assert "InlineStoreBackend does not support moving of keys" in str(e.value)
 
     # test invalid .remove_key
-    key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.PROGRESS_BARS, resource_name="profilers"
+    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.PROGRESS_BARS,
     )
+    key = DataContextVariableKey(resource_name="profilers")
     tuple_ = key.to_tuple()
     with pytest.raises(StoreBackendError) as e:
         inline_store_backend.remove_key(tuple_)
 
     assert "Could not find a value associated with key" in str(e.value)
 
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+    key = DataContextVariableKey()
     tuple_ = key.to_tuple()
     with pytest.raises(StoreBackendError) as e:
         inline_store_backend.remove_key(tuple_)
@@ -1676,6 +1657,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     )
 
     # test valid .remove_key
+    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.STORES,
+    )
     store_name: str = "my_store"
     store_value: dict = {
         "class_name": "ExpectationsStore",
@@ -1683,9 +1668,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
             "class_name": "TupleFilesystemStoreBackend",
         },
     }
-    key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.STORES, resource_name=store_name
-    )
+    key = DataContextVariableKey(resource_name=store_name)
 
     tuple_ = key.to_tuple()
     inline_store_backend.set(key=tuple_, value=store_value)
@@ -1698,11 +1681,12 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
         empty_data_context.root_directory, empty_data_context.GE_YML
     )
 
+    # 1. Set simple string config value and confirm it persists in the GE.yml
+
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.CONFIG_VERSION,
     )
-
-    # 1. Set simple string config value and confirm it persists in the GE.yml
 
     with open(path_to_great_expectations_yml) as data:
         config_commented_map_from_yaml = yaml.load(data)
@@ -1710,7 +1694,7 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
     assert config_commented_map_from_yaml["config_version"] == 3.0
 
     new_config_version: float = 5.0
-    key = DataContextVariableKey(resource_type=DataContextVariableSchema.CONFIG_VERSION)
+    key = DataContextVariableKey()
     tuple_ = key.to_tuple()
 
     inline_store_backend.set(tuple_, new_config_version)
@@ -1721,6 +1705,11 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
     assert config_commented_map_from_yaml["config_version"] == new_config_version
 
     # 2. Set nested dictionary config value and confirm it persists in the GE.yml
+
+    inline_store_backend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.DATASOURCES,
+    )
 
     with open(path_to_great_expectations_yml) as data:
         config_commented_map_from_yaml = yaml.load(data)
@@ -1747,7 +1736,6 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
     datasource_config: dict = yaml.load(datasource_config_string)
 
     key = DataContextVariableKey(
-        resource_type=DataContextVariableSchema.DATASOURCES,
         resource_name="my_datasource",
     )
     tuple_ = key.to_tuple()

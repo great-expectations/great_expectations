@@ -13,17 +13,15 @@ repos:
       - id: requirements-txt-fixer
         exclude: docs/.*
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.5.2
+    rev: 5.10.1
     hooks:
       - id: isort
-        exclude: venv/.*\|docs/.*|tests/test_sets/broken_excel_file\.xls
   - repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:
       - id: black
-        exclude: docs/.*|tests/.*.fixture|.*.ge_store_backend_id
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.3
+  - repo: https://github.com/PyCQA/flake8
+    rev: 5.0.4
     hooks:
       - id: flake8
         files: ^(great_expectations/core)

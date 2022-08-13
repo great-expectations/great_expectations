@@ -1,7 +1,10 @@
 from typing import Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
 
 
 class RuleState:
@@ -131,9 +134,7 @@ pass "overwrite=True" or call "RuleState.remove_parameter_container_from_domain(
 """
             )
 
-        parameter_container: ParameterContainer = ParameterContainer(
-            parameter_nodes=None
-        )
+        parameter_container = ParameterContainer(parameter_nodes=None)
         self._parameters[domain.id] = parameter_container
 
     def remove_parameter_container_from_domain_if_exists(self, domain: Domain) -> None:

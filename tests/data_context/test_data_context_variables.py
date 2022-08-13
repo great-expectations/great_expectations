@@ -400,6 +400,7 @@ def test_data_context_variables_save_config(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
+    shared_called_with_request_kwargs: dict,
     # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -419,7 +420,7 @@ def test_data_context_variables_save_config(
 
     # FileDataContextVariables
     with mock.patch(
-        "great_expectations.data_context.DataContext._save_project_config",
+        "great_expectations.data_context.store.InlineStoreBackend._save_changes",
         autospec=True,
     ) as mock_save:
         file_data_context_variables.save_config()
@@ -455,10 +456,7 @@ def test_data_context_variables_save_config(
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": f"Bearer {ge_cloud_access_token}",
-            },
+            **shared_called_with_request_kwargs,
         )
 
 
@@ -531,7 +529,7 @@ def test_file_data_context_variables_e2e(
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
 
 
-@pytest.mark.integration
+@pytest.mark.e2e
 @pytest.mark.cloud
 def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     cloud_data_context: CloudDataContext,
@@ -549,7 +547,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     assert success is True
 
 
-@pytest.mark.integration
+@pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_cloud_enabled_data_context_variables_e2e(
