@@ -1,7 +1,7 @@
 import logging
 import uuid
 from abc import ABCMeta, abstractmethod
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 import pyparsing as pp
 
@@ -135,7 +135,7 @@ class StoreBackend(metaclass=ABCMeta):
         self._validate_key(dest_key)
         return self._move(source_key, dest_key, **kwargs)
 
-    def has_key(self, key):
+    def has_key(self, key) -> bool:
         self._validate_key(key)
         return self._has_key(key)
 
@@ -182,14 +182,14 @@ class StoreBackend(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def list_keys(self, prefix=()) -> None:
+    def list_keys(self, prefix=()) -> List[str]:
         raise NotImplementedError
 
     @abstractmethod
     def remove_key(self, key) -> None:
         raise NotImplementedError
 
-    def _has_key(self, key) -> None:
+    def _has_key(self, key) -> bool:
         raise NotImplementedError
 
     def is_ignored_key(self, key):
