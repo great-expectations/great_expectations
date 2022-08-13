@@ -36,6 +36,8 @@ from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
+    from io import TextIOWrapper
+
     from great_expectations.checkpoint import Checkpoint
 
 yaml = YAML()
@@ -120,7 +122,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile: str) -> None:
+    def to_yaml(self, outfile: Union[str, "TextIOWrapper"]) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
