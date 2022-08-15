@@ -12,7 +12,6 @@ from great_expectations.data_context import (
     BaseDataContext,
     CloudDataContext,
 )
-from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
