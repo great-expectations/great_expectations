@@ -420,7 +420,7 @@ def test_inline_renderer_rendered_content_return_value(
     (
         expectation_configuration_rendered_atomic_content,
         expectation_validation_result_rendered_atomic_content,
-    ) = inline_renderer.render()
+    ) = inline_renderer.render_expectation_validation_result()
 
     actual_serialized_expectation_configuration_rendered_atomic_content: List[dict] = [
         rendered_atomic_content.to_json_dict()
