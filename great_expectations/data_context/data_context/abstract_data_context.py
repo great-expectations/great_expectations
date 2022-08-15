@@ -160,8 +160,8 @@ class AbstractDataContext(ABC):
         self.runtime_environment = runtime_environment
 
         # These attributes that are set downstream.
-        self._variables = None
-        self._config_variables = None
+        self._variables: Optional[DataContextVariables] = None
+        self._config_variables: Optional[dict] = None
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(

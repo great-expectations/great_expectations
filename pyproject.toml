@@ -39,8 +39,6 @@ exclude = [
     'data_context/data_context/base_data_context.py', # 76
     'data_context/data_context/cloud_data_context.py', # 17
     'data_context/data_context/data_context.py', # 13
-    'data_context/data_context/ephemeral_data_context.py', # 3
-    'data_context/data_context/file_data_context.py', # 3
     'execution_engine', # 100
     'marshmallow__shade', # 19
     '.*render', # 72
