@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 
 import requests
 
+from great_expectations import __version__
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -172,10 +173,11 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         filter_properties_dict(properties=self._config, inplace=True)
 
     @property
-    def auth_headers(self) -> Dict[str, str]:
+    def headers(self) -> Dict[str, str]:
         return {
             "Content-Type": "application/vnd.api+json",
             "Authorization": f'Bearer {self.ge_cloud_credentials.get("access_token")}',
+            "Gx-Version": __version__,
         }
 
     def _get(self, key: Tuple[str, ...]) -> ResponsePayload:  # type: ignore[override]
@@ -189,7 +191,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             response = requests.get(
                 ge_cloud_url,
-                headers=self.auth_headers,
+                headers=self.headers,
                 params=params,
                 timeout=self.TIMEOUT,
             )
@@ -241,7 +243,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         try:
             response = requests.put(
-                url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
+                url, json=data, headers=self.headers, timeout=self.TIMEOUT
             )
             response_status_code = response.status_code
 
@@ -253,7 +255,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
             ):
                 response = requests.patch(
-                    url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
+                    url, json=data, headers=self.headers, timeout=self.TIMEOUT
                 )
                 response_status_code = response.status_code
 
@@ -329,7 +331,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
         try:
             response = requests.post(
-                url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
+                url, json=data, headers=self.headers, timeout=self.TIMEOUT
             )
             response_json = response.json()
 
@@ -372,7 +374,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
         try:
             response = requests.get(
-                url, headers=self.auth_headers, timeout=self.TIMEOUT
+                url, headers=self.headers, timeout=self.TIMEOUT
             )
             response_json = response.json()
             keys = [
@@ -424,7 +426,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
         try:
             response = requests.delete(
-                url, json=data, headers=self.auth_headers, timeout=self.TIMEOUT
+                url, json=data, headers=self.headers, timeout=self.TIMEOUT
             )
             response_status_code = response.status_code
 
