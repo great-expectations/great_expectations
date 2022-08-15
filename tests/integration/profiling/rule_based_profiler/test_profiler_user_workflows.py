@@ -891,7 +891,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": -52.0,
-        "max_value": 2183.0,
+        "max_value": 3004.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 1.0,
@@ -914,7 +914,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": 0.0,
-        "max_value": 2183.0,
+        "max_value": 3004.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 1.0,
@@ -938,7 +938,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": 0.0,
-        "max_value": 2183.0,
+        "max_value": 3004.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 8.75e-1,
@@ -2130,7 +2130,7 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
     atol: float = 2.0e1 * ATOL
 
     min_value_actual: float = result.expectation_config["kwargs"]["min_value"]
-    min_value_expected: float = 155.0
+    min_value_expected: float = 150.0
 
     np.testing.assert_allclose(
         actual=float(min_value_actual),
@@ -2141,7 +2141,7 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
     )
 
     max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
-    max_value_expected: float = 3004.0
+    max_value_expected: float = 429490.2
     np.testing.assert_allclose(
         actual=float(max_value_actual),
         desired=float(max_value_expected),
@@ -2162,8 +2162,8 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
     validator: Validator = quentin_validator
 
     test_cases: Tuple[Tuple[str, int, int], ...] = (
-        ("pickup_location_id", 118, 212),
-        ("dropoff_location_id", 190, 236),
+        ("pickup_location_id", 118, 214),
+        ("dropoff_location_id", 184, 238),
     )
 
     for column_name, min_value_expected, max_value_expected in test_cases:
@@ -2327,7 +2327,7 @@ def test_quentin_expect_column_stdev_to_be_between_auto_yes_default_profiler_con
     validator: Validator = quentin_validator
 
     test_cases: Tuple[Tuple[str, float, float], ...] = (
-        ("fare_amount", 10.0, 32.57),
+        ("fare_amount", 10.0, 4294.79),
         ("passenger_count", 1.0, 2.0),
     )
 
