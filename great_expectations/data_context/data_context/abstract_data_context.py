@@ -829,9 +829,6 @@ class AbstractDataContext(ABC):
                 "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"
             )
 
-        if self.ge_cloud_mode:
-            include_rendered_content = True
-
         if batch_list:
             pass
 
