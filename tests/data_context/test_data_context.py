@@ -284,7 +284,7 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
 def test_save_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
-    expectation_suite = (
+    expectation_suite: ExpectationSuite = (
         data_context_parameterized_expectation_suite.create_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
@@ -294,11 +294,12 @@ def test_save_expectation_suite_include_rendered_content(
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
+    assert expectation_suite.expectations[0].rendered_content is None
     data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite,
         include_rendered_content=True,
     )
-    expectation_suite_saved = (
+    expectation_suite_saved: ExpectationSuite = (
         data_context_parameterized_expectation_suite.get_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
