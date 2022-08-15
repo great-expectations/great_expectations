@@ -957,7 +957,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                 "table_rule": {
                     "variables": {
                         "false_positive_rate": 0.05,
-                        "quantile_statistic_interpolation_method": "linear",
+                        "quantile_statistic_interpolation_method": "nearest",
                         "quantile_bias_correction": False,
                         "quantile_bias_std_error_ratio_threshold": None,
                         "estimator": "bootstrap",
@@ -1040,7 +1040,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "strict_min": False,
                         "strict_max": False,
                         "false_positive_rate": 0.05,
-                        "quantile_statistic_interpolation_method": "linear",
+                        "quantile_statistic_interpolation_method": "nearest",
                         "quantile_bias_correction": False,
                         "quantile_bias_std_error_ratio_threshold": None,
                         "estimator": "bootstrap",
