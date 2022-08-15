@@ -9,9 +9,25 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.data_context import DataContext
+from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.inline_renderer import InlineRenderer
 from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
+
+
+def test_inline_renderer_error_message(
+    alice_columnar_table_single_batch_context: DataContext,
+):
+    context: DataContext = alice_columnar_table_single_batch_context
+    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        "validating_alice_data"
+    )
+    with pytest.raises(InvalidRenderedContentError) as e:
+        InlineRenderer(render_object=expectation_suite)  # type: ignore
+    assert (
+        str(e.value)
+        == "InlineRenderer.render_expectation_configuration can only be used with an ExpectationConfiguration, but <class 'great_expectations.core.expectation_suite.ExpectationSuite'> was used."
+    )
 
 
 @pytest.mark.parametrize(
