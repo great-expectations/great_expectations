@@ -2,6 +2,7 @@ from json import loads
 from typing import Dict
 
 from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.util import load_class
 from great_expectations.render.types import RenderedDocumentContent
 from great_expectations.util import (
     filter_properties_dict,
@@ -23,13 +24,12 @@ class JsonSiteStore(Store):
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
             )
-            # store_backend_class_name = store_backend.get(
-            #     "class_name", "InMemoryStoreBackend"
-            # )
+            store_backend_class_name = store_backend.get(
+                "class_name", "InMemoryStoreBackend"
+            )
             verify_dynamic_loading_support(module_name=store_backend_module_name)
-            # store_backend_class = load_class(
-            #     store_backend_class_name, store_backend_module_name
-            # )
+            # TODO: GG 20220815 loaded store_backend_class is not used remove this if not needed
+            _ = load_class(store_backend_class_name, store_backend_module_name)
 
         super().__init__(
             store_backend=store_backend,
