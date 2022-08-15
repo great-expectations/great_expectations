@@ -86,10 +86,10 @@ class KdeNumericRangeEstimator(NumericRangeEstimator):
             variables=variables,
             parameters=parameters,
         )
-        # if quantile_statistic_interpolation_method is None:
-        #     quantile_statistic_interpolation_method = (
-        #         DEFAULT_KDE_QUANTILE_STATISTIC_INTERPOLATION_METHOD
-        #     )
+        if quantile_statistic_interpolation_method is None:
+            quantile_statistic_interpolation_method = (
+                DEFAULT_KDE_QUANTILE_STATISTIC_INTERPOLATION_METHOD
+            )
 
         # Obtain bw_method override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         bw_method: Optional[
