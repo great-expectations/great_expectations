@@ -13,7 +13,7 @@ from great_expectations.exceptions import DataContextError, GeCloudError
 def ge_cloud_data_context_config(
     ge_cloud_runtime_base_url,
     ge_cloud_runtime_organization_id,
-    ge_cloud_runtime_access_token,
+    ge_cloud_access_token,
 ):
     """
     This fixture is used to replicate a response retrieved from a GE Cloud API request.
@@ -57,7 +57,7 @@ def ge_cloud_data_context_config(
           ge_cloud_base_url: {ge_cloud_runtime_base_url}
           ge_cloud_resource_type: expectation_suite
           ge_cloud_credentials:
-            access_token: {ge_cloud_runtime_access_token}
+            access_token: {ge_cloud_access_token}
             organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
 
@@ -68,7 +68,7 @@ def ge_cloud_data_context_config(
           ge_cloud_base_url: {ge_cloud_runtime_base_url}
           ge_cloud_resource_type: validation_result
           ge_cloud_credentials:
-            access_token: {ge_cloud_runtime_access_token}
+            access_token: {ge_cloud_access_token}
             organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
 
@@ -79,7 +79,7 @@ def ge_cloud_data_context_config(
           ge_cloud_base_url: {ge_cloud_runtime_base_url}
           ge_cloud_resource_type: checkpoint
           ge_cloud_credentials:
-            access_token: {ge_cloud_runtime_access_token}
+            access_token: {ge_cloud_access_token}
             organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
 
@@ -97,7 +97,7 @@ def ge_cloud_data_context_config(
           ge_cloud_base_url: {ge_cloud_runtime_base_url}
           ge_cloud_resource_type: rendered_data_doc
           ge_cloud_credentials:
-            access_token: {ge_cloud_runtime_access_token}
+            access_token: {ge_cloud_access_token}
             organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
         site_index_builder:
@@ -132,7 +132,7 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     request_headers: dict,
     ge_cloud_runtime_base_url,
     ge_cloud_runtime_organization_id,
-    ge_cloud_runtime_access_token,
+    ge_cloud_access_token,
 ):
     # Ensure that the request goes through
     mock_request.return_value.status_code = 200
@@ -141,7 +141,7 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
             ge_cloud_mode=True,
             ge_cloud_base_url=ge_cloud_runtime_base_url,
             ge_cloud_organization_id=ge_cloud_runtime_organization_id,
-            ge_cloud_access_token=ge_cloud_runtime_access_token,
+            ge_cloud_access_token=ge_cloud_access_token,
         )
     except:  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
         pass
@@ -161,7 +161,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
     mock_request,
     ge_cloud_runtime_base_url,
     ge_cloud_runtime_organization_id,
-    ge_cloud_runtime_access_token,
+    ge_cloud_access_token,
 ):
     # Ensure that the request fails
     mock_request.return_value.status_code = 401
@@ -171,7 +171,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
             ge_cloud_mode=True,
             ge_cloud_base_url=ge_cloud_runtime_base_url,
             ge_cloud_organization_id=ge_cloud_runtime_organization_id,
-            ge_cloud_access_token=ge_cloud_runtime_access_token,
+            ge_cloud_access_token=ge_cloud_access_token,
         )
 
 
@@ -183,7 +183,7 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     ge_cloud_base_url,
     empty_base_data_context_in_cloud_mode_custom_base_url: BaseDataContext,
     ge_cloud_runtime_organization_id,
-    ge_cloud_runtime_access_token,
+    ge_cloud_access_token,
 ):
 
     custom_base_url: str = "https://some_url.org"
