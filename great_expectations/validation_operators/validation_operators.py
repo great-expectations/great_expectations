@@ -390,18 +390,18 @@ class ActionListValidationOperator(ValidationOperator):
                         run_id=run_id,
                     )
 
+                validation_result = async_batch_validation_result.result()
+                validation_result.meta["validation_id"] = validation_id
+
                 batch_actions_results = self._run_actions(
                     batch=batch,
                     expectation_suite_identifier=expectation_suite_identifier,
                     expectation_suite=batch._expectation_suite,
-                    batch_validation_result=async_batch_validation_result.result(),
+                    batch_validation_result=validation_result,
                     run_id=run_id,
                     validation_result_id=validation_result_id,
                     checkpoint_identifier=checkpoint_identifier,
                 )
-
-                validation_result = async_batch_validation_result.result()
-                validation_result.meta["validation_id"] = validation_id
 
                 run_result_obj = {
                     "validation_result": validation_result,
