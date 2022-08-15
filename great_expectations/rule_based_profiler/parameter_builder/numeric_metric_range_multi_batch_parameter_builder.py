@@ -64,7 +64,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     The implementation supports four methods of estimating parameter values from data:
     * quantiles -- assumes that metric values, computed on batch data, are normally distributed and computes the mean
       and the standard error using the queried batches as the single sample of the distribution.
-    * exact (default) -- uses the minimum and maximum observations for range boundaries.
+    * exact -- uses the minimum and maximum observations for range boundaries.
     * bootstrap -- a statistical resampling technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)").
     * kde -- a statistical technique that fits a gaussian to the distribution and resamples from it.
     """

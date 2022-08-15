@@ -4350,6 +4350,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         "variables": {
             "estimator": "quantiles",
             "false_positive_rate": 0.01,
+            "quantile_statistic_interpolation_method": "nearest",
             "mostly": 1.0,
         },
         "rules": {
@@ -4376,7 +4377,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "random_seed": None,
                         "include_estimator_samples_histogram_in_details": False,
                         "false_positive_rate": "$variables.false_positive_rate",
-                        "quantile_statistic_interpolation_method": "auto",
+                        "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                         "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
