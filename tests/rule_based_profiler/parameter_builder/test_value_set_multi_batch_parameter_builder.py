@@ -61,12 +61,12 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     }
 
     metric_domain_kwargs: dict = {"column": "event_type"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -137,12 +137,12 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     }
 
     metric_domain_kwargs: dict = {"column": "user_agent"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -222,12 +222,12 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     )
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -299,12 +299,12 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
     )
 
     metric_domain_kwargs: dict = {"column": "store_and_fwd_flag"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }

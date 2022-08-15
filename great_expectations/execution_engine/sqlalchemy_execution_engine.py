@@ -1142,7 +1142,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         batch_data: Optional[SqlAlchemyBatchData] = None
-        batch_markers: BatchMarkers = BatchMarkers(
+        batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"

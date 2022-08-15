@@ -850,7 +850,7 @@ class DataAsset:
                         expectation_suite_dict: dict = expectationSuiteSchema.loads(
                             infile.read()
                         )
-                        expectation_suite: ExpectationSuite = ExpectationSuite(
+                        expectation_suite = ExpectationSuite(
                             **expectation_suite_dict, data_context=self._data_context
                         )
                 except ValidationError:
@@ -861,7 +861,7 @@ class DataAsset:
                     )
             elif isinstance(expectation_suite, dict):
                 expectation_suite_dict: dict = expectation_suite
-                expectation_suite: ExpectationSuite = ExpectationSuite(
+                expectation_suite = ExpectationSuite(
                     **expectation_suite_dict, data_context=None
                 )
             elif not isinstance(expectation_suite, ExpectationSuite):

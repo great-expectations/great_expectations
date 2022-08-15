@@ -19,7 +19,7 @@ def test_instantiation_with_table_name(sqlite_view_engine):
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
     )
-    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+    batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine,
         table_name="test_table",
     )
@@ -44,7 +44,7 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
     query: str = "SELECT * FROM test_table_0"
     # If create_temp_table=False, a new temp table should NOT be created
     # noinspection PyUnusedLocal
-    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+    batch_data = SqlAlchemyBatchData(
         execution_engine=sqlite_view_engine,
         query=query,
         create_temp_table=False,
@@ -143,7 +143,7 @@ def test_instantiation_with_unknown_dialect(sqlite_view_engine):
         engine=sqlite_view_engine
     )
     execution_engine.engine.dialect.name = "not_a_supported_dialect"
-    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+    batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine,
         table_name="test_table",
     )

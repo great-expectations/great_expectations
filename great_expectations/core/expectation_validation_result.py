@@ -378,6 +378,7 @@ class ExpectationSuiteValidationResultMeta(TypedDict):
     expectation_suite_name: str
     great_expectations_version: str
     run_id: RunIdentifier
+    validation_id: Optional[str]
     validation_time: str
 
 

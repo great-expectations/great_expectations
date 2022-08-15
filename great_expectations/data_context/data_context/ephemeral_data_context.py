@@ -41,12 +41,12 @@ class EphemeralDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        self._config_variables = self._load_config_variables()
-        self._variables = self._init_variables()
+        self._config_variables: dict = self._load_config_variables()
+        self._variables: EphemeralDataContextVariables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_variables(self) -> EphemeralDataContextVariables:
-        variables: EphemeralDataContextVariables = EphemeralDataContextVariables(
+        variables = EphemeralDataContextVariables(
             config=self._project_config,
         )
         return variables
@@ -60,13 +60,13 @@ class EphemeralDataContext(AbstractDataContext):
         # to the convention set by other internal Stores
         store_backend: dict = {"class_name": "InMemoryStoreBackend"}
 
-        datasource_store: DatasourceStore = DatasourceStore(
+        datasource_store = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,
         )
         self._datasource_store = datasource_store
 
-    def save_expectation_suite(
+    def save_expectation_suite(  # type: ignore[override]
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
@@ -87,15 +87,18 @@ class EphemeralDataContext(AbstractDataContext):
             None
         """
         if expectation_suite_name is None:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite.expectation_suite_name
             )
         else:
             expectation_suite.expectation_suite_name = expectation_suite_name
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
-        if self.expectations_store.has_key(key) and not overwrite_existing:
+        if (
+            self.expectations_store.has_key(key)  # noqa: @601
+            and not overwrite_existing
+        ):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(

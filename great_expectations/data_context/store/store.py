@@ -133,7 +133,7 @@ class Store:
 
     def tuple_to_key(self, tuple_: Tuple[str, ...]) -> DataContextKey:
         if tuple_ == StoreBackend.STORE_BACKEND_ID_KEY:
-            return StoreBackend.STORE_BACKEND_ID_KEY[0]
+            return StoreBackend.STORE_BACKEND_ID_KEY[0]  # type: ignore[return-value]
         if self._use_fixed_length_key:
             return self.key_class.from_fixed_length_tuple(tuple_)
         return self.key_class.from_tuple(tuple_)
@@ -179,11 +179,13 @@ class Store:
 
     def has_key(self, key: DataContextKey) -> bool:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return self._store_backend.has_key(key)
+            return self._store_backend.has_key(key)  # noqa: W601
         else:
             if self._use_fixed_length_key:
-                return self._store_backend.has_key(key.to_fixed_length_tuple())
-            return self._store_backend.has_key(key.to_tuple())
+                return self._store_backend.has_key(  # noqa: W601
+                    key.to_fixed_length_tuple()
+                )
+            return self._store_backend.has_key(key.to_tuple())  # noqa: W601
 
     def self_check(self, pretty_print: bool) -> None:
         NotImplementedError(

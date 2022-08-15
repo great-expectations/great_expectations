@@ -58,7 +58,6 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 )
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (
     RuntimeEnvironmentDomainTypeDirectives,
-    RuntimeEnvironmentDomainTypeDirectivesKeys,
     RuntimeEnvironmentVariablesDirectives,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -395,7 +394,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         for rule_state in self.rule_states:
             domain: Domain = rule_state.get_domains_as_dict().get(domain_id)
             if domain is not None:
-                rule_output: RuleOutput = RuleOutput(rule_state=rule_state)
+                rule_output = RuleOutput(rule_state=rule_state)
                 return rule_output.get_fully_qualified_parameter_names_for_domain_id(
                     domain_id=domain_id
                 )
@@ -435,7 +434,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         for rule_state in self.rule_states:
             domain: Domain = rule_state.get_domains_as_dict().get(domain_id)
             if domain is not None:
-                rule_output: RuleOutput = RuleOutput(rule_state=rule_state)
+                rule_output = RuleOutput(rule_state=rule_state)
                 return rule_output.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
                     domain_id=domain_id
                 )
@@ -946,7 +945,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rules_as_dict: Dict[str, Rule] = {rule.name: rule for rule in rules}
 
         variables: Optional[Dict[str, Any]]
-        rule_varables_configs: Optional[Dict[str, Any]]
+        rule_variables_configs: Optional[Dict[str, Any]]
         for variables_directives in variables_directives_list:
             variables = variables_directives.variables or {}
             rule = rules_as_dict[variables_directives.rule_name]
@@ -989,7 +988,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 for rule in rules
                 if rule.domain_builder.domain_type == domain_type_directives.domain_type
             ]
-            property_key: RuntimeEnvironmentDomainTypeDirectivesKeys
+            property_key: str
             property_value: Any
             existing_property_value: Any
             for rule in domain_rules:
@@ -1000,13 +999,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     try:
                         # Insure that new directives augment (not eliminate) existing directives.
                         existing_property_value = getattr(
-                            rule.domain_builder, property_key.value
+                            rule.domain_builder, property_key
                         )
                         property_value = BaseRuleBasedProfiler._get_effective_domain_builder_property_value(
                             dest_property_value=property_value,
                             source_property_value=existing_property_value,
                         )
-                        setattr(rule.domain_builder, property_key.value, property_value)
+                        setattr(rule.domain_builder, property_key, property_value)
                     except AttributeError:
                         # Skip every directive that is not defined property of "DomainBuilder" object of "domain_type".
                         pass
@@ -1431,7 +1430,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             expectation_configuration_builders configuration components
             data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
         """
-        profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        profiler_config = RuleBasedProfilerConfig(
             name=name,
             id_=id_,
             config_version=config_version,

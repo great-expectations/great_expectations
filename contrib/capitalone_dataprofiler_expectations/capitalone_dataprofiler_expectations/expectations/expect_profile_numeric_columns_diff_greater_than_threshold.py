@@ -4,6 +4,9 @@ from typing import Any, Dict, Optional
 
 import dataprofiler as dp
 import pandas as pd
+from capitalone_dataprofiler_expectations.expectations.profile_numeric_columns_diff_expectation import (
+    ProfileNumericColumnsDiffExpectation,
+)
 from capitalone_dataprofiler_expectations.expectations.util import (
     is_value_greater_than_threshold,
     replace_generic_operator_in_report_keys,
@@ -14,7 +17,6 @@ from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_pro
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -132,10 +134,12 @@ class DataProfilerProfileNumericColumnsDiffGreaterThanThreshold(
         return dependencies
 
 
-class ExpectProfileNumericColumnsDiffGreaterThanThreshold(TableExpectation):
+class ExpectProfileNumericColumnsDiffGreaterThanThreshold(
+    ProfileNumericColumnsDiffExpectation
+):
     """
     This expectation takes the difference report between the data it is called on and a DataProfiler profile of the same schema loaded from a provided path.
-    This function builds upon the custom table expectations of Great Expectations.
+    This function builds upon the custom ProfileNumericColumnsDiff Expectation of Capital One's DataProfiler Expectations.
     Each numerical column will be checked against a user provided dictionary of columns paired with dictionaries of statistics containing a threshold value.
     It is expected that a statistics value for a given column is greater than the specified threshold.
 
@@ -259,9 +263,7 @@ class ExpectProfileNumericColumnsDiffGreaterThanThreshold(TableExpectation):
         },
     ]
 
-    metric_dependencies = (
-        "data_profiler.profile_numeric_columns_diff_greater_than_threshold",
-    )
+    profile_metric = "data_profiler.profile_numeric_columns_diff_greater_than_threshold"
 
     success_keys = (
         "profile_path",
@@ -296,52 +298,6 @@ class ExpectProfileNumericColumnsDiffGreaterThanThreshold(TableExpectation):
         "numerical_diff_statistics": numerical_diff_statistics,
         "mostly": 1.0,
     }
-
-    def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        delta_between_thresholds = metrics.get(
-            "data_profiler.profile_numeric_columns_diff_greater_than_threshold"
-        )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
-
-        unexpected_values = {}
-        total_stats = 0.0
-        failed_stats = 0.0
-        for column, value in delta_between_thresholds.items():
-            column_unexpected_values = {}
-            if not isinstance(value, dict):
-                unexpected_values[column] = value
-                failed_stats += 1.0
-                total_stats += 1.0
-                continue
-            for stat, val in value.items():
-                if val is not True:
-                    column_unexpected_values[stat] = val
-                    failed_stats += 1.0
-                total_stats += 1.0
-            if column_unexpected_values != {}:
-                unexpected_values[column] = column_unexpected_values
-
-        successful_stats = total_stats - failed_stats
-        percent_successful = successful_stats / total_stats
-
-        success = percent_successful >= mostly
-
-        results = {
-            "success": success,
-            "expectation_config": configuration,
-            "result": {
-                "unexpected_values": unexpected_values,
-            },
-        }
-        return results
 
     library_metadata = {
         "requirements": ["dataprofiler", "tensorflow", "scikit-learn", "numpy"],

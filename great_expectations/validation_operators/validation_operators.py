@@ -290,6 +290,7 @@ class ActionListValidationOperator(ValidationOperator):
         result_format=None,
         checkpoint_identifier=None,
         checkpoint_name: Optional[str] = None,
+        validation_id: Optional[str] = None,
     ) -> ValidationOperatorResult:
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -377,7 +378,7 @@ class ActionListValidationOperator(ValidationOperator):
                         ge_cloud_id=batch._expectation_suite.ge_cloud_id,
                     )
                     validation_result_id = GeCloudIdentifier(
-                        resource_type=GeCloudRESTResource.SUITE_VALIDATION_RESULT
+                        resource_type=GeCloudRESTResource.VALIDATION_RESULT
                     )
                 else:
                     expectation_suite_identifier = ExpectationSuiteIdentifier(
@@ -389,18 +390,22 @@ class ActionListValidationOperator(ValidationOperator):
                         run_id=run_id,
                     )
 
+                validation_result = async_batch_validation_result.result()
+                validation_result.meta["validation_id"] = validation_id
+                validation_result.meta["checkpoint_id"] = checkpoint_identifier
+
                 batch_actions_results = self._run_actions(
                     batch=batch,
                     expectation_suite_identifier=expectation_suite_identifier,
                     expectation_suite=batch._expectation_suite,
-                    batch_validation_result=async_batch_validation_result.result(),
+                    batch_validation_result=validation_result,
                     run_id=run_id,
                     validation_result_id=validation_result_id,
                     checkpoint_identifier=checkpoint_identifier,
                 )
 
                 run_result_obj = {
-                    "validation_result": async_batch_validation_result.result(),
+                    "validation_result": validation_result,
                     "actions_results": batch_actions_results,
                 }
                 run_results[validation_result_id] = run_result_obj

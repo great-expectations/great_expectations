@@ -14,6 +14,8 @@ KNOWN_EXTENSIONS = [
     ".csv",
     ".tsv",
     ".parquet",
+    ".parq",
+    ".pqt",
     ".xls",
     ".xlsx",
     ".json",
