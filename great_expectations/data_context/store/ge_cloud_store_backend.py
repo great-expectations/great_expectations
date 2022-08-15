@@ -2,7 +2,7 @@ import logging
 from abc import ABCMeta
 from enum import Enum
 from json import JSONDecodeError
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
@@ -212,8 +212,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self) -> None:  # type: ignore[override]
         pass
 
-    # TODO: GG 20220810 return the `ResponsePayload`
-    def _update(self, ge_cloud_id: str, value: Any) -> bool:
+    def _update(self, identifier: GeCloudIdentifier, value: Any) -> dict:
+        ge_cloud_id = identifier.ge_cloud_id
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -258,7 +258,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code = response.status_code
 
             response.raise_for_status()
-            return True
+
+            response_payload = cast(ResponsePayload, response.json())
+            return response_payload["data"][attributes_key]
 
         except (requests.HTTPError, requests.Timeout) as http_exc:
             raise StoreBackendError(
@@ -459,3 +461,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ge_cloud_id=id_,
             resource_name=name,
         )
+
+    def _validate_key(self, key) -> None:
+        pass

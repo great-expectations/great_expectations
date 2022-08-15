@@ -198,16 +198,16 @@ def test_datasource_store_update(
     The datasource store when used with a cloud backend should emit the correct request when creating a new datasource.
     """
 
-    with patch("requests.post", autospec=True) as mock_post, patch(
+    with patch("requests.put", autospec=True) as mock_put, patch(
         "great_expectations.data_context.store.DatasourceStore.has_key", autospec=True
     ) as mock_has_key:
         # Mocking has_key so that we don't try to connect to the cloud backend to verify key existence.
         mock_has_key.return_value = True
-        type(mock_post.return_value).status_code = PropertyMock(return_value=200)
+        type(mock_put.return_value).status_code = PropertyMock(return_value=200)
 
         datasource_store_ge_cloud_backend.update(datasource_config)
 
-        mock_post.assert_called_once_with(
+        mock_put.assert_called_once_with(
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {

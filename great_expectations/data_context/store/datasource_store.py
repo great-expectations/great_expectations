@@ -11,7 +11,7 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
-    DatasourceConfigSchema,
+    datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -24,6 +24,7 @@ class DatasourceStore(Store):
     """
 
     _key_class = DataContextVariableKey
+    _schema = datasourceConfigSchema
 
     def __init__(
         self,
@@ -31,7 +32,6 @@ class DatasourceStore(Store):
         store_backend: Optional[dict] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
-        self._schema = DatasourceConfigSchema()
         super().__init__(
             store_backend=store_backend,
             runtime_environment=runtime_environment,
@@ -210,7 +210,8 @@ class DatasourceStore(Store):
                 f"Unable to load datasource `{config.name}` -- no configuration found or invalid configuration."
             )
 
-        raw_config: dict = self.store_backend.update(key=key, value=config)
+        config_dict = self._schema.dump(config)
+        raw_config: dict = self.store_backend.update(key=key, value=config_dict)
         validated_config = cast(dict, self._schema.load(raw_config))
         datasource_config: DatasourceConfig = DatasourceConfig(**validated_config)
         return datasource_config
