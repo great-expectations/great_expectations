@@ -1173,7 +1173,7 @@ def filter_properties_dict(
 
 
 def deep_filter_properties_iterable(
-    properties: Optional[Union[dict, list, set, tuple]] = None,
+    properties: Optional[Any] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
@@ -1240,7 +1240,8 @@ def deep_filter_properties_iterable(
             )
 
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
-        properties = list(
+        properties_type: type = type(properties)
+        properties = properties_type(
             filter(
                 lambda v: not _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=v,
@@ -1410,6 +1411,11 @@ def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     except (TypeError, ValueError):
         return False
     return True
+
+
+def is_ndarray_datetime_dtype(data: np.ndarray) -> bool:
+    value: Any
+    return all(isinstance(value, datetime.datetime) for value in data)
 
 
 def get_context():
