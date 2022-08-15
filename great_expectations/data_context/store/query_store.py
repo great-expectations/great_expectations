@@ -23,7 +23,7 @@ class SqlAlchemyQueryStore(Store):
     """SqlAlchemyQueryStore stores queries by name, and makes it possible to retrieve the resulting value by query
     name."""
 
-    _key_class = StringKey
+    _key_class = StringKey  # type: ignore[assignment] # StringKey is a DataContextKey??
 
     def __init__(
         self,
