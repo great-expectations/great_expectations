@@ -52,6 +52,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         assets: Optional[Dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        id_: Optional[str] = None,
     ) -> None:
         self._assets: dict = {}
         if assets:
@@ -65,6 +66,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         super().__init__(
             name=name,
+            id_=id_,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
@@ -207,7 +209,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         for batch_identifiers in sub_cache:
-            batch_definition: BatchDefinition = BatchDefinition(
+            batch_definition = BatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,

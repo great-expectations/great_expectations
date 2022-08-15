@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseStoreBackend(StoreBackend):
-    def __init__(
+    def __init__(  # noqa: C901 - 16
         self,
         table_name,
         key_columns,
@@ -86,12 +86,12 @@ class DatabaseStoreBackend(StoreBackend):
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
         cols = []
-        for column in key_columns:
-            if column == "value":
+        for column_ in key_columns:
+            if column_ == "value":
                 raise ge_exceptions.InvalidConfigError(
                     "'value' cannot be used as a key_element name"
                 )
-            cols.append(Column(column, String, primary_key=True))
+            cols.append(Column(column_, String, primary_key=True))
         cols.append(Column("value", String))
         try:
             table = Table(table_name, meta, autoload=True, autoload_with=self.engine)
@@ -255,7 +255,7 @@ class DatabaseStoreBackend(StoreBackend):
         cols["value"] = value
 
         if allow_update:
-            if self.has_key(key):
+            if self.has_key(key):  # noqa: W601
                 ins = (
                     self._table.update()
                     .where(getattr(self._table.columns, self.key_columns[0]) == key[0])
@@ -276,7 +276,7 @@ class DatabaseStoreBackend(StoreBackend):
                     f"Integrity error {str(e)} while trying to store key"
                 )
 
-    def _move(self) -> None:
+    def _move(self) -> None:  # type: ignore[override]
         raise NotImplementedError
 
     def get_url_for_key(self, key):
@@ -351,5 +351,3 @@ class DatabaseStoreBackend(StoreBackend):
     @property
     def config(self) -> dict:
         return self._config
-
-    _move = None

@@ -12,7 +12,7 @@ from great_expectations.data_context.types.base import (
     S3StoreBackendDefaults,
 )
 
-sc = SparkContext()
+sc = SparkContext.getOrCreate()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 s3_client = boto3.client("s3")
@@ -46,6 +46,8 @@ expectation_suite_name = "suite_name"
 suite = context_gx.create_expectation_suite(expectation_suite_name)
 batch_request = RuntimeBatchRequest(
     datasource_name="spark_s3",
+    data_asset_name="datafile_name",
+    batch_identifiers={"runtime_batch_identifier_name": "default_identifier"},
     data_connector_name="default_inferred_data_connector_name",
     runtime_parameters={"path": "s3a://bucket_name/path_to_file.format"},
 )

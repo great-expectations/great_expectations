@@ -290,6 +290,7 @@ class ActionListValidationOperator(ValidationOperator):
         result_format=None,
         checkpoint_identifier=None,
         checkpoint_name: Optional[str] = None,
+        validation_id: Optional[str] = None,
     ) -> ValidationOperatorResult:
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -377,7 +378,7 @@ class ActionListValidationOperator(ValidationOperator):
                         ge_cloud_id=batch._expectation_suite.ge_cloud_id,
                     )
                     validation_result_id = GeCloudIdentifier(
-                        resource_type=GeCloudRESTResource.SUITE_VALIDATION_RESULT
+                        resource_type=GeCloudRESTResource.VALIDATION_RESULT
                     )
                 else:
                     expectation_suite_identifier = ExpectationSuiteIdentifier(
@@ -399,8 +400,11 @@ class ActionListValidationOperator(ValidationOperator):
                     checkpoint_identifier=checkpoint_identifier,
                 )
 
+                validation_result = async_batch_validation_result.result()
+                validation_result.meta["validation_id"] = validation_id
+
                 run_result_obj = {
-                    "validation_result": async_batch_validation_result.result(),
+                    "validation_result": validation_result,
                     "actions_results": batch_actions_results,
                 }
                 run_results[validation_result_id] = run_result_obj

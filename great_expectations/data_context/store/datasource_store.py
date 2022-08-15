@@ -117,7 +117,7 @@ class DatasourceStore(Store):
         datasource_key: Union[
             DataContextVariableKey, GeCloudIdentifier
         ] = self.store_backend.build_key(name=datasource_name)
-        if not self.has_key(datasource_key):
+        if not self.has_key(datasource_key):  # noqa: W601
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
@@ -203,7 +203,6 @@ class DatasourceStore(Store):
         Raises:
             ValueError if a DatasourceConfig is not found.
         """
-
         key: DataContextKey = self._build_key_from_config(config)
 
         if not self.has_key(key):
@@ -217,7 +216,7 @@ class DatasourceStore(Store):
         return datasource_config
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
-        datasource_key: DataContextVariableKey = DataContextVariableKey(
+        datasource_key = DataContextVariableKey(
             resource_name=datasource_name,
         )
         return datasource_key

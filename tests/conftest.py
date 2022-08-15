@@ -337,7 +337,7 @@ def basic_spark_df_execution_engine(spark_session):
 
     conf: List[tuple] = spark_session.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
-    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
+    execution_engine = SparkDFExecutionEngine(
         spark_config=spark_config,
     )
     return execution_engine
@@ -733,7 +733,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     datasource_config: str = f"""
@@ -980,7 +980,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # add simple template config
-    simple_checkpoint_template_config: CheckpointConfig = CheckpointConfig(
+    simple_checkpoint_template_config = CheckpointConfig(
         name="my_simple_template_checkpoint",
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template-$VAR",
@@ -1028,7 +1028,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # add nested template configs
-    nested_checkpoint_template_config_1: CheckpointConfig = CheckpointConfig(
+    nested_checkpoint_template_config_1 = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template-$VAR",
@@ -1086,7 +1086,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=nested_checkpoint_template_config_1,
     )
 
-    nested_checkpoint_template_config_2: CheckpointConfig = CheckpointConfig(
+    nested_checkpoint_template_config_2 = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
         config_version=1,
         template_name="my_nested_checkpoint_template_1",
@@ -1136,7 +1136,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=nested_checkpoint_template_config_2,
     )
 
-    nested_checkpoint_template_config_3: CheckpointConfig = CheckpointConfig(
+    nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
         config_version=1,
         template_name="my_nested_checkpoint_template_2",
@@ -1189,12 +1189,12 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # add minimal SimpleCheckpoint
-    simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
+    simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
         config_version=1,
     )
-    simple_checkpoint_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
+    simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
     )
     context.checkpoint_store.set(
@@ -1203,7 +1203,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # add SimpleCheckpoint with slack webhook
-    simple_checkpoint_with_slack_webhook_config: CheckpointConfig = CheckpointConfig(
+    simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
         class_name="SimpleCheckpoint",
         config_version=1,
@@ -1220,14 +1220,14 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # add SimpleCheckpoint with slack webhook and notify_with
-    simple_checkpoint_with_slack_webhook_and_notify_with_all_config: CheckpointConfig = CheckpointConfig(
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
         class_name="SimpleCheckpoint",
         config_version=1,
         slack_webhook="https://hooks.slack.com/foo/bar",
         notify_with="all",
     )
-    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
     )
     context.checkpoint_store.set(
@@ -1236,7 +1236,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # add SimpleCheckpoint with site_names
-    simple_checkpoint_with_site_names_config: CheckpointConfig = CheckpointConfig(
+    simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
         class_name="SimpleCheckpoint",
         config_version=1,
@@ -2337,7 +2337,7 @@ stores:
     store_backend:
       class_name: GeCloudStoreBackend
       ge_cloud_base_url: {ge_cloud_base_url}
-      ge_cloud_resource_type: suite_validation_result
+      ge_cloud_resource_type: validation_result
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
         organization_id: {ge_cloud_organization_id}
@@ -2348,7 +2348,7 @@ stores:
     store_backend:
       class_name: GeCloudStoreBackend
       ge_cloud_base_url: {ge_cloud_base_url}
-      ge_cloud_resource_type: contract
+      ge_cloud_resource_type: checkpoint
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
         organization_id: {ge_cloud_organization_id}
@@ -2432,7 +2432,7 @@ def empty_data_context_in_cloud_mode(
         autospec=True,
         side_effect=mocked_get_ge_cloud_config,
     ):
-        context: DataContext = DataContext(
+        context = DataContext(
             ge_cloud_mode=True,
             context_root_dir=project_path_name,
         )
@@ -2632,9 +2632,7 @@ def populated_profiler_store(
     deserialized_config.pop("module_name")
     deserialized_config.pop("class_name")
 
-    profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        **deserialized_config
-    )
+    profiler_config = RuleBasedProfilerConfig(**deserialized_config)
 
     profiler_store = empty_profiler_store
     profiler_store.set(key=profiler_key, value=profiler_config)
@@ -2907,7 +2905,7 @@ def alice_columnar_table_single_batch(empty_data_context):
     )
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
-    expected_expectation_suite: ExpectationSuite = ExpectationSuite(
+    expected_expectation_suite = ExpectationSuite(
         expectation_suite_name=expectation_suite_name, data_context=empty_data_context
     )
     expectation_configuration: ExpectationConfiguration
@@ -4334,7 +4332,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     expectation_suite_name_oneshot_estimator: str = (
         "bobby_columnar_table_multi_batch_oneshot_estimator"
     )
-    expected_expectation_suite_oneshot_estimator: ExpectationSuite = ExpectationSuite(
+    expected_expectation_suite_oneshot_estimator = ExpectationSuite(
         expectation_suite_name=expectation_suite_name_oneshot_estimator,
         data_context=empty_data_context,
     )
@@ -6438,7 +6436,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
         ),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
@@ -6515,7 +6513,7 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
         ),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
@@ -6676,7 +6674,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
             path_or_buf=os.path.join(context_path, "..", "data", file_name), index=False
         )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
@@ -6835,7 +6833,7 @@ def quentin_columnar_table_multi_batch_data_context(
             os.path.join(context_path, "..", "data", file_name),
         )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context

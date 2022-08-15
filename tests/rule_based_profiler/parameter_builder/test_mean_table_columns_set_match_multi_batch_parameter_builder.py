@@ -57,7 +57,7 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
         )
     )
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.TABLE,
         domain_kwargs=None,
         rule_name="my_rule",
@@ -65,7 +65,7 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
 
     variables: Optional[ParameterContainer] = None
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }

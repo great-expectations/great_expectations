@@ -1004,7 +1004,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition: BatchDefinition = BatchDefinition(
+    expected_batch_definition = BatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_gcs_data_connector",
         data_asset_name="TestFiles",

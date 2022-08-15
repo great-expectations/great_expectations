@@ -160,8 +160,8 @@ class AbstractDataContext(ABC):
         self.runtime_environment = runtime_environment
 
         # These attributes that are set downstream.
-        self._variables = None
-        self._config_variables = None
+        self._variables: Optional[DataContextVariables] = None
+        self._config_variables: Optional[dict] = None
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -202,15 +202,14 @@ class AbstractDataContext(ABC):
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
-    @abstractmethod
     def _save_project_config(self) -> None:
         """
-        Each DataContext will define how its project_config will be saved.
+        Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
             - CloudDataContext : Cloud endpoint
             - Ephemeral : not saved, and logging message outputted
         """
-        raise NotImplementedError
+        self.variables.save_config()
 
     @abstractmethod
     def save_expectation_suite(
@@ -901,7 +900,7 @@ class AbstractDataContext(ABC):
         execution_engine: ExecutionEngine = self.datasources[
             batch_definition.datasource_name
         ].execution_engine
-        validator: Validator = Validator(
+        validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
@@ -1031,13 +1030,14 @@ class AbstractDataContext(ABC):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
-        expectation_suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
-        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite_name
-        )
-        if self.expectations_store.has_key(key) and not overwrite_existing:
+        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        if (
+            self.expectations_store.has_key(key)  # noqa: W601
+            and not overwrite_existing
+        ):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
@@ -1060,10 +1060,8 @@ class AbstractDataContext(ABC):
         Returns:
             True for Success and False for Failure.
         """
-        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-            expectation_suite_name
-        )
-        if not self.expectations_store.has_key(key):
+        key = ExpectationSuiteIdentifier(expectation_suite_name)
+        if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
             )
@@ -1088,7 +1086,7 @@ class AbstractDataContext(ABC):
             expectation_suite_name=expectation_suite_name
         )
 
-        if self.expectations_store.has_key(key):
+        if self.expectations_store.has_key(key):  # noqa: W601
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
             )
@@ -1686,7 +1684,7 @@ class AbstractDataContext(ABC):
             expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
             if not expectation_suite_dict:
                 continue
-            expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite = ExpectationSuite(
                 **expectation_suite_dict, data_context=self
             )
 

@@ -6,6 +6,7 @@ from unittest.mock import PropertyMock, patch
 import pytest
 
 import great_expectations as ge
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
@@ -348,7 +349,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                             "access_token": ge_cloud_access_token,
                             "organization_id": org_id,
                         },
-                        "ge_cloud_resource_type": "contract",
+                        "ge_cloud_resource_type": "checkpoint",
                         "suppress_store_backend_id": True,
                     },
                 },
@@ -377,7 +378,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                             "access_token": ge_cloud_access_token,
                             "organization_id": org_id,
                         },
-                        "ge_cloud_resource_type": "suite_validation_result",
+                        "ge_cloud_resource_type": "validation_result",
                         "suppress_store_backend_id": True,
                     },
                 },
@@ -633,3 +634,12 @@ def datasource_config() -> DatasourceConfig:
             }
         },
     )
+
+
+@pytest.fixture
+def shared_called_with_request_kwargs(request_headers) -> dict:
+    """
+    Standard request kwargs that all GeCloudStoreBackend http calls are made with.
+    Use in combination with `assert_called_with()`
+    """
+    return dict(timeout=GeCloudStoreBackend.TIMEOUT, headers=request_headers)

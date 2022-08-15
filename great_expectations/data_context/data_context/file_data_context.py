@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import Any, Dict, Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -48,7 +47,7 @@ class FileDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        self._variables = self._init_variables()
+        self._variables: FileDataContextVariables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_datasource_store(self) -> None:
@@ -69,14 +68,14 @@ class FileDataContext(AbstractDataContext):
             # we ensure that the same exact context (memory address and all) is supplied to the Store backend
         }
 
-        datasource_store: DatasourceStore = DatasourceStore(
+        datasource_store = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
         )
         self._datasource_store = datasource_store
 
-    def save_expectation_suite(
+    def save_expectation_suite(  # type: ignore[override]
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
@@ -96,15 +95,18 @@ class FileDataContext(AbstractDataContext):
             None
         """
         if expectation_suite_name is None:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite.expectation_suite_name
             )
         else:
             expectation_suite.expectation_suite_name = expectation_suite_name
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
-        if self.expectations_store.has_key(key) and not overwrite_existing:
+        if (
+            self.expectations_store.has_key(key)  # noqa: W601
+            and not overwrite_existing
+        ):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
@@ -125,19 +127,8 @@ class FileDataContext(AbstractDataContext):
         return self._context_root_directory
 
     def _init_variables(self) -> FileDataContextVariables:
-        variables: FileDataContextVariables = FileDataContextVariables(
+        variables = FileDataContextVariables(
             config=self._project_config,
-            data_context=self,
+            data_context=self,  # type: ignore[arg-type]
         )
         return variables
-
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug("Starting DataContext._save_project_config")
-        self._save_project_config_to_disk()
-
-    def _save_project_config_to_disk(self) -> None:
-        """Helper method to make save_project_config more explicit"""
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)

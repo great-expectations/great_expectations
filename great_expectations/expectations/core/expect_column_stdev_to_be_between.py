@@ -104,7 +104,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
-    stdev_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    stdev_range_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="stdev_range_estimator",
@@ -130,7 +130,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         stdev_range_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_stdev_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
