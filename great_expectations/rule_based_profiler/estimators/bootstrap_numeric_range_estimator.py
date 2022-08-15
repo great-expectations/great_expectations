@@ -80,7 +80,6 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             parameters=parameters,
         )
 
-        # Obtain quantile_statistic_interpolation_method override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
             quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,
             round_decimals=self.configuration.round_decimals,
