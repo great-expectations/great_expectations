@@ -99,22 +99,24 @@ def _add_datasource_helper(
     else:
         name_and_save_changes_params_base: dict = {"save_changes": save_changes}
 
+    name_and_save_changes_params: dict = name_and_save_changes_params_base.copy()
     if config_type == ConfigType.NAME_SUPPLIED_SEPARATELY:
-        name_and_save_changes_params: dict = name_and_save_changes_params_base.copy()
         name_and_save_changes_params.update({"name": datasource_name})
+        datasource_config_dict: dict = datasource_config.to_dict().copy()
+        datasource_config_dict.pop(
+            "name", None
+        )  # make sure name (even if None) is not present
         stored_datasource = context.add_datasource(
             **name_and_save_changes_params,
-            **datasource_config.to_dict(),
+            **datasource_config_dict,
         )
     elif config_type == ConfigType.CONFIG_INCLUDES_NAME:
-        name_and_save_changes_params: dict = name_and_save_changes_params_base.copy()
         name_and_save_changes_params.update({})
         stored_datasource = context.add_datasource(
             **name_and_save_changes_params,
             **datasource_config_with_name.to_dict(),
         )
     elif config_type == ConfigType.NAME_SUPPLIED_SEPARATELY_AND_INCLUDED_IN_CONFIG:
-        name_and_save_changes_params: dict = name_and_save_changes_params_base.copy()
         name_and_save_changes_params.update({"name": datasource_name})
         stored_datasource = context.add_datasource(
             **name_and_save_changes_params,
