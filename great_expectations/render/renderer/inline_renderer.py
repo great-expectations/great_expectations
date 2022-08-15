@@ -3,13 +3,13 @@ from typing import Callable, List, Optional, Tuple, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationSuite,
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
     get_renderer_impl,
     get_renderer_names_with_renderer_prefix,
 )
+from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import RenderedAtomicContent
 
@@ -144,7 +144,12 @@ Default renderer "{default_prescriptive_renderer_name}" will be used to render p
             A tuple containing RenderedAtomicContent objects for a given ExpectationConfiguration (index 0) and
             ExpectationValidationResult (index 1).
         """
-        render_object: ExpectationValidationResult = self._render_object
+        if isinstance(self._render_object, ExpectationValidationResult):
+            render_object: ExpectationValidationResult = self._render_object
+        else:
+            raise InvalidRenderedContentError(
+                f"InlineRenderer.render_expectation_validation_result can only be used with an ExpectationValidationResult, but {type(self._render_object)} was used."
+            )
 
         return (
             self.get_atomic_rendered_content_for_object(
@@ -159,6 +164,11 @@ Default renderer "{default_prescriptive_renderer_name}" will be used to render p
         Returns:
             RenderedAtomicContent objects for a given ExpectationConfiguration.
         """
-        render_object: ExpectationConfiguration = self._render_object
+        if isinstance(self._render_object, ExpectationConfiguration):
+            render_object: ExpectationConfiguration = self._render_object
+        else:
+            raise InvalidRenderedContentError(
+                f"InlineRenderer.render_expectation_configuration can only be used with an ExpectationConfiguration, but {type(self._render_object)} was used."
+            )
 
         return self.get_atomic_rendered_content_for_object(render_object=render_object)
