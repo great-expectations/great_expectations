@@ -94,7 +94,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         n_resamples: Optional[Union[str, int]] = None,
         random_seed: Optional[Union[str, int]] = None,
         quantile_statistic_interpolation_method: str = "auto",
-        quantile_bias_correction: bool = False,
+        quantile_bias_correction: Union[str, bool] = False,
         quantile_bias_std_error_ratio_threshold: Optional[Union[str, float]] = None,
         bw_method: Optional[Union[str, float, Callable]] = None,
         include_estimator_samples_histogram_in_details: Union[str, bool] = False,
@@ -242,7 +242,7 @@ detected.
         return self._quantile_statistic_interpolation_method
 
     @property
-    def quantile_bias_correction(self) -> bool:
+    def quantile_bias_correction(self) -> Union[str, bool]:
         return self._quantile_bias_correction
 
     @property
