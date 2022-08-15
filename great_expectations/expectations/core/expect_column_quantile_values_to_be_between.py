@@ -148,7 +148,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
-    quantile_value_ranges_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    quantile_value_ranges_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="quantile_value_ranges_estimator",
@@ -177,7 +177,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         quantile_value_ranges_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
