@@ -318,6 +318,10 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert actual_value_05_lower == expected_value_05_lower
     assert actual_value_05_upper == expected_value_05_upper
 
+    # if false positive rate is higher, our range should be more narrow
+    assert actual_value_01_lower < actual_value_05_lower
+    assert actual_value_01_upper > actual_value_05_upper
+
     expected_estimation_histogram: np.ndarray = np.asarray(
         [
             1.0,
@@ -646,6 +650,10 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
 
     assert actual_value_05_lower == expected_value_05_lower
     assert actual_value_05_upper == expected_value_05_upper
+
+    # if false positive rate is higher, our range should be more narrow
+    assert actual_value_01_lower < actual_value_05_lower
+    assert actual_value_01_upper > actual_value_05_upper
 
     expected_estimation_histogram: np.ndarray = np.asarray(
         [

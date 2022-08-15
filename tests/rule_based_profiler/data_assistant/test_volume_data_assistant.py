@@ -1299,7 +1299,7 @@ def quentin_expected_expectation_suite(
                         "max_value": 31,
                         "strict_min": False,
                         "column": "tolls_amount",
-                        "min_value": 19,
+                        "min_value": 18,
                     },
                 }
             ),
