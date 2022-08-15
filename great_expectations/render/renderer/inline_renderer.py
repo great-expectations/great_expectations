@@ -147,7 +147,9 @@ Default renderer "{default_prescriptive_renderer_name}" will be used to render p
         render_object: ExpectationValidationResult = self._render_object
 
         return (
-            render_object.expectation_config.render_expectation_configuration(),
+            self.get_atomic_rendered_content_for_object(
+                render_object=render_object.expectation_config
+            ),
             self.get_atomic_rendered_content_for_object(render_object=render_object),
         )
 
