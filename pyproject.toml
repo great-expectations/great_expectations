@@ -35,8 +35,9 @@ exclude = [
     'core', # 201
     'datasource', # 93
     'dataset',  # 19
-    'data_context/data_context', # 199
-    'data_context/store', # 39
+    'data_context/data_context/abstract_data_context.py', # 84
+    'data_context/data_context/base_data_context.py', # 76
+    'data_context/data_context/cloud_data_context.py', # 17
     'execution_engine', # 100
     'marshmallow__shade', # 19
     '.*render', # 72

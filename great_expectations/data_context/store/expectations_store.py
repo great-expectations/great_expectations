@@ -175,7 +175,7 @@ class ExpectationsStore(Store):
         return expectation_suite_dict
 
     def get(self, key) -> ExpectationSuite:
-        return super().get(key)
+        return super().get(key)  # type: ignore[return-value]
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
