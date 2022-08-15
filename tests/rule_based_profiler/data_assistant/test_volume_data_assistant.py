@@ -19,6 +19,9 @@ from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
+    NumericRangeEstimatorType,
+)
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
     VolumeDataAssistantResult,
@@ -946,7 +949,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
         name: str, exclude_column_names: Optional[List[str]] = None
     ) -> RuleBasedProfilerConfig:
         exclude_column_names = exclude_column_names or []
-        expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        expected_rule_based_profiler_config = RuleBasedProfilerConfig(
             config_version=1.0,
             name=name,
             variables={"random_seed": None},
@@ -1357,7 +1360,7 @@ def quentin_expected_expectation_suite(
 
         expectation_suite_name: str = "my_suite"
 
-        expected_expectation_suite: ExpectationSuite = ExpectationSuite(
+        expected_expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name,
         )
 
@@ -1400,7 +1403,8 @@ def bobby_volume_data_assistant_result(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1419,7 +1423,8 @@ def bobby_volume_data_assistant_result_usage_stats_enabled(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1451,7 +1456,7 @@ def quentin_explicit_instantiation_result_actual_time(
 
     data_assistant_name: str = "test_volume_data_assistant"
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name=data_assistant_name,
         validator=validator,
     )
@@ -1488,7 +1493,7 @@ def quentin_explicit_instantiation_result_frozen_time(
 
     data_assistant_name: str = "test_volume_data_assistant"
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name=data_assistant_name,
         validator=validator,
     )
@@ -1512,7 +1517,8 @@ def quentin_implicit_invocation_result_actual_time(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1533,7 +1539,8 @@ def quentin_implicit_invocation_result_frozen_time(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1602,7 +1609,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         persist=False,
     )
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
         validator=validator,
     )
@@ -1640,6 +1647,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_result_serialization(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -1657,6 +1665,7 @@ def test_volume_data_assistant_result_serialization(
     assert len(bobby_volume_data_assistant_result.profiler_config.rules) == 2
 
 
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1684,6 +1693,7 @@ def test_volume_data_assistant_result_get_expectation_suite(
     )
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
@@ -1709,6 +1719,7 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_instantiation(
     quentin_explicit_instantiation_result_frozen_time,
     quentin_expected_metrics_by_domain,
@@ -1769,6 +1780,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
     assert actual_expectation_suite == expected_expectation_suite
 
 
+@pytest.mark.unit
 @freeze_time("09/26/2019 13:42:41")
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
@@ -1846,6 +1858,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
+@pytest.mark.unit
 @freeze_time("09/26/2019 13:42:41")
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
     quentin_columnar_table_multi_batch_data_context,
@@ -1870,45 +1883,8 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     ]
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        # include_column_names=include_column_names,
+        estimation=NumericRangeEstimatorType.FLAG_OUTLIERS,
         exclude_column_names=exclude_column_names,
-        # include_column_name_suffixes=include_column_name_suffixes,
-        # exclude_column_name_suffixes=exclude_column_name_suffixes,
-        # semantic_type_filter_module_name=semantic_type_filter_module_name,
-        # semantic_type_filter_class_name=semantic_type_filter_class_name,
-        # include_semantic_types=include_semantic_types,
-        # exclude_semantic_types=exclude_semantic_types,
-        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        # cardinality_limit_mode=CardinalityLimitMode.FEW,
-        # max_unique_values=max_unique_values,
-        # max_proportion_unique=max_proportion_unique,
-        # column_value_uniqueness_rule={
-        #     "success_ratio": 0.8,
-        # },
-        # column_value_nullity_rule={
-        # },
-        # column_value_nonnullity_rule={
-        # },
-        # numeric_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "random_seed": 43792,
-        # },
-        # datetime_columns_rule={
-        #     "truncate_values": {
-        #         "lower_bound": 0,
-        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
-        #     },
-        #     "round_decimals": 0,
-        # },
-        # text_columns_rule={
-        #     "strict_min": True,
-        #     "strict_max": True,
-        #     "success_ratio": 0.8,
-        # },
-        # categorical_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "round_decimals": 3,
-        # },
     )
 
     column_name: str
@@ -2026,6 +2002,34 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
+@pytest.mark.unit
+@freeze_time("09/26/2019 13:42:41")
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
+    )
+
+    rule_config: dict
+    assert all(
+        [
+            rule_config["variables"]["estimator"] == "exact"
+            if "estimator" in rule_config["variables"]
+            else True
+            for rule_config in data_assistant_result.profiler_config.rules.values()
+        ]
+    )
+
+
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -2039,44 +2043,9 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        # include_column_names=include_column_names,
-        # exclude_column_names=exclude_column_names,
-        # include_column_name_suffixes=include_column_name_suffixes,
-        # exclude_column_name_suffixes=exclude_column_name_suffixes,
-        # semantic_type_filter_module_name=semantic_type_filter_module_name,
-        # semantic_type_filter_class_name=semantic_type_filter_class_name,
-        # include_semantic_types=include_semantic_types,
-        # exclude_semantic_types=exclude_semantic_types,
-        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        # cardinality_limit_mode=CardinalityLimitMode.REL_100,
-        # max_unique_values=max_unique_values,
-        # max_proportion_unique=max_proportion_unique,
-        # column_value_uniqueness_rule={
-        #     "success_ratio": 0.8,
-        # },
-        # column_value_nullity_rule={
-        # },
-        # column_value_nonnullity_rule={
-        # },
-        # numeric_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "random_seed": 43792,
-        # },
-        # datetime_columns_rule={
-        #     "truncate_values": {
-        #         "lower_bound": 0,
-        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
-        #     },
-        #     "round_decimals": 0,
-        # },
-        # text_columns_rule={
-        #     "strict_min": True,
-        #     "strict_max": True,
-        #     "success_ratio": 0.8,
-        # },
+        estimation=NumericRangeEstimatorType.FLAG_OUTLIERS,
         categorical_columns_rule={
             "false_positive_rate": 0.1,
-            # "round_decimals": 3,
         },
     )
     assert (
@@ -2087,6 +2056,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     )
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
@@ -2098,6 +2068,7 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_explici
     assert data_assistant_result.execution_time > 0.0
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
 ):
@@ -2109,6 +2080,7 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_implici
     assert data_assistant_result.execution_time > 0.0
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
@@ -2133,6 +2105,7 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2157,6 +2130,7 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
         )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2177,6 +2151,7 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution(
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2197,6 +2172,7 @@ def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2219,6 +2195,7 @@ def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2243,6 +2220,7 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     )
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2252,6 +2230,7 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_cha
     assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2275,6 +2254,7 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_ch
     assert find_strings_in_nested_obj(column_domain_charts, columns)
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_include_column_names_filters_output(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2290,6 +2270,7 @@ def test_volume_data_assistant_plot_include_column_names_filters_output(
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_exclude_column_names_filters_output(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2303,6 +2284,7 @@ def test_volume_data_assistant_plot_exclude_column_names_filters_output(
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_error(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2314,6 +2296,7 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_custom_theme_overrides(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2372,6 +2355,7 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
     )
 
 
+@pytest.mark.unit
 def test_volume_data_assistant_plot_return_tooltip(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2415,7 +2399,7 @@ def test_volume_data_assistant_plot_return_tooltip(
         alt.Tooltip(
             **{
                 "field": "min_value",
-                "format": ",",
+                "format": "",
                 "title": "Min Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
@@ -2423,7 +2407,7 @@ def test_volume_data_assistant_plot_return_tooltip(
         alt.Tooltip(
             **{
                 "field": "max_value",
-                "format": ",",
+                "format": "",
                 "title": "Max Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
@@ -2444,23 +2428,17 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "type": AltairDataTypes.NOMINAL.value,
             }
         ),
-        alt.Tooltip(
-            **{
-                "field": "column_distinct_values_count",
-                "format": ",",
-                "title": "Column Distinct Values Count",
-                "type": AltairDataTypes.QUANTITATIVE.value,
-            }
-        ),
     ]
 
     single_column_return_chart: alt.LayerChart = plot_result.charts[2]
     layer_1: alt.Chart = single_column_return_chart.layer[1]
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
-    assert actual_tooltip == expected_tooltip
+    for tooltip in expected_tooltip:
+        assert tooltip in actual_tooltip
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2481,6 +2459,7 @@ def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2501,20 +2480,3 @@ def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_seq
         new_cell=new_cell,
         implicit=True,
     )
-
-
-def test_volume_data_assistant_plot_non_sequential(
-    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
-) -> None:
-    sequential: bool = False
-    plot_metrics_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics(
-        sequential=sequential
-    )
-
-    assert all([chart.mark == "bar" for chart in plot_metrics_result.charts])
-
-    plot_expectations_result: PlotResult = (
-        bobby_volume_data_assistant_result.plot_metrics(sequential=sequential)
-    )
-
-    assert all([chart.mark == "bar" for chart in plot_expectations_result.charts])

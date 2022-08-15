@@ -894,7 +894,7 @@ def validate(
             expectation_suite_dict: dict = expectationSuiteSchema.load(
                 expectation_suite
             )
-            expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite = ExpectationSuite(
                 **expectation_suite_dict, data_context=data_context
             )
 

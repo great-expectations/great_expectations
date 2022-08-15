@@ -963,7 +963,7 @@ def test_data_context_updates_expectation_suite_names(
         ),
     ) as suite_file:
         loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
-        loaded_suite: ExpectationSuite = ExpectationSuite(
+        loaded_suite = ExpectationSuite(
             **loaded_suite_dict,
             data_context=data_context_parameterized_expectation_suite,
         )

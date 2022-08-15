@@ -4,6 +4,7 @@ import logging
 import re
 import uuid
 import warnings
+from dataclasses import field
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -567,17 +568,16 @@ def compute_quantiles(
 ) -> NumericRangeEstimationResult:
     lower_quantile = numpy_quantile(
         a=metric_values,
-        q=(false_positive_rate / 2),
+        q=(false_positive_rate / 2.0),
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
     upper_quantile = numpy_quantile(
         a=metric_values,
-        q=1.0 - (false_positive_rate / 2),
+        q=1.0 - (false_positive_rate / 2.0),
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
-
     return build_numeric_range_estimation_result(
         metric_values=metric_values,
         min_value=lower_quantile,
@@ -623,6 +623,7 @@ def compute_kde_quantiles_point_estimate(
     metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
         metric_values, bw_method=bw_method
     )
+
     metric_values_gaussian_sample: np.ndarray
     if random_seed:
         metric_values_gaussian_sample = metric_values_density_estimate.resample(
@@ -644,7 +645,6 @@ def compute_kde_quantiles_point_estimate(
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
-
     return build_numeric_range_estimation_result(
         metric_values=metric_values,
         min_value=lower_quantile_point_estimate,
@@ -715,8 +715,8 @@ def compute_bootstrap_quantiles_point_estimate(
     computing the stopping criterion, expressed as the optimal number of bootstrap samples, needed to achieve a maximum
     probability that the value of the statistic of interest will be minimally deviating from its actual (ideal) value.
     """
-    lower_quantile_pct: float = false_positive_rate / 2
-    upper_quantile_pct: float = 1.0 - false_positive_rate / 2
+    lower_quantile_pct: float = false_positive_rate / 2.0
+    upper_quantile_pct: float = 1.0 - false_positive_rate / 2.0
 
     sample_lower_quantile: np.ndarray = numpy_quantile(
         a=metric_values,
@@ -750,7 +750,6 @@ def compute_bootstrap_quantiles_point_estimate(
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_lower_quantile,
     )
-
     upper_quantile_bias_corrected_point_estimate: np.float64 = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
@@ -759,7 +758,6 @@ def compute_bootstrap_quantiles_point_estimate(
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_upper_quantile,
     )
-
     return build_numeric_range_estimation_result(
         metric_values=metric_values,
         min_value=lower_quantile_bias_corrected_point_estimate,
@@ -940,3 +938,8 @@ def sanitize_parameter_name(name: str) -> str:
     This method provides display-friendly version of "name" argument.
     """
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
+
+
+def default_field(obj: Dict[Union[str, Tuple[str]], str]) -> field:
+    """Shorthand method of allowing mutable dataclass variables."""
+    return field(default_factory=lambda: copy.copy(obj))

@@ -12,7 +12,7 @@ from great_expectations.data_context.types.base import (
     S3StoreBackendDefaults,
 )
 
-sc = SparkContext()
+sc = SparkContext.getOrCreate()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 s3_client = boto3.client("s3")

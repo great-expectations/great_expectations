@@ -108,7 +108,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
-    min_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    min_range_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="min_range_estimator",
@@ -134,7 +134,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         min_range_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_min_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},

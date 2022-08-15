@@ -104,16 +104,16 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
     batch_spec_passthrough={
-        "bigquery_temp_table": "ge_temp"
+        "bigquery_temp_table": temp_table_name
     },  # this is the name of the table you would like to use a 'temp_table'
 )
 
 context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
+    expectation_suite_name="test_suite_2", overwrite_existing=True
 )
 with pytest.warns(DeprecationWarning):
     validator: Validator = context.get_validator(
-        batch_request=batch_request, expectation_suite_name="test_suite"
+        batch_request=batch_request, expectation_suite_name="test_suite_2"
     )
 
 # Testing `validator.head()` when using BigQuery without temp tables
@@ -130,4 +130,5 @@ validator_without_temp_table = context.get_validator(
     expectation_suite_name="test_suite_2",
 )
 
-assert validator.head(n_rows=5, fetch_all=False)
+df = validator_without_temp_table.head(n_rows=5, fetch_all=False)
+assert not df.empty

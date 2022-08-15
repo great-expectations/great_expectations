@@ -175,7 +175,7 @@ class ExpectationsStore(Store):
         return expectation_suite_dict
 
     def get(self, key) -> ExpectationSuite:
-        return super().get(key)
+        return super().get(key)  # type: ignore[return-value]
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
@@ -218,7 +218,7 @@ class ExpectationsStore(Store):
         )
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
-                resource_type=GeCloudRESTResource.CONTRACT,
+                resource_type=GeCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
         else:

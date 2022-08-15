@@ -383,7 +383,7 @@ class BaseCheckpoint(ConfigPeer):
             checkpoint_identifier = None
             if self.data_context.ge_cloud_mode:
                 checkpoint_identifier = GeCloudIdentifier(
-                    resource_type=GeCloudRESTResource.CONTRACT,
+                    resource_type=GeCloudRESTResource.CHECKPOINT,
                     ge_cloud_id=str(self.ge_cloud_id),
                 )
 
@@ -568,7 +568,7 @@ constructor arguments.
 """
             )
 
-        checkpoint_config: CheckpointConfig = CheckpointConfig(
+        checkpoint_config = CheckpointConfig(
             name=name,
             config_version=config_version,
             template_name=template_name,

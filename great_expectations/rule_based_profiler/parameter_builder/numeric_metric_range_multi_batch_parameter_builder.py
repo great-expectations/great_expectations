@@ -24,8 +24,8 @@ from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
 )
-from great_expectations.rule_based_profiler.estimators.oneshot_numeric_range_estimator import (
-    OneShotNumericRangeEstimator,
+from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_estimator import (
+    QuantilesNumericRangeEstimator,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
@@ -61,17 +61,19 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     On the other hand, it is specific in the sense that the parameter names will always have the semantics of numeric
     ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
 
-    The implementation supports two methods of estimating parameter values from data:
-    * bootstrapped (default) -- a statistical technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)")
-    * one-shot -- assumes that metric values, computed on batch data, are normally distributed and computes the mean
-      and the standard error using the queried batches as the single sample of the distribution (fast, but inaccurate).
+    The implementation supports four methods of estimating parameter values from data:
+    * quantiles -- assumes that metric values, computed on batch data, are normally distributed and computes the mean
+      and the standard error using the queried batches as the single sample of the distribution.
+    * exact -- uses the minimum and maximum observations for range boundaries.
+    * bootstrap -- a statistical resampling technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)").
+    * kde -- a statistical technique that fits a gaussian to the distribution and resamples from it.
     """
 
     RECOGNIZED_SAMPLING_METHOD_NAMES: set = {
         "bootstrap",
         "exact",
         "kde",
-        "oneshot",
+        "quantiles",
     }
 
     RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
@@ -94,7 +96,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         n_resamples: Optional[Union[str, int]] = None,
         random_seed: Optional[Union[str, int]] = None,
         quantile_statistic_interpolation_method: str = "auto",
-        quantile_bias_correction: bool = False,
+        quantile_bias_correction: Union[str, bool] = False,
         quantile_bias_std_error_ratio_threshold: Optional[Union[str, float]] = None,
         bw_method: Optional[Union[str, float, Callable]] = None,
         include_estimator_samples_histogram_in_details: Union[str, bool] = False,
@@ -122,7 +124,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
                 identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
-            estimator: choice of the estimation algorithm: "oneshot" (one observation), "bootstrap" (default), "exact"
+            estimator: choice of the estimation algorithm: "quantiles", "bootstrap", "exact"
                 (deterministic, incorporating entire observed value range), or "kde" (kernel density estimation).
             n_resamples: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 9999 is used (default in
@@ -242,7 +244,7 @@ detected.
         return self._quantile_statistic_interpolation_method
 
     @property
-    def quantile_bias_correction(self) -> bool:
+    def quantile_bias_correction(self) -> Union[str, bool]:
         return self._quantile_bias_correction
 
     @property
@@ -417,8 +419,8 @@ detected.
 """
             )
 
-        if estimator == "oneshot":
-            return OneShotNumericRangeEstimator(
+        if estimator == "quantiles":
+            return QuantilesNumericRangeEstimator(
                 configuration=Attributes(
                     {
                         "false_positive_rate": self.false_positive_rate,
