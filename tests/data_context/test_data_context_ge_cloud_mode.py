@@ -129,6 +129,7 @@ def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_er
 @mock.patch("requests.get")
 def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     mock_request,
+    request_headers: dict,
     ge_cloud_runtime_base_url,
     ge_cloud_runtime_organization_id,
     ge_cloud_runtime_access_token,
@@ -146,12 +147,7 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
         pass
 
     called_with_url = f"{ge_cloud_runtime_base_url}/organizations/{ge_cloud_runtime_organization_id}/data-context-configuration"
-    called_with_header = {
-        "headers": {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {ge_cloud_runtime_access_token}",
-        }
-    }
+    called_with_header = {"headers": request_headers}
 
     # Only ever called once with the endpoint URL and auth token as args
     mock_request.assert_called_once()
