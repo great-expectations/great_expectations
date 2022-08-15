@@ -317,14 +317,12 @@ class CloudDataContext(AbstractDataContext):
         """
 
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(config)
+        datasource_config.name = name
 
         if save_changes:
-
-            datasource_config["name"] = name
-            resource_ref: GeCloudResourceRef = self._datasource_store.create(
-                datasource_config
+            datasource_config = self._datasource_store.set(
+                key=None, value=datasource_config
             )
-            datasource_config.id_ = resource_ref.ge_cloud_id
 
         self.config.datasources[name] = datasource_config
 
@@ -345,6 +343,10 @@ class CloudDataContext(AbstractDataContext):
             **datasourceConfigSchema.load(substituted_config_dict)
         )
         schema_validated_substituted_config_dict = substituted_config.to_json_dict()
+
+        # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
+        #  instead of popping the name field
+        schema_validated_substituted_config_dict.pop("name", None)
 
         datasource: Optional[Datasource] = None
         if initialize:
