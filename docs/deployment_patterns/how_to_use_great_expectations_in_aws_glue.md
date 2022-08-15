@@ -33,11 +33,11 @@ Here we initialize a Spark and Glue, and read great_expectations.yaml
 ```
 
 ### 4. Create Expectations
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L45-L60
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L45-L62
 ```
 
 ### 5. Validate your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L62-L76
+```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L64-L78
 ```
 
 ### 6. Congratulations!

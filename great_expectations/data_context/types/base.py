@@ -14,7 +14,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
-from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -167,6 +167,7 @@ class AssetConfig(SerializableDictDot):
         splitter_kwargs: Optional[Dict[str, str]] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
+        reader_options: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         if name is not None:
@@ -195,6 +196,8 @@ class AssetConfig(SerializableDictDot):
             self.sampling_method = sampling_method
         if sampling_kwargs is not None:
             self.sampling_kwargs = sampling_kwargs
+        if reader_options is not None:
+            self.reader_options = reader_options
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -259,6 +262,8 @@ class AssetConfigSchema(Schema):
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
+
+    reader_options = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
@@ -362,10 +367,11 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class DataConnectorConfig(SerializableDictDot):
+class DataConnectorConfig(AbstractConfig):
     def __init__(
         self,
         class_name,
+        id_: Optional[str] = None,
         module_name=None,
         credentials=None,
         assets=None,
@@ -441,6 +447,8 @@ class DataConnectorConfig(SerializableDictDot):
         if delimiter is not None:
             self.delimiter = delimiter
 
+        super().__init__(id_=id_)
+
         # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -466,9 +474,15 @@ class DataConnectorConfig(SerializableDictDot):
         return serializeable_dict
 
 
-class DataConnectorConfigSchema(Schema):
+class DataConnectorConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
+
+    id_ = fields.String(
+        required=False,
+        allow_none=True,
+        data_key="id",
+    )
 
     class_name = fields.String(
         required=True,
@@ -932,7 +946,7 @@ class DatasourceConfig(AbstractConfig):
         return serializeable_dict
 
 
-class DatasourceConfigSchema(Schema):
+class DatasourceConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
@@ -2239,7 +2253,7 @@ class CheckpointValidationConfig(AbstractConfig):
             setattr(self, k, v)
 
 
-class CheckpointValidationConfigSchema(Schema):
+class CheckpointValidationConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
@@ -2256,11 +2270,14 @@ class CheckpointValidationConfigSchema(Schema):
         explicitly name all possible values in CheckpoingValidationConfigSchema as
         schema fields.
         """
-        original_obj = copy.deepcopy(obj)
         data = super().dump(obj, many=many)
 
-        for key, value in original_obj.items():
-            if key not in data and key not in self.declared_fields:
+        for key, value in obj.items():
+            if (
+                key not in data
+                and key not in self.declared_fields
+                and value is not None
+            ):
                 data[key] = value
 
         sorted_data = dict(sorted(data.items()))
@@ -2283,6 +2300,7 @@ class CheckpointConfigSchema(Schema):
             "evaluation_parameters",
             "runtime_configuration",
             "validations",
+            "default_validation_id",
             "profilers",
             # Next two fields are for LegacyCheckpoint configuration
             "validation_operator_name",
@@ -2305,6 +2323,7 @@ class CheckpointConfigSchema(Schema):
         "notify_with",
         "validation_operator_name",
         "batches",
+        "default_validation_id",
     ]
 
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
@@ -2339,6 +2358,8 @@ class CheckpointConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
+    default_validation_id = fields.String(required=False, allow_none=True)
+
     profilers = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
     )
@@ -2419,6 +2440,7 @@ class CheckpointConfig(BaseYamlConfig):
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[CheckpointValidationConfig]] = None,
+        default_validation_id: Optional[str] = None,
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
@@ -2449,6 +2471,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
+            self._default_validation_id = default_validation_id
             self._profilers = profilers or []
             self._ge_cloud_id = ge_cloud_id
             # the following attributes are used by SimpleCheckpoint
@@ -2534,6 +2557,14 @@ class CheckpointConfig(BaseYamlConfig):
     @validations.setter
     def validations(self, value: List[CheckpointValidationConfig]) -> None:
         self._validations = value
+
+    @property
+    def default_validation_id(self) -> Optional[str]:
+        return self._default_validation_id
+
+    @default_validation_id.setter
+    def default_validation_id(self, validation_id: str) -> None:
+        self._default_validation_id = validation_id
 
     @property
     def profilers(self) -> List[dict]:

@@ -214,7 +214,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
         )
     )
     assert len(returned_batch_definition_list) == 24
-    expected_batch_definition: BatchDefinition = BatchDefinition(
+    expected_batch_definition = BatchDefinition(
         datasource_name="taxi_multi_batch_sql_datasource",
         data_connector_name="by_pickup_date_time",
         data_asset_name="yellow_tripdata_sample_2020_01",
@@ -254,7 +254,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index(
     )
     assert len(returned_batch_definition_list) == 1
 
-    expected_batch_definition: BatchDefinition = BatchDefinition(
+    expected_batch_definition = BatchDefinition(
         datasource_name="taxi_multi_batch_sql_datasource",
         data_connector_name="by_pickup_date_time",
         data_asset_name="yellow_tripdata_sample_2020_01",

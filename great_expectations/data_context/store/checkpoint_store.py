@@ -55,12 +55,12 @@ class CheckpointStore(ConfigurationStore):
         test_checkpoint_name: str = "test-name-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
-        test_checkpoint_configuration: CheckpointConfig = CheckpointConfig(
+        test_checkpoint_configuration = CheckpointConfig(
             **{"name": test_checkpoint_name}
         )
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
-                resource_type=GeCloudRESTResource.CONTRACT,
+                resource_type=GeCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
         else:

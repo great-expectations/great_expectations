@@ -128,7 +128,7 @@ def titanic_data_context_with_spark_datasource(
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     datasource_config: str = f"""
@@ -3928,6 +3928,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
 
 
 def _write_checkpoint_dict_to_file(config, checkpoint_file_path):
-    yaml_obj: YAML = YAML()
+    yaml_obj = YAML()
     with open(checkpoint_file_path, "w") as f:
         yaml_obj.dump(config, f)
