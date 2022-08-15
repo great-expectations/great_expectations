@@ -149,7 +149,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
-def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
+def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
@@ -173,7 +173,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             metric_multi_batch_parameter_builder_name=None,
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            estimator="oneshot",
+            estimator="quantiles",
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=1,
@@ -276,7 +276,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             metric_multi_batch_parameter_builder_name=None,
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            estimator="oneshot",
+            estimator="quantiles",
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=5.0e-2,
             round_decimals=1,
@@ -467,7 +467,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
-def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(
+def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
@@ -506,7 +506,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
             metric_multi_batch_parameter_builder_name="my_column_min",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            estimator="oneshot",
+            estimator="quantiles",
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=1,
@@ -609,7 +609,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
             metric_multi_batch_parameter_builder_name="my_column_min",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            estimator="oneshot",
+            estimator="quantiles",
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=5.0e-2,
             round_decimals=1,
