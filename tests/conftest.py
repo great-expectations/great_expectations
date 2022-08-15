@@ -3414,7 +3414,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     ] = [
         ExpectationConfiguration(
             **{
-                "kwargs": {"min_value": 7510, "max_value": 8995},
+                "kwargs": {"min_value": 7500, "max_value": 9000},
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -5058,7 +5058,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "mostly": 1.0,
             },
             "$parameter.raw.row_count_range": {
-                "value": [7510, 8995],
+                "value": [7500, 9000],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "table.row_count",
@@ -5070,7 +5070,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
             },
             "$parameter.row_count_range": {
-                "value": [7510, 8995],
+                "value": [7500, 9000],
                 "details": {
                     "metric_configuration": {
                         "metric_name": "table.row_count",
