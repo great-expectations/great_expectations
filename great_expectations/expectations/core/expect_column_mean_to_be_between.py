@@ -141,12 +141,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                 "variables": {
                     "strict_min": False,
                     "strict_max": False,
-                    "false_positive_rate": 0.05,
-                    "estimator": "bootstrap",
-                    "n_resamples": 9999,
-                    "random_seed": None,
-                    "quantile_statistic_interpolation_method": "nearest",
-                    "quantile_bias_correction": False,
+                    "estimator": "exact",
                     "quantile_bias_std_error_ratio_threshold": None,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
