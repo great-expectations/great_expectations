@@ -92,10 +92,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         replace_nan_with_zero: Union[str, bool] = True,
         reduce_scalar_metric: Union[str, bool] = True,
         false_positive_rate: Optional[Union[str, float]] = None,
-        estimator: str = "quantiles",
+        estimator: str = "bootstrap",
         n_resamples: Optional[Union[str, int]] = None,
         random_seed: Optional[Union[str, int]] = None,
-        quantile_statistic_interpolation_method: str = "nearest",
+        quantile_statistic_interpolation_method: str = "linear",
         quantile_bias_correction: Union[str, bool] = False,
         quantile_bias_std_error_ratio_threshold: Optional[Union[str, float]] = None,
         bw_method: Optional[Union[str, float, Callable]] = None,
@@ -124,7 +124,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
                 identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
-            estimator: choice of the estimation algorithm: "quantiles" (default), "bootstrap", "exact"
+            estimator: choice of the estimation algorithm: "quantiles", "bootstrap", "exact"
                 (deterministic, incorporating entire observed value range), or "kde" (kernel density estimation).
             n_resamples: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 9999 is used (default in
