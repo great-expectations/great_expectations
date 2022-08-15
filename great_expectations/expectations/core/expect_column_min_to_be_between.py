@@ -145,6 +145,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                     "strict_max": False,
                     "false_positive_rate": 0.05,
                     "estimator": "bootstrap",
+                    "n_resamples": 9999,
                     "random_seed": None,
                     "quantile_statistic_interpolation_method": "nearest",
                     "quantile_bias_correction": False,
