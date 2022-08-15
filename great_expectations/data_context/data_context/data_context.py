@@ -476,15 +476,15 @@ class DataContext(BaseDataContext):
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
 
+        except DuplicateKeyError:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
+            )
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
                 "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
                     err
                 )
-            )
-        except DuplicateKeyError:
-            raise ge_exceptions.InvalidConfigurationYamlError(
-                "Error: duplicate key found in project YAML file."
             )
         except OSError:
             raise ge_exceptions.ConfigNotFoundError()
