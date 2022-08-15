@@ -16,6 +16,10 @@ from great_expectations.checkpoint.checkpoint import (
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
+)
+from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.util import deep_filter_properties_iterable
 
 
@@ -3462,3 +3466,47 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_validations_into_checkpo
         match='batch_data found in validations cannot be saved to CheckpointStore "checkpoint_store"',
     ):
         context.add_checkpoint(**checkpoint_config)
+
+
+@pytest.mark.unit
+def test_simple_checkpoint_result_validations_include_rendered_content(
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
+    sa,
+):
+    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    expectation_suite_name = "my_expectation_suite"
+    include_rendered_content = True
+
+    # add checkpoint config
+    checkpoint_config = {
+        "class_name": "SimpleCheckpoint",
+        "validations": [
+            {
+                "batch_request": batch_request,
+                "expectation_suite_name": expectation_suite_name,
+                "include_rendered_content": include_rendered_content,
+            }
+        ],
+    }
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint", data_context=context, **checkpoint_config
+    )
+
+    result: CheckpointResult = checkpoint.run()
+
+    validation_result_identifier: ValidationResultIdentifier = (
+        result.list_validation_result_identifiers()[0]
+    )
+    assert isinstance(
+        result.run_results[validation_result_identifier]["validation_result"]
+        .results[0]
+        .rendered_content[0],
+        RenderedAtomicContent,
+    )
