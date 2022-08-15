@@ -2327,7 +2327,7 @@ def test_quentin_expect_column_stdev_to_be_between_auto_yes_default_profiler_con
     validator: Validator = quentin_validator
 
     test_cases: Tuple[Tuple[str, float, float], ...] = (
-        ("fare_amount", 10.0, 32.57),
+        ("fare_amount", 10.0, 4294.79),
         ("passenger_count", 1.0, 2.0),
     )
 
