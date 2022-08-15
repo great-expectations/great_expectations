@@ -63,10 +63,10 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
             variables=variables,
             parameters=parameters,
         )
-        if quantile_statistic_interpolation_method is None:
-            quantile_statistic_interpolation_method = (
-                DEFAULT_QUANTILES_QUANTILE_STATISTIC_INTERPOLATION_METHOD
-            )
+        # if quantile_statistic_interpolation_method is None:
+        #     quantile_statistic_interpolation_method = (
+        #         DEFAULT_QUANTILES_QUANTILE_STATISTIC_INTERPOLATION_METHOD
+        #     )
 
         return compute_quantiles(
             metric_values=metric_values,
