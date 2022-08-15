@@ -1585,7 +1585,10 @@ class AbstractDataContext(ABC):
         # context provides. Datasources should not see unsubstituted variables in their config.
 
         if name is None:
-            name = config.name
+            if isinstance(config, DatasourceConfig):
+                name = config.name
+            else:
+                name = config["name"]
 
         try:
             datasource: Datasource = self._build_datasource_from_config(
@@ -1598,8 +1601,11 @@ class AbstractDataContext(ABC):
         return datasource
 
     def _build_datasource_from_config(
-        self, name: str, config: Union[dict, DatasourceConfig]
+        self, name: Union[str, None], config: Union[dict, DatasourceConfig]
     ) -> Datasource:
+
+        if name is None:
+            name = config.name
         # We convert from the type back to a dictionary for purposes of instantiation
         # Round trip through schema validation and config creation to ensure "id_" is present
         #
@@ -1668,15 +1674,11 @@ class AbstractDataContext(ABC):
             substituted_config.to_json_dict()
         )
 
-        # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
-        #  instead of popping the name field
-        schema_validated_substituted_config_dict.pop("name", None)
-
         datasource: Optional[Datasource] = None
         if initialize:
             try:
                 datasource: Datasource = self._instantiate_datasource_from_config(
-                    name=name, config=schema_validated_substituted_config_dict
+                    name=None, config=schema_validated_substituted_config_dict
                 )
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:

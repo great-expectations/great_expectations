@@ -344,15 +344,11 @@ class CloudDataContext(AbstractDataContext):
         )
         schema_validated_substituted_config_dict = substituted_config.to_json_dict()
 
-        # TODO: AJB 20220803 change _instantiate_datasource_from_config to not require name
-        #  instead of popping the name field
-        schema_validated_substituted_config_dict.pop("name", None)
-
         datasource: Optional[Datasource] = None
         if initialize:
             try:
                 datasource = self._instantiate_datasource_from_config(
-                    name=name, config=schema_validated_substituted_config_dict
+                    name=None, config=schema_validated_substituted_config_dict
                 )
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
