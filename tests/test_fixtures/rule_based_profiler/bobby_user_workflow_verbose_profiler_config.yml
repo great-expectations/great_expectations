@@ -5,7 +5,7 @@ class_name: RuleBaseProfiler
 config_version: 1.0
 
 variables:
-  estimator: quantiles  # Choices: quantiles; exact; kde; or bootstrap
+  estimator: bootstrap  # Choices: quantiles; exact; kde; or bootstrap
   false_positive_rate: 1.0e-2
   mostly: 1.0
 
