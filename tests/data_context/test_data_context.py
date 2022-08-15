@@ -42,6 +42,7 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
+from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
@@ -301,7 +302,10 @@ def test_save_expectation_suite_include_rendered_content(
             "this_data_asset_config_does_not_exist.default"
         )
     )
-    assert expectation_suite_saved.expectations[0].rendered_content is None
+    assert isinstance(
+        expectation_suite_saved.expectations[0].rendered_content[0],
+        RenderedAtomicContent,
+    )
 
 
 def test_compile_evaluation_parameter_dependencies(

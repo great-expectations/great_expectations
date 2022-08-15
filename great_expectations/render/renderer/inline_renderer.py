@@ -3,6 +3,7 @@ from typing import Callable, List, Optional, Tuple, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
+    ExpectationSuite,
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 class InlineRenderer(Renderer):
     def __init__(
         self,
-        render_object: ExpectationValidationResult,
+        render_object: Union[ExpectationConfiguration, ExpectationValidationResult],
     ) -> None:
         super().__init__()
 
@@ -134,8 +135,10 @@ Default renderer "{default_prescriptive_renderer_name}" will be used to render p
 
         return renderer_rendered_content
 
-    def render(self) -> Tuple[List[RenderedAtomicContent], List[RenderedAtomicContent]]:
-        """Gets RenderedAtomicContent for a given ExpectationConfiguration or ExpectationValidationResult.
+    def render_expectation_validation_result(
+        self,
+    ) -> Tuple[List[RenderedAtomicContent], List[RenderedAtomicContent]]:
+        """Gets RenderedAtomicContent for a given ExpectationValidationResult.
 
         Returns:
             A tuple containing RenderedAtomicContent objects for a given ExpectationConfiguration (index 0) and
@@ -143,6 +146,17 @@ Default renderer "{default_prescriptive_renderer_name}" will be used to render p
         """
         render_object: ExpectationValidationResult = self._render_object
 
-        return self.get_atomic_rendered_content_for_object(
-            render_object=render_object.expectation_config
-        ), self.get_atomic_rendered_content_for_object(render_object=render_object)
+        return (
+            render_object.expectation_config.render_expectation_configuration(),
+            self.get_atomic_rendered_content_for_object(render_object=render_object),
+        )
+
+    def render_expectation_configuration(self) -> List[RenderedAtomicContent]:
+        """Gets RenderedAtomicContent for a given ExpectationConfiguration.
+
+        Returns:
+            RenderedAtomicContent objects for a given ExpectationConfiguration.
+        """
+        render_object: ExpectationConfiguration = self._render_object
+
+        return self.get_atomic_rendered_content_for_object(render_object=render_object)

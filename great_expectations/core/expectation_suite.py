@@ -25,7 +25,9 @@ from great_expectations.core.util import (
     nested_update,
     parse_string_to_datetime,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
+    ClassInstantiationError,
     DataContextError,
     InvalidExpectationConfigurationError,
 )
@@ -59,7 +61,6 @@ class ExpectationSuite(SerializableDictDot):
         data_asset_type=None,
         execution_engine_type=None,
         meta=None,
-        include_rendered_content=None,
         ge_cloud_id=None,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
@@ -89,7 +90,6 @@ class ExpectationSuite(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
-        self._include_rendered_content = include_rendered_content
 
     def add_citation(
         self,
@@ -938,6 +938,32 @@ class ExpectationSuite(SerializableDictDot):
             expectation_configurations.append(expectation_configuration)
 
         return expectation_configurations_by_domain
+
+    def render(self) -> None:
+        """Renders content using the atomic prescriptive renderer for each expectation configuration associated with
+        this ExpectationSuite to ExpectationConfiguration.rendered_content
+        """
+        for expectation_configuration in self.expectations:
+            inline_renderer_config: Dict[str, Union[str, ExpectationConfiguration]] = {
+                "class_name": "InlineRenderer",
+                "render_object": expectation_configuration,
+            }
+            module_name: str = "great_expectations.render.renderer.inline_renderer"
+            inline_renderer = instantiate_class_from_config(
+                config=inline_renderer_config,
+                runtime_environment={},
+                config_defaults={"module_name": module_name},
+            )
+            if not inline_renderer:
+                raise ClassInstantiationError(
+                    module_name=module_name,
+                    package_name=None,
+                    class_name=inline_renderer_config["class_name"],
+                )
+
+            expectation_configuration.rendered_content = (
+                inline_renderer.render_expectation_configuration()
+            )
 
 
 class ExpectationSuiteSchema(Schema):
