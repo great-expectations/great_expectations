@@ -8,6 +8,7 @@ import requests
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
+from great_expectations import __version__
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
@@ -444,12 +445,13 @@ class DataContext(BaseDataContext):
         ge_cloud_url = (
             f"{base_url}/organizations/{organization_id}/data-context-configuration"
         )
-        auth_headers = {
+        headers = {
             "Content-Type": "application/vnd.api+json",
             "Authorization": f"Bearer {self.ge_cloud_config.access_token}",  # type: ignore[union-attr]
+            "Gx-Version": __version__,
         }
 
-        response = requests.get(ge_cloud_url, headers=auth_headers)
+        response = requests.get(ge_cloud_url, headers=headers)
         if response.status_code != 200:
             raise ge_exceptions.GeCloudError(
                 f"Bad request made to GE Cloud; {response.text}"
