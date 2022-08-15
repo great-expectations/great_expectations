@@ -139,7 +139,7 @@ class ParameterNode(SerializableDotDict):
     """
 
     def to_dict(self) -> dict:
-        return convert_parameter_nodes_to_dictionaries(source=dict(self))
+        return convert_parameter_node_to_dictionary(source=dict(self))
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
@@ -215,7 +215,7 @@ class ParameterContainer(SerializableDictDot):
         if self.parameter_nodes is None:
             return None
 
-        parameter_node: ParameterNode = convert_dictionaries_to_parameter_nodes(
+        parameter_node: ParameterNode = convert_dictionary_to_parameter_node(
             source=self.parameter_nodes.get(parameter_name_root)
         )
 
@@ -228,7 +228,7 @@ class ParameterContainer(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-def convert_dictionaries_to_parameter_nodes(
+def convert_dictionary_to_parameter_node(
     source: Optional[Any],
 ) -> Optional[ParameterNode]:
     if source is None:
@@ -241,18 +241,18 @@ def convert_dictionaries_to_parameter_nodes(
         key: str
         value: Any
         for key, value in source.items():
-            source[key] = convert_dictionaries_to_parameter_nodes(source=value)
+            source[key] = convert_dictionary_to_parameter_node(source=value)
     elif isinstance(source, (list, tuple, set)):
         source_type: type = type(source)
         value: Any
         return source_type(
-            [convert_dictionaries_to_parameter_nodes(source=value) for value in source]
+            [convert_dictionary_to_parameter_node(source=value) for value in source]
         )
 
     return source
 
 
-def convert_parameter_nodes_to_dictionaries(
+def convert_parameter_node_to_dictionary(
     source: Optional[Any],
 ) -> Optional[dict]:
     if source is None:
@@ -264,7 +264,7 @@ def convert_parameter_nodes_to_dictionaries(
         key: str
         value: Any
         for key, value in source.items():
-            source[key] = convert_parameter_nodes_to_dictionaries(source=value)
+            source[key] = convert_parameter_node_to_dictionary(source=value)
 
     return source
 
@@ -387,7 +387,7 @@ def _build_parameter_node_tree_for_one_parameter(
     else:
         # If the fully-qualified parameter name (or "name space") is trivial (i.e., at "leaf node" / last part), then
         # store the supplied attribute value into the given ParameterNode using leaf "parameter_name_part" name as key.
-        parameter_node[parameter_name_part] = convert_dictionaries_to_parameter_nodes(
+        parameter_node[parameter_name_part] = convert_dictionary_to_parameter_node(
             source=parameter_value
         )
 
