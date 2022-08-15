@@ -4350,7 +4350,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         "variables": {
             "estimator": "quantiles",
             "false_positive_rate": 0.01,
-            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_statistic_interpolation_method": "auto",
             "mostly": 1.0,
         },
         "rules": {
@@ -5054,7 +5054,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.row_count_range": {
@@ -5097,7 +5097,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5164,7 +5164,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5231,7 +5231,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5298,7 +5298,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5365,7 +5365,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5432,7 +5432,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5499,7 +5499,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5566,7 +5566,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5633,7 +5633,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5700,7 +5700,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5767,7 +5767,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5834,7 +5834,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5901,7 +5901,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -5968,7 +5968,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -6035,7 +6035,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.min_range": {
@@ -6102,7 +6102,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.my_date_format": {
@@ -6135,7 +6135,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.my_date_format": {
@@ -6168,7 +6168,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.my_regex": {
@@ -6201,7 +6201,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.my_regex": {
@@ -6234,7 +6234,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.my_regex": {
@@ -6267,7 +6267,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.my_regex": {
@@ -6300,7 +6300,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.my_pickup_location_id_value_set": {
@@ -6343,7 +6343,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$variables": {
                 "estimator": "quantiles",
                 "false_positive_rate": 0.01,
-                "quantile_statistic_interpolation_method": "nearest",
+                "quantile_statistic_interpolation_method": "auto",
                 "mostly": 1.0,
             },
             "$parameter.raw.my_pickup_location_id_value_set": {
