@@ -373,9 +373,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
         try:
-            response = requests.get(
-                url, headers=self.headers, timeout=self.TIMEOUT
-            )
+            response = requests.get(url, headers=self.headers, timeout=self.TIMEOUT)
             response_json = response.json()
             keys = [
                 (
