@@ -15,6 +15,7 @@ from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
 
+@pytest.mark.unit
 def test_inline_renderer_error_message(
     alice_columnar_table_single_batch_context: DataContext,
 ):
@@ -30,6 +31,7 @@ def test_inline_renderer_error_message(
     )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "expectation_configuration,expected_serialized_expectation_configuration_rendered_atomic_content,expected_serialized_expectation_validation_result_rendered_atomic_content",
     [
