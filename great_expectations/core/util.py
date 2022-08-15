@@ -668,9 +668,11 @@ def get_or_create_spark_application(
         spark_config = {}
     else:
         spark_config = copy.deepcopy(spark_config)
+
     name: Optional[str] = spark_config.get("spark.app.name")
     if not name:
         name = "default_great_expectations_spark_application"
+
     spark_config.update({"spark.app.name": name})
 
     spark_session: Optional[SparkSession] = get_or_create_spark_session(
@@ -697,7 +699,7 @@ def get_or_create_spark_application(
         spark_session = get_or_create_spark_session(spark_config=spark_config)
         if spark_session is None:
             raise ValueError("SparkContext could not be started.")
-        # noinspection PyProtectedMember
+        # noinspection PyProtectedMember,PyUnresolvedReferences
         sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
 
     if sc_stopped:
@@ -736,13 +738,16 @@ def get_or_create_spark_session(
         app_name: Optional[str] = spark_config.get("spark.app.name")
         if app_name:
             builder.appName(app_name)
+
         for k, v in spark_config.items():
             if k != "spark.app.name":
                 builder.config(k, v)
+
         spark_session = builder.getOrCreate()
-        # noinspection PyProtectedMember
+        # noinspection PyProtectedMember,PyUnresolvedReferences
         if spark_session.sparkContext._jsc.sc().isStopped():
             raise ValueError("SparkContext stopped unexpectedly.")
+
     except AttributeError:
         logger.error(
             "Unable to load spark context; install optional spark dependency for support."

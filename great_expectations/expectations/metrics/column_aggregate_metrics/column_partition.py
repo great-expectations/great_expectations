@@ -13,7 +13,10 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.util import is_ndarray_datetime_dtype
+from great_expectations.util import (
+    convert_ndarray_to_datetime_dtype_best_effort,
+    is_ndarray_datetime_dtype,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -134,7 +137,9 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
         min_ = _metrics["column.min"]
         max_ = _metrics["column.max"]
 
-        datetime_detected: bool = is_ndarray_datetime_dtype(data=[min_, max_])
+        datetime_detected: bool = is_ndarray_datetime_dtype(
+            data=[min_, max_], parse_strings_as_datetimes=True
+        )
         bins = _determine_bins_using_proper_units(
             datetime_detected=datetime_detected,
             n_bins=n_bins,
@@ -152,7 +157,9 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
         min_original = min_
         max_original = max_
 
-        datetime_detected: bool = is_ndarray_datetime_dtype(data=[min_, _25, _75, max_])
+        datetime_detected: bool = is_ndarray_datetime_dtype(
+            data=[min_, _25, _75, max_], parse_strings_as_datetimes=True
+        )
         if datetime_detected:
             min_ = min_.timestamp()
             _25 = _25.timestamp()
@@ -187,13 +194,18 @@ def _determine_bins_using_proper_units(
     datetime_detected: bool, n_bins: int, min_: Any, max_: Any
 ) -> List[Any]:
     if datetime_detected:
+        data: np.ndaarray = convert_ndarray_to_datetime_dtype_best_effort(
+            data=[min_, max_]
+        )
+        min_ = data[0]
+        max_ = data[1]
         if n_bins == 0:
             bins = [min_]
         else:
             delta_t = (max_ - min_) / n_bins
             bins = []
             for idx in range(n_bins + 1):
-                bins.append(min_ + delta_t)
+                bins.append(min_ + idx * delta_t)
     else:
         # PRECISION NOTE: some implementations of quantiles could produce
         # varying levels of precision (e.g. a NUMERIC column producing
