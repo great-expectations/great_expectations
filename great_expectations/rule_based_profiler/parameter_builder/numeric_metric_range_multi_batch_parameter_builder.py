@@ -95,7 +95,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         estimator: str = "bootstrap",
         n_resamples: Optional[Union[str, int]] = None,
         random_seed: Optional[Union[str, int]] = None,
-        quantile_statistic_interpolation_method: str = "linear",
+        quantile_statistic_interpolation_method: str = "auto",
         quantile_bias_correction: Union[str, bool] = False,
         quantile_bias_std_error_ratio_threshold: Optional[Union[str, float]] = None,
         bw_method: Optional[Union[str, float, Callable]] = None,
