@@ -607,6 +607,7 @@ def request_headers(ge_cloud_access_token) -> Dict[str, str]:
     return {
         "Content-Type": "application/vnd.api+json",
         "Authorization": f"Bearer {ge_cloud_access_token}",
+        "Gx-Version": ge.__version__,
     }
 
 
