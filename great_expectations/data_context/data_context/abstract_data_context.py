@@ -1645,6 +1645,7 @@ class AbstractDataContext(ABC):
         save_changes: bool = False,
     ) -> Optional[Datasource]:
         """ """
+        # TODO: AJB here we are losing the data_connector names
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
