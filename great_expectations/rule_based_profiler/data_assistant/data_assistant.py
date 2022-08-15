@@ -469,7 +469,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         run_profiler_on_data(
             data_assistant=self,
             data_assistant_result=data_assistant_result,
-            profiler=self.profiler,
+            profiler=self._profiler,
             variables=variables,
             rules=rules,
             batch_list=list(batches.values()),
