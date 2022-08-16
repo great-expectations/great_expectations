@@ -200,6 +200,7 @@ def test_cli_datasource_new(
                     "base_directory": "../../test_cli_datasource_new0/filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
+                    "name": "default_inferred_data_connector_name",
                 },
                 "default_runtime_data_connector_name": {
                     "assets": {
@@ -211,6 +212,7 @@ def test_cli_datasource_new(
                     },
                     "class_name": "RuntimeDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
+                    "name": "default_runtime_data_connector_name",
                 },
             },
             "execution_engine": {
@@ -348,6 +350,7 @@ def test_cli_datasource_new_with_name_param(
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
+                    "name": "default_inferred_data_connector_name",
                 },
                 "default_runtime_data_connector_name": {
                     "assets": {
@@ -359,6 +362,7 @@ def test_cli_datasource_new_with_name_param(
                     },
                     "class_name": "RuntimeDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
+                    "name": "default_runtime_data_connector_name",
                 },
             },
             "execution_engine": {
@@ -428,6 +432,7 @@ def test_cli_datasource_new_from_misc_directory(
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
+                    "name": "default_inferred_data_connector_name",
                 },
                 "default_runtime_data_connector_name": {
                     "assets": {
@@ -439,6 +444,7 @@ def test_cli_datasource_new_from_misc_directory(
                     },
                     "class_name": "RuntimeDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
+                    "name": "default_runtime_data_connector_name",
                 },
             },
             "execution_engine": {
