@@ -93,9 +93,11 @@ except ImportError:
 try:
     from pyspark.sql import DataFrame as SparkDataFrame
     from pyspark.sql import SparkSession
+    from pyspark.sql.types import StructType
 except ImportError:
-    SparkSession = None  # type: ignore
     SparkDataFrame = type(None)  # type: ignore
+    SparkSession = None  # type: ignore
+    StructType = None  # type: ignore
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
@@ -1315,6 +1317,7 @@ def build_sa_engine(
 def build_spark_engine(
     spark: SparkSession,
     df: Union[pd.DataFrame, SparkDataFrame],
+    schema: StructType = None,
     batch_id: Optional[str] = None,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
@@ -1336,16 +1339,20 @@ def build_spark_engine(
         batch_id = cast(BatchDefinition, batch_definition).id
 
     if isinstance(df, pd.DataFrame):
-        df = spark.createDataFrame(
-            [
+        if schema is None:
+            data: Union[pd.DataFrame, List[tuple]] = [
                 tuple(
                     None if isinstance(x, (float, int)) and np.isnan(x) else x
                     for x in record.tolist()
                 )
                 for record in df.to_records(index=False)
-            ],
-            df.columns.tolist(),
-        )
+            ]
+            schema = df.columns.tolist()
+        else:
+            data = df
+
+        df = spark.createDataFrame(data=data, schema=schema)
+
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
     execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
