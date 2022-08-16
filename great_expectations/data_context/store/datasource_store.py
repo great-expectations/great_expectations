@@ -13,7 +13,6 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     DatasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.util import filter_properties_dict
 
