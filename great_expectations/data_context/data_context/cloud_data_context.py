@@ -1,8 +1,9 @@
 import logging
-from typing import List, Mapping, Optional, Union, cast
+from typing import Any, Callable, List, Mapping, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import Batch, BatchRequestBase, IDDict
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -24,6 +25,7 @@ from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.datasource import Datasource
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -438,3 +440,124 @@ class CloudDataContext(AbstractDataContext):
             checkpoint_config=checkpoint_config, data_context=self
         )
         return checkpoint
+
+    def get_validator(
+        self,
+        datasource_name: Optional[str] = None,
+        data_connector_name: Optional[str] = None,
+        data_asset_name: Optional[str] = None,
+        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        batch_request_list: Optional[List[BatchRequestBase]] = None,
+        batch_data: Optional[Any] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
+        batch_identifiers: Optional[dict] = None,
+        limit: Optional[int] = None,
+        index: Optional[Union[int, list, tuple, slice, str]] = None,
+        custom_filter_function: Optional[Callable] = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[dict] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        expectation_suite_name: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        create_expectation_suite_with_name: Optional[str] = None,
+        include_rendered_content: bool = True,
+        **kwargs: Optional[dict],
+    ) -> Validator:
+        """
+        This method applies only to the new (V3) Datasource schema.
+        """
+
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    expectation_suite is not None,
+                    expectation_suite_name is not None,
+                    create_expectation_suite_with_name is not None,
+                    expectation_suite_ge_cloud_id is not None,
+                ]
+            )
+            > 1
+        ):
+            raise ValueError(
+                f"No more than one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name can be specified"
+            )
+
+        if expectation_suite_ge_cloud_id is not None:
+            expectation_suite = self.get_expectation_suite(
+                ge_cloud_id=expectation_suite_ge_cloud_id
+            )
+        if expectation_suite_name is not None:
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)
+        if create_expectation_suite_with_name is not None:
+            expectation_suite = self.create_expectation_suite(
+                expectation_suite_name=create_expectation_suite_with_name
+            )
+
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    batch is not None,
+                    batch_list is not None,
+                    batch_request is not None,
+                    batch_request_list is not None,
+                ]
+            )
+            > 1
+        ):
+            raise ValueError(
+                "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"
+            )
+
+        if batch_list:
+            pass
+
+        elif batch:
+            batch_list: List = [batch]
+
+        else:
+            batch_list: List = []
+            if not batch_request_list:
+                batch_request_list = [batch_request]
+
+            for batch_request in batch_request_list:
+                batch_list.extend(
+                    self.get_batch_list(
+                        datasource_name=datasource_name,
+                        data_connector_name=data_connector_name,
+                        data_asset_name=data_asset_name,
+                        batch_request=batch_request,
+                        batch_data=batch_data,
+                        data_connector_query=data_connector_query,
+                        batch_identifiers=batch_identifiers,
+                        limit=limit,
+                        index=index,
+                        custom_filter_function=custom_filter_function,
+                        sampling_method=sampling_method,
+                        sampling_kwargs=sampling_kwargs,
+                        splitter_method=splitter_method,
+                        splitter_kwargs=splitter_kwargs,
+                        runtime_parameters=runtime_parameters,
+                        query=query,
+                        path=path,
+                        batch_filter_parameters=batch_filter_parameters,
+                        batch_spec_passthrough=batch_spec_passthrough,
+                        **kwargs,
+                    )
+                )
+
+        return self.get_validator_using_batch_list(
+            expectation_suite=expectation_suite,
+            batch_list=batch_list,
+            include_rendered_content=include_rendered_content,
+        )
