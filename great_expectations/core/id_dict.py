@@ -25,6 +25,9 @@ class IDDict(dict):
 
     @staticmethod
     def convert_dictionary_to_id_dict(data: Optional[Any]):
+        """
+        This method converts any nested "data" argument of dictionary or iterable type to "IDDict" object (recursively).
+        """
         if isinstance(data, dict):
             data = IDDict(data)
 
