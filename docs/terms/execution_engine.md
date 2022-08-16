@@ -70,13 +70,13 @@ If you are interested in using and accessing data with an Execution Engine that 
 
 - `name`
 - `caching`
-- `batch_spec_defaults` (is this needed?)
+- `batch_spec_defaults`
 - `batch_data_dict`
 - `validator`
 
 ### Execution Engine Properties
 
-- `loaded_batch_data` (all "loaded" batches)
+- `loaded_batch_data`
 - `active_batch_data_id`
 
 ### Execution Engine Methods
