@@ -705,7 +705,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                 "class_name": "Datasource",
                 "module_name": "great_expectations.datasource",
             },
-            id="minimal",
+            id="DatasourceConfig-minimal",
         ),
         pytest.param(
             DatasourceConfig(
@@ -720,7 +720,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                 "class_name": "Datasource",
                 "module_name": "great_expectations.datasource",
             },
-            id="minimal_with_name_and_id",
+            id="DatasourceConfig-minimal_with_name_and_id",
         ),
         pytest.param(
             DatasourceConfig(
@@ -748,9 +748,35 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                     },
                 },
             },
-            datasourceConfigSchema,
-            id="nested_data_connector_id",
+            id="DatasourceConfig-nested_data_connector_id",
         ),
+        pytest.param(
+            CheckpointValidationConfig(  # to_json_dict() not implemented
+                id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
+                name="my_checkpoint",
+            ),
+            checkpointConfigSchema,
+            {"id": "d3a14abd-d4cb-4343-806e-55b555b15c28", "name": "my_checkpoint"},
+            id="CheckpointValidationConfig-minimal_with_name_and_id",
+        ),
+        pytest.param(
+            CheckpointConfig(  # Not an AbstractConfig
+                # id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
+                name="my_checkpoint",
+            ),
+            checkpointConfigSchema,
+            {"id": "d3a14abd-d4cb-4343-806e-55b555b15c28", "name": "my_checkpoint"},
+            id="CheckpointConfig-minimal_with_name_and_id",
+        ),
+        # pytest.param(
+        #     Checkpoint(  # needs `data_context`
+        #         id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
+        #         name="my_checkpoint",
+        #     ),
+        #     checkpointConfigSchema,
+        #     {"id": "d3a14abd-d4cb-4343-806e-55b555b15c28", "name": "my_checkpoint"},
+        #     id="Checkpoint-minimal_with_name_and_id",
+        # ),
     ],
 )
 def test_dict_round_trip_serialization(
