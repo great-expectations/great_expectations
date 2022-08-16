@@ -627,19 +627,15 @@ def compute_kde_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
 
-    ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
-        data=metric_values, parse_strings_as_datetimes=True
-    )
-
-    metric_values_original: np.ndarray
-    if ndarray_is_datetime_type:
-        metric_values_original = copy.deepcopy(metric_values)
-        metric_values = convert_ndarray_datetime_to_float_dtype(data=metric_values)
-    else:
-        metric_values_original = metric_values
+    ndarray_is_datetime_type: bool
+    metric_values_converted: np.ndarray
+    (
+        ndarray_is_datetime_type,
+        metric_values_converted,
+    ) = _convert_metric_values_to_float_dtype_best_effort(metric_values=metric_values)
 
     metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
-        metric_values, bw_method=bw_method
+        metric_values_converted, bw_method=bw_method
     )
 
     metric_values_gaussian_sample: np.ndarray
@@ -677,7 +673,7 @@ def compute_kde_quantiles_point_estimate(
         )
 
     return build_numeric_range_estimation_result(
-        metric_values=metric_values_original,
+        metric_values=metric_values,
         min_value=lower_quantile_point_estimate,
         max_value=upper_quantile_point_estimate,
     )
@@ -832,8 +828,6 @@ def build_numeric_range_estimation_result(
     Returns:
         Structured "NumericRangeEstimationResult" object, containing histogram and value_range attributes.
     """
-    metric_values_original: np.ndarray = metric_values
-
     ndarray_is_datetime_type: bool
     metric_values_converted: np.ndarray
     (
