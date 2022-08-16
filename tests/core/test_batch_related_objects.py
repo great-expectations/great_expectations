@@ -13,6 +13,38 @@ from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.exceptions import InvalidBatchSpecError
 
 
+def test_id_dict_structure():
+    data: dict = {
+        "a0": 1,
+        "a1": {
+            "b0": 2,
+            "b1": [
+                "c0",
+                (
+                    "d0",
+                    {
+                        "e0": 3,
+                        "e1": 4,
+                    },
+                    {"f0", "f1", "f2"},
+                ),
+            ],
+            "b2": 5,
+        },
+    }
+    nested_id_dictionary: IDDict = IDDict.convert_dictionary_to_id_dict(data=data)
+    assert isinstance(nested_id_dictionary, IDDict)
+    assert not isinstance(nested_id_dictionary["a0"], IDDict)
+    assert isinstance(nested_id_dictionary["a1"], IDDict)
+    assert not isinstance(nested_id_dictionary["a1"]["b0"], IDDict)
+    assert not isinstance(nested_id_dictionary["a1"]["b1"], IDDict)
+    assert not isinstance(nested_id_dictionary["a1"]["b1"][0], IDDict)
+    assert not isinstance(list(nested_id_dictionary["a1"]["b1"][1])[0], IDDict)
+    assert isinstance(list(nested_id_dictionary["a1"]["b1"][1])[1], IDDict)
+    assert isinstance(list(nested_id_dictionary["a1"]["b1"][1])[2], set)
+    assert isinstance(nested_id_dictionary["a1"]["b2"], int)
+
+
 def test_batch_definition_id():
     # noinspection PyUnusedLocal,PyPep8Naming
     A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
