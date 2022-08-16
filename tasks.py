@@ -202,16 +202,28 @@ def mv_usage_stats_json(ctx):
     print(f"'{outfile}' copied to dbfs.")
 
 
+PYTHON_VERSION_DEFAULT: float = 3.8
+
+
 @invoke.task(
     help={
         "name": "Docker image name.",
         "tag": "Docker image tag.",
         "build": "If True build the image, otherwise run it. Defaults to False.",
         "detach": "Run container in background and print container ID. Defaults to False.",
+        "py": f"version of python to use. Default is {PYTHON_VERSION_DEFAULT}",
         "cmd": "Command for docker image. Default is bash.",
     }
 )
-def docker(ctx, name="gx38local", tag="latest", build=False, detach=False, cmd="bash"):
+def docker(
+    ctx,
+    name="gx38local",
+    tag="latest",
+    build=False,
+    detach=False,
+    cmd="bash",
+    py=PYTHON_VERSION_DEFAULT,
+):
     """
     Build or run gx docker image.
     """
@@ -235,7 +247,7 @@ def docker(ctx, name="gx38local", tag="latest", build=False, detach=False, cmd="
                 f"--tag {name}:{tag}",
                 *[
                     f"--build-arg {arg}"
-                    for arg in ["SOURCE=local", "PYTHON_VERSION=3.8"]
+                    for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]
                 ],
                 ".",
             ]
