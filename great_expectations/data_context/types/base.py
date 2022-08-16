@@ -1049,6 +1049,11 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
+        # Add names to data connectors
+        for data_connector_name, data_connector_config in data.get(
+            "data_connectors", {}
+        ).items():
+            data_connector_config["name"] = data_connector_name
         return DatasourceConfig(**data)
 
 
