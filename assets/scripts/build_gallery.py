@@ -6,8 +6,9 @@ import os
 import re
 import sys
 import traceback
+from glob import glob
 from io import StringIO
-from subprocess import CalledProcessError, CompletedProcess, run
+from subprocess import CalledProcessError, CompletedProcess, check_output, run
 from typing import Dict, List
 
 import click
@@ -72,6 +73,50 @@ def execute_shell_command(command: str) -> int:
         logger.error(exception_message)
 
     return status_code
+
+
+def get_expectation_file_info_dict() -> dict:
+    result = {}
+    oldpwd = os.getcwd()
+    os.chdir(f"..{os.path.sep}..")
+    repo_path = os.getcwd()
+    logger.debug(
+        "Finding Expectation files in the repo and getting their create/update times"
+    )
+
+    files_found = glob(
+        os.path.join(
+            repo_path, "great_expectations", "expectations", "core", "expect_*.py"
+        ),
+        recursive=True,
+    )
+    files_found.extend(
+        glob(
+            os.path.join(repo_path, "contrib", "**", "expect_*.py"),
+            recursive=True,
+        )
+    )
+
+    for file_path in files_found:
+        file_path = file_path.replace(f"{repo_path}{os.path.sep}", "")
+        name = os.path.basename(file_path).replace(".py", "")
+
+        updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
+        created_at_cmd = (
+            f'git log --diff-filter=A --format="%ai %ar" -- {repr(file_path)}'
+        )
+        result[name] = {
+            "updated_at": check_output(updated_at_cmd, shell=True)
+            .decode("utf-8")
+            .strip(),
+            "created_at": check_output(updated_at_cmd, shell=True)
+            .decode("utf-8")
+            .strip(),
+            "path": file_path,
+        }
+
+    os.chdir(oldpwd)
+    return result
 
 
 def get_contrib_requirements(filepath: str) -> Dict:
@@ -143,6 +188,7 @@ def build_gallery(
     installed_packages_txt = sorted(f"{i.key}=={i.version}" for i in installed_packages)
     logger.debug(f"Found the following packages: {installed_packages_txt}")
 
+    expectation_file_info = get_expectation_file_info_dict()
     import great_expectations
 
     core_expectations = (
@@ -260,6 +306,12 @@ def build_gallery(
         else:
             try:
                 gallery_info[expectation] = diagnostics.to_json_dict()
+                gallery_info[expectation]["created_at"] = expectation_file_info[
+                    expectation
+                ]["created_at"]
+                gallery_info[expectation]["updated_at"] = expectation_file_info[
+                    expectation
+                ]["updated_at"]
             except TypeError as e:
                 logger.error(f"Failed to create JSON for: {expectation}")
                 print(traceback.format_exc())
