@@ -44,10 +44,10 @@ def pytest_generate_tests(metafunc):
         )
         backends = build_test_backends_list(metafunc)
         for c in backends:
-            if c in [
-                "trino",
-            ]:
-                continue
+            # if c in [
+            #     "trino",
+            # ]:
+            #     continue
             for filename in test_configuration_files:
                 file = open(filename)
                 # Use OrderedDict so that python2 will use the correct order of columns in all cases

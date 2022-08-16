@@ -57,7 +57,6 @@
       "title" : "basic_negative_example_compare_numbers",
       "include_in_gallery": true,
       "exact_match_out" : false,
-      "suppress_test_for": ["trino"],
       "in": {
         "column_A": "a",
         "column_B": "x"
@@ -87,7 +86,6 @@
     },{
       "title" : "positive_example_with_mostly_compare_numbers",
       "exact_match_out" : false,
-      "suppress_test_for": ["trino"],
       "in": {
         "column_A": "a",
         "column_B": "x",
