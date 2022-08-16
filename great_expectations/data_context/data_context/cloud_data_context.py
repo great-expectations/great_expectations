@@ -186,7 +186,10 @@ class CloudDataContext(AbstractDataContext):
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
         )
-        if self.expectations_store.has_key(key) and not overwrite_existing:
+        if (
+            self.expectations_store.has_key(key)  # noqa: W601
+            and not overwrite_existing
+        ):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(ge_cloud_id)
@@ -211,7 +214,7 @@ class CloudDataContext(AbstractDataContext):
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
         )
-        if not self.expectations_store.has_key(key):
+        if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
                 f"expectation_suite with id {ge_cloud_id} does not exist."
             )
@@ -236,7 +239,7 @@ class CloudDataContext(AbstractDataContext):
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
         )
-        if self.expectations_store.has_key(key):
+        if self.expectations_store.has_key(key):  # noqa: W601
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
             )
@@ -273,7 +276,10 @@ class CloudDataContext(AbstractDataContext):
             if ge_cloud_id is not None
             else str(expectation_suite.ge_cloud_id),
         )
-        if self.expectations_store.has_key(key) and not overwrite_existing:
+        if (
+            self.expectations_store.has_key(key)  # noqa: W601
+            and not overwrite_existing
+        ):
             raise ge_exceptions.DataContextError(
                 f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. "
                 f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."

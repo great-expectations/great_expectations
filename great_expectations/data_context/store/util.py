@@ -29,7 +29,7 @@ def build_configuration_store(
         f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}"
     )
 
-    if store_backend is not None and issubclass(type(store_backend), StoreBackend):
+    if store_backend is not None and isinstance(store_backend, StoreBackend):
         store_backend = store_backend.config
     elif not isinstance(store_backend, dict):
         raise ge_exceptions.DataContextError(
@@ -45,7 +45,7 @@ def build_configuration_store(
         "overwrite_existing": overwrite_existing,
         "store_backend": store_backend,
     }
-    configuration_store: ConfigurationStore = build_store_from_config(
+    configuration_store: ConfigurationStore = build_store_from_config(  # type: ignore[assignment]
         store_config=store_config,
         module_name=module_name,
         runtime_environment=None,
@@ -108,7 +108,7 @@ def load_config_from_store_backend(
     key = ConfigurationIdentifier(
         configuration_key=configuration_key,
     )
-    return config_store.get(key=key)
+    return config_store.get(key=key)  # type: ignore[return-value]
 
 
 def delete_config_from_store_backend(
@@ -161,7 +161,7 @@ def load_checkpoint_config_from_store_backend(
         configuration_key=checkpoint_name,
     )
     try:
-        return config_store.get(key=key)
+        return config_store.get(key=key)  # type: ignore[return-value]
     except ge_exceptions.InvalidBaseYamlConfigError as exc:
         logger.error(exc.messages)
         raise ge_exceptions.InvalidCheckpointConfigError(

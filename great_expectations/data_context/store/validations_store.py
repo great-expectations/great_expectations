@@ -95,7 +95,7 @@ class ValidationsStore(Store):
     --ge-feature-maturity-info--
     """
 
-    _key_class = ValidationResultIdentifier
+    _key_class = ValidationResultIdentifier  # type: ignore[assignment]
 
     def __init__(
         self, store_backend=None, runtime_environment=None, store_name=None

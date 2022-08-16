@@ -9,6 +9,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import __version__
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -108,13 +109,13 @@ class DataContext(BaseDataContext):
             DataContext
         """
 
-        if not os.path.isdir(project_root_dir):
+        if not os.path.isdir(project_root_dir):  # type: ignore[arg-type]
             raise ge_exceptions.DataContextError(
                 "The project_root_dir must be an existing directory in which "
                 "to initialize a new DataContext"
             )
 
-        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
+        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)  # type: ignore[arg-type]
         os.makedirs(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
@@ -312,7 +313,7 @@ class DataContext(BaseDataContext):
                 f"environment or in global configs ({(', ').join(global_config_path_str)})."
             )
 
-        return GeCloudConfig(**ge_cloud_config_dict)
+        return GeCloudConfig(**ge_cloud_config_dict)  # type: ignore[arg-type]
 
     # TODO: deprecate ge_cloud_account_id
     def __init__(
@@ -393,12 +394,12 @@ class DataContext(BaseDataContext):
         ] = self.config.anonymous_usage_statistics
 
         if (
-            project_config_usage_stats.enabled is False
-            or context_config_usage_stats.enabled is False
+            project_config_usage_stats.enabled is False  # type: ignore[union-attr]
+            or context_config_usage_stats.enabled is False  # type: ignore[union-attr]
         ):
             return False
 
-        if project_config_usage_stats.explicit_id is False:
+        if project_config_usage_stats.explicit_id is False:  # type: ignore[union-attr]
             return True
 
         if project_config_usage_stats == context_config_usage_stats:
@@ -439,16 +440,18 @@ class DataContext(BaseDataContext):
 
         :return: the configuration object retrieved from the Cloud API
         """
+        base_url = self.ge_cloud_config.base_url  # type: ignore[union-attr]
+        organization_id = self.ge_cloud_config.organization_id  # type: ignore[union-attr]
         ge_cloud_url = (
-            self.ge_cloud_config.base_url
-            + f"/organizations/{self.ge_cloud_config.organization_id}/data-context-configuration"
+            f"{base_url}/organizations/{organization_id}/data-context-configuration"
         )
-        auth_headers = {
+        headers = {
             "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {self.ge_cloud_config.access_token}",
+            "Authorization": f"Bearer {self.ge_cloud_config.access_token}",  # type: ignore[union-attr]
+            "Gx-Version": __version__,
         }
 
-        response = requests.get(ge_cloud_url, headers=auth_headers)
+        response = requests.get(ge_cloud_url, headers=headers)
         if response.status_code != 200:
             raise ge_exceptions.GeCloudError(
                 f"Bad request made to GE Cloud; {response.text}"
@@ -476,15 +479,15 @@ class DataContext(BaseDataContext):
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
 
+        except DuplicateKeyError:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
+            )
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
                 "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
                     err
                 )
-            )
-        except DuplicateKeyError:
-            raise ge_exceptions.InvalidConfigurationYamlError(
-                "Error: duplicate key found in project YAML file."
             )
         except OSError:
             raise ge_exceptions.ConfigNotFoundError()
@@ -504,7 +507,7 @@ class DataContext(BaseDataContext):
         self._save_project_config()
         return new_store
 
-    def add_datasource(
+    def add_datasource(  # type: ignore[override]
         self, name: str, **kwargs: dict
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
@@ -514,7 +517,7 @@ class DataContext(BaseDataContext):
         ] = super().add_datasource(name=name, save_changes=True, **kwargs)
         return new_datasource
 
-    def update_datasource(
+    def update_datasource(  # type: ignore[override]
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
     ) -> None:
@@ -531,7 +534,7 @@ class DataContext(BaseDataContext):
             save_changes=True,
         )
 
-    def delete_datasource(self, name: str) -> None:
+    def delete_datasource(self, name: str) -> None:  # type: ignore[override]
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
         super().delete_datasource(datasource_name=name, save_changes=True)
         self._save_project_config()

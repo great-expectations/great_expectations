@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -13,6 +13,10 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.util import (
+    convert_ndarray_to_datetime_dtype_best_effort,
+    is_ndarray_datetime_dtype,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -132,10 +136,16 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
     if bins == "uniform":
         min_ = _metrics["column.min"]
         max_ = _metrics["column.max"]
-        # PRECISION NOTE: some implementations of quantiles could produce
-        # varying levels of precision (e.g. a NUMERIC column producing
-        # Decimal from a SQLAlchemy source, so we cast to float for numpy)
-        bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins + 1).tolist()
+
+        datetime_detected: bool = is_ndarray_datetime_dtype(
+            data=[min_, max_], parse_strings_as_datetimes=True
+        )
+        bins = _determine_bins_using_proper_units(
+            datetime_detected=datetime_detected,
+            n_bins=n_bins,
+            min_=min_,
+            max_=max_,
+        )
     elif bins in ["ntile", "quantile", "percentile"]:
         bins = _metrics["column.quantile_values"]
     elif bins == "auto":
@@ -143,6 +153,19 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
         nonnull_count = _metrics["column_values.nonnull.count"]
         sturges = np.log2(1.0 * nonnull_count + 1.0)
         min_, _25, _75, max_ = _metrics["column.quantile_values"]
+
+        min_original = min_
+        max_original = max_
+
+        datetime_detected: bool = is_ndarray_datetime_dtype(
+            data=[min_, _25, _75, max_], parse_strings_as_datetimes=True
+        )
+        if datetime_detected:
+            min_ = min_.timestamp()
+            _25 = _25.timestamp()
+            _75 = _75.timestamp()
+            max_ = max_.timestamp()
+
         iqr = _75 - _25
         if iqr < 1.0e-10:  # Consider IQR 0 and do not use variance-based estimator
             n_bins = int(np.ceil(sturges))
@@ -155,8 +178,38 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
                     int(np.ceil(sturges)), int(np.ceil(float(max_ - min_) / fd))
                 )
 
-        bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins + 1).tolist()
+        bins = _determine_bins_using_proper_units(
+            datetime_detected=datetime_detected,
+            n_bins=n_bins,
+            min_=min_original,
+            max_=max_original,
+        )
     else:
         raise ValueError("Invalid parameter for bins argument")
+
+    return bins
+
+
+def _determine_bins_using_proper_units(
+    datetime_detected: bool, n_bins: int, min_: Any, max_: Any
+) -> List[Any]:
+    if datetime_detected:
+        data: np.ndaarray = convert_ndarray_to_datetime_dtype_best_effort(
+            data=[min_, max_]
+        )
+        min_ = data[0]
+        max_ = data[1]
+        if n_bins == 0:
+            bins = [min_]
+        else:
+            delta_t = (max_ - min_) / n_bins
+            bins = []
+            for idx in range(n_bins + 1):
+                bins.append(min_ + idx * delta_t)
+    else:
+        # PRECISION NOTE: some implementations of quantiles could produce
+        # varying levels of precision (e.g. a NUMERIC column producing
+        # Decimal from a SQLAlchemy source, so we cast to float for numpy)
+        bins = np.linspace(start=float(min_), stop=float(max_), num=n_bins + 1).tolist()
 
     return bins
