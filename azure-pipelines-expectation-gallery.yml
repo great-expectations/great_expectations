@@ -217,6 +217,13 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times for individual tests'
 
+          - script: |
+              cd contrib/cli
+              pip install .
+              cd -
+            workingDirectory: $(Build.SourcesDirectory)/contrib/cli/
+            displayName: 'Install contrib CLI tool'
+
           - bash: python ./build_package_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Package Gallery'
