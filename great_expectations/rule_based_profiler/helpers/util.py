@@ -1,4 +1,5 @@
 import copy
+import datetime
 import itertools
 import logging
 import re
@@ -39,7 +40,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     is_fully_qualified_parameter_name_literal_string_format,
 )
 from great_expectations.types import safe_deep_copy
-from great_expectations.util import numpy_quantile
+from great_expectations.util import (
+    convert_ndarray_datetime_to_float_dtype,
+    convert_ndarray_float_to_datetime_dtype,
+    is_ndarray_datetime_dtype,
+    numpy_quantile,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -620,6 +626,15 @@ def compute_kde_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
 
+    ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(data=metric_values)
+
+    metric_values_original: np.ndarray
+    if ndarray_is_datetime_type:
+        metric_values_original = copy.deepcopy(metric_values)
+        metric_values = convert_ndarray_datetime_to_float_dtype(data=metric_values)
+    else:
+        metric_values_original = metric_values
+
     metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
         metric_values, bw_method=bw_method
     )
@@ -635,18 +650,31 @@ def compute_kde_quantiles_point_estimate(
             n_resamples,
         )
 
-    lower_quantile_point_estimate: np.float64 = numpy_quantile(
+    lower_quantile_point_estimate: Union[
+        np.float64, datetime.datetime
+    ] = numpy_quantile(
         metric_values_gaussian_sample,
         q=lower_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
-    upper_quantile_point_estimate: np.float64 = numpy_quantile(
+    upper_quantile_point_estimate: Union[
+        np.float64, datetime.datetime
+    ] = numpy_quantile(
         metric_values_gaussian_sample,
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
+
+    if ndarray_is_datetime_type:
+        lower_quantile_point_estimate = datetime.datetime.fromtimestamp(
+            lower_quantile_point_estimate
+        )
+        upper_quantile_point_estimate = datetime.datetime.fromtimestamp(
+            upper_quantile_point_estimate
+        )
+
     return build_numeric_range_estimation_result(
-        metric_values=metric_values,
+        metric_values=metric_values_original,
         min_value=lower_quantile_point_estimate,
         max_value=upper_quantile_point_estimate,
     )
@@ -718,6 +746,15 @@ def compute_bootstrap_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2.0
 
+    ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(data=metric_values)
+
+    metric_values_original: np.ndarray
+    if ndarray_is_datetime_type:
+        metric_values_original = copy.deepcopy(metric_values)
+        metric_values = convert_ndarray_datetime_to_float_dtype(data=metric_values)
+    else:
+        metric_values_original = metric_values
+
     sample_lower_quantile: np.ndarray = numpy_quantile(
         a=metric_values,
         q=lower_quantile_pct,
@@ -742,7 +779,9 @@ def compute_bootstrap_quantiles_point_estimate(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
-    lower_quantile_bias_corrected_point_estimate: np.float64 = _determine_quantile_bias_corrected_point_estimate(
+    lower_quantile_bias_corrected_point_estimate: Union[
+        np.float64, datetime.datetime
+    ] = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=lower_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
@@ -750,7 +789,9 @@ def compute_bootstrap_quantiles_point_estimate(
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_lower_quantile,
     )
-    upper_quantile_bias_corrected_point_estimate: np.float64 = _determine_quantile_bias_corrected_point_estimate(
+    upper_quantile_bias_corrected_point_estimate: Union[
+        np.float64, datetime.datetime
+    ] = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
@@ -758,8 +799,17 @@ def compute_bootstrap_quantiles_point_estimate(
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_upper_quantile,
     )
+
+    if ndarray_is_datetime_type:
+        lower_quantile_bias_corrected_point_estimate = datetime.datetime.fromtimestamp(
+            lower_quantile_bias_corrected_point_estimate
+        )
+        upper_quantile_bias_corrected_point_estimate = datetime.datetime.fromtimestamp(
+            upper_quantile_bias_corrected_point_estimate
+        )
+
     return build_numeric_range_estimation_result(
-        metric_values=metric_values,
+        metric_values=metric_values_original,
         min_value=lower_quantile_bias_corrected_point_estimate,
         max_value=upper_quantile_bias_corrected_point_estimate,
     )
@@ -820,9 +870,19 @@ def build_numeric_range_estimation_result(
     Returns:
         Structured "NumericRangeEstimationResult" object, containing histogram and value_range attributes.
     """
+    ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(data=metric_values)
+
+    if ndarray_is_datetime_type:
+        metric_values = convert_ndarray_datetime_to_float_dtype(data=metric_values)
+
     histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
         a=metric_values, bins=NUM_HISTOGRAM_BINS
     )
+    bin_edges: np.ndarray = histogram[1]
+
+    if ndarray_is_datetime_type:
+        bin_edges = convert_ndarray_float_to_datetime_dtype(data=bin_edges)
+
     return NumericRangeEstimationResult(
         estimation_histogram=np.vstack(
             (
@@ -832,7 +892,7 @@ def build_numeric_range_estimation_result(
                     mode="constant",
                     constant_values=0,
                 ),
-                histogram[1],
+                bin_edges,
             )
         ),
         value_range=np.asarray([min_value, max_value]),
