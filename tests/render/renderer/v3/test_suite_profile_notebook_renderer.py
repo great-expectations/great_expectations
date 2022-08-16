@@ -278,6 +278,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
                         "group_names": ["data_asset_name"],
                     },
                     "class_name": "InferredAssetFilesystemDataConnector",
+                    "name": "my_basic_data_connector",
                 },
                 "my_special_data_connector": {
                     "glob_directive": "*.csv",
@@ -294,6 +295,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
                     "base_directory": f"{root_dir}/../data/titanic",
                     "default_regex": {"pattern": "(.+)\\.csv", "group_names": ["name"]},
                     "class_name": "ConfiguredAssetFilesystemDataConnector",
+                    "name": "my_special_data_connector",
                 },
                 "my_other_data_connector": {
                     "glob_directive": "*.csv",
@@ -307,11 +309,13 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
                     "base_directory": f"{root_dir}/../data/titanic",
                     "default_regex": {"pattern": "(.+)\\.csv", "group_names": ["name"]},
                     "class_name": "ConfiguredAssetFilesystemDataConnector",
+                    "name": "my_other_data_connector",
                 },
                 "my_runtime_data_connector": {
                     "module_name": "great_expectations.datasource.data_connector",
                     "batch_identifiers": ["pipeline_stage_name", "airflow_run_id"],
                     "class_name": "RuntimeDataConnector",
+                    "name": "my_runtime_data_connector",
                 },
             },
         },
@@ -332,6 +336,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
                     },
                     "base_directory": f"{root_dir}/../data/titanic",
                     "class_name": "InferredAssetFilesystemDataConnector",
+                    "name": "my_additional_data_connector",
                 }
             },
         },
