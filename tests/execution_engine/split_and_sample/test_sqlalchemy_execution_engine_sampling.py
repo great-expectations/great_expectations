@@ -137,6 +137,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             GESqlDialect.TERADATASQL: "teradatasql://",
             GESqlDialect.TRINO: "trino://",
             GESqlDialect.HIVE: "hive://",
+            GESqlDialect.VERTICA: "vertica+vertica_python://",
         }
 
         @property

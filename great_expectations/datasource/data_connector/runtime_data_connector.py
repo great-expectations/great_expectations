@@ -311,15 +311,14 @@ class RuntimeDataConnector(DataConnector):
         batch_spec: BatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
+        batch_spec.update(runtime_parameters)
+
         if "batch_data" in runtime_parameters:
-            batch_spec["batch_data"] = runtime_parameters.get("batch_data")
             return RuntimeDataBatchSpec(batch_spec)
         elif "query" in runtime_parameters:
-            batch_spec["query"] = runtime_parameters.get("query")
             return RuntimeQueryBatchSpec(batch_spec)
         elif "path" in runtime_parameters:
             path: str = runtime_parameters["path"]
-            batch_spec["path"] = path
             if "s3" in path:
                 return S3BatchSpec(batch_spec)
             elif "blob.core.windows.net" in path:
