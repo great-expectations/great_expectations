@@ -616,6 +616,18 @@ def test_column_histogram_metric_spark(spark_session):
 
 
 def test_column_partition_metric_pd():
+    """
+    Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
+
+    The "column.partition" metric depends on "column.max" metric and on "column.max" metric.
+
+    For "PandasExecutionEngine", explicit values of these metrics are needed.
+
+    For standard numerical data, test set contains 12 evenly spaced integers.
+    For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
+
+    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    """
     week_idx: int
     engine = build_pandas_engine(
         pd.DataFrame(
@@ -643,6 +655,8 @@ def test_column_partition_metric_pd():
         ),
     )
 
+    second_in_week: int = 604800
+
     n_bins: int = 10
 
     increment: Union[float, datetime.timedelta]
@@ -654,7 +668,7 @@ def test_column_partition_metric_pd():
     table_columns_metric: MetricConfiguration
     results: dict
 
-    # Test using a floating point number typed column.
+    # Test using standard numeric column.
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -713,7 +727,7 @@ def test_column_partition_metric_pd():
         for idx, element in enumerate(results[desired_metric.id])
     )
 
-    # Test using a datetime.datetime typed column.
+    # Test using "datetime.datetime" column.
 
     metrics = {}
     table_columns_metric, results = get_table_columns_metric(engine=engine)
@@ -767,7 +781,9 @@ def test_column_partition_metric_pd():
     )
     metrics.update(results)
 
-    increment = datetime.timedelta(seconds=(7 * 3600 * 24 * float(n_bins + 1) / n_bins))
+    increment = datetime.timedelta(
+        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+    )
     assert all(
         isclose(
             operand_a=element.to_pydatetime(),
@@ -778,6 +794,19 @@ def test_column_partition_metric_pd():
 
 
 def test_column_partition_metric_sa(sa):
+    """
+    Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
+
+    The "column.partition" metric depends on "column.max" metric and on "column.max" metric.
+
+    For "SqlAlchemyExecutionEngine", explicit values of these metrics are needed, each requiring a "metric_partial_fn",
+    corresponding to "column.min.aggregate_fn" metric and "column.max.aggregate_fn" metric, respectively, resolved.
+
+    For standard numerical data, test set contains 12 evenly spaced integers.
+    For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
+
+    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    """
     week_idx: int
     engine = build_sa_engine(
         pd.DataFrame(
@@ -806,6 +835,8 @@ def test_column_partition_metric_sa(sa):
         sa,
     )
 
+    second_in_week: int = 604800
+
     n_bins: int = 10
 
     increment: Union[float, datetime.timedelta]
@@ -817,7 +848,7 @@ def test_column_partition_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: dict
 
-    # Test using a floating point number typed column.
+    # Test using standard numeric column.
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -903,7 +934,7 @@ def test_column_partition_metric_sa(sa):
         for idx, element in enumerate(results[desired_metric.id])
     )
 
-    # Test using a datetime.datetime typed column.
+    # Test using "datetime.datetime" column.
 
     metrics = {}
     table_columns_metric, results = get_table_columns_metric(engine=engine)
@@ -984,7 +1015,9 @@ def test_column_partition_metric_sa(sa):
     )
     metrics.update(results)
 
-    increment = datetime.timedelta(seconds=(7 * 3600 * 24 * float(n_bins + 1) / n_bins))
+    increment = datetime.timedelta(
+        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+    )
     assert all(
         isclose(
             operand_a=element,
@@ -995,6 +1028,19 @@ def test_column_partition_metric_sa(sa):
 
 
 def test_column_partition_metric_spark(spark_session):
+    """
+    Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
+
+    The "column.partition" metric depends on "column.max" metric and on "column.max" metric.
+
+    For "SparkDFExecutionEngine", explicit values of these metrics are needed, each requiring a "metric_partial_fn",
+    corresponding to "column.min.aggregate_fn" metric and "column.max.aggregate_fn" metric, respectively, resolved.
+
+    For standard numerical data, test set contains 12 evenly spaced integers.
+    For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
+
+    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    """
     from great_expectations.expectations.metrics.import_manager import sparktypes
 
     week_idx: int
@@ -1032,6 +1078,8 @@ def test_column_partition_metric_spark(spark_session):
         batch_id="my_id",
     )
 
+    second_in_week: int = 604800
+
     n_bins: int = 10
 
     increment: Union[float, datetime.timedelta]
@@ -1043,7 +1091,7 @@ def test_column_partition_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: dict
 
-    # Test using a floating point number typed column.
+    # Test using standard numeric column.
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -1129,7 +1177,7 @@ def test_column_partition_metric_spark(spark_session):
         for idx, element in enumerate(results[desired_metric.id])
     )
 
-    # Test using a datetime.datetime typed column.
+    # Test using "datetime.datetime" column.
 
     metrics = {}
     table_columns_metric, results = get_table_columns_metric(engine=engine)
@@ -1210,7 +1258,9 @@ def test_column_partition_metric_spark(spark_session):
     )
     metrics.update(results)
 
-    increment = datetime.timedelta(seconds=(7 * 3600 * 24 * float(n_bins + 1) / n_bins))
+    increment = datetime.timedelta(
+        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+    )
     assert all(
         isclose(
             operand_a=element,
