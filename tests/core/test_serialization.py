@@ -18,6 +18,10 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.marshmallow__shade import Schema
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
@@ -751,22 +755,24 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
             id="DatasourceConfig-nested_data_connector_id",
         ),
         pytest.param(
-            CheckpointValidationConfig(  # to_json_dict() not implemented
+            CheckpointValidationConfig(
                 id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
                 name="my_checkpoint",
             ),
             checkpointConfigSchema,
             {"id": "d3a14abd-d4cb-4343-806e-55b555b15c28", "name": "my_checkpoint"},
             id="CheckpointValidationConfig-minimal_with_name_and_id",
+            marks=pytest.mark.xfail(reason="to_json_dict() not implemented"),
         ),
         pytest.param(
-            CheckpointConfig(  # Not an AbstractConfig
+            CheckpointConfig(
                 # id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
                 name="my_checkpoint",
             ),
             checkpointConfigSchema,
             {"id": "d3a14abd-d4cb-4343-806e-55b555b15c28", "name": "my_checkpoint"},
             id="CheckpointConfig-minimal_with_name_and_id",
+            marks=pytest.mark.xfail(reason="Not an AbstractConfig"),
         ),
         # pytest.param(
         #     Checkpoint(  # needs `data_context`
@@ -777,6 +783,50 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
         #     {"id": "d3a14abd-d4cb-4343-806e-55b555b15c28", "name": "my_checkpoint"},
         #     id="Checkpoint-minimal_with_name_and_id",
         # ),
+        pytest.param(
+            RuleBasedProfilerConfig(
+                name="my_rbp",
+                config_version=1.0,
+                variables={
+                    "false_positive_threshold": 1.0e-2,
+                },
+                rules={
+                    "rule_1": {
+                        "variables": {},
+                        "domain_builder": {
+                            "class_name": "TableDomainBuilder",
+                        },
+                        "parameter_builders": [
+                            {
+                                "class_name": "MetricMultiBatchParameterBuilder",
+                                "name": "my_parameter",
+                                "metric_name": "my_metric",
+                            },
+                        ],
+                        "expectation_configuration_builders": [
+                            {
+                                "class_name": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                                "column_A": "$domain.domain_kwargs.column_A",
+                                "column_B": "$domain.domain_kwargs.column_B",
+                                "my_arg": "$parameter.my_parameter.value[0]",
+                                "my_other_arg": "$parameter.my_parameter.value[1]",
+                                "meta": {
+                                    "profiler_details": {
+                                        "my_parameter_estimator": "$parameter.my_parameter.details",
+                                        "note": "Important remarks about estimation algorithm.",
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                },
+                id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
+            ),
+            ruleBasedProfilerConfigSchema,
+            {"id": "d3a14abd-d4cb-4343-806e-55b555b15c28", "name": "my_rbp"},
+            id="RuleBasedProfilerConfig-minimal_with_name_and_id",
+        ),
     ],
 )
 def test_dict_round_trip_serialization(
