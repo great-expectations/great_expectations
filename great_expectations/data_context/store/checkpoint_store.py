@@ -3,7 +3,7 @@ import logging
 import os
 import random
 import uuid
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import DataContextKey
@@ -24,6 +24,9 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.marshmallow__shade import ValidationError
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +58,7 @@ class CheckpointStore(ConfigurationStore):
         test_checkpoint_name: str = "test-name-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
-        test_checkpoint_configuration: CheckpointConfig = CheckpointConfig(
+        test_checkpoint_configuration = CheckpointConfig(
             **{"name": test_checkpoint_name}
         )
         if self.ge_cloud_mode:
@@ -78,8 +81,8 @@ class CheckpointStore(ConfigurationStore):
             print(
                 f"Attempting to retrieve the test value associated with key {test_key} from Checkpoint store..."
             )
-        # noinspection PyUnusedLocal
-        test_value: CheckpointConfig = self.get(key=test_key)
+
+        self.get(key=test_key)
         if pretty_print:
             print("\tTest value successfully retrieved from Checkpoint store.")
             print()
@@ -87,8 +90,7 @@ class CheckpointStore(ConfigurationStore):
         if pretty_print:
             print(f"Cleaning up test key {test_key} and value from Checkpoint store...")
 
-        # noinspection PyUnusedLocal
-        test_value: CheckpointConfig = self.remove_key(key=test_key)
+        self.remove_key(key=test_key)
         if pretty_print:
             print("\tTest key and value successfully removed from Checkpoint store.")
             print()
@@ -149,7 +151,7 @@ class CheckpointStore(ConfigurationStore):
                 batches is not None
                 and (
                     len(batches) == 0
-                    or {"batch_kwargs", "expectation_suite_names",}.issubset(
+                    or {"batch_kwargs", "expectation_suite_names"}.issubset(
                         set(
                             itertools.chain.from_iterable(
                                 item.keys() for item in batches
@@ -186,11 +188,13 @@ class CheckpointStore(ConfigurationStore):
             None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
             which was used to create the config in the backend.
         """
-        key: DataContextKey = self._build_key_from_config(checkpoint_config)
+        # CheckpointConfig not an AbstractConfig??
+        # mypy error: incompatible type "CheckpointConfig"; expected "AbstractConfig"
+        key: DataContextKey = self._build_key_from_config(checkpoint_config)  # type: ignore[arg-type]
 
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[GeCloudResourceRef] = self.set(key, checkpoint_config)
+        ref: Optional[GeCloudResourceRef] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
         if ref:
             assert isinstance(key, GeCloudIdentifier)
             key.ge_cloud_id = ref.ge_cloud_id

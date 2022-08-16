@@ -94,9 +94,11 @@ except ImportError:
 try:
     from pyspark.sql import DataFrame as SparkDataFrame
     from pyspark.sql import SparkSession
+    from pyspark.sql.types import StructType
 except ImportError:
-    SparkSession = None  # type: ignore
     SparkDataFrame = type(None)  # type: ignore
+    SparkSession = None  # type: ignore
+    StructType = None  # type: ignore
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
@@ -1382,7 +1384,7 @@ def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> Validator:
-    batch: Batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
         execution_engine=PandasExecutionEngine(),
         batches=[
@@ -1603,7 +1605,7 @@ def build_spark_validator_with_data(
             ],
             df.columns.tolist(),
         )
-    batch: Batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark,
         df=df,
@@ -1620,11 +1622,9 @@ def build_spark_validator_with_data(
 def build_pandas_engine(
     df: pd.DataFrame,
 ) -> PandasExecutionEngine:
-    batch: Batch = Batch(data=df)
+    batch = Batch(data=df)
 
-    execution_engine: PandasExecutionEngine = PandasExecutionEngine(
-        batch_data_dict={batch.id: batch.data}
-    )
+    execution_engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     return execution_engine
 
 
@@ -1652,10 +1652,10 @@ def build_sa_engine(
     execution_engine: SqlAlchemyExecutionEngine
 
     execution_engine = SqlAlchemyExecutionEngine(engine=sqlalchemy_engine)
-    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+    batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
     )
-    batch: Batch = Batch(data=batch_data)
+    batch = Batch(data=batch_data)
 
     execution_engine = SqlAlchemyExecutionEngine(
         engine=sqlalchemy_engine, batch_data_dict={batch.id: batch_data}
@@ -1668,6 +1668,7 @@ def build_sa_engine(
 def build_spark_engine(
     spark: SparkSession,
     df: Union[pd.DataFrame, SparkDataFrame],
+    schema: StructType = None,
     batch_id: Optional[str] = None,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
@@ -1689,21 +1690,23 @@ def build_spark_engine(
         batch_id = cast(BatchDefinition, batch_definition).id  # type: ignore
 
     if isinstance(df, pd.DataFrame):
-        df = spark.createDataFrame(
-            [
+        if schema is None:
+            data: Union[pd.DataFrame, List[tuple]] = [
                 tuple(
                     None if isinstance(x, (float, int)) and np.isnan(x) else x
                     for x in record.tolist()
                 )
                 for record in df.to_records(index=False)
-            ],
-            df.columns.tolist(),
-        )
+            ]
+            schema = df.columns.tolist()
+        else:
+            data = df
+
+        df = spark.createDataFrame(data=data, schema=schema)
+
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
-    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
-        spark_config=spark_config
-    )
+    execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
     execution_engine.load_batch_data(batch_id=batch_id, batch_data=df)
     return execution_engine
 

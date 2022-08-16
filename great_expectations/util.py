@@ -894,7 +894,7 @@ def validate(
             expectation_suite_dict: dict = expectationSuiteSchema.load(
                 expectation_suite
             )
-            expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite = ExpectationSuite(
                 **expectation_suite_dict, data_context=data_context
             )
 
@@ -1173,7 +1173,7 @@ def filter_properties_dict(
 
 
 def deep_filter_properties_iterable(
-    properties: Optional[Union[dict, list, set, tuple]] = None,
+    properties: Optional[Any] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
@@ -1240,7 +1240,8 @@ def deep_filter_properties_iterable(
             )
 
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
-        properties = list(
+        properties_type: type = type(properties)
+        properties = properties_type(
             filter(
                 lambda v: not _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=v,
@@ -1338,8 +1339,8 @@ def requires_lossy_conversion(d: decimal.Decimal) -> bool:
 
 
 def isclose(
-    operand_a: Union[datetime.datetime, Number],
-    operand_b: Union[datetime.datetime, Number],
+    operand_a: Union[datetime.datetime, datetime.timedelta, Number],
+    operand_b: Union[datetime.datetime, datetime.timedelta, Number],
     rtol: float = 1.0e-5,  # controls relative weight of "operand_b" (when its magnitude is large)
     atol: float = 1.0e-8,  # controls absolute accuracy (based on floating point machine precision)
     equal_nan: bool = False,
@@ -1362,11 +1363,19 @@ def isclose(
     relative tolerance ("rtol") parameter carries a greater weight in the comparison assessment, because the acceptable
     deviation between the two quantities can be relatively larger for them to be deemed as "close enough" in this case.
     """
-    if (isinstance(operand_a, str) and isinstance(operand_b, str)) or (
-        isinstance(operand_a, datetime.datetime)
-        and isinstance(operand_b, datetime.datetime)
-    ):
+    if isinstance(operand_a, str) and isinstance(operand_b, str):
         return operand_a == operand_b
+
+    if isinstance(operand_a, datetime.datetime) and isinstance(
+        operand_b, datetime.datetime
+    ):
+        operand_a = operand_a.timestamp()
+        operand_b = operand_b.timestamp()
+    elif isinstance(operand_a, datetime.timedelta) and isinstance(
+        operand_b, datetime.timedelta
+    ):
+        operand_a = operand_a.total_seconds()
+        operand_b = operand_b.total_seconds()
 
     return np.isclose(
         a=np.float64(operand_a),
@@ -1409,7 +1418,38 @@ def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
         parse(value, fuzzy=fuzzy)
     except (TypeError, ValueError):
         return False
+
     return True
+
+
+def is_ndarray_datetime_dtype(
+    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+) -> bool:
+    """
+    Determine whether or not all elements of 1-D "np.ndarray" argument are "datetime.datetime" type objects.
+    """
+    value: Any
+    result: bool = all(isinstance(value, datetime.datetime) for value in data)
+    return result or (
+        parse_strings_as_datetimes
+        and all(is_parseable_date(value=value, fuzzy=fuzzy) for value in data)
+    )
+
+
+def convert_ndarray_to_datetime_dtype_best_effort(
+    data: np.ndarray, fuzzy: bool = False
+) -> np.ndarray:
+    """
+    Attempt to parse all elements of 1-D "np.ndarray" argument into "datetime.datetime" type objects.
+    """
+    value: Any
+    if all(is_parseable_date(value=value) for value in data):
+        try:
+            return np.asarray([parse(value, fuzzy=fuzzy) for value in data])
+        except (TypeError, ValueError):
+            return data
+
+    return data
 
 
 def get_context():

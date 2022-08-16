@@ -62,36 +62,40 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             data_context: BaseDataContext associated with this ParameterBuilder
         """
 
-        self._column_partition_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricSingleBatchParameterBuilder",
-            name="column_partition_metric_single_batch_parameter_builder",
-            metric_name="column.partition",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs={
-                "bins": "auto",
-                "allow_relative_error": False,
-            },
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=False,
-            evaluation_parameter_builder_configs=None,
+        self._column_partition_metric_single_batch_parameter_builder_config = (
+            ParameterBuilderConfig(
+                module_name="great_expectations.rule_based_profiler.parameter_builder",
+                class_name="MetricSingleBatchParameterBuilder",
+                name="column_partition_metric_single_batch_parameter_builder",
+                metric_name="column.partition",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs={
+                    "bins": "auto",
+                    "allow_relative_error": False,
+                },
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=False,
+                evaluation_parameter_builder_configs=None,
+            )
         )
-        self._column_value_counts_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricSingleBatchParameterBuilder",
-            name="column_value_counts_metric_single_batch_parameter_builder",
-            metric_name="column.value_counts",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs={
-                "sort": "value",
-            },
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=False,
-            evaluation_parameter_builder_configs=None,
+        self._column_value_counts_metric_single_batch_parameter_builder_config = (
+            ParameterBuilderConfig(
+                module_name="great_expectations.rule_based_profiler.parameter_builder",
+                class_name="MetricSingleBatchParameterBuilder",
+                name="column_value_counts_metric_single_batch_parameter_builder",
+                metric_name="column.value_counts",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs={
+                    "sort": "value",
+                },
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=False,
+                evaluation_parameter_builder_configs=None,
+            )
         )
-        self._column_values_nonnull_count_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        self._column_values_nonnull_count_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="MetricSingleBatchParameterBuilder",
             name="column_values_nonnull_count_metric_single_batch_parameter_builder",

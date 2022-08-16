@@ -31,7 +31,7 @@ def datasource_store_with_single_datasource(
     datasource_config: DatasourceConfig,
     empty_datasource_store: DatasourceStore,
 ) -> DatasourceStore:
-    key: DataContextVariableKey = DataContextVariableKey(
+    key = DataContextVariableKey(
         resource_name=datasource_name,
     )
     empty_datasource_store.set(key=key, value=datasource_config)
@@ -59,7 +59,7 @@ def test_datasource_store_retrieval(
 ) -> None:
     store: DatasourceStore = empty_datasource_store
 
-    key: DataContextVariableKey = DataContextVariableKey(
+    key = DataContextVariableKey(
         resource_name="my_datasource",
     )
     store.set(key=key, value=datasource_config)
@@ -74,6 +74,7 @@ def test_datasource_store_retrieval_cloud_mode(
     ge_cloud_base_url: str,
     ge_cloud_access_token: str,
     ge_cloud_organization_id: str,
+    shared_called_with_request_kwargs: dict,
 ) -> None:
     ge_cloud_store_backend_config: dict = {
         "class_name": "GeCloudStoreBackend",
@@ -86,12 +87,12 @@ def test_datasource_store_retrieval_cloud_mode(
         "suppress_store_backend_id": True,
     }
 
-    store: DatasourceStore = DatasourceStore(
+    store = DatasourceStore(
         store_name="my_cloud_datasource_store",
         store_backend=ge_cloud_store_backend_config,
     )
 
-    key: GeCloudIdentifier = GeCloudIdentifier(
+    key = GeCloudIdentifier(
         resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id="foobarbaz"
     )
 
@@ -114,10 +115,7 @@ def test_datasource_store_retrieval_cloud_mode(
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": "Bearer 6bb5b6f5c7794892a4ca168c65c2603e",
-            },
+            **shared_called_with_request_kwargs,
         )
 
 
@@ -131,12 +129,12 @@ def test_datasource_store_with_inline_store_backend(
         "suppress_store_backend_id": True,
     }
 
-    store: DatasourceStore = DatasourceStore(
+    store = DatasourceStore(
         store_name="my_datasource_store",
         store_backend=inline_store_backend_config,
     )
 
-    key: DataContextVariableKey = DataContextVariableKey(
+    key = DataContextVariableKey(
         resource_name="my_datasource",
     )
 
@@ -217,7 +215,7 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
     datasource_name: str,
     empty_datasource_store: DatasourceStore,
 ) -> None:
-    updated_datasource_config: DatasourceConfig = DatasourceConfig()
+    updated_datasource_config = DatasourceConfig()
     with pytest.raises(ValueError) as e:
         empty_datasource_store.update_by_name(
             datasource_name=datasource_name, datasource_config=updated_datasource_config

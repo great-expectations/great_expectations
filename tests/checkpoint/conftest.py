@@ -72,7 +72,7 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     datasource_config: str = f"""

@@ -1,5 +1,7 @@
 import copy
+import datetime
 import logging
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -21,6 +23,7 @@ from great_expectations.self_check.util import (
     build_sa_engine,
     build_spark_engine,
 )
+from great_expectations.util import isclose
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
@@ -610,6 +613,661 @@ def test_column_histogram_metric_spark(spark_session):
     )
     metrics.update(results)
     assert results == {desired_metric.id: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+
+
+def test_column_partition_metric_pd():
+    """
+    Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
+
+    The "column.partition" metric depends on "column.max" metric and on "column.max" metric.
+
+    For "PandasExecutionEngine", explicit values of these metrics are needed.
+
+    For standard numerical data, test set contains 12 evenly spaced integers.
+    For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
+
+    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    """
+    week_idx: int
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                ],
+                "b": [
+                    datetime.datetime(2021, 1, 1, 0, 0, 0)
+                    + datetime.timedelta(days=(week_idx * 7))
+                    for week_idx in range(12)
+                ],
+            },
+        ),
+    )
+
+    second_in_week: int = 604800
+
+    n_bins: int = 10
+
+    increment: Union[float, datetime.timedelta]
+    idx: int
+    element: Union[float, pd.Timestamp]
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    # Test using standard numeric column.
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    column_min_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": False,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    column_max_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": False,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            column_min_metric,
+            column_max_metric,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.partition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "bins": "uniform",
+            "n_bins": n_bins,
+            "allow_relative_error": False,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "column.min": column_min_metric,
+            "column.max": column_max_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    increment = float(n_bins + 1) / n_bins
+    assert all(
+        isclose(operand_a=element, operand_b=(increment * idx))
+        for idx, element in enumerate(results[desired_metric.id])
+    )
+
+    # Test using "datetime.datetime" column.
+
+    metrics = {}
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    column_min_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    column_max_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            column_min_metric,
+            column_max_metric,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.partition",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "bins": "uniform",
+            "n_bins": n_bins,
+            "allow_relative_error": False,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "column.min": column_min_metric,
+            "column.max": column_max_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    increment = datetime.timedelta(
+        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+    )
+    assert all(
+        isclose(
+            operand_a=element.to_pydatetime(),
+            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),
+        )
+        for idx, element in enumerate(results[desired_metric.id])
+    )
+
+
+def test_column_partition_metric_sa(sa):
+    """
+    Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
+
+    The "column.partition" metric depends on "column.max" metric and on "column.max" metric.
+
+    For "SqlAlchemyExecutionEngine", explicit values of these metrics are needed, each requiring a "metric_partial_fn",
+    corresponding to "column.min.aggregate_fn" metric and "column.max.aggregate_fn" metric, respectively, resolved.
+
+    For standard numerical data, test set contains 12 evenly spaced integers.
+    For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
+
+    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    """
+    week_idx: int
+    engine = build_sa_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                ],
+                "b": [
+                    datetime.datetime(2021, 1, 1, 0, 0, 0)
+                    + datetime.timedelta(days=(week_idx * 7))
+                    for week_idx in range(12)
+                ],
+            },
+        ),
+        sa,
+    )
+
+    second_in_week: int = 604800
+
+    n_bins: int = 10
+
+    increment: Union[float, datetime.timedelta]
+    idx: int
+    element: Union[float, pd.Timestamp]
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    # Test using standard numeric column.
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    partial_column_min_metric = MetricConfiguration(
+        metric_name="column.min.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    partial_column_max_metric = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            partial_column_min_metric,
+            partial_column_max_metric,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    column_min_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": False,
+        },
+        metric_dependencies={
+            "metric_partial_fn": partial_column_min_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    column_max_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": False,
+        },
+        metric_dependencies={
+            "metric_partial_fn": partial_column_max_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            column_min_metric,
+            column_max_metric,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.partition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "bins": "uniform",
+            "n_bins": n_bins,
+            "allow_relative_error": False,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "column.min": column_min_metric,
+            "column.max": column_max_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    increment = float(n_bins + 1) / n_bins
+    assert all(
+        isclose(operand_a=element, operand_b=(increment * idx))
+        for idx, element in enumerate(results[desired_metric.id])
+    )
+
+    # Test using "datetime.datetime" column.
+
+    metrics = {}
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    partial_column_min_metric = MetricConfiguration(
+        metric_name="column.min.aggregate_fn",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    partial_column_max_metric = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            partial_column_min_metric,
+            partial_column_max_metric,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    column_min_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "metric_partial_fn": partial_column_min_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    column_max_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "metric_partial_fn": partial_column_max_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            column_min_metric,
+            column_max_metric,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.partition",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "bins": "uniform",
+            "n_bins": n_bins,
+            "allow_relative_error": False,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "column.min": column_min_metric,
+            "column.max": column_max_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    increment = datetime.timedelta(
+        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+    )
+    assert all(
+        isclose(
+            operand_a=element,
+            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),
+        )
+        for idx, element in enumerate(results[desired_metric.id])
+    )
+
+
+def test_column_partition_metric_spark(spark_session):
+    """
+    Test of "column.partition" metric for both, standard numeric column and "datetime.datetime" valued column.
+
+    The "column.partition" metric depends on "column.max" metric and on "column.max" metric.
+
+    For "SparkDFExecutionEngine", explicit values of these metrics are needed, each requiring a "metric_partial_fn",
+    corresponding to "column.min.aggregate_fn" metric and "column.max.aggregate_fn" metric, respectively, resolved.
+
+    For standard numerical data, test set contains 12 evenly spaced integers.
+    For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
+
+    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    """
+    from great_expectations.expectations.metrics.import_manager import sparktypes
+
+    week_idx: int
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {
+                "a": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                ],
+                "b": [
+                    datetime.datetime(2021, 1, 1, 0, 0, 0)
+                    + datetime.timedelta(days=(week_idx * 7))
+                    for week_idx in range(12)
+                ],
+            },
+        ),
+        schema=sparktypes.StructType(
+            [
+                sparktypes.StructField("a", sparktypes.IntegerType(), True),
+                sparktypes.StructField("b", sparktypes.TimestampType(), True),
+            ]
+        ),
+        batch_id="my_id",
+    )
+
+    second_in_week: int = 604800
+
+    n_bins: int = 10
+
+    increment: Union[float, datetime.timedelta]
+    idx: int
+    element: Union[float, pd.Timestamp]
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    # Test using standard numeric column.
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    partial_column_min_metric = MetricConfiguration(
+        metric_name="column.min.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    partial_column_max_metric = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            partial_column_min_metric,
+            partial_column_max_metric,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    column_min_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": False,
+        },
+        metric_dependencies={
+            "metric_partial_fn": partial_column_min_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    column_max_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": False,
+        },
+        metric_dependencies={
+            "metric_partial_fn": partial_column_max_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            column_min_metric,
+            column_max_metric,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.partition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "bins": "uniform",
+            "n_bins": n_bins,
+            "allow_relative_error": False,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "column.min": column_min_metric,
+            "column.max": column_max_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    increment = float(n_bins + 1) / n_bins
+    assert all(
+        isclose(operand_a=element, operand_b=(increment * idx))
+        for idx, element in enumerate(results[desired_metric.id])
+    )
+
+    # Test using "datetime.datetime" column.
+
+    metrics = {}
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    partial_column_min_metric = MetricConfiguration(
+        metric_name="column.min.aggregate_fn",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    partial_column_max_metric = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            partial_column_min_metric,
+            partial_column_max_metric,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    column_min_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "metric_partial_fn": partial_column_min_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    column_max_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "metric_partial_fn": partial_column_max_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            column_min_metric,
+            column_max_metric,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.partition",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "bins": "uniform",
+            "n_bins": n_bins,
+            "allow_relative_error": False,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "column.min": column_min_metric,
+            "column.max": column_max_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    increment = datetime.timedelta(
+        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+    )
+    assert all(
+        isclose(
+            operand_a=element,
+            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),
+        )
+        for idx, element in enumerate(results[desired_metric.id])
+    )
 
 
 def test_max_metric_column_exists_pd():

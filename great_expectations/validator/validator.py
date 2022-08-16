@@ -637,7 +637,7 @@ class Validator:
             profiler_config.name == expectation_type
         ), "The name of profiler used to build an ExpectationConfiguration must equal to expectation_type of the expectation being invoked."
 
-        profiler: BaseRuleBasedProfiler = BaseRuleBasedProfiler(
+        profiler = BaseRuleBasedProfiler(
             profiler_config=profiler_config,
             data_context=self.data_context,
         )
@@ -815,7 +815,7 @@ class Validator:
         metrics: List of desired MetricConfiguration objects to be resolved.
         Return Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
-        graph: ValidationGraph = ValidationGraph()
+        graph = ValidationGraph()
 
         metric_configuration: MetricConfiguration
         for metric_configuration in metric_configurations:
@@ -1075,11 +1075,11 @@ class Validator:
                 if catch_exceptions:
                     exception_traceback: str = traceback.format_exc()
                     exception_message: str = str(err)
-                    exception_info: ExceptionInfo = ExceptionInfo(
+                    exception_info = ExceptionInfo(
                         exception_traceback=exception_traceback,
                         exception_message=exception_message,
                     )
-                    result: ExpectationValidationResult = ExpectationValidationResult(
+                    result = ExpectationValidationResult(
                         success=False,
                         exception_info=exception_info,
                         expectation_config=evaluated_config,
@@ -1104,7 +1104,7 @@ class Validator:
                 ]
             )
         )
-        validation_graph: ValidationGraph = ValidationGraph(edges=edges)
+        validation_graph = ValidationGraph(edges=edges)
         return validation_graph
 
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
@@ -1175,7 +1175,7 @@ class Validator:
             List of ExpectationValidationResult objects with unsuccessful ExpectationValidationResult objects appended
         """
         exception_message: str = str(exception)
-        exception_info: ExceptionInfo = ExceptionInfo(
+        exception_info = ExceptionInfo(
             exception_traceback=exception_traceback,
             exception_message=exception_message,
         )

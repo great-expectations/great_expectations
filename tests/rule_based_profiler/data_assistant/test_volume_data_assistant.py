@@ -19,6 +19,9 @@ from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
+    NumericRangeEstimatorType,
+)
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
     VolumeDataAssistantResult,
@@ -946,7 +949,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
         name: str, exclude_column_names: Optional[List[str]] = None
     ) -> RuleBasedProfilerConfig:
         exclude_column_names = exclude_column_names or []
-        expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        expected_rule_based_profiler_config = RuleBasedProfilerConfig(
             config_version=1.0,
             name=name,
             variables={"random_seed": None},
@@ -1357,7 +1360,7 @@ def quentin_expected_expectation_suite(
 
         expectation_suite_name: str = "my_suite"
 
-        expected_expectation_suite: ExpectationSuite = ExpectationSuite(
+        expected_expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name,
         )
 
@@ -1400,7 +1403,8 @@ def bobby_volume_data_assistant_result(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1419,7 +1423,8 @@ def bobby_volume_data_assistant_result_usage_stats_enabled(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1451,7 +1456,7 @@ def quentin_explicit_instantiation_result_actual_time(
 
     data_assistant_name: str = "test_volume_data_assistant"
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name=data_assistant_name,
         validator=validator,
     )
@@ -1488,7 +1493,7 @@ def quentin_explicit_instantiation_result_frozen_time(
 
     data_assistant_name: str = "test_volume_data_assistant"
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name=data_assistant_name,
         validator=validator,
     )
@@ -1512,7 +1517,8 @@ def quentin_implicit_invocation_result_actual_time(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1533,7 +1539,8 @@ def quentin_implicit_invocation_result_frozen_time(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -1602,7 +1609,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         persist=False,
     )
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
         validator=validator,
     )
@@ -1876,45 +1883,8 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     ]
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        # include_column_names=include_column_names,
+        estimation=NumericRangeEstimatorType.FLAG_OUTLIERS,
         exclude_column_names=exclude_column_names,
-        # include_column_name_suffixes=include_column_name_suffixes,
-        # exclude_column_name_suffixes=exclude_column_name_suffixes,
-        # semantic_type_filter_module_name=semantic_type_filter_module_name,
-        # semantic_type_filter_class_name=semantic_type_filter_class_name,
-        # include_semantic_types=include_semantic_types,
-        # exclude_semantic_types=exclude_semantic_types,
-        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        # cardinality_limit_mode=CardinalityLimitMode.FEW,
-        # max_unique_values=max_unique_values,
-        # max_proportion_unique=max_proportion_unique,
-        # column_value_uniqueness_rule={
-        #     "success_ratio": 0.8,
-        # },
-        # column_value_nullity_rule={
-        # },
-        # column_value_nonnullity_rule={
-        # },
-        # numeric_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "random_seed": 43792,
-        # },
-        # datetime_columns_rule={
-        #     "truncate_values": {
-        #         "lower_bound": 0,
-        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
-        #     },
-        #     "round_decimals": 0,
-        # },
-        # text_columns_rule={
-        #     "strict_min": True,
-        #     "strict_max": True,
-        #     "success_ratio": 0.8,
-        # },
-        # categorical_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "round_decimals": 3,
-        # },
     )
 
     column_name: str
@@ -2033,6 +2003,33 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 
 @pytest.mark.unit
+@freeze_time("09/26/2019 13:42:41")
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
+    )
+
+    rule_config: dict
+    assert all(
+        [
+            rule_config["variables"]["estimator"] == "exact"
+            if "estimator" in rule_config["variables"]
+            else True
+            for rule_config in data_assistant_result.profiler_config.rules.values()
+        ]
+    )
+
+
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -2046,44 +2043,9 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        # include_column_names=include_column_names,
-        # exclude_column_names=exclude_column_names,
-        # include_column_name_suffixes=include_column_name_suffixes,
-        # exclude_column_name_suffixes=exclude_column_name_suffixes,
-        # semantic_type_filter_module_name=semantic_type_filter_module_name,
-        # semantic_type_filter_class_name=semantic_type_filter_class_name,
-        # include_semantic_types=include_semantic_types,
-        # exclude_semantic_types=exclude_semantic_types,
-        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        # cardinality_limit_mode=CardinalityLimitMode.REL_100,
-        # max_unique_values=max_unique_values,
-        # max_proportion_unique=max_proportion_unique,
-        # column_value_uniqueness_rule={
-        #     "success_ratio": 0.8,
-        # },
-        # column_value_nullity_rule={
-        # },
-        # column_value_nonnullity_rule={
-        # },
-        # numeric_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "random_seed": 43792,
-        # },
-        # datetime_columns_rule={
-        #     "truncate_values": {
-        #         "lower_bound": 0,
-        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
-        #     },
-        #     "round_decimals": 0,
-        # },
-        # text_columns_rule={
-        #     "strict_min": True,
-        #     "strict_max": True,
-        #     "success_ratio": 0.8,
-        # },
+        estimation=NumericRangeEstimatorType.FLAG_OUTLIERS,
         categorical_columns_rule={
             "false_positive_rate": 0.1,
-            # "round_decimals": 3,
         },
     )
     assert (
