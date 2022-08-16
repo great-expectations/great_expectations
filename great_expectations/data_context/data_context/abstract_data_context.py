@@ -1623,6 +1623,12 @@ class AbstractDataContext(ABC):
             "Datasource",
         ]:
             config.update({"data_context_root_directory": self.root_directory})
+            # TODO: AJB 20220816 DEBUGGING vvvv
+            for data_connector_name, data_connector_config in config[
+                "data_connectors"
+            ].items():
+                data_connector_config["name"] = data_connector_name
+            # TODO: AJB 20220816 DEBUGGING ^^^^
         module_name: str = "great_expectations.datasource"
         datasource: Datasource = instantiate_class_from_config(
             config=config,
