@@ -27,7 +27,7 @@ def test_inline_renderer_error_message(
         InlineRenderer(render_object=expectation_suite)  # type: ignore
     assert (
         str(e.value)
-        == "InlineRenderer.render_expectation_configuration can only be used with an ExpectationConfiguration, but <class 'great_expectations.core.expectation_suite.ExpectationSuite'> was used."
+        == "InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but <class 'great_expectations.core.expectation_suite.ExpectationSuite'> was used."
     )
 
 
@@ -438,7 +438,7 @@ def test_inline_renderer_rendered_content_return_value(
     (
         expectation_configuration_rendered_atomic_content,
         expectation_validation_result_rendered_atomic_content,
-    ) = inline_renderer.render_expectation_validation_result()
+    ) = inline_renderer.get_expectation_validation_result_rendered_content()
 
     actual_serialized_expectation_configuration_rendered_atomic_content: List[dict] = [
         rendered_atomic_content.to_json_dict()

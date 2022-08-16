@@ -940,8 +940,9 @@ class ExpectationSuite(SerializableDictDot):
         return expectation_configurations_by_domain
 
     def render(self) -> None:
-        """Renders content using the atomic prescriptive renderer for each expectation configuration associated with
-        this ExpectationSuite to ExpectationConfiguration.rendered_content
+        """
+        Renders content using the atomic prescriptive renderer for each expectation configuration associated with
+           this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """
         for expectation_configuration in self.expectations:
             inline_renderer_config: Dict[str, Union[str, ExpectationConfiguration]] = {
@@ -962,7 +963,7 @@ class ExpectationSuite(SerializableDictDot):
                 )
 
             expectation_configuration.rendered_content = (
-                inline_renderer.render_expectation_configuration()
+                inline_renderer.get_expectation_configuration_rendered_content()
             )
 
 

@@ -29,7 +29,7 @@ class InlineRenderer(Renderer):
             self._render_object = render_object
         else:
             raise InvalidRenderedContentError(
-                f"InlineRenderer.render_expectation_configuration can only be used with an ExpectationConfiguration, but {type(render_object)} was used."
+                f"InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but {type(render_object)} was used."
             )
 
     def _get_atomic_rendered_content_for_object(
@@ -141,7 +141,7 @@ Default renderer "{default_prescriptive_renderer_name}" will be used to render p
 
         return renderer_rendered_content
 
-    def render_expectation_validation_result(
+    def get_expectation_validation_result_rendered_content(
         self,
     ) -> Tuple[List[RenderedAtomicContent], List[RenderedAtomicContent]]:
         """Gets RenderedAtomicContent for a given ExpectationValidationResult.
@@ -159,7 +159,9 @@ Default renderer "{default_prescriptive_renderer_name}" will be used to render p
             self._get_atomic_rendered_content_for_object(render_object=render_object),
         )
 
-    def render_expectation_configuration(self) -> List[RenderedAtomicContent]:
+    def get_expectation_configuration_rendered_content(
+        self,
+    ) -> List[RenderedAtomicContent]:
         """Gets RenderedAtomicContent for a given ExpectationConfiguration.
 
         Returns:
