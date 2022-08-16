@@ -168,8 +168,8 @@ class DatasourceStore(Store):
 
     def set(
         self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
-    ) -> DatasourceConfig:
-        """Create a datasource config in the store using a store_backend-specific key, then get and return that config.
+    ) -> None:
+        """Create a datasource config in the store using a store_backend-specific key.
 
         Args:
             key: Optional key to use when setting value.
@@ -177,16 +177,12 @@ class DatasourceStore(Store):
             **_: kwargs will be ignored but accepted to align with the parent class.
 
         Returns:
-            DatasourceConfig retrieved from the store after setting it.
+            None
         """
         if not key:
             key = self._build_key_from_config(value)
 
         super().set(key, value)
-
-        datasource_config_from_store: DatasourceConfig = self.get(key)
-
-        return datasource_config_from_store
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
