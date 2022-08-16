@@ -1630,7 +1630,7 @@ class AbstractDataContext(ABC):
     ) -> Datasource:
 
         if name is None:
-            name = config.name
+            name = config.get("name")
         # We convert from the type back to a dictionary for purposes of instantiation
         # Round trip through schema validation and config creation to ensure "id_" is present
         #
