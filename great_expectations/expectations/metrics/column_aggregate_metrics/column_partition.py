@@ -142,7 +142,8 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
             conversion_ndarray_to_datetime_type_performed,
             data,
         ) = convert_ndarray_to_datetime_dtype_best_effort(
-            data=[min_, max_], parse_strings_as_datetimes=True
+            data=[min_, max_],
+            parse_strings_as_datetimes=True,
         )
         ndarray_is_datetime_type: bool = (
             original_ndarray_is_datetime_type
@@ -173,7 +174,8 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
             conversion_ndarray_to_datetime_type_performed,
             data,
         ) = convert_ndarray_to_datetime_dtype_best_effort(
-            data=[min_, _25, _75, max_], parse_strings_as_datetimes=True
+            data=[min_, _25, _75, max_],
+            parse_strings_as_datetimes=True,
         )
         ndarray_is_datetime_type: bool = (
             original_ndarray_is_datetime_type

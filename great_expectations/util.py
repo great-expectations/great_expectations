@@ -1415,10 +1415,14 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
-        parse(value, fuzzy=fuzzy)
+        _ = parse(value, fuzzy=fuzzy)
         return True
     except (TypeError, ValueError):
-        return False
+        try:
+            _ = datetime.datetime.fromisoformat(value)
+            return True
+        except (TypeError, ValueError):
+            return False
 
 
 def is_ndarray_datetime_dtype(
@@ -1465,6 +1469,22 @@ def convert_ndarray_to_datetime_dtype_best_effort(
             pass
 
     return False, False, data
+
+
+def convert_ndarray_datetime_to_float_dtype(data: np.ndarray) -> np.ndarray:
+    """
+    Conver all elements of 1-D "np.ndarray" argument from "datetime.datetime" type to "timestamp" "float" type objects.
+    """
+    value: Any
+    return np.asarray([value.timestamp() for value in data])
+
+
+def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
+    """
+    Conver all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type objects.
+    """
+    value: Any
+    return np.asarray([datetime.datetime.fromtimestamp(value) for value in data])
 
 
 def get_context():
