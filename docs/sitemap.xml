@@ -548,6 +548,11 @@
   <priority>0.41</priority>
 </url>
 <url>
+  <loc>https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_emr_serverless/</loc>
+  <lastmod>2022-07-28T20:46:21+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
   <loc>https://docs.greatexpectations.io/docs/terms/checkpoint_store/</loc>
   <lastmod>2022-04-07T20:46:21+00:00</lastmod>
   <priority>0.33</priority>
