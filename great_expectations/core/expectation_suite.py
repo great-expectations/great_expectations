@@ -949,7 +949,7 @@ class ExpectationSuite(SerializableDictDot):
                 "class_name": "InlineRenderer",
                 "render_object": expectation_configuration,
             }
-            module_name: str = "great_expectations.render.renderer.inline_renderer"
+            module_name = "great_expectations.render.renderer.inline_renderer"
             inline_renderer = instantiate_class_from_config(
                 config=inline_renderer_config,
                 runtime_environment={},

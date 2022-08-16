@@ -263,12 +263,12 @@ class CloudDataContext(AbstractDataContext):
         """Save the provided expectation suite into the DataContext.
 
         Args:
-            expectation_suite: the suite to save
-            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
-                be read from the suite
-            overwrite_existing: whether to over-write the suite if it already exists
-            include_rendered_content: whether to save the prescriptive rendered content for each expectation
-            ge_cloud_id: cloud id for saving expectation suite
+            expectation_suite: The suite to save.
+            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
+                from the suite.
+            overwrite_existing: Whether to overwrite the suite if it already exists.
+            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
+            ge_cloud_id: Cloud ID for saving expectation suite.
 
         Returns:
             None
