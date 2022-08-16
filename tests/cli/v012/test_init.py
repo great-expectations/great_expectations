@@ -210,6 +210,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
                 "credentials": "${my_db}",
                 "class_name": "SqlAlchemyDatasource",
                 "module_name": "great_expectations.datasource",
+                "name": "my_db",
             }
         }
 
