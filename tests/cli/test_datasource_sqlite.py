@@ -312,11 +312,13 @@ def test_cli_datasource_new_connection_string(
                     "batch_identifiers": ["default_identifier_name"],
                     "class_name": "RuntimeDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
+                    "name": "default_runtime_data_connector_name",
                 },
                 "default_inferred_data_connector_name": {
                     "class_name": "InferredAssetSqlDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
                     "include_schema_name": True,
+                    "name": "default_inferred_data_connector_name",
                 },
             },
             "name": "my_datasource",
