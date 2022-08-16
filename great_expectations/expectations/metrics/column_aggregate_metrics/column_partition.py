@@ -13,10 +13,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.util import (
-    convert_ndarray_to_datetime_dtype_best_effort,
-    is_ndarray_datetime_dtype,
-)
+from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effort
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -137,11 +134,26 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
         min_ = _metrics["column.min"]
         max_ = _metrics["column.max"]
 
-        datetime_detected: bool = is_ndarray_datetime_dtype(
-            data=[min_, max_], parse_strings_as_datetimes=True
+        original_ndarray_is_datetime_type: bool
+        conversion_ndarray_to_datetime_type_performed: bool
+        min_max_values: np.ndaarray
+        (
+            original_ndarray_is_datetime_type,
+            conversion_ndarray_to_datetime_type_performed,
+            min_max_values,
+        ) = convert_ndarray_to_datetime_dtype_best_effort(
+            data=[min_, max_],
+            parse_strings_as_datetimes=True,
         )
+        ndarray_is_datetime_type: bool = (
+            original_ndarray_is_datetime_type
+            or conversion_ndarray_to_datetime_type_performed
+        )
+        min_ = min_max_values[0]
+        max_ = min_max_values[1]
+
         bins = _determine_bins_using_proper_units(
-            datetime_detected=datetime_detected,
+            ndarray_is_datetime_type=ndarray_is_datetime_type,
             n_bins=n_bins,
             min_=min_,
             max_=max_,
@@ -154,19 +166,35 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
         sturges = np.log2(1.0 * nonnull_count + 1.0)
         min_, _25, _75, max_ = _metrics["column.quantile_values"]
 
-        min_original = min_
-        max_original = max_
-
-        datetime_detected: bool = is_ndarray_datetime_dtype(
-            data=[min_, _25, _75, max_], parse_strings_as_datetimes=True
+        original_ndarray_is_datetime_type: bool
+        conversion_ndarray_to_datetime_type_performed: bool
+        box_plot_values: np.ndaarray
+        (
+            original_ndarray_is_datetime_type,
+            conversion_ndarray_to_datetime_type_performed,
+            box_plot_values,
+        ) = convert_ndarray_to_datetime_dtype_best_effort(
+            data=[min_, _25, _75, max_],
+            parse_strings_as_datetimes=True,
         )
-        if datetime_detected:
-            min_ = min_.timestamp()
-            _25 = _25.timestamp()
-            _75 = _75.timestamp()
-            max_ = max_.timestamp()
+        ndarray_is_datetime_type: bool = (
+            original_ndarray_is_datetime_type
+            or conversion_ndarray_to_datetime_type_performed
+        )
+        min_ = box_plot_values[0]
+        _25 = box_plot_values[1]
+        _75 = box_plot_values[2]
+        max_ = box_plot_values[3]
 
-        iqr = _75 - _25
+        if ndarray_is_datetime_type:
+            iqr = _75.timestamp() - _25.timestamp()
+            min_as_float_ = min_.timestamp()
+            max_as_float_ = max_.timestamp()
+        else:
+            iqr = _75 - _25
+            min_as_float_ = min_
+            max_as_float_ = max_
+
         if iqr < 1.0e-10:  # Consider IQR 0 and do not use variance-based estimator
             n_bins = int(np.ceil(sturges))
         else:
@@ -175,14 +203,15 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
             else:
                 fd = (2 * float(iqr)) / (nonnull_count ** (1.0 / 3.0))
                 n_bins = max(
-                    int(np.ceil(sturges)), int(np.ceil(float(max_ - min_) / fd))
+                    int(np.ceil(sturges)),
+                    int(np.ceil(float(max_as_float_ - min_as_float_) / fd)),
                 )
 
         bins = _determine_bins_using_proper_units(
-            datetime_detected=datetime_detected,
+            ndarray_is_datetime_type=ndarray_is_datetime_type,
             n_bins=n_bins,
-            min_=min_original,
-            max_=max_original,
+            min_=min_,
+            max_=max_,
         )
     else:
         raise ValueError("Invalid parameter for bins argument")
@@ -191,14 +220,9 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
 
 
 def _determine_bins_using_proper_units(
-    datetime_detected: bool, n_bins: int, min_: Any, max_: Any
+    ndarray_is_datetime_type: bool, n_bins: int, min_: Any, max_: Any
 ) -> List[Any]:
-    if datetime_detected:
-        data: np.ndaarray = convert_ndarray_to_datetime_dtype_best_effort(
-            data=[min_, max_]
-        )
-        min_ = data[0]
-        max_ = data[1]
+    if ndarray_is_datetime_type:
         if n_bins == 0:
             bins = [min_]
         else:
