@@ -1620,7 +1620,7 @@ class AbstractDataContext(ABC):
         # Load class to check if it is a subclass of LegacyDatasource to support custom v2 datasources
         class_ = load_class(class_name=config["class_name"], module_name=module_name)
 
-        unsupported_keys = ("name", "id_")
+        unsupported_keys = ("id_",)
         if issubclass(class_, LegacyDatasource):
             for attr in unsupported_keys:
                 config.pop(attr, None)
