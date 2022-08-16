@@ -177,7 +177,9 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
         if bins is None:
             is_categorical = True
         else:
-            ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(data=bins)
+            ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
+                data=bins, parse_strings_as_datetimes=True
+            )
             bins_ndarray_as_float: MetricValue
             if ndarray_is_datetime_type:
                 bins_ndarray_as_float = convert_ndarray_datetime_to_float_dtype(
