@@ -1409,7 +1409,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if ge_cloud_id:
+        if ge_cloud_id or isinstance(self._data_context, CloudDataContext):
             include_rendered_content = True
             self._data_context.save_expectation_suite(
                 expectation_suite,
