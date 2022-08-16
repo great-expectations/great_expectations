@@ -122,7 +122,7 @@ class ConfigurationStore(Store):
     def config(self) -> dict:
         return self._config
 
-    def self_check(self, pretty_print: bool = True) -> dict:
+    def self_check(self, pretty_print: bool = True) -> dict:  # type: ignore[override]
         # Provide visibility into parameters that ConfigurationStore was instantiated with.
         report_object: dict = {"config": self.config}
 
@@ -130,7 +130,7 @@ class ConfigurationStore(Store):
             print("Checking for existing keys...")
 
         report_object["keys"] = sorted(
-            key.configuration_key for key in self.list_keys()
+            key.configuration_key for key in self.list_keys()  # type: ignore[attr-defined]
         )
 
         report_object["len_keys"] = len(report_object["keys"])
@@ -165,9 +165,9 @@ class ConfigurationStore(Store):
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.CONTRACT, ge_cloud_id=ge_cloud_id
+                resource_type=GeCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
             )
         else:
-            key = ConfigurationIdentifier(configuration_key=name)
+            key = ConfigurationIdentifier(configuration_key=name)  # type: ignore[arg-type]
 
         return key

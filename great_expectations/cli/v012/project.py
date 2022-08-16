@@ -66,7 +66,7 @@ def project_upgrade(directory) -> None:
 
 def do_config_check(target_directory):
     try:
-        context: DataContext = DataContext(context_root_dir=target_directory)
+        context = DataContext(context_root_dir=target_directory)
         ge_config_version: int = context.get_config().config_version
         if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
             upgrade_message: str = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.

@@ -87,7 +87,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "profiler_config",
     )
 
-    table_row_count_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    table_row_count_range_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="table_row_count_range_estimator",
@@ -113,20 +113,14 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         table_row_count_range_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
         rules={
             "default_expect_table_row_count_to_be_between_rule": {
                 "variables": {
-                    "false_positive_rate": 0.05,
-                    "estimator": "bootstrap",
-                    "n_resamples": 9999,
-                    "random_seed": None,
-                    "quantile_statistic_interpolation_method": "nearest",
-                    "quantile_bias_correction": False,
-                    "quantile_bias_std_error_ratio_threshold": None,
+                    "estimator": "exact",
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": 0,

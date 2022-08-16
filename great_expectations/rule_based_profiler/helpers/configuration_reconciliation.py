@@ -37,7 +37,7 @@ class ReconciliationDirectives(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-DEFAULT_RECONCILATION_DIRECTIVES: ReconciliationDirectives = ReconciliationDirectives(
+DEFAULT_RECONCILATION_DIRECTIVES = ReconciliationDirectives(
     variables=ReconciliationStrategy.UPDATE,
     domain_builder=ReconciliationStrategy.UPDATE,
     parameter_builder=ReconciliationStrategy.UPDATE,

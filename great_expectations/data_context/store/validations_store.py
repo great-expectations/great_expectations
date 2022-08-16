@@ -95,7 +95,7 @@ class ValidationsStore(Store):
     --ge-feature-maturity-info--
     """
 
-    _key_class = ValidationResultIdentifier
+    _key_class = ValidationResultIdentifier  # type: ignore[assignment]
 
     def __init__(
         self, store_backend=None, runtime_environment=None, store_name=None
@@ -206,7 +206,7 @@ class ValidationsStore(Store):
 
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
-                resource_type=GeCloudRESTResource.CONTRACT,
+                resource_type=GeCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
 
