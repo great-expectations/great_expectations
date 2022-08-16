@@ -7,7 +7,6 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from dateutil.parser import parse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
@@ -565,14 +564,13 @@ specified (empty "metric_name" value detected)."""
             for metric_value_idx in metric_value_indices:
                 metric_value: MetricValue = metric_values[metric_value_idx]
                 if enforce_numeric_metric:
-                    if isinstance(metric_value, str) and not is_parseable_date(
-                        value=metric_value
-                    ):
-                        raise ge_exceptions.ProfilerExecutionError(
-                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
+                    if isinstance(metric_value, (str, np.str_)):
+                        if not is_parseable_date(value=metric_value):
+                            raise ge_exceptions.ProfilerExecutionError(
+                                message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
 metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
 """
-                        )
+                            )
                     elif not (
                         isinstance(metric_value, datetime.datetime)
                         or np.issubdtype(metric_value.dtype, np.number)

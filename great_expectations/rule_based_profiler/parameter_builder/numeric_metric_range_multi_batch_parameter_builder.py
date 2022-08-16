@@ -630,7 +630,9 @@ detected.
         metric_value_vector: np.ndarray
         for metric_value_idx in metric_value_vector_indices:
             metric_value_vector = metric_values[metric_value_idx]
-            if not is_ndarray_datetime_dtype(data=metric_value_vector):
+            if not is_ndarray_datetime_dtype(
+                data=metric_value_vector, parse_strings_as_datetimes=True
+            ):
                 return False
 
         return True
@@ -674,7 +676,9 @@ detected.
         lower_bound: Optional[Number] = truncate_values.get("lower_bound")
         upper_bound: Optional[Number] = truncate_values.get("upper_bound")
 
-        if not is_ndarray_datetime_dtype(data=metric_values):
+        if metric_values.shape == 1 and not is_ndarray_datetime_dtype(
+            data=metric_values, parse_strings_as_datetimes=True
+        ):
             if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
                 lower_bound = 0.0
 
