@@ -866,6 +866,9 @@ class AbstractDataContext(ABC):
                     )
                 )
 
+        if self.ge_cloud_mode:
+            include_rendered_content = True
+
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
             batch_list=batch_list,
