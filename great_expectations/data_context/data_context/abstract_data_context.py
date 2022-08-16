@@ -1624,6 +1624,17 @@ class AbstractDataContext(ABC):
         ]:
             config.update({"data_context_root_directory": self.root_directory})
         module_name: str = "great_expectations.datasource"
+
+        # Load class to check if it is a subclass of LegacyDatasource to support custom v2 datasources
+        # Then remove name and id_ which are not supported
+        class_ = load_class(class_name=config["class_name"], module_name=module_name)
+        if issubclass(class_, LegacyDatasource):
+            if "id_" in config.keys():
+                config.pop("id_", None)
+
+            if "name" in config.keys():
+                config.pop("name", None)
+
         datasource: Datasource = instantiate_class_from_config(
             config=config,
             runtime_environment={"data_context": self, "concurrency": self.concurrency},
