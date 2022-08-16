@@ -1,5 +1,6 @@
 import hashlib
 import json
+from typing import Any, Optional
 
 
 class IDDict(dict):
@@ -21,6 +22,31 @@ class IDDict(dict):
         return hashlib.md5(
             json.dumps(_id_dict, sort_keys=True).encode("utf-8")
         ).hexdigest()
+
+    @staticmethod
+    def convert_dictionary_to_id_dict(data: Optional[Any]):
+        if isinstance(data, dict):
+            data = IDDict(data)
+
+            key: str
+            value: Any
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    data[key] = IDDict.convert_dictionary_to_id_dict(data=value)
+        elif isinstance(data, (list, set, tuple)):
+            data_type: type = type(data)
+
+            value: Any
+            data = data_type(
+                [IDDict.convert_dictionary_to_id_dict(data=value)] for value in data
+            )
+
+        return data
+
+    def __hash__(self) -> int:
+        """Overrides the default implementation"""
+        _result_hash: int = hash(self.to_id())
+        return _result_hash
 
 
 class BatchKwargs(IDDict):
