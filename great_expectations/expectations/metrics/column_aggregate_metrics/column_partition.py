@@ -136,11 +136,11 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
 
         original_ndarray_is_datetime_type: bool
         conversion_ndarray_to_datetime_type_performed: bool
-        data: np.ndaarray
+        min_max_values: np.ndaarray
         (
             original_ndarray_is_datetime_type,
             conversion_ndarray_to_datetime_type_performed,
-            data,
+            min_max_values,
         ) = convert_ndarray_to_datetime_dtype_best_effort(
             data=[min_, max_],
             parse_strings_as_datetimes=True,
@@ -149,8 +149,8 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
             original_ndarray_is_datetime_type
             or conversion_ndarray_to_datetime_type_performed
         )
-        min_ = data[0]
-        max_ = data[1]
+        min_ = min_max_values[0]
+        max_ = min_max_values[1]
 
         bins = _determine_bins_using_proper_units(
             ndarray_is_datetime_type=ndarray_is_datetime_type,
@@ -168,11 +168,11 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
 
         original_ndarray_is_datetime_type: bool
         conversion_ndarray_to_datetime_type_performed: bool
-        data: np.ndaarray
+        box_plot_values: np.ndaarray
         (
             original_ndarray_is_datetime_type,
             conversion_ndarray_to_datetime_type_performed,
-            data,
+            box_plot_values,
         ) = convert_ndarray_to_datetime_dtype_best_effort(
             data=[min_, _25, _75, max_],
             parse_strings_as_datetimes=True,
@@ -181,10 +181,10 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
             original_ndarray_is_datetime_type
             or conversion_ndarray_to_datetime_type_performed
         )
-        min_ = data[0]
-        _25 = data[1]
-        _75 = data[2]
-        max_ = data[3]
+        min_ = box_plot_values[0]
+        _25 = box_plot_values[1]
+        _75 = box_plot_values[2]
+        max_ = box_plot_values[3]
 
         if ndarray_is_datetime_type:
             iqr = _75.timestamp() - _25.timestamp()
