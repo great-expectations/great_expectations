@@ -91,7 +91,6 @@ class FileDataContext(AbstractDataContext):
                 from the suite.
             overwrite_existing: Whether to overwrite the suite if it already exists.
             include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
-            ge_cloud_id: Cloud ID for saving expectation suite.
 
         Returns:
             None
