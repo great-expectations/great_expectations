@@ -1600,6 +1600,31 @@ class AbstractDataContext(ABC):
             )
         return datasource
 
+    @staticmethod
+    def _remove_keys_not_supported_in_v2_datasource_config(
+        config: dict, default_module_name: str
+    ) -> None:
+        """Remove keys that are not supported in v2 datasource configs from the datasource config.
+
+        This supports custom v2 datasource classes by loading the class to check if it is a subclass of LegacyDatasource.
+
+        Args:
+            config: Datasource config to process.
+            default_module_name: Used to import the datasource class if module_name is not provided in the config.
+
+        Returns:
+            None, config is modified in place.
+        """
+        module_name = config.get("module_name", default_module_name)
+
+        # Load class to check if it is a subclass of LegacyDatasource to support custom v2 datasources
+        class_ = load_class(class_name=config["class_name"], module_name=module_name)
+
+        unsupported_keys = ("name", "id_")
+        if issubclass(class_, LegacyDatasource):
+            for attr in unsupported_keys:
+                config.pop(attr, None)
+
     def _build_datasource_from_config(
         self, name: Union[str, None], config: Union[dict, DatasourceConfig]
     ) -> Datasource:
@@ -1625,15 +1650,7 @@ class AbstractDataContext(ABC):
             config.update({"data_context_root_directory": self.root_directory})
         module_name: str = "great_expectations.datasource"
 
-        # Load class to check if it is a subclass of LegacyDatasource to support custom v2 datasources
-        # Then remove name and id_ which are not supported
-        class_ = load_class(class_name=config["class_name"], module_name=module_name)
-        if issubclass(class_, LegacyDatasource):
-            if "id_" in config.keys():
-                config.pop("id_", None)
-
-            if "name" in config.keys():
-                config.pop("name", None)
+        self._remove_keys_not_supported_in_v2_datasource_config(config, module_name)
 
         datasource: Datasource = instantiate_class_from_config(
             config=config,
