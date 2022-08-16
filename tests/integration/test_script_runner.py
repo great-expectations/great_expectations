@@ -329,8 +329,16 @@ local_tests = [
         name="how_to_use_great_expectations_in_aws_glue_yaml",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns_great_expectations.yaml",
     ),
+    IntegrationTestFixture(
+        name="how_to_use_great_expectations_in_aws_emr_serverless",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTestFixture(
+        name="how_to_use_great_expectations_in_aws_emr_serverless_yaml",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns_great_expectations.yaml",
+    ),
 ]
-
 
 dockerized_db_tests = [
     IntegrationTestFixture(
@@ -820,7 +828,6 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
 ]
-
 
 # CLOUD
 cloud_snowflake_tests = [
