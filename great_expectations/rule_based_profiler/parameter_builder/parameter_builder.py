@@ -263,6 +263,7 @@ class ParameterBuilder(ABC, Builder):
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        force_no_progress_bar: Optional[bool] = False,
     ) -> MetricComputationResult:
         """
         General multi-batch metric computation facility.
@@ -394,7 +395,8 @@ specified (empty "metric_name" value detected)."""
         )
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
-            metric_configurations=metrics_to_resolve
+            metric_configurations=metrics_to_resolve,
+            force_no_progress_bar=force_no_progress_bar,
         )
 
         # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.

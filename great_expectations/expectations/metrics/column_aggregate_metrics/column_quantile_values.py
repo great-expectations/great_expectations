@@ -435,7 +435,7 @@ def _get_column_quantiles_generic_sqlalchemy(
             quantiles_query_approx: Select = sa.select(selects_approx).select_from(
                 selectable
             )
-            if allow_relative_error:
+            if allow_relative_error or sqlalchemy_engine.driver == "psycopg2":
                 try:
                     quantiles_results: Row = sqlalchemy_engine.execute(
                         quantiles_query_approx

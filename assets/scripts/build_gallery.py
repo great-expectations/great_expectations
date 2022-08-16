@@ -121,6 +121,7 @@ def build_gallery(
     include_core: bool = True,
     include_contrib: bool = True,
     only_these_expectations: List[str] = [],
+    only_consider_these_backends: List[str] = [],
 ) -> Dict:
     """
     Build the gallery object by running diagnostics for each Expectation and returning the resulting reports.
@@ -129,6 +130,7 @@ def build_gallery(
         include_core: if true, include Expectations defined in the core module
         include_contrib: if true, include Expectations defined in contrib:
         only_these_expectations: list of specific Expectations to include
+        only_consider_these_backends: list of backends to consider running tests against
 
     Returns:
         None
@@ -235,7 +237,10 @@ def build_gallery(
             expectation
         )
         try:
-            diagnostics = impl().run_diagnostics()
+            diagnostics = impl().run_diagnostics(
+                debug_logger=logger,
+                only_consider_these_backends=only_consider_these_backends,
+            )
             checklist_string = diagnostics.generate_checklist()
             expectation_checklists.write(
                 f"\n\n----------------\n{expectation} ({group})\n"
@@ -432,32 +437,43 @@ def format_docstring_to_markdown(docstr: str) -> str:
     default=False,
     help="Do not include contrib/package Expectations",
 )
+@click.option(
+    "--outfile-name",
+    "-o",
+    "outfile_name",
+    default="expectation_library_v2.json",
+    help="Name for the generated JSON file",
+)
+@click.option(
+    "--backends",
+    "-b",
+    "backends",
+    help="Backends to consider running tests against (comma-separated)",
+)
 @click.argument("args", nargs=-1)
 def main(**kwargs):
     """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2.json
 
     - args: snake_name of specific Expectations to include (useful for testing)
     """
+    backends = []
+    if kwargs["backends"]:
+        backends = [name.strip() for name in kwargs["backends"].split(",")]
     gallery_info = build_gallery(
         include_core=not kwargs["no_core"],
         include_contrib=not kwargs["no_contrib"],
         only_these_expectations=kwargs["args"],
+        only_consider_these_backends=backends,
     )
     tracebacks = expectation_tracebacks.getvalue()
     checklists = expectation_checklists.getvalue()
     if tracebacks != "":
-        print("\n\n\n" + "#" * 30 + "   T R A C E B A C K S   " + "#" * 30 + "\n")
-        print(tracebacks)
-        print(
-            "\n\n" + "#" * 30 + "   E N D   T R A C E B A C K S   " + "#" * 30 + "\n\n"
-        )
-        with open("./gallery-errors.txt", "w") as outfile:
+        with open("./gallery-tracebacks.txt", "w") as outfile:
             outfile.write(tracebacks)
     if checklists != "":
-        print(checklists)
         with open("./checklists.txt", "w") as outfile:
             outfile.write(checklists)
-    with open("./expectation_library_v2.json", "w") as outfile:
+    with open(f"./{kwargs['outfile_name']}", "w") as outfile:
         json.dump(gallery_info, outfile, indent=4)
 
 

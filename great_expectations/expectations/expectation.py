@@ -4,10 +4,11 @@ import json
 import logging
 import os
 import re
+import time
 import traceback
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
-from collections import Counter
+from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
@@ -881,6 +882,7 @@ class Expectation(metaclass=MetaExpectation):
         interactive_evaluation=True,
         data_context=None,
         runtime_configuration=None,
+        force_no_progress_bar: bool = False,
     ):
         include_rendered_content: bool = validator._include_rendered_content
 
@@ -893,6 +895,7 @@ class Expectation(metaclass=MetaExpectation):
         evr = validator.graph_validate(
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
+            force_no_progress_bar=force_no_progress_bar,
         )[0]
         if include_rendered_content:
             evr.render()
@@ -948,6 +951,8 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
+        debug_logger: Optional[logging.Logger] = None,
+        only_consider_these_backends: Optional[List[str]] = None,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -969,6 +974,10 @@ class Expectation(metaclass=MetaExpectation):
         incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
         that do not exist). These errors are added under "errors" key in the report.
         """
+
+        _debug = lambda x: x
+        if debug_logger:
+            _debug = lambda x: debug_logger.debug(f"(run_diagnostics) {x}")
 
         errors: List[ExpectationErrorDiagnostics] = []
 
@@ -1008,11 +1017,14 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
 
+        _debug("Getting test results")
         test_results: List[ExpectationTestDiagnostics] = self._get_test_results(
             expectation_type=description_diagnostics.snake_name,
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
+            debug_logger=debug_logger,
+            only_consider_these_backends=only_consider_these_backends,
         )
 
         backend_test_result_counts: List[
@@ -1036,6 +1048,24 @@ class Expectation(metaclass=MetaExpectation):
                 backend_test_result_counts=backend_test_result_counts,
                 execution_engines=introspected_execution_engines,
             )
+        )
+
+        # Set a coverage_score
+        _total_passed = 0
+        _total_failed = 0
+        _num_backends = 0.0001
+        _num_engines = sum([x for x in introspected_execution_engines.values() if x])
+        for result in backend_test_result_counts:
+            _num_backends += 1
+            _total_passed += result.num_passed
+            _total_failed += result.num_failed
+        coverage_score = _num_engines * (
+            (_total_passed / _num_backends) - (1.5 * _total_failed)
+        )
+        _debug(
+            f"coverage_score: {coverage_score} for {self.expectation_type} ... "
+            f"engines: {_num_engines}, backends: {_num_backends}, "
+            f"passing tests: {_total_passed}, failing tests:{_total_failed}"
         )
 
         # Set final maturity level based on status of all checks
@@ -1070,6 +1100,7 @@ class Expectation(metaclass=MetaExpectation):
             backend_test_result_counts=backend_test_result_counts,
             maturity_checklist=maturity_checklist,
             errors=errors,
+            coverage_score=coverage_score,
         )
 
     def print_diagnostic_checklist(
@@ -1139,14 +1170,27 @@ class Expectation(metaclass=MetaExpectation):
             #   - https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/column_map_expectations/expect_column_values_to_be_unique.json#L174
             #   - https://github.com/great-expectations/great_expectations/pull/4073
             top_level_only_for = example.get("only_for")
+            top_level_suppress_test_for = example.get("suppress_test_for")
             for test in example["tests"]:
                 if (
                     test.get("include_in_gallery") == True
                     or return_only_gallery_examples == False
                 ):
                     copied_test = deepcopy(test)
-                    if top_level_only_for and "only_for" not in copied_test:
-                        copied_test["only_for"] = top_level_only_for
+                    if top_level_only_for:
+                        if "only_for" not in copied_test:
+                            copied_test["only_for"] = top_level_only_for
+                        else:
+                            copied_test["only_for"].extend(top_level_only_for)
+                    if top_level_suppress_test_for:
+                        if "suppress_test_for" not in copied_test:
+                            copied_test[
+                                "suppress_test_for"
+                            ] = top_level_suppress_test_for
+                        else:
+                            copied_test["suppress_test_for"].extend(
+                                top_level_suppress_test_for
+                            )
                     included_test_cases.append(
                         ExpectationLegacyTestCaseAdapter(**copied_test)
                     )
@@ -1158,6 +1202,7 @@ class Expectation(metaclass=MetaExpectation):
                 copied_example["tests"] = included_test_cases
                 copied_example.pop("_notes", None)
                 copied_example.pop("only_for", None)
+                copied_example.pop("suppress_test_for", None)
                 if "test_backends" in copied_example:
                     copied_example["test_backends"] = [
                         TestBackend(**tb) for tb in copied_example["test_backends"]
@@ -1269,8 +1314,19 @@ class Expectation(metaclass=MetaExpectation):
         test_data_cases: List[ExpectationTestDataCases],
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
         raise_exceptions_for_backends: bool = False,
+        force_no_progress_bar: bool = True,
+        debug_logger: Optional[logging.Logger] = None,
+        only_consider_these_backends: Optional[List[str]] = None,
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
+
+        _debug = lambda x: x
+        _error = lambda x: x
+        if debug_logger:
+            _debug = lambda x: debug_logger.debug(f"(_get_test_results) {x}")
+            _error = lambda x: debug_logger.error(f"(_get_test_results) {x}")
+        _debug("Starting")
+
         test_results = []
 
         exp_tests = generate_expectation_tests(
@@ -1278,22 +1334,58 @@ class Expectation(metaclass=MetaExpectation):
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
+            debug_logger=debug_logger,
+            only_consider_these_backends=only_consider_these_backends,
         )
 
+        backend_test_times = defaultdict(list)
         for exp_test in exp_tests:
+            if exp_test["test"] is None:
+                _debug(
+                    f"validator_with_data failure for {exp_test['backend']}--{expectation_type}"
+                )
+
+                error_diagnostics = ExpectationErrorDiagnostics(
+                    error_msg=exp_test["error"],
+                    stack_trace="",
+                    test_title="all",
+                    test_backend=exp_test["backend"],
+                )
+
+                test_results.append(
+                    ExpectationTestDiagnostics(
+                        test_title="all",
+                        backend=exp_test["backend"],
+                        test_passed=False,
+                        include_in_gallery=False,
+                        validation_result=None,
+                        error_diagnostics=error_diagnostics,
+                    )
+                )
+                continue
+
+            exp_combined_test_name = f"{exp_test['backend']}--{exp_test['test']['title']}--{expectation_type}"
+            _debug(f"Starting {exp_combined_test_name}")
+            _start = time.time()
             validation_result, error_message, stack_trace = evaluate_json_test_cfe(
                 validator=exp_test["validator_with_data"],
                 expectation_type=exp_test["expectation_type"],
                 test=exp_test["test"],
                 raise_exception=False,
+                force_no_progress_bar=force_no_progress_bar,
             )
-            print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
+            _end = time.time()
+            _duration = _end - _start
+            backend_test_times[exp_test["backend"]].append(_duration)
+            _debug(
+                f"Took {_duration} seconds to evaluate_json_test_cfe for {exp_combined_test_name}"
+            )
             if error_message is None:
-                print(f"  PASSED")
+                _debug(f"PASSED {exp_combined_test_name}")
                 test_passed = True
                 error_diagnostics = None
             else:
-                print(f"  ERROR: {repr(error_message)}")
+                _error(f"{repr(error_message)} for {exp_combined_test_name}")
                 print(f"{stack_trace[0]}")
                 error_diagnostics = ExpectationErrorDiagnostics(
                     error_msg=error_message,
@@ -1319,6 +1411,11 @@ class Expectation(metaclass=MetaExpectation):
                     validation_result=validation_result,
                     error_diagnostics=error_diagnostics,
                 )
+            )
+
+        for backend_name, test_times in sorted(backend_test_times.items()):
+            _debug(
+                f"Took {sum(test_times)} seconds to run {len(test_times)} tests {backend_name}--{expectation_type}"
             )
 
         return test_results
