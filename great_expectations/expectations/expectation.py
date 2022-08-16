@@ -1064,7 +1064,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         _debug(
             f"coverage_score: {coverage_score} for {self.expectation_type} ... "
-            f"engines: {_num_engines}, backends: {_num_backends}, "
+            f"engines: {_num_engines}, backends: {round(_num_backends)}, "
             f"passing tests: {_total_passed}, failing tests:{_total_failed}"
         )
 

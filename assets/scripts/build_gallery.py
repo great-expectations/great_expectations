@@ -97,7 +97,7 @@ def get_expectation_file_info_dict() -> dict:
         )
     )
 
-    for file_path in files_found:
+    for file_path in sorted(files_found):
         file_path = file_path.replace(f"{repo_path}{os.path.sep}", "")
         name = os.path.basename(file_path).replace(".py", "")
 
@@ -109,11 +109,12 @@ def get_expectation_file_info_dict() -> dict:
             "updated_at": check_output(updated_at_cmd, shell=True)
             .decode("utf-8")
             .strip(),
-            "created_at": check_output(updated_at_cmd, shell=True)
+            "created_at": check_output(created_at_cmd, shell=True)
             .decode("utf-8")
             .strip(),
             "path": file_path,
         }
+        logger.debug(f"{name} was created {result[name]['created_at']} and updated {result[name]['updated_at']}")
 
     os.chdir(oldpwd)
     return result
