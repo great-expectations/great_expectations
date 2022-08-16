@@ -38,6 +38,7 @@ def test_requirements_files():
     assert (
         req_set_dict["requirements-dev-spark.txt"]
         & req_set_dict["requirements-dev-sqlalchemy.txt"]
+        & req_set_dict["requirements-dev-azure.txt"]
         == set()
     )
 
@@ -67,6 +68,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-sqlalchemy.txt"]
         | req_set_dict["requirements-dev-arrow.txt"]
+        | req_set_dict["requirements-dev-azure.txt"]
         | req_set_dict["requirements-dev-excel.txt"]
         | req_set_dict["requirements-dev-pagerduty.txt"]
         | req_set_dict["requirements-dev-spark.txt"]

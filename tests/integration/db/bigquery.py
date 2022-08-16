@@ -24,7 +24,8 @@ This integration test tests the following:
 
 1. get_validator() will create a temp_table with the expected expiration
 2. passing in `bigquery_temp_table` as part of `batch_spec_passthrough` will raise a DeprecationWarning.
-
+3. the validator.head method (and corresponding metric) will work on bigquery datasources even when temp table creation
+    is turned off
 """
 
 gcp_project: str = os.environ.get("GE_TEST_GCP_PROJECT")
@@ -103,14 +104,31 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
     batch_spec_passthrough={
-        "bigquery_temp_table": "ge_temp"
+        "bigquery_temp_table": temp_table_name
     },  # this is the name of the table you would like to use a 'temp_table'
 )
 
 context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
+    expectation_suite_name="test_suite_2", overwrite_existing=True
 )
 with pytest.warns(DeprecationWarning):
     validator: Validator = context.get_validator(
-        batch_request=batch_request, expectation_suite_name="test_suite"
+        batch_request=batch_request, expectation_suite_name="test_suite_2"
     )
+
+# Testing `validator.head()` when using BigQuery without temp tables
+batch_request_without_temp_table: RuntimeBatchRequest = RuntimeBatchRequest(
+    datasource_name="my_bigquery_datasource",
+    data_connector_name="default_runtime_data_connector_name",
+    data_asset_name="asset_a",  # this can be anything that identifies this data
+    runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
+    batch_identifiers={"default_identifier_name": "default_identifier"},
+    batch_spec_passthrough={"create_temp_table": False},
+)
+validator_without_temp_table = context.get_validator(
+    batch_request=batch_request_without_temp_table,
+    expectation_suite_name="test_suite_2",
+)
+
+df = validator_without_temp_table.head(n_rows=5, fetch_all=False)
+assert not df.empty

@@ -9,6 +9,10 @@ from great_expectations.core.batch import (
     IDDict,
 )
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.datasource.data_connector.batch_filter import (
+    BatchFilter,
+    build_batch_filter,
+)
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
@@ -48,6 +52,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         assets: Optional[Dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        id_: Optional[str] = None,
     ) -> None:
         self._assets: dict = {}
         if assets:
@@ -61,6 +66,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         super().__init__(
             name=name,
+            id_=id_,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
@@ -173,21 +179,37 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return []
 
     def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):
+        """
+        Retrieve batch_definitions that match batch_request
+
+        First retrieves all batch_definitions that match batch_request
+            - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.
+            - NOTE : currently sql data connectors do not support sorters.
+
+        Args:
+            batch_request (BatchRequestBase): BatchRequestBase (BatchRequest without attribute validation) to process
+
+        Returns:
+            A list of BatchDefinition objects that match BatchRequest
+        """
         self._validate_batch_request(batch_request=batch_request)
 
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = []
+        sub_cache: Optional[List[str]] = None
         try:
-            sub_cache = self._data_references_cache[batch_request.data_asset_name]
+            sub_cache = self._get_data_reference_list_from_cache_by_data_asset_name(
+                data_asset_name=batch_request.data_asset_name
+            )
         except KeyError:
             raise KeyError(
                 f"data_asset_name {batch_request.data_asset_name} is not recognized."
             )
 
         for batch_identifiers in sub_cache:
-            batch_definition: BatchDefinition = BatchDefinition(
+            batch_definition = BatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,
@@ -197,6 +219,26 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
+        # <WILL> 20220725 - In the case of file_data_connectors, this step is enabled, but sql_data_connectors
+        # currently do not support sorters. This step can be enabled once sorting is implemented for sql_data_connectors
+        # if len(self.sorters) > 0:
+        #     batch_definition_list = self._sort_batch_definition_list(
+        #         batch_definition_list=batch_definition_list
+        #     )
+        if batch_request.data_connector_query is not None:
+            data_connector_query_dict = batch_request.data_connector_query.copy()
+            if (
+                batch_request.limit is not None
+                and data_connector_query_dict.get("limit") is None
+            ):
+                data_connector_query_dict["limit"] = batch_request.limit
+
+            batch_filter_obj: BatchFilter = build_batch_filter(
+                data_connector_query_dict=data_connector_query_dict
+            )
+            batch_definition_list = batch_filter_obj.select_from_data_connector_query(
+                batch_definition_list=batch_definition_list
+            )
         return batch_definition_list
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
@@ -284,10 +326,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self, batch_definition: BatchDefinition
     ) -> str:
         """
-            Helper method called by _get_batch_identifiers_list_from_data_asset_config() to parse table_name from data_asset_name in cases
-            where schema is included.
+        Helper method called by _get_batch_identifiers_list_from_data_asset_config() to parse table_name from
+        data_asset_name in cases where schema is included.
 
-            data_asset_name in those cases are [schema].[table_name].
+        data_asset_name in those cases are [schema].[table_name].
 
         function will split data_asset_name on [schema]. and return the resulting table_name.
         """

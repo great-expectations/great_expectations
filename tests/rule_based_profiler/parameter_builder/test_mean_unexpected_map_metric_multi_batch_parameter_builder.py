@@ -4,8 +4,9 @@ import numpy as np
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -14,9 +15,8 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    Domain,
     ParameterContainer,
     ParameterNode,
 )
@@ -129,7 +129,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
     )
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -137,7 +137,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
 
     variables: Optional[ParameterContainer] = None
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -196,7 +196,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         "data_asset_name": "my_reports",
     }
 
-    my_total_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    my_total_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_total_count",
@@ -208,7 +208,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
     )
-    my_null_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    my_null_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_null_count",
@@ -239,7 +239,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
     )
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -247,7 +247,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
 
     variables: Optional[ParameterContainer] = None
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -293,7 +293,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         "data_asset_name": "my_reports",
     }
 
-    my_total_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    my_total_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_total_count",
@@ -334,7 +334,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
     )
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -342,7 +342,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
 
     variables: Optional[ParameterContainer] = None
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -432,7 +432,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
     )
 
     metric_domain_kwargs: dict = {"column": "pickup_datetime"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -440,7 +440,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
 
     variables: Optional[ParameterContainer] = None
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -499,7 +499,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         "data_asset_name": "my_reports",
     }
 
-    my_total_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    my_total_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_total_count",
@@ -511,7 +511,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
     )
-    my_null_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    my_null_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_null_count",
@@ -542,7 +542,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
     )
 
     metric_domain_kwargs: dict = {"column": "pickup_datetime"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -550,7 +550,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
 
     variables: Optional[ParameterContainer] = None
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -607,7 +607,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         evaluation_parameter_builder_configs=None,
         data_context=data_context,
     )
-    my_null_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    my_null_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_null_count",
@@ -637,7 +637,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
     )
 
     metric_domain_kwargs: dict = {"column": "pickup_datetime"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -645,7 +645,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
 
     variables: Optional[ParameterContainer] = None
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -728,7 +728,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
-    my_total_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    my_total_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_total_count",
@@ -740,7 +740,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
     )
-    my_null_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    my_null_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_null_count",

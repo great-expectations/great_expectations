@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import List
 
 import pandas as pd
 import pytest
@@ -10,11 +9,9 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.execution_engine.sqlalchemy_batch_data import (
-    SqlAlchemyBatchData,
-)
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -27,6 +24,7 @@ from great_expectations.expectations.row_conditions import (
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import get_sqlalchemy_domain_data
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
 
@@ -71,6 +69,42 @@ def test_instantiation_via_url(sa):
             sampling_kwargs={"n": 5},
         )
     )
+
+
+@pytest.mark.integration
+def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
+    """Ensure that we can still retrieve data when the dialect is not recognized."""
+
+    # 1. Create engine with sqlite db
+    db_file = file_relative_path(
+        __file__,
+        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+    my_execution_engine = SqlAlchemyExecutionEngine(url="sqlite:///" + db_file)
+    assert my_execution_engine.connection_string is None
+    assert my_execution_engine.credentials is None
+    assert my_execution_engine.url[-36:] == "test_cases_for_sql_data_connector.db"
+
+    # 2. Change dialect to one not listed in GESqlDialect
+    my_execution_engine.engine.dialect.name = "other_dialect"
+
+    # 3. Get data
+    num_rows_in_sample: int = 10
+    batch_data, _ = my_execution_engine.get_batch_data_and_markers(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
+            table_name="table_partitioned_by_date_column__A",
+            sampling_method="_sample_using_limit",
+            sampling_kwargs={"n": num_rows_in_sample},
+        )
+    )
+
+    # 4. Assert dialect and data are as expected
+
+    assert batch_data.dialect == GESqlDialect.OTHER
+
+    my_execution_engine.load_batch_data("__", batch_data)
+    validator = Validator(my_execution_engine)
+    assert len(validator.head(fetch_all=True)) == num_rows_in_sample
 
 
 def test_instantiation_via_credentials(sa, test_backends, test_df):
@@ -830,90 +864,3 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     )
 
     validate_tmp_tables()
-
-
-def test_sample_using_random(sqlite_view_engine, test_df):
-    my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_view_engine
-    )
-
-    p: float
-    batch_spec: SqlAlchemyDatasourceBatchSpec
-    batch_data: SqlAlchemyBatchData
-    num_rows: int
-    rows_0: List[tuple]
-    rows_1: List[tuple]
-
-    # First, make sure that degenerative case never passes.
-
-    test_df_0: pd.DataFrame = test_df.iloc[:1]
-    test_df_0.to_sql("test_table_0", con=my_execution_engine.engine)
-
-    p = 1.0
-    batch_spec = SqlAlchemyDatasourceBatchSpec(
-        table_name="test_table_0",
-        schema_name="main",
-        sampling_method="_sample_using_random",
-        sampling_kwargs={"p": p},
-    )
-
-    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
-    ).scalar()
-    assert num_rows == round(p * test_df_0.shape[0])
-
-    rows_0: List[tuple] = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
-    ).fetchall()
-
-    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
-    ).scalar()
-    assert num_rows == round(p * test_df_0.shape[0])
-
-    rows_1: List[tuple] = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
-    ).fetchall()
-
-    assert len(rows_0) == len(rows_1) == 1
-
-    assert rows_0 == rows_1
-
-    # Second, verify that realistic case always returns different random sample of rows.
-
-    test_df_1: pd.DataFrame = test_df
-    test_df_1.to_sql("test_table_1", con=my_execution_engine.engine)
-
-    p = 2.0e-1
-    batch_spec = SqlAlchemyDatasourceBatchSpec(
-        table_name="test_table_1",
-        schema_name="main",
-        sampling_method="_sample_using_random",
-        sampling_kwargs={"p": p},
-    )
-
-    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
-    ).scalar()
-    assert num_rows == round(p * test_df_1.shape[0])
-
-    rows_0 = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
-    ).fetchall()
-
-    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
-    ).scalar()
-    assert num_rows == round(p * test_df_1.shape[0])
-
-    rows_1 = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
-    ).fetchall()
-
-    assert len(rows_0) == len(rows_1)
-
-    assert not (rows_0 == rows_1)

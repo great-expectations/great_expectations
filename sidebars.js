@@ -174,7 +174,6 @@ module.exports = {
           label: 'Core skills',
           items: [
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
-            'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
             'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
             { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
@@ -196,7 +195,7 @@ module.exports = {
           items: [
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler',
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler'
           ]
         },
         {
@@ -210,6 +209,7 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
+            'guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
             'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
             // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
@@ -283,14 +283,19 @@ module.exports = {
       link: { type: 'doc', id: 'deployment_patterns/reference_architecture_overview' },
       items: [
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
-        'deployment_patterns/how_to_use_great_expectations_in_databricks',
-        'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_flyte',
+        'deployment_patterns/how_to_use_great_expectations_in_databricks',
+        'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
+        { type: 'doc', id: 'integrations/integration_datahub' },
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
-        'deployment_patterns/how_to_use_great_expectations_with_prefect',
+        'deployment_patterns/how_to_use_great_expectations_in_flyte',
+        'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_use_great_expectations_with_meltano',
+        'deployment_patterns/how_to_use_great_expectations_with_prefect',
+        'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
+        'deployment_patterns/how_to_use_great_expectations_in_emr_serverless',
+        { type: 'doc', id: 'integrations/integration_zenml' },
         { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
       ]
     },
@@ -308,7 +313,7 @@ module.exports = {
             { type: 'doc', id: 'contributing/contributing_github' },
             { type: 'doc', id: 'contributing/contributing_test' },
             { type: 'doc', id: 'contributing/contributing_maturity' },
-            { type: 'doc', id: 'contributing/contributing_misc' },
+            { type: 'doc', id: 'contributing/contributing_misc' }
           ]
         },
         {

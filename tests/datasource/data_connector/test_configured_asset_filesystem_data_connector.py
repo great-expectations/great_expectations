@@ -618,7 +618,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition: BatchDefinition = BatchDefinition(
+    expected_batch_definition = BatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",

@@ -8,10 +8,13 @@ import re
 import warnings
 from collections import OrderedDict
 from functools import lru_cache
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 from urllib.parse import urlparse
 
 from great_expectations.types import safe_deep_copy
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.store import Store
 
 try:
     from azure.identity import DefaultAzureCredential
@@ -71,6 +74,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("module_name", None)
 
+    logger.debug(f"(instantiate_class_from_config) module_name -> {module_name}")
     verify_dynamic_loading_support(module_name=module_name)
 
     class_name = config.pop("class_name", None)
@@ -131,7 +135,7 @@ def build_store_from_config(
     store_config: Optional[dict] = None,
     module_name: str = "great_expectations.data_context.store",
     runtime_environment: Optional[dict] = None,
-) -> Optional["Store"]:  # noqa: F821
+) -> Optional["Store"]:
     if store_config is None or module_name is None:
         return None
 
@@ -220,7 +224,7 @@ def substitute_config_variable(
             raise ge_exceptions.MissingConfigVariableError(
                 f"""\n\nUnable to find a match for config substitution variable: `{config_variable_name}`.
 Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
-See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets""",
+See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials""",
                 missing_config_variable=config_variable_name,
             )
 

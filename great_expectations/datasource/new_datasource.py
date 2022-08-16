@@ -32,6 +32,7 @@ class BaseDatasource:
         execution_engine=None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
+        id_: Optional[str] = None,
     ) -> None:
         """
         Build a new Datasource.
@@ -41,8 +42,10 @@ class BaseDatasource:
             execution_engine (ClassConfig): the type of compute engine to produce
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
+            id_: Identifier specific to this datasource.
         """
         self._name = name
+        self._id_ = id_
 
         self._data_context_root_directory = data_context_root_directory
         if execution_engine is None:
@@ -56,13 +59,15 @@ class BaseDatasource:
                 runtime_environment={"concurrency": concurrency},
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
-            self._datasource_config = {
+            self._datasource_config: dict = {
                 "execution_engine": execution_engine,
+                "id_": id_,
+                "name": name,
             }
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
 
-        self._data_connectors = {}
+        self._data_connectors: dict = {}
 
     def get_batch_from_batch_definition(
         self,
@@ -88,7 +93,7 @@ class BaseDatasource:
             ) = data_connector.get_batch_data_and_metadata(
                 batch_definition=batch_definition
             )
-        new_batch: Batch = Batch(
+        new_batch = Batch(
             data=batch_data,
             batch_request=None,
             batch_definition=batch_definition,
@@ -169,7 +174,7 @@ class BaseDatasource:
                 runtime_parameters=runtime_parameters,
             )
 
-            new_batch: Batch = Batch(
+            new_batch = Batch(
                 data=batch_data,
                 batch_request=batch_request,
                 batch_definition=batch_definition,
@@ -194,7 +199,7 @@ class BaseDatasource:
                 ) = data_connector.get_batch_data_and_metadata(
                     batch_definition=batch_definition
                 )
-                new_batch: Batch = Batch(
+                new_batch = Batch(
                     data=batch_data,
                     batch_request=batch_request,
                     batch_definition=batch_definition,
@@ -377,6 +382,13 @@ class BaseDatasource:
         return self._name
 
     @property
+    def id_(self) -> str:
+        """
+        Property for datasource id_
+        """
+        return self._id_
+
+    @property
     def execution_engine(self) -> ExecutionEngine:
         return self._execution_engine
 
@@ -403,6 +415,7 @@ class Datasource(BaseDatasource):
         data_connectors=None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
+        id_: Optional[str] = None,
     ) -> None:
         """
         Build a new Datasource with data connectors.
@@ -413,6 +426,7 @@ class Datasource(BaseDatasource):
             data_connectors: DataConnectors to add to the datasource
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
+            id_: Identifier specific to this datasource.
         """
         self._name = name
 
@@ -421,6 +435,7 @@ class Datasource(BaseDatasource):
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory,
             concurrency=concurrency,
+            id_=id_,
         )
 
         if data_connectors is None:

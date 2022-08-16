@@ -12,7 +12,7 @@ sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
 sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
 sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 
-CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&application=great_expectations_oss"
 
 context = ge.get_context()
 
@@ -21,7 +21,7 @@ name: my_snowflake_datasource
 class_name: Datasource
 execution_engine:
   class_name: SqlAlchemyExecutionEngine
-  connection_string: snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>
+  connection_string: snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>&application=great_expectations_oss
 data_connectors:
    default_runtime_data_connector_name:
        class_name: RuntimeDataConnector
@@ -35,7 +35,7 @@ data_connectors:
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace(
-    "snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>",
+    "snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>&application=great_expectations_oss",
     CONNECTION_STRING,
 )
 

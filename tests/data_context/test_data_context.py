@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import shutil
@@ -25,6 +26,7 @@ from great_expectations.data_context import (
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
+    DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
 )
@@ -441,6 +443,20 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
         ]
 
 
+@mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
+def test_update_datasource_persists_changes_with_store(
+    mock_update_by_name: mock.MagicMock,
+    data_context_parameterized_expectation_suite: DataContext,
+) -> None:
+    context: DataContext = data_context_parameterized_expectation_suite
+
+    datasource_to_update: Datasource = tuple(context.datasources.values())[0]
+
+    context.update_datasource(datasource=datasource_to_update)
+
+    assert mock_update_by_name.call_count == 1
+
+
 @freeze_time("09/26/2019 13:42:41")
 def test_data_context_get_validation_result(titanic_data_context):
     """
@@ -778,6 +794,7 @@ def test_ExplorerDataContext(titanic_data_context):
 
 
 # noinspection PyPep8Naming
+@pytest.mark.unit
 def test_ConfigOnlyDataContext__initialization(
     tmp_path_factory, basic_data_context_config
 ):
@@ -789,36 +806,37 @@ def test_ConfigOnlyDataContext__initialization(
         config_path,
     )
 
-    assert (
-        context.root_directory.split("/")[-1]
-        == "test_ConfigOnlyDataContext__initialization__dir0"
+    assert context.root_directory.split("/")[-1].startswith(
+        "test_ConfigOnlyDataContext__initialization__dir"
     )
-    assert context.plugins_directory.split("/")[-3:] == [
-        "test_ConfigOnlyDataContext__initialization__dir0",
-        "plugins",
-        "",
-    ]
+
+    plugins_dir_parts = context.plugins_directory.split("/")[-3:]
+    assert len(plugins_dir_parts) == 3
+    assert plugins_dir_parts[0].startswith(
+        "test_ConfigOnlyDataContext__initialization__dir"
+    )
+    assert plugins_dir_parts[1:] == ["plugins", ""]
 
 
+@pytest.mark.unit
 def test__normalize_absolute_or_relative_path(
     tmp_path_factory, basic_data_context_config
 ):
-    config_path = str(
-        tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
+    full_test_dir = tmp_path_factory.mktemp(
+        "test__normalize_absolute_or_relative_path__dir"
     )
+    test_dir = full_test_dir.parts[-1]
+    config_path = str(full_test_dir)
     context = BaseDataContext(
         basic_data_context_config,
         config_path,
     )
 
-    assert str(
-        os.path.join("test__normalize_absolute_or_relative_path__dir0", "yikes")
-    ) in context._normalize_absolute_or_relative_path("yikes")
-
-    assert (
-        "test__normalize_absolute_or_relative_path__dir"
-        not in context._normalize_absolute_or_relative_path("/yikes")
+    assert context._normalize_absolute_or_relative_path("yikes").endswith(
+        os.path.join(test_dir, "yikes")
     )
+
+    assert test_dir not in context._normalize_absolute_or_relative_path("/yikes")
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
@@ -916,7 +934,7 @@ def test_data_context_updates_expectation_suite_names(
         ),
     ) as suite_file:
         loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
-        loaded_suite: ExpectationSuite = ExpectationSuite(
+        loaded_suite = ExpectationSuite(
             **loaded_suite_dict,
             data_context=data_context_parameterized_expectation_suite,
         )
@@ -1610,7 +1628,7 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         context.get_checkpoint("foo")
 
 
-# TODO: add more test cases
+@pytest.mark.integration
 def test_run_checkpoint_new_style(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1662,8 +1680,6 @@ def test_run_checkpoint_new_style(
         context.run_checkpoint(checkpoint_name=checkpoint_config.name)
 
     assert len(context.validations_store.list_keys()) == 0
-
-    # print(context.list_datasources())
 
     context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
 
@@ -2285,6 +2301,8 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
                 "base_directory": "../data",
             }
         },
+        "id_": None,
+        "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)
     assert datasource_from_yaml.__class__.__name__ == "Datasource"
@@ -2641,6 +2659,8 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
                 "module_name": "great_expectations.datasource.data_connector",
             },
         },
+        "id_": None,
+        "name": "my_datasource",
     }
     assert datasource_from_yaml.config == {
         "execution_engine": {
@@ -2666,6 +2686,8 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
                 "module_name": "great_expectations.datasource.data_connector",
             },
         },
+        "id_": None,
+        "name": "my_datasource",
     }
 
     assert datasource_from_yaml.name == datasource_name
@@ -2814,6 +2836,8 @@ def test_add_datasource_from_yaml_with_substitution_variables(
                 "base_directory": "../data",
             }
         },
+        "id_": None,
+        "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)
     assert datasource_from_yaml.__class__.__name__ == "Datasource"
@@ -2879,3 +2903,101 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     )
     checkpoint_result = checkpoint.run()
     assert checkpoint_result.get("success") is True
+
+
+def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
+    empty_data_context: DataContext, monkeypatch
+) -> None:
+    """
+    What does this test do and why?
+
+    Great Expectations recognizes changes made to environment variables within a program execution
+    and ensures that these changes are recognized in subsequent calls within the same process.
+
+    This is particularly relevant when performing substitutions within a user's project config.
+    """
+    context: DataContext = empty_data_context
+    env_var_name: str = "MY_PLUGINS_DIRECTORY"
+    env_var_value: str = "my_patched_value"
+
+    context.variables.config.plugins_directory = f"${env_var_name}"
+    monkeypatch.setenv(env_var_name, env_var_value)
+
+    assert context.plugins_directory and context.plugins_directory.endswith(
+        env_var_value
+    )
+
+
+def test_modifications_to_config_vars_is_recognized_within_same_program_execution(
+    empty_data_context: DataContext,
+) -> None:
+    """
+    What does this test do and why?
+
+    Great Expectations recognizes changes made to config variables within a program execution
+    and ensures that these changes are recognized in subsequent calls within the same process.
+
+    This is particularly relevant when performing substitutions within a user's project config.
+    """
+    context: DataContext = empty_data_context
+    config_var_name: str = "my_plugins_dir"
+    config_var_value: str = "my_patched_value"
+
+    context.variables.config.plugins_directory = f"${config_var_name}"
+    context.save_config_variable(
+        config_variable_name=config_var_name, value=config_var_value
+    )
+
+    assert context.plugins_directory and context.plugins_directory.endswith(
+        config_var_value
+    )
+
+
+@pytest.mark.integration
+def test_check_for_usage_stats_sync_finds_diff(
+    empty_data_context_stats_enabled: DataContext,
+    data_context_config_with_datasources: DataContextConfig,
+) -> None:
+    """
+    What does this test do and why?
+
+    During DataContext instantiation, if the project config used to create the object
+    and the actual config assigned to self.config differ in terms of their usage statistics
+    values, we want to be able to identify that and persist values accordingly.
+    """
+    context = empty_data_context_stats_enabled
+    project_config = data_context_config_with_datasources
+
+    res = context._check_for_usage_stats_sync(project_config=project_config)
+    assert res is True
+
+
+@pytest.mark.integration
+def test_check_for_usage_stats_sync_does_not_find_diff(
+    empty_data_context_stats_enabled: DataContext,
+) -> None:
+    """
+    What does this test do and why?
+
+    During DataContext instantiation, if the project config used to create the object
+    and the actual config assigned to self.config differ in terms of their usage statistics
+    values, we want to be able to identify that and persist values accordingly.
+    """
+    context = empty_data_context_stats_enabled
+    project_config = copy.deepcopy(context.config)  # Using same exact config
+
+    res = context._check_for_usage_stats_sync(project_config=project_config)
+    assert res is False
+
+
+@pytest.mark.integration
+def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
+    empty_data_context: DataContext,
+    data_context_config_with_datasources: DataContextConfig,
+) -> None:
+    context = empty_data_context
+    project_config = data_context_config_with_datasources
+    project_config.anonymous_usage_statistics.enabled = False
+
+    res = context._check_for_usage_stats_sync(project_config=project_config)
+    assert res is False

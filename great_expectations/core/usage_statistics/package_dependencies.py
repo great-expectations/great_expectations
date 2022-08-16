@@ -4,7 +4,7 @@ This module contains static lists of GE dependencies, along with a utility for
 checking and updating these static lists.
 
     Typical usage example:
-        ge_dependencies: GEDependencies = GEDependencies()
+        ge_dependencies = GEDependencies()
         print(ge_dependencies.get_required_dependency_names())
         print(ge_dependencies.get_dev_dependency_names())
 
@@ -38,9 +38,11 @@ class GEDependencies:
             "cryptography",
             "importlib-metadata",
             "Ipython",
+            "ipywidgets",
             "jinja2",
             "jsonpatch",
             "jsonschema",
+            "makefun",
             "mistune",
             "nbformat",
             "notebook",
@@ -77,11 +79,12 @@ class GEDependencies:
             "gcsfs",
             "google-cloud-secret-manager",
             "google-cloud-storage",
-            "ipywidgets",
+            "invoke",
             "isort",
             "mistune",
             "mock-alchemy",
             "moto",
+            "mypy",
             "nbconvert",
             "openpyxl",
             "pre-commit",
@@ -94,8 +97,10 @@ class GEDependencies:
             "pyspark",
             "pytest",
             "pytest-benchmark",
+            "pytest-azurepipelines",
             "pytest-cov",
             "pytest-order",
+            "pytest-random-order",
             "pyupgrade",
             "requirements-parser",
             "s3fs",
@@ -115,7 +120,9 @@ class GEDependencies:
         # requirements-dev-contrib.txt:
         "black",
         "flake8",
+        "invoke",
         "isort",
+        "mypy",
         "pre-commit",
         "pytest-cov",
         "pytest-order",
@@ -123,7 +130,6 @@ class GEDependencies:
         # requirements-dev-lite.txt:
         "flask",
         "freezegun",
-        "ipywidgets",
         "mistune",
         "mock-alchemy",
         "moto",
@@ -139,6 +145,9 @@ class GEDependencies:
         "PyHive",
         "thrift",
         "thrift-sasl",
+        # requirements-dev-test-pipeline.txt:
+        "pytest-azurepipelines",
+        "pytest-random-order",
     ]
 
     GE_DEV_DEPENDENCIES: List[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(
@@ -248,7 +257,7 @@ class GEDependencies:
 
 def main() -> None:
     """Run this module to generate a list of packages from requirements files to update our static lists"""
-    ge_dependencies: GEDependencies = GEDependencies()
+    ge_dependencies = GEDependencies()
     print("\n\nRequired Dependencies:\n\n")
     print(ge_dependencies.get_required_dependency_names_from_requirements_file())
     print("\n\nDev Dependencies:\n\n")

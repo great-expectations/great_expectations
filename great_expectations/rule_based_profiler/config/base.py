@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from ruamel.yaml.comments import CommentedMap
 
+from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
@@ -18,7 +19,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_PREFIX,
     ParameterContainer,
 )
@@ -482,26 +483,26 @@ class RuleConfigSchema(NotNullSchema):
     )
 
 
-class RuleBasedProfilerConfig(BaseYamlConfig):
+class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
     def __init__(
         self,
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
+        id_: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ) -> None:
         self.module_name = "great_expectations.rule_based_profiler"
         self.class_name = "RuleBasedProfiler"
 
-        self.name = name
-
         self.config_version = config_version
 
         self.variables = variables
         self.rules = rules
 
-        super().__init__(commented_map=commented_map)
+        AbstractConfig.__init__(self, id_=id_, name=name)
+        BaseYamlConfig.__init__(self, commented_map=commented_map)
 
     @classmethod
     def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
@@ -664,7 +665,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         return rule_dict
 
 
-class RuleBasedProfilerConfigSchema(Schema):
+class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     """
     Schema classes for configurations which extend from BaseYamlConfig must extend top-level Marshmallow Schema class.
     Schema classes for their constituent configurations which extend DictDot leve must extend NotNullSchema class.
@@ -674,6 +675,7 @@ class RuleBasedProfilerConfigSchema(Schema):
         unknown = INCLUDE
         fields = (
             "name",
+            "id_",
             "config_version",
             "module_name",
             "class_name",
@@ -685,6 +687,11 @@ class RuleBasedProfilerConfigSchema(Schema):
     name = fields.String(
         required=True,
         allow_none=False,
+    )
+    id_ = fields.String(
+        required=False,
+        allow_none=False,
+        data_key="id",
     )
     config_version = fields.Float(
         required=True,

@@ -9,6 +9,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import __version__
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -23,14 +24,15 @@ from great_expectations.data_context.templates import (
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
+    AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     GeCloudConfig,
-    dataContextConfigSchema,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.exceptions import DataContextError
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -107,13 +109,13 @@ class DataContext(BaseDataContext):
             DataContext
         """
 
-        if not os.path.isdir(project_root_dir):
+        if not os.path.isdir(project_root_dir):  # type: ignore[arg-type]
             raise ge_exceptions.DataContextError(
                 "The project_root_dir must be an existing directory in which "
                 "to initialize a new DataContext"
             )
 
-        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
+        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)  # type: ignore[arg-type]
         os.makedirs(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
@@ -134,7 +136,7 @@ class DataContext(BaseDataContext):
         else:
             cls.write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(ge_dir, runtime_environment=runtime_environment)
+        return cls(context_root_dir=ge_dir, runtime_environment=runtime_environment)
 
     @classmethod
     def all_uncommitted_directories_exist(cls, ge_dir: str) -> bool:
@@ -311,7 +313,7 @@ class DataContext(BaseDataContext):
                 f"environment or in global configs ({(', ').join(global_config_path_str)})."
             )
 
-        return GeCloudConfig(**ge_cloud_config_dict)
+        return GeCloudConfig(**ge_cloud_config_dict)  # type: ignore[arg-type]
 
     # TODO: deprecate ge_cloud_account_id
     def __init__(
@@ -353,7 +355,6 @@ class DataContext(BaseDataContext):
 
         context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
         self._context_root_directory = context_root_directory
-
         project_config = self._load_project_config()
         super().__init__(
             project_config,
@@ -363,13 +364,70 @@ class DataContext(BaseDataContext):
             ge_cloud_config=ge_cloud_config,
         )
 
-        # save project config if data_context_id auto-generated or global config values applied
-        project_config_dict = dataContextConfigSchema.dump(project_config)
-        if (
-            project_config.anonymous_usage_statistics.explicit_id is False
-            or project_config_dict != dataContextConfigSchema.dump(self.config)
-        ):
+        # Save project config if data_context_id auto-generated
+        if self._check_for_usage_stats_sync(project_config):
             self._save_project_config()
+
+    def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
+        """
+        If there are differences between the DataContextConfig used to instantiate
+        the DataContext and the DataContextConfig assigned to `self.config`, we want
+        to save those changes to disk so that subsequent instantiations will utilize
+        the same values.
+
+        A small caveat is that if that difference stems from a global override (env var
+        or conf file), we don't want to write to disk. This is due to the fact that
+        those mechanisms allow for dynamic values and saving them will make them static.
+
+        Args:
+            project_config: The DataContextConfig used to instantiate the DataContext.
+
+        Returns:
+            A boolean signifying whether or not the current DataContext's config needs
+            to be persisted in order to recognize changes made to usage statistics.
+        """
+        project_config_usage_stats: Optional[
+            AnonymizedUsageStatisticsConfig
+        ] = project_config.anonymous_usage_statistics
+        context_config_usage_stats: Optional[
+            AnonymizedUsageStatisticsConfig
+        ] = self.config.anonymous_usage_statistics
+
+        if (
+            project_config_usage_stats.enabled is False  # type: ignore[union-attr]
+            or context_config_usage_stats.enabled is False  # type: ignore[union-attr]
+        ):
+            return False
+
+        if project_config_usage_stats.explicit_id is False:  # type: ignore[union-attr]
+            return True
+
+        if project_config_usage_stats == context_config_usage_stats:
+            return False
+
+        if project_config_usage_stats is None or context_config_usage_stats is None:
+            return True
+
+        # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.
+        global_data_context_id: Optional[str] = self._get_data_context_id_override()
+        if (
+            project_config_usage_stats.data_context_id
+            != context_config_usage_stats.data_context_id
+            and context_config_usage_stats.data_context_id != global_data_context_id
+        ):
+            return True
+
+        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.
+        global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
+        if (
+            project_config_usage_stats.usage_statistics_url
+            != context_config_usage_stats.usage_statistics_url
+            and context_config_usage_stats.usage_statistics_url
+            != global_usage_stats_url
+        ):
+            return True
+
+        return False
 
     def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
         """
@@ -382,16 +440,18 @@ class DataContext(BaseDataContext):
 
         :return: the configuration object retrieved from the Cloud API
         """
+        base_url = self.ge_cloud_config.base_url  # type: ignore[union-attr]
+        organization_id = self.ge_cloud_config.organization_id  # type: ignore[union-attr]
         ge_cloud_url = (
-            self.ge_cloud_config.base_url
-            + f"/organizations/{self.ge_cloud_config.organization_id}/data-context-configuration"
+            f"{base_url}/organizations/{organization_id}/data-context-configuration"
         )
-        auth_headers = {
+        headers = {
             "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {self.ge_cloud_config.access_token}",
+            "Authorization": f"Bearer {self.ge_cloud_config.access_token}",  # type: ignore[union-attr]
+            "Gx-Version": __version__,
         }
 
-        response = requests.get(ge_cloud_url, headers=auth_headers)
+        response = requests.get(ge_cloud_url, headers=headers)
         if response.status_code != 200:
             raise ge_exceptions.GeCloudError(
                 f"Bad request made to GE Cloud; {response.text}"
@@ -414,20 +474,20 @@ class DataContext(BaseDataContext):
             config = self._retrieve_data_context_config_from_ge_cloud()
             return config
 
-        path_to_yml = os.path.join(self.root_directory, self.GE_YML)
+        path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
 
+        except DuplicateKeyError:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
+            )
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
                 "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
                     err
                 )
-            )
-        except DuplicateKeyError:
-            raise ge_exceptions.InvalidConfigurationYamlError(
-                "Error: duplicate key found in project YAML file."
             )
         except OSError:
             raise ge_exceptions.ConfigNotFoundError()
@@ -440,19 +500,6 @@ class DataContext(BaseDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        if self.ge_cloud_mode:
-            logger.debug(
-                "ge_cloud_mode detected - skipping DataContext._save_project_config"
-            )
-            return
-        logger.debug("Starting DataContext._save_project_config")
-
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
-
     def add_store(self, store_name, store_config):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")
 
@@ -460,21 +507,59 @@ class DataContext(BaseDataContext):
         self._save_project_config()
         return new_store
 
-    def add_datasource(
-        self, name, **kwargs
+    def add_datasource(  # type: ignore[override]
+        self, name: str, **kwargs: dict
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(name=name, **kwargs)
-
+        ] = super().add_datasource(name=name, save_changes=True, **kwargs)
         return new_datasource
 
-    def delete_datasource(self, name: str) -> None:
-        logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
+    def update_datasource(  # type: ignore[override]
+        self,
+        datasource: Union[LegacyDatasource, BaseDatasource],
+    ) -> None:
+        """
+        See parent `BaseDataContext.update_datasource` for more details.
+        Note that this method persists changes using an underlying Store.
+        """
+        logger.debug(
+            f"Starting DataContext.update_datasource for datasource {datasource.name}"
+        )
 
-        super().delete_datasource(datasource_name=name)
+        super().update_datasource(
+            datasource=datasource,
+            save_changes=True,
+        )
+
+    def delete_datasource(self, name: str) -> None:  # type: ignore[override]
+        logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
+        super().delete_datasource(datasource_name=name, save_changes=True)
+        self._save_project_config()
+
+    def add_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: Dict[str, dict],
+        variables: Optional[dict] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> RuleBasedProfiler:
+        """
+        Constructs a RuleBasedProfiler instance just like the parent `BaseDataContext.add_profiler`
+        but also persists the result object utilizing the context's ProfilerStore instance.
+        """
+        profiler: RuleBasedProfiler = super().add_profiler(
+            name=name,
+            config_version=config_version,
+            rules=rules,
+            variables=variables,
+            ge_cloud_id=ge_cloud_id,
+        )
+        self.save_profiler(profiler=profiler, name=name, ge_cloud_id=ge_cloud_id)
+        return profiler
 
     @classmethod
     def find_context_root_dir(cls):

@@ -2,13 +2,13 @@ from typing import Optional
 
 import pytest
 
-from great_expectations.rule_based_profiler.helpers.util import (
-    integer_semantic_domain_type,
-)
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    integer_semantic_domain_type,
 )
 
 
@@ -189,7 +189,7 @@ def test_semantic_domain_equivalence():
     assert not (domain_a == domain_b)
     assert domain_b == domain_c
 
-    domain_d: Domain = Domain(
+    domain_d = Domain(
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={
@@ -209,7 +209,7 @@ def test_semantic_domain_equivalence():
         in str(excinfo.value)
     )
 
-    domain_e: Domain = Domain(
+    domain_e = Domain(
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={

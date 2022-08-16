@@ -1,14 +1,18 @@
 import copy
 import json
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    determine_progress_bar_method_by_environment,
+)
 from great_expectations.rule_based_profiler.config.base import (
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -22,12 +26,11 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
-    RuleState,
     build_parameter_container_for_variables,
 )
+from great_expectations.rule_based_profiler.rule_state import RuleState
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -109,8 +112,8 @@ class Rule(SerializableDictDot):
         """
         variables = build_parameter_container_for_variables(
             variables_configs=reconcile_rule_variables(
-                variables=variables,
-                variables_config=convert_variables_to_dict(variables=self.variables),
+                variables=self.variables,
+                variables_config=convert_variables_to_dict(variables=variables),
                 reconciliation_strategy=reconciliation_directives.variables,
             )
         )
@@ -134,8 +137,16 @@ class Rule(SerializableDictDot):
 
         rule_state.reset_parameter_containers()
 
+        pbar_method: Callable = determine_progress_bar_method_by_environment()
+
         domain: Domain
-        for domain in domains:
+        for domain in pbar_method(
+            domains,
+            desc="Profiling Dataset:",
+            position=1,
+            leave=False,
+            bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
+        ):
             rule_state.initialize_parameter_container_for_domain(domain=domain)
 
             parameter_builders: List[ParameterBuilder] = self.parameter_builders or []

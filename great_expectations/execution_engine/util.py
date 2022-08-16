@@ -35,6 +35,7 @@ def is_valid_categorical_partition_object(partition_object):
         or ("values" not in partition_object)
     ):
         return False
+
     # Expect the same number of values as weights; weights should sum to one
     return len(partition_object["values"]) == len(
         partition_object["weights"]

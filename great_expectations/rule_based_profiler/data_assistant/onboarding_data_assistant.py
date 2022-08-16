@@ -5,6 +5,11 @@ from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
     build_map_metric_rule,
 )
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+    OnboardingDataAssistantResult,
+)
+from great_expectations.rule_based_profiler.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
     ColumnDomainBuilder,
@@ -24,19 +29,14 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     ValueSetMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     VARIABLES_KEY,
-    SemanticDomainTypes,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
-    OnboardingDataAssistantResult,
-)
+from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.validator.validator import Validator
 
 
@@ -146,7 +146,7 @@ class OnboardingDataAssistant(DataAssistant):
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
         return OnboardingDataAssistantResult(
-            batch_id_to_batch_identifier_display_name_map=data_assistant_result.batch_id_to_batch_identifier_display_name_map,
+            _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
@@ -154,7 +154,7 @@ class OnboardingDataAssistant(DataAssistant):
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
             execution_time=data_assistant_result.execution_time,
-            usage_statistics_handler=data_assistant_result.usage_statistics_handler,
+            _usage_statistics_handler=data_assistant_result._usage_statistics_handler,
         )
 
     @staticmethod
@@ -164,7 +164,7 @@ class OnboardingDataAssistant(DataAssistant):
         """
         # Step-1: Instantiate "TableDomainBuilder" object.
 
-        table_domain_builder: TableDomainBuilder = TableDomainBuilder(
+        table_domain_builder = TableDomainBuilder(
             data_context=None,
         )
 
@@ -190,11 +190,13 @@ class OnboardingDataAssistant(DataAssistant):
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
 
-        mean_table_columns_set_match_multi_batch_parameter_builder_for_validations: ParameterBuilder = MeanTableColumnsSetMatchMultiBatchParameterBuilder(
-            name="column_names_set_estimator",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=None,
+        mean_table_columns_set_match_multi_batch_parameter_builder_for_validations = (
+            MeanTableColumnsSetMatchMultiBatchParameterBuilder(
+                name="column_names_set_estimator",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                evaluation_parameter_builder_configs=None,
+            )
         )
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
@@ -206,7 +208,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **table_row_count_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_table_row_count_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_table_row_count_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_table_row_count_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             min_value=f"{table_row_count_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
@@ -221,7 +223,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **mean_table_columns_set_match_multi_batch_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_table_columns_to_match_set_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_table_columns_to_match_set_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_table_columns_to_match_set",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             condition=f"{mean_table_columns_set_match_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
@@ -236,10 +238,12 @@ class OnboardingDataAssistant(DataAssistant):
 
         variables: dict = {
             "false_positive_rate": 0.05,
-            "quantile_statistic_interpolation_method": "auto",
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": 0,
@@ -257,7 +261,7 @@ class OnboardingDataAssistant(DataAssistant):
             expect_table_row_count_to_be_between_expectation_configuration_builder,
             expect_table_columns_to_match_set_expectation_configuration_builder,
         ]
-        rule: Rule = Rule(
+        rule = Rule(
             name="table_rule",
             variables=variables,
             domain_builder=table_domain_builder,
@@ -275,7 +279,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting numeric columns (but not "ID-type" columns).
 
-        numeric_column_type_domain_builder: ColumnDomainBuilder = ColumnDomainBuilder(
+        numeric_column_type_domain_builder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -400,7 +404,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_min_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_min_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_min_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_min_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -418,7 +422,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_max_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_max_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_max_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_max_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -439,7 +443,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_max_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_values_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_values_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -461,7 +465,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_quantile_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_quantile_values_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_quantile_values_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -480,7 +484,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_median_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_median_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_median_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_median_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -498,7 +502,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_mean_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_mean_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_mean_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_mean_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -516,7 +520,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_standard_deviation_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_stdev_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_stdev_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_stdev_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -540,18 +544,20 @@ class OnboardingDataAssistant(DataAssistant):
                 0.5,
                 0.75,
             ],
-            "allow_relative_error": "linear",
+            "allow_relative_error": False,
             "false_positive_rate": 0.05,
-            "quantile_statistic_interpolation_method": "auto",
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": None,
                 "upper_bound": None,
             },
-            "round_decimals": 12,
+            "round_decimals": 15,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_partition_parameter_builder_for_metrics,
@@ -566,12 +572,12 @@ class OnboardingDataAssistant(DataAssistant):
             expect_column_min_to_be_between_expectation_configuration_builder,
             expect_column_max_to_be_between_expectation_configuration_builder,
             expect_column_values_to_be_between_expectation_configuration_builder,
-            expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder,
+            expect_column_quantile_values_to_be_between_expectation_configuration_builder,
             expect_column_median_to_be_between_expectation_configuration_builder,
             expect_column_mean_to_be_between_expectation_configuration_builder,
             expect_column_stdev_to_be_between_expectation_configuration_builder,
         ]
-        rule: Rule = Rule(
+        rule = Rule(
             name="numeric_columns_rule",
             variables=variables,
             domain_builder=numeric_column_type_domain_builder,
@@ -589,7 +595,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper datetime columns (not "datetime-looking" text).
 
-        datetime_column_type_domain_builder: ColumnDomainBuilder = ColumnDomainBuilder(
+        datetime_column_type_domain_builder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -620,15 +626,6 @@ class OnboardingDataAssistant(DataAssistant):
         column_quantile_values_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_quantile_values_metric_multi_batch_parameter_builder()
         )
-        column_median_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_median_metric_multi_batch_parameter_builder()
-        )
-        column_mean_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_mean_metric_multi_batch_parameter_builder()
-        )
-        column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_standard_deviation_metric_multi_batch_parameter_builder()
-        )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
@@ -656,6 +653,20 @@ class OnboardingDataAssistant(DataAssistant):
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
 
+        evaluation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **column_quantile_values_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
+            ),
+        ]
+        column_quantile_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
+            metric_name=None,
+            metric_value_kwargs={
+                "quantiles": f"{VARIABLES_KEY}quantiles",
+                "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
+            },
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        )
+
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
@@ -665,7 +676,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_min_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_min_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_min_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_min_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -683,7 +694,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_max_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_max_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_max_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_max_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -704,7 +715,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_max_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_values_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_values_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -721,18 +732,44 @@ class OnboardingDataAssistant(DataAssistant):
             },
         )
 
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **column_quantile_values_range_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
+        expect_column_quantile_values_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_column_quantile_values_to_be_between",
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
+            column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            quantile_ranges={
+                "quantiles": f"{VARIABLES_KEY}quantiles",
+                "value_ranges": f"{column_quantile_values_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+            },
+            allow_relative_error=f"{VARIABLES_KEY}allow_relative_error",
+            meta={
+                "profiler_details": f"{column_quantile_values_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
+
         # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
         variables: dict = {
             "mostly": 1.0,
             "strict_min": False,
             "strict_max": False,
-            "allow_relative_error": "linear",
+            "quantiles": [
+                0.25,
+                0.5,
+                0.75,
+            ],
+            "allow_relative_error": False,
             "false_positive_rate": 0.05,
-            "quantile_statistic_interpolation_method": "auto",
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": None,
@@ -745,16 +782,14 @@ class OnboardingDataAssistant(DataAssistant):
             column_min_metric_multi_batch_parameter_builder_for_metrics,
             column_max_metric_multi_batch_parameter_builder_for_metrics,
             column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,
-            column_median_metric_multi_batch_parameter_builder_for_metrics,
-            column_mean_metric_multi_batch_parameter_builder_for_metrics,
-            column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics,
         ]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
             expect_column_min_to_be_between_expectation_configuration_builder,
             expect_column_max_to_be_between_expectation_configuration_builder,
             expect_column_values_to_be_between_expectation_configuration_builder,
+            expect_column_quantile_values_to_be_between_expectation_configuration_builder,
         ]
-        rule: Rule = Rule(
+        rule = Rule(
             name="datetime_columns_rule",
             variables=variables,
             domain_builder=datetime_column_type_domain_builder,
@@ -769,7 +804,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
-        text_column_type_domain_builder: ColumnDomainBuilder = ColumnDomainBuilder(
+        text_column_type_domain_builder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -837,7 +872,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_max_length_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_value_lengths_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_value_lengths_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_value_lengths_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -859,7 +894,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_values_to_match_regex_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_values_to_match_regex_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_values_to_match_regex_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_match_regex",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             condition=f"{column_values_to_match_regex_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}success_ratio >= {VARIABLES_KEY}success_ratio",
@@ -878,10 +913,12 @@ class OnboardingDataAssistant(DataAssistant):
             "strict_min": False,
             "strict_max": False,
             "false_positive_rate": 0.05,
-            "quantile_statistic_interpolation_method": "auto",
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": 0,
@@ -898,7 +935,7 @@ class OnboardingDataAssistant(DataAssistant):
             expect_column_value_lengths_to_be_between_expectation_configuration_builder,
             expect_column_values_to_match_regex_expectation_configuration_builder,
         ]
-        rule: Rule = Rule(
+        rule = Rule(
             name="text_columns_rule",
             variables=variables,
             domain_builder=text_column_type_domain_builder,
@@ -927,7 +964,7 @@ class OnboardingDataAssistant(DataAssistant):
                 include_semantic_types=None,
                 exclude_semantic_types=None,
                 allowed_semantic_types_passthrough=None,
-                cardinality_limit_mode=CardinalityLimitMode.FEW,
+                cardinality_limit_mode=f"{VARIABLES_KEY}cardinality_limit_mode",
                 max_unique_values=None,
                 max_proportion_unique=None,
                 data_context=None,
@@ -941,18 +978,20 @@ class OnboardingDataAssistant(DataAssistant):
         )
         metric_name: str = "column.value_counts"
         name: str = sanitize_parameter_name(name=metric_name)
-        column_value_counts_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = MetricMultiBatchParameterBuilder(
-            name=name,
-            metric_name=metric_name,
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs={
-                "sort": "value",
-            },
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            data_context=None,
+        column_value_counts_metric_multi_batch_parameter_builder_for_metrics = (
+            MetricMultiBatchParameterBuilder(
+                name=name,
+                metric_name=metric_name,
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs={
+                    "sort": "value",
+                },
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                data_context=None,
+            )
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
@@ -994,7 +1033,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **value_set_multi_batch_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_values_to_be_in_set_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_values_to_be_in_set_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_in_set",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -1010,7 +1049,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_distinct_values_count_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_unique_value_count_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_unique_value_count_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_unique_value_count_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -1028,7 +1067,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_unique_proportion_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_proportion_of_unique_values_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_proportion_of_unique_values_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_proportion_of_unique_values_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -1044,20 +1083,23 @@ class OnboardingDataAssistant(DataAssistant):
         # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
         variables: dict = {
+            "cardinality_limit_mode": CardinalityLimitMode.FEW.name,
             "mostly": 1.0,
             "strict_min": False,
             "strict_max": False,
             "false_positive_rate": 0.05,
-            "quantile_statistic_interpolation_method": "auto",
             "estimator": "bootstrap",
             "n_resamples": 9999,
             "random_seed": None,
+            "quantile_statistic_interpolation_method": "nearest",
+            "quantile_bias_correction": False,
+            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": 0.0,
                 "upper_bound": None,
             },
-            "round_decimals": 4,
+            "round_decimals": 15,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,
@@ -1068,7 +1110,7 @@ class OnboardingDataAssistant(DataAssistant):
             expect_column_unique_value_count_to_be_between_expectation_configuration_builder,
             expect_column_proportion_of_unique_values_to_be_between_expectation_configuration_builder,
         ]
-        rule: Rule = Rule(
+        rule = Rule(
             name="categorical_columns_rule",
             variables=variables,
             domain_builder=categorical_column_type_domain_builder,

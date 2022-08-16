@@ -1,11 +1,16 @@
 import os
 import shutil
+from typing import Dict
 from unittest.mock import PropertyMock, patch
 
 import pytest
 
 import great_expectations as ge
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.store import GeCloudStoreBackend
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    DatasourceConfig,
+)
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -344,7 +349,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                             "access_token": ge_cloud_access_token,
                             "organization_id": org_id,
                         },
-                        "ge_cloud_resource_type": "contract",
+                        "ge_cloud_resource_type": "checkpoint",
                         "suppress_store_backend_id": True,
                     },
                 },
@@ -373,7 +378,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                             "access_token": ge_cloud_access_token,
                             "organization_id": org_id,
                         },
-                        "ge_cloud_resource_type": "suite_validation_result",
+                        "ge_cloud_resource_type": "validation_result",
                         "suppress_store_backend_id": True,
                     },
                 },
@@ -410,11 +415,6 @@ def ge_cloud_runtime_base_url():
 @pytest.fixture
 def ge_cloud_runtime_organization_id():
     return "a8a35168-68d5-4366-90ae-00647463d37e"
-
-
-@pytest.fixture
-def ge_cloud_runtime_access_token():
-    return "b17bc2539062410db0a30e28fb0ee930"
 
 
 @pytest.fixture
@@ -585,3 +585,57 @@ def data_context_with_incomplete_global_config_in_dot_dir_only(
             str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
         )
         yield
+
+
+@pytest.fixture
+def datasource_name() -> str:
+    return "my_first_datasource"
+
+
+@pytest.fixture
+def datasource_store_name() -> str:
+    return "datasource_store"
+
+
+@pytest.fixture
+def request_headers(ge_cloud_access_token) -> Dict[str, str]:
+    return {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+        "Gx-Version": ge.__version__,
+    }
+
+
+@pytest.fixture
+def datasource_config() -> DatasourceConfig:
+    return DatasourceConfig(
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        data_connectors={
+            "tripdata_monthly_configured": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "base_directory": "/path/to/trip_data",
+                "assets": {
+                    "yellow": {
+                        "class_name": "Asset",
+                        "module_name": "great_expectations.datasource.data_connector.asset",
+                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                        "group_names": ["year", "month"],
+                    }
+                },
+            }
+        },
+    )
+
+
+@pytest.fixture
+def shared_called_with_request_kwargs(request_headers) -> dict:
+    """
+    Standard request kwargs that all GeCloudStoreBackend http calls are made with.
+    Use in combination with `assert_called_with()`
+    """
+    return dict(timeout=GeCloudStoreBackend.TIMEOUT, headers=request_headers)

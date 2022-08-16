@@ -4,19 +4,19 @@ import pytest
 
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import ProfilerConfigurationError
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (
     CategoricalColumnDomainBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
-)
-from great_expectations.rule_based_profiler.types import (
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
-    SemanticDomainTypes,
 )
 
 

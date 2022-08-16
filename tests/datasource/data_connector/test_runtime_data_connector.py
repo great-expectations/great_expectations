@@ -177,7 +177,7 @@ def test_add_batch_identifiers_correct(basic_datasource_with_assets):
 
 def test_batch_identifiers_missing_completely():
     # missing from base DataConnector
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
         instantiate_class_from_config(
             config=yaml.load(
                 """
@@ -196,10 +196,14 @@ execution_engine:
                 "module_name": "great_expectations.datasource",
             },
         )
+    expected_error_message: str = """
+        RuntimeDataConnector "runtime" requires batch_identifiers to be configured, either at the DataConnector or Asset-level.
+    """
+    assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
 def test_batch_identifiers_missing_from_named_asset():
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
         basic_datasource: Datasource = instantiate_class_from_config(
             config=yaml.load(
                 """
@@ -223,6 +227,11 @@ execution_engine:
                 "module_name": "great_expectations.datasource",
             },
         )
+
+    expected_error_message: str = """
+        RuntimeDataConnector "runtime" requires batch_identifiers to be configured when specifying Assets.
+        """
+    assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
 def test_error_checking_unknown_datasource(basic_datasource):
@@ -326,7 +335,7 @@ def test_asset_is_named_but_batch_identifier_in_other_asset(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_assets.name,
@@ -340,6 +349,14 @@ def test_asset_is_named_but_batch_identifier_in_other_asset(
                 runtime_parameters={"batch_data": test_df_pandas},
             )
         )
+    expected_error_message: str = """
+                Data Asset asset_a was invoked with one or more batch_identifiers
+                that were not configured for the asset.
+
+                The Data Asset was configured with : ['day', 'month']
+                It was invoked with : ['year', 'month', 'day']
+    """
+    assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
 def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
@@ -348,7 +365,7 @@ def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_assets.name,
@@ -358,6 +375,14 @@ def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
                 runtime_parameters={"batch_data": test_df_pandas},
             )
         )
+    expected_error_message: str = """
+                Data Asset asset_a was invoked with one or more batch_identifiers
+                that were not configured for the asset.
+
+                The Data Asset was configured with : ['day', 'month']
+                It was invoked with : ['blorg']
+    """
+    assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
 def test_named_asset_is_trying_to_use_batch_identifier_defined_in_data_connector(
@@ -366,7 +391,7 @@ def test_named_asset_is_trying_to_use_batch_identifier_defined_in_data_connector
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_assets.name,
@@ -380,6 +405,14 @@ def test_named_asset_is_trying_to_use_batch_identifier_defined_in_data_connector
                 runtime_parameters={"batch_data": test_df_pandas},
             )
         )
+    expected_error_message: str = """
+                Data Asset asset_a was invoked with one or more batch_identifiers
+                that were not configured for the asset.
+
+                The Data Asset was configured with : ['day', 'month']
+                It was invoked with : ['month', 'day', 'hour']
+    """
+    assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
 def test_runtime_batch_request_trying_to_use_batch_identifier_defined_at_asset_level(
@@ -388,7 +421,7 @@ def test_runtime_batch_request_trying_to_use_batch_identifier_defined_at_asset_l
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
         runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
                 datasource_name=basic_datasource_with_assets.name,
@@ -402,6 +435,14 @@ def test_runtime_batch_request_trying_to_use_batch_identifier_defined_at_asset_l
                 runtime_parameters={"batch_data": test_df_pandas},
             )
         )
+    expected_error_message: str = """
+                RuntimeDataConnector runtime was invoked with one or more batch identifiers that do not
+        appear among the configured batch identifiers.
+
+                The RuntimeDataConnector was configured with : ['hour', 'minute']
+                It was invoked with : ['year', 'hour', 'minute']
+    """
+    assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
 def test_error_checking_too_many_runtime_parameters(basic_datasource):
@@ -492,13 +533,21 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
         # noinspection PyUnusedLocal
         batch_definition_list: List[
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
+    expected_error_message: str = """
+        RuntimeDataConnector test_runtime_data_connector was invoked with one or more batch identifiers that do not
+        appear among the configured batch identifiers.
+
+                The RuntimeDataConnector was configured with : ['pipeline_stage_name', 'airflow_run_id', 'custom_key_0']
+                It was invoked with : ['pipeline_stage_name', 'airflow_run_id', 'custom_key_0', 'custom_key_1']
+    """
+    assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
     batch_identifiers = {"batch_identifiers": {"unknown_key": "some_value"}}
 
@@ -517,13 +566,20 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(ge_exceptions.DataConnectorError) as data_connector_error:
         # noinspection PyUnusedLocal
         batch_definition_list: List[
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
+    expected_error_message: str = """
+        RuntimeDataConnector test_runtime_data_connector was invoked with one or more batch identifiers that do not
+        appear among the configured batch identifiers.
+
+                The RuntimeDataConnector was configured with : ['pipeline_stage_name', 'airflow_run_id', 'custom_key_0']
+                It was invoked with : ['batch_identifiers']    """
+    assert str(data_connector_error.value).strip() == expected_error_message.strip()
 
 
 def test_get_available_data_asset_names(basic_datasource):

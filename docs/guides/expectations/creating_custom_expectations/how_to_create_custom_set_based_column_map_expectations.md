@@ -20,7 +20,7 @@ This guide will walk you through the process of creating a Custom `SetBasedColum
 
 ### 1. Choose a name for your Expectation
 
-First, decide on a name for your own Expectation. By convention, all `ColumnMapExpectations`, including `SetBasedColumnMapExpectations`, start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](../../../contributing/style_guides/code_style#expectations)  of the code Style Guide.
+First, decide on a name for your own Expectation. By convention, all `ColumnMapExpectations`, including `SetBasedColumnMapExpectations`, start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](../../../contributing/style_guides/code_style.md#expectations)  of the code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
@@ -154,7 +154,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
 
-If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet. 
+If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet.
 However, you should see that the tests you've written are now being caught and reported in your checklist:
 
 ```
@@ -180,9 +180,9 @@ see our guide on [how to create example cases for a Custom Expectation](../featu
 
 ### 6. Define your set and connect it to your Expectation
 
-This is the stage where you implement the actual business logic for your Expectation.   
+This is the stage where you implement the actual business logic for your Expectation.
 
-In the case of your Custom `SetBasedColumnMapExpectation`, Great Expectations will handle the actual validation of your data against your set. 
+In the case of your Custom `SetBasedColumnMapExpectation`, Great Expectations will handle the actual validation of your data against your set.
 
 To do this, we replace these:
 
@@ -194,7 +194,7 @@ with something like this:
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L10-L33
 ```
 
-For more detail when rendering your Custom Expectation, you can optionally specify the semantic name of the set you're validating. 
+For more detail when rendering your Custom Expectation, you can optionally specify the semantic name of the set you're validating.
 
 For example:
 
@@ -237,7 +237,7 @@ Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
 
 ### 7. Linting
 
-Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`. 
+Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`.
 
 If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
@@ -266,10 +266,10 @@ Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
 ...
 ```
 
-<div style={{"text-align":"center"}}>  
-<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>  
-Congratulations!<br/>&#127881; You've just built your first Custom Set-Based Column Map Expectation! &#127881;  
-</b></p>  
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've just built your first Custom Set-Based Column Map Expectation! &#127881;
+</b></p>
 </div>
 
 :::note

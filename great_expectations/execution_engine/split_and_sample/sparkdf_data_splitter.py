@@ -172,7 +172,7 @@ class SparkDataSplitter(DataSplitter):
         Returns:
             String representing the spark function to use for the given DatePart.
         """
-        date_part: DatePart = DatePart(date_part)
+        date_part = DatePart(date_part)
 
         spark_date_part_decoder: dict = {
             DatePart.YEAR: "year",

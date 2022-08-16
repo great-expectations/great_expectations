@@ -71,8 +71,8 @@ class DataSampler(abc.ABC):
                 f"Please make sure to provide the {key} key in sampling_kwargs in addition to your sampling_method."
             )
 
+    @staticmethod
     def get_sampling_kwargs_value_or_default(
-        self,
         batch_spec: BatchSpec,
         sampling_kwargs_key: str,
         default_value: Optional[Any] = None,
