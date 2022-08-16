@@ -676,9 +676,7 @@ detected.
         lower_bound: Optional[Number] = truncate_values.get("lower_bound")
         upper_bound: Optional[Number] = truncate_values.get("upper_bound")
 
-        if metric_values.shape == 1 and not is_ndarray_datetime_dtype(
-            data=metric_values, parse_strings_as_datetimes=True
-        ):
+        if metric_values.shape == 1 and np.issubdtype(metric_values.dtype, np.number):
             if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
                 lower_bound = 0.0
 
