@@ -2,8 +2,8 @@
 from abc import ABC
 from typing import Optional
 
-from great_expectations.marshmallow__shade import Schema
 from great_expectations.marshmallow__shade.decorators import post_dump
+from great_expectations.marshmallow__shade.schema import Schema
 from great_expectations.types import SerializableDictDot
 
 
@@ -19,7 +19,8 @@ class AbstractConfig(ABC, SerializableDictDot):
     def _dict_round_trip(cls, schema: Schema, target: dict) -> dict:
         """
         Round trip a dictionary with a schema so that validation and serialization logic is applied.
-        Example: Swapping `id_` with `id`.
+
+        Example: Loading a config with a `_id` field but serializing it as `id`.
         """
         _loaded = schema.load(target)
         _config = cls(**_loaded)
