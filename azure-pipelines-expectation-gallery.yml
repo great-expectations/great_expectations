@@ -218,9 +218,7 @@ stages:
             displayName: 'Show testing times for individual tests'
 
           - script: |
-              cd contrib/cli
               pip install .
-              cd -
             workingDirectory: $(Build.SourcesDirectory)/contrib/cli/
             displayName: 'Install contrib CLI tool'
 
