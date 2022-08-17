@@ -10,9 +10,17 @@ from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
+    AbstractConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
+    DatasourceConfig,
     checkpointConfigSchema,
+    datasourceConfigSchema,
+)
+from great_expectations.marshmallow__shade import Schema
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -685,4 +693,82 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
     observed_load = CheckpointConfig(**loaded_data)
     assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
         checkpoint_config
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "config,schema,expected_serialized_config",
+    [
+        pytest.param(
+            DatasourceConfig(
+                class_name="Datasource",
+            ),
+            datasourceConfigSchema,
+            {
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+            },
+            id="DatasourceConfig-minimal",
+        ),
+        pytest.param(
+            DatasourceConfig(
+                name="my_datasource",
+                id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
+                class_name="Datasource",
+            ),
+            datasourceConfigSchema,
+            {
+                "name": "my_datasource",
+                "id": "d3a14abd-d4cb-4343-806e-55b555b15c28",
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+            },
+            id="DatasourceConfig-minimal_with_name_and_id",
+        ),
+        pytest.param(
+            DatasourceConfig(
+                name="my_datasource",
+                class_name="Datasource",
+                data_connectors={
+                    "my_data_connector": DatasourceConfig(
+                        class_name="RuntimeDataConnector",
+                        batch_identifiers=["default_identifier_name"],
+                        id_="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                    )
+                },
+            ),
+            datasourceConfigSchema,
+            {
+                "name": "my_datasource",
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "my_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "module_name": "great_expectations.datasource",
+                        "id": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                        "batch_identifiers": ["default_identifier_name"],
+                    },
+                },
+            },
+            id="DatasourceConfig-nested_data_connector_id",
+        ),
+    ],
+)
+def test_dict_round_trip_serialization(
+    config: AbstractConfig,
+    schema: Schema,
+    expected_serialized_config: dict,
+):
+    observed_dump = datasourceConfigSchema.dump(config)
+
+    round_tripped = config._dict_round_trip(schema, observed_dump)
+
+    assert round_tripped == config.to_json_dict()
+
+    assert (
+        round_tripped.get("id_")
+        == observed_dump.get("id")
+        == expected_serialized_config.get("id")
     )
