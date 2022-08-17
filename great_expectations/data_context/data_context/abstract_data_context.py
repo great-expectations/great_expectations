@@ -931,7 +931,7 @@ class AbstractDataContext(ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        **kwargs: Optional[dict],
+        **kwargs: dict,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
         This method applies only to the new (V3) Datasource schema.

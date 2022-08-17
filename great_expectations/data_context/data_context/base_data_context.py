@@ -1393,7 +1393,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         overwrite_existing: bool = True,
         include_rendered_content: bool = False,
         ge_cloud_id: Optional[str] = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> None:
         """Save the provided expectation suite into the DataContext.
 
