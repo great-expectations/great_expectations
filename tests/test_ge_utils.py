@@ -1,18 +1,25 @@
 import copy
+import datetime
 import json
 import logging
 import os
+from typing import Any
 
+import numpy as np
 import pytest
 
 import great_expectations as ge
 from great_expectations.core.util import nested_update
 from great_expectations.util import (
     convert_json_string_to_be_python_compliant,
+    convert_ndarray_datetime_to_float_dtype,
+    convert_ndarray_float_to_datetime_tuple,
+    convert_ndarray_to_datetime_dtype_best_effort,
     deep_filter_properties_iterable,
     filter_properties_dict,
     get_currently_executing_function_call_arguments,
     hyphen,
+    is_ndarray_datetime_dtype,
     lint_code,
 )
 
@@ -35,6 +42,33 @@ def file_data_asset(tmp_path):
         file.write(json.dumps([0, 1, 2, 3, 4]))
 
     return ge.data_asset.FileDataAsset(file_path=path)
+
+
+@pytest.fixture
+def datetime_array():
+    week_idx: int
+    return [
+        datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))
+        for week_idx in range(4)
+    ]
+
+
+@pytest.fixture
+def datetime_string_array():
+    week_idx: int
+    return [
+        (
+            datetime.datetime(2021, 1, 1, 0, 0, 0)
+            + datetime.timedelta(days=(week_idx * 7))
+        ).isoformat()
+        for week_idx in range(4)
+    ]
+
+
+@pytest.fixture
+def numeric_array():
+    idx: int
+    return [idx for idx in range(4)]
 
 
 def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
@@ -600,6 +634,199 @@ def test_deep_filter_properties_iterable_on_batch_request_dict():
         "data_connector_name": "123a3221fc4b65014d061cce4a71782e",
         "data_asset_name": "eac128c5824b698c22b441ada61022d4",
     }
+
+
+def test_is_ndarray_datetime_dtype(
+    datetime_array,
+    datetime_string_array,
+    numeric_array,
+):
+    assert is_ndarray_datetime_dtype(
+        data=datetime_array, parse_strings_as_datetimes=False
+    )
+    assert is_ndarray_datetime_dtype(
+        data=datetime_array, parse_strings_as_datetimes=True
+    )
+
+    assert not is_ndarray_datetime_dtype(
+        data=datetime_string_array, parse_strings_as_datetimes=False
+    )
+    assert is_ndarray_datetime_dtype(
+        data=datetime_string_array, parse_strings_as_datetimes=True
+    )
+
+    assert not is_ndarray_datetime_dtype(
+        data=numeric_array, parse_strings_as_datetimes=False
+    )
+    assert not is_ndarray_datetime_dtype(
+        data=numeric_array, parse_strings_as_datetimes=True
+    )
+
+    datetime_string_array[-1] = "malformed_datetime_string"
+    assert not is_ndarray_datetime_dtype(
+        data=datetime_string_array, parse_strings_as_datetimes=True
+    )
+
+
+def test_convert_ndarray_to_datetime_dtype_best_effort(
+    datetime_array,
+    datetime_string_array,
+    numeric_array,
+):
+    original_ndarray_is_datetime_type: bool
+    conversion_ndarray_to_datetime_type_performed: bool
+    ndarray_is_datetime_type: bool
+    values_converted: np.ndaarray
+
+    (
+        original_ndarray_is_datetime_type,
+        conversion_ndarray_to_datetime_type_performed,
+        values_converted,
+    ) = convert_ndarray_to_datetime_dtype_best_effort(
+        data=datetime_array,
+        parse_strings_as_datetimes=False,
+    )
+    ndarray_is_datetime_type = (
+        original_ndarray_is_datetime_type
+        or conversion_ndarray_to_datetime_type_performed
+    )
+
+    assert ndarray_is_datetime_type
+    assert values_converted == datetime_array
+
+    (
+        original_ndarray_is_datetime_type,
+        conversion_ndarray_to_datetime_type_performed,
+        values_converted,
+    ) = convert_ndarray_to_datetime_dtype_best_effort(
+        data=datetime_array,
+        parse_strings_as_datetimes=True,
+    )
+    ndarray_is_datetime_type = (
+        original_ndarray_is_datetime_type
+        or conversion_ndarray_to_datetime_type_performed
+    )
+
+    assert ndarray_is_datetime_type
+    assert values_converted == datetime_array
+
+    (
+        original_ndarray_is_datetime_type,
+        conversion_ndarray_to_datetime_type_performed,
+        values_converted,
+    ) = convert_ndarray_to_datetime_dtype_best_effort(
+        data=datetime_string_array,
+        parse_strings_as_datetimes=False,
+    )
+    ndarray_is_datetime_type = (
+        original_ndarray_is_datetime_type
+        or conversion_ndarray_to_datetime_type_performed
+    )
+
+    assert not ndarray_is_datetime_type
+    assert values_converted == datetime_string_array
+
+    (
+        original_ndarray_is_datetime_type,
+        conversion_ndarray_to_datetime_type_performed,
+        values_converted,
+    ) = convert_ndarray_to_datetime_dtype_best_effort(
+        data=datetime_string_array,
+        parse_strings_as_datetimes=True,
+    )
+    ndarray_is_datetime_type = (
+        original_ndarray_is_datetime_type
+        or conversion_ndarray_to_datetime_type_performed
+    )
+
+    assert ndarray_is_datetime_type
+    assert values_converted.tolist() == datetime_array
+
+    datetime_string_array[-1] = "malformed_datetime_string"
+    (
+        original_ndarray_is_datetime_type,
+        conversion_ndarray_to_datetime_type_performed,
+        values_converted,
+    ) = convert_ndarray_to_datetime_dtype_best_effort(
+        data=datetime_string_array,
+        parse_strings_as_datetimes=True,
+    )
+    ndarray_is_datetime_type = (
+        original_ndarray_is_datetime_type
+        or conversion_ndarray_to_datetime_type_performed
+    )
+
+    assert not ndarray_is_datetime_type
+    assert values_converted == datetime_string_array
+
+    (
+        original_ndarray_is_datetime_type,
+        conversion_ndarray_to_datetime_type_performed,
+        values_converted,
+    ) = convert_ndarray_to_datetime_dtype_best_effort(
+        data=numeric_array,
+        parse_strings_as_datetimes=False,
+    )
+    ndarray_is_datetime_type = (
+        original_ndarray_is_datetime_type
+        or conversion_ndarray_to_datetime_type_performed
+    )
+
+    assert not ndarray_is_datetime_type
+    assert values_converted == numeric_array
+
+    (
+        original_ndarray_is_datetime_type,
+        conversion_ndarray_to_datetime_type_performed,
+        values_converted,
+    ) = convert_ndarray_to_datetime_dtype_best_effort(
+        data=numeric_array,
+        parse_strings_as_datetimes=True,
+    )
+    ndarray_is_datetime_type = (
+        original_ndarray_is_datetime_type
+        or conversion_ndarray_to_datetime_type_performed
+    )
+
+    assert not ndarray_is_datetime_type
+    assert values_converted == numeric_array
+
+
+def test_convert_ndarray_datetime_to_float_dtype(
+    datetime_array,
+    datetime_string_array,
+    numeric_array,
+):
+    element: Any
+
+    assert convert_ndarray_datetime_to_float_dtype(data=datetime_array).tolist() == [
+        element.timestamp() for element in datetime_array
+    ]
+
+    with pytest.raises(AttributeError) as e:
+        _ = convert_ndarray_datetime_to_float_dtype(data=numeric_array)
+
+    assert str(e.value) == "'int' object has no attribute 'timestamp'"
+
+    with pytest.raises(AttributeError) as e:
+        _ = convert_ndarray_datetime_to_float_dtype(data=datetime_string_array)
+
+    assert str(e.value) == "'str' object has no attribute 'timestamp'"
+
+
+def test_convert_ndarray_float_to_datetime_tuple(
+    datetime_array,
+):
+    element: Any
+
+    assert convert_ndarray_float_to_datetime_tuple(
+        data=[element.timestamp() for element in datetime_array]
+    ) == tuple([element for element in datetime_array])
+
+    with pytest.raises(TypeError) as e:
+        _ = convert_ndarray_float_to_datetime_tuple(data=datetime_array)
+
+    assert str(e.value) == "an integer is required (got type datetime.datetime)"
 
 
 def test_hyphen():
