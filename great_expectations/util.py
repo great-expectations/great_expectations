@@ -1415,11 +1415,14 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
-        parse(value, fuzzy=fuzzy)
+        _ = parse(value, fuzzy=fuzzy)
+        return True
     except (TypeError, ValueError):
-        return False
-
-    return True
+        try:
+            _ = datetime.datetime.fromisoformat(value)
+            return True
+        except (TypeError, ValueError):
+            return False
 
 
 def is_ndarray_datetime_dtype(
@@ -1437,19 +1440,60 @@ def is_ndarray_datetime_dtype(
 
 
 def convert_ndarray_to_datetime_dtype_best_effort(
-    data: np.ndarray, fuzzy: bool = False
-) -> np.ndarray:
+    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+) -> Tuple[bool, bool, np.ndarray]:
     """
     Attempt to parse all elements of 1-D "np.ndarray" argument into "datetime.datetime" type objects.
+
+    Returns:
+        Boolean flag -- True if all elements of original "data" were "datetime.datetime" type objects; False, otherwise.
+        Boolean flag -- True, if conversion was performed; False, otherwise.
+        Output "np.ndarray" (converted, if necessary).
+    """
+    if is_ndarray_datetime_dtype(
+        data=data, parse_strings_as_datetimes=False, fuzzy=fuzzy
+    ):
+        return True, False, data
+
+    value: Any
+    if is_ndarray_datetime_dtype(
+        data=data, parse_strings_as_datetimes=parse_strings_as_datetimes, fuzzy=fuzzy
+    ):
+        try:
+            return (
+                False,
+                True,
+                np.asarray([parse(value, fuzzy=fuzzy) for value in data]),
+            )
+        except (TypeError, ValueError):
+            pass
+
+    return False, False, data
+
+
+def convert_ndarray_datetime_to_float_dtype(data: np.ndarray) -> np.ndarray:
+    """
+    Convert all elements of 1-D "np.ndarray" argument from "datetime.datetime" type to "timestamp" "float" type objects.
     """
     value: Any
-    if all(is_parseable_date(value=value) for value in data):
-        try:
-            return np.asarray([parse(value, fuzzy=fuzzy) for value in data])
-        except (TypeError, ValueError):
-            return data
+    return np.asarray([value.timestamp() for value in data])
 
-    return data
+
+def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
+    """
+    Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type objects.
+    """
+    value: Any
+    return np.asarray([datetime.datetime.fromtimestamp(value) for value in data])
+
+
+def convert_ndarray_float_to_datetime_tuple(
+    data: np.ndarray,
+) -> Tuple[datetime.datetime, ...]:
+    """
+    Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type tuple elements.
+    """
+    return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
 def get_context():

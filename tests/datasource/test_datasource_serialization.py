@@ -64,13 +64,35 @@ from great_expectations.data_context.types.base import (
         ),
     ],
 )
-def test_datasource_config_is_serialized(
-    datasource_config: DatasourceConfig, expected_serialized_datasource_config: dict
-):
-    """Datasource Config should be serialized appropriately with/without optional params."""
-    observed_dump = datasourceConfigSchema.dump(datasource_config)
-    assert observed_dump == expected_serialized_datasource_config
+class TestDatasourceConfigSerialization:
+    def test_is_serialized(
+        self,
+        datasource_config: DatasourceConfig,
+        expected_serialized_datasource_config: dict,
+    ):
+        """Datasource Config should be serialized appropriately with/without optional params."""
+        observed_dump = datasourceConfigSchema.dump(datasource_config)
+        assert observed_dump == expected_serialized_datasource_config
 
-    loaded_data = datasourceConfigSchema.load(observed_dump)
-    observed_load = DatasourceConfig(**loaded_data)
-    assert observed_load.to_json_dict() == datasource_config.to_json_dict()
+        loaded_data = datasourceConfigSchema.load(observed_dump)
+        observed_load = DatasourceConfig(**loaded_data)
+        assert observed_load.to_json_dict() == datasource_config.to_json_dict()
+
+    def test_dict_round_trip_serialization(
+        self,
+        datasource_config: DatasourceConfig,
+        expected_serialized_datasource_config: dict,
+    ):
+        observed_dump = datasourceConfigSchema.dump(datasource_config)
+
+        round_tripped = DatasourceConfig._dict_round_trip(
+            datasourceConfigSchema, observed_dump
+        )
+
+        assert round_tripped == datasource_config.to_json_dict()
+
+        assert (
+            round_tripped.get("id_")
+            == observed_dump.get("id")
+            == expected_serialized_datasource_config.get("id")
+        )
