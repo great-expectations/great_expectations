@@ -18,10 +18,7 @@ from great_expectations.rule_based_profiler.metric_computation_result import Met
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
-from great_expectations.util import (
-    convert_ndarray_float_to_datetime_dtype,
-    convert_ndarray_float_to_datetime_tuple,
-)
+from great_expectations.util import convert_ndarray_float_to_datetime_tuple
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
