@@ -20,7 +20,7 @@ class AbstractConfig(ABC, SerializableDictDot):
         """
         Round trip a dictionary with a schema so that validation and serialization logic is applied.
 
-        Example: Loading a config with a `_id` field but serializing it as `id`.
+        Example: Loading a config with a `id_` field but serializing it as `id`.
         """
         _loaded = schema.load(target)
         _config = cls(**_loaded)
