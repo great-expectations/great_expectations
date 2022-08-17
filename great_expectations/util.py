@@ -1487,6 +1487,15 @@ def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
     return np.asarray([datetime.datetime.fromtimestamp(value) for value in data])
 
 
+def convert_ndarray_float_to_datetime_tuple(
+    data: np.ndarray,
+) -> Tuple[datetime.datetime, ...]:
+    """
+    Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type tuple elements.
+    """
+    return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
+
+
 def get_context():
     from great_expectations.data_context.data_context import DataContext
 
