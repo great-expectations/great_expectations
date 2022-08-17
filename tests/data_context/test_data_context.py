@@ -280,7 +280,7 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_save_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
