@@ -1,4 +1,5 @@
 import copy
+import datetime
 import itertools
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Union, cast
@@ -34,6 +35,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricValue,
     MetricValues,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -47,7 +49,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import is_numeric
+from great_expectations.util import is_ndarray_datetime_dtype, is_numeric
 
 MAX_DECIMALS: int = 9
 
@@ -514,25 +516,43 @@ detected.
         # Initialize value range estimate for multi-dimensional metric to all trivial values (to be updated in situ).
         # Since range includes min and max values, value range estimate contains 2-element least-significant dimension.
         metric_value_range_shape: tuple = metric_value_shape + (2,)
-        metric_value_range: np.ndarray = np.zeros(shape=metric_value_range_shape)
         # Initialize observed_values for multi-dimensional metric to all trivial values (to be updated in situ).
         # Return values of "numpy.histogram()", histogram and bin edges, are packaged in least-significant dimensions.
         estimation_histogram_shape: tuple = metric_value_shape + (
             2,
             NUM_HISTOGRAM_BINS + 1,
         )
-        estimation_histogram: np.ndarray = np.empty(shape=estimation_histogram_shape)
+        datetime_detected: bool = self._is_metric_values_ndarray_datetime_dtype(
+            metric_values=metric_values,
+            metric_value_vector_indices=metric_value_vector_indices,
+        )
 
+        metric_value_range: np.ndarray
+        estimation_histogram: np.ndarray
+        if datetime_detected:
+            metric_value_range = np.full(
+                shape=metric_value_range_shape, fill_value=datetime.datetime.min
+            )
+            estimation_histogram = np.full(
+                shape=estimation_histogram_shape, fill_value=datetime.datetime.min
+            )
+        else:
+            metric_value_range = np.zeros(shape=metric_value_range_shape)
+            estimation_histogram = np.empty(shape=estimation_histogram_shape)
+
+        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         metric_value_vector: np.ndarray
         metric_value_range_min_idx: tuple
         metric_value_range_max_idx: tuple
         metric_value_estimation_histogram_idx: tuple
         numeric_range_estimation_result: NumericRangeEstimationResult
-        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         for metric_value_idx in metric_value_vector_indices:
             # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
             metric_value_vector = metric_values[metric_value_idx]
-            if np.all(np.isclose(metric_value_vector, metric_value_vector[0])):
+            metric_value: MetricValue
+            if not datetime_detected and np.all(
+                np.isclose(metric_value_vector, metric_value_vector[0])
+            ):
                 # Computation is unnecessary if distribution is degenerate.
                 numeric_range_estimation_result = build_numeric_range_estimation_result(
                     metric_values=metric_value_vector,
@@ -573,12 +593,16 @@ detected.
             metric_value_estimation_histogram_idx = metric_value_idx
 
             # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
-            metric_value_range[metric_value_range_min_idx] = round(
-                cast(float, min_value), round_decimals
-            )
-            metric_value_range[metric_value_range_max_idx] = round(
-                cast(float, max_value), round_decimals
-            )
+            if datetime_detected:
+                metric_value_range[metric_value_range_min_idx] = min_value
+                metric_value_range[metric_value_range_max_idx] = max_value
+            else:
+                metric_value_range[metric_value_range_min_idx] = round(
+                    cast(float, min_value), round_decimals
+                )
+                metric_value_range[metric_value_range_max_idx] = round(
+                    cast(float, max_value), round_decimals
+                )
 
             # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
             estimation_histogram[
@@ -597,6 +621,21 @@ detected.
             estimation_histogram=estimation_histogram,
             value_range=metric_value_range,
         )
+
+    @staticmethod
+    def _is_metric_values_ndarray_datetime_dtype(
+        metric_values: np.ndarray,
+        metric_value_vector_indices: List[tuple],
+    ) -> bool:
+        metric_value_vector: np.ndarray
+        for metric_value_idx in metric_value_vector_indices:
+            metric_value_vector = metric_values[metric_value_idx]
+            if not is_ndarray_datetime_dtype(
+                data=metric_value_vector, parse_strings_as_datetimes=True
+            ):
+                return False
+
+        return True
 
     def _get_truncate_values_using_heuristics(
         self,
@@ -623,6 +662,7 @@ detected.
                 (
                     distribution_boundary is None
                     or is_numeric(value=distribution_boundary)
+                    or isinstance(distribution_boundary, datetime.datetime)
                 )
                 for distribution_boundary in truncate_values.values()
             ]
@@ -636,11 +676,12 @@ detected.
         lower_bound: Optional[Number] = truncate_values.get("lower_bound")
         upper_bound: Optional[Number] = truncate_values.get("upper_bound")
 
-        if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
-            lower_bound = 0.0
+        if metric_values.shape == 1 and np.issubdtype(metric_values.dtype, np.number):
+            if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
+                lower_bound = 0.0
 
-        if upper_bound is None and np.all(np.less(metric_values, (-NP_EPSILON))):
-            upper_bound = 0.0
+            if upper_bound is None and np.all(np.less(metric_values, (-NP_EPSILON))):
+                upper_bound = 0.0
 
         return {
             "lower_bound": lower_bound,
