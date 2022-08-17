@@ -2300,7 +2300,6 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
                 "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
                 "base_directory": "../data",
                 "name": "data_dir_example_data_connector",
-                "id_": None,
             }
         },
         "id_": None,
@@ -2837,7 +2836,6 @@ def test_add_datasource_from_yaml_with_substitution_variables(
                 "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
                 "base_directory": "../data",
                 "name": "data_dir_example_data_connector",
-                "id_": None,
             }
         },
         "id_": None,
