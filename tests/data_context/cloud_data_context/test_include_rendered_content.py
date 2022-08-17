@@ -16,7 +16,7 @@ from great_expectations.validator.validator import Validator
 @pytest.mark.cloud
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "data_context_fixture_name,data_context_type",
+    "data_context_fixture_name",
     [
         # In order to leverage existing fixtures in parametrization, we provide
         # their string names and dynamically retrieve them using pytest's built-in
@@ -106,7 +106,7 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
 @pytest.mark.cloud
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "data_context_fixture_name,data_context_type",
+    "data_context_fixture_name",
     [
         # In order to leverage existing fixtures in parametrization, we provide
         # their string names and dynamically retrieve them using pytest's built-in
