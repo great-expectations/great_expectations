@@ -1056,11 +1056,12 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
     @post_load
     def make_datasource_config(self, data, **kwargs):
         # Add names to data connectors
-        for data_connector_name, data_connector_config in data.get(
+        data_copy: dict = copy.deepcopy(data)
+        for data_connector_name, data_connector_config in data_copy.get(
             "data_connectors", {}
         ).items():
             data_connector_config["name"] = data_connector_name
-        return DatasourceConfig(**data)
+        return DatasourceConfig(**data_copy)
 
 
 class AnonymizedUsageStatisticsConfig(DictDot):
