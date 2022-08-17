@@ -218,7 +218,7 @@ class AbstractDataContext(ABC):
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
         include_rendered_content: bool = False,
-        **kwargs: Optional[dict],
+        **kwargs,
     ) -> None:
         """
         Each DataContext will define how ExpectationSuite will be saved.

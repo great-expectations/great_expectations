@@ -72,7 +72,7 @@ class EphemeralDataContext(AbstractDataContext):
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
         include_rendered_content: bool = False,
-        **kwargs: Dict[str, Any],
+        **kwargs,
     ) -> None:
         """Save the provided expectation suite into the DataContext.
 
