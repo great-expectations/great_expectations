@@ -76,6 +76,8 @@ def execute_shell_command(command: str) -> int:
 
 
 def get_expectation_file_info_dict() -> dict:
+    rx = re.compile(r".*?([A-Za-z]+?Expectation).*")
+    ignore_match_set = set(["InvalidExpectation"])
     result = {}
     oldpwd = os.getcwd()
     os.chdir(f"..{os.path.sep}..")
@@ -115,6 +117,19 @@ def get_expectation_file_info_dict() -> dict:
             "path": file_path,
         }
         logger.debug(f"{name} was created {result[name]['created_at']} and updated {result[name]['updated_at']}")
+        logger.debug(f"Checking Expectation type(s) used in {file_path}")
+        with open(file_path, "r") as fp:
+            text = fp.read()
+
+        exp_type_set = set()
+        for line in re.split("\r?\n", text):
+            match = rx.match(line)
+            if match:
+                match_name = match.group(1)
+                if match_name not in ignore_match_set:
+                    exp_type_set.add(match_name)
+        result[name]["exp_type"] = sorted(exp_type_set)
+        logger.debug(f"Expectation type {sorted(exp_type_set)}")
 
     os.chdir(oldpwd)
     return result
@@ -313,6 +328,9 @@ def build_gallery(
                 gallery_info[expectation]["updated_at"] = expectation_file_info[
                     expectation
                 ]["updated_at"]
+                gallery_info[expectation]["exp_type"] = expectation_file_info[
+                    expectation
+                ].get("exp_type")
             except TypeError as e:
                 logger.error(f"Failed to create JSON for: {expectation}")
                 print(traceback.format_exc())
