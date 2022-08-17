@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.data_context_key import DataContextKey
@@ -160,14 +160,22 @@ class Store:
         else:
             return None
 
-    def set(self, key: DataContextKey, value: Any, **kwargs: dict) -> None:
+    def set(self, key: DataContextKey, value: Any, **kwargs: dict) -> Union[Dict, None]:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.set(key, value, **kwargs)
 
         self._validate_key(key)
-        return self._store_backend.set(
-            self.key_to_tuple(key), self.serialize(value), **kwargs
-        )
+        # For backward compatibility, we are keeping the tuple codepath and instead
+        # creating a new fork to use typed keys and values for store backends that
+        # support them.
+        if isinstance(self._store_backend, GeCloudStoreBackend):
+            return self.ge_cloud_response_json_to_object_dict(
+                response_json=self._store_backend.set(key, value, **kwargs)
+            )
+        else:
+            return self._store_backend.set(
+                self.key_to_tuple(key), self.serialize(value), **kwargs
+            )
 
     def list_keys(self) -> List[DataContextKey]:
         keys_without_store_backend_id = [
@@ -193,9 +201,7 @@ class Store:
         )
 
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
-        id_: Optional[str] = None
-        if hasattr(config, "id_"):
-            id_ = config.id_
+        id_: Optional[str] = config.id_
         name: Optional[str] = None
         if hasattr(config, "name"):
             name = config.name

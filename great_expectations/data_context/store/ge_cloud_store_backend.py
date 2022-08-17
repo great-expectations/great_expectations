@@ -8,10 +8,13 @@ from urllib.parse import urljoin
 import requests
 
 from great_expectations import __version__
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.data_context.types.base import datasourceConfigSchema
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
+from great_expectations.marshmallow__shade import Schema
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
 try:
@@ -172,6 +175,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
         filter_properties_dict(properties=self._config, inplace=True)
 
+        if ge_cloud_resource_type == GeCloudRESTResource.DATASOURCE:
+            self._schema: Schema = datasourceConfigSchema
+
     @property
     def headers(self) -> Dict[str, str]:
         return {
@@ -214,8 +220,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self) -> None:  # type: ignore[override]
         pass
 
-    # TODO: GG 20220810 return the `ResponsePayload`
-    def _update(self, ge_cloud_id: str, value: Any) -> bool:
+    def _update(self, key: GeCloudIdentifier, value: AbstractConfig) -> ResponsePayload:
+
+        assert isinstance(
+            value, AbstractConfig
+        ), f"Only {AbstractConfig.__name__} is supported in {self.__class__.__name__}"
+
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -260,7 +270,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code = response.status_code
 
             response.raise_for_status()
-            return True
+            return self.get(key=key.to_tuple())
 
         except (requests.HTTPError, requests.Timeout) as http_exc:
             raise StoreBackendError(
@@ -289,15 +299,31 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')
         return None
 
+    def _validate_key(self, key: Union[GeCloudIdentifier, Tuple]) -> None:
+        # Continue to support tuple as a key for get method until we can refactor
+        if not isinstance(key, GeCloudIdentifier):
+            super()._validate_key(key)
+        else:
+            assert isinstance(
+                key, GeCloudIdentifier
+            ), f"Only {GeCloudIdentifier.__name__} is supported in {self.__class__.__name__}"
+
     def _set(  # type: ignore[override]
         self,
-        key: Tuple[GeCloudRESTResource, ...],
-        value: Any,
+        key: GeCloudIdentifier,
+        value: AbstractConfig,
         **kwargs: dict,
-    ) -> Union[bool, GeCloudResourceRef]:
+    ) -> ResponsePayload:
+
+        assert isinstance(
+            value, AbstractConfig
+        ), f"Only {AbstractConfig.__name__} is supported in {self.__class__.__name__}"
+
         # Each resource type has corresponding attribute key to include in POST body
-        ge_cloud_resource = key[0]
-        ge_cloud_id: str = key[1]
+        ge_cloud_resource: GeCloudRESTResource = key.resource_type
+        ge_cloud_id: str = key.ge_cloud_id
+
+        serialized_value: dict = self._schema.dump(value)
 
         # if key has ge_cloud_id, perform _update instead
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
@@ -306,7 +332,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ge_cloud_id
             or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES
         ):
-            return self._update(ge_cloud_id=ge_cloud_id, value=value)
+            return self._update(key=key, value=value)
 
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
@@ -319,7 +345,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "type": resource_type,
                 "attributes": {
                     "organization_id": organization_id,
-                    attributes_key: value,
+                    attributes_key: serialized_value,
                     **(kwargs if self.validate_set_kwargs(kwargs) else {}),
                 },
             }
@@ -333,21 +359,33 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response = requests.post(
                 url, json=data, headers=self.headers, timeout=self.TIMEOUT
             )
-            response_json = response.json()
 
-            object_id = response_json["data"]["id"]
-            object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
-            return GeCloudResourceRef(
-                resource_type=resource_type,
-                ge_cloud_id=object_id,
-                url=object_url,
+            value.id_ = self._retrieve_id_from_response(response)
+
+            key: GeCloudIdentifier = self.build_key(
+                name=value.name,
+                id_=value.id_,
             )
+
+            return self.get(key.to_tuple())
+
         # TODO Show more detailed error messages
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
                 f"Unable to set object in GE Cloud Store Backend: {e}"
             )
+
+    def _retrieve_id_from_response(self, response: requests.Response) -> str:
+        """Pull out the id from the response object json
+
+        Args:
+            response: response to retrieve id from
+
+        Returns:
+            string of id
+        """
+        return response.json()["data"]["id"]
 
     @property
     def ge_cloud_base_url(self) -> str:

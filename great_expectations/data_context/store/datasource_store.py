@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import (
     DataContextKey,
@@ -168,8 +168,8 @@ class DatasourceStore(Store):
 
     def set(
         self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
-    ) -> None:
-        """Create a datasource config in the store using a store_backend-specific key.
+    ) -> DatasourceConfig:
+        """Create a datasource config in the store using a store_backend-specific key, then get and return that config.
 
         Args:
             key: Optional key to use when setting value.
@@ -177,12 +177,16 @@ class DatasourceStore(Store):
             **_: kwargs will be ignored but accepted to align with the parent class.
 
         Returns:
-            None
+            Datasource config retrieved from the datasource store.
         """
         if not key:
             key = self._build_key_from_config(value)
 
         super().set(key, value)
+
+        datasource_config_from_store: DatasourceConfig = self.get(key.to_tuple())
+
+        return datasource_config_from_store
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
@@ -213,3 +217,12 @@ class DatasourceStore(Store):
             resource_name=datasource_name,
         )
         return datasource_key
+
+    def _validate_key(self, key: Union[GeCloudIdentifier, Tuple[str, ...]]) -> None:
+        # Continue to support tuple as a key for get method until we can refactor
+        if not isinstance(key, GeCloudIdentifier):
+            super()._validate_key(key)
+        else:
+            assert isinstance(
+                key, GeCloudIdentifier
+            ), f"Only {GeCloudIdentifier.__name__} is supported in {self.__class__.__name__}"
