@@ -1575,6 +1575,12 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
 
 
 def get_sqlalchemy_subquery_type():
+    """
+    Beginning from SQLAlchemy 1.4, `sqlalchemy.sql.Alias` has been deprecated in favor of `sqlalchemy.sql.Subquery`.
+    This helper method ensures that the appropriate type is returned.
+
+    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
+    """
     try:
         return sa.sql.Subquery
     except AttributeError:
