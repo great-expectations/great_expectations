@@ -15,8 +15,10 @@ import InferredAssetDataConnector from './pandas_components/inferred_asset_data_
 
 <Prerequisites>
 
+- Initialized a Data Context in your current working directory.
+- Have filesystem data available in a sub-folder of your Data Context's root directory.
 - Know [how to choose which DataConnector to use](../how_to_choose_which_dataconnector_to_use.md).
-- Know how to choose between working with a single or multiple Batches of data.
+- Know [how to choose between working with a single or multiple Batches of data](../how_to_choose_between_working_with_a_single_or_multiple_batches_of_data.md).
 
 </Prerequisites>
 
@@ -27,18 +29,31 @@ import InferredAssetDataConnector from './pandas_components/inferred_asset_data_
 ```python
 import great_expectations as gx
 from ruamel import yaml
-from great_expectations.core.batch import BatchRequest
 
 data_context: gx.DataContext = gx.get_context()
 
 ```
+The `great_expectations` module will give you access to your Data Context, which is the entry point for working with a Great Expectations project.
 
+The `yaml` module from `ruamel` will be used in validating your Datasource's configuration.  Great Expectations will use a Python dictionary representation of your Datasource configuration when you add your Datasource to your Data Context.  However, Great Expectations saves configurations as `yaml` files, so when you validate your configuration you will need to convert it from a Python dictionary to a `yaml` string, first.
+
+Your Data Context that is initialized by `get_data_context()` will be the Data Context defined in your current working directory.  It will provide you with convenience methods that we will use to validate your Datasource configuration and add your Datasource to your Great Expectations project once you have configured it.
 
 ### 2. Create a new Datasource configuration.
 
 A new Datasource can be configured in Python as a dictionary with a specific set of keys.  We will build our Datasource configuration from scratch in this guide, although you can just as easily modify an existing one.
 
 To start, create an empty dictionary.  You will be populating it with keys as you go forward.
+
+At this point, the configuration for your Datasource is merely:
+
+```python
+datasource_config = {}
+```
+
+However, from this humble beginning you will be able to build a full Datasource configuration.
+
+#### The keys needed for your Datasource configuration
 
 At the top level, your Datasource's configuration will need the following keys: 
 - `name`: The name of the Datasource, which will be used to reference the datasource in Batch Requests.
@@ -47,12 +62,21 @@ At the top level, your Datasource's configuration will need the following keys:
 - `execution_engine`: a dictionary containing the `class_name` and `module_name` of the Execution Engine instantiated by the Datasource.
 - `data_connectors`: the configurations for any Data Connectors and their associated Data Assets that you want to have available when utilizing the Datasource.
 
+In the following step we will add those keys and their corresponding values to your currently empty Datasource configuration dictionary.
 
 ### 3. Name your Datasource
 
 The first key that you will need to define for your new Datasource is its `name`.  You will use this to reference the Datasource in future workflows.  It can be anything you want it to be, but ideally you will name it something relevant to the data that it interacts with.
 
-Your configuration should now look like:
+For the purposes of this example, we will name this Datasource:
+
+```python
+    "name": "name_of_my_datasource",
+```
+
+You should, however, name your Datsource something more relevant to your data.
+
+At this point, your configuration should now look like:
 
 ```python
 datasource_config = {
@@ -64,7 +88,12 @@ datasource_config = {
 
 The `class_name` and `module_name` for your Datasource will almost always indicate the `Datasource` class found at `great_expectations.datasource`.  You may replace this with a specialized subclass, or a custom class, but for almost all regular purposes these two default values will suffice.  For the purposes of this guide, add those two values to their corresponding keys.
 
-Your configuration should now look like:
+```python
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+```
+
+Your full configuration should now look like:
 
 ```python
 datasource_config = {
@@ -250,7 +279,7 @@ This means that when configuring your Data Connector's regular expression, you h
 
 :::tip 
 
-If you are uncertain as to which type of configuration is best for your use case, please refer to our guide on [how to choose between working with a single or multiple Batches of data].
+If you are uncertain as to which type of configuration is best for your use case, please refer to our guide on [how to choose between working with a single or multiple Batches of data](../how_to_choose_between_working_with_a_single_or_multiple_batches_of_data.md).
 
 :::
 
@@ -264,8 +293,6 @@ If you are uncertain as to which type of configuration is best for your use case
 
   </TabItem>
   </Tabs>
-
-
 
 
 ### 9. Test your configuration with `.test_yaml_config(...)`
@@ -314,7 +341,6 @@ else:
 ```
 
 :::
-
 
 ## Next Steps
 
