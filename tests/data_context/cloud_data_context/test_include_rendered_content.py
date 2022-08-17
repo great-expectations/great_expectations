@@ -1,4 +1,3 @@
-from typing import Type
 from unittest import mock
 
 import pandas as pd
@@ -10,12 +9,6 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.data_context import (
-    AbstractDataContext,
-    BaseDataContext,
-    CloudDataContext,
-    DataContext,
-)
 from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
@@ -31,18 +24,14 @@ from great_expectations.validator.validator import Validator
         # Source: https://stackoverflow.com/a/64348247
         pytest.param(
             "empty_base_data_context_in_cloud_mode",
-            BaseDataContext,
             id="BaseDataContext",
         ),
-        pytest.param("empty_data_context_in_cloud_mode", DataContext, id="DataContext"),
-        pytest.param(
-            "empty_cloud_data_context", CloudDataContext, id="CloudDataContext"
-        ),
+        pytest.param("empty_data_context_in_cloud_mode", id="DataContext"),
+        pytest.param("empty_cloud_data_context", id="CloudDataContext"),
     ],
 )
 def test_cloud_backed_data_context_save_expectation_suite_include_rendered_content(
     data_context_fixture_name: str,
-    data_context_type: Type[AbstractDataContext],
     request,
 ) -> None:
     """
@@ -125,24 +114,20 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         # Source: https://stackoverflow.com/a/64348247
         pytest.param(
             "cloud_base_data_context_in_cloud_mode_with_datasource_pandas_engine",
-            BaseDataContext,
             id="BaseDataContext",
         ),
         pytest.param(
             "cloud_data_context_in_cloud_mode_with_datasource_pandas_engine",
-            DataContext,
             id="DataContext",
         ),
         pytest.param(
             "cloud_data_context_with_datasource_pandas_engine",
-            CloudDataContext,
             id="CloudDataContext",
         ),
     ],
 )
 def test_cloud_backed_data_context_expectation_validation_result_include_rendered_content(
     data_context_fixture_name: str,
-    data_context_type: Type[AbstractDataContext],
     request,
 ) -> None:
     """

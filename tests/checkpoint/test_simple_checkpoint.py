@@ -3468,7 +3468,7 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_validations_into_checkpo
         context.add_checkpoint(**checkpoint_config)
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_simple_checkpoint_result_validations_include_rendered_content(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
