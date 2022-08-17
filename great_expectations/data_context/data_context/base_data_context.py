@@ -1394,7 +1394,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         include_rendered_content: bool = False,
         ge_cloud_id: Optional[str] = None,
         **kwargs,
-    ):
+    ) -> None:
         """Save the provided expectation suite into the DataContext.
 
         Args:
