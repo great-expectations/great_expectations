@@ -698,7 +698,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "config,schema,expected_serialized_config",
+    "config,schema,expected_roundtrip_config,expected_serialized_config",
     [
         # pytest.param(
         #     DatasourceConfig(
@@ -735,7 +735,6 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                         class_name="RuntimeDataConnector",
                         batch_identifiers=["default_identifier_name"],
                         id_="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
-                        name="my_data_connector",
                     )
                 },
             ),
@@ -748,32 +747,80 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                     "my_data_connector": {
                         "class_name": "RuntimeDataConnector",
                         "module_name": "great_expectations.datasource",
+                        "id_": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                        "batch_identifiers": ["default_identifier_name"],
+                        "name": "my_data_connector",
+                    },
+                },
+                # TODO: AJB 20220817 Why is this not filtered out in the round trip?
+                "id_": None,
+            },
+            {
+                "name": "my_datasource",
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "my_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "module_name": "great_expectations.datasource",
                         "id": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
                         "batch_identifiers": ["default_identifier_name"],
-                        # "name": "my_data_connector"
+                        "name": "my_data_connector",
                     },
                 },
             },
             id="DatasourceConfig-nested_data_connector_id",
         ),
+        # pytest.param(
+        #     DatasourceConfig(
+        #         name="my_datasource",
+        #         class_name="Datasource",
+        #         data_connectors={
+        #             "my_data_connector": DatasourceConfig(
+        #                 class_name="RuntimeDataConnector",
+        #                 batch_identifiers=["default_identifier_name"],
+        #                 id_="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+        #             )
+        #         },
+        #         id_="e25279d2-a809-4d1f-814c-76e892e645bf",
+        #     ),
+        #     datasourceConfigSchema,
+        #     {
+        #         "name": "my_datasource",
+        #         "class_name": "Datasource",
+        #         "module_name": "great_expectations.datasource",
+        #         "data_connectors": {
+        #             "my_data_connector": {
+        #                 "class_name": "RuntimeDataConnector",
+        #                 "module_name": "great_expectations.datasource",
+        #                 "id": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+        #                 "batch_identifiers": ["default_identifier_name"],
+        #                 "name": "my_data_connector"
+        #             },
+        #         },
+        #         "id": "e25279d2-a809-4d1f-814c-76e892e645bf",
+        #     },
+        #     id="DatasourceConfig-datasource_id_and_nested_data_connector_id",
+        # ),
     ],
 )
 def test_dict_round_trip_serialization(
     config: AbstractConfig,
     schema: Schema,
+    expected_roundtrip_config: dict,
     expected_serialized_config: dict,
 ):
     observed_dump = datasourceConfigSchema.dump(config)
 
     round_tripped = config._dict_round_trip(schema, observed_dump)
 
-    # TODO: AJB 20220817 this assertion needs to change to validate against a
-    #  set fixture since round_tripped can be different (e.g. inserting data connector
-    #  names).
-    assert round_tripped == config.to_json_dict()
+    assert round_tripped == expected_roundtrip_config
 
     assert (
         round_tripped.get("id_")
         == observed_dump.get("id")
         == expected_serialized_config.get("id")
+        == expected_roundtrip_config.get("id_")
     )
+
+    # TODO: Assert data connector ids
