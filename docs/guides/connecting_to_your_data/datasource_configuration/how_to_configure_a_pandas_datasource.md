@@ -316,6 +316,14 @@ else:
 :::
 
 
-### 11. Use a `BatchRequest` to access your data
+## Next Steps
+
+Congratulations!  You have fully configured a Datasource and verified that it can be used in future workflows to provide a Batch or Batches of data.
+
+::: tip
 
 For more information on using Batch Requests to retrieve data, please see our guide on [how to get a Batch of data from a configured Datasource](../how_to_get_a_batch_of_data_from_a_configured_datasource.md).
+
+:::
+
+You can now move forward and [create Expectations for your Datasource](../../expectations/create_expectations_overview.md).
