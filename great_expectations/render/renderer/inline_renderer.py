@@ -1,5 +1,6 @@
 import logging
-from typing import Callable, List, Optional, Tuple, Union
+from collections import namedtuple
+from typing import Callable, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -14,6 +15,15 @@ from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import RenderedAtomicContent
 
 logger = logging.getLogger(__name__)
+
+
+ExpectationValidationResultRenderedContent = namedtuple(
+    "ExpectationValidationResultRenderedContent",
+    [
+        "ExpectationConfigurationRenderedContent",
+        "ExpectationValidationResultRenderedContent",
+    ],
+)
 
 
 class InlineRenderer(Renderer):
@@ -143,7 +153,7 @@ Default renderer "{default_prescriptive_renderer_name}" will be used to render p
 
     def get_expectation_validation_result_rendered_content(
         self,
-    ) -> Tuple[List[RenderedAtomicContent], List[RenderedAtomicContent]]:
+    ) -> ExpectationValidationResultRenderedContent:
         """Gets RenderedAtomicContent for a given ExpectationValidationResult.
 
         Returns:

@@ -10,7 +10,10 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.data_context import DataContext
 from great_expectations.render.exceptions import InvalidRenderedContentError
-from great_expectations.render.renderer.inline_renderer import InlineRenderer
+from great_expectations.render.renderer.inline_renderer import (
+    ExpectationValidationResultRenderedContent,
+    InlineRenderer,
+)
 from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
@@ -433,12 +436,21 @@ def test_inline_renderer_rendered_content_return_value(
     inline_renderer: InlineRenderer = InlineRenderer(
         render_object=expectation_validation_result
     )
-    expectation_configuration_rendered_atomic_content: List[RenderedAtomicContent]
-    expectation_validation_result_rendered_atomic_content: List[RenderedAtomicContent]
-    (
-        expectation_configuration_rendered_atomic_content,
-        expectation_validation_result_rendered_atomic_content,
-    ) = inline_renderer.get_expectation_validation_result_rendered_content()
+
+    expectation_validation_result_rendered_content: ExpectationValidationResultRenderedContent = (
+        inline_renderer.get_expectation_validation_result_rendered_content()
+    )
+
+    expectation_configuration_rendered_atomic_content: List[
+        RenderedAtomicContent
+    ] = (
+        expectation_validation_result_rendered_content.ExpectationConfigurationRenderedContent
+    )
+    expectation_validation_result_rendered_atomic_content: List[
+        RenderedAtomicContent
+    ] = (
+        expectation_validation_result_rendered_content.ExpectationValidationResultRenderedContent
+    )
 
     actual_serialized_expectation_configuration_rendered_atomic_content: List[dict] = [
         rendered_atomic_content.to_json_dict()
