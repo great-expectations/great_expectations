@@ -26,7 +26,7 @@ import InferredAssetDataConnector from './pandas_components/inferred_asset_data_
 
 ### 1. Import necessary modules and initialize your Data Context
 
-```python
+```python title="Python code:"
 import great_expectations as gx
 from ruamel import yaml
 
@@ -47,7 +47,7 @@ To start, create an empty dictionary.  You will be populating it with keys as yo
 
 At this point, the configuration for your Datasource is merely:
 
-```python
+```python title="Python code:"
 datasource_config = {}
 ```
 
@@ -70,7 +70,7 @@ The first key that you will need to define for your new Datasource is its `name`
 
 For the purposes of this example, we will name this Datasource:
 
-```python
+```python title="Python dictionary key/value:"
     "name": "name_of_my_datasource",
 ```
 
@@ -78,7 +78,7 @@ You should, however, name your Datsource something more relevant to your data.
 
 At this point, your configuration should now look like:
 
-```python
+```python title="Python code:"
 datasource_config = {
     "name": "name_of_my_datasource",  # Preferably name it something relevant
 }
@@ -88,14 +88,14 @@ datasource_config = {
 
 The `class_name` and `module_name` for your Datasource will almost always indicate the `Datasource` class found at `great_expectations.datasource`.  You may replace this with a specialized subclass, or a custom class, but for almost all regular purposes these two default values will suffice.  For the purposes of this guide, add those two values to their corresponding keys.
 
-```python
+```python title="Python dictionary key/value:"
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
 ```
 
 Your full configuration should now look like:
 
-```python
+```python title="Python code:"
 datasource_config = {
     "name": "my_datasource_name",  # Preferably name it something relevant
     "class_name": "Datasource",
@@ -110,7 +110,7 @@ Your Execution Engine is where you will specify that you want this Datasource to
 
 The `execution_engine` key and its corresponding value will therefore look like this:
 
-```python
+```python title="Python dictionary key/value:"
     "execution_engine": {
         "class_name": "PandasExecutionEngine",
         "module_name": "great_expectations.execution_engine",
@@ -119,7 +119,7 @@ The `execution_engine` key and its corresponding value will therefore look like 
 
 After adding the above snippet to your Datasource configuration, your full configuration dictionary should now look like:
 
-```python
+```python title="Python code:"
 datasource_config = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -143,7 +143,7 @@ For now, start by adding an empty dictionary as the value of the `data_connector
 
 Your current configuration should look like:
 
-```python
+```python title="Python code:"
 datasource_config = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -191,7 +191,7 @@ Remember, the key that you provide for each Data Connector configuration diction
 
 At this point, your configuration should look like:
 
-```python
+```python title="Python code:"
 datasource_config = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -214,19 +214,19 @@ When defining an `InferredAssetFilesystemDataConnector` you will need to provide
 
 For this example, you will be using the `InferredAssetFilesystemDataConnector` as your `class_name`.  This is a subclass of the `InferredAssetDataConnector` that is specialized to support filesystem Execution Engines, such as the `PandasExecutionEngine`.  This key/value entry will therefore look like:
 
-```python
+```python title="Python dictionary key/value:"
         "class_name": "InferredAssetFilesystemDataConnector",
 ```
 
 For the base directory, you will want to put the relative path of your data from the folder that contains your Data Context.  In this example we will use the same path that was used in the [Getting Started Tutorial, Step 2: Connect to Data](../../../tutorials/getting_started/tutorial_connect_to_data.md).  Since we are manually entering this value rather than letting the CLI generate it, the key/value pair will look like:
 
-```python
+```python title="Python dictionary key/value:"
         "base_directory": "./data",
 ```
 
 With these values added, along with a blank dictionary for `default_regex` (we will define it in the next step), your full configuration should now look like:
 
-```python
+```python title="Python code:"
 datasource_config = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -299,7 +299,7 @@ If you are uncertain as to which type of configuration is best for your use case
 
 Now that you have a full Datasource configuration, you can confirm that it is valid by testing it with the `.test_yaml_config(...)` method.  To do this, execute the Python code:
 
-```python
+```python title="Python code:"
 data_context.test_yaml_config(yaml.dump(datasource_config))
 ```
 
@@ -310,13 +310,13 @@ For a Datasource, this includes:
 - gathering a list of available Data Assets
 - verifying that at least one Batch can be fetched from the Datasource
 
-For more information on `test_yaml_config`, please see our guide on [how to configure `DataContext` components using `test_yaml_config`](../../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
+For more information on `test_yaml_config`, please see our guide on [how to configure `DataContext` components using `test_yaml_config`](../../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
 
 ### 10. Add your new Datasource to your Data Context
 
 Now that you have verified that you have a valid configuration you can add your new Datasource to your Data Context with the command:
-
-```python
+ 
+```python title="Python code:"
 data_context.add_datasource(**datasource_config)
 ```
 
@@ -330,7 +330,7 @@ If the value of `datasource_config["name"]` corresponds to a Datasource that is 
 
 If you want to ensure that you only add a Datasource when it won't overwrite an existing one, you can use the following code instead:
 
-```python
+```python title="Python code:"
 # add_datasource only if it doesn't already exist in your Data Context
 try:
     data_context.get_datasource(datasource_config["name"])

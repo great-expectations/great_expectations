@@ -23,7 +23,7 @@ For this example, lets assume we have the following files in our `data` director
 
 In this case you could define the `pattern` key as follows:
 
-```python
+```python title="Python dictionary key/value:"
 "pattern": "(.*)\\.csv"
 ```
 
@@ -33,7 +33,7 @@ Since each `.csv` file will necessarily have a unique name preceeding its extens
 
 To correspond to the single group that was defined in your regex, you will define a single entry in the list for the `group_names` key.  Since the first group in an Inferred Asset Data Connector is used to generate names for the inferred Data Assets, you should name that group as follows:
 
-```python
+```python title="Python dictionary key/value:"
     "group_names": ["data_asset_name"],
 ```
 
@@ -50,7 +50,7 @@ Since we did not include `.csv` in the first group of the regex we defined, the 
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 
-```python
+```python title="Python dictionary key/value:"
         "name_of_my_inferred_data_connector": {
             "class_name": "InferredAssetFilesystemDataConnector",
             "base_directory": "./data",
@@ -63,7 +63,7 @@ With all of these values put together into a single dictionary, your Data Connec
 
 And the full configuration for your Datasource should look like:
 
-```python
+```python title="Python code:"
 datasource_config = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -102,7 +102,7 @@ For this example, lets assume you have the following files in our `data` directo
 
 You can configure a Data Asset that groups these files together and differentiates each batch by month with the regex:
 
-```python
+```python title="Python dictionary key/value:"
     "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
 ```
 
@@ -112,7 +112,7 @@ The second defined group consists of the numeric characters after the last dash 
 
 Since you have defined two groups in your regex, you will need to provide two corresponding group names in your `group_names` key.  Since the first group in an Inferred Asset Data Connector is used to generate the names for the inferred Data Assets provided by the Data Connector and the second group you defined corresponds to the month of data that each file contains, you should name those groups as follows:
 
-```python
+```python title="Python dictionary key/value:"
     "group_names": ["data_asset_name", "month"],
 ```
 
@@ -135,7 +135,7 @@ For more information on the special characters and mechanics of matching and gro
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 
-```python
+```python title="Python dictionary key/value:"
         "name_of_my_inferred_data_connector": {
             "class_name": "InferredAssetFilesystemDataConnector",
             "base_directory": "./data",
@@ -148,7 +148,7 @@ With all of these values put together into a single dictionary, your Data Connec
 
 And the full configuration for your Datasource should look like:
 
-```python
+```python title="Python code:"
 datasource_config = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
