@@ -24,7 +24,7 @@ class InlineRenderer(Renderer):
         super().__init__()
 
         if isinstance(
-            render_object, ExpectationConfiguration, ExpectationValidationResult
+            render_object, (ExpectationConfiguration, ExpectationValidationResult)
         ):
             self._render_object = render_object
         else:
