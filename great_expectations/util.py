@@ -1574,6 +1574,13 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
     return selectable
 
 
+def get_sqlalchemy_subquery_type():
+    try:
+        return sa.sql.Subquery
+    except AttributeError:
+        return sa.sql.Alias
+
+
 def get_sqlalchemy_domain_data(domain_data):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
