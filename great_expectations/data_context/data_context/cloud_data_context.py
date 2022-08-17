@@ -576,7 +576,6 @@ class CloudDataContext(AbstractDataContext):
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
-        *,
         batch_request: Optional[BatchRequestBase] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[dict] = None,

@@ -66,14 +66,14 @@ class EphemeralDataContext(AbstractDataContext):
         )
         self._datasource_store = datasource_store
 
-    def save_expectation_suite(  # type: ignore[override]
+    def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
         include_rendered_content: bool = False,
         **kwargs: Dict[str, Any],
-    ):
+    ) -> None:
         """Save the provided expectation suite into the DataContext.
 
         Args:
