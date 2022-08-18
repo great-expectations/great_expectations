@@ -5,6 +5,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
+from tests.core.test_serialization import generic_config_serialization_assertions
 
 
 @pytest.mark.unit
@@ -145,12 +146,12 @@ class TestDatasourceConfigSerialization:
         expected_roundtrip_config: dict,
     ):
         """Datasource Config should be serialized appropriately with/without optional params."""
-        observed_dump = datasourceConfigSchema.dump(datasource_config)
-        assert observed_dump == expected_serialized_datasource_config
-
-        loaded_data = datasourceConfigSchema.load(observed_dump)
-        observed_load = DatasourceConfig(**loaded_data)
-        assert observed_load.to_json_dict() == expected_roundtrip_config
+        generic_config_serialization_assertions(
+            datasource_config,
+            datasourceConfigSchema,
+            expected_serialized_datasource_config,
+            expected_roundtrip_config,
+        )
 
     def test_dict_round_trip_serialization(
         self,

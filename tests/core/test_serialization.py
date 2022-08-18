@@ -694,3 +694,32 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
     assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
         checkpoint_config
     )
+
+
+def generic_config_serialization_assertions(
+    config: AbstractConfig,
+    schema: Schema,
+    expected_serialized_config: dict,
+    expected_roundtrip_config: dict,
+) -> None:
+    """Generic assertions for testing configuration serialization.
+
+    Args:
+        config: config object to check serialization.
+        schema: Marshmallow schema used for serializing / deserializing config object.
+        expected_serialized_config: expected when serializing a config via dump
+        expected_roundtrip_config: expected config after loading the dump
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError
+    """
+
+    observed_dump = schema.dump(config)
+    assert observed_dump == expected_serialized_config
+
+    loaded_data = schema.load(observed_dump)
+    observed_load = DatasourceConfig(**loaded_data)
+    assert observed_load.to_json_dict() == expected_roundtrip_config
