@@ -144,6 +144,20 @@ class DataAssistantResult(SerializableDictDot):
     # Reference to "UsageStatisticsHandler" object for this "DataAssistantResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
+    @property
+    def metric_expectation_map(self) -> Dict[Union[str, Tuple[str]], str]:
+        """
+        A mapping is defined for which metrics to plot and their associated expectations.
+        """
+        raise NotImplementedError("Subclasses must implement this property.")
+
+    @property
+    def metric_types(self) -> Dict[str, AltairDataTypes]:
+        """
+        A mapping is defined for the Altair data type associated with each metric.
+        """
+        raise NotImplementedError("Subclasses must implement this property.")
+
     def show_expectations_by_domain_type(
         self,
         expectation_suite_name: str,
