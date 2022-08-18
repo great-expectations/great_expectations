@@ -11,30 +11,43 @@ from great_expectations.data_context.types.base import (
 @pytest.mark.parametrize(
     "datasource_config,expected_serialized_datasource_config,expected_roundtrip_config",
     [
-        # pytest.param(
-        #     DatasourceConfig(
-        #         class_name="Datasource",
-        #     ),
-        #     {
-        #         "class_name": "Datasource",
-        #         "module_name": "great_expectations.datasource",
-        #     },
-        #     id="minimal",
-        # ),
-        # pytest.param(
-        #     DatasourceConfig(
-        #         name="my_datasource",
-        #         id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
-        #         class_name="Datasource",
-        #     ),
-        #     {
-        #         "name": "my_datasource",
-        #         "id": "d3a14abd-d4cb-4343-806e-55b555b15c28",
-        #         "class_name": "Datasource",
-        #         "module_name": "great_expectations.datasource",
-        #     },
-        #     id="minimal_with_name_and_id",
-        # ),
+        pytest.param(
+            DatasourceConfig(
+                class_name="Datasource",
+            ),
+            {
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+            },
+            {
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                # TODO: AJB 20220818 Why is this not filtered out in the round trip?
+                "name": None,
+                "id_": None,
+            },
+            id="minimal",
+        ),
+        pytest.param(
+            DatasourceConfig(
+                name="my_datasource",
+                id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
+                class_name="Datasource",
+            ),
+            {
+                "name": "my_datasource",
+                "id": "d3a14abd-d4cb-4343-806e-55b555b15c28",
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+            },
+            {
+                "name": "my_datasource",
+                "id_": "d3a14abd-d4cb-4343-806e-55b555b15c28",
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+            },
+            id="minimal_with_name_and_id",
+        ),
         pytest.param(
             DatasourceConfig(
                 name="my_datasource",
@@ -160,7 +173,10 @@ class TestDatasourceConfigSerialization:
             == expected_roundtrip_config.get("id_")
         )
 
-        if datasource_config.data_connectors:
+        if (
+            hasattr(datasource_config, "data_connectors")
+            and datasource_config.data_connectors
+        ):
             for (
                 data_connector_name,
                 data_connector_config,
