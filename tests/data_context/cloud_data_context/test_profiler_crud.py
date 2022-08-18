@@ -101,6 +101,12 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     ge_cloud_organization_id: str,
     shared_called_with_request_kwargs: dict,
 ) -> None:
+    """
+    What does this test do and why?
+
+    `DataContext.save_profiler()` should take in an input profiler with an id, save it to the GX Cloud backend,
+    and return the same profiler (id and all).
+    """
     context = empty_base_data_context_in_cloud_mode
 
     with mock.patch("requests.put", autospec=True) as mock_put, mock.patch(
@@ -149,6 +155,12 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     ge_cloud_organization_id: str,
     shared_called_with_request_kwargs: dict,
 ) -> None:
+    """
+    What does this test do and why?
+
+    `DataContext.save_profiler()` should take in an input profiler without an id, save it to the GX Cloud backend,
+    and return the same profiler with the Cloud generated id.
+    """
     context = empty_base_data_context_in_cloud_mode
 
     with mock.patch(
