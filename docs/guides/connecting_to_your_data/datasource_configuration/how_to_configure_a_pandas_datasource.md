@@ -10,8 +10,11 @@ import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 import InferredAssetDataConnector from './pandas_components/inferred_asset_data_connector.md'
-
+import ConfiguredAssetDataConnector from './pandas_components/configured_asset_data_connector.md'
 <UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/>
+import TipCustomDataConnectorModuleName from './components/tip_custom_data_connector_module_name.mdx'
+import FilesystemBaseDirectory from './components/base_directory_for_filesystem.mdx'
+import IntroForSingleOrMultiBatchConfiguration from './components/intro_for_single_or_multi_batch_configuration.mdx'
 
 This guide will walk you through the process of configuring a Pandas Datasource from scratch, verifying that your configuration is valid, and adding it to your Data Context.  By the end of this guide you will have a Pandas Datasource which you can use in future workflows for creating Expectations and validating data.
 
@@ -161,7 +164,7 @@ datasource_config: dict = {
 
 ### 7. Configure your individual Data Connectors
 
-For each Data Connector configuration, you will need to specify which type of Data Connector you will be using.  For Pandas, the most likely ones will be the `InferredAssetFilesystemDataConnector`, the `ConfiguredAssetDataConnector`, and the `RuntimeDataConnector`.  If you are uncertain as to which one best suits your needs, please refer to our guide on [how to choose which Data Connector to use](../how_to_choose_which_dataconnector_to_use.md).
+For each Data Connector configuration, you will need to specify which type of Data Connector you will be using.  For Pandas, the most likely ones will be the `InferredAssetFilesystemDataConnector`, the `ConfiguredAssetFilesystemDataConnector`, and the `RuntimeDataConnector`.  If you are uncertain as to which one best suits your needs, please refer to our guide on [how to choose which Data Connector to use](../how_to_choose_which_dataconnector_to_use.md).
 
 #### Data Connector example configurations:
 
@@ -189,7 +192,7 @@ If you are at the point of building a repeatable workflow, we encourage using th
 
 :::
 
-Remember, the key that you provide for each Data Connector configuration dictionary will be used as the name of the Data Connector.  for this example, we will use the name `name_of_my_inferred_data_connector` but you may have it be anything you like.
+Remember, the key that you provide for each Data Connector configuration dictionary will be used as the name of the Data Connector.  For this example, we will use the name `name_of_my_inferred_data_connector` but you may have it be anything you like.
 
 At this point, your configuration should look like:
 
@@ -220,11 +223,9 @@ For this example, you will be using the `InferredAssetFilesystemDataConnector` a
         "class_name": "InferredAssetFilesystemDataConnector",
 ```
 
-For the base directory, you will want to put the relative path of your data from the folder that contains your Data Context.  In this example we will use the same path that was used in the [Getting Started Tutorial, Step 2: Connect to Data](../../../tutorials/getting_started/tutorial_connect_to_data.md).  Since we are manually entering this value rather than letting the CLI generate it, the key/value pair will look like:
+<TipCustomDataConnectorModuleName />
 
-```python"
-        "base_directory": "./data",
-```
+<FilesystemBaseDirectory />
 
 With these values added, along with a blank dictionary for `default_regex` (we will define it in the next step), your full configuration should now look like:
 
@@ -250,6 +251,76 @@ datasource_config: dict = {
   </TabItem>
   <TabItem value="configured">
 
+:::tip 
+
+A `ConfiguredAssetDataConnector` allows you to have the most fine-tuning, and requires an explicit listing of each Data Asset you want to connect to.
+
+However, a `ConfiguredAssetDataConnector` can be used to functionally duplicate the ability of an `InferredAssetDataConnector` to grant access to all files in a folder based on a regex match by defining a Data Asset that uses the same `pattern` as you would use in an `InferredAssetDataConnector`'s `default_regex`.  This will cause the Data Asset in question to have one Batch for each matched file, just as the `InferredAssetDataConnector` would have one Data Asset for each file.  Therefore, the only difference would be in how you accessed the data in question.  
+
+With an `InferredAssetDataConnector`, you would need to provide your Batch Request the name of the Data Asset in question in order to retrieve it as a Batch from a Batch Request.  
+
+With a `ConfiguredAssetDataConnector`, you would provide your Batch Request with the name of the Data Asset that was configured with an `InferredAssetDataConnector` style pattern, and then provide the same name as you would have used for an `InferredAssetDataConnector`'s Data Asset as a `batch_identifier` in your Batch Request.  This will result in the `ConfiguredAssetDataConnector` providing the same data in response to the Batch Request as an `InferredAssetDataConnector` requesting the data as a Data Asset would.
+
+In the section where configuring Data Assets for a `ConfiguredAssetDataConnector` is explained, there will also be an example of this.
+
+:::
+
+Remember, the key that you provide for each Data Connector configuration dictionary will be used as the name of the Data Connector.  For this example, we will use the name `name_of_my_configured_data_connector` but you may have it be anything you like.
+
+At this point, your configuration should look like:
+
+```python"
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "PandasExecutionEngine",  
+        "module_name": "great_expectations.execution_engine",
+    },
+    "data_connectors": {
+        "name_of_my_configured_data_connector": {}
+        }
+    }
+}
+```
+
+When defining a `ConfiguredAssetFilesystemDataConnector` you will need to provide values for three keys in Data Connector's configuration dictionary (the currently empty dictionary that corresponds to `"name_of_my_configured_data_connector"` in the example above).  These key/value pairs consist of:
+- `class_name`: The name of the Class that will be instantiated for this `DataConnector`.
+- `base_directory`: The string representation of the directory that contains your filesystem data.
+- `assets`: A dictionary containing one entry for each Data Asset made available by the Data Connector.  You will need to explicitly define an entry for each Data Asset you want to make available through a configured Data Connector.
+
+For this example, you will be using the `ConfiguredAssetFilesystemDataConnector` as your `class_name`.  This is a subclass of the `ConfiguredAssetDataConnector` that is specialized to support filesystem Execution Engines, such as the `PandasExecutionEngine`.  This key/value entry will therefore look like:
+
+```python"
+        "class_name": "ConfiguredAssetFilesystemDataConnector",
+```
+
+<TipCustomDataConnectorModuleName />
+
+<FilesystemBaseDirectory />
+
+With these values added, along with a blank dictionary for `assets` (we will define entries for it in the next step), your full configuration should now look like:
+
+```python"
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "PandasExecutionEngine",  
+        "module_name": "great_expectations.execution_engine",
+    },
+    "data_connectors": {
+        "name_of_my_configured_data_connector": {
+            "class_name": "ConfiguredAssetFilesystemDataConnector",
+            "base_directory": "./data",
+            "assets": {}
+        }
+    }
+}
+```
+
   </TabItem>
   <TabItem value="runtime">
 
@@ -270,25 +341,28 @@ datasource_config: dict = {
 
   <TabItem value="inferred">
 
-
 In an Inferred Asset Data Connector for filesystem data, a regular expression is used to group the files into Batches for a Data Asset.  This is done with the value we will define for the Data Connector's `default_regex` key.  The value for this key will consist of a dictionary that contains two values:
 - `pattern`: This is the regex pattern that will define your Data Asset's potential Batch or Batches.
 - `group_names`: This is a list of names that correspond to the groups you defined in `pattern`'s regular expression.
 
 The `pattern` in `default_regex` will be matched against the files in your `base_directory`, and everything that matches against the first group in your regex will become a Batch in a Data Asset that possesses the name of the matching text.  Any files that have a matching string for the first group will become Batches in the same Data Asset.
 
-This means that when configuring your Data Connector's regular expression, you have the option to design it so that the Data Connector is only capable of returning a single Batch per Data Asset, or so that it is capable of returning multiple Batches grouped into individual Data Assets.  Each type of configuration is useful in certain cases, so we will provide examples of both.
-
-:::tip 
-
-If you are uncertain as to which type of configuration is best for your use case, please refer to our guide on [how to choose between working with a single or multiple Batches of data](../how_to_choose_between_working_with_a_single_or_multiple_batches_of_data.md).
-
-:::
+<IntroForSingleOrMultiBatchConfiguration />
 
 <InferredAssetDataConnector/>
 
   </TabItem>
   <TabItem value="configured">
+
+In a Configured Asset Data Connector for filesystem data, each entry in the `assets` dictionary will correspond to an explicitly defined Data Asset.  The key provided will be used as the name of the Data Asset, while the value will be a dictionary that contains two additional keys:
+- `pattern`: This is the regex pattern that will define your Data Asset's potential Batch or Batches.
+- `group_names`: This is a list of names that correspond to the groups you defined in `pattern`'s regular expression.
+
+The `pattern` in each `assets` entry will be matched against the files in your `base_directory`, and everything that matches against the `pattern`'s value will become a Batch in a Data Asset with a name matching the key for this entry in the `assets` dictionary.
+
+<IntroForSingleOrMultiBatchConfiguration />
+
+<ConfiguredAssetDataConnector/>
 
   </TabItem>
   <TabItem value="runtime">
