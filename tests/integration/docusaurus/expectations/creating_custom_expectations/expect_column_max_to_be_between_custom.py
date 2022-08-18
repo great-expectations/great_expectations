@@ -68,7 +68,7 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
 
-        query = sa.select(sa.func.max(column)).select_from(selectable)
+        query = sa.select([sa.func.max(column)]).select_from(selectable)
         result = sqlalchemy_engine.execute(query).fetchone()
 
         return result[0]
