@@ -1,6 +1,7 @@
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+import TipMoreInfoOnRegex from '../components/tip_more_info_on_regex.mdx'
 
 <Tabs
   groupId="batch-count"
@@ -127,11 +128,7 @@ Any characters that are not included in a group when you define your regex will 
 
 :::
 
-:::tip
-
-For more information on the special characters and mechanics of matching and grouping strings with regular expressions, please see [the Python documentation on the `re` module](https://docs.python.org/3/library/re.html).
-
-:::
+<TipMoreInfoOnRegex />
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 

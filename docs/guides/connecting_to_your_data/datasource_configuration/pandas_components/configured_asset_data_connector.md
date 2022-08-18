@@ -1,6 +1,7 @@
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+import TipMoreInfoOnRegex from '../components/tip_more_info_on_regex.mdx'
 
 <Tabs
   groupId="batch-count"
@@ -12,51 +13,68 @@ import TabItem from '@theme/TabItem';
     
   <TabItem value="single">
 
-Because of the simple regex matching that groups files into Batches for a given Data Asset, it is actually quite straight forward to create a Data Connector which has Data Assets that are only capable of providing a single Batch.  All you need to do is define a regular expression that consists of a single group which corresponds to a unique portion of your data files' names that is unique for each file.
+Because you are explicitly defining each Data Asset in a `ConfiguredAssetDataConnector`, it is very easy to define one that can will only have one Batch.
 
-The simplest way to do this is to define a group that consists of the entire file name.
+The simplest way to do this is to define a Data Asset with a `pattern` value that does not contain any regex special characters which would match on more than one value.
 
 For this example, lets assume we have the following files in our `data` directory:
 - `yellow_tripdata_sample_2020-01.csv`
 - `yellow_tripdata_sample_2020-02.csv`
 - `yellow_tripdata_sample_2020-03.csv`
 
-In this case you could define the `pattern` key as follows:
+In this case, we want to define a single Data Asset for each month.  To do so, we will need an entry in the `assets` dictionary for each month, as well: one for each Data Asset we want to create.
 
-```python"
-"pattern": "(.*)\\.csv"
+Let's walk through the creation of the Data Asset for January's data.
+
+First, you need to add an empty dictionary entry into the `assets` dictionary.  Since the key you associate with this entry will be treated as the Data Asset's name, go ahead and name it `yellow_trip_data_jan`.
+
+At this point, your entry in the `assets dictionary will look like:
+
+```python
+  "yellow_trip_data_jan": {}
 ```
 
-This regex will match the full name of any file that has the `.csv` extension, and will put everything prior to `.csv` extension into a group.
+Next, you will need to define the `pattern` value and `group_names` value for this Data Asset.
 
-Since each `.csv` file will necessarily have a unique name preceeding its extension, the content that matches this pattern will be unique for each file.  This will ensure that only one file is included as a Batch for each Data Asset.
-
-To correspond to the single group that was defined in your regex, you will define a single entry in the list for the `group_names` key.  Since the first group in an Inferred Asset Data Connector is used to generate names for the inferred Data Assets, you should name that group as follows:
+Since you want this Data Asset to only match the file `yellow_tripdata_sample_2020-01.csv` value for the `pattern` key should be one that does not contain any regex special characters that can match on more than one value.  An example follows:
 
 ```python"
-    "group_names": ["data_asset_name"],
+"pattern": "yellow_tripdata_sample_2020-(01)\\.csv"
 ```
 
-Looking back at our sample files, this regex will result in the `InferredAssetFilesystemDataConnector` providing three Data Assets, which can be accessed by the portion of the file that matches the first group in our regex.  In future workflows you will be able to refer to one of these Data Assets in a Batch Request py providing one of the following `data_asset_name`s:
-- `yellow_tripdata_sample_2020-01`
-- `yellow_tripdata_sample_2020-02`
-- `yellow_tripdata_sample_2020-03`
-
-:::note 
-
-Since we did not include `.csv` in the first group of the regex we defined, the `.csv` portion of the filename will be dropped from the value that is recognized as a valid `data_asset_name`.
-
+:::note
+The pattern we defined contains a regex group, even though we logically don't need a group to identify the desired Batch in a Data Asset that can only return one Batch.  This is because Great Expectations currently does not permit `pattern` to be defined without also having `group_names` defined.  Thus, in the example above you are creating a group that corresponds to `01` so that there is a valid group to associate a `group_names` entry with.
 :::
+
+Since none of the characters in this regex can possibly match more than one value, the only file that can possibly be matched is the one you want it to match: `yellow_tripdata_sample_2020-01.csv`.  This batch will also be associated with the Batch Identifier `01`, but you won't need to use that to specify the Batch in a Batch Request as it is the only Batch that this Data Asset is capable of returning.
+
+To correspond to the single group that was defined in your regex, you will define a single entry in the list for the `group_names` key.  Since the `assets` dictionary key is used for this Data Asset's name, you can give this group a name relevant to what it is matching on:
+
+```python"
+    "group_names": ["month"],
+```
+
+Put entirely together, your `assets` entry will look like:
+
+```python
+  "yellow_tripdata_jan": {
+    "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
+    "group_names": ["month"],
+  }
+```
+
+Looking back at our sample files, this entry will result in the `ConfiguredAssetFilesystemDataConnector` providing one Data Asset, which can be accessed by the name `yellow_tripdata_jan`.  In future workflows you will be able to refer to this Data Asset and its single corresponding Batch by providing that name.
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 
 ```python"
-        "name_of_my_inferred_data_connector": {
+        "name_of_my_configured_data_connector": {
             "class_name": "ConfiguredAssetFilesystemDataConnector",
             "base_directory": "./data",
-            "default_regex": {
-                "pattern": "(.*)\\.csv",
-                "group_names": ["data_asset_name"],
+                "yellow_tripdata_jan": {
+                  "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
+                  "group_names": ["month"],
+                }
             }
         }
 ```
@@ -73,75 +91,90 @@ datasource_config = {
         "module_name": "great_expectations.execution_engine",
     },
     "data_connectors": {
-        "name_of_my_inferred_data_connector": {
-            "class_name": "InferredAssetFilesystemDataConnector",
+        "name_of_my_configured_data_connector": {
+            "class_name": "ConfiguredAssetFilesystemDataConnector",
             "base_directory": "./data",
-            "default_regex": {
-                "pattern": "(.*)\\.csv",
-                "group_names": ["data_asset_name"],
+                "yellow_tripdata_jan": {
+                  "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
+                  "group_names": ["month"],
+                }
             }
         }
     }
 }
 ```
 
+:::note
+
+Because Configured Data Assets require that you explicitly define each Data Asset they provide access to, you will have to add `assets` entries for February and March if you also want to access `yellow_tripdata_sample_2020-02.csv` and `yellow_tripdata_sample_2020-03.csv` in the same way.
+
+:::
+
   </TabItem>
   <TabItem value="multi">
 
 
-Configuring an `InferredAssetFilesystemDataConnector` so that its Data Assets are capable of returning more than one Batch is just a matter of defining an appropriate regular expression.  For this kind of configuration, the regular expression you define should have two or more groups.
+Configuring a `ConfiguredAssetFilesystemDataConnector` so that its Data Assets are capable of returning more than one Batch is just a matter of defining an appropriate regular expression.  For this kind of configuration, the regular expression you define should include at least one group that contains regular expression special characters capable of matching more than one value.
 
-The first group will be treated as the Data Asset's name.  It should be a portion of your file names that occurs in more than one file.  The files that match this portion of the regular expression will be grouped together as a single Data Asset.
-
-Any additional groups that you include in your regular expression will be used to identify specific Batches among those that are grouped together in each Data Asset.
-
-For this example, lets assume you have the following files in our `data` directory:
+For this example, lets assume we have the following files in our `data` directory:
 - `yellow_tripdata_sample_2020-01.csv`
 - `yellow_tripdata_sample_2020-02.csv`
 - `yellow_tripdata_sample_2020-03.csv`
 
-You can configure a Data Asset that groups these files together and differentiates each batch by month with the regex:
+In this case, we want to define a Data Asset that contains all of our data for the year 2020.
 
-```python"
-    "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
+First, you need to add an empty dictionary entry into the `assets` dictionary.  Since the key you associate with this entry will be treated as the Data Asset's name, go ahead and name it `yellow_trip_data_2020`.
+
+At this point, your entry in the `assets dictionary will look like:
+
+```python
+  "yellow_trip_data_2020": {}
 ```
 
-This regex will group together all files that match the content of the first group as a single Data Asset.  Since the first group does not include any special regex characters, this means that all of the `.csv` files that start with "yellow_tripdata_sample_2020" will be combined into one Data Asset, and that all other files will be ignored.
+Next, you will need to define the `pattern` value and `group_names` value for this Data Asset.
 
-The second defined group consists of the numeric characters after the last dash in a file name and prior to the `.csv` extension.  Specifying a value for that group in your future Batch Requests will allow you to request a specific Batch from the Data Asset.
+Since you want this Data Asset to all of the 2020 files, the value for `pattern` needs to be a regular expression that is capable of matching all of the files.  To do this, we will need to use regular expression special characters that are capable of matching one more than one value.
 
-Since you have defined two groups in your regex, you will need to provide two corresponding group names in your `group_names` key.  Since the first group in an Inferred Asset Data Connector is used to generate the names for the inferred Data Assets provided by the Data Connector and the second group you defined corresponds to the month of data that each file contains, you should name those groups as follows:
+Looking back at the files in our `data` directory, you can see that each file differs from the others only in the digits indicating the month of the file.  Therefore, the regular expression we create will separate those specific characters into a group, and will define the content of that group using special characters capable of matching on any values, like so:
 
 ```python"
-    "group_names": ["data_asset_name", "month"],
+"pattern": "yellow_tripdata_sample_2020-(.*)\\.csv"
 ```
 
-Looking back at our sample files, this regex will result in the `InferredAssetFilesystemDataConnector` providing a single Data Asset, which will contain three batches.  In future workflows you will be able to refer to a specific Batch in this Data Asset in a Batch Request py providing the  `data_asset_name` of `"yellow_tripdata_sample_2020"` and one of the following `month`s:
-- `01`
-- `02`
-- `03`
+To correspond to the single group that was defined in your `pattern`, you will define a single entry in the list for the `group_names` key.  Since the `assets` dictionary key is used for this Data Asset's name, you can give this group a name relevant to what it is matching on:
 
-:::note 
+```python"
+    "group_names": ["month"],
+```
 
-Any characters that are not included in a group when you define your regex will still be checked for when determining if a file name "matches" the regular expression.  However, those characters will not be included in any of the Batch Identifiers, which is why the `-` and `.csv` portions of the filenames are not found in either the `data_asset_name` or `month` values.
+Since the group in the above regular expression will match on any characters, this regex will successfully match on each of the file names in our `data` directory, and will associate each file with the identifier `month` that corresponds to the file's grouped characters:
+- `yellow_tripdata_sample_2020_01.csv` will be Batch identified by a `month` value of `01`
+- `yellow_tripdata_sample_2020_02.csv` will be Batch identified by a `month` value of `02`
+- `yellow_tripdata_sample_2020_03.csv` will be Batch identified by a `month` value of `03`
 
-:::
+Put entirely together, your `assets` entry will look like:
 
-:::tip
+```python
+  "yellow_tripdata_2020": {
+    "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
+    "group_names": ["month"],
+  }
+```
 
-For more information on the special characters and mechanics of matching and grouping strings with regular expressions, please see [the Python documentation on the `re` module](https://docs.python.org/3/library/re.html).
+Looking back at our sample files, this entry will result in the `ConfiguredAssetFilesystemDataConnector` providing one Data Asset, which can be accessed by the name `yellow_tripdata_2020`.  In future workflows you will be able to refer to this Data Asset and by providing that name, and refer to a specific Batch in this Data Asset by providing your Batch Request with a `batch_identifier` entry using the key `month` and the value corresponding to the month portion of the filename of the file that corresponds to the Batch in question.
 
-:::
+<TipMoreInfoOnRegex />
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 
 ```python"
-        "name_of_my_inferred_data_connector": {
-            "class_name": "InferredAssetFilesystemDataConnector",
+        "name_of_my_configured_data_connector": {
+            "class_name": "ConfiguredAssetFilesystemDataConnector",
             "base_directory": "./data",
-            "default_regex": {
-                "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
-                "group_names": ["data_asset_name", "month"],
+                "yellow_tripdata_2020": {
+                  "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
+                  "group_names": ["month"],
+                }
             }
         }
 ```
@@ -158,12 +191,13 @@ datasource_config = {
         "module_name": "great_expectations.execution_engine",
     },
     "data_connectors": {
-        "name_of_my_inferred_data_connector": {
-            "class_name": "InferredAssetFilesystemDataConnector",
+        "name_of_my_configured_data_connector": {
+            "class_name": "ConfiguredAssetFilesystemDataConnector",
             "base_directory": "./data",
-            "default_regex": {
-                "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
-                "group_names": ["data_asset_name", "month"],
+                "yellow_tripdata_jan": {
+                  "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
+                  "group_names": ["month"],
+                }
             }
         }
     }
