@@ -117,7 +117,7 @@ def validation_result_suite():
 @pytest.fixture(scope="module")
 def validation_result_suite_ge_cloud_identifier(validation_result_suite_ge_cloud_id):
     return GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.CONTRACT,
+        resource_type=GeCloudRESTResource.CHECKPOINT,
         ge_cloud_id=validation_result_suite_ge_cloud_id,
     )
 

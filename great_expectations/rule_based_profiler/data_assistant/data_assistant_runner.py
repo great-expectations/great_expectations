@@ -1,3 +1,4 @@
+from enum import Enum
 from inspect import Parameter, Signature, getattr_static, signature
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
@@ -27,6 +28,11 @@ from great_expectations.rule_based_profiler.helpers.runtime_environment import (
     build_domain_type_directives,
     build_variables_directives,
 )
+
+
+class NumericRangeEstimatorType(Enum):
+    EXACT = "exact"
+    FLAG_OUTLIERS = "flag_outliers"
 
 
 class DataAssistantRunner:
@@ -91,6 +97,7 @@ class DataAssistantRunner:
 
         def run(
             batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+            estimation: Optional[Union[str, NumericRangeEstimatorType]] = None,
             **kwargs,
         ) -> DataAssistantResult:
             """
@@ -99,6 +106,10 @@ class DataAssistantRunner:
 
             Args:
                 batch_request: Explicit batch_request used to supply data at runtime
+                estimation: Global type directive for applicable "Rule" objects that utilize numeric range estimation.
+                    If set to "exact" (default), all "Rule" objects using "NumericMetricRangeMultiBatchParameterBuilder"
+                    will have the value of "estimator" property (referred to by "$variables.estimator") equal "exact".
+                    If set to "flag_outliers", then "bootstrap" estimator (default in "Rule" variables) takes effect.
                 kwargs: placeholder for "makefun.create_function()" to propagate dynamically generated signature
 
             Returns:
@@ -110,6 +121,13 @@ class DataAssistantRunner:
                     message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be specified \
 (empty or missing "batch_request" detected)."""
                 )
+
+            if estimation is None:
+                estimation = NumericRangeEstimatorType.EXACT
+
+            if isinstance(estimation, str):
+                estimation = estimation.lower()
+                estimation = NumericRangeEstimatorType(estimation)
 
             data_assistant: DataAssistant = self._build_data_assistant(
                 batch_request=batch_request
@@ -136,7 +154,11 @@ class DataAssistantRunner:
             )
             variables_directives_list: List[
                 RuntimeEnvironmentVariablesDirectives
-            ] = build_variables_directives(**variables_directives_kwargs)
+            ] = build_variables_directives(
+                exact_estimation=(estimation == NumericRangeEstimatorType.EXACT),
+                rules=self._profiler.rules,
+                **variables_directives_kwargs,
+            )
             domain_type_directives_list: List[
                 RuntimeEnvironmentDomainTypeDirectives
             ] = build_domain_type_directives(**domain_type_directives_kwargs)
@@ -150,7 +172,13 @@ class DataAssistantRunner:
             Parameter(
                 name="batch_request",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
-                annotation=Optional[Union[BatchRequestBase, dict]],
+                annotation=Union[BatchRequestBase, dict],
+            ),
+            Parameter(
+                name="estimation",
+                kind=Parameter.POSITIONAL_OR_KEYWORD,
+                default="exact",
+                annotation=Optional[Union[str, NumericRangeEstimatorType]],
             ),
         ]
 
@@ -162,7 +190,7 @@ class DataAssistantRunner:
             self._get_method_signature_parameters_for_variables_directives()
         )
 
-        func_sig: Signature = Signature(
+        func_sig = Signature(
             parameters=parameters, return_annotation=DataAssistantResult
         )
         gen_func: Callable = create_function(func_signature=func_sig, func_impl=run)
@@ -298,9 +326,13 @@ class DataAssistantRunner:
 
     @staticmethod
     def _get_rule_domain_type_attributes(rule: Rule) -> List[str]:
-        return list(
+        klass: type = rule.domain_builder.__class__
+        sig: Signature = signature(obj=klass.__init__)
+        parameters: Dict[str, Parameter] = dict(sig.parameters)
+        attribute_names: List[str] = list(
             filter(
-                lambda key: key not in ["class_name", "module_name"],
-                rule.domain_builder.to_json_dict().keys(),
+                lambda element: element not in rule.domain_builder.exclude_field_names,
+                list(parameters.keys())[1:],
             )
         )
+        return attribute_names

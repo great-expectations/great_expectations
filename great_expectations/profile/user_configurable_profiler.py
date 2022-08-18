@@ -815,7 +815,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
 
         return profile_dataset
 
-    def _build_expectations_numeric(self, profile_dataset, column):
+    def _build_expectations_numeric(self, profile_dataset, column):  # noqa: C901 - 17
         """
         Adds a set of numeric expectations for a given column
         Args:

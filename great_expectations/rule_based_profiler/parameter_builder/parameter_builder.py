@@ -1,10 +1,12 @@
 import copy
+import datetime
 import itertools
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
+import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
@@ -41,6 +43,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     get_fully_qualified_parameter_names,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -561,14 +564,25 @@ specified (empty "metric_name" value detected)."""
             for metric_value_idx in metric_value_indices:
                 metric_value: MetricValue = metric_values[metric_value_idx]
                 if enforce_numeric_metric:
-                    if not np.issubdtype(metric_value.dtype, np.number):
+                    if isinstance(metric_value, (str, np.str_)):
+                        if not is_parseable_date(value=metric_value):
+                            raise ge_exceptions.ProfilerExecutionError(
+                                message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
+metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
+"""
+                            )
+                    elif not (
+                        isinstance(metric_value, datetime.datetime)
+                        or np.issubdtype(metric_value.dtype, np.number)
+                    ):
                         raise ge_exceptions.ProfilerExecutionError(
-                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(metric_value.dtype)}" was computed).
+                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
+metrics (value {metric_value} having numpy.dtype "{str(metric_value.dtype)}" and Python type \
+"{str(type(metric_value))}" was computed).
 """
                         )
 
-                    if np.isnan(metric_value):
+                    if pd.isnull(metric_value):
                         if not replace_nan_with_zero:
                             raise ValueError(
                                 f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.

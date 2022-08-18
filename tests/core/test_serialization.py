@@ -10,9 +10,17 @@ from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
+    AbstractConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
+    DatasourceConfig,
     checkpointConfigSchema,
+    datasourceConfigSchema,
+)
+from great_expectations.marshmallow__shade import Schema
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -124,7 +132,7 @@ def test_checkpoint_config_deepcopy(
         }
     )
 
-    nested_checkpoint_config: CheckpointConfig = CheckpointConfig(
+    nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
         template_name="my_nested_checkpoint_template_2",
@@ -257,7 +265,7 @@ def test_checkpoint_config_print(
         }
     )
 
-    nested_checkpoint_config: CheckpointConfig = CheckpointConfig(
+    nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
         template_name="my_nested_checkpoint_template_2",
@@ -352,101 +360,103 @@ def test_checkpoint_config_print(
         }
     )
 
-    expected_nested_checkpoint_config_template_and_runtime_template_name: CheckpointConfig = CheckpointConfig(
-        name="my_nested_checkpoint",
-        config_version=1.0,
-        class_name="Checkpoint",
-        module_name="great_expectations.checkpoint",
-        template_name="my_nested_checkpoint_template_3",
-        run_name_template="runtime_run_template",
-        batch_request=runtime_batch_request.to_dict(),
-        expectation_suite_name="runtime_suite_name",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
+    expected_nested_checkpoint_config_template_and_runtime_template_name = (
+        CheckpointConfig(
+            name="my_nested_checkpoint",
+            config_version=1.0,
+            class_name="Checkpoint",
+            module_name="great_expectations.checkpoint",
+            template_name="my_nested_checkpoint_template_3",
+            run_name_template="runtime_run_template",
+            batch_request=runtime_batch_request.to_dict(),
+            expectation_suite_name="runtime_suite_name",
+            action_list=[
+                {
+                    "name": "store_validation_result",
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
                 },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
+                {
+                    "name": "store_evaluation_params",
+                    "action": {
+                        "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
+                    },
                 },
-            },
-            {
-                "name": "new_action_from_template_2",
-                "action": {"class_name": "Template2SpecialAction"},
-            },
-            {
-                "name": "new_action_from_template_3",
-                "action": {"class_name": "Template3SpecialAction"},
-            },
-            {
-                "name": "update_data_docs_deluxe_runtime",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
+                {
+                    "name": "new_action_from_template_2",
+                    "action": {"class_name": "Template2SpecialAction"},
                 },
+                {
+                    "name": "new_action_from_template_3",
+                    "action": {"class_name": "Template3SpecialAction"},
+                },
+                {
+                    "name": "update_data_docs_deluxe_runtime",
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
+                },
+            ],
+            evaluation_parameters={
+                "environment": "runtime-my_ge_environment",
+                "tolerance": 1.0e-2,
+                "aux_param_0": "runtime-1",
+                "aux_param_1": "1 + 1",
+                "template_1_key": 456,
+                "template_3_key": 123,
+                "new_runtime_eval_param": "bloopy!",
             },
-        ],
-        evaluation_parameters={
-            "environment": "runtime-my_ge_environment",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "runtime-1",
-            "aux_param_1": "1 + 1",
-            "template_1_key": 456,
-            "template_3_key": 123,
-            "new_runtime_eval_param": "bloopy!",
-        },
-        runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 999,
-            "template_1_key": 123,
-            "template_3_key": "bloopy!",
-            "new_runtime_config_key": "bleepy!",
-        },
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource_template_1",
-                    "data_connector_name": "my_special_data_connector_template_1",
-                    "data_asset_name": "users_from_template_1",
-                    "data_connector_query": {"partition_index": -999},
-                }
+            runtime_configuration={
+                "result_format": "BASIC",
+                "partial_unexpected_count": 999,
+                "template_1_key": 123,
+                "template_3_key": "bloopy!",
+                "new_runtime_config_key": "bleepy!",
             },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -1},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -2},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector_2_runtime",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -3},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector_3_runtime",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -4},
-                }
-            },
-        ],
+            validations=[
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource_template_1",
+                        "data_connector_name": "my_special_data_connector_template_1",
+                        "data_asset_name": "users_from_template_1",
+                        "data_connector_query": {"partition_index": -999},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_special_data_connector",
+                        "data_asset_name": "users",
+                        "data_connector_query": {"partition_index": -1},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector",
+                        "data_asset_name": "users",
+                        "data_connector_query": {"partition_index": -2},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_2_runtime",
+                        "data_asset_name": "users",
+                        "data_connector_query": {"partition_index": -3},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_3_runtime",
+                        "data_asset_name": "users",
+                        "data_connector_query": {"partition_index": -4},
+                    }
+                },
+            ],
+        )
     )
 
     assert deep_filter_properties_iterable(
@@ -683,4 +693,82 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
     observed_load = CheckpointConfig(**loaded_data)
     assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
         checkpoint_config
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "config,schema,expected_serialized_config",
+    [
+        pytest.param(
+            DatasourceConfig(
+                class_name="Datasource",
+            ),
+            datasourceConfigSchema,
+            {
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+            },
+            id="DatasourceConfig-minimal",
+        ),
+        pytest.param(
+            DatasourceConfig(
+                name="my_datasource",
+                id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
+                class_name="Datasource",
+            ),
+            datasourceConfigSchema,
+            {
+                "name": "my_datasource",
+                "id": "d3a14abd-d4cb-4343-806e-55b555b15c28",
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+            },
+            id="DatasourceConfig-minimal_with_name_and_id",
+        ),
+        pytest.param(
+            DatasourceConfig(
+                name="my_datasource",
+                class_name="Datasource",
+                data_connectors={
+                    "my_data_connector": DatasourceConfig(
+                        class_name="RuntimeDataConnector",
+                        batch_identifiers=["default_identifier_name"],
+                        id_="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                    )
+                },
+            ),
+            datasourceConfigSchema,
+            {
+                "name": "my_datasource",
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "my_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "module_name": "great_expectations.datasource",
+                        "id": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                        "batch_identifiers": ["default_identifier_name"],
+                    },
+                },
+            },
+            id="DatasourceConfig-nested_data_connector_id",
+        ),
+    ],
+)
+def test_dict_round_trip_serialization(
+    config: AbstractConfig,
+    schema: Schema,
+    expected_serialized_config: dict,
+):
+    observed_dump = datasourceConfigSchema.dump(config)
+
+    round_tripped = config._dict_round_trip(schema, observed_dump)
+
+    assert round_tripped == config.to_json_dict()
+
+    assert (
+        round_tripped.get("id_")
+        == observed_dump.get("id")
+        == expected_serialized_config.get("id")
     )
