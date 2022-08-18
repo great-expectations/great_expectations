@@ -17,6 +17,7 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,
 )
+from great_expectations.util import get_sqlalchemy_subquery_type
 
 
 class QueryPairColumn(QueryMetricProvider):
@@ -52,7 +53,7 @@ class QueryPairColumn(QueryMetricProvider):
                 column_A=column_A, column_B=column_B, active_batch=selectable
             )
         elif isinstance(
-            selectable, sa.sql.Subquery
+            selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
             query = query.format(
                 column_A=column_A, column_B=column_B, active_batch=f"({selectable})"
