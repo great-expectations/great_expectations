@@ -2358,6 +2358,8 @@ evaluation_parameter_store_name: default_evaluation_parameter_store
 expectations_store_name: default_expectations_store
 validations_store_name: default_validations_store
 checkpoint_store_name: default_checkpoint_store
+include_rendered_content:
+    globally: True
 """
     data_context_config_dict = yaml.load(config_yaml_str)
     return DataContextConfig(**data_context_config_dict)
