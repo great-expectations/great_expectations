@@ -13,12 +13,14 @@ import InferredAssetDataConnector from './pandas_components/inferred_asset_data_
 
 <UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/>
 
+This guide will walk you through the process of configuring a Pandas Datasource from scratch, verifying that your configuration is valid, and adding it to your Data Context.  By the end of this guide you will have a Pandas Datasource which you can use in future workflows for creating Expectations and validating data.
+
 <Prerequisites>
 
 - Initialized a Data Context in your current working directory.
-- Have filesystem data available in a sub-folder of your Data Context's root directory.
-- Know [how to choose which DataConnector to use](../how_to_choose_which_dataconnector_to_use.md).
-- Know [how to choose between working with a single or multiple Batches of data](../how_to_choose_between_working_with_a_single_or_multiple_batches_of_data.md).
+- Filesystem data available in a sub-folder of your Data Context's root directory.
+- Familiarity with [how to choose which DataConnector to use](../how_to_choose_which_dataconnector_to_use.md).
+- Familiarity with [how to choose between working with a single or multiple Batches of data](../how_to_choose_between_working_with_a_single_or_multiple_batches_of_data.md).
 
 </Prerequisites>
 
@@ -26,7 +28,7 @@ import InferredAssetDataConnector from './pandas_components/inferred_asset_data_
 
 ### 1. Import necessary modules and initialize your Data Context
 
-```python title="Python code:"
+```python"
 import great_expectations as gx
 from ruamel import yaml
 
@@ -47,8 +49,8 @@ To start, create an empty dictionary.  You will be populating it with keys as yo
 
 At this point, the configuration for your Datasource is merely:
 
-```python title="Python code:"
-datasource_config = {}
+```python"
+datasource_config: dict = {}
 ```
 
 However, from this humble beginning you will be able to build a full Datasource configuration.
@@ -70,17 +72,17 @@ The first key that you will need to define for your new Datasource is its `name`
 
 For the purposes of this example, we will name this Datasource:
 
-```python title="Python dictionary key/value:"
-    "name": "name_of_my_datasource",
+```python"
+    "name": "my_datasource_name",
 ```
 
 You should, however, name your Datsource something more relevant to your data.
 
 At this point, your configuration should now look like:
 
-```python title="Python code:"
-datasource_config = {
-    "name": "name_of_my_datasource",  # Preferably name it something relevant
+```python"
+datasource_config: dict = {
+    "name": "my_datasource_name",  # Preferably name it something relevant
 }
 ```
 
@@ -88,15 +90,15 @@ datasource_config = {
 
 The `class_name` and `module_name` for your Datasource will almost always indicate the `Datasource` class found at `great_expectations.datasource`.  You may replace this with a specialized subclass, or a custom class, but for almost all regular purposes these two default values will suffice.  For the purposes of this guide, add those two values to their corresponding keys.
 
-```python title="Python dictionary key/value:"
+```python"
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
 ```
 
 Your full configuration should now look like:
 
-```python title="Python code:"
-datasource_config = {
+```python"
+datasource_config: dict = {
     "name": "my_datasource_name",  # Preferably name it something relevant
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
@@ -110,7 +112,7 @@ Your Execution Engine is where you will specify that you want this Datasource to
 
 The `execution_engine` key and its corresponding value will therefore look like this:
 
-```python title="Python dictionary key/value:"
+```python"
     "execution_engine": {
         "class_name": "PandasExecutionEngine",
         "module_name": "great_expectations.execution_engine",
@@ -119,8 +121,8 @@ The `execution_engine` key and its corresponding value will therefore look like 
 
 After adding the above snippet to your Datasource configuration, your full configuration dictionary should now look like:
 
-```python title="Python code:"
-datasource_config = {
+```python"
+datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
@@ -143,8 +145,8 @@ For now, start by adding an empty dictionary as the value of the `data_connector
 
 Your current configuration should look like:
 
-```python title="Python code:"
-datasource_config = {
+```python"
+datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
@@ -191,8 +193,8 @@ Remember, the key that you provide for each Data Connector configuration diction
 
 At this point, your configuration should look like:
 
-```python title="Python code:"
-datasource_config = {
+```python"
+datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
@@ -214,20 +216,20 @@ When defining an `InferredAssetFilesystemDataConnector` you will need to provide
 
 For this example, you will be using the `InferredAssetFilesystemDataConnector` as your `class_name`.  This is a subclass of the `InferredAssetDataConnector` that is specialized to support filesystem Execution Engines, such as the `PandasExecutionEngine`.  This key/value entry will therefore look like:
 
-```python title="Python dictionary key/value:"
+```python"
         "class_name": "InferredAssetFilesystemDataConnector",
 ```
 
 For the base directory, you will want to put the relative path of your data from the folder that contains your Data Context.  In this example we will use the same path that was used in the [Getting Started Tutorial, Step 2: Connect to Data](../../../tutorials/getting_started/tutorial_connect_to_data.md).  Since we are manually entering this value rather than letting the CLI generate it, the key/value pair will look like:
 
-```python title="Python dictionary key/value:"
+```python"
         "base_directory": "./data",
 ```
 
 With these values added, along with a blank dictionary for `default_regex` (we will define it in the next step), your full configuration should now look like:
 
-```python title="Python code:"
-datasource_config = {
+```python"
+datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
@@ -269,11 +271,11 @@ datasource_config = {
   <TabItem value="inferred">
 
 
-In an Inferred Asset Data Connector for filesystem data, a regular expression is used to group the files into batches for a Data Asset.  This is done with the value we will define for the Data Connector's `default_regex` key.  The value for this key will consist of a dictionary that contains two values:
+In an Inferred Asset Data Connector for filesystem data, a regular expression is used to group the files into Batches for a Data Asset.  This is done with the value we will define for the Data Connector's `default_regex` key.  The value for this key will consist of a dictionary that contains two values:
 - `pattern`: This is the regex pattern that will define your Data Asset's potential Batch or Batches.
 - `group_names`: This is a list of names that correspond to the groups you defined in `pattern`'s regular expression.
 
-The `pattern` in `default_regex` will be matched against the files in your `base_directory`, and everything that matches against the first group in your regex will become a batch in a Data Asset that possesses the name of the matching text.  Any files that have a matching string for the first group will become Batches in the same Data Asset.
+The `pattern` in `default_regex` will be matched against the files in your `base_directory`, and everything that matches against the first group in your regex will become a Batch in a Data Asset that possesses the name of the matching text.  Any files that have a matching string for the first group will become Batches in the same Data Asset.
 
 This means that when configuring your Data Connector's regular expression, you have the option to design it so that the Data Connector is only capable of returning a single Batch per Data Asset, or so that it is capable of returning multiple Batches grouped into individual Data Assets.  Each type of configuration is useful in certain cases, so we will provide examples of both.
 
@@ -299,7 +301,7 @@ If you are uncertain as to which type of configuration is best for your use case
 
 Now that you have a full Datasource configuration, you can confirm that it is valid by testing it with the `.test_yaml_config(...)` method.  To do this, execute the Python code:
 
-```python title="Python code:"
+```python"
 data_context.test_yaml_config(yaml.dump(datasource_config))
 ```
 
@@ -316,7 +318,7 @@ For more information on `test_yaml_config`, please see our guide on [how to conf
 
 Now that you have verified that you have a valid configuration you can add your new Datasource to your Data Context with the command:
  
-```python title="Python code:"
+```python"
 data_context.add_datasource(**datasource_config)
 ```
 
@@ -330,7 +332,7 @@ If the value of `datasource_config["name"]` corresponds to a Datasource that is 
 
 If you want to ensure that you only add a Datasource when it won't overwrite an existing one, you can use the following code instead:
 
-```python title="Python code:"
+```python"
 # add_datasource only if it doesn't already exist in your Data Context
 try:
     data_context.get_datasource(datasource_config["name"])
