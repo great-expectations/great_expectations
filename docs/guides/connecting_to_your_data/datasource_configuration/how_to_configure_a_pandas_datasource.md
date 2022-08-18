@@ -388,7 +388,11 @@ For a Datasource, this includes:
 
 For more information on `test_yaml_config`, please see our guide on [how to configure `DataContext` components using `test_yaml_config`](../../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
 
-### 10. Add your new Datasource to your Data Context
+### 10. (Optional) Add more Data Connectors your configuration
+
+The `data_connectors` dictionary in your `datasource_config` can contain multiple entries.  If you want to add additional Data Connectors, just go through the process starting at step 7 again.
+
+### 11. Add your new Datasource to your Data Context
 
 Now that you have verified that you have a valid configuration you can add your new Datasource to your Data Context with the command:
  
