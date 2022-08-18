@@ -14,6 +14,11 @@ from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import RenderedAtomicContent
 
+try:
+    from typing import TypedDict  # type: ignore[attr-defined]
+except ImportError:
+    from typing_extensions import TypedDict
+
 logger = logging.getLogger(__name__)
 
 
@@ -24,6 +29,11 @@ ExpectationValidationResultRenderedContent = namedtuple(
         "ExpectationValidationResultRenderedContent",
     ],
 )
+
+
+class InlineRendererConfig(TypedDict):
+    class_name: str
+    render_object: Union[ExpectationConfiguration, ExpectationValidationResult]
 
 
 class InlineRenderer(Renderer):
