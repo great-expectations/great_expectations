@@ -36,6 +36,8 @@ from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
+    from io import TextIOWrapper
+
     from great_expectations.checkpoint import Checkpoint
 
 yaml = YAML()
@@ -98,9 +100,11 @@ class BaseYamlConfig(SerializableDictDot):
             return cls.get_config_class().schema_instance
 
     @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
+    def from_commented_map(
+        cls, commented_map: Union[CommentedMap, Dict]
+    ) -> "BaseYamlConfig":
         try:
-            schema_instance: Any = cls._get_schema_instance()
+            schema_instance: Schema = cls._get_schema_instance()
             config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
@@ -118,7 +122,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile: str) -> None:
+    def to_yaml(self, outfile: Union[str, "TextIOWrapper"]) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
@@ -367,10 +371,11 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class DataConnectorConfig(SerializableDictDot):
-    def __init__(
+class DataConnectorConfig(AbstractConfig):
+    def __init__(  # noqa: C901 - 20
         self,
         class_name,
+        id_: Optional[str] = None,
         module_name=None,
         credentials=None,
         assets=None,
@@ -446,6 +451,8 @@ class DataConnectorConfig(SerializableDictDot):
         if delimiter is not None:
             self.delimiter = delimiter
 
+        super().__init__(id_=id_)
+
         # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -471,9 +478,15 @@ class DataConnectorConfig(SerializableDictDot):
         return serializeable_dict
 
 
-class DataConnectorConfigSchema(Schema):
+class DataConnectorConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
+
+    id_ = fields.String(
+        required=False,
+        allow_none=True,
+        data_key="id",
+    )
 
     class_name = fields.String(
         required=True,
@@ -834,7 +847,7 @@ configuration to continue.
 
 
 class DatasourceConfig(AbstractConfig):
-    def __init__(
+    def __init__(  # noqa: C901 - 21
         self,
         name: Optional[
             str
@@ -2083,7 +2096,7 @@ class DataContextConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = DataContextConfigSchema
 
-    def __init__(
+    def __init__(  # noqa: C901 - 21
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
@@ -2808,8 +2821,8 @@ class CheckpointConfig(BaseYamlConfig):
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
             )
-            validation_batch_request: BatchRequestBase = substituted_validation_dict.get(
-                "batch_request"  # type: ignore[assignment]
+            validation_batch_request: BatchRequestBase = substituted_validation_dict.get(  # type: ignore[assignment]
+                "batch_request"
             )
             validation_dict["batch_request"] = validation_batch_request
             validation_expectation_suite_name: str = substituted_validation_dict.get(  # type: ignore[assignment]
@@ -2818,14 +2831,14 @@ class CheckpointConfig(BaseYamlConfig):
             validation_dict[
                 "expectation_suite_name"
             ] = validation_expectation_suite_name
-            validation_expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
-                "expectation_suite_ge_cloud_id"  # type: ignore[assignment]
+            validation_expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(  # type: ignore[assignment]
+                "expectation_suite_ge_cloud_id"
             )
             validation_dict[
                 "expectation_suite_ge_cloud_id"
             ] = validation_expectation_suite_ge_cloud_id
-            validation_action_list: list = substituted_validation_dict.get(
-                "action_list"  # type: ignore[assignment]
+            validation_action_list: list = substituted_validation_dict.get(  # type: ignore[assignment]
+                "action_list"
             )
             validation_dict["action_list"] = validation_action_list
 

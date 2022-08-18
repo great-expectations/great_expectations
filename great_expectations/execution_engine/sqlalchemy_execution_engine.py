@@ -918,7 +918,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
 
-            domain_id = compute_domain_kwargs.to_id()
+            domain_id = IDDict.convert_dictionary_to_id_dict(
+                data=convert_to_json_serializable(data=compute_domain_kwargs)
+            ).to_id()
             if domain_id not in queries:
                 queries[domain_id] = {
                     "select": [],
@@ -967,7 +969,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     ).fetchall()
 
                 logger.debug(
-                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
+                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"
                 )
             except OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
@@ -1142,7 +1144,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         batch_data: Optional[SqlAlchemyBatchData] = None
-        batch_markers: BatchMarkers = BatchMarkers(
+        batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"

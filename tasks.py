@@ -9,6 +9,7 @@ To show all available tasks `invoke --list`
 To show task help page `invoke <NAME> --help`
 """
 import json
+import os
 import pathlib
 import shutil
 
@@ -119,40 +120,11 @@ def type_coverage(ctx):
         raise invoke.Exit(message=str(err), code=1)
 
 
-# numbers next to each package represent the last known number of typing errors.
-# when errors reach 0 please uncomment the module so it becomes type-checked by default.
-DEFAULT_PACKAGES_TO_TYPE_CHECK = [
-    # "checkpoint",  # 78
-    # "cli",  # 237
-    # "core",  # 242
-    "data_asset",  # 0
-    # "data_context",  # 242
-    # "data_context/data_context",  # 195
-    # "data_context/store", # 83
-    "data_context/types",  # 0
-    # "datasource",  # 98
-    "exceptions",  # 0
-    # "execution_engine",  # 109
-    # "expectations",  # 462
-    "jupyter_ux",  # 0
-    # "marshmallow__shade",  # 14
-    "profile",  # 0
-    # "render",  # 87
-    # "rule_based_profiler",  # 469
-    "self_check",  # 0
-    "types",  # 0
-    # "validation_operators", # 47
-    # "validator",  # 46
-    # util.py # 28
-]
-
-
 @invoke.task(
     aliases=["types"],
     iterable=["packages"],
     help={
-        "packages": f"One or more packages to type-check with mypy. (Default: {DEFAULT_PACKAGES_TO_TYPE_CHECK})",
-        "show-default-packages": "Print the default packages to type-check and then exit.",
+        "packages": "One or more `great_expectatations` sub-packages to type-check with mypy.",
         "install-types": "Automatically install any needed types from `typeshed`.",
         "daemon": "Run mypy in daemon mode with faster analysis."
         " The daemon will be started and re-used for subsequent calls."
@@ -164,7 +136,6 @@ def type_check(
     ctx,
     packages,
     install_types=False,
-    show_default_packages=False,
     daemon=False,
     clear_cache=False,
 ):
@@ -178,21 +149,11 @@ def type_check(
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 
-    if show_default_packages:
-        # Use this to keep the Type-checking section of the docs up to date.
-        # https://docs.greatexpectations.io/docs/contributing/style_guides/code_style#type-checking
-        print("\n".join(DEFAULT_PACKAGES_TO_TYPE_CHECK))
-        raise invoke.Exit(code=0)
-
     if daemon:
         bin = "dmypy run --"
     else:
         bin = "mypy"
 
-    packages = packages or DEFAULT_PACKAGES_TO_TYPE_CHECK
-    # once we have sunsetted `type-coverage` and our typing has matured we should define
-    # our packages to exclude (if any) in the mypy config file.
-    # https://mypy.readthedocs.io/en/stable/config_file.html#confval-exclude
     ge_pkgs = [f"great_expectations/{p}" for p in packages]
     cmds = [
         bin,
@@ -239,3 +200,74 @@ def mv_usage_stats_json(ctx):
     cmd = cmd.format(outfile)
     ctx.run(cmd)
     print(f"'{outfile}' copied to dbfs.")
+
+
+PYTHON_VERSION_DEFAULT: float = 3.8
+
+
+@invoke.task(
+    help={
+        "name": "Docker image name.",
+        "tag": "Docker image tag.",
+        "build": "If True build the image, otherwise run it. Defaults to False.",
+        "detach": "Run container in background and print container ID. Defaults to False.",
+        "py": f"version of python to use. Default is {PYTHON_VERSION_DEFAULT}",
+        "cmd": "Command for docker image. Default is bash.",
+    }
+)
+def docker(
+    ctx,
+    name="gx38local",
+    tag="latest",
+    build=False,
+    detach=False,
+    cmd="bash",
+    py=PYTHON_VERSION_DEFAULT,
+):
+    """
+    Build or run gx docker image.
+    """
+    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    curdir = os.path.realpath(os.getcwd())
+    if filedir != curdir:
+        raise invoke.Exit(
+            "The docker task must be invoked from the same directory as the task.py file at the top of the repo.",
+            code=1,
+        )
+
+    cmds = ["docker"]
+
+    if build:
+        cmds.extend(
+            [
+                "buildx",
+                "build",
+                "-f",
+                "docker/Dockerfile.tests",
+                f"--tag {name}:{tag}",
+                *[
+                    f"--build-arg {arg}"
+                    for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]
+                ],
+                ".",
+            ]
+        )
+
+    else:
+        cmds.append("run")
+        if detach:
+            cmds.append("--detach")
+        cmds.extend(
+            [
+                "-it",
+                "--rm",
+                "--mount",
+                f"type=bind,source={filedir},target=/great_expectations",
+                "-w",
+                "/great_expectations",
+                f"{name}:{tag}",
+                f"{cmd}",
+            ]
+        )
+
+    ctx.run(" ".join(cmds), echo=True, pty=True)

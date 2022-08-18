@@ -24,7 +24,7 @@ def datasource_store_ge_cloud_backend(
         "suppress_store_backend_id": True,
     }
 
-    store: DatasourceStore = DatasourceStore(
+    store = DatasourceStore(
         store_name=datasource_store_name,
         store_backend=ge_cloud_store_backend_config,
     )

@@ -115,7 +115,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
-    max_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    max_range_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="max_range_estimator",
@@ -141,7 +141,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         max_range_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_max_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
@@ -150,13 +150,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                 "variables": {
                     "strict_min": False,
                     "strict_max": False,
-                    "false_positive_rate": 0.05,
-                    "estimator": "bootstrap",
-                    "n_resamples": 9999,
-                    "random_seed": None,
-                    "quantile_statistic_interpolation_method": "nearest",
-                    "quantile_bias_correction": False,
-                    "quantile_bias_std_error_ratio_threshold": None,
+                    "estimator": "exact",
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": None,

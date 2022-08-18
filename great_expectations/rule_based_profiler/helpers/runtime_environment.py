@@ -4,6 +4,10 @@ from typing import Any, Dict, List, Optional
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.rule_based_profiler.helpers.util import (
+    convert_variables_to_dict,
+)
+from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
@@ -47,6 +51,8 @@ class RuntimeEnvironmentDomainTypeDirectives(SerializableDictDot):
 
 
 def build_variables_directives(
+    exact_estimation: bool,
+    rules: List[Rule],
     **kwargs: dict,
 ) -> List[RuntimeEnvironmentVariablesDirectives]:
     """
@@ -54,14 +60,33 @@ def build_variables_directives(
     components of "Rule" objects, identified by respective "rule_name" property as indicated, and return each of these
     directives as part of dedicated "RuntimeEnvironmentVariablesDirectives" typed object for every "rule_name" (string).
     """
+    directives: Dict[str, Dict[str, Any]]
+    if exact_estimation:
+        directives = {}
+        rule_variables_configs: Optional[Dict[str, Any]]
+        rule: Rule
+        for rule in rules:
+            rule_variables_configs = convert_variables_to_dict(variables=rule.variables)
+            if rule.name in kwargs:
+                rule_variables_configs.update(kwargs[rule.name])
+
+            rule_variables_configs.update(
+                {
+                    "estimator": "exact",
+                }
+            )
+
+            directives[rule.name] = rule_variables_configs
+    else:
+        directives = kwargs
+
     rule_name: str
-    variables: Optional[Dict[str, Any]]
     return [
         RuntimeEnvironmentVariablesDirectives(
             rule_name=rule_name,
             variables=variables,
         )
-        for rule_name, variables in kwargs.items()
+        for rule_name, variables in directives.items()
     ]
 
 
