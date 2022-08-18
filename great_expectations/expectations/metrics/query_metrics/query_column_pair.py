@@ -20,8 +20,8 @@ from great_expectations.expectations.metrics.query_metric_provider import (
 from great_expectations.util import get_sqlalchemy_subquery_type
 
 
-class QueryPairColumn(QueryMetricProvider):
-    metric_name = "query.pair_column"
+class QueryColumnPair(QueryMetricProvider):
+    metric_name = "query.column_pair"
     value_keys = (
         "column_A",
         "column_B",

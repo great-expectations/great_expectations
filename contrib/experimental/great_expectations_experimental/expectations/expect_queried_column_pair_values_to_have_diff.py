@@ -15,12 +15,16 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     QueryExpectation,
 )
+from great_expectations.expectations.metrics.import_manager import (
+    pyspark_sql_Row,
+    sqlalchemy_engine_Row,
+)
 
 
-class ExpectQueriedPairColumnValuesToHaveDiff(QueryExpectation):
-    """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
+class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
+    """Expect the frequency of occurrences of a specified value in a queried column to be at least <mostly> percent of values in that column."""
 
-    metric_dependencies = ("query.pair_column",)
+    metric_dependencies = ("query.column_pair",)
 
     query = """
             SELECT {column_A} - {column_B} as diff
@@ -67,15 +71,14 @@ class ExpectQueriedPairColumnValuesToHaveDiff(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        diff: Union[float, int] = configuration["kwargs"].get("diff")
+        mostly: str = configuration["kwargs"].get("mostly")
+        strict: bool = configuration["kwargs"].get("strict")
+        query_result: Union[sqlalchemy_engine_Row, pyspark_sql_Row] = metrics.get(
+            "query.column_pair"
+        )
 
-        diff = configuration["kwargs"].get("diff")
-        mostly = configuration["kwargs"].get("mostly")
-        strict = configuration["kwargs"].get("strict")
-        query_result = metrics.get("query.pair_column")
-
-        if mostly == 1:
-            success = all([(abs(x[0]) == diff) for x in query_result])
-        elif mostly != 1 and strict is True:
+        if mostly != 1 and strict is True:
             success = (
                 sum([(abs(x[0]) == diff) for x in query_result]) / len(query_result)
             ) > mostly
@@ -91,15 +94,10 @@ class ExpectQueriedPairColumnValuesToHaveDiff(QueryExpectation):
 
     examples = [
         {
-            "data": [
-                {
-                    "dataset_name": "test",
-                    "data": {
-                        "col1": [1, 2, 2, 3, 4],
-                        "col2": [2, 3, 3, 4, 2],
-                    },
-                },
-            ],
+            "data": {
+                "col1": [1, 2, 2, 3, 4],
+                "col2": [2, 3, 3, 4, 2],
+            },
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -129,6 +127,42 @@ class ExpectQueriedPairColumnValuesToHaveDiff(QueryExpectation):
                 },
             ],
         },
+        {
+            "data": {
+                "col1": [1, 2, 2, 3, 4],
+                "col2": [2, 3, 3, 4, 2],
+                "col3": [True, False, "a", 3, 5],
+                "col4": [0.1, 22.3, 4, 4.2, 6],
+            },
+            "tests": [
+                {
+                    "title": "mixed_types_positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_A": "col1",
+                        "column_B": "col3",
+                        "diff": 2,
+                        "mostly": 0.4,
+                    },
+                    "out": {"success": True},
+                    "only_for": ["sqlite"],
+                },
+                {
+                    "title": "floating_point_negative_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column_A": "col2",
+                        "column_B": "col4",
+                        "diff": 1,
+                        "mostly": 0.4,
+                    },
+                    "out": {"success": False},
+                    "only_for": ["sqlite"],
+                },
+            ],
+        },
     ]
 
     # This dictionary contains metadata for display in the public gallery
@@ -139,4 +173,4 @@ class ExpectQueriedPairColumnValuesToHaveDiff(QueryExpectation):
 
 
 if __name__ == "__main__":
-    ExpectQueriedPairColumnValuesToHaveDiff().print_diagnostic_checklist()
+    ExpectQueriedColumnPairValuesToHaveDiff().print_diagnostic_checklist()
