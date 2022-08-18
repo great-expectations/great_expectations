@@ -1349,7 +1349,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         res = self._data_context.create_expectation_suite(
             expectation_suite_name,
             overwrite_existing=overwrite_existing,
-            ge_cloud_id=ge_cloud_id,
             **kwargs,
         )
         self._synchronize_self_with_underlying_data_context()

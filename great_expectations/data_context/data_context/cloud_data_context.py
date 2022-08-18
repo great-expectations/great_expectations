@@ -163,7 +163,6 @@ class CloudDataContext(AbstractDataContext):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
@@ -182,6 +181,7 @@ class CloudDataContext(AbstractDataContext):
         expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
+        ge_cloud_id = expectation_suite.ge_cloud_id
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
@@ -191,8 +191,8 @@ class CloudDataContext(AbstractDataContext):
             and not overwrite_existing
         ):
             raise ge_exceptions.DataContextError(
-                "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(ge_cloud_id)
+                f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
             )
         self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
