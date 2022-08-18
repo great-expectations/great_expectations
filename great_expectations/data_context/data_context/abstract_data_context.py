@@ -217,7 +217,7 @@ class AbstractDataContext(ABC):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        include_rendered_content: bool = False,
+        include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
         """
@@ -778,7 +778,7 @@ class AbstractDataContext(ABC):
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
-        include_rendered_content: bool = False,
+        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
         """
@@ -864,6 +864,9 @@ class AbstractDataContext(ABC):
                         **kwargs,
                     )
                 )
+
+        if include_rendered_content is None:
+            include_rendered_content = self.variables.include_rendered_content
 
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,

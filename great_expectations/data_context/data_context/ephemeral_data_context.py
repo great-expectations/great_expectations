@@ -71,7 +71,7 @@ class EphemeralDataContext(AbstractDataContext):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        include_rendered_content: bool = False,
+        include_rendered_content: Optional[bool] = None,
         **kwargs: dict,
     ) -> None:
         """Save the provided expectation suite into the DataContext.

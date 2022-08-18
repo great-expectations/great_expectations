@@ -8,6 +8,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     ConcurrencyConfig,
     DataContextConfig,
+    IncludeRenderedContentConfig,
     NotebookConfig,
     ProgressBarsConfig,
 )
@@ -42,6 +43,7 @@ class DataContextVariableSchema(str, enum.Enum):
     ANONYMOUS_USAGE_STATISTICS = "anonymous_usage_statistics"
     CONCURRENCY = "concurrency"
     PROGRESS_BARS = "progress_bars"
+    INCLUDE_RENDERED_CONTENT = "include_rendered_content"
 
     @classmethod
     def has_value(cls, value: str) -> bool:
@@ -269,6 +271,19 @@ class DataContextVariables(ABC):
         self._set(
             DataContextVariableSchema.PROGRESS_BARS,
             progress_bars,
+        )
+
+    @property
+    def include_rendered_content(self) -> Optional[IncludeRenderedContentConfig]:
+        return self._get(DataContextVariableSchema.INCLUDE_RENDERED_CONTENT)
+
+    @include_rendered_content.setter
+    def include_rendered_content(
+        self, include_rendered_content: IncludeRenderedContentConfig
+    ) -> None:
+        self._set(
+            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
+            include_rendered_content,
         )
 
 

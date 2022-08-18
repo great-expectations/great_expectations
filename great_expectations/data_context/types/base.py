@@ -1287,6 +1287,24 @@ class ProgressBarsConfigSchema(Schema):
     metric_calculations = fields.Boolean(default=True)
 
 
+class IncludeRenderedContentConfig(DictDot):
+    def __init__(
+        self,
+        globally: bool = False,
+        expectation_suite: bool = False,
+        expectation_validation_result: bool = False,
+    ) -> None:
+        self.globally = globally
+        self.expectation_suite = expectation_suite
+        self.expectation_validation_result = expectation_validation_result
+
+
+class IncludeRenderedContentConfigSchema(Schema):
+    globally = fields.Boolean(default=False)
+    expectation_suite = fields.Boolean(default=False)
+    expectation_validation_result = fields.Boolean(default=False)
+
+
 class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
@@ -2126,6 +2144,7 @@ class DataContextConfig(BaseYamlConfig):
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
+        include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
         # Set defaults
         if config_version is None:
@@ -2180,6 +2199,7 @@ class DataContextConfig(BaseYamlConfig):
             concurrency = ConcurrencyConfig(**concurrency)
         self.concurrency = concurrency
         self.progress_bars = progress_bars
+        self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)
 
