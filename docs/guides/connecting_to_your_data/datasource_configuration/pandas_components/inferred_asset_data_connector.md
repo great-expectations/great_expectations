@@ -54,7 +54,7 @@ With all of these values put together into a single dictionary, your Data Connec
 ```python"
         "name_of_my_inferred_data_connector": {
             "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "./data",
+            "base_directory": "../data",
             "default_regex": {
                 "pattern": "(.*)\\.csv",
                 "group_names": ["data_asset_name"],
@@ -76,7 +76,7 @@ datasource_config = {
     "data_connectors": {
         "name_of_my_inferred_data_connector": {
             "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "./data",
+            "base_directory": "../data",
             "default_regex": {
                 "pattern": "(.*)\\.csv",
                 "group_names": ["data_asset_name"],
@@ -135,7 +135,7 @@ With all of these values put together into a single dictionary, your Data Connec
 ```python"
         "name_of_my_inferred_data_connector": {
             "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "./data",
+            "base_directory": "../data",
             "default_regex": {
                 "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
                 "group_names": ["data_asset_name", "month"],
@@ -157,7 +157,7 @@ datasource_config = {
     "data_connectors": {
         "name_of_my_inferred_data_connector": {
             "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "./data",
+            "base_directory": "../data",
             "default_regex": {
                 "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
                 "group_names": ["data_asset_name", "month"],
