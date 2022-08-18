@@ -6,7 +6,6 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 )
 
 
-# noinspection PyAbstractClass
 class OnboardingDataAssistantResult(DataAssistantResult):
     @property
     def metric_expectation_map(self) -> Dict[Union[str, Tuple[str]], str]:
