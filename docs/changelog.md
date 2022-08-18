@@ -17,6 +17,7 @@ title: Changelog
 * [BUGFIX] Return appropriate subquery type to Query Metrics for SA version (#5783)
 * [DOCS] added guide how to use gx with emr serverless (#5623) (thanks @bvolodarskiy)
 * [DOCS] DOC-362: how to choose between working with a single or multiple batches of data (#5745)
+* [MAINTENANCE] Temporarily xfail E2E Cloud tests due to Azure env var issues (#5787)
 * [MAINTENANCE] Add ids to `DataConnectorConfig` (#5740)
 * [MAINTENANCE] Rename GX Cloud "contract" resource to "checkpoint" (#5748)
 * [MAINTENANCE] Rename GX Cloud "suite_validation_result" resource to "validation_result" (#5749)
