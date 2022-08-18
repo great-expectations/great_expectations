@@ -239,24 +239,20 @@ class CloudDataContext(AbstractDataContext):
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
         )
-        if self.expectations_store.has_key(key):  # noqa: W601
-            expectations_schema_dict: dict = cast(
-                dict, self.expectations_store.get(key)
-            )
-            # create the ExpectationSuite from constructor
-            return ExpectationSuite(**expectations_schema_dict, data_context=self)
-
-        else:
+        if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
                 f"expectation_suite {expectation_suite_name} not found"
             )
+
+        expectations_schema_dict: dict = cast(dict, self.expectations_store.get(key))
+        # create the ExpectationSuite from constructor
+        return ExpectationSuite(**expectations_schema_dict, data_context=self)
 
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        ge_cloud_id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> None:
         """Save the provided expectation suite into the DataContext.
@@ -270,6 +266,7 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             None
         """
+        ge_cloud_id = expectation_suite.ge_cloud_id
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id
