@@ -27,6 +27,7 @@ from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     GeCloudConfig,
+    IncludeRenderedContentConfig,
     NotebookConfig,
     NotebookTemplateConfig,
     ProgressBarsConfig,
@@ -200,6 +201,15 @@ def progress_bars() -> ProgressBarsConfig:
     )
 
 
+@pytest.fixture
+def include_rendered_content() -> IncludeRenderedContentConfig:
+    return IncludeRenderedContentConfig(
+        globally=True,
+        expectation_validation_result=False,
+        expectation_suite=False,
+    )
+
+
 @pytest.mark.parametrize(
     "target_attr",
     [
@@ -255,6 +265,10 @@ def progress_bars() -> ProgressBarsConfig:
         pytest.param(
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars getter",
+        ),
+        pytest.param(
+            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
+            id="include_rendered_content getter",
         ),
     ],
 )
@@ -369,6 +383,11 @@ def test_data_context_variables_get_with_substitutions(
             progress_bars,
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars setter",
+        ),
+        pytest.param(
+            include_rendered_content,
+            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
+            id="include_rendered_content setter",
         ),
     ],
 )

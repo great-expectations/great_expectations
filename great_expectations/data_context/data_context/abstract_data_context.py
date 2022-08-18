@@ -865,8 +865,14 @@ class AbstractDataContext(ABC):
                     )
                 )
 
-        if include_rendered_content is None:
-            include_rendered_content = self.variables.include_rendered_content
+        if include_rendered_content is None and (
+            self.variables.include_rendered_content.expectation_validation_result
+            is True
+            or self.variables.include_rendered_content.globally is True
+        ):
+            include_rendered_content = True
+        else:
+            include_rendered_content = False
 
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
@@ -878,7 +884,7 @@ class AbstractDataContext(ABC):
         self,
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
-        include_rendered_content: bool = False,
+        include_rendered_content: bool,
         **kwargs: Optional[dict],
     ) -> Validator:
         """
