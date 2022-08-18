@@ -1434,6 +1434,9 @@ class DataContextConfigSchema(Schema):
     progress_bars = fields.Nested(
         ProgressBarsConfigSchema, required=False, allow_none=True
     )
+    include_rendered_content = fields.Nested(
+        IncludeRenderedContentConfigSchema, required=False, allow_none=True
+    )
     concurrency = fields.Nested(
         ConcurrencyConfigSchema, required=False, allow_none=True
     )
@@ -1443,6 +1446,7 @@ class DataContextConfigSchema(Schema):
     REMOVE_KEYS_IF_NONE = [
         "concurrency",  # 0.13.33
         "progress_bars",  # 0.13.49
+        "include_rendered_content",  # 0.15.19
     ]
 
     # noinspection PyUnusedLocal
@@ -2199,12 +2203,6 @@ class DataContextConfig(BaseYamlConfig):
             concurrency = ConcurrencyConfig(**concurrency)
         self.concurrency = concurrency
         self.progress_bars = progress_bars
-        if include_rendered_content is None:
-            include_rendered_content = IncludeRenderedContentConfig()
-        elif isinstance(include_rendered_content, dict):
-            include_rendered_content = IncludeRenderedContentConfig(
-                **include_rendered_content
-            )
         self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)
