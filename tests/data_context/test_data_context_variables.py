@@ -72,6 +72,7 @@ def data_context_config_dict() -> dict:
         "notebooks": None,
         "concurrency": None,
         "progress_bars": None,
+        "include_rendered_content": None,
     }
     return config
 
@@ -204,7 +205,7 @@ def progress_bars() -> ProgressBarsConfig:
 @pytest.fixture
 def include_rendered_content() -> IncludeRenderedContentConfig:
     return IncludeRenderedContentConfig(
-        globally=True,
+        globally=False,
         expectation_validation_result=False,
         expectation_suite=False,
     )
@@ -504,7 +505,10 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 
 @pytest.mark.integration
 def test_file_data_context_variables_e2e(
-    monkeypatch, file_data_context: FileDataContext, progress_bars: ProgressBarsConfig
+    monkeypatch,
+    file_data_context: FileDataContext,
+    progress_bars: ProgressBarsConfig,
+    include_rendered_content: IncludeRenderedContentConfig,
 ) -> None:
     """
     What does this test do and why?
@@ -517,10 +521,16 @@ def test_file_data_context_variables_e2e(
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
     """
-    # Prepare updated progress bars to set and serialize to disk
+    # Prepare updated progress_bars to set and serialize to disk
     updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
     updated_progress_bars.globally = False
     updated_progress_bars.profilers = True
+
+    # Prepare updated include_rendered_content to set and serialize to disk
+    updated_include_rendered_content: IncludeRenderedContentConfig = copy.deepcopy(
+        include_rendered_content
+    )
+    updated_include_rendered_content.expectation_validation_result = True
 
     # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
@@ -529,6 +539,9 @@ def test_file_data_context_variables_e2e(
 
     # Set attributes defined above
     file_data_context.variables.progress_bars = updated_progress_bars
+    file_data_context.variables.include_rendered_content = (
+        updated_include_rendered_content
+    )
     file_data_context.variables.plugins_directory = f"${env_var_name}"
     file_data_context.variables.save_config()
 
@@ -542,6 +555,10 @@ def test_file_data_context_variables_e2e(
         config_saved_to_disk: DataContextConfig = DataContextConfig(**contents)
 
     assert config_saved_to_disk.progress_bars == updated_progress_bars.to_dict()
+    assert (
+        config_saved_to_disk.include_rendered_content.to_dict()
+        == updated_include_rendered_content.to_dict()
+    )
     assert (
         file_data_context.variables.plugins_directory == value_associated_with_env_var
     )
