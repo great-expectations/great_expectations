@@ -55,7 +55,6 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
 )
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
-    default_field,
     get_or_create_expectation_suite,
     sanitize_parameter_name,
 )
@@ -110,42 +109,6 @@ class DataAssistantResult(SerializableDictDot):
     ("RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
     Use "_batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
     """
-
-    # A mapping is defined for which metrics to plot and their associated expectations
-    METRIC_EXPECTATION_MAP: Dict[Union[str, Tuple[str]], str] = default_field(
-        {
-            "table.columns": "expect_table_columns_to_match_set",
-            "table.row_count": "expect_table_row_count_to_be_between",
-            "column.distinct_values.count": "expect_column_unique_value_count_to_be_between",
-            "column.min": "expect_column_min_to_be_between",
-            "column.max": "expect_column_max_to_be_between",
-            "column.mean": "expect_column_mean_to_be_between",
-            "column.median": "expect_column_median_to_be_between",
-            "column.standard_deviation": "expect_column_stdev_to_be_between",
-            "column.quantile_values": "expect_column_quantile_values_to_be_between",
-            ("column.min", "column.max"): "expect_column_values_to_be_between",
-        }
-    )
-
-    # A mapping is defined for the Altair data type associated with each metric
-    # Altair data types can be one of:
-    #     - Nominal: Metric is a discrete unordered category
-    #     - Ordinal: Metric is a discrete ordered quantity
-    #     - Quantitative: Metric is a continuous real-valued quantity
-    #     - Temporal: Metric is a time or date value
-    METRIC_TYPES: Dict[str, AltairDataTypes] = default_field(
-        {
-            "table.columns": AltairDataTypes.NOMINAL,
-            "table.row_count": AltairDataTypes.QUANTITATIVE,
-            "column.distinct_values.count": AltairDataTypes.QUANTITATIVE,
-            "column.min": AltairDataTypes.QUANTITATIVE,
-            "column.max": AltairDataTypes.QUANTITATIVE,
-            "column.mean": AltairDataTypes.QUANTITATIVE,
-            "column.median": AltairDataTypes.QUANTITATIVE,
-            "column.standard_deviation": AltairDataTypes.QUANTITATIVE,
-            "column.quantile_values": AltairDataTypes.QUANTITATIVE,
-        }
-    )
 
     ALLOWED_KEYS = {
         "_batch_id_to_batch_identifier_display_name_map",
@@ -337,17 +300,17 @@ class DataAssistantResult(SerializableDictDot):
     def _get_metric_expectation_map(self) -> Dict[Tuple[str], str]:
         if not all(
             [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
-            for metric_names in self.METRIC_EXPECTATION_MAP.keys()
+            for metric_names in self.metric_expectation_map.keys()
         ):
             raise ge_exceptions.DataAssistantResultExecutionError(
-                "All METRIC_EXPECTATION_MAP keys must be of type str or tuple."
+                "All metric_expectation_map keys must be of type str or tuple."
             )
 
         return {
             (
                 (metric_names,) if isinstance(metric_names, str) else metric_names
             ): expectation_name
-            for metric_names, expectation_name in self.METRIC_EXPECTATION_MAP.items()
+            for metric_names, expectation_name in self.metric_expectation_map.items()
         }
 
     def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:
@@ -3967,7 +3930,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_sanitized_metric_names_from_altair_type(
         self, altair_type: AltairDataTypes
     ) -> Set[str]:
-        metric_types: Dict[str, AltairDataTypes] = self.METRIC_TYPES
+        metric_types: Dict[str, AltairDataTypes] = self.metric_types
         return {
             sanitize_parameter_name(name=metric)
             for metric in metric_types.keys()
