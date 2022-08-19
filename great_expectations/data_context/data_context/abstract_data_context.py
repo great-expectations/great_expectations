@@ -865,14 +865,15 @@ class AbstractDataContext(ABC):
                     )
                 )
 
-        if include_rendered_content is None and (
-            self.variables.include_rendered_content.expectation_validation_result
-            is True
-            or self.variables.include_rendered_content.globally is True
-        ):
-            include_rendered_content = True
-        else:
-            include_rendered_content = False
+        if include_rendered_content is None:
+            if (
+                self.variables.include_rendered_content.expectation_validation_result
+                is True
+                or self.variables.include_rendered_content.globally is True
+            ):
+                include_rendered_content = True
+            else:
+                include_rendered_content = False
 
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
