@@ -73,19 +73,13 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
         diff: Union[float, int] = configuration["kwargs"].get("diff")
         mostly: str = configuration["kwargs"].get("mostly")
-        strict: bool = configuration["kwargs"].get("strict")
         query_result: Union[sqlalchemy_engine_Row, pyspark_sql_Row] = metrics.get(
             "query.column_pair"
         )
 
-        if mostly != 1 and strict is True:
-            success = (
-                sum([(abs(x[0]) == diff) for x in query_result]) / len(query_result)
-            ) > mostly
-        else:
-            success = (
-                sum([(abs(x[0]) == diff) for x in query_result]) / len(query_result)
-            ) >= mostly
+        success = (
+            sum([(abs(x[0]) == diff) for x in query_result]) / len(query_result)
+        ) >= mostly
 
         return {
             "success": success,
