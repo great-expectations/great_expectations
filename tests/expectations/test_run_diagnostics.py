@@ -121,6 +121,7 @@ def test_expectation_self_check():
         "tests": [],
         "backend_test_result_counts": [],
         "errors": [],
+        "coverage_score": 0.0,
         "maturity_checklist": {
             "beta": [
                 {
