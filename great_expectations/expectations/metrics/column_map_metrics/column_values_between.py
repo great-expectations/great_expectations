@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -209,8 +209,8 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
     def _pandas_vectorized(
         cls,
         column: pd.Series,
-        min_value: Union[int, float, datetime.datetime],
-        max_value: Union[int, float, datetime.datetime],
+        min_value: Optional[Union[int, float, datetime.datetime]],
+        max_value: Optional[Union[int, float, datetime.datetime]],
         strict_min: bool,
         strict_max: bool,
     ):
