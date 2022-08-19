@@ -885,7 +885,7 @@ class AbstractDataContext(ABC):
         self,
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
-        include_rendered_content: bool,
+        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
         """
@@ -904,6 +904,14 @@ class AbstractDataContext(ABC):
                 """Validator could not be created because BatchRequest returned an empty batch_list.
                 Please check your parameters and try again."""
             )
+        if include_rendered_content is None:
+            if (
+                self.include_rendered_content.expectation_validation_result is True
+                or self.include_rendered_content.globally is True
+            ):
+                include_rendered_content = True
+            else:
+                include_rendered_content = False
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         batch_definition: BatchDefinition = batch_list[-1].batch_definition
