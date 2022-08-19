@@ -148,7 +148,7 @@ stages:
               secureFile: 'aws_config_sandbox'
               retryCount: '2'
 
-          - bash: python ./build_gallery.py --outfile-name "expectation_library_v3.json" | tee output--build_gallery.txt ; grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt
+          - bash: python ./build_gallery.py --outfile-name "expectation_library_v3.json" | tee output--build_gallery.txt ; grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery.txt | sort > gallery-exp-types.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
             env:
@@ -184,6 +184,10 @@ stages:
           - bash: grep -o "coverage_score:.*" output--build_gallery.txt | sort -k2,2nr
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show coverage scores'
+
+          - bash: cut -d " " -f 3 gallery-exp-types.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,5 gallery-exp-types.txt | sort
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show Expectation types and counts'
 
           - bash: cat checklists.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/

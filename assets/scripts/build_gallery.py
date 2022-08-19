@@ -127,7 +127,6 @@ def get_expectation_file_info_dict(
             "path": file_path,
         }
         logger.debug(f"{name} was created {result[name]['created_at']} and updated {result[name]['updated_at']}")
-        logger.debug(f"Checking Expectation type(s) used in {file_path}")
         with open(file_path, "r") as fp:
             text = fp.read()
 
