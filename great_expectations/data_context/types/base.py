@@ -55,7 +55,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
-def object_to_yaml_str(obj):
+def object_to_yaml_str(obj):  # type: ignore[no-untyped-def]
     output_str: str
     with StringIO() as string_stream:
         yaml.dump(obj, string_stream)
@@ -172,7 +172,7 @@ class AssetConfig(SerializableDictDot):
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
         reader_options: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: dict,
     ) -> None:
         if name is not None:
             self.name = name
@@ -206,11 +206,11 @@ class AssetConfig(SerializableDictDot):
             setattr(self, k, v)
 
     @property
-    def class_name(self):
+    def class_name(self) -> Optional[str]:
         return self._class_name
 
     @property
-    def module_name(self):
+    def module_name(self) -> Optional[str]:
         return self._module_name
 
     def to_json_dict(self) -> dict:
@@ -270,17 +270,17 @@ class AssetConfigSchema(Schema):
     reader_options = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
 
     @validates_schema
-    def validate_schema(self, data, **kwargs) -> None:
+    def validate_schema(self, data, **kwargs) -> None:  # type: ignore[no-untyped-def]
         pass
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_asset_config(self, data, **kwargs):
+    def make_asset_config(self, data, **kwargs):  # type: ignore[no-untyped-def]
         return AssetConfig(**data)
 
 
 class SorterConfig(DictDot):
-    def __init__(
+    def __init__(  # type: ignore[no-untyped-def]
         self,
         name,
         class_name=None,
