@@ -310,6 +310,7 @@ def get_resolved_metrics_by_key(
         Dictionary of the form {
             "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
         }
+        force_no_progress_bar: (bool) if True, prevent all "Calculating Metrics" output; (False by default).
 
     Returns:
         Dictionary of the form {
