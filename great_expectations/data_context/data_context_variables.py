@@ -274,7 +274,7 @@ class DataContextVariables(ABC):
         )
 
     @property
-    def include_rendered_content(self) -> Optional[IncludeRenderedContentConfig]:
+    def include_rendered_content(self) -> IncludeRenderedContentConfig:
         return self._get(DataContextVariableSchema.INCLUDE_RENDERED_CONTENT)
 
     @include_rendered_content.setter
