@@ -1408,8 +1408,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if ge_cloud_id or isinstance(self._data_context, CloudDataContext):
+        if include_rendered_content is None and (
+            self.variables.include_rendered_content.expectation_validation_result
+            is True
+            or self.variables.include_rendered_content.globally is True
+        ):
             include_rendered_content = True
+        else:
+            include_rendered_content = False
+
+        if ge_cloud_id:
             self._data_context.save_expectation_suite(
                 expectation_suite,
                 expectation_suite_name,

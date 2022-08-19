@@ -106,6 +106,13 @@ class EphemeralDataContext(AbstractDataContext):
                 )
             )
         self._evaluation_parameter_dependencies_compiled = False
-        if include_rendered_content:
+        if include_rendered_content is True or (
+            include_rendered_content is None
+            and (
+                self.variables.include_rendered_content.expectation_validation_result
+                is True
+                or self.variables.include_rendered_content.globally is True
+            )
+        ):
             expectation_suite.render()
         return self.expectations_store.set(key, expectation_suite, **kwargs)

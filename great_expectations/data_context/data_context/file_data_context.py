@@ -80,7 +80,7 @@ class FileDataContext(AbstractDataContext):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        include_rendered_content: bool = False,
+        include_rendered_content: Optional[bool] = None,
         **kwargs: dict,
     ) -> None:
         """Save the provided expectation suite into the DataContext.
@@ -115,7 +115,14 @@ class FileDataContext(AbstractDataContext):
                 )
             )
         self._evaluation_parameter_dependencies_compiled = False
-        if include_rendered_content:
+        if include_rendered_content is True or (
+            include_rendered_content is None
+            and (
+                self.variables.include_rendered_content.expectation_validation_result
+                is True
+                or self.variables.include_rendered_content.globally is True
+            )
+        ):
             expectation_suite.render()
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
