@@ -75,10 +75,14 @@ def execute_shell_command(command: str) -> int:
     return status_code
 
 
-def get_expectation_file_info_dict() -> dict:
-    rx = re.compile(r".*?([A-Za-z]+?Expectation).*")
-    ignore_match_set = set(["InvalidExpectation"])
+def get_expectation_file_info_dict(
+    include_core: bool = True,
+    include_contrib: bool = True,
+    only_these_expectations: List[str] = [],
+) -> dict:
+    rx = re.compile(r".*?([A-Za-z]+?Expectation\b).*")
     result = {}
+    files_found = []
     oldpwd = os.getcwd()
     os.chdir(f"..{os.path.sep}..")
     repo_path = os.getcwd()
@@ -86,22 +90,28 @@ def get_expectation_file_info_dict() -> dict:
         "Finding Expectation files in the repo and getting their create/update times"
     )
 
-    files_found = glob(
-        os.path.join(
-            repo_path, "great_expectations", "expectations", "core", "expect_*.py"
-        ),
-        recursive=True,
-    )
-    files_found.extend(
-        glob(
-            os.path.join(repo_path, "contrib", "**", "expect_*.py"),
-            recursive=True,
+    if include_core:
+        files_found.extend(
+            glob(
+                os.path.join(
+                    repo_path, "great_expectations", "expectations", "core", "expect_*.py"
+                ),
+                recursive=True,
+            )
         )
-    )
+    if include_contrib:
+        files_found.extend(
+            glob(
+                os.path.join(repo_path, "contrib", "**", "expect_*.py"),
+                recursive=True,
+            )
+        )
 
     for file_path in sorted(files_found):
         file_path = file_path.replace(f"{repo_path}{os.path.sep}", "")
         name = os.path.basename(file_path).replace(".py", "")
+        if only_these_expectations and name not in only_these_expectations:
+            continue
 
         updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
         created_at_cmd = (
@@ -125,11 +135,10 @@ def get_expectation_file_info_dict() -> dict:
         for line in re.split("\r?\n", text):
             match = rx.match(line)
             if match:
-                match_name = match.group(1)
-                if match_name not in ignore_match_set:
-                    exp_type_set.add(match_name)
-        result[name]["exp_type"] = sorted(exp_type_set)
-        logger.debug(f"Expectation type {sorted(exp_type_set)}")
+                if not line.strip().startswith("#"):
+                    exp_type_set.add(match.group(1))
+        result[name]["exp_type"] = sorted(exp_type_set)[0]
+        logger.debug(f"Expectation type {sorted(exp_type_set)[0]} for {name} in {file_path}")
 
     os.chdir(oldpwd)
     return result
@@ -204,7 +213,11 @@ def build_gallery(
     installed_packages_txt = sorted(f"{i.key}=={i.version}" for i in installed_packages)
     logger.debug(f"Found the following packages: {installed_packages_txt}")
 
-    expectation_file_info = get_expectation_file_info_dict()
+    expectation_file_info = get_expectation_file_info_dict(
+        include_core=include_core,
+        include_contrib=include_contrib,
+        only_these_expectations=only_these_expectations,
+    )
     import great_expectations
 
     core_expectations = (
@@ -215,6 +228,9 @@ def build_gallery(
         logger.info("Getting base registered expectations list")
         logger.debug(f"Found the following expectations: {sorted(core_expectations)}")
         for expectation in core_expectations:
+            if only_these_expectations and expectation not in only_these_expectations:
+                # logger.debug(f"Skipping {expectation} since it's not requested")
+                continue
             requirements_dict[expectation] = {"group": "core"}
 
     just_installed = set()
@@ -243,17 +259,18 @@ def build_gallery(
                     sys.path.append(os.path.dirname(root))
             for filename in files:
                 if filename.endswith(".py") and filename.startswith("expect_"):
+                    if only_these_expectations and filename.replace(".py", "") not in only_these_expectations:
+                        # logger.debug(f"Skipping {filename} since it's not requested")
+                        continue
                     logger.debug(f"Getting requirements for module {filename}")
                     contrib_subdir_name = os.path.basename(os.path.dirname(root))
                     requirements_dict[filename[:-3]] = get_contrib_requirements(
                         os.path.join(root, filename)
                     )
                     requirements_dict[filename[:-3]]["group"] = contrib_subdir_name
+        logger.info("Done finding contrib modules")
 
     for expectation in sorted(requirements_dict):
-        if only_these_expectations:
-            if expectation not in only_these_expectations:
-                continue
         # Temp
         if expectation == "expect_column_kl_divergence_to_be_less_than":
             continue
