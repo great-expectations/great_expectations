@@ -275,7 +275,9 @@ class CloudDataContext(AbstractDataContext):
         """
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=ge_cloud_id,
+            ge_cloud_id=ge_cloud_id
+            if ge_cloud_id is not None
+            else str(expectation_suite.ge_cloud_id),
         )
         if (
             self.expectations_store.has_key(key)  # noqa: W601
