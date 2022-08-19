@@ -304,27 +304,27 @@ class SorterConfig(DictDot):
             self._datetime_format = datetime_format
 
     @property
-    def name(self):
+    def name(self):  # type: ignore[no-untyped-def]
         return self._name
 
     @property
-    def module_name(self):
+    def module_name(self):  # type: ignore[no-untyped-def]
         return self._module_name
 
     @property
-    def class_name(self):
+    def class_name(self):  # type: ignore[no-untyped-def]
         return self._class_name
 
     @property
-    def orderby(self):
+    def orderby(self):  # type: ignore[no-untyped-def]
         return self._orderby
 
     @property
-    def reference_list(self):
+    def reference_list(self):  # type: ignore[no-untyped-def]
         return self._reference_list
 
     @property
-    def datetime_format(self):
+    def datetime_format(self):  # type: ignore[no-untyped-def]
         return self._datetime_format
 
 
