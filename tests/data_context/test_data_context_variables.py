@@ -556,7 +556,7 @@ def test_file_data_context_variables_e2e(
 
     assert config_saved_to_disk.progress_bars == updated_progress_bars.to_dict()
     assert (
-        config_saved_to_disk.include_rendered_content
+        config_saved_to_disk.include_rendered_content.to_dict()
         == updated_include_rendered_content.to_dict()
     )
     assert (
