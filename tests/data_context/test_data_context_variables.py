@@ -567,9 +567,6 @@ def test_file_data_context_variables_e2e(
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
 
 
-@pytest.mark.xfail(
-    reason="Environment variable issues with Azure; temporary xfail to unblock release 0.15.19"
-)
 @pytest.mark.e2e
 @pytest.mark.cloud
 def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
@@ -588,9 +585,6 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     assert success is True
 
 
-@pytest.mark.xfail(
-    reason="Environment variable issues with Azure; temporary xfail to unblock release 0.15.19"
-)
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")

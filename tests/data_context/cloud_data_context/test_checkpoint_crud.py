@@ -217,9 +217,6 @@ def test_cloud_backed_data_context_add_checkpoint(
     assert checkpoint.validations[1]["id_"] == validation_id_2
 
 
-@pytest.mark.xfail(
-    reason="Environment variable issues with Azure; temporary xfail to unblock release 0.15.19"
-)
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
