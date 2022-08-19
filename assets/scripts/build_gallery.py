@@ -94,7 +94,11 @@ def get_expectation_file_info_dict(
         files_found.extend(
             glob(
                 os.path.join(
-                    repo_path, "great_expectations", "expectations", "core", "expect_*.py"
+                    repo_path,
+                    "great_expectations",
+                    "expectations",
+                    "core",
+                    "expect_*.py",
                 ),
                 recursive=True,
             )
@@ -126,7 +130,9 @@ def get_expectation_file_info_dict(
             .strip(),
             "path": file_path,
         }
-        logger.debug(f"{name} was created {result[name]['created_at']} and updated {result[name]['updated_at']}")
+        logger.debug(
+            f"{name} was created {result[name]['created_at']} and updated {result[name]['updated_at']}"
+        )
         with open(file_path, "r") as fp:
             text = fp.read()
 
@@ -137,7 +143,9 @@ def get_expectation_file_info_dict(
                 if not line.strip().startswith("#"):
                     exp_type_set.add(match.group(1))
         result[name]["exp_type"] = sorted(exp_type_set)[0]
-        logger.debug(f"Expectation type {sorted(exp_type_set)[0]} for {name} in {file_path}")
+        logger.debug(
+            f"Expectation type {sorted(exp_type_set)[0]} for {name} in {file_path}"
+        )
 
     os.chdir(oldpwd)
     return result
@@ -258,7 +266,10 @@ def build_gallery(
                     sys.path.append(os.path.dirname(root))
             for filename in files:
                 if filename.endswith(".py") and filename.startswith("expect_"):
-                    if only_these_expectations and filename.replace(".py", "") not in only_these_expectations:
+                    if (
+                        only_these_expectations
+                        and filename.replace(".py", "") not in only_these_expectations
+                    ):
                         # logger.debug(f"Skipping {filename} since it's not requested")
                         continue
                     logger.debug(f"Getting requirements for module {filename}")
