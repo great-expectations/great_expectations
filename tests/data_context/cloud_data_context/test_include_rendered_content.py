@@ -68,7 +68,7 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         mock_update.call_args[1]["value"].pop("meta")
 
         mock_update.assert_called_with(
-            ge_cloud_id="None",
+            ge_cloud_id="",
             value={
                 "expectations": [
                     {
