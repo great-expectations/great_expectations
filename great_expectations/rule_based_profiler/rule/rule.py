@@ -318,6 +318,7 @@ class Rule(SerializableDictDot):
             for expectation_configuration_builder in expectation_configuration_builders
         }
 
+    # noinspection PyUnusedLocal
     @measure_execution_time(
         execution_time_holder_object_reference_name="rule_state",
         execution_time_property_name="rule_domain_builder_execution_time",
