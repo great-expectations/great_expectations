@@ -1,14 +1,8 @@
 import logging
-from typing import Any, Callable, List, Mapping, Optional, Union
+from typing import Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    get_batch_list_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
