@@ -478,6 +478,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             variables_directives_list=variables_directives_list,
             domain_type_directives_list=domain_type_directives_list,
         )
+        data_assistant_result.profiler_execution_time = (
+            data_assistant_result.execution_time
+        )
         return self._build_data_assistant_result(
             data_assistant_result=data_assistant_result
         )
