@@ -2203,6 +2203,12 @@ class DataContextConfig(BaseYamlConfig):
             concurrency = ConcurrencyConfig(**concurrency)
         self.concurrency = concurrency
         self.progress_bars = progress_bars
+        if anonymous_usage_statistics is None:
+            include_rendered_content = IncludeRenderedContentConfig()
+        elif isinstance(include_rendered_content, dict):
+            include_rendered_content = IncludeRenderedContentConfig(
+                **include_rendered_content
+            )
         self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)

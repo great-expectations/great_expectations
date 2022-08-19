@@ -1409,8 +1409,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             None
         """
         if include_rendered_content is None and (
-            self.variables.include_rendered_content.expectation_validation_result
-            is True
+            self.variables.include_rendered_content.expectation_suite is True
             or self.variables.include_rendered_content.globally is True
         ):
             include_rendered_content = True
