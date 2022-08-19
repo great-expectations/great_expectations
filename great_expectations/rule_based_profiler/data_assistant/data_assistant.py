@@ -464,7 +464,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         data_assistant_result = DataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
-            execution_time=0.0,
             _usage_statistics_handler=usage_statistics_handler,
         )
         run_profiler_on_data(
@@ -477,9 +476,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
             batch_request=None,
             variables_directives_list=variables_directives_list,
             domain_type_directives_list=domain_type_directives_list,
-        )
-        data_assistant_result.profiler_execution_time = (
-            data_assistant_result.execution_time
         )
         return self._build_data_assistant_result(
             data_assistant_result=data_assistant_result
@@ -616,7 +612,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
 @measure_execution_time(
     execution_time_holder_object_reference_name="data_assistant_result",
-    execution_time_property_name="execution_time",
+    execution_time_property_name="profiler_execution_time",
     pretty_print=False,
 )
 def run_profiler_on_data(
@@ -671,7 +667,9 @@ configuration included.
     )
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
-    result.profiler_execution_time = rule_based_profiler_result.execution_time
+    result.rule_domain_builder_execution_time = (
+        rule_based_profiler_result.rule_domain_builder_execution_time
+    )
     result.rule_execution_time = rule_based_profiler_result.rule_execution_time
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
     result.expectation_configurations = (

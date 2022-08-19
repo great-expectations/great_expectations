@@ -83,7 +83,7 @@ class Rule(SerializableDictDot):
 
     @measure_execution_time(
         execution_time_holder_object_reference_name="rule_state",
-        execution_time_property_name="execution_time",
+        execution_time_property_name="rule_execution_time",
         pretty_print=False,
     )
     def run(
@@ -117,19 +117,16 @@ class Rule(SerializableDictDot):
                 reconciliation_strategy=reconciliation_directives.variables,
             )
         )
-        domains: List[Domain] = (
-            []
-            if self.domain_builder is None
-            else self.domain_builder.get_domains(
-                rule_name=self.name,
-                variables=variables,
-                batch_list=batch_list,
-                batch_request=batch_request,
-            )
-        )
 
         if rule_state is None:
             rule_state = RuleState()
+
+        domains: List[Domain] = self._get_rule_domains(
+            variables=variables,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            rule_state=rule_state,
+        )
 
         rule_state.rule = self
         rule_state.variables = variables
@@ -320,3 +317,27 @@ class Rule(SerializableDictDot):
             expectation_configuration_builder.expectation_type: expectation_configuration_builder
             for expectation_configuration_builder in expectation_configuration_builders
         }
+
+    @measure_execution_time(
+        execution_time_holder_object_reference_name="rule_state",
+        execution_time_property_name="rule_domain_builder_execution_time",
+        pretty_print=False,
+    )
+    def _get_rule_domains(
+        self,
+        variables: Optional[ParameterContainer] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        rule_state: Optional[RuleState] = None,
+    ) -> List[Domain]:
+        domains: List[Domain] = (
+            []
+            if self.domain_builder is None
+            else self.domain_builder.get_domains(
+                rule_name=self.name,
+                variables=variables,
+                batch_list=batch_list,
+                batch_request=batch_request,
+            )
+        )
+        return domains

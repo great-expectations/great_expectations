@@ -86,7 +86,8 @@ class RuleStats(SerializableDictDot):
     )
     num_parameter_builders: int = 0
     num_expectation_configuration_builders: int = 0
-    execution_time: Optional[float] = None
+    rule_domain_builder_execution_time: Optional[float] = None
+    rule_execution_time: Optional[float] = None
 
     def to_dict(self) -> dict:
         """
@@ -114,15 +115,15 @@ class DataAssistantResult(SerializableDictDot):
         "_batch_id_to_batch_identifier_display_name_map",
         "profiler_config",
         "profiler_execution_time",
+        "rule_domain_builder_execution_time",
         "rule_execution_time",
         "metrics_by_domain",
         "expectation_configurations",
         "citation",
-        "execution_time",
     }
 
     IN_JUPYTER_NOTEBOOK_KEYS = {
-        "execution_time",
+        "profiler_execution_time",
     }
 
     _batch_id_to_batch_identifier_display_name_map: Optional[
@@ -131,16 +132,16 @@ class DataAssistantResult(SerializableDictDot):
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
     profiler_execution_time: Optional[
         float
-    ] = None  # Effective Rule-Based Profiler total execution time (in seconds).
+    ] = None  # Effective Rule-Based Profiler overall execution time (in seconds).
+    rule_domain_builder_execution_time: Optional[
+        Dict[str, float]
+    ] = None  # Effective Rule-Based Profiler per-Rule DomainBuilder execution time (in seconds).
     rule_execution_time: Optional[
         Dict[str, float]
-    ] = None  # Effective Rule-Based Profiler per-Rule execution time (in seconds).
+    ] = None  # Effective Rule-Based Profiler per-Rule total execution time (in seconds).
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
-    execution_time: Optional[
-        float
-    ] = None  # Overall DataAssistant execution time (in seconds).
     # Reference to "UsageStatisticsHandler" object for this "DataAssistantResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
@@ -225,6 +226,9 @@ class DataAssistantResult(SerializableDictDot):
             "profiler_execution_time": convert_to_json_serializable(
                 data=self.profiler_execution_time
             ),
+            "rule_domain_builder_execution_time": convert_to_json_serializable(
+                data=self.rule_domain_builder_execution_time
+            ),
             "rule_execution_time": convert_to_json_serializable(
                 data=self.rule_execution_time
             ),
@@ -243,7 +247,6 @@ class DataAssistantResult(SerializableDictDot):
                 for expectation_configuration in self.expectation_configurations
             ],
             "citation": convert_to_json_serializable(data=self.citation),
-            "execution_time": convert_to_json_serializable(data=self.execution_time),
         }
 
     def to_json_dict(self) -> dict:
@@ -369,7 +372,10 @@ class DataAssistantResult(SerializableDictDot):
                         ),
                     )
                     rule_name_to_rule_stats_map[rule_name] = rule_stats
-                    rule_stats.execution_time = self.rule_execution_time[rule_name]
+                    rule_stats.rule_domain_builder_execution_time = (
+                        self.rule_domain_builder_execution_time[rule_name]
+                    )
+                    rule_stats.rule_execution_time = self.rule_execution_time[rule_name]
 
                 if num_domains > 0:
                     for domain in domains:
