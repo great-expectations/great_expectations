@@ -72,7 +72,9 @@ def data_context_config_dict() -> dict:
         "notebooks": None,
         "concurrency": None,
         "progress_bars": None,
-        "include_rendered_content": None,
+        "include_rendered_content": IncludeRenderedContentConfig(
+            expectation_suite=False, expectation_validation_result=False, globally=False
+        ),
     }
     return config
 

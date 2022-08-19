@@ -50,6 +50,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
+    IncludeRenderedContentConfig,
     NotebookConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
@@ -867,9 +868,8 @@ class AbstractDataContext(ABC):
 
         if include_rendered_content is None:
             if (
-                self.variables.include_rendered_content.expectation_validation_result
-                is True
-                or self.variables.include_rendered_content.globally is True
+                self.include_rendered_content.expectation_validation_result is True
+                or self.include_rendered_content.globally is True
             ):
                 include_rendered_content = True
             else:
@@ -1472,6 +1472,10 @@ class AbstractDataContext(ABC):
     @property
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
         return self.variables.progress_bars
+
+    @property
+    def include_rendered_content(self) -> IncludeRenderedContentConfig:
+        return self.variables.include_rendered_content
 
     @property
     def notebooks(self) -> NotebookConfig:

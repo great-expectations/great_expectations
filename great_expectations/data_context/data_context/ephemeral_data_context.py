@@ -109,8 +109,8 @@ class EphemeralDataContext(AbstractDataContext):
         if include_rendered_content is True or (
             include_rendered_content is None
             and (
-                self.variables.include_rendered_content.expectation_suite is True
-                or self.variables.include_rendered_content.globally is True
+                self.include_rendered_content.expectation_suite is True
+                or self.include_rendered_content.globally is True
             )
         ):
             expectation_suite.render()
