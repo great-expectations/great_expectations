@@ -251,9 +251,6 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
     return _closure
 
 
-@pytest.mark.xfail(
-    reason="Environment variable issues with Azure; temporary xfail to unblock release 0.15.19"
-)
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
@@ -283,9 +280,6 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     assert mock_put.call_count == 1
 
 
-@pytest.mark.xfail(
-    reason="Environment variable issues with Azure; temporary xfail to unblock release 0.15.19"
-)
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
