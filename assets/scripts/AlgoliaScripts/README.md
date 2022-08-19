@@ -30,8 +30,8 @@ To run this project, you will need to add the following environment variables to
 
 `ALGOLIA_WRITE_KEY`
 
-`EXPECTATION_INDEX` : prod_expectations
+`ALGOLIA_EXPECTATION_INDEX` : prod_expectations
 
-`PACKAGE_INDEX` : prod_packages
+`ALGOLIA_PACKAGE_INDEX` : prod_packages
 
-`PACKAGE_EXPEC_INDEX` : prod_packages_expectations
+`ALGOLIA_PACKAGE_EXPEC_INDEX` : prod_packages_expectations
