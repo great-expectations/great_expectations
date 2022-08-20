@@ -245,9 +245,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendError(
                 f"Unable to get object in GE Cloud Store Backend: {jsonError}"
             )
-        except (requests.HTTPError, requests.Timeout) as http_exc:
+        except requests.HTTPError as http_err:
             raise StoreBackendError(
-                f"Unable to get object in GE Cloud Store Backend: {http_exc}"
+                f"Unable to get object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_err)}"
+            )
+        except requests.Timeout as timeout_exc:
+            raise StoreBackendError(
+                f"Unable to get object in GE Cloud Store Backend: {timeout_exc}"
             )
 
     def _move(self) -> None:  # type: ignore[override]
@@ -301,9 +305,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response.raise_for_status()
             return True
 
-        except (requests.HTTPError, requests.Timeout) as http_exc:
+        except requests.HTTPError as http_exc:
             raise StoreBackendError(
-                f"Unable to update object in GE Cloud Store Backend {http_exc}"
+                f"Unable to update object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
             )
         except Exception as e:
             logger.debug(str(e))
