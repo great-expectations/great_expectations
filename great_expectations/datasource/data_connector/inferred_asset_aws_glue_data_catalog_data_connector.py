@@ -1,8 +1,8 @@
 import logging
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Tuple
 
-from great_expectations.datasource.data_connector.configured_asset_glue_catalog_data_connector import (
-    ConfiguredAssetGlueCatalogDataConnector,
+from great_expectations.datasource.data_connector.configured_asset_aws_glue_data_catalog_data_connector import (
+    ConfiguredAssetAWSGlueDataCatalogDataConnector,
 )
 from great_expectations.exceptions import DataConnectorError
 from great_expectations.execution_engine import ExecutionEngine
@@ -10,15 +10,17 @@ from great_expectations.execution_engine import ExecutionEngine
 logger = logging.getLogger(__name__)
 
 
-class InferredAssetGlueCatalogDataConnector(ConfiguredAssetGlueCatalogDataConnector):
+class InferredAssetAWSGlueDataCatalogDataConnector(
+    ConfiguredAssetAWSGlueDataCatalogDataConnector
+):
     """
-    The InferredAssetGlueCatalogDataConnector is one of two classes (ConfiguredAssetGlueCatalogDataConnector being the
+    The InferredAssetAWSGlueDataCatalogDataConnector is one of two classes (ConfiguredAssetAWSGlueDataCatalogDataConnector being the
     other one) designed for connecting to data through AWS Glue Data Catalog.
 
     It connects to assets (database and tables) inferred from AWS Glue Data Catalog.
 
-    InferredAssetGlueCatalogDataConnector that operates on AWS Glue Data Catalog and determines
-    the data_asset_name implicitly (e.g., by listing all database and table names from Glue Data Catalog)
+    InferredAssetAWSGlueDataCatalogDataConnector that operates on AWS Glue Data Catalog and determines
+    the data_asset_name implicitly (e.g., by listing all database and table names from AWS Glue Data Catalog)
     """
 
     def __init__(
@@ -36,7 +38,7 @@ class InferredAssetGlueCatalogDataConnector(ConfiguredAssetGlueCatalogDataConnec
         batch_spec_passthrough: Optional[dict] = None,
     ):
         """
-        GlueCatalogDataConnector for connecting to AWS Glue Data Catalog.
+        DataConnector for connecting to AWS Glue Data Catalog.
 
         Args:
             name (str): Required name for data_connector
@@ -52,10 +54,9 @@ class InferredAssetGlueCatalogDataConnector(ConfiguredAssetGlueCatalogDataConnec
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         logger.warning(
-            "Warning: great_expectations.datasource.data_connector.InferredAssetGlueCatalogDataConnector is "
+            "Warning: great_expectations.datasource.data_connector.InferredAssetAWSGlueDataCatalogDataConnector is "
             "experimental. Methods, APIs, and core behavior may change in the future."
         )
-        self._catalog_id = catalog_id
         self._data_asset_name_prefix = data_asset_name_prefix
         self._data_asset_name_suffix = data_asset_name_suffix
         self._excluded_tables = excluded_tables
@@ -66,6 +67,7 @@ class InferredAssetGlueCatalogDataConnector(ConfiguredAssetGlueCatalogDataConnec
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
+            catalog_id=catalog_id,
             assets=None,
             batch_spec_passthrough=batch_spec_passthrough,
             boto3_options=boto3_options,
@@ -80,7 +82,7 @@ class InferredAssetGlueCatalogDataConnector(ConfiguredAssetGlueCatalogDataConnec
         )
 
     @property
-    def assets(self) -> Dict[str, Any]:
+    def assets(self) -> Dict[str, dict]:
         return self._introspected_assets_cache
 
     def _refresh_data_references_cache(self) -> None:
@@ -105,16 +107,11 @@ class InferredAssetGlueCatalogDataConnector(ConfiguredAssetGlueCatalogDataConnec
             **self._glue_introspection_directives
         )
         for metadata in introspected_table_metadata:
-            if (excluded_tables is not None) and (
-                f"{metadata['database_name']}.{metadata['table_name']}"
-                in excluded_tables
-            ):
+            table = f"{metadata['database_name']}.{metadata['table_name']}"
+            if (excluded_tables is not None) and (table in excluded_tables):
                 continue
 
-            if (included_tables is not None) and (
-                f"{metadata['database_name']}.{metadata['table_name']}"
-                not in included_tables
-            ):
+            if (included_tables is not None) and (table not in included_tables):
                 continue
 
             data_asset_name = (
@@ -128,20 +125,11 @@ class InferredAssetGlueCatalogDataConnector(ConfiguredAssetGlueCatalogDataConnec
             data_asset_config = {
                 "database_name": metadata["database_name"],
                 "table_name": metadata["table_name"],
-                "type": metadata["type"],
+                "partitions": metadata["partitions"],
             }
-
-            # Attempt to fetch a list of batch_identifiers from the table
-            self._get_batch_identifiers_list_from_data_asset_config(
-                data_asset_name,
-                data_asset_config,
-            )
 
             # Store an asset config for each introspected data asset.
             self._introspected_assets_cache[data_asset_name] = data_asset_config
-
-    def _get_glue_paginator_kwargs(self) -> dict:
-        return {"CatalogId": self._catalog_id} if self._catalog_id else {}
 
     def _get_databases(self) -> Iterator[str]:
         paginator = self._glue.get_paginator("get_databases")
@@ -150,14 +138,11 @@ class InferredAssetGlueCatalogDataConnector(ConfiguredAssetGlueCatalogDataConnec
             for db in page["DatabaseList"]:
                 yield db["Name"]
 
-    def _get_tables(self, database: str = None) -> Iterator[Tuple[str, str]]:
-        if database:
-            databases: List[str] = [database]
-        else:
-            databases = list(self._get_databases())
-
+    def _get_tables(self, database: str = None) -> Iterator[Tuple[str, str, str]]:
         paginator = self._glue.get_paginator("get_tables")
         paginator_kwargs = self._get_glue_paginator_kwargs()
+
+        databases: List[str] = [database] if database else list(self._get_databases())
         for db in databases:
             paginator_kwargs["DatabaseName"] = db
             iterator = paginator.paginate(**paginator_kwargs)
@@ -166,29 +151,21 @@ class InferredAssetGlueCatalogDataConnector(ConfiguredAssetGlueCatalogDataConnec
                     for tb in page["TableList"]:
                         database_name = tb["DatabaseName"]
                         table_name = tb["Name"]
-                        yield database_name, table_name
+                        partitions = [p["Name"] for p in tb["PartitionKeys"]]
+                        yield database_name, table_name, partitions
             except self._glue.exceptions.EntityNotFoundException:
                 raise DataConnectorError(
-                    f"InferredAssetGlueCatalogDataConnector could not find a database with name: {db}."
+                    f"InferredAssetAWSGlueDataCatalogDataConnector could not find a database with name: {db}."
                 )
 
-    def _introspect_catalog(self, database_name: str = None) -> List[Dict[str, str]]:
-        tables: List[Dict[str, str]] = []
-        for db_name, table_name in self._get_tables(database_name):
+    def _introspect_catalog(self, database_name: str = None) -> List[dict]:
+        tables: List[dict] = []
+        for db_name, table_name, partitions in self._get_tables(database_name):
             tables.append(
                 {
                     "database_name": db_name,
                     "table_name": table_name,
-                    "type": "table",
+                    "partitions": partitions,
                 }
             )
         return tables
-
-    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
-        """
-        Return the list of asset names and types known by this DataConnector.
-
-        Returns:
-            A list of tuples consisting of available names and types
-        """
-        return [(asset["table_name"], asset["type"]) for asset in self.assets.values()]

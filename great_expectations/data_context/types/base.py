@@ -250,6 +250,12 @@ class AssetConfigSchema(Schema):
     schema_name = fields.String(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
+    # Necessary addition for AWS Glue Data Catalog assets
+    database_name = fields.String(required=False, allow_none=True)
+    partitions = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+
     # Necessary addition for Cloud assets
     table_name = fields.String(required=False, allow_none=True)
     type = fields.String(required=False, allow_none=True)
@@ -557,7 +563,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
-    # Inferred Glue Catalog
+    # AWS Glue Data Catalog
     glue_introspection_directives = fields.Dict(required=False, allow_none=True)
     catalog_id = fields.String(required=False, allow_none=True)
 
@@ -730,8 +736,8 @@ continue.
             in [
                 "InferredAssetSqlDataConnector",
                 "ConfiguredAssetSqlDataConnector",
-                "InferredAssetGlueCatalogDataConnector",
-                "ConfiguredAssetGlueCatalogDataConnector",
+                "InferredAssetAWSGlueDataCatalogDataConnector",
+                "ConfiguredAssetAWSGlueDataCatalogDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
@@ -744,8 +750,8 @@ continue.
         if ("catalog_id" in data or "glue_introspection_directives" in data) and not (
             data["class_name"]
             in [
-                "InferredAssetGlueCatalogDataConnector",
-                "ConfiguredAssetGlueCatalogDataConnector",
+                "InferredAssetAWSGlueDataCatalogDataConnector",
+                "ConfiguredAssetAWSGlueDataCatalogDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(

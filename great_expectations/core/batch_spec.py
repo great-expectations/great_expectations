@@ -1,5 +1,6 @@
 import logging
 from abc import ABCMeta
+from typing import List
 
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
@@ -109,19 +110,38 @@ class RuntimeQueryBatchSpec(BatchSpec):
         self["query"] = query
 
 
-class GlueCatalogBatchSpec(BatchSpec, metaclass=ABCMeta):
-    """This is an abstract class and should not be instantiated. It's relevant for testing whether
-    a subclass is allowed
-    """
+class GlueDataCatalogBatchSpec(BatchSpec):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        if "database_name" not in self:
+            raise InvalidBatchSpecError(
+                "GlueDataCatalogBatchSpec requires a database_name"
+            )
+        if "table_name" not in self:
+            raise InvalidBatchSpecError(
+                "GlueDataCatalogBatchSpec requires a table_name"
+            )
+
+    @property
+    def reader_method(self) -> dict:
+        return "table"
 
     @property
     def database_name(self) -> str:
-        return self.get("database_name", None)
+        return self.get("database_name")
 
     @property
     def table_name(self) -> str:
-        return self.get("table_name", None)
+        return self.get("table_name")
 
     @property
-    def query_condition(self) -> str:
-        return self.get("query_condition", None)
+    def path(self) -> str:
+        return f"{self.database_name}.{self.table_name}"
+
+    @property
+    def reader_options(self) -> dict:
+        return self.get("reader_options", {})
+
+    @property
+    def partitions(self) -> List[str]:
+        return self.get("partitions", [])

@@ -12,7 +12,7 @@ from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
-    GlueCatalogBatchSpec,
+    GlueDataCatalogBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
@@ -282,18 +282,18 @@ Please check your config."""
                     """
                 )
 
-        elif isinstance(batch_spec, PathBatchSpec):
+        elif isinstance(batch_spec, (PathBatchSpec, GlueDataCatalogBatchSpec)):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
+            reader_arg: str = batch_spec.path
             try:
                 reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
-                    path=path,
+                    path=reader_arg,
                 )
-                batch_data = reader_fn(path)
+                batch_data = reader_fn(reader_arg)
             except AttributeError:
                 raise ExecutionEngineError(
                     """
@@ -303,30 +303,7 @@ Please check your config."""
             # pyspark will raise an AnalysisException error if path is incorrect
             except pyspark.sql.utils.AnalysisException:
                 raise ExecutionEngineError(
-                    f"""Unable to read in batch from the following path: {path}. Please check your configuration."""
-                )
-
-        elif isinstance(batch_spec, GlueCatalogBatchSpec):
-            database: str = batch_spec.database_name
-            table_name: str = batch_spec.table_name
-            query_condition: str = batch_spec.query_condition
-
-            table = f"{database}.{table_name}" if database else table_name
-            query = f"SELECT * FROM {table}"
-            try:
-                batch_data = self.spark.sql(query)
-                if query_condition:
-                    batch_data = batch_data.filter(query_condition)
-            except AttributeError:
-                raise ExecutionEngineError(
-                    """
-                    Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
-                    """
-                )
-            # pyspark will raise an AnalysisException error if path is incorrect
-            except pyspark.sql.utils.AnalysisException:
-                raise ExecutionEngineError(
-                    f"""Unable to read in batch from the following table: {table}. Please check your configuration."""
+                    f"""Unable to read in batch from the following: {reader_arg}. Please check your configuration."""
                 )
 
         else:
@@ -342,6 +319,14 @@ Please check your config."""
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
+        # Note this is to get a batch from tables in AWS Glue Data Catalog by its partitions 
+        partitions: Optional[List[str]] = batch_spec.get("partitions")
+        if partitions:
+            batch_data = self._data_splitter.split_on_multi_column_values(
+                df=batch_data,
+                column_names=partitions,
+                batch_identifiers=batch_spec.get("batch_identifiers"),
+            )
 
         splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
         if splitter_method_name:

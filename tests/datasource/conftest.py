@@ -1,8 +1,10 @@
 import hashlib
 import math
 import os
+from itertools import product
 
 import pytest
+from moto import mock_glue
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
@@ -64,8 +66,75 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
 
 
 @pytest.fixture(scope="module")
-def test_cases_for_glue_catalog_data_connector_spark_execution_engine(titanic_spark_db):
+def test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine(
+    titanic_spark_db,
+):
     return SparkDFExecutionEngine(
         name="test_spark_execution_engine",
         force_reuse_spark_context=True,
     )
+
+
+@pytest.fixture
+def glue_titanic_catalog():
+    try:
+        import boto3
+    except ImportError:
+        raise ValueError(
+            "AWS Glue Data Catalog Data Connector tests are requested, but boto3 is not installed"
+        )
+
+    with mock_glue():
+        region_name: str = "us-east-1"
+        client = boto3.client("glue", region_name=region_name)
+        database_name = "db_test"
+        ## Database A
+        client.create_database(DatabaseInput={"Name": database_name})
+        client.create_table(
+            DatabaseName=database_name,
+            TableInput={
+                "Name": "tb_titanic_with_partitions",
+                "PartitionKeys": [
+                    {
+                        "Name": "PClass",
+                        "Type": "string",
+                    },
+                    {
+                        "Name": "SexCode",
+                        "Type": "string",
+                    },
+                ],
+            },
+        )
+        create_partitions_for_table(
+            glue_client=client,
+            database_name=database_name,
+            table_name="tb_titanic_with_partitions",
+            partitions={"PClass": ["1st", "2nd", "3rd"], "SexCode": ["0", "1"]},
+        )
+        client.create_table(
+            DatabaseName=database_name,
+            TableInput={
+                "Name": "tb_titanic_without_partitions",
+                "PartitionKeys": [],
+            },
+        )
+        yield client
+
+
+def create_partitions_for_table(
+    glue_client, database_name: str, table_name: str, partitions: dict
+):
+    partition_values = list(product(*partitions.values()))
+    partition_path = "={}/".join(partitions.keys()) + "={}/"
+
+    for value in partition_values:
+        path = partition_path.format(*value)
+        glue_client.create_partition(
+            DatabaseName=database_name,
+            TableName=table_name,
+            PartitionInput={
+                "Values": list(value),
+                "StorageDescriptor": {"Location": path},
+            },
+        )
