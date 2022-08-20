@@ -15,6 +15,17 @@ class AbstractConfig(ABC, SerializableDictDot):
         self.name = name
         super().__init__()
 
+    @classmethod
+    def _dict_round_trip(cls, schema: Schema, target: dict) -> dict:
+        """
+        Round trip a dictionary with a schema so that validation and serialization logic is applied.
+
+        Example: Loading a config with a `_id` field but serializing it as `id`.
+        """
+        _loaded = schema.load(target)
+        _config = cls(**_loaded)
+        return _config.to_json_dict()
+
 
 class AbstractConfigSchema(Schema):
     REMOVE_KEYS_IF_NONE = ["id", "name"]

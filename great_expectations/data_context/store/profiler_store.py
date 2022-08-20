@@ -18,7 +18,7 @@ class ProfilerStore(ConfigurationStore):
     A ProfilerStore manages Profilers for the DataContext.
     """
 
-    _configuration_class = RuleBasedProfilerConfig
+    _configuration_class = RuleBasedProfilerConfig  # type: ignore[assignment]
 
     def serialization_self_check(self, pretty_print: bool) -> None:
         """
@@ -34,12 +34,12 @@ class ProfilerStore(ConfigurationStore):
 
         test_key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
-            test_key = self.key_class(
+            test_key = self.key_class(  # type: ignore[assignment,call-arg]
                 resource_type=GeCloudRESTResource.PROFILER,
                 ge_cloud_id=str(uuid.uuid4()),
             )
         else:
-            test_key = self.key_class(configuration_key=test_profiler_name)
+            test_key = self.key_class(configuration_key=test_profiler_name)  # type: ignore[assignment,call-arg]
 
         if pretty_print:
             print(f"Attempting to add a new test key {test_key} to Profiler store...")

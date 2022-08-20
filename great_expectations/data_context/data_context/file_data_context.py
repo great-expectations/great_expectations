@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import Any, Dict, Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -48,7 +47,7 @@ class FileDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        self._variables = self._init_variables()
+        self._variables: FileDataContextVariables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_datasource_store(self) -> None:
@@ -76,7 +75,7 @@ class FileDataContext(AbstractDataContext):
         )
         self._datasource_store = datasource_store
 
-    def save_expectation_suite(
+    def save_expectation_suite(  # type: ignore[override]
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
@@ -104,7 +103,10 @@ class FileDataContext(AbstractDataContext):
             key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
-        if self.expectations_store.has_key(key) and not overwrite_existing:
+        if (
+            self.expectations_store.has_key(key)  # noqa: W601
+            and not overwrite_existing
+        ):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
@@ -127,6 +129,6 @@ class FileDataContext(AbstractDataContext):
     def _init_variables(self) -> FileDataContextVariables:
         variables = FileDataContextVariables(
             config=self._project_config,
-            data_context=self,
+            data_context=self,  # type: ignore[arg-type]
         )
         return variables

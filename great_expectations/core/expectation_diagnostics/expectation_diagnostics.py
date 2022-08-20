@@ -71,6 +71,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     backend_test_result_counts: List[ExpectationBackendTestResultCounts]
     errors: List[ExpectationErrorDiagnostics]
     maturity_checklist: ExpectationDiagnosticMaturityMessages
+    coverage_score: float
 
     def to_json_dict(self) -> dict:
         result = convert_to_json_serializable(data=asdict(self))
