@@ -376,6 +376,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response = requests.post(
                 url, json=data, headers=self.headers, timeout=self.TIMEOUT
             )
+            response.raise_for_status()
             response_json = response.json()
 
             object_id = response_json["data"]["id"]
@@ -385,7 +386,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 ge_cloud_id=object_id,
                 url=object_url,
             )
-        # TODO Show more detailed error messages
+        except requests.HTTPError as http_exc:
+            raise StoreBackendError(
+                f"Unable to set object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+            )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
@@ -469,10 +473,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response = requests.delete(
                 url, json=data, headers=self.headers, timeout=self.TIMEOUT
             )
-            response_status_code = response.status_code
-
-            if response_status_code < 300:
-                return True
+            response.raise_for_status()
+            return True
+        except requests.HTTPError as http_exc:
+            # TODO: GG 20220819 should we raise an error here instead of returning False
+            logger.warning(
+                f"Unable to delete object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+            )
             return False
         except Exception as e:
             logger.debug(str(e))
