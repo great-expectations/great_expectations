@@ -319,7 +319,7 @@ Please check your config."""
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
-        # Note this is to get a batch from tables in AWS Glue Data Catalog by its partitions 
+        # Note this is to get a batch from tables in AWS Glue Data Catalog by its partitions
         partitions: Optional[List[str]] = batch_spec.get("partitions")
         if partitions:
             batch_data = self._data_splitter.split_on_multi_column_values(
