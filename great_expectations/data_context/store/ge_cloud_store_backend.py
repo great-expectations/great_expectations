@@ -21,6 +21,10 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+CONTACT_SUPERCONDUCTIVE_MESSAGE = (
+    "Please contact superconductive at foobar@superconductive.com"
+)
+
 
 class ErrorDetail(TypedDict):
     code: Optional[str]
@@ -43,6 +47,28 @@ class ResponsePayload(TypedDict):
 
 
 AnyPayload = Union[ResponsePayload, ErrorPayload]
+
+
+def _get_user_friendly_error_message(
+    http_exc: requests.exceptions.HTTPError,
+) -> str:
+    # TODO: define a GeCloud service/client for this & other related behavior
+    support_message = []
+    response: requests.Response = http_exc.response
+
+    request_id = response.headers.get("request-id", "")
+    if request_id:
+        support_message.append(f"Request-Id: {request_id}")
+
+    try:
+        error_json: ErrorPayload = http_exc.response.json()
+        errors = error_json.get("errors")
+        if errors:
+            support_message.append(json.dumps(errors))
+
+    except json.JSONDecodeError:
+        support_message.append(CONTACT_SUPERCONDUCTIVE_MESSAGE)
+    return " ".join(support_message)
 
 
 class GeCloudRESTResource(str, Enum):
