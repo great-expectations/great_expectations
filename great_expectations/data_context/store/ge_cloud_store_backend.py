@@ -22,6 +22,16 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+class ErrorDetail(TypedDict):
+    code: Optional[str]
+    detail: Optional[str]
+    source: Optional[str]
+
+
+class ErrorPayload(TypedDict):
+    errors: List[ErrorDetail]
+
+
 class PayloadDataField(TypedDict):
     attributes: dict
     id: str
@@ -30,6 +40,9 @@ class PayloadDataField(TypedDict):
 
 class ResponsePayload(TypedDict):
     data: PayloadDataField
+
+
+AnyPayload = Union[ResponsePayload, ErrorPayload]
 
 
 class GeCloudRESTResource(str, Enum):
