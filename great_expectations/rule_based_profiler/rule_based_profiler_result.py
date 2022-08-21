@@ -23,7 +23,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
     "RuleBasedProfilerResult" is a "dataclass" object, designed to hold results (with auxiliary information) of
     executing "RuleBasedProfiler.run()" method.  Principal properties are: "fully_qualified_parameter_names_by_domain",
     "parameter_values_for_fully_qualified_parameter_names_by_domain", "expectation_configurations", and "citation"
-    (which represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled").
+    (which represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled).
     """
 
     fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]]
