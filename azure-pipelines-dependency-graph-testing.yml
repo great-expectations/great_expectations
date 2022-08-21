@@ -249,7 +249,7 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
@@ -322,7 +322,7 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
@@ -450,7 +450,7 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
@@ -489,7 +489,7 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
@@ -535,7 +535,7 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'

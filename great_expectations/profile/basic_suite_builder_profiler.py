@@ -534,8 +534,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     column, min_value, max_value, parse_strings_as_datetimes=True
                 )
 
-    @classmethod  # noqa: C901 - 28
-    def _profile(cls, dataset, configuration=None):
+    @classmethod
+    def _profile(cls, dataset, configuration=None):  # noqa: C901 - 28
         logger.debug(f"Running profiler with configuration: {configuration}")
         if configuration == "demo":
             return cls._demo_profile(dataset)
