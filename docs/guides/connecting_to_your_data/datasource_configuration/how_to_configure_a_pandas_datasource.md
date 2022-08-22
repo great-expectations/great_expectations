@@ -137,15 +137,15 @@ datasource_config: dict = {
 }
 ```
 
-### 6. Add a dictionary as the value of the `data_connector` key
+### 6. Add a dictionary as the value of the `data_connectors` key
 
-The `data_connector` key should have a dictionary as its value.  Each key/value pair in this dictionary will correspond to a Data Connector's name and configuration, respectively.
+The `data_connectors` key should have a dictionary as its value.  Each key/value pair in this dictionary will correspond to a Data Connector's name and configuration, respectively.
 
-The keys in the `data_connector` dictionary will be the names of the Data Connectors, which you will use to indicate which Data Connector to use in future workflows.  As with value of your Datasource's `name` key, you can use any value you want for a Data Connector's name.  Ideally, you will use something relevant to the data that each particular Data Connector will provide; the only significant difference is that for Data Connectors the name of the Data Connector _is_ its key in the `data_connector` dictionary.
+The keys in the `data_connectors` dictionary will be the names of the Data Connectors, which you will use to indicate which Data Connector to use in future workflows.  As with value of your Datasource's `name` key, you can use any value you want for a Data Connector's name.  Ideally, you will use something relevant to the data that each particular Data Connector will provide; the only significant difference is that for Data Connectors the name of the Data Connector _is_ its key in the `data_connectors` dictionary.
 
-The values for each of your `data_connector` keys will be the Data Connector configurations that correspond to each Data Connector's name.  You may define multiple Data Connectors in the `data_connector` dictionary by including multiple key/value pairs.
+The values for each of your `data_connectors` keys will be the Data Connector configurations that correspond to each Data Connector's name.  You may define multiple Data Connectors in the `data_connectors` dictionary by including multiple key/value pairs.
 
-For now, start by adding an empty dictionary as the value of the `data_connector` key.  We will begin populating it with Data Connector configurations in the next step.
+For now, start by adding an empty dictionary as the value of the `data_connectors` key.  We will begin populating it with Data Connector configurations in the next step.
 
 Your current configuration should look like:
 
