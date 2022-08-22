@@ -1395,7 +1395,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
         include_rendered_content: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
         **kwargs: dict,
     ) -> None:
         """Save the provided expectation suite into the DataContext.
@@ -1406,7 +1405,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 from the suite.
             overwrite_existing: Whether to overwrite the suite if it already exists.
             include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
-            ge_cloud_id: Cloud ID for saving expectation suite.
 
         Returns:
             None
@@ -1418,23 +1416,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         )
 
-        if ge_cloud_id:
-            self._data_context.save_expectation_suite(
-                expectation_suite,
-                expectation_suite_name,
-                overwrite_existing,
-                include_rendered_content,
-                ge_cloud_id,
-                **kwargs,
-            )
-        else:
-            self._data_context.save_expectation_suite(
-                expectation_suite,
-                expectation_suite_name,
-                overwrite_existing,
-                include_rendered_content,
-                **kwargs,
-            )
+        self._data_context.save_expectation_suite(
+            expectation_suite,
+            expectation_suite_name,
+            overwrite_existing,
+            include_rendered_content,
+            **kwargs,
+        )
         self._synchronize_self_with_underlying_data_context()
 
     def store_validation_result_metrics(
