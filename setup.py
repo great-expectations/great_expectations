@@ -49,6 +49,9 @@ def get_extras_require():
         results[key] += results["sqlalchemy"]
 
     results.pop("boto")
+    all_requirements_set = set()
+    [all_requirements_set.update(vals) for vals in results.values()]
+    results["dev"] = sorted(all_requirements_set)
     return results
 
 
