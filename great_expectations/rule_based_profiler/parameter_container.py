@@ -231,8 +231,9 @@ class ParameterContainer(SerializableDictDot):
 def convert_dictionary_to_parameter_node(
     source: Optional[Any],
 ) -> Optional[ParameterNode]:
-    if source is None:
-        return None
+    # Prerequisite: If "source" is already "ParameterNode", then deep conversion is assumed to have been performed.
+    if source is None or isinstance(source, ParameterNode):
+        return source
 
     if isinstance(source, dict):
         if not isinstance(source, ParameterNode):

@@ -15,10 +15,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.data_assistant import (
-    DataAssistant,
-    VolumeDataAssistant,
-)
+from great_expectations.rule_based_profiler.data_assistant import VolumeDataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
     NumericRangeEstimatorType,
 )
@@ -2064,8 +2061,8 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_explici
     data_assistant_result: DataAssistantResult
     validator, data_assistant_result = quentin_explicit_instantiation_result_actual_time
 
-    # Execution time (in seconds) must have non-trivial value.
-    assert data_assistant_result.execution_time > 0.0
+    # Rule-Based Profiler execution time (in seconds) must have non-trivial value.
+    assert data_assistant_result.profiler_execution_time > 0.0
 
 
 @pytest.mark.unit
@@ -2076,8 +2073,8 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_implici
         quentin_implicit_invocation_result_actual_time
     )
 
-    # Execution time (in seconds) must have non-trivial value.
-    assert data_assistant_result.execution_time > 0.0
+    # Rule-Based Profiler execution time (in seconds) must have non-trivial value.
+    assert data_assistant_result.profiler_execution_time > 0.0
 
 
 @pytest.mark.unit
