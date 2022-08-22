@@ -1,6 +1,6 @@
 import copy
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, TypeVar, Union
 
 from pyparsing import (
     Literal,
@@ -72,6 +72,9 @@ attribute_naming_pattern = Word(alphas, alphanums + "_.") + ZeroOrMore(
         + Suppress(Literal("]"))
     )
 )
+
+
+T = TypeVar("T")
 
 
 class ParameterAttributeNameParserError(ge_exceptions.GreatExpectationsError):
@@ -228,29 +231,19 @@ class ParameterContainer(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
+def _convert_dictionary_to_parameter_node(source: dict) -> ParameterNode:
+    for key, value in source.items():
+        if isinstance(value, dict):
+            source[key] = _convert_dictionary_to_parameter_node(value)
+    return ParameterNode(source)
+
+
 def convert_dictionary_to_parameter_node(
-    source: Optional[Any],
-) -> Optional[ParameterNode]:
-    # Prerequisite: If "source" is already "ParameterNode", then deep conversion is assumed to have been performed.
-    if source is None or isinstance(source, ParameterNode):
+    source: Union[T, dict]
+) -> Union[T, ParameterNode]:
+    if not isinstance(source, dict):
         return source
-
-    if isinstance(source, dict):
-        if not isinstance(source, ParameterNode):
-            source = ParameterNode(source)
-
-        key: str
-        value: Any
-        for key, value in source.items():
-            source[key] = convert_dictionary_to_parameter_node(source=value)
-    elif isinstance(source, (list, tuple, set)):
-        source_type: type = type(source)
-        value: Any
-        return source_type(
-            [convert_dictionary_to_parameter_node(source=value) for value in source]
-        )
-
-    return source
+    return _convert_dictionary_to_parameter_node(source)
 
 
 def convert_parameter_node_to_dictionary(
