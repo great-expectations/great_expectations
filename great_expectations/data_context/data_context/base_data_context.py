@@ -2212,7 +2212,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config_version: float,
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
-        ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
         config_data = {
             "name": name,
@@ -2233,7 +2232,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             config=config,
             data_context=self,
             profiler_store=self.profiler_store,
-            ge_cloud_id=ge_cloud_id,
         )
         return profiler
 
