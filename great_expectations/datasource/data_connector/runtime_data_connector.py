@@ -313,6 +313,7 @@ class RuntimeDataConnector(DataConnector):
             return RuntimeDataBatchSpec(batch_spec)
         elif "query" in runtime_parameters:
             batch_spec["query"] = runtime_parameters.get("query")
+            batch_spec["temp_table_schema_name"] = runtime_parameters.get("temp_table_schema_name")
             return RuntimeQueryBatchSpec(batch_spec)
         elif "path" in runtime_parameters:
             path: str = runtime_parameters["path"]
