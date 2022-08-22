@@ -21,9 +21,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-CONTACT_SUPERCONDUCTIVE_MESSAGE = (
-    "Please contact superconductive at foobar@superconductive.com"
-)
+SUPPORT_EMAIL = "support@greatexpectations.io"
 
 
 class ErrorDetail(TypedDict):
@@ -67,7 +65,7 @@ def _get_user_friendly_error_message(
             support_message.append(json.dumps(errors))
 
     except json.JSONDecodeError:
-        support_message.append(CONTACT_SUPERCONDUCTIVE_MESSAGE)
+        support_message.append(f"Please contact superconductive at {SUPPORT_EMAIL}")
     return " ".join(support_message)
 
 
