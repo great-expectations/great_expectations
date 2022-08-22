@@ -866,14 +866,11 @@ class AbstractDataContext(ABC):
                     )
                 )
 
-        if include_rendered_content is None:
-            if (
-                self.include_rendered_content.expectation_validation_result is True
-                or self.include_rendered_content.globally is True
-            ):
-                include_rendered_content = True
-            else:
-                include_rendered_content = False
+        include_rendered_content: bool = (
+            self._determine_if_expectation_validation_result_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
 
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
@@ -1797,3 +1794,29 @@ class AbstractDataContext(ABC):
             None
         """
         send_usage_message(self, event, event_payload, success)
+
+    def _determine_if_expectation_suite_include_rendered_content(
+        self, include_rendered_content: Optional[bool] = None
+    ) -> bool:
+        if include_rendered_content is None:
+            if (
+                self.include_rendered_content.expectation_suite is True
+                or self.include_rendered_content.globally is True
+            ):
+                return True
+            else:
+                return False
+        return include_rendered_content
+
+    def _determine_if_expectation_validation_result_include_rendered_content(
+        self, include_rendered_content: Optional[bool] = None
+    ) -> bool:
+        if include_rendered_content is None:
+            if (
+                self.include_rendered_content.expectation_validation_result is True
+                or self.include_rendered_content.globally is True
+            ):
+                return True
+            else:
+                return False
+        return include_rendered_content

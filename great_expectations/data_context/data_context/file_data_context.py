@@ -115,13 +115,12 @@ class FileDataContext(AbstractDataContext):
                 )
             )
         self._evaluation_parameter_dependencies_compiled = False
-        if include_rendered_content is True or (
-            include_rendered_content is None
-            and (
-                self.include_rendered_content.expectation_suite is True
-                or self.include_rendered_content.globally is True
+        include_rendered_content: bool = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
             )
-        ):
+        )
+        if include_rendered_content:
             expectation_suite.render()
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
