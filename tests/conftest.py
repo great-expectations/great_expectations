@@ -2385,10 +2385,22 @@ stores:
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
+  default_profiler_store:
+    class_name: ProfilerStore
+    store_backend:
+      class_name: GeCloudStoreBackend
+      ge_cloud_base_url: {ge_cloud_base_url}
+      ge_cloud_resource_type: profiler
+      ge_cloud_credentials:
+        access_token: {ge_cloud_access_token}
+        organization_id: {ge_cloud_organization_id}
+      suppress_store_backend_id: True
+
 evaluation_parameter_store_name: default_evaluation_parameter_store
 expectations_store_name: default_expectations_store
 validations_store_name: default_validations_store
 checkpoint_store_name: default_checkpoint_store
+profiler_store_name: default_profiler_store
 """
     data_context_config_dict = yaml.load(config_yaml_str)
     return DataContextConfig(**data_context_config_dict)
@@ -2568,19 +2580,56 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
     return context
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def profiler_name() -> str:
     return "my_first_profiler"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def profiler_store_name() -> str:
     return "profiler_store"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
+def profiler_rules() -> dict:
+    rules = {
+        "rule_1": {
+            "variables": {},
+            "domain_builder": {
+                "class_name": "TableDomainBuilder",
+            },
+            "parameter_builders": [
+                {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "name": "my_parameter",
+                    "metric_name": "my_metric",
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_arg": "$parameter.my_parameter.value[0]",
+                    "my_other_arg": "$parameter.my_parameter.value[1]",
+                    "meta": {
+                        "profiler_details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    return rules
+
+
+@pytest.fixture
 def profiler_config_with_placeholder_args(
     profiler_name: str,
+    profiler_rules: dict,
 ) -> RuleBasedProfilerConfig:
     """
     This fixture does not correspond to a practical profiler with rules, whose constituent components perform meaningful
@@ -2592,37 +2641,7 @@ def profiler_config_with_placeholder_args(
         variables={
             "false_positive_threshold": 1.0e-2,
         },
-        rules={
-            "rule_1": {
-                "variables": {},
-                "domain_builder": {
-                    "class_name": "TableDomainBuilder",
-                },
-                "parameter_builders": [
-                    {
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "name": "my_parameter",
-                        "metric_name": "my_metric",
-                    },
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                        "column_A": "$domain.domain_kwargs.column_A",
-                        "column_B": "$domain.domain_kwargs.column_B",
-                        "my_arg": "$parameter.my_parameter.value[0]",
-                        "my_other_arg": "$parameter.my_parameter.value[1]",
-                        "meta": {
-                            "profiler_details": {
-                                "my_parameter_estimator": "$parameter.my_parameter.details",
-                                "note": "Important remarks about estimation algorithm.",
-                            },
-                        },
-                    },
-                ],
-            },
-        },
+        rules=profiler_rules,
     )
 
 
