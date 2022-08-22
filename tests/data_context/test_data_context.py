@@ -306,7 +306,8 @@ def test_compile_evaluation_parameter_dependencies(
     )
 
 
-def test_list_datasources(data_context_parameterized_expectation_suite):
+@pytest.mark.v2_api
+def test_list_datasources_v2_api(data_context_parameterized_expectation_suite):
     datasources = data_context_parameterized_expectation_suite.list_datasources()
 
     assert datasources == [
