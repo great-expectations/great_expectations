@@ -139,6 +139,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         self._rule_states = []
 
+    @property
+    def ge_cloud_id(self) -> Optional[str]:
+        return self._id
+
     def _init_profiler_rules(
         self,
         rules: Dict[str, Dict[str, Any]],

@@ -83,7 +83,10 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import (
+    GeCloudIdAwareRef,
+    GeCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -2243,19 +2246,21 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         config = RuleBasedProfilerConfig(**profiler_config)
 
-        return RuleBasedProfiler.add_profiler(
+        profiler = RuleBasedProfiler.add_profiler(
             config=config,
             data_context=self,
             profiler_store=self.profiler_store,
             ge_cloud_id=ge_cloud_id,
         )
+        return profiler
 
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> None:
+    ) -> RuleBasedProfiler:
+        name = profiler.name
+        ge_cloud_id = profiler.ge_cloud_id
+
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
             key = GeCloudIdentifier(
@@ -2264,7 +2269,16 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         else:
             key = ConfigurationIdentifier(configuration_key=name)
 
-        self.profiler_store.set(key=key, value=profiler.config)
+        response = self.profiler_store.set(key=key, value=profiler.config)
+        if isinstance(response, GeCloudResourceRef):
+            ge_cloud_id = response.ge_cloud_id
+
+        # If an id is present, we want to prioritize that as our key for object retrieval
+        if ge_cloud_id:
+            name = None
+
+        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
+        return profiler
 
     def get_profiler(
         self,
