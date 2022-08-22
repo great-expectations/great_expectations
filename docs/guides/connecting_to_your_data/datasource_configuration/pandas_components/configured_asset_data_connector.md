@@ -38,7 +38,7 @@ Next, you will need to define the `pattern` value and `group_names` value for th
 
 Since you want this Data Asset to only match the file `yellow_tripdata_sample_2020-01.csv` value for the `pattern` key should be one that does not contain any regex special characters that can match on more than one value.  An example follows:
 
-```python"
+```python
 "pattern": "yellow_tripdata_sample_2020-(01)\\.csv"
 ```
 
@@ -50,7 +50,7 @@ Since none of the characters in this regex can possibly match more than one valu
 
 To correspond to the single group that was defined in your regex, you will define a single entry in the list for the `group_names` key.  Since the `assets` dictionary key is used for this Data Asset's name, you can give this group a name relevant to what it is matching on:
 
-```python"
+```python
     "group_names": ["month"],
 ```
 
@@ -67,7 +67,7 @@ Looking back at our sample files, this entry will result in the `ConfiguredAsset
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 
-```python"
+```python
         "name_of_my_configured_data_connector": {
             "class_name": "ConfiguredAssetFilesystemDataConnector",
             "base_directory": "../data",
@@ -81,7 +81,7 @@ With all of these values put together into a single dictionary, your Data Connec
 
 And the full configuration for your Datasource should look like:
 
-```python"
+```python
 datasource_config = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -137,13 +137,13 @@ Since you want this Data Asset to all of the 2020 files, the value for `pattern`
 
 Looking back at the files in our `data` directory, you can see that each file differs from the others only in the digits indicating the month of the file.  Therefore, the regular expression we create will separate those specific characters into a group, and will define the content of that group using special characters capable of matching on any values, like so:
 
-```python"
+```python
 "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv"
 ```
 
 To correspond to the single group that was defined in your `pattern`, you will define a single entry in the list for the `group_names` key.  Since the `assets` dictionary key is used for this Data Asset's name, you can give this group a name relevant to what it is matching on:
 
-```python"
+```python
     "group_names": ["month"],
 ```
 
@@ -167,7 +167,7 @@ Looking back at our sample files, this entry will result in the `ConfiguredAsset
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 
-```python"
+```python
         "name_of_my_configured_data_connector": {
             "class_name": "ConfiguredAssetFilesystemDataConnector",
             "base_directory": "../data",
@@ -181,7 +181,7 @@ With all of these values put together into a single dictionary, your Data Connec
 
 And the full configuration for your Datasource should look like:
 
-```python"
+```python
 datasource_config = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
