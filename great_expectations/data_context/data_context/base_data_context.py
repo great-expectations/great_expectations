@@ -1393,7 +1393,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
         include_rendered_content: Optional[bool] = None,
-        **kwargs: dict,
+        **kwargs: Optional[dict],
     ) -> None:
         """Save the provided expectation suite into the DataContext.
 

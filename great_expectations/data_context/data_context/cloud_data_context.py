@@ -255,7 +255,7 @@ class CloudDataContext(AbstractDataContext):
         overwrite_existing: bool = True,
         include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
-        **kwargs: dict,
+        **kwargs: Optional[dict],
     ) -> None:
         """Save the provided expectation suite into the DataContext.
 

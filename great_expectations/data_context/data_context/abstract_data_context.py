@@ -219,7 +219,7 @@ class AbstractDataContext(ABC):
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
         include_rendered_content: Optional[bool] = None,
-        **kwargs: dict,
+        **kwargs: Optional[dict],
     ) -> None:
         """
         Each DataContext will define how ExpectationSuite will be saved.
@@ -943,7 +943,7 @@ class AbstractDataContext(ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        **kwargs: dict,
+        **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
         This method applies only to the new (V3) Datasource schema.
