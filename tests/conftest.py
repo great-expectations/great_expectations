@@ -2661,10 +2661,8 @@ def ge_cloud_profiler_id() -> str:
 
 
 @pytest.fixture
-def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
-    return GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_profiler_id
-    )
+def ge_cloud_profiler_key() -> GeCloudIdentifier:
+    return GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER)
 
 
 @pytest.fixture
