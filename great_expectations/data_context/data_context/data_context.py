@@ -558,7 +558,7 @@ class DataContext(BaseDataContext):
             variables=variables,
             ge_cloud_id=ge_cloud_id,
         )
-        self.save_profiler(profiler=profiler, name=name, ge_cloud_id=ge_cloud_id)
+        self.save_profiler(profiler=profiler)
         return profiler
 
     @classmethod

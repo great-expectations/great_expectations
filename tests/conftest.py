@@ -168,6 +168,21 @@ def pytest_addoption(parser):
         help="If set, execute tests against trino",
     )
     parser.addoption(
+        "--redshift",
+        action="store_true",
+        help="If set, execute tests against redshift",
+    )
+    parser.addoption(
+        "--athena",
+        action="store_true",
+        help="If set, execute tests against athena",
+    )
+    parser.addoption(
+        "--snowflake",
+        action="store_true",
+        help="If set, execute tests against snowflake",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests for usage_statistics",
@@ -229,6 +244,9 @@ def build_test_backends_list_cfe(metafunc):
     include_aws: bool = metafunc.config.getoption("--aws")
     include_trino: bool = metafunc.config.getoption("--trino")
     include_azure: bool = metafunc.config.getoption("--azure")
+    include_redshift: bool = metafunc.config.getoption("--redshift")
+    include_athena: bool = metafunc.config.getoption("--athena")
+    include_snowflake: bool = metafunc.config.getoption("--snowflake")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -240,6 +258,9 @@ def build_test_backends_list_cfe(metafunc):
         include_aws=include_aws,
         include_trino=include_trino,
         include_azure=include_azure,
+        include_redshift=include_redshift,
+        include_athena=include_athena,
+        include_snowflake=include_snowflake,
     )
     return test_backend_names
 
@@ -297,7 +318,17 @@ def sa(test_backends):
     if not any(
         [
             dbms in test_backends
-            for dbms in ["postgresql", "sqlite", "mysql", "mssql", "bigquery", "trino"]
+            for dbms in [
+                "postgresql",
+                "sqlite",
+                "mysql",
+                "mssql",
+                "bigquery",
+                "trino",
+                "redshift",
+                "athena",
+                "snowflake",
+            ]
         ]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
