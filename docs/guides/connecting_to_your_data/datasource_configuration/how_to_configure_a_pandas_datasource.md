@@ -15,6 +15,7 @@ import ConfiguredAssetDataConnector from './pandas_components/configured_asset_d
 import TipCustomDataConnectorModuleName from './components/tip_custom_data_connector_module_name.mdx'
 import FilesystemBaseDirectory from './components/base_directory_for_filesystem.mdx'
 import IntroForSingleOrMultiBatchConfiguration from './components/intro_for_single_or_multi_batch_configuration.mdx'
+import RuntimeAssetDataConnector from './pandas_components/runtime_asset_data_connector.md'
 
 This guide will walk you through the process of configuring a Pandas Datasource from scratch, verifying that your configuration is valid, and adding it to your Data Context.  By the end of this guide you will have a Pandas Datasource which you can use in future workflows for creating Expectations and validating data.
 
@@ -261,8 +262,6 @@ With an `InferredAssetDataConnector`, you would need to provide your Batch Reque
 
 With a `ConfiguredAssetDataConnector`, you would provide your Batch Request with the name of the Data Asset that was configured with an `InferredAssetDataConnector` style pattern, and then provide the same name as you would have used for an `InferredAssetDataConnector`'s Data Asset as a `batch_identifier` in your Batch Request.  This will result in the `ConfiguredAssetDataConnector` providing the same data in response to the Batch Request as an `InferredAssetDataConnector` requesting the data as a Data Asset would.
 
-In the section where configuring Data Assets for a `ConfiguredAssetDataConnector` is explained, there will also be an example of this.
-
 :::
 
 Remember, the key that you provide for each Data Connector configuration dictionary will be used as the name of the Data Connector.  For this example, we will use the name `name_of_my_configured_data_connector` but you may have it be anything you like.
@@ -324,6 +323,72 @@ datasource_config: dict = {
   </TabItem>
   <TabItem value="runtime">
 
+:::tip
+
+A `RuntimeDataConnector` is used to connect to an in-memory dataframe or path.  With a Pandas Execution Engine, this will mean connecting to a Pandas dataframe.  The dataframe or path used for a `RuntimeDataConnector` is therefore passed to the `RuntimeDataConnector` as part of a Batch Request, rather than being a static part of the `RuntimeDataConnector`'s configuration.
+
+This also means that a `RuntimeDataConnector`'s Data Asset definitions operate in a different fashion than an `InferredDataConnector` or a `ConfiguredDataConnector`.  Inferred and Configured Data Connectors are capable of returning more than one Data Asset in a Batch Request, but a Runtime Data Connector will always only return one Batch of data: the _current_ data.  
+
+This means that while an Inferred or Configured Data Connector needs a way to identify which Batch of data to return, a Runtime Data Connector needs a way for you to attach identifying values to a returned Batch of data so that the data _as it was at the time it was returned_ can be referred to again in the future.
+
+For more information on configuring a Batch Request for a Pandas Runtime Data Connector, please see our guide on [how to create a Batch of data from an in-memory Spark or Pandas dataframe or path](../how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe.md).
+
+:::
+
+Remember, the key that you provide for each Data Connector configuration dictionary will be used as the name of the Data Connector.  For this example, we will use the name `name_of_my_runtime_data_connector` but you may have it be anything you like.
+
+At this point, your configuration should look like:
+
+```python"
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "PandasExecutionEngine",  
+        "module_name": "great_expectations.execution_engine",
+    },
+    "data_connectors": {
+        "name_of_my_runtime_data_connector": {}
+        }
+    }
+}
+```
+
+Unlike Inferred and Configured Data Connectors, when working with a Runtime Data Connector you do not need to configure your Data Connector to catalog the available Batches (there's always only one: the current one) so that you can request them by name and identifiers.  Instead, you need to configure your Data Connector so that you can attach identifiers to the Batch that is returned by your Batch Request, so that you can refer back to this particular set of data in the future if you need to.
+
+Additionally, Batch Requests that specify a Runtime Data Connector must also include `runtime_parameters` in the request.  For a Pandas Datasource, your Batch Request's `runtime_parameters` will include the `path` parameter.  Therefore, you will not need to define a `path` as part of your Runtime Data Connector's configuration.
+
+Instead, all you will need to define in your Runtime Data Connector's configuration is the `class_name` for the Data Connector you will use and a list of `batch_identifiers` that you will provide so that a returned Batch can be referred back to in the future.
+
+For this example, you will be using the `RuntimeDataConnector` as your `class_name`.  This key/value entry will therefore look like:
+
+```python
+    "class_name": "RuntimeDataConnector",
+```
+
+After including a blank list for your `batch_identifiers`, your full configuration should now look like:
+
+```python"
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "PandasExecutionEngine",  
+        "module_name": "great_expectations.execution_engine",
+    },
+    "data_connectors": {
+        "name_of_my_runtime_data_connector": {
+            "class_name": "RuntimeDataConnector",
+            "batch_identifiers": []
+        }
+    }
+}
+```
+
+<TipCustomDataConnectorModuleName />
+
   </TabItem>
   </Tabs>
 
@@ -366,6 +431,8 @@ The `pattern` in each `assets` entry will be matched against the files in your `
 
   </TabItem>
   <TabItem value="runtime">
+
+<RuntimeAssetDataConnector />
 
   </TabItem>
   </Tabs>
