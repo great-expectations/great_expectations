@@ -248,8 +248,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to get object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_err)}"
             )
         except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
             raise StoreBackendError(
-                f"Unable to get object in GE Cloud Store Backend: {timeout_exc}"
+                "Unable to get object in GE Cloud Store Backend. This is likely a transient error. Please try again."
             )
 
     def _move(self) -> None:  # type: ignore[override]
@@ -306,6 +307,11 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
                 f"Unable to update object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to update object in GE Cloud Store Backend. This is likely a transient error. Please try again."
             )
         except Exception as e:
             logger.debug(str(e))
@@ -387,6 +393,11 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
                 f"Unable to set object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to set object in GE Cloud Store Backend. This is likely a transient error. Please try again."
             )
         except Exception as e:
             logger.debug(str(e))
@@ -479,6 +490,11 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to delete object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
             )
             return False
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to delete object in GE Cloud Store Backend. This is likely a transient error. Please try again."
+            )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
