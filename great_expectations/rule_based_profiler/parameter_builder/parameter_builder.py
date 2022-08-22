@@ -263,10 +263,10 @@ class ParameterBuilder(ABC, Builder):
         ] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
+        force_no_progress_bar: Optional[bool] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        force_no_progress_bar: Optional[bool] = False,
     ) -> MetricComputationResult:
         """
         General multi-batch metric computation facility.
@@ -278,6 +278,7 @@ class ParameterBuilder(ABC, Builder):
         :param metric_value_kwargs: Metric Value Kwargs is an essential parameter of the MetricConfiguration object.
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
+        :param force_no_progress_bar (bool) if True, prevent all "Calculating Metrics" output; (False by default).
         :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.

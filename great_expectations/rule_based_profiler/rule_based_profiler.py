@@ -336,11 +336,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     "rules": effective_rules_configs,
                 },
             },
-            execution_time=sum(
-                [rule_state.execution_time for rule_state in self.rule_states]
-            ),
+            rule_domain_builder_execution_time={
+                rule_state.rule.name: rule_state.rule_domain_builder_execution_time
+                for rule_state in self.rule_states
+            },
             rule_execution_time={
-                rule_state.rule.name: rule_state.execution_time
+                rule_state.rule.name: rule_state.rule_execution_time
                 for rule_state in self.rule_states
             },
             _usage_statistics_handler=self._usage_statistics_handler,
