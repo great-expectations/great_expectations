@@ -106,7 +106,7 @@ class EphemeralDataContext(AbstractDataContext):
                 )
             )
         self._evaluation_parameter_dependencies_compiled = False
-        include_rendered_content: bool = (
+        include_rendered_content = (
             self._determine_if_expectation_suite_include_rendered_content(
                 include_rendered_content=include_rendered_content
             )

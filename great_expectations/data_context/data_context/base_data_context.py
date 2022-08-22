@@ -1407,7 +1407,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        include_rendered_content: bool = (
+        include_rendered_content = (
             self._determine_if_expectation_suite_include_rendered_content(
                 include_rendered_content=include_rendered_content
             )
