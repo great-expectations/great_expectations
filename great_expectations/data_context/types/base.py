@@ -375,6 +375,7 @@ class DataConnectorConfig(AbstractConfig):
     def __init__(  # noqa: C901 - 20
         self,
         class_name,
+        name: Optional[str] = None,
         id_: Optional[str] = None,
         module_name=None,
         credentials=None,
@@ -451,7 +452,7 @@ class DataConnectorConfig(AbstractConfig):
         if delimiter is not None:
             self.delimiter = delimiter
 
-        super().__init__(id_=id_)
+        super().__init__(id_=id_, name=name)
 
         # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
@@ -481,6 +482,11 @@ class DataConnectorConfig(AbstractConfig):
 class DataConnectorConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
+
+    name = fields.String(
+        required=False,
+        allow_none=True,
+    )
 
     id_ = fields.String(
         required=False,
