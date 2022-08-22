@@ -1343,7 +1343,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> ExpectationSuite:
         """
@@ -1352,7 +1351,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         res = self._data_context.create_expectation_suite(
             expectation_suite_name,
             overwrite_existing=overwrite_existing,
-            ge_cloud_id=ge_cloud_id,
             **kwargs,
         )
         self._synchronize_self_with_underlying_data_context()
@@ -1409,7 +1407,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-
         include_rendered_content: bool = (
             self._determine_if_expectation_suite_include_rendered_content(
                 include_rendered_content=include_rendered_content
