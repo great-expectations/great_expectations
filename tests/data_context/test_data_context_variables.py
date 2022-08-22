@@ -72,9 +72,11 @@ def data_context_config_dict() -> dict:
         "notebooks": None,
         "concurrency": None,
         "progress_bars": None,
-        "include_rendered_content": IncludeRenderedContentConfig(
-            expectation_suite=False, expectation_validation_result=False, globally=False
-        ),
+        "include_rendered_content": {
+            "expectation_suite": False,
+            "expectation_validation_result": False,
+            "globally": False,
+        },
     }
     return config
 
@@ -463,6 +465,7 @@ def test_data_context_variables_save_config(
             "notebooks",
             "plugins_directory",
             "stores",
+            "include_rendered_content",
         ):
             expected_config_dict[attr] = data_context_config_dict[attr]
 
