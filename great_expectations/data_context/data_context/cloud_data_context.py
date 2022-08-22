@@ -254,7 +254,6 @@ class CloudDataContext(AbstractDataContext):
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
         include_rendered_content: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> None:
         """Save the provided expectation suite into the DataContext.
@@ -265,7 +264,6 @@ class CloudDataContext(AbstractDataContext):
                 from the suite.
             overwrite_existing: Whether to overwrite the suite if it already exists.
             include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
-            ge_cloud_id: Cloud ID for saving expectation suite.
 
         Returns:
             None

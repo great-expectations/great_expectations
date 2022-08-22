@@ -172,7 +172,7 @@ class AssetConfig(SerializableDictDot):
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
         reader_options: Optional[Dict[str, Any]] = None,
-        **kwargs: dict,
+        **kwargs: Optional[dict],
     ) -> None:
         if name is not None:
             self.name = name

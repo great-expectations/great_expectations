@@ -162,10 +162,10 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
             validator.expect_table_row_count_to_equal(value=10)
         )
 
-    assert isinstance(
-        expectation_validation_result.rendered_content[0], RenderedAtomicContent
-    )
-    assert isinstance(
-        expectation_validation_result.expectation_config.rendered_content[0],
-        RenderedAtomicContent,
-    )
+    for result in expectation_validation_result.results:
+        for rendered_content in result.rendered_content:
+            assert isinstance(rendered_content, RenderedAtomicContent)
+
+    for expectation_configuration in expectation_validation_result.expectation_config:
+        for rendered_content in expectation_configuration.rendered_content:
+            assert isinstance(rendered_content, RenderedAtomicContent)

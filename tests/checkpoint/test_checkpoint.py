@@ -5136,12 +5136,12 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    assert isinstance(
-        result.run_results[validation_result_identifier]["validation_result"]
-        .results[0]
-        .rendered_content[0],
-        RenderedAtomicContent,
-    )
+    expectation_validation_result: ExpectationValidationResult = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
+    for result in expectation_validation_result.results:
+        for rendered_content in result.rendered_content:
+            assert isinstance(rendered_content, RenderedAtomicContent)
 
 
 @pytest.mark.integration
