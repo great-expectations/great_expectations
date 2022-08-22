@@ -2254,13 +2254,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
         return profiler
 
-        # If an id is present, we want to prioritize that as our key for object retrieval
-        if ge_cloud_id:
-            name = None
-
-        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
-        return profiler
-
     def get_profiler(
         self,
         name: Optional[str] = None,
