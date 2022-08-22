@@ -325,11 +325,11 @@ datasource_config: dict = {
 
 :::tip
 
-A `RuntimeDataConnector` is used to connect to an in-memory dataframe or path.  With a Pandas Execution Engine, this will mean connecting to a Pandas dataframe.  The dataframe or path used for a `RuntimeDataConnector` is therefore passed to the `RuntimeDataConnector` as part of a Batch Request, rather than being a static part of the `RuntimeDataConnector`'s configuration.
+A `RuntimeDataConnector` is used to connect to an in-memory dataframe or path.  The dataframe or path used for a `RuntimeDataConnector` is therefore passed to the `RuntimeDataConnector` as part of a Batch Request, rather than being a static part of the `RuntimeDataConnector`'s configuration.
 
-This also means that a `RuntimeDataConnector`'s Data Asset definitions operate in a different fashion than an `InferredDataConnector` or a `ConfiguredDataConnector`.  Inferred and Configured Data Connectors are capable of returning more than one Data Asset in a Batch Request, but a Runtime Data Connector will always only return one Batch of data: the _current_ data.  
+A Runtime Data Connector will always only return one Batch of data: the _current_ data that was passed in or specified as part of a Batch Request.  This means that a `RuntimeDataConnector` does not define Data Assets like an `InferredDataConnector` or a `ConfiguredDataConnector` would.  
 
-This means that while an Inferred or Configured Data Connector needs a way to identify which Batch of data to return, a Runtime Data Connector needs a way for you to attach identifying values to a returned Batch of data so that the data _as it was at the time it was returned_ can be referred to again in the future.
+Instead, a Runtime Data Connector's configuration will provides a way for you to attach identifying values to a returned Batch of data so that the data _as it was at the time it was returned_ can be referred to again in the future.
 
 For more information on configuring a Batch Request for a Pandas Runtime Data Connector, please see our guide on [how to create a Batch of data from an in-memory Spark or Pandas dataframe or path](../how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe.md).
 
@@ -355,11 +355,7 @@ datasource_config: dict = {
 }
 ```
 
-Unlike Inferred and Configured Data Connectors, when working with a Runtime Data Connector you do not need to configure your Data Connector to catalog the available Batches (there's always only one: the current one) so that you can request them by name and identifiers.  Instead, you need to configure your Data Connector so that you can attach identifiers to the Batch that is returned by your Batch Request, so that you can refer back to this particular set of data in the future if you need to.
-
-Additionally, Batch Requests that specify a Runtime Data Connector must also include `runtime_parameters` in the request.  For a Pandas Datasource, your Batch Request's `runtime_parameters` will include the `path` parameter.  Therefore, you will not need to define a `path` as part of your Runtime Data Connector's configuration.
-
-Instead, all you will need to define in your Runtime Data Connector's configuration is the `class_name` for the Data Connector you will use and a list of `batch_identifiers` that you will provide so that a returned Batch can be referred back to in the future.
+All you will need to define in your Runtime Data Connector's configuration is the `class_name` for the Data Connector you will use and a list of `batch_identifiers` that you will provide to any Batch Request that utilizes the Data Connector so that the returned Batch can be referred back to in the future.
 
 For this example, you will be using the `RuntimeDataConnector` as your `class_name`.  This key/value entry will therefore look like:
 
