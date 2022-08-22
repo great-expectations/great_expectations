@@ -128,6 +128,7 @@ def get_batch_ids(
     data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
+    limit: Optional[int] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -147,6 +148,9 @@ def get_batch_ids(
         batch_list = data_context.get_batch_list(batch_request=batch_request)
 
     batch_ids: List[str] = [batch.id for batch in batch_list]
+
+    if limit is not None:
+        batch_ids = batch_ids[0:limit]
 
     num_batch_ids: int = len(batch_ids)
     if num_batch_ids == 0:
