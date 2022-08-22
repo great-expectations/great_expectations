@@ -299,6 +299,7 @@ def get_parameter_value(
 def get_resolved_metrics_by_key(
     validator: "Validator",  # noqa: F821
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
+    force_no_progress_bar: bool = False,
 ) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
@@ -309,6 +310,7 @@ def get_resolved_metrics_by_key(
         Dictionary of the form {
             "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
         }
+        force_no_progress_bar: (bool) if True, prevent all "Calculating Metrics" output; (False by default).
 
     Returns:
         Dictionary of the form {
@@ -326,7 +328,8 @@ def get_resolved_metrics_by_key(
             metric_configuration
             for key, metric_configurations_for_key in metric_configurations_by_key.items()
             for metric_configuration in metric_configurations_for_key
-        ]
+        ],
+        force_no_progress_bar=force_no_progress_bar,
     )
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
