@@ -135,9 +135,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        limit: Optional[int] = None
-        if single_batch_mode:
-            limit = 1
+        limit: Optional[int] = 1 if single_batch_mode else None
 
         metric_computation_result: MetricComputationResult = self.get_metrics(
             metric_name=self.metric_name,
