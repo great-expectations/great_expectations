@@ -32,7 +32,7 @@ This guide will walk you through the process of configuring a Pandas Datasource 
 
 ### 1. Import necessary modules and initialize your Data Context
 
-```python"
+```python
 import great_expectations as gx
 from ruamel import yaml
 
@@ -53,7 +53,7 @@ To start, create an empty dictionary.  You will be populating it with keys as yo
 
 At this point, the configuration for your Datasource is merely:
 
-```python"
+```python
 datasource_config: dict = {}
 ```
 
@@ -76,7 +76,7 @@ The first key that you will need to define for your new Datasource is its `name`
 
 For the purposes of this example, we will name this Datasource:
 
-```python"
+```python
     "name": "my_datasource_name",
 ```
 
@@ -84,7 +84,7 @@ You should, however, name your Datsource something more relevant to your data.
 
 At this point, your configuration should now look like:
 
-```python"
+```python
 datasource_config: dict = {
     "name": "my_datasource_name",  # Preferably name it something relevant
 }
@@ -94,14 +94,14 @@ datasource_config: dict = {
 
 The `class_name` and `module_name` for your Datasource will almost always indicate the `Datasource` class found at `great_expectations.datasource`.  You may replace this with a specialized subclass, or a custom class, but for almost all regular purposes these two default values will suffice.  For the purposes of this guide, add those two values to their corresponding keys.
 
-```python"
+```python
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
 ```
 
 Your full configuration should now look like:
 
-```python"
+```python
 datasource_config: dict = {
     "name": "my_datasource_name",  # Preferably name it something relevant
     "class_name": "Datasource",
@@ -116,7 +116,7 @@ Your Execution Engine is where you will specify that you want this Datasource to
 
 The `execution_engine` key and its corresponding value will therefore look like this:
 
-```python"
+```python
     "execution_engine": {
         "class_name": "PandasExecutionEngine",
         "module_name": "great_expectations.execution_engine",
@@ -125,7 +125,7 @@ The `execution_engine` key and its corresponding value will therefore look like 
 
 After adding the above snippet to your Datasource configuration, your full configuration dictionary should now look like:
 
-```python"
+```python
 datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -149,7 +149,7 @@ For now, start by adding an empty dictionary as the value of the `data_connector
 
 Your current configuration should look like:
 
-```python"
+```python
 datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -197,7 +197,7 @@ Remember, the key that you provide for each Data Connector configuration diction
 
 At this point, your configuration should look like:
 
-```python"
+```python
 datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -220,7 +220,7 @@ When defining an `InferredAssetFilesystemDataConnector` you will need to provide
 
 For this example, you will be using the `InferredAssetFilesystemDataConnector` as your `class_name`.  This is a subclass of the `InferredAssetDataConnector` that is specialized to support filesystem Execution Engines, such as the `PandasExecutionEngine`.  This key/value entry will therefore look like:
 
-```python"
+```python
         "class_name": "InferredAssetFilesystemDataConnector",
 ```
 
@@ -230,7 +230,7 @@ For this example, you will be using the `InferredAssetFilesystemDataConnector` a
 
 With these values added, along with a blank dictionary for `default_regex` (we will define it in the next step), your full configuration should now look like:
 
-```python"
+```python
 datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -268,7 +268,7 @@ Remember, the key that you provide for each Data Connector configuration diction
 
 At this point, your configuration should look like:
 
-```python"
+```python
 datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -291,7 +291,7 @@ When defining a `ConfiguredAssetFilesystemDataConnector` you will need to provid
 
 For this example, you will be using the `ConfiguredAssetFilesystemDataConnector` as your `class_name`.  This is a subclass of the `ConfiguredAssetDataConnector` that is specialized to support filesystem Execution Engines, such as the `PandasExecutionEngine`.  This key/value entry will therefore look like:
 
-```python"
+```python
         "class_name": "ConfiguredAssetFilesystemDataConnector",
 ```
 
@@ -301,7 +301,7 @@ For this example, you will be using the `ConfiguredAssetFilesystemDataConnector`
 
 With these values added, along with a blank dictionary for `assets` (we will define entries for it in the next step), your full configuration should now look like:
 
-```python"
+```python
 datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -339,7 +339,7 @@ Remember, the key that you provide for each Data Connector configuration diction
 
 At this point, your configuration should look like:
 
-```python"
+```python
 datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -369,7 +369,7 @@ For this example, you will be using the `RuntimeDataConnector` as your `class_na
 
 After including a blank list for your `batch_identifiers`, your full configuration should now look like:
 
-```python"
+```python
 datasource_config: dict = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
@@ -442,7 +442,7 @@ The `pattern` in each `assets` entry will be matched against the files in your `
 
 Now that you have a full Datasource configuration, you can confirm that it is valid by testing it with the `.test_yaml_config(...)` method.  To do this, execute the Python code:
 
-```python"
+```python
 data_context.test_yaml_config(yaml.dump(datasource_config))
 ```
 
@@ -463,7 +463,7 @@ The `data_connectors` dictionary in your `datasource_config` can contain multipl
 
 Now that you have verified that you have a valid configuration you can add your new Datasource to your Data Context with the command:
  
-```python"
+```python
 data_context.add_datasource(**datasource_config)
 ```
 
@@ -477,7 +477,7 @@ If the value of `datasource_config["name"]` corresponds to a Datasource that is 
 
 If you want to ensure that you only add a Datasource when it won't overwrite an existing one, you can use the following code instead:
 
-```python"
+```python
 # add_datasource only if it doesn't already exist in your Data Context
 try:
     data_context.get_datasource(datasource_config["name"])
