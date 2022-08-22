@@ -24,6 +24,7 @@ from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.datasource import Datasource
+from great_expectations.datasource.datasource_serializer import JsonDatasourceSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,7 @@ class CloudDataContext(AbstractDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
+            serializer=JsonDatasourceSerializer(),
         )
         self._datasource_store = datasource_store
 

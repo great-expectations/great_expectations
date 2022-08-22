@@ -4,6 +4,7 @@ import copy
 from typing import List, Optional, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.core.serializer import BaseSerializer
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
@@ -27,8 +28,12 @@ class DatasourceStore(Store):
         store_name: Optional[str] = None,
         store_backend: Optional[dict] = None,
         runtime_environment: Optional[dict] = None,
+        serializer: Optional[BaseSerializer] = None,
     ) -> None:
         self._schema = DatasourceConfigSchema()
+        if serializer is None:
+            serializer = BaseSerializer()
+        self._serializer = serializer
         super().__init__(
             store_backend=store_backend,
             runtime_environment=runtime_environment,
@@ -64,14 +69,15 @@ class DatasourceStore(Store):
         """
         return self._store_backend.remove_key(key.to_tuple())
 
-    def serialize(self, value: DatasourceConfig) -> Union[str, DatasourceConfig]:
+    def serialize(self, value: DatasourceConfig) -> Union[str, DatasourceConfig, dict]:
         """
         See parent 'Store.serialize()' for more information
         """
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._schema.dump(value)
-        return value
+
+        return self._serializer.serialize(value)
 
     def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
         """

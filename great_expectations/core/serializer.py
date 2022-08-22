@@ -10,10 +10,15 @@ Typical usage example:
 """
 
 import abc
-from typing import Any
+from typing import Any, Optional
+
+from great_expectations.marshmallow__shade import Schema
 
 
 class AbstractSerializer(abc.ABC):
+    def __init__(self, schema: Optional[Schema] = None) -> None:
+        self._schema = schema
+
     @abc.abstractmethod
     def serialize(self, obj: Any) -> Any:
         """Serialize to serializer specific data type.
@@ -30,5 +35,16 @@ class AbstractSerializer(abc.ABC):
 
 
 class BaseSerializer(AbstractSerializer):
-    # TODO: This will contain a default implementation to be overridden in subclasses
-    pass
+    def serialize(self, obj: Any) -> Any:
+        """Serialize to serializer specific data type.
+
+        This default implementation can be overridden in subclasses.
+        Note, specific parameter and return types to be implemented in subclasses.
+
+        Args:
+            obj: object to serialize.
+
+        Returns:
+            representation of object in serializer specific data type.
+        """
+        return self._schema.dump(obj)

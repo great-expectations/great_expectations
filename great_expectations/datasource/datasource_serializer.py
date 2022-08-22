@@ -7,23 +7,25 @@ Typical usage example:
 
 # TODO: AJB 20220822 Add typical usage example
 """
-from typing import Union
+from typing import Optional
 
 from great_expectations.core.serializer import BaseSerializer
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.datasource import Datasource
 from great_expectations.marshmallow__shade import Schema
 
 
 class YamlDatasourceSerializer(BaseSerializer):
+    def __init__(self, schema: Optional[Schema] = None) -> None:
+        super().__init__(schema=schema)
 
-    _schema: Schema = datasourceConfigSchema
+        # Override schema
+        self._schema = datasourceConfigSchema
 
-    def serialize(self, obj: Union[Datasource, DatasourceConfig]) -> dict:
-        """Serialize Datasource or DatasourceConfig to yaml.
+    def serialize(self, obj: DatasourceConfig) -> dict:
+        """Serialize DatasourceConfig to dict appropriate for writing to yaml.
 
         Args:
             obj: object to serialize.
@@ -31,8 +33,6 @@ class YamlDatasourceSerializer(BaseSerializer):
         Returns:
             representation of object in serializer specific data type.
         """
-        if isinstance(obj, Datasource):
-            obj = DatasourceConfig(**obj.config)
 
         config: dict = self._schema.dump(obj)
 
@@ -46,3 +46,7 @@ class YamlDatasourceSerializer(BaseSerializer):
             data_connector_config.pop("name", None)
 
         return config
+
+
+class JsonDatasourceSerializer(BaseSerializer):
+    pass
