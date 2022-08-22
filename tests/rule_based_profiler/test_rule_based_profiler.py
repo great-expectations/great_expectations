@@ -1168,7 +1168,6 @@ def test_add_profiler_ge_cloud_mode(
         profiler_config_with_placeholder_args,
         data_context=mock_data_context,
         profiler_store=mock_data_context.profiler_store,
-        ge_cloud_id=ge_cloud_profiler_id,
     )
 
     assert isinstance(profiler, RuleBasedProfiler)
