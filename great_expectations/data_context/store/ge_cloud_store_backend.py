@@ -54,7 +54,7 @@ def _get_user_friendly_error_message(
     support_message = []
     response: requests.Response = http_exc.response
 
-    logger.info(f"{http_exc.__class__.__name__}:{http_exc} - {response}")
+    logger.warning(f"{http_exc.__class__.__name__}:{http_exc} - {response}")
 
     request_id = response.headers.get("request-id", "")
     if request_id:
