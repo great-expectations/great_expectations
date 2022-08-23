@@ -76,6 +76,11 @@ def construct_data_context_config():
                 "data_context_id": data_context_id,
                 "enabled": True,
             },
+            "include_rendered_content": {
+                "globally": False,
+                "expectation_suite": False,
+                "expectation_validation_result": False,
+            },
         }
 
     return _construct_data_context_config
@@ -1443,6 +1448,11 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         "config_version": 3.0,
         "evaluation_parameter_store_name": "evaluation_parameter_store",
         "expectations_store_name": "expectations_store",
+        "include_rendered_content": {
+            "expectation_suite": False,
+            "expectation_validation_result": False,
+            "globally": False,
+        },
         "stores": {
             "checkpoint_store": {
                 "class_name": "CheckpointStore",
