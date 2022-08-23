@@ -83,7 +83,10 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import (
+    GeCloudIdAwareRef,
+    GeCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -1153,7 +1156,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
-        *,
         batch_request: Optional[BatchRequestBase] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[dict] = None,
@@ -1341,7 +1343,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> ExpectationSuite:
         """
@@ -1350,7 +1351,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         res = self._data_context.create_expectation_suite(
             expectation_suite_name,
             overwrite_existing=overwrite_existing,
-            ge_cloud_id=ge_cloud_id,
             **kwargs,
         )
         self._synchronize_self_with_underlying_data_context()
@@ -1392,34 +1392,34 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        ge_cloud_id: Optional[str] = None,
-        **kwargs,
-    ):
+        include_rendered_content: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> None:
         """Save the provided expectation suite into the DataContext.
 
         Args:
-            expectation_suite: the suite to save
-            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
-                be read from the suite
+            expectation_suite: The suite to save.
+            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
+                from the suite.
+            overwrite_existing: Whether to overwrite the suite if it already exists.
+            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
 
         Returns:
             None
         """
-        if ge_cloud_id:
-            self._data_context.save_expectation_suite(
-                expectation_suite,
-                expectation_suite_name,
-                overwrite_existing,
-                ge_cloud_id,
-                **kwargs,
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
             )
-        else:
-            self._data_context.save_expectation_suite(
-                expectation_suite,
-                expectation_suite_name,
-                overwrite_existing,
-                **kwargs,
-            )
+        )
+
+        self._data_context.save_expectation_suite(
+            expectation_suite,
+            expectation_suite_name,
+            overwrite_existing,
+            include_rendered_content,
+            **kwargs,
+        )
         self._synchronize_self_with_underlying_data_context()
 
     def store_validation_result_metrics(
@@ -2212,7 +2212,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config_version: float,
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
-        ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
         config_data = {
             "name": name,
@@ -2229,19 +2228,20 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         config = RuleBasedProfilerConfig(**profiler_config)
 
-        return RuleBasedProfiler.add_profiler(
+        profiler = RuleBasedProfiler.add_profiler(
             config=config,
             data_context=self,
             profiler_store=self.profiler_store,
-            ge_cloud_id=ge_cloud_id,
         )
+        return profiler
 
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> None:
+    ) -> RuleBasedProfiler:
+        name = profiler.name
+        ge_cloud_id = profiler.ge_cloud_id
+
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
             key = GeCloudIdentifier(
@@ -2250,7 +2250,16 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         else:
             key = ConfigurationIdentifier(configuration_key=name)
 
-        self.profiler_store.set(key=key, value=profiler.config)
+        response = self.profiler_store.set(key=key, value=profiler.config)
+        if isinstance(response, GeCloudResourceRef):
+            ge_cloud_id = response.ge_cloud_id
+
+        # If an id is present, we want to prioritize that as our key for object retrieval
+        if ge_cloud_id:
+            name = None
+
+        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
+        return profiler
 
     def get_profiler(
         self,
