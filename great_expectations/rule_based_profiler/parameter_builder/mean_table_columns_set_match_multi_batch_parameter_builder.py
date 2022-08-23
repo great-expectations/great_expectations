@@ -39,6 +39,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         str
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "metric_name",
+        "single_batch_mode",
         "enforce_numeric_metric",
         "replace_nan_with_zero",
         "reduce_scalar_metric",
