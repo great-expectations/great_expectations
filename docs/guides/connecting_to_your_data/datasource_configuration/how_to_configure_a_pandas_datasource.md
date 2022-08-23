@@ -218,6 +218,9 @@ When defining an `InferredAssetFilesystemDataConnector` you will need to provide
 - `base_directory`: The string representation of the directory that contains your filesystem data.
 - `default_regex`: A dictionary that describes how the data should be grouped into Batches.
 
+Additionally, you may optionally choose to define:
+- `glob_directive`: A regular expression that can be used to access source data files contained in subfolders of your `base_directory`.  If this is not defined, the default value of `*` will cause your Data Connector to only look at files in the `base_directory` itself.
+
 For this example, you will be using the `InferredAssetFilesystemDataConnector` as your `class_name`.  This is a subclass of the `InferredAssetDataConnector` that is specialized to support filesystem Execution Engines, such as the `PandasExecutionEngine`.  This key/value entry will therefore look like:
 
 ```python
@@ -248,6 +251,31 @@ datasource_config: dict = {
     }
 }
 ```
+:::info Optional parameter: `glob_directive`
+
+The `glob_directive` parameter is provided to give the `DataConnector` information about the directory structure to expect when identifying source data files to check against each Data Asset's `default_regex`.  If you do not specify a value for `glob_directive` a default value of `"*"` will be used. This will cause your Data Asset to check all files in the folder specified by `base_directory` to determine which should be returned as Batches for the Data Asset, but will ignore any files in subdirectories.
+
+Overriding the `glob_directive` by providing your own value will allow your Data Connector to traverse subdirectories or otherwise alter which source data files are compared against your Data Connector's `default_regex`.
+
+For example, assume your source data is in files contained by subdirectories of your `base_folder`, like so:
+- 2019/yellow_taxidata_2019_01.csv
+- 2020/yellow_taxidata_2020_01.csv
+- 2021/yellow_taxidata_2021_01.csv
+- 2022/yellow_taxidata_2022_01.csv
+
+To include all of these files, you would need to tell the Data connector to look for files that are nested one level deeper than the `base_directory` itself. 
+
+ You would do this by setting the `glob_directive` key in your Data Connector config to a value of `"*/*"`.  This value will cause the Data Connector to look for regex matches against the file names for all files found in any subfolder of your `base_directory`.  Such an entry would look like:
+
+```python
+    "glob_directive": "*/*",
+```
+
+The `glob_directive` parameter works off of regex.  You can also use it to limit the files that will be compared against the Data Connector's `default_regex` for a match.  For example, to only permit `.csv` files to be checked for a match, you could specify the `glob_directive` as `"*.csv"`.  To only check for matches against the `.csv` files in subdirectories, you would use the value `*/*.csv`, and so forth.
+
+In this guide's examples, all of our data is assumed to be in the `base_directory` folder.  Therefore, you will not need to add an entry for `glob_directive` to your configuration.
+
+:::
 
   </TabItem>
   <TabItem value="configured">
