@@ -1,5 +1,5 @@
 import copy
-import os
+import pathlib
 from typing import List, cast
 from unittest.mock import PropertyMock, patch
 
@@ -339,7 +339,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     _assert_serialized_datasource_configs_are_equal([res, datasource_config])
 
     with open(
-        os.path.join(empty_data_context.root_directory, "great_expectations.yml")
+        pathlib.Path(empty_data_context.root_directory) / "great_expectations.yml"
     ) as f:
         context_config_from_disk: dict = yaml.load(f)
 
@@ -377,7 +377,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     _assert_serialized_datasource_configs_are_equal([res, datasource_config])
 
     with open(
-        os.path.join(empty_data_context.root_directory, "great_expectations.yml")
+        pathlib.Path(empty_data_context.root_directory) / "great_expectations.yml"
     ) as f:
         context_config_from_disk: dict = yaml.load(f)
 
