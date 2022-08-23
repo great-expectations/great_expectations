@@ -570,8 +570,7 @@ def get_dataset(
                     type_ = np.dtype(value)
                 except TypeError:
                     # noinspection PyUnresolvedReferences
-                    type_ = getattr(pd.core.dtypes.dtypes, value)
-                    # If this raises AttributeError it's okay: it means someone built a bad test
+                    type_ = getattr(pd, value)()
                 pandas_schema[key] = type_
             # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
@@ -1233,8 +1232,7 @@ def get_test_validator_with_data(
                     type_ = np.dtype(value)
                 except TypeError:
                     # noinspection PyUnresolvedReferences
-                    type_ = getattr(pd.core.dtypes.dtypes, value)
-                    # If this raises AttributeError it's okay: it means someone built a bad test
+                    type_ = getattr(pd, value)()
                 pandas_schema[key] = type_
             # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
