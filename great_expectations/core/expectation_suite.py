@@ -4,7 +4,7 @@ import logging
 import pprint
 import uuid
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 import great_expectations as ge
 from great_expectations import __version__ as ge_version
@@ -25,7 +25,9 @@ from great_expectations.core.util import (
     nested_update,
     parse_string_to_datetime,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
+    ClassInstantiationError,
     DataContextError,
     InvalidExpectationConfigurationError,
 )
@@ -37,6 +39,9 @@ from great_expectations.marshmallow__shade import (
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
 
@@ -107,12 +112,13 @@ class ExpectationSuite(SerializableDictDot):
             self.meta["citations"] = []
 
         if isinstance(citation_date, str):
-            citation_date = parse_string_to_datetime(datetime_string=citation_date)
+            citation_date = parse_string_to_datetime(datetime_string=citation_date)  # type: ignore[assignment]
 
         citation_date = citation_date or datetime.datetime.now(datetime.timezone.utc)
         citation: Dict[str, Any] = {
             "citation_date": get_datetime_string_from_strftime_format(
-                format_str="%Y-%m-%dT%H:%M:%S.%fZ", datetime_obj=citation_date
+                format_str="%Y-%m-%dT%H:%M:%S.%fZ",
+                datetime_obj=citation_date,  # type: ignore[arg-type]
             ),
             "batch_request": batch_request,
             "batch_definition": batch_definition,
@@ -216,7 +222,7 @@ class ExpectationSuite(SerializableDictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self) -> dict:
-        dependencies = {}
+        dependencies: dict = {}
         for expectation in self.expectations:
             t = expectation.get_evaluation_parameter_dependencies()
             nested_update(dependencies, t)
@@ -308,7 +314,7 @@ class ExpectationSuite(SerializableDictDot):
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
-            ge_cloud_id=ge_cloud_id,
+            ge_cloud_id=ge_cloud_id,  # type: ignore[arg-type]
         )
         if len(found_expectation_indexes) < 1:
             raise ValueError("No matching expectation was found.")
@@ -793,7 +799,7 @@ class ExpectationSuite(SerializableDictDot):
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expectation_configurations:
-            expectation_configuration.kwargs = deep_filter_properties_iterable(
+            expectation_configuration.kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
 
@@ -812,7 +818,7 @@ class ExpectationSuite(SerializableDictDot):
         kwargs: dict
         column_name: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(
+            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_name = kwargs.pop("column")
@@ -836,7 +842,7 @@ class ExpectationSuite(SerializableDictDot):
         column_A_name: str
         column_B_name: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(
+            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_A_name = kwargs.pop("column_A")
@@ -863,7 +869,7 @@ class ExpectationSuite(SerializableDictDot):
         kwargs: dict
         column_list: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(
+            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_list = kwargs.pop("column_list")
@@ -924,7 +930,7 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration]
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in accessor_method():
-            expectation_configurations = expectation_configurations_by_domain.get(
+            expectation_configurations = expectation_configurations_by_domain.get(  # type: ignore[assignment]
                 domain_type
             )
             if expectation_configurations is None:
@@ -936,6 +942,33 @@ class ExpectationSuite(SerializableDictDot):
             expectation_configurations.append(expectation_configuration)
 
         return expectation_configurations_by_domain
+
+    def render(self) -> None:
+        """
+        Renders content using the atomic prescriptive renderer for each expectation configuration associated with
+           this ExpectationSuite to ExpectationConfiguration.rendered_content.
+        """
+        for expectation_configuration in self.expectations:
+            inline_renderer_config: "InlineRendererConfig" = {
+                "class_name": "InlineRenderer",
+                "render_object": expectation_configuration,
+            }
+            module_name = "great_expectations.render.renderer.inline_renderer"
+            inline_renderer = instantiate_class_from_config(
+                config=inline_renderer_config,
+                runtime_environment={},
+                config_defaults={"module_name": module_name},
+            )
+            if not inline_renderer:
+                raise ClassInstantiationError(
+                    module_name=module_name,
+                    package_name=None,
+                    class_name=inline_renderer_config["class_name"],
+                )
+
+            expectation_configuration.rendered_content = (
+                inline_renderer.get_expectation_configuration_rendered_content()
+            )
 
 
 class ExpectationSuiteSchema(Schema):

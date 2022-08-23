@@ -82,6 +82,7 @@ stages:
       vmImage: 'ubuntu-latest'
     jobs:
     - job: test_docs
+      timeoutInMinutes: 120
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
       variables:
         python.version: '3.8'

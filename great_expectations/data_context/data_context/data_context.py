@@ -545,7 +545,6 @@ class DataContext(BaseDataContext):
         config_version: float,
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
-        ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
         """
         Constructs a RuleBasedProfiler instance just like the parent `BaseDataContext.add_profiler`
@@ -556,9 +555,7 @@ class DataContext(BaseDataContext):
             config_version=config_version,
             rules=rules,
             variables=variables,
-            ge_cloud_id=ge_cloud_id,
         )
-        self.save_profiler(profiler=profiler, name=name, ge_cloud_id=ge_cloud_id)
         return profiler
 
     @classmethod

@@ -20,10 +20,11 @@ from great_expectations.expectations.metrics.query_metric_provider import (
 from great_expectations.util import get_sqlalchemy_subquery_type
 
 
-class QueryColumn(QueryMetricProvider):
-    metric_name = "query.column"
+class QueryColumnPair(QueryMetricProvider):
+    metric_name = "query.column_pair"
     value_keys = (
-        "column",
+        "column_A",
+        "column_B",
         "query",
     )
 
@@ -45,22 +46,30 @@ class QueryColumn(QueryMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
 
-        column: str = metric_value_kwargs.get("column")
+        column_A: str = metric_value_kwargs.get("column_A")
+        column_B: str = metric_value_kwargs.get("column_B")
         if isinstance(selectable, sa.Table):
-            query = query.format(col=column, active_batch=selectable)
+            query = query.format(
+                column_A=column_A, column_B=column_B, active_batch=selectable
+            )
         elif isinstance(
             selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active bacth as a Subquery; sectioning the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(col=column, active_batch=f"({selectable})")
+            query = query.format(
+                column_A=column_A, column_B=column_B, active_batch=f"({selectable})"
+            )
         elif isinstance(
             selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation & aliasing when formatting the parameterized query
             query = query.format(
-                col=column,
+                column_A=column_A,
+                column_B=column_B,
                 active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
             )
         else:
-            query = query.format(col=column, active_batch=f"({selectable})")
+            query = query.format(
+                column_A=column_A, column_B=column_B, active_batch=f"({selectable})"
+            )
 
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
@@ -86,8 +95,11 @@ class QueryColumn(QueryMetricProvider):
         )
 
         df.createOrReplaceTempView("tmp_view")
-        column: str = metric_value_kwargs.get("column")
-        query = query.format(col=column, active_batch="tmp_view")
+        column_A: str = metric_value_kwargs.get("column_A")
+        column_B: str = metric_value_kwargs.get("column_B")
+        query = query.format(
+            column_A=column_A, column_B=column_B, active_batch="tmp_view"
+        )
 
         engine: pyspark_sql_SparkSession = execution_engine.spark
         result: List[pyspark_sql_Row] = engine.sql(query).collect()
