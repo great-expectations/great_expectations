@@ -1,3 +1,4 @@
+from typing import Dict
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -185,9 +186,27 @@ def test_datasource_store_delete_by_id(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "http_verb,method,args",
+    [
+        ("get", "get", []),
+        ("put", "set", ["foobar"]),
+        pytest.param(
+            "delete",
+            "delete",
+            [],
+            marks=pytest.mark.xfail(
+                reason="We do not raise errors on delete fail", strict=True
+            ),
+        ),
+    ],
+)
 def test_datasource_error_handling(
     datasource_store_ge_cloud_backend: DatasourceStore,
-    mock_ge_cloud_unavailable: Mock,
+    mock_http_unavailable: Dict[str, Mock],
+    http_verb: str,
+    method: str,
+    args: list,
 ):
     id_: str = "example_id_normally_uuid"
 
@@ -198,8 +217,9 @@ def test_datasource_error_handling(
         StoreBackendError, match=r"Unable to \w+ object in GE Cloud Store Backend"
     ) as exc_info:
 
-        datasource_store_ge_cloud_backend.get(key=key)
+        backend_method = getattr(datasource_store_ge_cloud_backend, method)
+        backend_method(key, *args)
 
     print(f"Exception details:\n\t{exc_info.type}\n\t{exc_info.value}")
 
-    mock_ge_cloud_unavailable.assert_called_once()
+    mock_http_unavailable[http_verb].assert_called_once()

@@ -2,8 +2,8 @@ import json
 import os
 import shutil
 import unittest.mock
-from typing import Any, Callable, Dict, Optional, Union
-from unittest.mock import PropertyMock, patch
+from typing import Any, Callable, Dict, Optional, Union, cast
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 import requests
@@ -701,7 +701,9 @@ def mock_response_factory() -> Callable[
 
 
 @pytest.fixture
-def mock_ge_cloud_unavailable(mock_response_factory: Callable):
+def mock_http_unavailable(mock_response_factory: Callable):
+    """Mock all request http calls to return a 503 Unavailable response."""
+
     def mocked_response(*args, **kwargs):
 
         return MockResponse(
@@ -709,7 +711,18 @@ def mock_ge_cloud_unavailable(mock_response_factory: Callable):
             503,
         )
 
-    with unittest.mock.patch(
-        "requests.get", autospec=True, side_effect=mocked_response
-    ) as mock_request:
-        yield mock_request
+    # should have been able to do this by mocking `requests.request` but this didn't work
+    with unittest.mock.patch.multiple(
+        "requests",
+        autospec=True,
+        get=unittest.mock.DEFAULT,
+        post=unittest.mock.DEFAULT,
+        put=unittest.mock.DEFAULT,
+        patch=unittest.mock.DEFAULT,
+        delete=unittest.mock.DEFAULT,
+    ) as mock_requests:
+        for name, mock in cast(Dict[str, Mock], mock_requests).items():
+            mock.side_effect = mocked_response
+            print(f"Mocking `requests.{name}` with `{mocked_response.__name__}()`")
+
+        yield mock_requests
