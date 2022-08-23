@@ -27,6 +27,7 @@ from great_expectations.core.util import (
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
+from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -142,6 +143,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @property
     def ge_cloud_id(self) -> Optional[str]:
         return self._id
+
+    @ge_cloud_id.setter
+    def ge_cloud_id(self, id: str) -> None:
+        self._id = id
 
     def _init_profiler_rules(
         self,
@@ -1135,7 +1140,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 configuration_key=config.name,
             )
 
-        profiler_store.set(key=key, value=config)
+        response = profiler_store.set(key=key, value=config)
+        if isinstance(response, GeCloudResourceRef):
+            new_profiler.ge_cloud_id = response.ge_cloud_id
 
         return new_profiler
 
