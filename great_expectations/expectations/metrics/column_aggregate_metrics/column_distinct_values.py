@@ -60,9 +60,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         )
         column = accessor_domain_kwargs["column"]
 
-        distinct_values = (
-            df.select(column).where(F.col(column).isNotNull()).groupBy(column).collect()
-        )
+        distinct_values = df.select(column).distinct().collect()
 
         return set(distinct_values)
 

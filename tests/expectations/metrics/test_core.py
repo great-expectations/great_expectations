@@ -3944,7 +3944,6 @@ def test_distinct_metric_spark(spark_session):
         metric_name="column.distinct_values",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={"column.value_counts": desired_metric},
     )
 
     results = engine.resolve_metrics(
@@ -3979,13 +3978,11 @@ def test_distinct_metric_sa(sa):
         metric_name="column.distinct_values",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={"column.value_counts": desired_metric},
     )
     desired_metric_b = MetricConfiguration(
         metric_name="column.distinct_values",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={"column.value_counts": desired_metric_b},
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric, desired_metric_b), metrics=metrics
