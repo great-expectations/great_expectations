@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, Optional, Union
 from unittest.mock import PropertyMock, patch
 
 import pytest
-from requests.exceptions import HTTPError, Timeout
+import requests
 
 import great_expectations as ge
 from great_expectations.data_context.store import GeCloudStoreBackend
@@ -645,7 +645,7 @@ def shared_called_with_request_kwargs(request_headers) -> dict:
 
 
 JSONData = Union[AnyPayload, Dict[str, Any]]
-RequestError = Union[HTTPError, Timeout]
+RequestError = Union[requests.exceptions.HTTPError, requests.exceptions.Timeout]
 
 
 class MockResponse:
@@ -667,7 +667,7 @@ class MockResponse:
         if self._exc_to_raise:
             raise self._exc_to_raise
         if self.status_code >= 400:
-            raise HTTPError(response=self)
+            raise requests.exceptions.HTTPError(response=self)
         return None
 
 
