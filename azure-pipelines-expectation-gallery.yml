@@ -103,9 +103,10 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install $(GE_pytest_pip_opts)
-              pip install --requirement requirements.txt
-              pip install  --editable .
+              pip install "google-cloud-bigquery-storage" -r requirements-dev-all-contrib-expectations.txt -e "contrib/cli" -e ".[dev]" -c constraints-dev.txt
+              # pip install $(GE_pytest_pip_opts)
+              # pip install --requirement requirements.txt
+              # pip install  --editable .
             displayName: 'Install dependencies'
 
           - script: |
@@ -220,14 +221,6 @@ stages:
           - bash: grep "to evaluate_json" testing-times.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times for individual tests'
-
-          - script: |
-              cd ../../contrib/cli
-              pwd
-              pip install .
-              cd -
-            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Install contrib CLI tool'
 
           - bash: python ./build_package_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
