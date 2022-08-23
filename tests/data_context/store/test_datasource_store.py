@@ -6,6 +6,7 @@ from unittest.mock import PropertyMock, patch
 import pytest
 
 from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.core.serializer import DictSerializer
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context_variables import (
@@ -20,14 +21,19 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
-from great_expectations.datasource.datasource_serializer import YamlDatasourceSerializer
+from great_expectations.datasource.datasource_serializer import (
+    YAMLReadyDictDatasourceSerializer,
+)
 
 yaml = YAMLHandler()
 
 
 @pytest.fixture
 def empty_datasource_store(datasource_store_name: str) -> DatasourceStore:
-    return DatasourceStore(store_name=datasource_store_name)
+    return DatasourceStore(
+        store_name=datasource_store_name,
+        serializer=DictSerializer(schema=datasourceConfigSchema),
+    )
 
 
 @pytest.fixture
@@ -244,7 +250,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     store = DatasourceStore(
         store_name="my_datasource_store",
         store_backend=inline_store_backend_config,
-        serializer=YamlDatasourceSerializer(),
+        serializer=YAMLReadyDictDatasourceSerializer(),
     )
 
     key = DataContextVariableKey(
@@ -281,7 +287,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     store = DatasourceStore(
         store_name="my_datasource_store",
         store_backend=inline_store_backend_config,
-        serializer=YamlDatasourceSerializer(),
+        serializer=YAMLReadyDictDatasourceSerializer(),
     )
 
     key = DataContextVariableKey(
