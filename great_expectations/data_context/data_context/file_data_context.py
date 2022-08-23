@@ -15,7 +15,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.datasource.datasource_serializer import (
-    YAMLReadyDictDatasourceSerializer,
+    YAMLReadyDictDatasourceConfigSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -75,7 +75,7 @@ class FileDataContext(AbstractDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            serializer=YAMLReadyDictDatasourceSerializer(),
+            serializer=YAMLReadyDictDatasourceConfigSerializer(),
         )
         self._datasource_store = datasource_store
 

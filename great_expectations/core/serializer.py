@@ -1,7 +1,7 @@
 """Serializer class interface definition.
 
 Serializers determine how to write an object to disk, json, etc.
-A serializer comprises the object destination and name e.g. YAMLReadyDictDatasourceSerializer.
+A serializer comprises the object destination and name e.g. YAMLReadyDictDatasourceConfigSerializer.
 A base implementation is provided if no modification needs to be included for the specific object / destination pair.
 
 Typical usage example:
@@ -16,7 +16,7 @@ from great_expectations.core.configuration import AbstractConfig
 from great_expectations.marshmallow__shade import Schema
 
 
-class AbstractSerializer(abc.ABC):
+class AbstractConfigSerializer(abc.ABC):
     """Serializer interface.
 
     Note: When mypy coverage is enhanced further, this Abstract class can be replaced with a Protocol.
@@ -40,7 +40,7 @@ class AbstractSerializer(abc.ABC):
         raise NotImplementedError
 
 
-class DictSerializer(AbstractSerializer):
+class DictConfigSerializer(AbstractConfigSerializer):
     def serialize(self, obj: AbstractConfig) -> dict:
         """Serialize to python dictionary.
 

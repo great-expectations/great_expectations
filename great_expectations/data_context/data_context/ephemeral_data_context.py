@@ -3,7 +3,7 @@ from typing import Any, Dict, Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.serializer import DictSerializer
+from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -67,7 +67,7 @@ class EphemeralDataContext(AbstractDataContext):
         datasource_store = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,
-            serializer=DictSerializer(schema=datasourceConfigSchema),
+            serializer=DictConfigSerializer(schema=datasourceConfigSchema),
         )
         self._datasource_store = datasource_store
 

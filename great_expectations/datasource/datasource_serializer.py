@@ -1,7 +1,7 @@
 """Serialize Datasource Configurations.
 
 Serializers determine how to write an object to disk, json, etc.
-A serializer comprises the object destination and name e.g. YAMLReadyDictDatasourceSerializer.
+A serializer comprises the object destination and name e.g. YAMLReadyDictDatasourceConfigSerializer.
 
 Typical usage example:
 
@@ -9,7 +9,7 @@ Typical usage example:
 """
 from typing import Optional
 
-from great_expectations.core.serializer import AbstractSerializer
+from great_expectations.core.serializer import AbstractConfigSerializer
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
@@ -17,7 +17,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.marshmallow__shade import Schema
 
 
-class YAMLReadyDictDatasourceSerializer(AbstractSerializer):
+class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
     def __init__(self, schema: Optional[Schema] = None) -> None:
         super().__init__(schema=schema)
 
@@ -48,6 +48,6 @@ class YAMLReadyDictDatasourceSerializer(AbstractSerializer):
         return config
 
 
-class JsonDatasourceSerializer(AbstractSerializer):
+class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
     # TODO: AJB 20220823 pass through convert_to_json_serializable?
     pass
