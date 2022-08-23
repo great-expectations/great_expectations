@@ -655,11 +655,10 @@ class MockResponse:
         self,
         json_data: JSONData,
         status_code: int,
-        headers: Optional[dict] = None,
+        headers: Optional[Dict[str, str]] = None,
         exc_to_raise: Optional[RequestError] = None,
     ) -> None:
         self._json_data = json_data
-        # status code should be publicly accesable
         self.status_code = status_code
         self.headers = headers or {
             "content-type": "application/json" if json_data else "text/html"
