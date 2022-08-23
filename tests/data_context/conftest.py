@@ -650,6 +650,7 @@ RequestError = Union[requests.exceptions.HTTPError, requests.exceptions.Timeout]
 
 
 class MockResponse:
+    # TODO: GG 08232022 update signature to accept arbitrary content types
     def __init__(
         self,
         json_data: JSONData,
@@ -674,8 +675,13 @@ class MockResponse:
         if self._exc_to_raise:
             raise self._exc_to_raise
         if self.status_code >= 400:
-            raise requests.exceptions.HTTPError(response=self)
+            raise requests.exceptions.HTTPError(
+                f"Mock {self.status_code} HTTPError", response=self
+            )
         return None
+
+    def __repr__(self):
+        return f"<Response [{self.status_code}]>"
 
 
 @pytest.fixture
