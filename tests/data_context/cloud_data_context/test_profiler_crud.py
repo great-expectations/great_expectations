@@ -10,7 +10,7 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from tests.data_context.cloud_data_context.conftest import MockResponse
+from tests.data_context.conftest import MockResponse
 
 
 @pytest.fixture
