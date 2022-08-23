@@ -1,4 +1,4 @@
-aequitas
+# aequitas          # This depends on old versions of Flask (0.12.2) and sqlalchemy (1.1.1)
 arxiv
 barcodenumber
 blockcypher
