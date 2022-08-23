@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import unittest.mock
@@ -653,15 +654,21 @@ class MockResponse:
         self,
         json_data: JSONData,
         status_code: int,
+        headers: Optional[dict] = None,
         exc_to_raise: Optional[RequestError] = None,
     ) -> None:
         self._json_data = json_data
         # status code should be publicly accesable
         self.status_code = status_code
+        self.headers = headers or {
+            "content-type": "application/json" if json_data else "text/html"
+        }
         self._exc_to_raise = exc_to_raise
 
     def json(self):
-        return self._json_data
+        if self.headers.get("content-type") == "application/json":
+            return self._json_data
+        raise json.JSONDecodeError("Uh oh - check content-type", "foobar", 1)
 
     def raise_for_status(self):
         if self._exc_to_raise:
