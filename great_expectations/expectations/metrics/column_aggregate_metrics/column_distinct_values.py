@@ -1,6 +1,7 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Set
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -11,6 +12,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -19,7 +21,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
+    def _pandas(cls, column, **kwargs) -> Set[Any]:
         return set(column.unique())
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -30,9 +32,18 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
-    ):
-        observed_value_counts = metrics["column.value_counts"]
-        return set(observed_value_counts.index)
+    ) -> Set[Any]:
+        selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+        column = accessor_domain_kwargs["column"]
+
+        query = sa.select(column).distinct()
+        results = execution_engine.engine.execute(
+            query.select_from(selectable)
+        ).fetchall()
+
+        return set(results)
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -42,47 +53,24 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
-    ):
-        observed_value_counts = metrics["column.value_counts"]
-        return set(observed_value_counts.index)
+    ) -> Set[Any]:
+        df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+        column = accessor_domain_kwargs["column"]
 
-    @classmethod
-    def _get_evaluation_dependencies(
-        cls,
-        metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[Dict] = None,
-    ):
-        """Returns a dictionary of given metric names and their corresponding configuration,
-        specifying the metric types and their respective domains"""
-        dependencies: dict = super()._get_evaluation_dependencies(
-            metric=metric,
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
+        distinct_values = (
+            df.select(column).where(F.col(column).isNotNull()).groupBy(column).collect()
         )
 
-        if isinstance(
-            execution_engine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)
-        ):
-            dependencies["column.value_counts"] = MetricConfiguration(
-                metric_name="column.value_counts",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs={
-                    "sort": "value",
-                    "collate": None,
-                },
-            )
-
-        return dependencies
+        return set(distinct_values)
 
 
 class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
+    def _pandas(cls, column, **kwargs) -> Set[Any]:
         return column.nunique()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -93,9 +81,18 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
-    ):
-        observed_value_counts = metrics["column.value_counts"]
-        return len(observed_value_counts)
+    ) -> Set[Any]:
+        selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+        column = accessor_domain_kwargs["column"]
+
+        query = sa.select(column).distinct()
+        results = execution_engine.engine.execute(
+            query.select_from(selectable)
+        ).fetchall()
+
+        return set(results)
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -105,37 +102,18 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
-    ):
-        observed_value_counts = metrics["column.value_counts"]
-        return len(observed_value_counts)
+    ) -> Set[Any]:
+        df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+        column = accessor_domain_kwargs["column"]
 
-    @classmethod
-    def _get_evaluation_dependencies(
-        cls,
-        metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[Dict] = None,
-    ):
-        """Returns a dictionary of given metric names and their corresponding configuration,
-        specifying the metric types and their respective domains"""
-        dependencies: dict = super()._get_evaluation_dependencies(
-            metric=metric,
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
+        distinct_values = (
+            df.select(column)
+            .where(F.col(column).isNotNull())
+            .groupBy(column)
+            .count()
+            .collect()
         )
 
-        if isinstance(
-            execution_engine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)
-        ):
-            dependencies["column.value_counts"] = MetricConfiguration(
-                metric_name="column.value_counts",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs={
-                    "sort": "value",
-                    "collate": None,
-                },
-            )
-
-        return dependencies
+        return set(distinct_values)
