@@ -2401,6 +2401,9 @@ expectations_store_name: default_expectations_store
 validations_store_name: default_validations_store
 checkpoint_store_name: default_checkpoint_store
 profiler_store_name: default_profiler_store
+
+include_rendered_content:
+    globally: True
 """
     data_context_config_dict = yaml.load(config_yaml_str)
     return DataContextConfig(**data_context_config_dict)
@@ -2532,7 +2535,7 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_pandas_engine(
+def cloud_base_data_context_in_cloud_mode_with_datasource_pandas_engine(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
 ):
     context: BaseDataContext = empty_base_data_context_in_cloud_mode
@@ -2548,15 +2551,20 @@ def cloud_data_context_with_datasource_pandas_engine(
                 - default_identifier_name
         """,
     )
-    context.add_datasource(
-        "my_datasource",
-        **config,
-    )
+    with mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
     return context
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_sqlalchemy_engine(
+def cloud_base_data_context_in_cloud_mode_with_datasource_sqlalchemy_engine(
     empty_base_data_context_in_cloud_mode: BaseDataContext, db_file
 ):
     context: BaseDataContext = empty_base_data_context_in_cloud_mode
@@ -2573,10 +2581,73 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
                 - default_identifier_name
         """,
     )
-    context.add_datasource(
-        "my_datasource",
-        **config,
+    with mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
+    return context
+
+
+@pytest.fixture
+def cloud_data_context_with_datasource_pandas_engine(
+    empty_cloud_data_context: CloudDataContext, db_file
+):
+    context: CloudDataContext = empty_cloud_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
     )
+    with mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
+    return context
+
+
+@pytest.fixture
+def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
+    empty_data_context_in_cloud_mode: DataContext, db_file
+):
+    context: DataContext = empty_data_context_in_cloud_mode
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    with mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
     return context
 
 
