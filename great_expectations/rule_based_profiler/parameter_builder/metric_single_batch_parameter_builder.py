@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Set, Union
 
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain import Domain
@@ -22,6 +22,12 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     A Single-Batch-only implementation for obtaining a resolved (evaluated) metric, using domain_kwargs, value_kwargs,
     and metric_name as arguments.
     """
+
+    exclude_field_names: Set[
+        str
+    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "single_batch_mode",
+    }
 
     def __init__(
         self,
@@ -59,6 +65,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             metric_name=metric_name,
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
+            single_batch_mode=True,
             enforce_numeric_metric=enforce_numeric_metric,
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
@@ -101,7 +108,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             {
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: None
                 if parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] is None
-                else parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0],
+                else parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][-1],
                 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
                     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
                 ],

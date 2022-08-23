@@ -1,5 +1,4 @@
 import logging
-import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions

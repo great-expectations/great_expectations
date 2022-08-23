@@ -19,7 +19,6 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.data_context.types.resource_identifiers import BatchIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import RuntimeDataConnector
@@ -103,6 +102,7 @@ def test_new_self_check_after_adding_named_asset_a(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
+    # noinspection PyUnusedLocal
     res: List[
         BatchDefinition
     ] = runtime_data_connector.get_batch_definition_list_from_batch_request(

@@ -55,7 +55,7 @@ class DomainBuilder(ABC, Builder):
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
         """
-        self.set_batch_list_or_batch_request(
+        self.set_batch_list_if_null_batch_request(
             batch_list=batch_list,
             batch_request=batch_request,
         )
