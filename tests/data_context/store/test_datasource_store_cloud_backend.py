@@ -1,4 +1,4 @@
-from unittest.mock import PropertyMock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
@@ -11,8 +11,8 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
-
-from ..cloud_data_context.conftest import MockResponse
+from great_expectations.exceptions import StoreBackendError
+from tests.data_context.conftest import MockResponse
 
 
 @pytest.mark.cloud
@@ -182,3 +182,19 @@ def test_datasource_store_delete_by_id(
             },
             **shared_called_with_request_kwargs,
         )
+
+
+@pytest.mark.unit
+def test_datasource_error_handling(
+    datasource_store_ge_cloud_backend: DatasourceStore,
+    mock_ge_cloud_unavailable: Mock,
+):
+    id_: str = "example_id_normally_uuid"
+
+    key = GeCloudIdentifier(
+        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
+    )
+    with pytest.raises(StoreBackendError):
+        datasource_store_ge_cloud_backend.remove_key(key)
+
+    mock_ge_cloud_unavailable.assert_called_once()
