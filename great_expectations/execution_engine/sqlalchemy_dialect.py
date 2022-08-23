@@ -22,6 +22,7 @@ class GESqlDialect(enum.Enum):
     SQLITE = "sqlite"
     TERADATASQL = "teradatasql"
     TRINO = "trino"
+    DATABRICKS = "databricks"
     OTHER = "other"
 
     @classmethod

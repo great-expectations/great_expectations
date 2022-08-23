@@ -593,6 +593,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             "oracle",
             "mssql",
             "hive",
+            "databricks"
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
@@ -626,7 +627,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif dialect_name == "trino":
             # WARNING: Trino Support is experimental, functionality is not fully under test
             self.dialect = import_library_module(module_name="trino.sqlalchemy.dialect")
-
+        elif dialect_name == "databricks":
+            self.dialect = import_library_module(module_name="sqlalchemy_databricks.dialect")
         else:
             self.dialect = None
 
