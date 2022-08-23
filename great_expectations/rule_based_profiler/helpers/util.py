@@ -5,7 +5,6 @@ import logging
 import re
 import uuid
 import warnings
-from dataclasses import field
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -129,6 +128,7 @@ def get_batch_ids(
     data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
+    limit: Optional[int] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -148,6 +148,9 @@ def get_batch_ids(
         batch_list = data_context.get_batch_list(batch_request=batch_request)
 
     batch_ids: List[str] = [batch.id for batch in batch_list]
+
+    if limit is not None:
+        batch_ids = batch_ids[0:limit]
 
     num_batch_ids: int = len(batch_ids)
     if num_batch_ids == 0:
@@ -300,6 +303,7 @@ def get_parameter_value(
 def get_resolved_metrics_by_key(
     validator: "Validator",  # noqa: F821
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
+    force_no_progress_bar: bool = False,
 ) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
@@ -310,6 +314,7 @@ def get_resolved_metrics_by_key(
         Dictionary of the form {
             "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
         }
+        force_no_progress_bar: (bool) if True, prevent all "Calculating Metrics" output; (False by default).
 
     Returns:
         Dictionary of the form {
@@ -327,7 +332,8 @@ def get_resolved_metrics_by_key(
             metric_configuration
             for key, metric_configurations_for_key in metric_configurations_by_key.items()
             for metric_configuration in metric_configurations_for_key
-        ]
+        ],
+        force_no_progress_bar=force_no_progress_bar,
     )
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
@@ -1053,8 +1059,3 @@ def sanitize_parameter_name(name: str) -> str:
     This method provides display-friendly version of "name" argument.
     """
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
-
-
-def default_field(obj: Dict[Union[str, Tuple[str]], str]) -> field:
-    """Shorthand method of allowing mutable dataclass variables."""
-    return field(default_factory=lambda: copy.copy(obj))

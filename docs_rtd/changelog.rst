@@ -4,6 +4,43 @@
 Changelog
 #########
 
+0.15.19
+-----------------
+* [FEATURE] `DataAssistantResult` plot multiple metrics per expectation (#5556)
+* [FEATURE] Enable passing "exact_estimation" boolean at `DataAssistant.run()` level (default value is True) (#5744)
+* [FEATURE] Example notebook for Onboarding DataAssistant - `postgres` (#5776)
+* [BUGFIX] dir update for data_assistant_result (#5751)
+* [BUGFIX] Fix docs_integration pipeline (#5734)
+* [BUGFIX] Patch flaky E2E Cloud test with randomized suite names (#5752)
+* [BUGFIX] Fix RegexPatternStringParameterBuilder to use legal character repetition.  Remove median, mean, and standard deviation features from OnboardingDataAssistant "datetime_columns_rule" definition. (#5757)
+* [BUGFIX] Move `SuiteValidationResult.meta` validation id propogation before `ValidationOperator._run_action` (#5760)
+* [BUGFIX] Update "column.partition" Metric to handle DateTime Arithmetic Properly (#5764)
+* [BUGFIX] JSON-serialize RowCondition and enable IDDict to support comparison operations (#5765)
+* [BUGFIX] Insure all estimators properly handle datetime-float conversion (#5774)
+* [BUGFIX] Return appropriate subquery type to Query Metrics for SA version (#5783)
+* [DOCS] added guide how to use gx with emr serverless (#5623) (thanks @bvolodarskiy)
+* [DOCS] DOC-362: how to choose between working with a single or multiple batches of data (#5745)
+* [MAINTENANCE] Temporarily xfail E2E Cloud tests due to Azure env var issues (#5787)
+* [MAINTENANCE] Add ids to `DataConnectorConfig` (#5740)
+* [MAINTENANCE] Rename GX Cloud "contract" resource to "checkpoint" (#5748)
+* [MAINTENANCE] Rename GX Cloud "suite_validation_result" resource to "validation_result" (#5749)
+* [MAINTENANCE] Store Refactor - cloud store return types & http-errors (#5730)
+* [MAINTENANCE] profile_numeric_columns_diff_expectation (#5741) (thanks @stevensecreti)
+* [MAINTENANCE] Clean up type hints around class constructors (#5738)
+* [MAINTENANCE] invoke docker (#5703)
+* [MAINTENANCE] Add plist to build docker test image daily. (#5754)
+* [MAINTENANCE] opt-out type-checking  (#5713)
+* [MAINTENANCE] Enable Algolia UI (#5753)
+* [MAINTENANCE] Linting & initial typing for data context (#5756)
+* [MAINTENANCE] Update `oneshot` estimator to `quantiles` estimator (#5737)
+* [MAINTENANCE] Update Auto-Initializing Expectations to use `exact` estimator by default (#5759)
+* [MAINTENANCE] Send a Gx-Version header set to __version__ in requests to cloud (#5758) (thanks @wookasz)
+* [MAINTENANCE]  invoke docker --detach and more typing (#5770)
+* [MAINTENANCE] In ParameterBuilder implementations, enhance handling of numpy.ndarray metric values, whose elements are or can be converted into datetime.datetime type. (#5771)
+* [MAINTENANCE] Config/Schema round_tripping (#5697)
+* [MAINTENANCE] Add experimental label to MetricStore Doc (#5782)
+* [MAINTENANCE] Remove `GeCloudIdentifier` creation in `Checkpoint.run()` (#5784)
+
 0.15.18
 -----------------
 * [FEATURE] Example notebooks for multi-batch Spark (#5683)
