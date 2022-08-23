@@ -88,7 +88,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         column,
         **kwargs,
     ):
-        return F.select(column).distinct().count()
+        return F.countDistinct(column)
 
 
 class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
