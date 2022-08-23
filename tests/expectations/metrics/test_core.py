@@ -4168,6 +4168,14 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         },
     )
     desired_metric_3 = MetricConfiguration(
+        metric_name="column.distinct_values.count.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_4 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
@@ -4175,7 +4183,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
             "table.columns": table_columns_metric,
         },
     )
-    desired_metric_4 = MetricConfiguration(
+    desired_metric_5 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
@@ -4183,12 +4191,23 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
             "table.columns": table_columns_metric,
         },
     )
+    desired_metric_6 = MetricConfiguration(
+        metric_name="column.distinct_values.count.aggregate_fn",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             desired_metric_1,
             desired_metric_2,
             desired_metric_3,
             desired_metric_4,
+            desired_metric_5,
+            desired_metric_6,
         ),
         metrics=metrics,
     )
@@ -4213,8 +4232,8 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         },
     )
     desired_metric_3 = MetricConfiguration(
-        metric_name="column.max",
-        metric_domain_kwargs={"column": "b"},
+        metric_name="column.distinct_values.count",
+        metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_3,
@@ -4222,11 +4241,29 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         },
     )
     desired_metric_4 = MetricConfiguration(
-        metric_name="column.min",
+        metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_4,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_5 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_5,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_6 = MetricConfiguration(
+        metric_name="column.distinct_values.count",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_6,
             "table.columns": table_columns_metric,
         },
     )
@@ -4239,6 +4276,8 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
             desired_metric_2,
             desired_metric_3,
             desired_metric_4,
+            desired_metric_5,
+            desired_metric_6,
         ),
         metrics=metrics,
     )
@@ -4248,15 +4287,17 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
     print(end - start)
     assert results[desired_metric_1.id] == 3
     assert results[desired_metric_2.id] == 1
-    assert results[desired_metric_3.id] == 4
+    assert results[desired_metric_3.id] == 3
     assert results[desired_metric_4.id] == 4
+    assert results[desired_metric_5.id] == 4
+    assert results[desired_metric_6.id] == 1
 
-    # Check that all four of these metrics were computed on a single domain
+    # Check that all six of these metrics were computed on a single domain
     found_message = False
     for record in caplog.records:
         if (
             record.message
-            == "SqlAlchemyExecutionEngine computed 4 metrics on domain_id ()"
+            == "SqlAlchemyExecutionEngine computed 6 metrics on domain_id ()"
         ):
             found_message = True
     assert found_message

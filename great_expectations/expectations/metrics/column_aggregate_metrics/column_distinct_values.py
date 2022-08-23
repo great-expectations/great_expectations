@@ -75,19 +75,19 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column: str, **kwargs: Optional[dict]) -> Set[Any]:
+    def _pandas(cls, column, **kwargs):
         return column.nunique()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column: str, **kwargs: Optional[dict]) -> Set[Any]:
-        return column.distinct().count()
+    def _sqlalchemy(cls, column, **kwargs):
+        return sa.func.count(column.distinct())
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        column: str,
-        **kwargs: Optional[dict],
-    ) -> Set[Any]:
+        column,
+        **kwargs,
+    ):
         return F.select(column).distinct().count()
 
 
@@ -95,15 +95,15 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count.under_threshold"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column: str, **kwargs: Optional[dict]) -> Set[Any]:
+    def _pandas(cls, column, **kwargs) -> Set[Any]:
         return column.nunique()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        column: str,
+        column,
         metrics: Dict[str, Any],
-        **kwargs: Optional[dict],
+        **kwargs,
     ) -> Set[Any]:
         column_distinct_values_count = metrics["column.distinct_values.count"]
         return column_distinct_values_count
