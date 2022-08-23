@@ -986,6 +986,7 @@ class OnboardingDataAssistant(DataAssistant):
                 metric_value_kwargs={
                     "sort": "value",
                 },
+                single_batch_mode=False,
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
                 reduce_scalar_metric=True,
