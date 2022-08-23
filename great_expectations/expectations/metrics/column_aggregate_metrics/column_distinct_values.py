@@ -60,7 +60,13 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         )
         column = accessor_domain_kwargs["column"]
 
-        distinct_values = df.select(column).distinct().collect()
+        distinct_values = (
+            df.select(column)
+            .distinct()
+            .where(F.col(column).isNotNull())
+            .rdd.flatMap(lambda x: x)
+            .collect()
+        )
 
         return set(distinct_values)
 
