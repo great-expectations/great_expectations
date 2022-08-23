@@ -153,9 +153,10 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         elif sort == "count":
             value_counts = value_counts.orderBy(F.desc("count"))
         value_counts = value_counts.collect()
+        arr = np.asarray(value_counts)
         series = pd.Series(
-            [row["count"] for row in value_counts],
-            index=pd.Index(data=[row[column] for row in value_counts], name="value"),
+            arr[:, 1],
+            index=pd.Index(data=arr[:, 0], name="value"),
             name="count",
         )
         return series
