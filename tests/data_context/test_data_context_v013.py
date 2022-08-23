@@ -229,6 +229,7 @@ def test_get_config(empty_data_context):
         "checkpoint_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",
+        "include_rendered_content",
     }
 
 

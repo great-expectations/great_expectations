@@ -9,11 +9,27 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.data_context import DataContext
-from great_expectations.render.renderer.inline_renderer import InlineRenderer
+from great_expectations.render.exceptions import InvalidRenderedContentError
+from great_expectations.render.renderer.inline_renderer import (
+    ExpectationValidationResultRenderedContent,
+    InlineRenderer,
+)
 from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
 
+@pytest.mark.integration
+def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite):
+    expectation_suite: ExpectationSuite = basic_expectation_suite
+    with pytest.raises(InvalidRenderedContentError) as e:
+        InlineRenderer(render_object=expectation_suite)  # type: ignore
+    assert (
+        str(e.value)
+        == "InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but <class 'great_expectations.core.expectation_suite.ExpectationSuite'> was used."
+    )
+
+
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "expectation_configuration,expected_serialized_expectation_configuration_rendered_atomic_content,expected_serialized_expectation_validation_result_rendered_atomic_content",
     [
@@ -415,12 +431,21 @@ def test_inline_renderer_rendered_content_return_value(
     inline_renderer: InlineRenderer = InlineRenderer(
         render_object=expectation_validation_result
     )
-    expectation_configuration_rendered_atomic_content: List[RenderedAtomicContent]
-    expectation_validation_result_rendered_atomic_content: List[RenderedAtomicContent]
-    (
-        expectation_configuration_rendered_atomic_content,
-        expectation_validation_result_rendered_atomic_content,
-    ) = inline_renderer.render()
+
+    expectation_validation_result_rendered_content: ExpectationValidationResultRenderedContent = (
+        inline_renderer.get_expectation_validation_result_rendered_content()
+    )
+
+    expectation_configuration_rendered_atomic_content: List[
+        RenderedAtomicContent
+    ] = (
+        expectation_validation_result_rendered_content.ExpectationConfigurationRenderedContent
+    )
+    expectation_validation_result_rendered_atomic_content: List[
+        RenderedAtomicContent
+    ] = (
+        expectation_validation_result_rendered_content.ExpectationValidationResultRenderedContent
+    )
 
     actual_serialized_expectation_configuration_rendered_atomic_content: List[dict] = [
         rendered_atomic_content.to_json_dict()

@@ -57,6 +57,7 @@ def test_partition_parameter_builder_alice_continuous(
     parameter_builder: ParameterBuilder = HistogramParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        bins="auto",
         evaluation_parameter_builder_configs=None,
         data_context=data_context,
     )
@@ -125,6 +126,7 @@ def test_partition_parameter_builder_alice_categorical(
     parameter_builder: ParameterBuilder = HistogramParameterBuilder(
         name="my_name",
         bucketize_data=False,
+        bins="auto",
         evaluation_parameter_builder_configs=None,
         data_context=data_context,
     )
@@ -192,6 +194,7 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
     parameter_builder: ParameterBuilder = HistogramParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        bins="auto",
         evaluation_parameter_builder_configs=None,
         data_context=data_context,
     )
@@ -257,6 +260,7 @@ def test_partition_parameter_builder_alice_continuous_check_serialized_keys(
     parameter_builder: ParameterBuilder = HistogramParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        bins="auto",
         evaluation_parameter_builder_configs=None,
         data_context=data_context,
     )

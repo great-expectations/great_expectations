@@ -64,6 +64,10 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             bucketize_data: If True (default), then data is continuous (non-categorical); hence, must bucketize it.
+            bins: Partitioning strategy (one of "uniform", "ntile", "quantile", "percentile", or "auto"); please refer
+            to "ColumnPartition" (great_expectations/expectations/metrics/column_aggregate_metrics/column_partition.py).
+            n_bins: Number of bins for histogram computation (ignored and recomputed if "bins" argument is "auto").
+            allow_relative_error: Used for partitionong strategy values that involve quantiles (all except "uniform").
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
@@ -181,7 +185,7 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
 
         if bins is None:
             is_categorical = True
-        else:
+        elif not is_categorical:
             ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
                 data=bins,
                 parse_strings_as_datetimes=True,
@@ -194,10 +198,8 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
             else:
                 bins_ndarray_as_float = bins
 
-            is_categorical = (
-                is_categorical
-                or ndarray_is_datetime_type
-                or not np.all(np.diff(bins_ndarray_as_float) > 0.0)
+            is_categorical = ndarray_is_datetime_type or not np.all(
+                np.diff(bins_ndarray_as_float) > 0.0
             )
 
         fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"

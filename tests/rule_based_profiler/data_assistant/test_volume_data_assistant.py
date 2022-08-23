@@ -974,6 +974,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "replace_nan_with_zero": True,
                             "name": "table_row_count",
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                            "single_batch_mode": False,
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
                             "reduce_scalar_metric": True,
@@ -1014,6 +1015,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                             "metric_value_kwargs": None,
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                             "metric_domain_kwargs": None,
+                                            "single_batch_mode": False,
                                             "reduce_scalar_metric": True,
                                             "metric_name": "table.row_count",
                                         }
@@ -1070,6 +1072,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
+                            "single_batch_mode": False,
                             "reduce_scalar_metric": True,
                             "metric_name": "column.distinct_values.count",
                         },
@@ -1117,6 +1120,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                             "metric_value_kwargs": None,
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                             "metric_domain_kwargs": "$domain.domain_kwargs",
+                                            "single_batch_mode": False,
                                             "reduce_scalar_metric": True,
                                             "metric_name": "column.distinct_values.count",
                                         }
