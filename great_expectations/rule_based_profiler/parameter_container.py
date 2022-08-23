@@ -359,31 +359,32 @@ def _build_parameter_node_tree_for_one_parameter(
     parameter_value: Any,
 ) -> None:
     """
-    Recursively builds a tree of ParameterNode objects, creating new ParameterNode objects parsimoniously (i.e., only if
-    ParameterNode object, corresponding to a part of fully-qualified parameter names in a "name space" does not exist).
-    :param parameter_node: root-level ParameterNode for the sub-tree, characterized by the first parameter name in list
-    :param parameter_name_as_list: list of parts of a fully-qualified parameter name of sub-tree (or sub "name space")
-    :param parameter_value: value pertaining to the last part of the fully-qualified parameter name ("leaf node")
+    Builds a tree of ParameterNode objects.
+
+    parameter_name_as_list is a list of property names which are used to access into parameter_node. If the property
+    doesn't exist, it is created. The parameter_value is assigned to the lowest most property.
+    For example if parameter_name_as_list is ["a", "b", "c"] and parameter_value is "value" then parameter_node is
+    modified in place so that:
+
+    parameter_node.a.b.c = parameter_value
+
+    Args:
+        parameter_node: root-level ParameterNode for the sub-tree, characterized by the first parameter name in list
+        parameter_name_as_list: list of parts of a fully-qualified parameter name of sub-tree (or sub "name space")
+        parameter_value: value pertaining to the last part of the fully-qualified parameter name ("leaf node")
     """
-    parameter_name_part: str = parameter_name_as_list[0]
-
-    # If the fully-qualified parameter name (or "name space") is still compound (i.e., not at "leaf node" / last part),
-    # then build the sub-tree, creating the descendant ParameterNode (to hold the sub-tree), if no descendants exist.
-    if len(parameter_name_as_list) > 1:
-        if parameter_name_part not in parameter_node:
-            parameter_node[parameter_name_part] = ParameterNode({})
-
-        _build_parameter_node_tree_for_one_parameter(
-            parameter_node=parameter_node[parameter_name_part],
-            parameter_name_as_list=parameter_name_as_list[1:],
-            parameter_value=parameter_value,
-        )
-    else:
-        # If the fully-qualified parameter name (or "name space") is trivial (i.e., at "leaf node" / last part), then
-        # store the supplied attribute value into the given ParameterNode using leaf "parameter_name_part" name as key.
-        parameter_node[parameter_name_part] = convert_dictionary_to_parameter_node(
-            source=parameter_value
-        )
+    node: ParameterNode = parameter_node
+    for parameter_name in parameter_name_as_list[:-1]:
+        # This conditional is functionally equivalent to `node = node.setdefault(parameter_name, ParameterNode({})).`
+        # However, setdefault always evaluates its second argument which is much slower in this hot code path.
+        if parameter_name in node:
+            node = node[parameter_name]
+        else:
+            node[parameter_name] = ParameterNode({})
+            node = node[parameter_name]
+    node[parameter_name_as_list[-1]] = convert_dictionary_to_parameter_node(
+        parameter_value
+    )
 
 
 def get_parameter_value_by_fully_qualified_parameter_name(
