@@ -217,12 +217,7 @@ class ParameterContainer(SerializableDictDot):
     def get_parameter_node(self, parameter_name_root: str) -> Optional[ParameterNode]:
         if self.parameter_nodes is None:
             return None
-
-        parameter_node: ParameterNode = convert_dictionary_to_parameter_node(
-            source=self.parameter_nodes.get(parameter_name_root)
-        )
-
-        return parameter_node
+        return self.parameter_nodes.get(parameter_name_root)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -274,18 +269,23 @@ def build_parameter_container_for_variables(
     Returns:
         ParameterContainer containing all variables
     """
-    variable_config_key: str
-    variable_config_value: Any
-    parameter_values: Dict[str, Any] = {}
-    for variable_config_key, variable_config_value in variables_configs.items():
-        variable_config_key = f"{VARIABLES_KEY}{variable_config_key}"
-        parameter_values[variable_config_key] = variable_config_value
-
-    parameter_container = ParameterContainer(parameter_nodes=None)
-    build_parameter_container(
-        parameter_container=parameter_container, parameter_values=parameter_values
+    parameter_node = ParameterNode()
+    key: str
+    value: Any
+    for key, value in variables_configs.items():
+        key_parts: List[str] = [PARAMETER_NAME_ROOT_FOR_VARIABLES] + key.split(
+            FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
+        )
+        _build_parameter_node_tree_for_one_parameter(parameter_node, key_parts, value)
+    # We only want to set the ParameterContainer key PARAMETER_NAME_ROOT_FOR_VARIABLES if
+    # parameter_node is non-empty since there is downstream logic that depends on this.
+    parameter_container = (
+        ParameterContainer(
+            parameter_nodes={PARAMETER_NAME_ROOT_FOR_VARIABLES: parameter_node}
+        )
+        if parameter_node
+        else ParameterContainer()
     )
-
     return parameter_container
 
 
