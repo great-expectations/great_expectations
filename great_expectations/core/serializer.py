@@ -1,7 +1,7 @@
 """Serializer class interface definition.
 
 Serializers determine how to write an object to disk, json, etc.
-A serializer comprises the object destination and name e.g. YamlDatasourceSerializer.
+A serializer comprises the object destination and name e.g. YAMLReadyDictDatasourceSerializer.
 A base implementation is provided if no modification needs to be included for the specific object / destination pair.
 
 Typical usage example:
@@ -10,41 +10,46 @@ Typical usage example:
 """
 
 import abc
-from typing import Any, Optional
+from typing import Optional, Union
 
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.marshmallow__shade import Schema
 
 
 class AbstractSerializer(abc.ABC):
+    """Serializer interface.
+
+    Note: When mypy coverage is enhanced further, this Abstract class can be replaced with a Protocol.
+    """
+
     def __init__(self, schema: Optional[Schema] = None) -> None:
         self._schema = schema
 
     @abc.abstractmethod
-    def serialize(self, obj: Any) -> Any:
+    def serialize(self, obj: AbstractConfig) -> Union[str, dict, AbstractConfig]:
         """Serialize to serializer specific data type.
 
-        Note, specific parameter and return types to be implemented in subclasses.
+        Note, specific return type to be implemented in subclasses.
 
         Args:
-            obj: object to serialize.
+            obj: Object to serialize.
 
         Returns:
-            representation of object in serializer specific data type.
+            Representation of object in serializer specific data type.
         """
         raise NotImplementedError
 
 
-class BaseSerializer(AbstractSerializer):
-    def serialize(self, obj: Any) -> Any:
-        """Serialize to serializer specific data type.
+class DictSerializer(AbstractSerializer):
+    def serialize(self, obj: AbstractConfig) -> dict:
+        """Serialize to python dictionary.
 
-        This default implementation can be overridden in subclasses.
-        Note, specific parameter and return types to be implemented in subclasses.
+        This is typically the default implementation used in can be overridden in subclasses.
 
         Args:
-            obj: object to serialize.
+            obj: Object to serialize.
 
         Returns:
-            representation of object in serializer specific data type.
+            Representation of object as a python dictionary using the defined marshmallow schema.
         """
         return self._schema.dump(obj)
