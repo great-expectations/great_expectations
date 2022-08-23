@@ -16,7 +16,7 @@ class SlackRenderer(Renderer):
         validation_result=None,
         data_docs_pages=None,
         notify_with=None,
-        show_failed_expectations: bool = False
+        show_failed_expectations: bool = False,
     ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
@@ -67,14 +67,14 @@ class SlackRenderer(Renderer):
                 f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
             )
 
-
             if validation_result.success:
                 status = "Success :tada:"
 
             else:
                 if show_failed_expectations:
-                    failed_expectations_text = self.create_failed_expectations_text(validation_result["results"])
-
+                    failed_expectations_text = self.create_failed_expectations_text(
+                        validation_result["results"]
+                    )
 
             summary_text = f"""*Batch Validation Status*: {status}
 *Expectation suite name*: `{expectation_suite_name}`
@@ -198,5 +198,3 @@ class SlackRenderer(Renderer):
                 expectation_name = expectation["expectation_config"]["expectation_type"]
                 failed_expectations_str += f"{failure_emoji}{expectation_name}\n"
         return failed_expectations_str
-
-

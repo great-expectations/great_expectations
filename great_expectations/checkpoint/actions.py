@@ -150,7 +150,7 @@ class SlackNotificationAction(ValidationAction):
         slack_channel=None,
         notify_on="all",
         notify_with=None,
-        show_failed_expectations=False
+        show_failed_expectations=False,
     ) -> None:
         """Construct a SlackNotificationAction
 
@@ -237,7 +237,10 @@ class SlackNotificationAction(ValidationAction):
             and not validation_success
         ):
             query: Dict = self.renderer.render(
-                validation_result_suite, data_docs_pages, self.notify_with, self.show_failed_expectations
+                validation_result_suite,
+                data_docs_pages,
+                self.notify_with,
+                self.show_failed_expectations,
             )
 
             # this will actually send the POST request to the Slack webapp server
