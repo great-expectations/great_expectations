@@ -360,13 +360,22 @@ def _build_parameter_node_tree_for_one_parameter(
 ) -> None:
     """
     Builds a tree of ParameterNode objects.
-    :param parameter_node: root-level ParameterNode for the sub-tree, characterized by the first parameter name in list
-    :param parameter_name_as_list: list of parts of a fully-qualified parameter name of sub-tree (or sub "name space")
-    :param parameter_value: value pertaining to the last part of the fully-qualified parameter name ("leaf node")
+
+    parameter_name_as_list is a list of property names which are used to access into parameter_node. If the property
+    doesn't exist, it is created. The parameter_value is assigned to the lowest most property.
+    For example if parameter_name_as_list is ["a", "b", "c"] and parameter_value is "value" then parameter_node is
+    modified in place so that:
+
+    parameter_node.a.b.c = parameter_value
+
+    Args:
+        parameter_node: root-level ParameterNode for the sub-tree, characterized by the first parameter name in list
+        parameter_name_as_list: list of parts of a fully-qualified parameter name of sub-tree (or sub "name space")
+        parameter_value: value pertaining to the last part of the fully-qualified parameter name ("leaf node")
     """
     node: ParameterNode = parameter_node
     for parameter_name in parameter_name_as_list[:-1]:
-        # This conditional is functionally equivalent to node.setdefault(parameter_name, ParameterNode({})).
+        # This conditional is functionally equivalent to `node = node.setdefault(parameter_name, ParameterNode({})).`
         # However, setdefault always evaluates its second argument which is much slower in this hot code path.
         if parameter_name in node:
             node = node[parameter_name]
