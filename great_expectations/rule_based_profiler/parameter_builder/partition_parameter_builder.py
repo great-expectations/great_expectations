@@ -49,6 +49,9 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
         self,
         name: str,
         bucketize_data: Union[str, bool] = True,
+        bins: str = "uniform",
+        n_bins: int = 10,
+        allow_relative_error: bool = False,
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
@@ -60,6 +63,10 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             bucketize_data: If True (default), then data is continuous (non-categorical); hence, must bucketize it.
+            bins: Partitioning strategy (one of "uniform", "ntile", "quantile", "percentile", or "auto"); please refer
+            to "ColumnPartition" (great_expectations/expectations/metrics/column_aggregate_metrics/column_partition.py).
+            n_bins: Number of bins for histogram computation (ignored and recomputed if "bins" argument is "auto").
+            allow_relative_error: Used for partitionong strategy values that involve quantiles (all except "uniform").
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
@@ -74,8 +81,9 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
                 metric_name="column.partition",
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs={
-                    "bins": "auto",
-                    "allow_relative_error": False,
+                    "bins": bins,
+                    "n_bins": n_bins,
+                    "allow_relative_error": allow_relative_error,
                 },
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
