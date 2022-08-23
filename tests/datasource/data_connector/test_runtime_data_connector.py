@@ -1219,3 +1219,4 @@ def test_temp_table_schema_name_included_in_batch_spec(basic_datasource):
     )
     assert type(batch_spec) == RuntimeQueryBatchSpec
     assert batch_spec["temp_table_schema_name"] == "my_schema"
+    
