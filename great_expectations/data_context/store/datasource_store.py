@@ -4,7 +4,7 @@ import copy
 from typing import List, Optional, Union
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.core.serializer import BaseSerializer
+from great_expectations.core.serializer import AbstractSerializer
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
@@ -25,14 +25,12 @@ class DatasourceStore(Store):
 
     def __init__(
         self,
+        serializer: AbstractSerializer,
         store_name: Optional[str] = None,
         store_backend: Optional[dict] = None,
         runtime_environment: Optional[dict] = None,
-        serializer: Optional[BaseSerializer] = None,
     ) -> None:
         self._schema = DatasourceConfigSchema()
-        if serializer is None:
-            serializer = BaseSerializer()
         self._serializer = serializer
         super().__init__(
             store_backend=store_backend,
