@@ -6,7 +6,9 @@ A base implementation is provided if no modification needs to be included for th
 
 Typical usage example:
 
-# TODO: AJB 20220822 Add typical usage example
+datasource_config = DatasourceConfig(...)
+serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+serialized_value = serializer.serialize(datasource_config)
 """
 
 import abc

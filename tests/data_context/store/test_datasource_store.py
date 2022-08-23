@@ -331,11 +331,9 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     )
 
     store.set(key=key, value=datasource_config_with_names)
-    # TODO: AJB 20220822 why are empty id and name fields not getting filtered out and res not DatasourceConfig?
-    # res: DatasourceConfig = store.get(key=key)
-    #
-    # assert isinstance(res, DatasourceConfig)
-    # assert res.to_json_dict() == datasource_config.to_json_dict()
+    res: DatasourceConfig = store.get(key=key)
+
+    _assert_serialized_datasource_configs_are_equal([res, datasource_config])
 
     with open(
         os.path.join(empty_data_context.root_directory, "great_expectations.yml")
@@ -368,11 +366,9 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     )
 
     store.set(key=key, value=datasource_config_with_names)
-    # TODO: AJB 20220822 why are empty id and name fields not getting filtered out and res not DatasourceConfig?
-    # res: DatasourceConfig = store.get(key=key)
-    #
-    # assert isinstance(res, DatasourceConfig)
-    # assert res.to_json_dict() == datasource_config.to_json_dict()
+    res: DatasourceConfig = store.get(key=key)
+
+    _assert_serialized_datasource_configs_are_equal([res, datasource_config])
 
     with open(
         os.path.join(empty_data_context.root_directory, "great_expectations.yml")

@@ -8,8 +8,6 @@ Typical usage example:
 datasource_config = DatasourceConfig(...)
 serializer = YAMLReadyDictDatasourceConfigSerializer()
 serialized_value = serializer.serialize(datasource_config)
-
-# TODO: AJB 20220822 Add typical usage example
 """
 from typing import Optional
 
