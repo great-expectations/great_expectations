@@ -39,12 +39,12 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         )
         column = accessor_domain_kwargs["column"]
 
-        query = sa.select(column).distinct()
+        query = sa.select(sa.column(column)).distinct()
         results = execution_engine.engine.execute(
             query.select_from(selectable)
         ).fetchall()
 
-        return set(results)
+        return {row[0] for row in results}
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -76,7 +76,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column: str, **kwargs: Optional[dict]) -> Set[Any]:
-        return sa.select(column).distinct().count()
+        return column.distinct().count()
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(
@@ -84,7 +84,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         column: str,
         **kwargs: Optional[dict],
     ) -> Set[Any]:
-        return F.select(column).where(F.col(column).isNotNull()).groupBy(column).count()
+        return F.select(column).distinct().count()
 
 
 class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
