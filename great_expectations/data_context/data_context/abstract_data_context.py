@@ -50,6 +50,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
+    IncludeRenderedContentConfig,
     NotebookConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
@@ -217,7 +218,7 @@ class AbstractDataContext(ABC):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        ge_cloud_id: Optional[str] = None,
+        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         """
@@ -778,7 +779,7 @@ class AbstractDataContext(ABC):
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
-        include_rendered_content: bool = False,
+        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
         """
@@ -865,6 +866,12 @@ class AbstractDataContext(ABC):
                     )
                 )
 
+        include_rendered_content = (
+            self._determine_if_expectation_validation_result_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
             batch_list=batch_list,
@@ -875,7 +882,7 @@ class AbstractDataContext(ABC):
         self,
         expectation_suite: ExpectationSuite,
         batch_list: List[Batch],
-        include_rendered_content: bool = False,
+        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
         """
@@ -894,6 +901,11 @@ class AbstractDataContext(ABC):
                 """Validator could not be created because BatchRequest returned an empty batch_list.
                 Please check your parameters and try again."""
             )
+        include_rendered_content = (
+            self._determine_if_expectation_validation_result_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         batch_definition: BatchDefinition = batch_list[-1].batch_definition
@@ -915,7 +927,6 @@ class AbstractDataContext(ABC):
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
-        *,
         batch_request: Optional[BatchRequestBase] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[dict] = None,
@@ -1014,7 +1025,6 @@ class AbstractDataContext(ABC):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
@@ -1465,6 +1475,10 @@ class AbstractDataContext(ABC):
         return self.variables.progress_bars
 
     @property
+    def include_rendered_content(self) -> IncludeRenderedContentConfig:
+        return self.variables.include_rendered_content
+
+    @property
     def notebooks(self) -> NotebookConfig:
         return self.variables.notebooks
 
@@ -1776,3 +1790,29 @@ class AbstractDataContext(ABC):
             None
         """
         send_usage_message(self, event, event_payload, success)
+
+    def _determine_if_expectation_suite_include_rendered_content(
+        self, include_rendered_content: Optional[bool] = None
+    ) -> bool:
+        if include_rendered_content is None:
+            if (
+                self.include_rendered_content.expectation_suite is True
+                or self.include_rendered_content.globally is True
+            ):
+                return True
+            else:
+                return False
+        return include_rendered_content
+
+    def _determine_if_expectation_validation_result_include_rendered_content(
+        self, include_rendered_content: Optional[bool] = None
+    ) -> bool:
+        if include_rendered_content is None:
+            if (
+                self.include_rendered_content.expectation_validation_result is True
+                or self.include_rendered_content.globally is True
+            ):
+                return True
+            else:
+                return False
+        return include_rendered_content

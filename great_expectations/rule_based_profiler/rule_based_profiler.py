@@ -139,6 +139,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         self._rule_states = []
 
+    @property
+    def ge_cloud_id(self) -> Optional[str]:
+        return self._id
+
     def _init_profiler_rules(
         self,
         rules: Dict[str, Dict[str, Any]],
@@ -336,11 +340,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     "rules": effective_rules_configs,
                 },
             },
-            execution_time=sum(
-                [rule_state.execution_time for rule_state in self.rule_states]
-            ),
+            rule_domain_builder_execution_time={
+                rule_state.rule.name: rule_state.rule_domain_builder_execution_time
+                for rule_state in self.rule_states
+            },
             rule_execution_time={
-                rule_state.rule.name: rule_state.execution_time
+                rule_state.rule.name: rule_state.rule_execution_time
                 for rule_state in self.rule_states
             },
             _usage_statistics_handler=self._usage_statistics_handler,
@@ -1102,7 +1107,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         config: RuleBasedProfilerConfig,
         data_context: "BaseDataContext",  # noqa: F821
         profiler_store: "ProfilerStore",  # noqa: F821
-        ge_cloud_id: Optional[str] = None,
     ) -> "RuleBasedProfiler":  # noqa: F821
         if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
             config=config
@@ -1125,9 +1129,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if data_context.ge_cloud_mode:
-            key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
-            )
+            key = GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER)
         else:
             key = ConfigurationIdentifier(
                 configuration_key=config.name,
