@@ -194,7 +194,10 @@ def test_datasource_error_handling(
     key = GeCloudIdentifier(
         resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
     )
-    with pytest.raises(StoreBackendError):
+    with pytest.raises(
+        StoreBackendError, match=r"Unable to \w+ object in GE Cloud Store Backend"
+    ) as exc_info:
         datasource_store_ge_cloud_backend.remove_key(key)
+    print(f"Exception details:\n\t{exc_info.type}\n\t{exc_info.value}")
 
     mock_ge_cloud_unavailable.assert_called_once()
