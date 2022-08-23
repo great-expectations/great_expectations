@@ -55,7 +55,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 )
 
 
-def object_to_yaml_str(obj):
+def object_to_yaml_str(obj):  # type: ignore[no-untyped-def]
     output_str: str
     with StringIO() as string_stream:
         yaml.dump(obj, string_stream)
@@ -172,7 +172,7 @@ class AssetConfig(SerializableDictDot):
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
         reader_options: Optional[Dict[str, Any]] = None,
-        **kwargs,
+        **kwargs: Optional[dict],
     ) -> None:
         if name is not None:
             self.name = name
@@ -206,11 +206,11 @@ class AssetConfig(SerializableDictDot):
             setattr(self, k, v)
 
     @property
-    def class_name(self):
+    def class_name(self) -> Optional[str]:
         return self._class_name
 
     @property
-    def module_name(self):
+    def module_name(self) -> Optional[str]:
         return self._module_name
 
     def to_json_dict(self) -> dict:
@@ -276,17 +276,17 @@ class AssetConfigSchema(Schema):
     reader_options = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
 
     @validates_schema
-    def validate_schema(self, data, **kwargs) -> None:
+    def validate_schema(self, data, **kwargs) -> None:  # type: ignore[no-untyped-def]
         pass
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_asset_config(self, data, **kwargs):
+    def make_asset_config(self, data, **kwargs):  # type: ignore[no-untyped-def]
         return AssetConfig(**data)
 
 
 class SorterConfig(DictDot):
-    def __init__(
+    def __init__(  # type: ignore[no-untyped-def]
         self,
         name,
         class_name=None,
@@ -310,27 +310,27 @@ class SorterConfig(DictDot):
             self._datetime_format = datetime_format
 
     @property
-    def name(self):
+    def name(self):  # type: ignore[no-untyped-def]
         return self._name
 
     @property
-    def module_name(self):
+    def module_name(self):  # type: ignore[no-untyped-def]
         return self._module_name
 
     @property
-    def class_name(self):
+    def class_name(self):  # type: ignore[no-untyped-def]
         return self._class_name
 
     @property
-    def orderby(self):
+    def orderby(self):  # type: ignore[no-untyped-def]
         return self._orderby
 
     @property
-    def reference_list(self):
+    def reference_list(self):  # type: ignore[no-untyped-def]
         return self._reference_list
 
     @property
-    def datetime_format(self):
+    def datetime_format(self):  # type: ignore[no-untyped-def]
         return self._datetime_format
 
 
@@ -1322,6 +1322,24 @@ class ProgressBarsConfigSchema(Schema):
     metric_calculations = fields.Boolean(default=True)
 
 
+class IncludeRenderedContentConfig(DictDot):
+    def __init__(
+        self,
+        globally: bool = False,
+        expectation_suite: bool = False,
+        expectation_validation_result: bool = False,
+    ) -> None:
+        self.globally = globally
+        self.expectation_suite = expectation_suite
+        self.expectation_validation_result = expectation_validation_result
+
+
+class IncludeRenderedContentConfigSchema(Schema):
+    globally = fields.Boolean(default=False)
+    expectation_suite = fields.Boolean(default=False)
+    expectation_validation_result = fields.Boolean(default=False)
+
+
 class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
@@ -1451,6 +1469,9 @@ class DataContextConfigSchema(Schema):
     progress_bars = fields.Nested(
         ProgressBarsConfigSchema, required=False, allow_none=True
     )
+    include_rendered_content = fields.Nested(
+        IncludeRenderedContentConfigSchema, required=False, allow_none=True
+    )
     concurrency = fields.Nested(
         ConcurrencyConfigSchema, required=False, allow_none=True
     )
@@ -1460,6 +1481,7 @@ class DataContextConfigSchema(Schema):
     REMOVE_KEYS_IF_NONE = [
         "concurrency",  # 0.13.33
         "progress_bars",  # 0.13.49
+        "include_rendered_content",  # 0.15.19
     ]
 
     # noinspection PyUnusedLocal
@@ -2161,6 +2183,7 @@ class DataContextConfig(BaseYamlConfig):
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
+        include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
         # Set defaults
         if config_version is None:
@@ -2215,6 +2238,13 @@ class DataContextConfig(BaseYamlConfig):
             concurrency = ConcurrencyConfig(**concurrency)
         self.concurrency = concurrency
         self.progress_bars = progress_bars
+        if include_rendered_content is None:
+            include_rendered_content = IncludeRenderedContentConfig()
+        elif isinstance(include_rendered_content, dict):
+            include_rendered_content = IncludeRenderedContentConfig(
+                **include_rendered_content
+            )
+        self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)
 
