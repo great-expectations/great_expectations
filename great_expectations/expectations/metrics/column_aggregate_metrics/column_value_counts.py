@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+import numpy as np
 import pandas as pd
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -112,9 +113,10 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         results = execution_engine.engine.execute(
             query.select_from(selectable)
         ).fetchall()
+        arr = np.asarray(results)
         series = pd.Series(
-            [row[1] for row in results],
-            index=pd.Index(data=[row[0] for row in results], name="value"),
+            arr[:, 1],
+            index=pd.Index(data=arr[:, 0], name="value"),
             name="count",
         )
         return series
