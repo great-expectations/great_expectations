@@ -1193,6 +1193,7 @@ def test_batch_identifiers_datetime(
     except TypeError:
         pytest.fail()
 
+
 def test_temp_table_schema_name_included_in_batch_spec(basic_datasource):
     batch_identifiers = {
         "custom_key_0": "staging",
@@ -1212,11 +1213,7 @@ def test_temp_table_schema_name_included_in_batch_spec(basic_datasource):
 
     batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(
         batch_definition=batch_definition,
-        runtime_parameters={
-            "query": "my_query",
-            "temp_table_schema_name": "my_schema"
-        },
+        runtime_parameters={"query": "my_query", "temp_table_schema_name": "my_schema"},
     )
     assert type(batch_spec) == RuntimeQueryBatchSpec
     assert batch_spec["temp_table_schema_name"] == "my_schema"
-    
