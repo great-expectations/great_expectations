@@ -1,3 +1,4 @@
+import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union
 
 import pytest
@@ -46,3 +47,18 @@ def mock_response_factory() -> Callable[
         )
 
     return _make_mock_response
+
+
+@pytest.fixture
+def mock_ge_cloud_unavailable(mock_response_factory: Callable):
+    def mocked_response(*args, **kwargs):
+
+        return MockResponse(
+            {"code": 503, "detail": "API is unavailable"},
+            503,
+        )
+
+    with unittest.mock.patch(
+        "requests.request", autospec=True, side_effect=mocked_response
+    ) as mock_request:
+        yield mock_request
