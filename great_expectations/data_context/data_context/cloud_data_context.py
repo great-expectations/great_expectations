@@ -82,7 +82,7 @@ class CloudDataContext(AbstractDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            serializer=JsonDatasourceConfigSerializer(),
+            serializer=JsonDatasourceConfigSerializer(schema=datasourceConfigSchema),
         )
         self._datasource_store = datasource_store
 

@@ -168,7 +168,7 @@ def test_datasource_store_retrieval_cloud_mode(
     store = DatasourceStore(
         store_name="my_cloud_datasource_store",
         store_backend=ge_cloud_store_backend_config,
-        serializer=JsonDatasourceConfigSerializer(),
+        serializer=JsonDatasourceConfigSerializer(schema=datasourceConfigSchema),
     )
 
     key = GeCloudIdentifier(

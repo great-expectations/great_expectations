@@ -12,7 +12,7 @@ serialized_value = serializer.serialize(datasource_config)
 """
 
 import abc
-from typing import Optional, Union
+from typing import Union
 
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.marshmallow__shade import Schema
@@ -24,13 +24,12 @@ class AbstractConfigSerializer(abc.ABC):
     Note: When mypy coverage is enhanced further, this Abstract class can be replaced with a Protocol.
     """
 
-    def __init__(self, schema: Optional[Schema] = None) -> None:
+    def __init__(self, schema: Schema) -> None:
         """
         Args:
-            schema: marshmallow schema defining raw serialized version of object. Optional
-                because some subclasses override with a default value.
+            schema: marshmallow schema defining raw serialized version of object.
         """
-        self._schema = schema
+        self.schema = schema
 
     @abc.abstractmethod
     def serialize(self, obj: AbstractConfig) -> Union[str, dict, AbstractConfig]:
@@ -59,4 +58,4 @@ class DictConfigSerializer(AbstractConfigSerializer):
         Returns:
             Representation of object as a python dictionary using the defined marshmallow schema.
         """
-        return self._schema.dump(obj)
+        return self.schema.dump(obj)
