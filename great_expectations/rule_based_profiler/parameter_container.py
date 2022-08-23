@@ -279,14 +279,13 @@ def build_parameter_container_for_variables(
         _build_parameter_node_tree_for_one_parameter(parameter_node, key_parts, value)
     # We only want to set the ParameterContainer key PARAMETER_NAME_ROOT_FOR_VARIABLES if
     # parameter_node is non-empty since there is downstream logic that depends on this.
-    parameter_container = (
+    return (
         ParameterContainer(
             parameter_nodes={PARAMETER_NAME_ROOT_FOR_VARIABLES: parameter_node}
         )
         if parameter_node
         else ParameterContainer()
     )
-    return parameter_container
 
 
 def build_parameter_container(
