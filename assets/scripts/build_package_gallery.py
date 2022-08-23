@@ -10,11 +10,11 @@ from typing import List
 
 import pip
 
-from contrib.cli.great_expectations_contrib.commands import (
+from great_expectations_contrib.commands import (
     read_package_from_file,
     sync_package,
 )
-from contrib.cli.great_expectations_contrib.package import (
+from great_expectations_contrib.package import (
     GreatExpectationsContribPackageManifest,
 )
 
