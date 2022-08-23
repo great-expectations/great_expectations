@@ -273,7 +273,27 @@ To include all of these files, you would need to tell the Data connector to look
 
 The `glob_directive` parameter works off of regex.  You can also use it to limit the files that will be compared against the Data Connector's `default_regex` for a match.  For example, to only permit `.csv` files to be checked for a match, you could specify the `glob_directive` as `"*.csv"`.  To only check for matches against the `.csv` files in subdirectories, you would use the value `*/*.csv`, and so forth.
 
-In this guide's examples, all of our data is assumed to be in the `base_directory` folder.  Therefore, you will not need to add an entry for `glob_directive` to your configuration.
+In this guide's examples, all of our data is assumed to be in the `base_directory` folder.  Therefore, you will not need to add an entry for `glob_directive` to your configuration.  However, if you were to include the example `glob_directive` from above, your full configuration would currently look like:
+
+```python
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "PandasExecutionEngine",  
+        "module_name": "great_expectations.execution_engine",
+    },
+    "data_connectors": {
+        "name_of_my_inferred_data_connector": {
+            "class_name": "InferredAssetFilesystemDataConnector",
+            "base_directory": "./data",
+            "glob_directive": "*/*",
+            "default_regex": {}
+        }
+    }
+}
+```
 
 :::
 
