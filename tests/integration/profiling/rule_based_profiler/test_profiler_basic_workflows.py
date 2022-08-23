@@ -302,7 +302,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         "variables": {},
     }
     my_rbp.add_rule(rule=simple_variables_rule)
-    context.save_profiler(name="my_rbp", profiler=my_rbp)
+    context.save_profiler(profiler=my_rbp)
 
     # load profiler from store
     my_loaded_profiler: RuleBasedProfiler = context.get_profiler(name="my_rbp")
@@ -334,6 +334,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "name": "my_column_min",
                         "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "single_batch_mode": False,
                         "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,

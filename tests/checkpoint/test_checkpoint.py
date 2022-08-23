@@ -31,6 +31,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
@@ -5135,12 +5136,12 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    assert (
-        result.run_results[validation_result_identifier]["validation_result"]
-        .results[0]
-        .rendered_content
-        is not None
-    )
+    expectation_validation_result: ExpectationValidationResult = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
+    for result in expectation_validation_result.results:
+        for rendered_content in result.rendered_content:
+            assert isinstance(rendered_content, RenderedAtomicContent)
 
 
 @pytest.mark.integration
