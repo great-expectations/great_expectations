@@ -1383,6 +1383,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
         "datasources",
         "evaluation_parameter_store_name",
         "expectations_store_name",
+        "include_rendered_content",
         "notebooks",
         "plugins_directory",
         "progress_bars",
