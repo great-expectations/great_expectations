@@ -7,8 +7,8 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
+    HistogramParameterBuilder,
     ParameterBuilder,
-    PartitionParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
@@ -22,21 +22,21 @@ def test_instantiation_partition_parameter_builder(
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     # noinspection PyUnusedLocal
-    parameter_builder_0: ParameterBuilder = PartitionParameterBuilder(
+    parameter_builder_0: ParameterBuilder = HistogramParameterBuilder(
         name="my_name_0",
         bucketize_data=True,
         data_context=data_context,
     )
 
     # noinspection PyUnusedLocal
-    parameter_builder_1: ParameterBuilder = PartitionParameterBuilder(
+    parameter_builder_1: ParameterBuilder = HistogramParameterBuilder(
         name="my_name_1",
         bucketize_data=False,
         data_context=data_context,
     )
 
     # noinspection PyUnusedLocal
-    parameter_builder_2: ParameterBuilder = PartitionParameterBuilder(
+    parameter_builder_2: ParameterBuilder = HistogramParameterBuilder(
         name="my_name_2",
         bucketize_data="$variables.bucketize_data",
         data_context=data_context,
@@ -54,7 +54,7 @@ def test_partition_parameter_builder_alice_continuous(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    parameter_builder: ParameterBuilder = PartitionParameterBuilder(
+    parameter_builder: ParameterBuilder = HistogramParameterBuilder(
         name="my_name",
         bucketize_data=True,
         evaluation_parameter_builder_configs=None,
@@ -122,7 +122,7 @@ def test_partition_parameter_builder_alice_categorical(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    parameter_builder: ParameterBuilder = PartitionParameterBuilder(
+    parameter_builder: ParameterBuilder = HistogramParameterBuilder(
         name="my_name",
         bucketize_data=False,
         evaluation_parameter_builder_configs=None,
@@ -189,7 +189,7 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    parameter_builder: ParameterBuilder = PartitionParameterBuilder(
+    parameter_builder: ParameterBuilder = HistogramParameterBuilder(
         name="my_name",
         bucketize_data=True,
         evaluation_parameter_builder_configs=None,
@@ -254,7 +254,7 @@ def test_partition_parameter_builder_alice_continuous_check_serialized_keys(
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
-    parameter_builder: ParameterBuilder = PartitionParameterBuilder(
+    parameter_builder: ParameterBuilder = HistogramParameterBuilder(
         name="my_name",
         bucketize_data=True,
         evaluation_parameter_builder_configs=None,

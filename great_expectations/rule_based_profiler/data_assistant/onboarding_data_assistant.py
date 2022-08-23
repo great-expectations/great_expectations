@@ -299,8 +299,8 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        column_partition_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_partition_parameter_builder(
-            name="column_values.partition",
+        column_partition_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_histogram_parameter_builder(
+            name="column_values.histogram",
             bucketize_data=True,
         )
         column_min_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
@@ -612,11 +612,6 @@ class OnboardingDataAssistant(DataAssistant):
         )
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
-
-        column_partition_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_partition_parameter_builder(
-            name="column_values.partition",
-            bucketize_data=False,
-        )
         column_min_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_min_metric_multi_batch_parameter_builder()
         )
@@ -778,7 +773,7 @@ class OnboardingDataAssistant(DataAssistant):
             "round_decimals": 1,
         }
         parameter_builders: List[ParameterBuilder] = [
-            column_partition_parameter_builder_for_metrics,
+            # column_partition_parameter_builder_for_metrics,
             column_min_metric_multi_batch_parameter_builder_for_metrics,
             column_max_metric_multi_batch_parameter_builder_for_metrics,
             column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,

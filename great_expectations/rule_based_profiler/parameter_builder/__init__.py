@@ -27,5 +27,5 @@ from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_ba
     ValueSetMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.partition_parameter_builder import (  # isort:skip
-    PartitionParameterBuilder,
+    HistogramParameterBuilder,
 )

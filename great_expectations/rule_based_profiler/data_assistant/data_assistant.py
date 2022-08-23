@@ -29,11 +29,11 @@ from great_expectations.rule_based_profiler.helpers.runtime_environment import (
 )
 from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
+    HistogramParameterBuilder,
     MeanUnexpectedMapMetricMultiBatchParameterBuilder,
     MetricMultiBatchParameterBuilder,
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
-    PartitionParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
     RegexPatternStringParameterBuilder,
@@ -359,15 +359,15 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
 
         @staticmethod
-        def build_partition_parameter_builder(
+        def build_histogram_parameter_builder(
             name: str,
             bucketize_data: Union[str, bool] = True,
-        ) -> PartitionParameterBuilder:
+        ) -> HistogramParameterBuilder:
             """
             This method instantiates "PartitionParameterBuilder" class with specific arguments for given purpose.
             """
             name: str = sanitize_parameter_name(name=f"{name}")
-            return PartitionParameterBuilder(
+            return HistogramParameterBuilder(
                 name=name,
                 bucketize_data=bucketize_data,
                 evaluation_parameter_builder_configs=None,

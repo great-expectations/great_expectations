@@ -26,7 +26,7 @@ from great_expectations.util import (
 )
 
 
-class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
+class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
     """
     Compute histogram/partition using specified metric (depending on bucketizaiton directive) for one Batch of data.
     """
@@ -48,7 +48,11 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
     def __init__(
         self,
         name: str,
-        bucketize_data: Union[str, bool] = True,
+        bucketize_data: bool = True,
+        bins: str = "uniform",
+        n_bins: int = 10,
+        # NOTE 20220822 - I think that ideally, the value of `allow_relative_error` would have a per-engine default
+        allow_relative_error: bool = False,
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
@@ -66,20 +70,23 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             data_context: BaseDataContext associated with this ParameterBuilder
         """
 
-        self._column_partition_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricSingleBatchParameterBuilder",
-            name="column_partition_metric_single_batch_parameter_builder",
-            metric_name="column.partition",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            # metric_value_kwargs={
-            #     "bins": "auto",
-            #     "allow_relative_error": False,
-            # },
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=False,
-            evaluation_parameter_builder_configs=None,
+        self._column_partition_metric_single_batch_parameter_builder_config = (
+            ParameterBuilderConfig(
+                module_name="great_expectations.rule_based_profiler.parameter_builder",
+                class_name="MetricSingleBatchParameterBuilder",
+                name="column_partition_metric_single_batch_parameter_builder",
+                metric_name="column.partition",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs={
+                    "bins": bins,
+                    "n_bins": n_bins,
+                    "allow_relative_error": allow_relative_error,
+                },
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=False,
+                evaluation_parameter_builder_configs=None,
+            )
         )
         self._column_value_counts_metric_single_batch_parameter_builder_config = (
             ParameterBuilderConfig(
