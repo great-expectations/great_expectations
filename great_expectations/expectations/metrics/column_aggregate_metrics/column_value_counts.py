@@ -30,7 +30,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
-    ):
+    ) -> pd.Series:
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
         collate = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
@@ -70,7 +70,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
-    ):
+    ) -> pd.Series:
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
         collate = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
@@ -113,10 +113,10 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         results = execution_engine.engine.execute(
             query.select_from(selectable)
         ).fetchall()
-        arr = np.asarray(results)
+        results_array = np.asarray(results)
         series = pd.Series(
-            arr[:, 1],
-            index=pd.Index(data=arr[:, 0], name="value"),
+            results_array[:, 1],
+            index=pd.Index(data=results_array[:, 0], name="value"),
             name="count",
         )
         return series
@@ -129,7 +129,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
-    ):
+    ) -> pd.Series:
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
         collate = metric_value_kwargs.get(
             "collate", cls.default_kwarg_values["collate"]
@@ -153,10 +153,10 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         elif sort == "count":
             value_counts = value_counts.orderBy(F.desc("count"))
         value_counts = value_counts.collect()
-        arr = np.asarray(value_counts)
+        results_array = np.asarray(value_counts)
         series = pd.Series(
-            arr[:, 1],
-            index=pd.Index(data=arr[:, 0], name="value"),
+            results_array[:, 1],
+            index=pd.Index(data=results_array[:, 0], name="value"),
             name="count",
         )
         return series
