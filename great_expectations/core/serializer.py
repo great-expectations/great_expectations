@@ -23,6 +23,10 @@ class AbstractConfigSerializer(abc.ABC):
     """
 
     def __init__(self, schema: Optional[Schema] = None) -> None:
+        """
+        Args:
+            schema: marshmallow schema defining raw serialized version of object.
+        """
         self._schema = schema
 
     @abc.abstractmethod

@@ -5,11 +5,16 @@ A serializer comprises the object destination and name e.g. YAMLReadyDictDatasou
 
 Typical usage example:
 
+datasource_config = DatasourceConfig(...)
+serializer = YAMLReadyDictDatasourceConfigSerializer()
+serialized_value = serializer.serialize(datasource_config)
+
 # TODO: AJB 20220822 Add typical usage example
 """
 from typing import Optional
 
 from great_expectations.core.serializer import AbstractConfigSerializer
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
@@ -19,6 +24,10 @@ from great_expectations.marshmallow__shade import Schema
 
 class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
     def __init__(self, schema: Optional[Schema] = None) -> None:
+        """
+        Args:
+            schema: marshmallow schema defining raw serialized version of object.
+        """
         super().__init__(schema=schema)
 
         # Override schema
@@ -49,5 +58,28 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
 
 
 class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
-    # TODO: AJB 20220823 pass through convert_to_json_serializable?
-    pass
+    def __init__(self, schema: Optional[Schema] = None) -> None:
+        """
+        Args:
+            schema: marshmallow schema defining raw serialized version of object.
+        """
+        super().__init__(schema=schema)
+
+        # Override schema
+        self._schema = datasourceConfigSchema
+
+    def serialize(self, obj: DatasourceConfig) -> dict:
+        """Serialize DatasourceConfig to json dict.
+
+        Args:
+            obj: DatasourceConfig object to serialize.
+
+        Returns:
+            Representation of object as a dict suitable for serializing to json.
+        """
+
+        config: dict = self._schema.dump(obj)
+
+        json_serializable_dict: dict = convert_to_json_serializable(data=config)
+
+        return json_serializable_dict
