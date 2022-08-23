@@ -253,16 +253,18 @@ class CloudDataContext(AbstractDataContext):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
+        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         """Save the provided expectation suite into the DataContext.
 
         Args:
-            expectation_suite: the suite to save
-            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
-                be read from the suite
-            ge_cloud_id: cloud id for saving expectation suite
-            overwrite_existing: should I over-write the Suite if it already exists?
+            expectation_suite: The suite to save.
+            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
+                from the suite.
+            overwrite_existing: Whether to overwrite the suite if it already exists.
+            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
+
         Returns:
             None
         """
@@ -282,6 +284,13 @@ class CloudDataContext(AbstractDataContext):
                 f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
             )
         self._evaluation_parameter_dependencies_compiled = False
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+        if include_rendered_content:
+            expectation_suite.render()
         self.expectations_store.set(key, expectation_suite, **kwargs)
 
     @property
