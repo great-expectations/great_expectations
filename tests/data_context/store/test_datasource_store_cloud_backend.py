@@ -197,7 +197,9 @@ def test_datasource_error_handling(
     with pytest.raises(
         StoreBackendError, match=r"Unable to \w+ object in GE Cloud Store Backend"
     ) as exc_info:
-        datasource_store_ge_cloud_backend.remove_key(key)
+
+        datasource_store_ge_cloud_backend.get(key=key)
+
     print(f"Exception details:\n\t{exc_info.type}\n\t{exc_info.value}")
 
     mock_ge_cloud_unavailable.assert_called_once()

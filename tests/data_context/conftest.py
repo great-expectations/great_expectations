@@ -710,6 +710,6 @@ def mock_ge_cloud_unavailable(mock_response_factory: Callable):
         )
 
     with unittest.mock.patch(
-        "requests.request", autospec=True, side_effect=mocked_response
+        "requests.get", autospec=True, side_effect=mocked_response
     ) as mock_request:
         yield mock_request
