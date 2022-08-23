@@ -443,6 +443,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         self,
         bucket,
         prefix="",
+        role_arn=None,
         boto3_options=None,
         s3_put_options=None,
         filepath_template=None,
@@ -478,6 +479,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
             # whether the rest of the key is built with platform-specific separators or not
             prefix = prefix.strip("/")
         self.prefix = prefix
+        self.role_arn = role_arn
+        self.role_assumed = False
         if boto3_options is None:
             boto3_options = {}
         self._boto3_options = boto3_options
@@ -494,6 +497,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         self._config = {
             "bucket": bucket,
             "prefix": prefix,
+            "role_arn": role_arn,
             "boto3_options": boto3_options,
             "s3_put_options": s3_put_options,
             "filepath_template": filepath_template,
@@ -511,6 +515,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
             "class_name": self.__class__.__name__,
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
+
+        if self.role_arn:
+            self._assume_role()
 
     def _build_s3_object_key(self, key):
         if self.platform_specific_separator:
@@ -721,6 +728,29 @@ class TupleS3StoreBackend(TupleStoreBackend):
         import boto3
 
         return boto3.client("s3", **self.boto3_options)
+
+    def _assume_role(self):
+        import boto3
+
+        # create an STS client object that represents a live connection to the
+        # STS service
+        sts_client = boto3.client("sts", **self.boto3_options)
+
+        logger.debug(f"Assuming role {self.role_arn}...")
+
+        # Call the assume_role method of the STSConnection object and pass the role
+        # ARN and a role session name.
+        assumed_role_object = sts_client.assume_role(
+            RoleArn=self.role_arn, RoleSessionName="AssumedRoleSession"
+        )
+
+        # From the response that contains the assumed role, get the temporary
+        # credentials that can be used to make subsequent API calls
+        self._boto3_options["aws_access_key_id"] = assumed_role_object["Credentials"]["AccessKeyId"]
+        self._boto3_options["aws_secret_access_key"] = assumed_role_object["Credentials"]["SecretAccessKey"]
+        self._boto3_options["aws_session_token"] = assumed_role_object["Credentials"]["SessionToken"]
+
+        logger.debug(f"Role {self.role_arn} assumed, access keys configured.")
 
     def _create_resource(self):
         import boto3
