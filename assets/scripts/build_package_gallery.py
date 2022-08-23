@@ -9,14 +9,8 @@ import os
 from typing import List
 
 import pip
-
-from great_expectations_contrib.commands import (
-    read_package_from_file,
-    sync_package,
-)
-from great_expectations_contrib.package import (
-    GreatExpectationsContribPackageManifest,
-)
+from great_expectations_contrib.commands import read_package_from_file, sync_package
+from great_expectations_contrib.package import GreatExpectationsContribPackageManifest
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
