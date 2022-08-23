@@ -139,7 +139,7 @@ class ParameterBuilder(ABC, Builder):
             or self.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
-            self.set_batch_list_or_batch_request(
+            self.set_batch_list_if_null_batch_request(
                 batch_list=batch_list,
                 batch_request=batch_request,
             )
@@ -724,7 +724,7 @@ def resolve_evaluation_dependencies(
             or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
-            evaluation_parameter_builder.set_batch_list_or_batch_request(
+            evaluation_parameter_builder.set_batch_list_if_null_batch_request(
                 batch_list=parameter_builder.batch_list,
                 batch_request=parameter_builder.batch_request,
             )
