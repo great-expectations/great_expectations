@@ -27,7 +27,7 @@ class AbstractConfigSerializer(abc.ABC):
     def __init__(self, schema: Schema) -> None:
         """
         Args:
-            schema: marshmallow schema defining raw serialized version of object.
+            schema: Marshmallow schema defining raw serialized version of object.
         """
         self.schema = schema
 
@@ -48,7 +48,7 @@ class AbstractConfigSerializer(abc.ABC):
 
 class DictConfigSerializer(AbstractConfigSerializer):
     def serialize(self, obj: AbstractConfig) -> dict:
-        """Serialize to python dictionary.
+        """Serialize to Python dictionary.
 
         This is typically the default implementation used in can be overridden in subclasses.
 
@@ -56,6 +56,6 @@ class DictConfigSerializer(AbstractConfigSerializer):
             obj: Object to serialize.
 
         Returns:
-            Representation of object as a python dictionary using the defined marshmallow schema.
+            Representation of object as a Python dictionary using the defined Marshmallow schema.
         """
         return self.schema.dump(obj)

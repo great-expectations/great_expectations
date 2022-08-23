@@ -22,7 +22,7 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
     def __init__(self, schema: Schema) -> None:
         """
         Args:
-            schema: marshmallow schema defining raw serialized version of object.
+            schema: Marshmallow schema defining raw serialized version of object.
         """
         super().__init__(schema=schema)
 
@@ -57,7 +57,7 @@ class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
     def __init__(self, schema: Schema) -> None:
         """
         Args:
-            schema: marshmallow schema defining raw serialized version of object.
+            schema: Marshmallow schema defining raw serialized version of object.
         """
         super().__init__(schema=schema)
 
