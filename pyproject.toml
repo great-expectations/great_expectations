@@ -42,7 +42,6 @@ exclude = [
     'core/config_peer\.py', # 1
     'core/evaluation_parameters\.py', # 6
     'core/expectation_configuration\.py', # 21
-    'core/expectation_suite\.py', # 10
     'core/expectation_validation_result\.py', # 9
     'core/run_identifier\.py', # 1
     'core/yaml_handler\.py', # 1
