@@ -2,7 +2,7 @@
 
 Serializers determine how to write an object to disk, json, etc.
 A serializer comprises the object destination and name e.g. YAMLReadyDictDatasourceConfigSerializer.
-A base implementation is provided if no modification needs to be included for the specific object / destination pair.
+A base implementation (DictConfigSerializer) is provided if no modification needs to be included for the specific object / destination pair.
 
 Typical usage example:
 
@@ -27,7 +27,8 @@ class AbstractConfigSerializer(abc.ABC):
     def __init__(self, schema: Optional[Schema] = None) -> None:
         """
         Args:
-            schema: marshmallow schema defining raw serialized version of object.
+            schema: marshmallow schema defining raw serialized version of object. Optional
+                because some subclasses override with a default value.
         """
         self._schema = schema
 
