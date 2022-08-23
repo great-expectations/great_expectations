@@ -371,9 +371,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
             name: str = sanitize_parameter_name(name=f"{name}")
             return PartitionParameterBuilder(
                 name=name,
-                bins="uniform",
-                n_bins=10,
-                allow_relative_error=False,
                 bucketize_data=bucketize_data,
                 evaluation_parameter_builder_configs=None,
                 data_context=None,

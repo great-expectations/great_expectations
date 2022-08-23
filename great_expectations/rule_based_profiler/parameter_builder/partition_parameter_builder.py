@@ -184,7 +184,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
 
         if bins is None:
             is_categorical = True
-        else:
+        elif not is_categorical:
             ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
                 data=bins,
                 parse_strings_as_datetimes=True,
@@ -197,10 +197,8 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             else:
                 bins_ndarray_as_float = bins
 
-            is_categorical = (
-                is_categorical
-                or ndarray_is_datetime_type
-                or not np.all(np.diff(bins_ndarray_as_float) > 0.0)
+            is_categorical = ndarray_is_datetime_type or not np.all(
+                np.diff(bins_ndarray_as_float) > 0.0
             )
 
         fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
