@@ -308,6 +308,7 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
     assert f"Unable to load datasource `{datasource_name}`" in str(e.value)
 
 
+@pytest.mark.integration
 def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_datasource_name(
     datasource_config_with_names: DatasourceConfig,
     datasource_config: DatasourceConfig,
@@ -323,7 +324,9 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     store = DatasourceStore(
         store_name="my_datasource_store",
         store_backend=inline_store_backend_config,
-        serializer=YAMLReadyDictDatasourceConfigSerializer(),
+        serializer=YAMLReadyDictDatasourceConfigSerializer(
+            schema=datasourceConfigSchema
+        ),
     )
 
     key = DataContextVariableKey(
@@ -343,6 +346,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     assert "name" not in context_config_from_disk["datasources"]["my_datasource"]
 
 
+@pytest.mark.integration
 def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_dataconnector_name(
     datasource_config_with_names: DatasourceConfig,
     datasource_config: DatasourceConfig,
@@ -358,7 +362,9 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     store = DatasourceStore(
         store_name="my_datasource_store",
         store_backend=inline_store_backend_config,
-        serializer=YAMLReadyDictDatasourceConfigSerializer(),
+        serializer=YAMLReadyDictDatasourceConfigSerializer(
+            schema=datasourceConfigSchema
+        ),
     )
 
     key = DataContextVariableKey(
