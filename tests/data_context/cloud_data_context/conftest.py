@@ -1,15 +1,18 @@
-from typing import Callable, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 import pytest
 from requests.exceptions import HTTPError, Timeout
 
+from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
+
+JSONData = Union[AnyPayload, Dict[str, Any]]
 RequestError = Union[HTTPError, Timeout]
 
 
 class MockResponse:
     def __init__(
         self,
-        json_data: dict,
+        json_data: JSONData,
         status_code: int,
         exc_to_raise: Optional[RequestError] = None,
     ) -> None:
@@ -31,10 +34,10 @@ class MockResponse:
 
 @pytest.fixture
 def mock_response_factory() -> Callable[
-    [dict, int, Optional[RequestError]], MockResponse
+    [JSONData, int, Optional[RequestError]], MockResponse
 ]:
     def _make_mock_response(
-        json_data: dict,
+        json_data: JSONData,
         status_code: int,
         exc_to_raise: Optional[RequestError] = None,
     ) -> MockResponse:
