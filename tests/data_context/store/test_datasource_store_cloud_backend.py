@@ -201,7 +201,7 @@ def test_datasource_store_delete_by_id(
         ),
     ],
 )
-def test_datasource_error_handling(
+def test_datasource_http_error_handling(
     datasource_store_ge_cloud_backend: DatasourceStore,
     mock_http_unavailable: Dict[str, Mock],
     http_verb: str,
