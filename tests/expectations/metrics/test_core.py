@@ -4052,7 +4052,7 @@ def test_batch_aggregate_metrics_pd():
                 "b": [
                     "2021-06-18",
                     "2021-05-01",
-                    "2021-02-21",
+                    "2021-02-28",
                     "2021-03-20",
                     "2021-02-28",
                     "2021-01-31",
@@ -4091,6 +4091,14 @@ def test_batch_aggregate_metrics_pd():
         },
     )
     desired_metric_3 = MetricConfiguration(
+        metric_name="column.distinct_values.count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_4 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs={
@@ -4100,12 +4108,20 @@ def test_batch_aggregate_metrics_pd():
             "table.columns": table_columns_metric,
         },
     )
-    desired_metric_4 = MetricConfiguration(
+    desired_metric_5 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_6 = MetricConfiguration(
+        metric_name="column.distinct_values.count",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -4119,6 +4135,8 @@ def test_batch_aggregate_metrics_pd():
                 desired_metric_2,
                 desired_metric_3,
                 desired_metric_4,
+                desired_metric_5,
+                desired_metric_6,
             ),
             metrics=metrics,
         )
@@ -4132,8 +4150,10 @@ def test_batch_aggregate_metrics_pd():
     print(end - start)
     assert results[desired_metric_1.id] == pd.Timestamp(year=2021, month=6, day=18)
     assert results[desired_metric_2.id] == pd.Timestamp(year=2021, month=1, day=1)
-    assert results[desired_metric_3.id] == pd.Timestamp(year=2021, month=6, day=18)
-    assert results[desired_metric_4.id] == pd.Timestamp(year=2021, month=1, day=1)
+    assert results[desired_metric_3.id] == 7
+    assert results[desired_metric_4.id] == pd.Timestamp(year=2021, month=6, day=18)
+    assert results[desired_metric_5.id] == pd.Timestamp(year=2021, month=1, day=1)
+    assert results[desired_metric_6.id] == 6
 
 
 def test_batch_aggregate_metrics_sa(caplog, sa):
