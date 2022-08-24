@@ -1336,9 +1336,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             validation_operators.append(value)
         return validation_operators
 
-    def list_expectation_suite_names(self) -> List[str]:
-        return self._data_context.list_expectation_suite_names()
-
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
