@@ -12,7 +12,7 @@ import ConfigForAssetsInferredMulti from '../filesystem_components/_config_for_a
   {label: 'Single Batch Configuration', value:'single'},
   {label: 'Multi-Batch Configuration', value:'multi'},
   ]}>
-    
+
   <TabItem value="single">
 
 <ConfigForAssetsInferredSingle />
@@ -25,7 +25,7 @@ datasource_config = {
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
     "execution_engine": {
-        "class_name": "PandasExecutionEngine",  
+        "class_name": "SparkDFExecutionEngine",
         "module_name": "great_expectations.execution_engine",
     },
     "data_connectors": {
@@ -35,7 +35,8 @@ datasource_config = {
             "default_regex": {
                 "pattern": "(.*)\\.csv",
                 "group_names": ["data_asset_name"],
-            }
+            },
+            "batch_spec_passthrough": {},
         }
     }
 }
@@ -54,7 +55,7 @@ datasource_config = {
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
     "execution_engine": {
-        "class_name": "PandasExecutionEngine",  
+        "class_name": "SparkDFExecutionEngine",
         "module_name": "great_expectations.execution_engine",
     },
     "data_connectors": {
@@ -64,7 +65,8 @@ datasource_config = {
             "default_regex": {
                 "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
                 "group_names": ["data_asset_name", "month"],
-            }
+            },
+            "batch_spec_passthrough": {}
         }
     }
 }

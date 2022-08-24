@@ -14,7 +14,7 @@ import NoteExplicitConfiguredAssetsMulti from '../filesystem_components/_note_ex
   {label: 'Single Batch Configuration', value:'single'},
   {label: 'Multi-Batch Configuration', value:'multi'},
   ]}>
-    
+
   <TabItem value="single">
 
 <ConfigForAssetsConfiguredSingle />
@@ -27,7 +27,7 @@ datasource_config = {
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
     "execution_engine": {
-        "class_name": "PandasExecutionEngine",  
+        "class_name": "SparkDFExecutionEngine",
         "module_name": "great_expectations.execution_engine",
     },
     "data_connectors": {
@@ -38,7 +38,8 @@ datasource_config = {
                   "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
                   "group_names": ["month"],
                 }
-            }
+            },
+            "batch_spec_passthrough": {},
         }
     }
 }
@@ -60,7 +61,7 @@ datasource_config = {
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
     "execution_engine": {
-        "class_name": "PandasExecutionEngine",  
+        "class_name": "SparkDFExecutionEngine",
         "module_name": "great_expectations.execution_engine",
     },
     "data_connectors": {
@@ -70,7 +71,8 @@ datasource_config = {
                 "yellow_tripdata_jan": {
                   "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
                   "group_names": ["month"],
-                }
+                },
+            "batch_spec_passthrough": {},
             }
         }
     }
