@@ -79,3 +79,35 @@ class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
         json_serializable_dict: dict = convert_to_json_serializable(data=config)
 
         return json_serializable_dict
+
+
+class ListDatasourceSerializer(AbstractConfigSerializer):
+    def __init__(self, schema: Schema) -> None:
+        """
+        Args:
+            schema: Marshmallow schema defining raw serialized version of object.
+        """
+        super().__init__(schema=schema)
+
+        # Override schema
+        self.schema = datasourceConfigSchema
+
+    def serialize(self, obj: DatasourceConfig) -> dict:
+        """Serialize DatasourceConfig with datasource name but not data connector name to match existing context.list_datasources() functionality.
+
+        Args:
+            obj: DatasourceConfig object to serialize.
+
+        Returns:
+            Representation of object as a dict suitable for return in list_datasources().
+        """
+
+        config: dict = self.schema.dump(obj)
+
+        # Remove data connector config names
+        for data_connector_name, data_connector_config in config.get(
+            "data_connectors", {}
+        ).items():
+            data_connector_config.pop("name", None)
+
+        return config
