@@ -102,9 +102,18 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count.under_threshold"
     condition_keys = ("threshold",)
 
-    @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, threshold, **kwargs) -> bool:
-        return column.nunique() < threshold
+    @metric_value(engine=PandasExecutionEngine)
+    def _pandas(
+        cls,
+        execution_engine: SqlAlchemyExecutionEngine,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: Dict,
+    ) -> bool:
+        threshold = metric_value_kwargs.get("threshold")
+        column_distinct_values_count = metrics.get("column.distinct_values.count")
+        return column_distinct_values_count < threshold
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
