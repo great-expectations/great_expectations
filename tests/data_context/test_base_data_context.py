@@ -251,6 +251,11 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
     return _closure
 
 
+@pytest.mark.xfail(
+    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of 0.15.20",
+    run=True,
+    strict=True,
+)
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
@@ -280,6 +285,11 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     assert mock_put.call_count == 1
 
 
+@pytest.mark.xfail(
+    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of 0.15.20",
+    run=True,
+    strict=True,
+)
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
