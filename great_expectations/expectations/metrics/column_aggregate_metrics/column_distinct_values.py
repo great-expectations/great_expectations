@@ -157,13 +157,10 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        if isinstance(
-            execution_engine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)
-        ):
-            if metric.metric_name == "column.distinct_values.count.under_threshold":
-                dependencies["column.distinct_values.count"] = MetricConfiguration(
-                    metric_name="column.distinct_values.count",
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                    metric_value_kwargs=None,
-                )
+        if metric.metric_name == "column.distinct_values.count.under_threshold":
+            dependencies["column.distinct_values.count"] = MetricConfiguration(
+                metric_name="column.distinct_values.count",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+                metric_value_kwargs=None,
+            )
         return dependencies
