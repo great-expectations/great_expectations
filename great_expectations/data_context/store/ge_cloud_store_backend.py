@@ -437,21 +437,22 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response = requests.get(url, headers=self.headers, timeout=self.TIMEOUT)
             response_json = response.json()
 
+            # Chetan - 20220824 - Explicit fork due to ExpectationSuite using a different name field.
+            # Once 'expectation_suite_name' is renamed, this can be removed.
+            name_attr: str
+            if resource_type is GeCloudRESTResource.EXPECTATION_SUITE:
+                name_attr = "expectation_suite_name"
+            else:
+                name_attr = "name"
+
             keys = []
             for resource in response_json["data"]:
                 id: str = resource["id"]
-                resource_name: Optional[str] = None
+
                 resource_dict: dict = resource.get("attributes", {}).get(
                     attributes_key, {}
                 )
-                # Chetan - 20220824 - Explicit fork due to ExpectationSuite using a different name field.
-                # Once 'expectation_suite_name' is renamed, this can be removed.
-                attr = (
-                    "name"
-                    if resource_type is not GeCloudRESTResource.EXPECTATION_SUITE
-                    else "expectation_suite_name"
-                )
-                resource_name: Optional[str] = resource_dict.get(attr)
+                resource_name: Optional[str] = resource_dict.get(name_attr)
 
                 key = (resource_type, id, resource_name)
                 keys.append(key)

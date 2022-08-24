@@ -253,7 +253,10 @@ class GeCloudIdentifier(DataContextKey):
         return cls.from_tuple(tuple_)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        if self.resource_name:
+            repr += f"::{self.resource_name}"
+        return repr
 
 
 class ValidationResultIdentifierSchema(Schema):
