@@ -815,7 +815,8 @@ class StoreValidationResultAction(ValidationAction):
 
         checkpoint_ge_cloud_id = None
         if self.data_context.ge_cloud_mode and checkpoint_identifier:
-            checkpoint_ge_cloud_id = checkpoint_identifier.ge_cloud_id
+            checkpoint_ge_cloud_id = checkpoint_identifier if isinstance(checkpoint_identifier, str) else \
+                checkpoint_identifier.ge_cloud_id
 
         expectation_suite_ge_cloud_id = None
         if self.data_context.ge_cloud_mode and expectation_suite_identifier:

@@ -346,14 +346,12 @@ try:
         "DECIMAL": redshifttypes.DECIMAL,
         "DOUBLE_PRECISION": redshifttypes.DOUBLE_PRECISION,
         "FOREIGN_KEY_RE": redshifttypes.FOREIGN_KEY_RE,
-        "GEOMETRY": redshifttypes.GEOMETRY,
         "INTEGER": redshifttypes.INTEGER,
         "PRIMARY_KEY_RE": redshifttypes.PRIMARY_KEY_RE,
         "REAL": redshifttypes.REAL,
         "SMALLINT": redshifttypes.SMALLINT,
         "TIMESTAMP": redshifttypes.TIMESTAMP,
         "TIMESTAMPTZ": redshifttypes.TIMESTAMPTZ,
-        "TIMETZ": redshifttypes.TIMETZ,
         "VARCHAR": redshifttypes.VARCHAR,
     }
 except (ImportError, KeyError):
