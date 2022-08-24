@@ -166,13 +166,13 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 "table_name": metadata["table_name"],
                 "type": metadata["type"],
             }
-            if not splitter_method is None:
+            if splitter_method is not None:
                 data_asset_config["splitter_method"] = splitter_method
-            if not splitter_kwargs is None:
+            if splitter_kwargs is not None:
                 data_asset_config["splitter_kwargs"] = splitter_kwargs
-            if not sampling_method is None:
+            if sampling_method is not None:
                 data_asset_config["sampling_method"] = sampling_method
-            if not sampling_kwargs is None:
+            if sampling_kwargs is not None:
                 data_asset_config["sampling_kwargs"] = sampling_kwargs
 
             # Attempt to fetch a list of batch_identifiers from the table
@@ -285,7 +285,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         except Exception as e:
             # Our testing shows that 'svv_external_tables' table is present in all Redshift clusters. This means that this
             # exception is highly unlikely to fire.
-            if not "UndefinedTable" in str(e):
+            if "UndefinedTable" not in str(e):
                 raise e
 
         return tables
