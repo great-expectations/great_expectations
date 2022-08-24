@@ -5,6 +5,9 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
+from great_expectations.datasource.datasource_serializer import (
+    YAMLReadyDictDatasourceConfigSerializer,
+)
 from tests.core.test_serialization import generic_config_serialization_assertions
 
 
@@ -187,3 +190,35 @@ class TestDatasourceConfigSerialization:
                     == round_tripped["data_connectors"][data_connector_name]["id_"]
                     == data_connector_config.id_
                 )
+
+
+def test_yaml_ready_dict_datasource_config_serializer(
+    datasource_config_with_names: DatasourceConfig,
+):
+    """Make sure the name fields are appropriately removed from datasource and data_connector."""
+
+    serializer = YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema)
+
+    assert serializer.serialize(datasource_config_with_names) == {
+        "class_name": "Datasource",
+        "data_connectors": {
+            "tripdata_monthly_configured": {
+                "assets": {
+                    "yellow": {
+                        "class_name": "Asset",
+                        "group_names": ["year", "month"],
+                        "module_name": "great_expectations.datasource.data_connector.asset",
+                        "pattern": "yellow_tripdata_(\\d{4})-(\\d{2})\\.csv$",
+                    }
+                },
+                "base_directory": "/path/to/trip_data",
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+            }
+        },
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "module_name": "great_expectations.datasource",
+    }
