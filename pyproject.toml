@@ -32,19 +32,11 @@ exclude = [
     # number is the current number of typing errors for the excluded pattern
     'checkpoint', # 75
     'cli', # 157
-    'core/usage_statistics', # 1
+    'core/usage_statistics', # 108
     'core/expectation_diagnostics', # 20
-    'core/__init__\.py', # 1
-    'core/id_dict\.py', # 1
-    'core/async_executor\.py', # 2
     'core/batch\.py', # 29
-    'core/batch_spec\.py', # 2
-    'core/config_peer\.py', # 1
-    'core/evaluation_parameters\.py', # 6
     'core/expectation_configuration\.py', # 21
     'core/expectation_validation_result\.py', # 9
-    'core/run_identifier\.py', # 1
-    'core/yaml_handler\.py', # 1
     'datasource/batch_kwargs_generator', # 16
     'datasource/data_connector', # 60
     'dataset',  # 19
