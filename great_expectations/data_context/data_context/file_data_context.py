@@ -10,9 +10,15 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
     FileDataContextVariables,
 )
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    datasourceConfigSchema,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+)
+from great_expectations.datasource.datasource_serializer import (
+    YAMLReadyDictDatasourceConfigSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -72,6 +78,9 @@ class FileDataContext(AbstractDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
+            serializer=YAMLReadyDictDatasourceConfigSerializer(
+                schema=datasourceConfigSchema
+            ),
         )
         self._datasource_store = datasource_store
 
