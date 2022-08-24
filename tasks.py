@@ -117,7 +117,9 @@ def type_coverage(ctx):
     try:
         check_type_hint_coverage.main()
     except AssertionError as err:
-        raise invoke.Exit(message=str(err), code=1)
+        raise invoke.Exit(
+            message=f"{err}\n  See {check_type_hint_coverage.__file__}", code=1
+        )
 
 
 @invoke.task(
