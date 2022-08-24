@@ -4164,6 +4164,7 @@ def test_distinct_metric_pd():
     assert metrics[desired_metric.id] is True
 
 
+@pytest.mark.integration
 def test_batch_aggregate_metrics_pd():
     import datetime
 
@@ -4286,6 +4287,7 @@ def test_batch_aggregate_metrics_pd():
     assert results[desired_metric_6.id] == 6
 
 
+@pytest.mark.integration
 def test_batch_aggregate_metrics_sa(caplog, sa):
     import datetime
 
@@ -4453,6 +4455,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
     assert found_message
 
 
+@pytest.mark.integration
 def test_batch_aggregate_metrics_spark(caplog, spark_session):
     import datetime
 
