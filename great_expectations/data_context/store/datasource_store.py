@@ -170,10 +170,6 @@ class DatasourceStore(Store):
         datasource_key: DataContextVariableKey = self._determine_datasource_key(
             datasource_name=datasource_name
         )
-        # TODO: AJB 20220818 if not cloud store backend then remove name and id.
-        #  but better to do this elsewhere e.g. via generic serializer interface
-        # if isinstance(self.store_backend, InlineStoreBackend):
-
         self.set(datasource_key, datasource_config)
 
     def create(
