@@ -6,11 +6,12 @@ import pytest
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
+from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from tests.data_context.cloud_data_context.conftest import MockResponse
+from tests.data_context.conftest import MockResponse
 
 
 @pytest.fixture
@@ -195,3 +196,28 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     )
 
     assert return_profiler.ge_cloud_id == profiler_id
+
+
+@pytest.mark.e2e
+@pytest.mark.cloud
+@mock.patch("great_expectations.data_context.DataContext._save_project_config")
+def test_cloud_backed_data_context_add_profiler_e2e(
+    mock_save_project_config: mock.MagicMock,
+    profiler_rules: dict,
+) -> None:
+    context = DataContext(ge_cloud_mode=True)
+
+    name = "oss_test_profiler"
+    config_version = 1.0
+    rules = profiler_rules
+
+    profiler = context.add_profiler(
+        name=name, config_version=config_version, rules=rules
+    )
+
+    ge_cloud_id = profiler.ge_cloud_id
+
+    profiler_stored_in_cloud = context.get_profiler(ge_cloud_id=ge_cloud_id)
+
+    assert profiler.ge_cloud_id == profiler_stored_in_cloud.ge_cloud_id
+    assert profiler.to_json_dict() == profiler_stored_in_cloud.to_json_dict()
