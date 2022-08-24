@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 try:
-    from shapely.geometry import Point, Polygon, LineString
+    from shapely.geometry import LineString, Point, Polygon
 except ImportError:
     Point = None
     Polygon = None
