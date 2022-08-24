@@ -2685,11 +2685,13 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "default_inferred_data_connector_name": {
                 "class_name": "InferredAssetSqlDataConnector",
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_inferred_data_connector_name",
             },
             "default_runtime_data_connector_name": {
                 "class_name": "RuntimeDataConnector",
                 "batch_identifiers": ["default_identifier_name"],
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_runtime_data_connector_name",
             },
         },
         "id_": None,
@@ -2712,11 +2714,13 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "default_inferred_data_connector_name": {
                 "class_name": "InferredAssetSqlDataConnector",
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_inferred_data_connector_name",
             },
             "default_runtime_data_connector_name": {
                 "class_name": "RuntimeDataConnector",
                 "batch_identifiers": ["default_identifier_name"],
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_runtime_data_connector_name",
             },
         },
         "id_": None,
