@@ -196,7 +196,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             # Store an asset config for each introspected data asset.
             self._introspected_assets_cache[data_asset_name] = data_asset_config
 
-    def _introspect_db(
+    def _introspect_db(  # noqa: C901 - 16
         self,
         schema_name: str = None,
         ignore_information_schemas_and_system_tables: bool = True,

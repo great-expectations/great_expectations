@@ -109,7 +109,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 )
                 self.inspector = None
 
-    def _get_iterator(
+    def _get_iterator(  # noqa: C901 - 19
         self,
         data_asset_name,
         query_parameters=None,
