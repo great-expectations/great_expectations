@@ -194,8 +194,8 @@ class Store:
 
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
         id_: Optional[str] = None
-        if hasattr(config, "id_"):
-            id_ = config.id_
+        if hasattr(config, "ge_cloud_id"):
+            id_ = config.ge_cloud_id
         name: Optional[str] = None
         if hasattr(config, "name"):
             name = config.name

@@ -195,7 +195,7 @@ class CheckpointStore(ConfigurationStore):
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
         ref: Optional[GeCloudResourceRef] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
-        if ref:
+        if ref and not isinstance(ref, bool):
             assert isinstance(key, GeCloudIdentifier)
             key.ge_cloud_id = ref.ge_cloud_id
 
