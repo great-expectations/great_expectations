@@ -91,7 +91,7 @@ class CloudDataContext(AbstractDataContext):
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GE Cloud ids is returned instead.
         """
-        return [suite_key.ge_cloud_id for suite_key in self.list_expectation_suites()]
+        return [suite_key.resource_name for suite_key in self.list_expectation_suites()]
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:

@@ -423,23 +423,41 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def ge_cloud_credentials(self) -> dict:
         return self._ge_cloud_credentials
 
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GeCloudRESTResource, Any]]:  # type: ignore[override]
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GeCloudRESTResource, str, Optional[str]]]:  # type: ignore[override]
         url = urljoin(
             self.ge_cloud_base_url,
             f"organizations/"
             f"{self.ge_cloud_credentials['organization_id']}/"
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
+        resource_type = self.ge_cloud_resource_type
+        attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
+
         try:
             response = requests.get(url, headers=self.headers, timeout=self.TIMEOUT)
+            response.raise_for_status()
             response_json = response.json()
-            keys = [
-                (
-                    self.ge_cloud_resource_type,
-                    resource["id"],
+
+            # Chetan - 20220824 - Explicit fork due to ExpectationSuite using a different name field.
+            # Once 'expectation_suite_name' is renamed, this can be removed.
+            name_attr: str
+            if resource_type is GeCloudRESTResource.EXPECTATION_SUITE:
+                name_attr = "expectation_suite_name"
+            else:
+                name_attr = "name"
+
+            keys = []
+            for resource in response_json["data"]:
+                id: str = resource["id"]
+
+                resource_dict: dict = resource.get("attributes", {}).get(
+                    attributes_key, {}
                 )
-                for resource in response_json.get("data")
-            ]
+                resource_name: Optional[str] = resource_dict.get(name_attr)
+
+                key = (resource_type, id, resource_name)
+                keys.append(key)
+
             return keys
         except Exception as e:
             logger.debug(str(e))
