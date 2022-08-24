@@ -2369,6 +2369,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ge_cloud_id=ge_cloud_id,
         )
 
+    def list_expectation_suites(self) -> Optional[List[str]]:
+        return self._data_context.list_expectation_suites()
+
+    def list_expectation_suite_names(self) -> List[str]:
+        return self._data_context.list_expectation_suite_names()
+
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,

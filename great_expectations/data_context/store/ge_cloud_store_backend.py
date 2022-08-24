@@ -430,16 +430,28 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{self.ge_cloud_credentials['organization_id']}/"
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
+        resource_type = self.ge_cloud_resource_type
+        attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
+
         try:
             response = requests.get(url, headers=self.headers, timeout=self.TIMEOUT)
             response_json = response.json()
-            keys = [
-                (
-                    self.ge_cloud_resource_type,
-                    resource["id"],
+
+            keys = []
+            for resource in response_json["data"]:
+                id: Optional[str] = resource.get("id")
+                resource_name: Optional[str] = None
+                attr: Optional[dict] = resource.get("attributes", {}).get(
+                    attributes_key
                 )
-                for resource in response_json.get("data")
-            ]
+                if attr:
+                    resource_name = attr.get("name") or attr.get(
+                        "expectation_suite_name"
+                    )
+
+                key = (resource_type, id, resource_name)
+                keys.append(key)
+
             return keys
         except Exception as e:
             logger.debug(str(e))
