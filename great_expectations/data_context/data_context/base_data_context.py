@@ -2370,9 +2370,15 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
 
     def list_expectation_suites(self) -> Optional[List[str]]:
+        """
+        See parent 'AbstractDataContext.list_expectation_suites()` for more information.
+        """
         return self._data_context.list_expectation_suites()
 
     def list_expectation_suite_names(self) -> List[str]:
+        """
+        See parent 'AbstractDataContext.list_expectation_suite_names()` for more information.
+        """
         return self._data_context.list_expectation_suite_names()
 
     def test_yaml_config(  # noqa: C901 - complexity 17
