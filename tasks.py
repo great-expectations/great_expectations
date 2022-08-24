@@ -161,7 +161,7 @@ def type_check(
         *ge_pkgs,
     ]
     if install_types:
-        cmds.extend(["--install-types", "--non-interactive", "--no-strict-optional"])
+        cmds.extend(["--install-types", "--non-interactive"])
     if daemon:
         # see related issue https://github.com/python/mypy/issues/9475
         cmds.extend(["--follow-imports=normal"])
