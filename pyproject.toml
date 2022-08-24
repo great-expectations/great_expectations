@@ -45,7 +45,8 @@ exclude = [
     'core/expectation_validation_result\.py', # 9
     'core/run_identifier\.py', # 1
     'core/yaml_handler\.py', # 1
-    'datasource', # 93
+    'datasource/batch_kwargs_generator', # 16
+    'datasource/data_connector', # 60
     'dataset',  # 19
     'data_context/data_context/base_data_context.py', # 76
     'data_context/data_context/cloud_data_context.py', # 17
