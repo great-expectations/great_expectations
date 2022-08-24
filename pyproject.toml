@@ -47,7 +47,6 @@ exclude = [
     'core/yaml_handler\.py', # 1
     'datasource', # 93
     'dataset',  # 19
-    'data_context/data_context/abstract_data_context.py', # 84
     'data_context/data_context/base_data_context.py', # 76
     'data_context/data_context/cloud_data_context.py', # 17
     'execution_engine', # 100
