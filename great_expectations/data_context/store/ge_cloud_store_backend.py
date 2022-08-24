@@ -423,7 +423,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def ge_cloud_credentials(self) -> dict:
         return self._ge_cloud_credentials
 
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GeCloudRESTResource, Any]]:  # type: ignore[override]
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GeCloudRESTResource, str, Optional[str]]]:  # type: ignore[override]
         url = urljoin(
             self.ge_cloud_base_url,
             f"organizations/"
