@@ -324,10 +324,10 @@ def build_gallery(
                 continue
 
         logger.debug(f"Running diagnostics for expectation: {expectation}")
-        impl = great_expectations.expectations.registry.get_expectation_impl(
-            expectation
-        )
         try:
+            impl = great_expectations.expectations.registry.get_expectation_impl(
+                expectation
+            )
             diagnostics = impl().run_diagnostics(
                 ignore_suppress=ignore_suppress,
                 ignore_only_for=ignore_only_for,
