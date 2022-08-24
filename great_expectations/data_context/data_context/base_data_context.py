@@ -41,7 +41,7 @@ try:
     from typing import Literal  # type: ignore[attr-defined]
 except ImportError:
     # Fallback for python < 3.8
-    from typing_extensions import Literal
+    from typing_extensions import Literal  # type: ignore[misc]
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
