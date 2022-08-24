@@ -49,7 +49,6 @@ exclude = [
     'datasource/data_connector', # 60
     'dataset',  # 19
     'data_context/data_context/base_data_context.py', # 76
-    'data_context/data_context/cloud_data_context.py', # 17
     'execution_engine', # 100
     'marshmallow__shade', # 19
     '.*render', # 72
