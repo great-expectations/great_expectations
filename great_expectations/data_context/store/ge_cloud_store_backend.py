@@ -1,7 +1,7 @@
+import json
 import logging
 from abc import ABCMeta
 from enum import Enum
-from json import JSONDecodeError
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
 
@@ -21,6 +21,18 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+SUPPORT_EMAIL = "support@greatexpectations.io"
+
+
+class ErrorDetail(TypedDict):
+    code: Optional[str]
+    detail: Optional[str]
+    source: Optional[str]
+
+
+class ErrorPayload(TypedDict):
+    errors: List[ErrorDetail]
+
 
 class PayloadDataField(TypedDict):
     attributes: dict
@@ -30,6 +42,33 @@ class PayloadDataField(TypedDict):
 
 class ResponsePayload(TypedDict):
     data: PayloadDataField
+
+
+AnyPayload = Union[ResponsePayload, ErrorPayload]
+
+
+def _get_user_friendly_error_message(
+    http_exc: requests.exceptions.HTTPError,
+) -> str:
+    # TODO: define a GeCloud service/client for this & other related behavior
+    support_message = []
+    response: requests.Response = http_exc.response
+
+    logger.warning(f"{http_exc.__class__.__name__}:{http_exc} - {response}")
+
+    request_id = response.headers.get("request-id", "")
+    if request_id:
+        support_message.append(f"Request-Id: {request_id}")
+
+    try:
+        error_json: ErrorPayload = http_exc.response.json()
+        errors = error_json.get("errors")
+        if errors:
+            support_message.append(json.dumps(errors))
+
+    except json.JSONDecodeError:
+        support_message.append(f"Please contact superconductive at {SUPPORT_EMAIL}")
+    return " ".join(support_message)
 
 
 class GeCloudRESTResource(str, Enum):
@@ -197,7 +236,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
             response.raise_for_status()
             return response.json()
-        except JSONDecodeError as jsonError:
+        except json.JSONDecodeError as jsonError:
             logger.debug(
                 "Failed to parse GE Cloud Response into JSON",
                 str(response.text),
@@ -206,9 +245,14 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendError(
                 f"Unable to get object in GE Cloud Store Backend: {jsonError}"
             )
-        except (requests.HTTPError, requests.Timeout) as http_exc:
+        except requests.HTTPError as http_err:
             raise StoreBackendError(
-                f"Unable to get object in GE Cloud Store Backend: {http_exc}"
+                f"Unable to get object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_err)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to get object in GE Cloud Store Backend: This is likely a transient error. Please try again."
             )
 
     def _move(self) -> None:  # type: ignore[override]
@@ -262,9 +306,14 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response.raise_for_status()
             return True
 
-        except (requests.HTTPError, requests.Timeout) as http_exc:
+        except requests.HTTPError as http_exc:
             raise StoreBackendError(
-                f"Unable to update object in GE Cloud Store Backend {http_exc}"
+                f"Unable to update object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to update object in GE Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
             logger.debug(str(e))
@@ -333,6 +382,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response = requests.post(
                 url, json=data, headers=self.headers, timeout=self.TIMEOUT
             )
+            response.raise_for_status()
             response_json = response.json()
 
             object_id = response_json["data"]["id"]
@@ -342,7 +392,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 ge_cloud_id=object_id,
                 url=object_url,
             )
-        # TODO Show more detailed error messages
+        except requests.HTTPError as http_exc:
+            raise StoreBackendError(
+                f"Unable to set object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to set object in GE Cloud Store Backend: This is likely a transient error. Please try again."
+            )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
@@ -426,11 +484,19 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response = requests.delete(
                 url, json=data, headers=self.headers, timeout=self.TIMEOUT
             )
-            response_status_code = response.status_code
-
-            if response_status_code < 300:
-                return True
+            response.raise_for_status()
+            return True
+        except requests.HTTPError as http_exc:
+            # TODO: GG 20220819 should we raise an error here instead of returning False
+            logger.warning(
+                f"Unable to delete object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+            )
             return False
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to delete object in GE Cloud Store Backend: This is likely a transient error. Please try again."
+            )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(

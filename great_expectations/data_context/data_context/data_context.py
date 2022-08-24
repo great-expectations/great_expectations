@@ -556,7 +556,6 @@ class DataContext(BaseDataContext):
             rules=rules,
             variables=variables,
         )
-        self.save_profiler(profiler=profiler)
         return profiler
 
     @classmethod

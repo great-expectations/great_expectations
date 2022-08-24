@@ -83,3 +83,6 @@ markers = [
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors)",
 ]
 testpaths = "tests"
+# use `pytest-mock` drop-in replacement for `unittest.mock`
+# https://pytest-mock.readthedocs.io/en/latest/configuration.html#use-standalone-mock-package
+mock_use_standalone_module = true
