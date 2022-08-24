@@ -18,7 +18,7 @@ from great_expectations.data_context.types.base import (
     CheckpointConfig,
     checkpointConfigSchema,
 )
-from tests.data_context.cloud_data_context.conftest import MockResponse
+from tests.data_context.conftest import MockResponse
 
 
 @pytest.fixture
