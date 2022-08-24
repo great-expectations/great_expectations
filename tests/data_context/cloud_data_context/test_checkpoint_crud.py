@@ -224,7 +224,7 @@ def test_cloud_backed_data_context_add_checkpoint(
 
 
 @pytest.mark.xfail(
-    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of 0.15.20",
+    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of the 0.15.20 release",
     run=True,
     strict=True,
 )

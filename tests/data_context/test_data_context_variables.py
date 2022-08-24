@@ -571,7 +571,7 @@ def test_file_data_context_variables_e2e(
 
 
 @pytest.mark.xfail(
-    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of 0.15.20",
+    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of the 0.15.20 release",
     run=True,
     strict=True,
 )
@@ -594,7 +594,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 
 
 @pytest.mark.xfail(
-    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of 0.15.20",
+    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of the 0.15.20 release",
     run=True,
     strict=True,
 )
