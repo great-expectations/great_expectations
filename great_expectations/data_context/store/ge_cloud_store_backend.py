@@ -435,6 +435,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         try:
             response = requests.get(url, headers=self.headers, timeout=self.TIMEOUT)
+            response.raise_for_status()
             response_json = response.json()
 
             # Chetan - 20220824 - Explicit fork due to ExpectationSuite using a different name field.
