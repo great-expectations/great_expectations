@@ -1,12 +1,15 @@
 import copy
 import pathlib
-from typing import List, cast
+from typing import List, Optional, cast
 from unittest.mock import PropertyMock, patch
 
 import pytest
 
 from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.core.serializer import DictConfigSerializer
+from great_expectations.core.serializer import (
+    AbstractConfigSerializer,
+    DictConfigSerializer,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context_variables import (
@@ -68,6 +71,7 @@ def test_datasource_store_with_bad_key_raises_error(
 
 def _assert_serialized_datasource_configs_are_equal(
     datasource_configs: List[DatasourceConfig],
+    serializers: Optional[List[AbstractConfigSerializer]] = None,
 ) -> None:
     """Assert that the datasource configs are equal using the DictConfigSerializer
 
@@ -83,11 +87,22 @@ def _assert_serialized_datasource_configs_are_equal(
     if len(datasource_configs) <= 1:
         raise AssertionError("Must provide at least 2 datasource configs")
 
-    dict_config_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+    if serializers is None:
+        serializers = [DictConfigSerializer(schema=datasourceConfigSchema)] * (
+            len(datasource_configs) + 1
+        )
+    else:
+        if len(serializers) <= 1:
+            raise AssertionError("Must provide at least 2 datasource serializers")
+        if not len(datasource_configs) == len(serializers):
+            raise AssertionError(
+                "Must provide the same number of serializers as datasource configs"
+            )
+
     for idx, config in enumerate(datasource_configs[:-1]):
-        assert dict_config_serializer.serialize(
-            config
-        ) == dict_config_serializer.serialize(datasource_configs[idx + 1])
+        assert serializers[idx].serialize(config) == serializers[idx + 1].serialize(
+            datasource_configs[idx + 1]
+        )
 
 
 def test__assert_serialized_datasource_configs_are_equal(
@@ -144,7 +159,13 @@ def test_datasource_store_retrieval(
     res: DatasourceConfig = store.get(key=key)
 
     assert isinstance(res, DatasourceConfig)
-    _assert_serialized_datasource_configs_are_equal([res, datasource_config])
+    set_config_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+    retrieved_config_serializer = YAMLReadyDictDatasourceConfigSerializer(
+        schema=datasourceConfigSchema
+    )
+    _assert_serialized_datasource_configs_are_equal(
+        [datasource_config, res], [set_config_serializer, retrieved_config_serializer]
+    )
 
 
 def test_datasource_store_retrieval_cloud_mode(
@@ -224,7 +245,13 @@ def test_datasource_store_with_inline_store_backend(
     res: DatasourceConfig = store.get(key=key)
 
     assert isinstance(res, DatasourceConfig)
-    _assert_serialized_datasource_configs_are_equal([res, datasource_config])
+    set_config_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+    retrieved_config_serializer = YAMLReadyDictDatasourceConfigSerializer(
+        schema=datasourceConfigSchema
+    )
+    _assert_serialized_datasource_configs_are_equal(
+        [datasource_config, res], [set_config_serializer, retrieved_config_serializer]
+    )
 
 
 def test_datasource_store_set_by_name(
@@ -251,7 +278,14 @@ def test_datasource_store_retrieve_by_name(
             datasource_name=datasource_name
         )
     )
-    _assert_serialized_datasource_configs_are_equal([datasource_config, actual_config])
+    set_config_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+    retrieved_config_serializer = YAMLReadyDictDatasourceConfigSerializer(
+        schema=datasourceConfigSchema
+    )
+    _assert_serialized_datasource_configs_are_equal(
+        [datasource_config, actual_config],
+        [set_config_serializer, retrieved_config_serializer],
+    )
 
 
 def test_datasource_store_delete_by_name(
@@ -290,8 +324,13 @@ def test_datasource_store_update_by_name(
         DatasourceConfig, datasource_store_with_single_datasource.get(key=key)
     )
 
+    set_config_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+    retrieved_config_serializer = YAMLReadyDictDatasourceConfigSerializer(
+        schema=datasourceConfigSchema
+    )
     _assert_serialized_datasource_configs_are_equal(
-        [actual_config, updated_datasource_config]
+        [updated_datasource_config, actual_config],
+        [set_config_serializer, retrieved_config_serializer],
     )
 
 
@@ -334,6 +373,16 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     )
 
     store.set(key=key, value=datasource_config_with_names)
+    res: DatasourceConfig = store.get(key=key)
+
+    assert isinstance(res, DatasourceConfig)
+    set_config_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+    retrieved_config_serializer = YAMLReadyDictDatasourceConfigSerializer(
+        schema=datasourceConfigSchema
+    )
+    _assert_serialized_datasource_configs_are_equal(
+        [datasource_config, res], [set_config_serializer, retrieved_config_serializer]
+    )
 
     with open(
         pathlib.Path(empty_data_context.root_directory) / "great_expectations.yml"
@@ -369,6 +418,16 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     )
 
     store.set(key=key, value=datasource_config_with_names)
+    res: DatasourceConfig = store.get(key=key)
+
+    assert isinstance(res, DatasourceConfig)
+    set_config_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+    retrieved_config_serializer = YAMLReadyDictDatasourceConfigSerializer(
+        schema=datasourceConfigSchema
+    )
+    _assert_serialized_datasource_configs_are_equal(
+        [datasource_config, res], [set_config_serializer, retrieved_config_serializer]
+    )
 
     with open(
         pathlib.Path(empty_data_context.root_directory) / "great_expectations.yml"
