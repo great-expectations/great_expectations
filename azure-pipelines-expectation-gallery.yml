@@ -84,7 +84,6 @@ stages:
         timeoutInMinutes: 300
         variables:
           python.version: '3.7'
-          GE_pytest_pip_opts: '"cookiecutter==1.7.3" "google-cloud-bigquery-storage" --requirement requirements-dev.txt --constraint constraints-dev.txt'
           GE_pytest_opts: ''
 
         services:
@@ -104,9 +103,6 @@ stages:
 
           - script: |
               pip install "google-cloud-bigquery-storage" -r requirements-dev-all-contrib-expectations.txt -e "contrib/cli" -e ".[dev]" -c constraints-dev.txt
-              # pip install $(GE_pytest_pip_opts)
-              # pip install --requirement requirements.txt
-              # pip install  --editable .
             displayName: 'Install dependencies'
 
           - script: |
