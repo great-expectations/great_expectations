@@ -334,9 +334,6 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     )
 
     store.set(key=key, value=datasource_config_with_names)
-    res: DatasourceConfig = store.get(key=key)
-
-    _assert_serialized_datasource_configs_are_equal([res, datasource_config])
 
     with open(
         pathlib.Path(empty_data_context.root_directory) / "great_expectations.yml"
@@ -372,9 +369,6 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     )
 
     store.set(key=key, value=datasource_config_with_names)
-    res: DatasourceConfig = store.get(key=key)
-
-    _assert_serialized_datasource_configs_are_equal([res, datasource_config])
 
     with open(
         pathlib.Path(empty_data_context.root_directory) / "great_expectations.yml"
