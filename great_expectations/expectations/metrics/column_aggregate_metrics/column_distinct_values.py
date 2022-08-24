@@ -76,14 +76,14 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, _metrics, **kwargs):
-        if "column_distinct_values" in _metrics:
-            return len(_metrics["column_distinct_values"])
+        if "column.distinct_values" in _metrics:
+            return len(_metrics["column.distinct_values"])
         return column.nunique()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _metrics, **kwargs):
-        if "column_distinct_values" in _metrics:
-            return sa.literal(len(_metrics["column_distinct_values"]))
+        if "column.distinct_values" in _metrics:
+            return sa.literal(len(_metrics["column.distinct_values"]))
         return sa.func.count(column.distinct())
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
@@ -93,8 +93,8 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         _metrics,
         **kwargs,
     ):
-        if "column_distinct_values" in _metrics:
-            return F.lit(len(_metrics["column_distinct_values"]))
+        if "column.distinct_values" in _metrics:
+            return F.lit(len(_metrics["column.distinct_values"]))
         return F.countDistinct(column)
 
 

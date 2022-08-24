@@ -3922,7 +3922,7 @@ def test_median_metric_spark(spark_session):
     assert results == {desired_metric.id: 2}
 
 
-def test_distinct_metric_spark(spark_session):
+def test_value_counts_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -3940,19 +3940,8 @@ def test_distinct_metric_spark(spark_session):
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
 
-    desired_metric = MetricConfiguration(
-        metric_name="column.distinct_values",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=None,
-    )
 
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
-    )
-    assert results == {desired_metric.id: {1, 2, 3}}
-
-
-def test_distinct_metric_sa(sa):
+def test_value_counts_metric_sa(sa):
     engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
@@ -3974,24 +3963,8 @@ def test_distinct_metric_sa(sa):
     assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
     assert pd.Series(index=[4], data=[6]).equals(metrics[desired_metric_b.id])
 
-    desired_metric = MetricConfiguration(
-        metric_name="column.distinct_values",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=None,
-    )
-    desired_metric_b = MetricConfiguration(
-        metric_name="column.distinct_values",
-        metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=None,
-    )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric, desired_metric_b), metrics=metrics
-    )
-    assert results[desired_metric.id] == {1, 2, 3}
-    assert results[desired_metric_b.id] == {4}
 
-
-def test_distinct_metric_pd():
+def test_value_counts_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
 
     metrics: dict = {}
@@ -4016,22 +3989,6 @@ def test_distinct_metric_pd():
     )
     metrics.update(results)
     assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
-
-    desired_metric = MetricConfiguration(
-        metric_name="column.distinct_values",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=None,
-        metric_dependencies={
-            "column.value_counts": desired_metric,
-            "table.columns": table_columns_metric,
-        },
-    )
-
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
-    )
-    metrics.update(results)
-    assert results == {desired_metric.id: {1, 2, 3}}
 
 
 @pytest.mark.integration
@@ -4108,7 +4065,6 @@ def test_distinct_metric_sa_and_spark(
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"threshold": 5},
         metric_dependencies={
-            "table.columns": table_columns_metric,
             "column.distinct_values.count": column_distinct_values_count_metric,
         },
     )
@@ -4133,7 +4089,7 @@ def test_distinct_metric_pd():
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
+    column_distinct_values_count_metric = MetricConfiguration(
         metric_name="column.distinct_values.count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
@@ -4143,25 +4099,26 @@ def test_distinct_metric_pd():
     )
 
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
+        metrics_to_resolve=(column_distinct_values_count_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert metrics[desired_metric.id] == 3
+    assert metrics[column_distinct_values_count_metric.id] == 3
 
-    desired_metric = MetricConfiguration(
+    column_distinct_values_count_threshold_metric = MetricConfiguration(
         metric_name="column.distinct_values.count.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"threshold": 5},
         metric_dependencies={
-            "table.columns": table_columns_metric,
+            "column.distinct_values.count": column_distinct_values_count_metric,
         },
     )
 
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
+        metrics_to_resolve=(column_distinct_values_count_threshold_metric,),
+        metrics=metrics,
     )
     metrics.update(results)
-    assert metrics[desired_metric.id] is True
+    assert metrics[column_distinct_values_count_threshold_metric.id] is True
 
 
 @pytest.mark.integration
