@@ -2371,13 +2371,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         See parent 'AbstractDataContext.list_expectation_suites()` for more information.
         """
-        return self._data_context.list_expectation_suites()
+        return self._data_context.list_expectation_suites()  # type: ignore[union-attr]
 
     def list_expectation_suite_names(self) -> List[str]:
         """
         See parent 'AbstractDataContext.list_expectation_suite_names()` for more information.
         """
-        return self._data_context.list_expectation_suite_names()
+        return self._data_context.list_expectation_suite_names()  # type: ignore[union-attr]
 
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,
