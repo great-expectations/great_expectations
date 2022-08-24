@@ -93,30 +93,37 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
 
 class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count.under_threshold"
+    condition_keys = ("threshold",)
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs) -> Set[Any]:
-        return column.nunique()
+    def _pandas(cls, column, threshold, **kwargs) -> bool:
+        return column.nunique() < threshold
 
-    @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        column,
+        execution_engine: SqlAlchemyExecutionEngine,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
-        **kwargs,
-    ) -> Set[Any]:
-        column_distinct_values_count = metrics["column.distinct_values.count"]
-        return column_distinct_values_count
+        runtime_configuration: Dict,
+    ) -> bool:
+        threshold = metric_value_kwargs.get("threshold")
+        column_distinct_values_count = metrics.get("column.distinct_values.count")
+        return column_distinct_values_count < threshold
 
-    @column_aggregate_partial(engine=SparkDFExecutionEngine)
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        column: str,
+        execution_engine: SparkDFExecutionEngine,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
-        **kwargs: Optional[dict],
-    ) -> Set[Any]:
-        column_distinct_values_count = metrics["column.distinct_values.count"]
-        return column_distinct_values_count
+        runtime_configuration: Dict,
+    ) -> bool:
+        threshold = metric_value_kwargs.get("threshold")
+        column_distinct_values_count = metrics.get("column.distinct_values.count")
+        return column_distinct_values_count < threshold
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -137,9 +144,10 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
         if isinstance(
             execution_engine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)
         ):
-            dependencies["column.distinct_values.count"] = MetricConfiguration(
-                metric_name="column.distinct_values.count",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs=None,
-            )
+            if metric.metric_name == "column.distinct_values.count.under_threshold":
+                dependencies["column.distinct_values.count"] = MetricConfiguration(
+                    metric_name="column.distinct_values.count",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=None,
+                )
         return dependencies

@@ -4034,6 +4034,136 @@ def test_distinct_metric_pd():
     assert results == {desired_metric.id: {1, 2, 3}}
 
 
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "execution_engine_type",
+    [
+        pytest.param(SqlAlchemyExecutionEngine, id="sa"),
+        pytest.param(SparkDFExecutionEngine, id="spark"),
+    ],
+)
+def test_distinct_metric_sa_and_spark(
+    execution_engine_type: Union[SqlAlchemyExecutionEngine, SparkDFExecutionEngine],
+    sa,
+    spark_session,
+):
+    if execution_engine_type is SqlAlchemyExecutionEngine:
+        engine = build_sa_engine(
+            pd.DataFrame(
+                {
+                    "a": [1, 2, 1, 2, 3, 3],
+                }
+            ),
+            sa,
+        )
+    elif execution_engine_type is SparkDFExecutionEngine:
+        engine = build_spark_engine(
+            spark=spark_session,
+            df=pd.DataFrame(
+                {"a": [1, 2, 1, 2, 3, 3, None]},
+            ),
+            batch_id="my_id",
+        )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    column_distinct_values_count_metric_partial_fn = MetricConfiguration(
+        metric_name="column.distinct_values.count.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(column_distinct_values_count_metric_partial_fn,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    column_distinct_values_count_metric = MetricConfiguration(
+        metric_name="column.distinct_values.count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": column_distinct_values_count_metric_partial_fn,
+        },
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(column_distinct_values_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert metrics[column_distinct_values_count_metric.id] == 3
+
+    column_distinct_values_count_threshold_metric = MetricConfiguration(
+        metric_name="column.distinct_values.count.under_threshold",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"threshold": 5},
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "column.distinct_values.count": column_distinct_values_count_metric,
+        },
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(column_distinct_values_count_threshold_metric,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+    assert metrics[column_distinct_values_count_threshold_metric.id] is True
+
+
+@pytest.mark.integration
+def test_distinct_metric_pd():
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.distinct_values.count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert metrics[desired_metric.id] == 3
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.distinct_values.count.under_threshold",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"threshold": 5},
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert metrics[desired_metric.id] is True
+
+
 def test_batch_aggregate_metrics_pd():
     import datetime
 
