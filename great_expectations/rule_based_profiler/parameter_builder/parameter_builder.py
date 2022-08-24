@@ -139,7 +139,7 @@ class ParameterBuilder(ABC, Builder):
             or self.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
-            self.set_batch_list_or_batch_request(
+            self.set_batch_list_if_null_batch_request(
                 batch_list=batch_list,
                 batch_request=batch_request,
             )
@@ -239,6 +239,7 @@ class ParameterBuilder(ABC, Builder):
 
     def get_batch_ids(
         self,
+        limit: Optional[int] = None,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -247,6 +248,7 @@ class ParameterBuilder(ABC, Builder):
             data_context=self.data_context,
             batch_list=self.batch_list,
             batch_request=self.batch_request,
+            limit=limit,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -261,8 +263,10 @@ class ParameterBuilder(ABC, Builder):
         metric_value_kwargs: Optional[
             Union[Union[str, dict], List[Union[str, dict]]]
         ] = None,
+        limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
+        force_no_progress_bar: Optional[bool] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -275,8 +279,10 @@ class ParameterBuilder(ABC, Builder):
         :param metric_name: Name of metric of interest, being computed.
         :param metric_domain_kwargs: Metric Domain Kwargs is an essential parameter of the MetricConfiguration object.
         :param metric_value_kwargs: Metric Value Kwargs is an essential parameter of the MetricConfiguration object.
+        :param limit: Optional limit on number of "Batch" objects requested (supports single-Batch scenarios).
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
+        :param force_no_progress_bar (bool) if True, prevent all "Calculating Metrics" output; (False by default).
         :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.
@@ -291,6 +297,7 @@ specified (empty "metric_name" value detected)."""
             )
 
         batch_ids: Optional[List[str]] = self.get_batch_ids(
+            limit=limit,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -397,7 +404,8 @@ specified (empty "metric_name" value detected)."""
         )
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
-            metric_configurations=metrics_to_resolve
+            metric_configurations=metrics_to_resolve,
+            force_no_progress_bar=force_no_progress_bar,
         )
 
         # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.
@@ -716,7 +724,7 @@ def resolve_evaluation_dependencies(
             or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
-            evaluation_parameter_builder.set_batch_list_or_batch_request(
+            evaluation_parameter_builder.set_batch_list_if_null_batch_request(
                 batch_list=parameter_builder.batch_list,
                 batch_request=parameter_builder.batch_request,
             )

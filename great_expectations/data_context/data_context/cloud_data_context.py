@@ -24,6 +24,9 @@ from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.datasource import Datasource
+from great_expectations.datasource.datasource_serializer import (
+    JsonDatasourceConfigSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +82,7 @@ class CloudDataContext(AbstractDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
+            serializer=JsonDatasourceConfigSerializer(schema=datasourceConfigSchema),
         )
         self._datasource_store = datasource_store
 
@@ -163,7 +167,6 @@ class CloudDataContext(AbstractDataContext):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
@@ -182,6 +185,7 @@ class CloudDataContext(AbstractDataContext):
         expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
+        ge_cloud_id = expectation_suite.ge_cloud_id
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
@@ -191,8 +195,8 @@ class CloudDataContext(AbstractDataContext):
             and not overwrite_existing
         ):
             raise ge_exceptions.DataContextError(
-                "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(ge_cloud_id)
+                f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
             )
         self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
@@ -239,37 +243,36 @@ class CloudDataContext(AbstractDataContext):
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
         )
-        if self.expectations_store.has_key(key):  # noqa: W601
-            expectations_schema_dict: dict = cast(
-                dict, self.expectations_store.get(key)
-            )
-            # create the ExpectationSuite from constructor
-            return ExpectationSuite(**expectations_schema_dict, data_context=self)
-
-        else:
+        if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
                 f"expectation_suite {expectation_suite_name} not found"
             )
+
+        expectations_schema_dict: dict = cast(dict, self.expectations_store.get(key))
+        # create the ExpectationSuite from constructor
+        return ExpectationSuite(**expectations_schema_dict, data_context=self)
 
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        ge_cloud_id: Optional[str] = None,
+        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         """Save the provided expectation suite into the DataContext.
 
         Args:
-            expectation_suite: the suite to save
-            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
-                be read from the suite
-            ge_cloud_id: cloud id for saving expectation suite
-            overwrite_existing: should I over-write the Suite if it already exists?
+            expectation_suite: The suite to save.
+            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
+                from the suite.
+            overwrite_existing: Whether to overwrite the suite if it already exists.
+            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
+
         Returns:
             None
         """
+        ge_cloud_id = expectation_suite.ge_cloud_id
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id
@@ -285,6 +288,13 @@ class CloudDataContext(AbstractDataContext):
                 f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
             )
         self._evaluation_parameter_dependencies_compiled = False
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+        if include_rendered_content:
+            expectation_suite.render()
         self.expectations_store.set(key, expectation_suite, **kwargs)
 
     @property

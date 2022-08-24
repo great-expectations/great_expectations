@@ -152,9 +152,27 @@ def profile(func: Callable = None) -> Callable:
 def measure_execution_time(
     execution_time_holder_object_reference_name: str = "execution_time_holder",
     execution_time_property_name: str = "execution_time",
+    method: str = "process_time",
     pretty_print: bool = True,
     include_arguments: bool = True,
 ) -> Callable:
+    """
+    Parameterizes template "execution_time_decorator" function with options, supplied as arguments.
+
+    Args:
+        execution_time_holder_object_reference_name: Handle, provided in "kwargs", holds execution time property setter.
+        execution_time_property_name: Property attribute nane, provided in "kwargs", sets execution time value.
+        method: Name of method in "time" module (default: "process_time") to be used for recording timestamps.
+        pretty_print: If True (default), prints execution time summary to standard output; if False, "silent" mode.
+        include_arguments: If True (default), prints arguments of function, whose execution time is measured.
+
+    Note: Method "time.perf_counter()" keeps going during sleep, while method "time.process_time()" does not.
+    Using "time.process_time()" is the better suited method for measuring code computational efficiency.
+
+    Returns:
+        Callable -- configured "execution_time_decorator" function.
+    """
+
     def execution_time_decorator(func: Callable) -> Callable:
         @wraps(func)
         def compute_delta_t(*args, **kwargs) -> Any:
@@ -170,11 +188,11 @@ def measure_execution_time(
             Returns:
                 Any (output value of original function being decorated).
             """
-            time_begin: float = time.perf_counter()
+            time_begin: float = (getattr(time, method))()
             try:
                 return func(*args, **kwargs)
             finally:
-                time_end: float = time.perf_counter()
+                time_end: float = (getattr(time, method))()
                 delta_t: float = time_end - time_begin
                 if kwargs is None:
                     kwargs = {}
@@ -1572,6 +1590,19 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
         else:
             selectable = selectable.alias()
     return selectable
+
+
+def get_sqlalchemy_subquery_type():
+    """
+    Beginning from SQLAlchemy 1.4, `sqlalchemy.sql.Alias` has been deprecated in favor of `sqlalchemy.sql.Subquery`.
+    This helper method ensures that the appropriate type is returned.
+
+    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
+    """
+    try:
+        return sa.sql.Subquery
+    except AttributeError:
+        return sa.sql.Alias
 
 
 def get_sqlalchemy_domain_data(domain_data):

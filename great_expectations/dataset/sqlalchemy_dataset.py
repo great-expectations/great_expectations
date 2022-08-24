@@ -162,6 +162,7 @@ try:
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
     teradatasqlalchemy = None
+
 try:
     import trino.sqlalchemy.datatype as trinotypes
     import trino.sqlalchemy.dialect

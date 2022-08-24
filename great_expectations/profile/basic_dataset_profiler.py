@@ -123,8 +123,8 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
     such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
     """
 
-    @classmethod  # noqa: C901 - 18
-    def _profile(cls, dataset, configuration=None):
+    @classmethod
+    def _profile(cls, dataset, configuration=None):  # noqa: C901 - 18
         df = dataset
 
         df.set_default_expectation_argument("catch_exceptions", True)

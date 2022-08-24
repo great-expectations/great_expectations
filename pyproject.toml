@@ -42,7 +42,6 @@ exclude = [
     'core/config_peer\.py', # 1
     'core/evaluation_parameters\.py', # 6
     'core/expectation_configuration\.py', # 21
-    'core/expectation_suite\.py', # 10
     'core/expectation_validation_result\.py', # 9
     'core/run_identifier\.py', # 1
     'core/yaml_handler\.py', # 1
@@ -81,5 +80,9 @@ markers = [
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "base_data_context: mark test as being relevant to BaseDataContext, which will be removed during refactor",
+    "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors)",
 ]
 testpaths = "tests"
+# use `pytest-mock` drop-in replacement for `unittest.mock`
+# https://pytest-mock.readthedocs.io/en/latest/configuration.html#use-standalone-mock-package
+mock_use_standalone_module = true
