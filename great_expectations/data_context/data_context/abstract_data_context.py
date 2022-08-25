@@ -22,6 +22,8 @@ from typing import (
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store import EvaluationParameterStore
+    from great_expectations.checkpoint import Checkpoint
+    from great_expectations.data_context.store import CheckpointStore
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -176,8 +178,8 @@ class AbstractDataContext(ABC):
             None  # This variable *may* be used in case we cannot save an instance id
         )
         # Init stores
-        self._stores = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
+        self._stores: dict = {}
+        self._init_stores(self.project_config_with_variables_substituted.stores)  # type: ignore[arg-type]
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -189,13 +191,13 @@ class AbstractDataContext(ABC):
         )
 
         # Store cached datasources but don't init them
-        self._cached_datasources = {}
+        self._cached_datasources: dict = {}
 
         # Build the datasources we know about and have access to
         self._init_datasources()
 
         self._evaluation_parameter_dependencies_compiled = False
-        self._evaluation_parameter_dependencies = {}
+        self._evaluation_parameter_dependencies: dict = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
 
@@ -234,7 +236,7 @@ class AbstractDataContext(ABC):
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
             instance_id = str(uuid.uuid4())
-            self._in_memory_instance_id = instance_id
+            self._in_memory_instance_id = instance_id  # type: ignore[assignment]
         return instance_id
 
     @property
@@ -263,9 +265,7 @@ class AbstractDataContext(ABC):
         """
         # NOTE: <DataContextRefactor>  Why does this exist in AbstractDataContext? CloudDataContext and
         # FileDataContext both use it. Determine whether this should stay here or in child classes
-        if hasattr(self, "_context_root_directory"):
-            return self._context_root_directory
-        return None
+        return getattr(self, "_context_root_directory", None)
 
     @property
     def project_config_with_variables_substituted(self) -> DataContextConfig:
@@ -319,7 +319,7 @@ class AbstractDataContext(ABC):
             )
 
             if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory
+                directory_path=self.root_directory  # type: ignore[arg-type]
             ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             if self.root_directory:
@@ -337,7 +337,7 @@ class AbstractDataContext(ABC):
                     f"to learn more about the upgrade process."
                 )
             else:
-                error_message: str = (
+                error_message = (
                     f"Attempted to access the 'checkpoint_store_name' field "
                     f"with no `checkpoints` directory.\n  "
                     f"Please create a `checkpoints` directory in your Great Expectations directory."
@@ -350,8 +350,8 @@ class AbstractDataContext(ABC):
             raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
     @property
-    def checkpoint_store(self) -> "CheckpointStore":  # noqa: F821
-        checkpoint_store_name: str = self.checkpoint_store_name
+    def checkpoint_store(self) -> "CheckpointStore":
+        checkpoint_store_name: str = self.checkpoint_store_name  # type: ignore[assignment]
         try:
             return self.stores[checkpoint_store_name]
         except KeyError:
@@ -360,7 +360,7 @@ class AbstractDataContext(ABC):
             )
 
             if CheckpointStore.default_checkpoints_exist(
-                directory_path=self.root_directory
+                directory_path=self.root_directory  # type: ignore[arg-type]
             ):
                 logger.warning(
                     f"Checkpoint store named '{checkpoint_store_name}' is not a configured store, "
@@ -369,9 +369,9 @@ class AbstractDataContext(ABC):
                     f"'Checkpoint Store' feature.\n  Visit {AbstractDataContext.MIGRATION_WEBSITE} "
                     f"to learn more about the upgrade process."
                 )
-                return self._build_store_from_config(
+                return self._build_store_from_config(  # type: ignore[return-value]
                     checkpoint_store_name,
-                    DataContextConfigDefaults.DEFAULT_STORES.value[
+                    DataContextConfigDefaults.DEFAULT_STORES.value[  # type: ignore[arg-type]
                         checkpoint_store_name
                     ],
                 )
@@ -403,7 +403,7 @@ class AbstractDataContext(ABC):
                     f"upgrade process."
                 )
             else:
-                error_message: str = (
+                error_message = (
                     f"Attempted to access the 'profiler_store_name' field "
                     f"with no `profilers` directory.\n  "
                     f"Please create a `profilers` directory in your Great Expectations project "
@@ -432,8 +432,8 @@ class AbstractDataContext(ABC):
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the upgrade process."
                 )
                 built_store: Optional[Store] = self._build_store_from_config(
-                    profiler_store_name,
-                    DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],
+                    profiler_store_name,  # type: ignore[arg-type]
+                    DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],  # type: ignore[index,arg-type]
                 )
                 return cast(ProfilerStore, built_store)
 
@@ -473,10 +473,10 @@ class AbstractDataContext(ABC):
         """
         logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
 
-        module_name: str = kwargs.get("module_name", "great_expectations.datasource")
+        module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
         verify_dynamic_loading_support(module_name=module_name)
-        class_name: Optional[str] = kwargs.get("class_name")
-        datasource_class = load_class(module_name=module_name, class_name=class_name)
+        class_name: Optional[str] = kwargs.get("class_name")  # type: ignore[assignment]
+        datasource_class = load_class(module_name=module_name, class_name=class_name)  # type: ignore[arg-type]
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
@@ -522,12 +522,12 @@ class AbstractDataContext(ABC):
         for (
             name,
             value,
-        ) in self.variables.stores.items():
+        ) in self.variables.stores.items():  # type: ignore[union-attr]
             store_config = copy.deepcopy(value)
             store_config["name"] = name
             masked_config = PasswordMasker.sanitize_config(store_config)
             stores.append(masked_config)
-        return stores
+        return stores  # type: ignore[return-value]
 
     def list_active_stores(self) -> List[Store]:
         """
@@ -539,20 +539,20 @@ class AbstractDataContext(ABC):
             profiler_store_name
         """
         active_store_names: List[str] = [
-            self.expectations_store_name,
-            self.validations_store_name,
-            self.evaluation_parameter_store_name,
+            self.expectations_store_name,  # type: ignore[list-item]
+            self.validations_store_name,  # type: ignore[list-item]
+            self.evaluation_parameter_store_name,  # type: ignore[list-item]
         ]
 
         try:
-            active_store_names.append(self.checkpoint_store_name)
+            active_store_names.append(self.checkpoint_store_name)  # type: ignore[arg-type]
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             logger.info(
                 "Checkpoint store is not configured; omitting it from active stores"
             )
 
         try:
-            active_store_names.append(self.profiler_store_name)
+            active_store_names.append(self.profiler_store_name)  # type: ignore[arg-type]
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             logger.info(
                 "Profiler store is not configured; omitting it from active stores"
@@ -561,7 +561,7 @@ class AbstractDataContext(ABC):
         return [
             store
             for store in self.list_stores()
-            if store.get("name") in active_store_names
+            if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
 
     def get_datasource(
@@ -583,7 +583,7 @@ class AbstractDataContext(ABC):
         if datasource_name in self._cached_datasources:
             return self._cached_datasources[datasource_name]
 
-        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
+        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(  # type: ignore[attr-defined]
             datasource_name=datasource_name
         )
 
@@ -613,7 +613,7 @@ class AbstractDataContext(ABC):
 
         datasource_name: str
         datasource_config: DatasourceConfig
-        for datasource_name, datasource_config in self.config.datasources.items():
+        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr,assignment]
             datasource_dict: dict = cast(
                 dict, datasourceConfigSchema.dump(datasource_config)
             )
@@ -647,9 +647,9 @@ class AbstractDataContext(ABC):
             raise ValueError(f"Datasource {datasource_name} not found")
 
         if save_changes:
-            self._datasource_store.delete_by_name(datasource_name)
+            self._datasource_store.delete_by_name(datasource_name)  # type: ignore[attr-defined]
         self._cached_datasources.pop(datasource_name, None)
-        self.config.datasources.pop(datasource_name, None)
+        self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
     def add_checkpoint(
         self,
@@ -677,13 +677,13 @@ class AbstractDataContext(ABC):
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
-    ) -> "Checkpoint":  # noqa: F821
+    ) -> "Checkpoint":
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
             data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,
+            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -736,7 +736,7 @@ class AbstractDataContext(ABC):
         Lists the available expectation suite names.
         """
         sorted_expectation_suite_names = [
-            i.expectation_suite_name for i in self.list_expectation_suites()
+            i.expectation_suite_name for i in self.list_expectation_suites()  # type: ignore[union-attr]
         ]
         sorted_expectation_suite_names.sort()
         return sorted_expectation_suite_names
@@ -749,7 +749,7 @@ class AbstractDataContext(ABC):
             raise ge_exceptions.InvalidConfigError(
                 f"Unable to find configured store: {str(e)}"
             )
-        return keys
+        return keys  # type: ignore[return-value]
 
     def get_validator(
         self,
@@ -799,7 +799,9 @@ class AbstractDataContext(ABC):
             > 1
         ):
             raise ValueError(
-                f"No more than one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name can be specified"
+                "No more than one of expectation_suite_name,"  # type: ignore[attr-defined]
+                f"{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''}"
+                " expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
         if expectation_suite_ge_cloud_id is not None:
@@ -833,15 +835,15 @@ class AbstractDataContext(ABC):
             pass
 
         elif batch:
-            batch_list: List = [batch]
+            batch_list = [batch]
 
         else:
-            batch_list: List = []
+            batch_list = []
             if not batch_request_list:
-                batch_request_list = [batch_request]
+                batch_request_list = [batch_request]  # type: ignore[list-item]
 
             for batch_request in batch_request_list:
-                batch_list.extend(
+                batch_list.extend(  # type: ignore[union-attr]
                     self.get_batch_list(
                         datasource_name=datasource_name,
                         data_connector_name=data_connector_name,
@@ -873,8 +875,8 @@ class AbstractDataContext(ABC):
         )
 
         return self.get_validator_using_batch_list(
-            expectation_suite=expectation_suite,
-            batch_list=batch_list,
+            expectation_suite=expectation_suite,  # type: ignore[arg-type]
+            batch_list=batch_list,  # type: ignore[arg-type]
             include_rendered_content=include_rendered_content,
         )
 
@@ -909,7 +911,7 @@ class AbstractDataContext(ABC):
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         batch_definition: BatchDefinition = batch_list[-1].batch_definition
-        execution_engine: ExecutionEngine = self.datasources[
+        execution_engine: ExecutionEngine = self.datasources[  # type: ignore[union-attr]
             batch_definition.datasource_name
         ].execution_engine
         validator = Validator(
@@ -1054,7 +1056,7 @@ class AbstractDataContext(ABC):
                     expectation_suite_name
                 )
             )
-        self.expectations_store.set(key, expectation_suite, **kwargs)
+        self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[arg-type]
         return expectation_suite
 
     def delete_expectation_suite(
@@ -1070,7 +1072,7 @@ class AbstractDataContext(ABC):
         Returns:
             True for Success and False for Failure.
         """
-        key = ExpectationSuiteIdentifier(expectation_suite_name)
+        key = ExpectationSuiteIdentifier(expectation_suite_name)  # type: ignore[arg-type]
         if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
@@ -1093,10 +1095,10 @@ class AbstractDataContext(ABC):
             expectation_suite
         """
         key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite_name
+            expectation_suite_name=expectation_suite_name  # type: ignore[arg-type]
         )
 
-        if self.expectations_store.has_key(key):  # noqa: W601
+        if self.expectations_store.has_key(key):  # type: ignore[arg-type] # noqa: W601
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
             )
@@ -1158,7 +1160,7 @@ class AbstractDataContext(ABC):
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
         ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
-        if environment_variable and os.environ.get(environment_variable, False):
+        if environment_variable and os.environ.get(environment_variable, ""):
             return os.environ.get(environment_variable)
         if conf_file_section and conf_file_option:
             for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
@@ -1238,11 +1240,11 @@ class AbstractDataContext(ABC):
         Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
         """
         if path is None:
-            return
+            return None
         if os.path.isabs(path):
             return path
         else:
-            return os.path.join(self.root_directory, path)
+            return os.path.join(self.root_directory, path)  # type: ignore[arg-type]
 
     def _apply_global_config_overrides(
         self, config: Union[DataContextConfig, Mapping]
@@ -1261,7 +1263,7 @@ class AbstractDataContext(ABC):
             DataContextConfig with the appropriate overrides
         """
         validation_errors: dict = {}
-        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
+        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)  # type: ignore[assignment]
         usage_stats_opted_out: bool = self._check_global_usage_statistics_opt_out()
         # if usage_stats_opted_out then usage_statistics is false
         # NOTE: <DataContextRefactor> 202207 Refactor so that this becomes usage_stats_enabled
@@ -1322,14 +1324,11 @@ class AbstractDataContext(ABC):
         have already been interpolated before being sent from the Cloud API.
 
         """
-        config_variables_file_path: str = cast(
-            DataContextConfig,
-            self._project_config,
-        ).config_variables_file_path
+        config_variables_file_path = self._project_config.config_variables_file_path
         if config_variables_file_path:
             try:
                 # If the user specifies the config variable path with an environment variable, we want to substitute it
-                defined_path: str = substitute_config_variable(
+                defined_path: str = substitute_config_variable(  # type: ignore[assignment]
                     config_variables_file_path, dict(os.environ)
                 )
                 if not os.path.isabs(defined_path) and hasattr(self, "root_directory"):
@@ -1337,7 +1336,7 @@ class AbstractDataContext(ABC):
                     # for any non-absolute path
                     root_directory: str = self.root_directory or os.curdir
                 else:
-                    root_directory: str = ""
+                    root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
                     res = dict(yaml.load(config_variables_file.read()))
@@ -1374,11 +1373,11 @@ class AbstractDataContext(ABC):
             config = configparser.ConfigParser()
             states = config.BOOLEAN_STATES
             for falsey_string in AbstractDataContext.FALSEY_STRINGS:
-                states[falsey_string] = False
+                states[falsey_string] = False  # type: ignore[index]
 
-            states["TRUE"] = True
-            states["True"] = True
-            config.BOOLEAN_STATES = states
+            states["TRUE"] = True  # type: ignore[index]
+            states["True"] = True  # type: ignore[index]
+            config.BOOLEAN_STATES = states  # type: ignore[misc] # Cannot assign to class variable via instance
             config.read(config_path)
             try:
                 if config.getboolean("anonymous_usage_statistics", "enabled") is False:
@@ -1427,13 +1426,13 @@ class AbstractDataContext(ABC):
         ):
             store_config["store_backend"].update(
                 {
-                    "manually_initialize_store_backend_id": self.variables.anonymous_usage_statistics.data_context_id
+                    "manually_initialize_store_backend_id": self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
                 }
             )
 
         # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
         if (
-            store_name not in [store["name"] for store in self.list_active_stores()]
+            store_name not in [store["name"] for store in self.list_active_stores()]  # type: ignore[index]
             and store_config.get("store_backend") is not None
         ):
             store_config["store_backend"].update({"suppress_store_backend_id": True})
@@ -1468,7 +1467,7 @@ class AbstractDataContext(ABC):
 
     @property
     def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
-        return self.variables.anonymous_usage_statistics
+        return self.variables.anonymous_usage_statistics  # type: ignore[return-value]
 
     @property
     def progress_bars(self) -> Optional[ProgressBarsConfig]:
@@ -1480,7 +1479,7 @@ class AbstractDataContext(ABC):
 
     @property
     def notebooks(self) -> NotebookConfig:
-        return self.variables.notebooks
+        return self.variables.notebooks  # type: ignore[return-value]
 
     @property
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
@@ -1489,7 +1488,7 @@ class AbstractDataContext(ABC):
 
     @property
     def data_context_id(self) -> str:
-        return self.variables.anonymous_usage_statistics.data_context_id
+        return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
     def _init_stores(self, store_configs: Dict[str, dict]) -> None:
         """Initialize all Stores for this DataContext.
@@ -1570,7 +1569,7 @@ class AbstractDataContext(ABC):
 
         for datasource_name, datasource_config in datasources.items():
             try:
-                config = copy.deepcopy(datasource_config)
+                config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
                 config_dict = dict(datasourceConfigSchema.dump(config))
                 datasource = self._instantiate_datasource_from_config(
                     name=datasource_name, config=config_dict
@@ -1614,13 +1613,13 @@ class AbstractDataContext(ABC):
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
-        config.update({"name": name})
+        config.update({"name": name})  # type: ignore[union-attr]
         # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
         if config["class_name"] in [
             "BaseDatasource",
             "Datasource",
         ]:
-            config.update({"data_context_root_directory": self.root_directory})
+            config.update({"data_context_root_directory": self.root_directory})  # type: ignore[union-attr]
         module_name: str = "great_expectations.datasource"
         datasource: Datasource = instantiate_class_from_config(
             config=config,
@@ -1648,14 +1647,14 @@ class AbstractDataContext(ABC):
         )
 
         if save_changes:
-            self._datasource_store.set_by_name(
+            self._datasource_store.set_by_name(  # type: ignore[attr-defined]
                 datasource_name=name, datasource_config=datasource_config
             )
-        self.config.datasources[name] = datasource_config
+        self.config.datasources[name] = datasource_config  # type: ignore[assignment,index]
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        config = dict(datasourceConfigSchema.dump(datasource_config))
         substituted_config: dict = substitute_all_config_variables(
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
@@ -1663,16 +1662,16 @@ class AbstractDataContext(ABC):
         datasource: Optional[Datasource] = None
         if initialize:
             try:
-                datasource: Datasource = self._instantiate_datasource_from_config(
+                datasource = self._instantiate_datasource_from_config(
                     name=name, config=substituted_config
                 )
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
                 if save_changes:
-                    self._datasource_store.delete_by_name(datasource_name=name)
+                    self._datasource_store.delete_by_name(datasource_name=name)  # type: ignore[attr-defined]
                 # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(name, None)
+                self.config.datasources.pop(name, None)  # type: ignore[union-attr]
                 raise e
 
         return datasource
@@ -1687,7 +1686,7 @@ class AbstractDataContext(ABC):
 
         # Otherwise choose the id stored in the project_config
         else:
-            return self.variables.anonymous_usage_statistics.data_context_id
+            return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
     def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}

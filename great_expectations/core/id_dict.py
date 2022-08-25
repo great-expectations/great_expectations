@@ -1,10 +1,10 @@
 import hashlib
 import json
-from typing import Any, Optional
+from typing import Any, Optional, Set
 
 
 class IDDict(dict):
-    _id_ignore_keys = set()
+    _id_ignore_keys: Set[str] = set()
 
     def to_id(self, id_keys=None, id_ignore_keys=None):
         if id_keys is None:
@@ -38,14 +38,14 @@ class IDDict(dict):
         elif isinstance(data, (list, set, tuple)):
             data_type: type = type(data)
 
-            value: Any
+            value: Any  # type: ignore[no-redef]
             data = data_type(
                 [IDDict.convert_dictionary_to_id_dict(data=value) for value in data]
             )
 
         return data
 
-    def __hash__(self) -> int:
+    def __hash__(self) -> int:  # type: ignore[override]
         """Overrides the default implementation"""
         _result_hash: int = hash(self.to_id())
         return _result_hash

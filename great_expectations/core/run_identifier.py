@@ -33,7 +33,7 @@ class RunIdentifier(DataContextKey):
 
         if not run_time:
             try:
-                run_time = parse(run_name)
+                run_time = parse(run_name)  # type: ignore[arg-type]
             except (ValueError, TypeError):
                 run_time = None
 
