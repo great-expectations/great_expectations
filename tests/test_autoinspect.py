@@ -10,6 +10,8 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.self_check.util import get_dataset
 
 
+@pytest.mark.v2_api
+@pytest.mark.unit
 def test_no_autoinspection():
     df = ge.dataset.PandasDataset({"a": [1, 2, 3]}, profiler=None)
     suite = df.get_expectation_suite()
@@ -17,6 +19,8 @@ def test_no_autoinspection():
     assert len(suite.expectations) == 0
 
 
+@pytest.mark.v2_api
+@pytest.mark.unit
 def test_default_no_autoinspection():
     df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
     suite = df.get_expectation_suite()
@@ -24,6 +28,8 @@ def test_default_no_autoinspection():
     assert len(suite.expectations) == 0
 
 
+@pytest.mark.v2_api
+@pytest.mark.unit
 def test_autoinspect_existing_dataset(test_backend):
     # Get a basic dataset with no expectations
     df = get_dataset(test_backend, {"a": [1, 2, 3]}, profiler=None)
@@ -43,6 +49,8 @@ def test_autoinspect_existing_dataset(test_backend):
     ]
 
 
+@pytest.mark.v2_api
+@pytest.mark.unit
 def test_autoinspect_columns_exist(test_backend):
     df = get_dataset(
         test_backend, {"a": [1, 2, 3]}, profiler=ge.profile.ColumnsExistProfiler
@@ -57,6 +65,8 @@ def test_autoinspect_columns_exist(test_backend):
     ]
 
 
+@pytest.mark.v2_api
+@pytest.mark.unit
 def test_autoinspect_warning():
     with pytest.raises(NotImplementedError):
         ge.dataset.Dataset(profiler=ge.profile.ColumnsExistProfiler)

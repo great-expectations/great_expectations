@@ -26,6 +26,8 @@ def generate_ids(test):
 @pytest.mark.parametrize(
     "test", test_config["tests"], ids=[generate_ids(t) for t in test_config["tests"]]
 )
+@pytest.mark.v2_api
+@pytest.mark.unit
 def test_implementations(test_backend, test):
     should_skip = candidate_getter_is_on_temporary_notimplemented_list(
         test_backend, test["func"]
@@ -64,6 +66,8 @@ def test_implementations(test_backend, test):
         assert test["expected"] == result
 
 
+@pytest.mark.v2_api
+@pytest.mark.unit
 def test_get_column_value_counts(test_backend):
     schemas = {
         "SparkDFDataset": {
