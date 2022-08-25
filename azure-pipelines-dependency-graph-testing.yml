@@ -245,6 +245,15 @@ stages:
 
           - script: |
               # Install dependencies
+              pip install pytest-cov pytest-icdiff pytest-mock pytest-azurepipelines invoke
+
+              # Run unit-tests
+              invoke tests --ci
+
+            displayName: 'Unit Tests'
+
+          - script: |
+              # Install dependencies
               pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
 
