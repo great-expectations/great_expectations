@@ -640,11 +640,14 @@ class AbstractDataContext(ABC):
         datasources: List[dict] = []
 
         datasource_name: str
-        datasource_config: DatasourceConfig
+        datasource_config: Union[dict, DatasourceConfig]
         serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
         for datasource_name, datasource_config in self.config.datasources.items():
-            datasource_config.name = datasource_name
+            if isinstance(datasource_config, dict):
+                datasource_config["name"] = datasource_name
+            else:
+                datasource_config.name = datasource_name
             masked_config: dict = (
                 self._serialize_substitute_and_sanitize_datasource_config(
                     serializer, datasource_config
