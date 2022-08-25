@@ -209,18 +209,21 @@ def mv_usage_stats_json(ctx):
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
     },
 )
-def tests(ctx, ci=False, html=False, cloud=True, slowest=5):
+def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5):
     """Run tests. Runs unit tests by default."""
     # TODO: update this to also run the full e2e/integration tests (but unit-tests should always be the default mode)
     cmds = [
         "pytest",
-        "-m",
-        "unit",
         f"--durations={slowest}",
         "--cov=great_expectations",
         "--cov-report term:skip-covered",  # modules with 100% will not be shown
         "-vv",
     ]
+    if unit:
+        cmds += [
+            "-m",
+            "unit",
+        ]
     if cloud:
         cmds += ["--cloud"]
     if ci:
