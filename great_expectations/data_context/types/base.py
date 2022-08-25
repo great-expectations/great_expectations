@@ -262,6 +262,9 @@ class AssetConfigSchema(Schema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
 
+    data_asset_name_prefix = fields.String(required=False, allow_none=True)
+    data_asset_name_suffix = fields.String(required=False, allow_none=True)
+    include_schema_name = fields.Boolean(required=False, allow_none=True)
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
@@ -552,6 +555,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
+
     excluded_tables = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
@@ -1028,6 +1032,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
+
         if (
             "connection_string" in data
             or "credentials" in data
