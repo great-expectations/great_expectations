@@ -59,7 +59,7 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
 
 
 @pytest.mark.unit
-def test_add_datasource_updates_cache(
+def test_BaseDataContext_add_datasource_updates_cache(
     in_memory_runtime_context: BaseDataContext,
 ) -> None:
     context = in_memory_runtime_context
@@ -82,7 +82,12 @@ def test_add_datasource_updates_cache(
 
 
 @pytest.mark.unit
-def test_update_datasource_updates_existing_value_in_cache(
+def test_DataContext_add_datasource_updates_cache_and_store() -> None:
+    pass
+
+
+@pytest.mark.unit
+def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
     in_memory_runtime_context: BaseDataContext,
 ) -> None:
     context = in_memory_runtime_context
@@ -103,7 +108,12 @@ def test_update_datasource_updates_existing_value_in_cache(
 
 
 @pytest.mark.unit
-def test_update_datasource_creates_new_value_in_cache(
+def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store() -> None:
+    pass
+
+
+@pytest.mark.unit
+def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
     in_memory_runtime_context: BaseDataContext,
 ) -> None:
     context = in_memory_runtime_context
@@ -121,7 +131,12 @@ def test_update_datasource_creates_new_value_in_cache(
 
 
 @pytest.mark.unit
-def test_delete_datasource_updates_cache(
+def test_DataContext_update_datasource_creates_new_value_in_cache_and_store() -> None:
+    pass
+
+
+@pytest.mark.unit
+def test_BaseDataContext_delete_datasource_updates_cache(
     in_memory_runtime_context: BaseDataContext,
 ) -> None:
     """
@@ -145,7 +160,12 @@ def test_delete_datasource_updates_cache(
 
 
 @pytest.mark.unit
-def test_get_datasource_retrieves_from_cache(
+def test_DataContext_delete_datasource_updates_cache_and_store() -> None:
+    pass
+
+
+@pytest.mark.unit
+def test_BaseDataContext_get_datasource_retrieves_from_cache(
     in_memory_runtime_context: BaseDataContext,
 ) -> None:
     context = in_memory_runtime_context
@@ -162,7 +182,12 @@ def test_get_datasource_retrieves_from_cache(
 
 
 @pytest.mark.unit
-def test_get_datasource_cache_miss(
+def test_DataContext_get_datasource_retrieves_from_cache() -> None:
+    pass
+
+
+@pytest.mark.unit
+def test_BaseDataContext_get_datasource_cache_miss(
     in_memory_runtime_context: BaseDataContext,
 ) -> None:
     context = in_memory_runtime_context
@@ -188,3 +213,8 @@ def test_get_datasource_cache_miss(
         context.get_datasource(name)
 
     assert not mock_get.called
+
+
+@pytest.mark.unit
+def test_DataContext_get_datasource_cache_miss() -> None:
+    pass
