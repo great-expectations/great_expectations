@@ -124,6 +124,12 @@ def test_update_datasource_creates_new_value_in_cache(
 def test_delete_datasource_updates_cache(
     in_memory_runtime_context: BaseDataContext,
 ) -> None:
+    """
+    What does this test and why?
+
+    With a DataContext that isn't set up for persistence (no `save_changes=True`),
+    we want to ensure that we're still removing the value from the cache.
+    """
     context = in_memory_runtime_context
 
     name = context.list_datasources()[0]["name"]
