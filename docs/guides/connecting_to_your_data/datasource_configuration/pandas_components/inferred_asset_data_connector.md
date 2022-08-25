@@ -1,7 +1,7 @@
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-import TipMoreInfoOnRegex from '../components/tip_more_info_on_regex.mdx'
+import TipMoreInfoOnRegex from '../components/_tip_more_info_on_regex.mdx'
 import ConfigForAssetsInferredSingle from '../filesystem_components/_config_for_assets_inferred_single.mdx'
 import ConfigForAssetsInferredMulti from '../filesystem_components/_config_for_assets_inferred_multi.mdx'
 

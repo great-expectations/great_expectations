@@ -1,3 +1,5 @@
+import TipMoreInfoOnRegex from '../components/_tip_more_info_on_regex.mdx'
+
 Configuring an `InferredAssetFilesystemDataConnector` so that its Data Assets are capable of returning more than one Batch is just a matter of defining an appropriate regular expression.  For this kind of configuration, the regular expression you define should have two or more groups.
 
 The first group will be treated as the Data Asset's name.  It should be a portion of your file names that occurs in more than one file.  The files that match this portion of the regular expression will be grouped together as a single Data Asset.

@@ -17,6 +17,12 @@ datasource_config: dict = {
     "data_connectors": {
         "name_of_my_runtime_data_connector": {
             "class_name": "RuntimeDataConnector",
+            "batch_spec_passthrough": {
+                "reader_method": "csv",
+                "reader_options": {
+                    "header": True,
+                    "inferSchema": True,
+            },
             "batch_identifiers": ["batch_timestamp"],
         }
     }

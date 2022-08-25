@@ -1,21 +1,20 @@
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-import TipMoreInfoOnRegex from '../components/tip_more_info_on_regex.mdx'
 import ConfigForAssetsInferredSingle from '../filesystem_components/_config_for_assets_inferred_single.mdx'
 import ConfigForAssetsInferredMulti from '../filesystem_components/_config_for_assets_inferred_multi.mdx'
 
 <Tabs
-  groupId="batch-count"
-  defaultValue='single'
-  values={[
-  {label: 'Single Batch Configuration', value:'single'},
-  {label: 'Multi-Batch Configuration', value:'multi'},
-  ]}>
+    groupId="batch-count"
+    defaultValue='single'
+    values={[
+    {label: 'Single Batch Configuration', value:'single'},
+    {label: 'Multi-Batch Configuration', value:'multi'},
+    ]}>
 
   <TabItem value="single">
 
-<ConfigForAssetsInferredSingle />
+  <ConfigForAssetsInferredSingle />
 
 And the full configuration for your Datasource should look like:
 
@@ -36,7 +35,13 @@ datasource_config = {
                 "pattern": "(.*)\\.csv",
                 "group_names": ["data_asset_name"],
             },
-            "batch_spec_passthrough": {},
+            "batch_spec_passthrough": {
+                "reader_method": "csv",
+                "reader_options": {
+                    "header": True,
+                    "inferSchema": True,
+                },
+            },
         }
     }
 }
@@ -45,7 +50,7 @@ datasource_config = {
   </TabItem>
   <TabItem value="multi">
 
-<ConfigForAssetsInferredMulti />
+  <ConfigForAssetsInferredMulti />
 
 And the full configuration for your Datasource should look like:
 
@@ -66,7 +71,13 @@ datasource_config = {
                 "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
                 "group_names": ["data_asset_name", "month"],
             },
-            "batch_spec_passthrough": {}
+            "batch_spec_passthrough": {
+                "reader_method": "csv",
+                "reader_options": {
+                    "header": True,
+                    "inferSchema": True,
+                },
+            },
         }
     }
 }
