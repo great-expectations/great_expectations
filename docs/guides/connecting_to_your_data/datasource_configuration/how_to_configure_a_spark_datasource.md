@@ -4,9 +4,6 @@ title: How to configure a Spark Datasource
 # [![Connect to data icon](../../../images/universal_map/Outlet-active.png)](../connect_to_data_overview.md) How to configure a Spark Datasource
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 import SectionIntro from './components/_section_intro.mdx';
 import SectionPrerequisites from './spark_components/_section_prerequisites.mdx'
