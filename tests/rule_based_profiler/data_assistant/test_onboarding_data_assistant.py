@@ -287,7 +287,7 @@ def test_onboarding_data_assistant_metrics_count(
     assert num_metrics == 184
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ):
@@ -569,7 +569,7 @@ def test_onboarding_data_assistant_plot_returns_proper_dict_repr_of_column_domai
     assert find_strings_in_nested_obj(column_domain_charts, columns)
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_metrics_include_column_names_filters_output(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
@@ -630,7 +630,7 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_exclude_column_
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_onboarding_data_assistant_plot_include_and_exclude_column_names_raises_error(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
