@@ -255,7 +255,7 @@ def test_onboarding_data_assistant_result_get_expectation_suite(
     )
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_onboarding_data_assistant_metrics_count(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ) -> None:
