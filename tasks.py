@@ -202,6 +202,26 @@ def mv_usage_stats_json(ctx):
     print(f"'{outfile}' copied to dbfs.")
 
 
+@invoke.task(aliases=["test"])
+def tests(ctx, ci=False, html=False, cloud=True):
+    """Run tests. Runs unit tests by default."""
+    cmds = [
+        "pytest",
+        "-m",
+        "unit",
+        "--cov=great_expectations",
+        "--cov-report term:skip-covered",  # modules with 100% will not be shown
+        "-vv",
+    ]
+    if cloud:
+        cmds += ["--cloud"]
+    if ci:
+        cmds += ["--cov-report", "xml"]
+    if html:
+        cmds += ["--cov-report", "html"]
+    ctx.run(" ".join(cmds), echo=True, pty=True)
+
+
 PYTHON_VERSION_DEFAULT: float = 3.8
 
 
