@@ -47,7 +47,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
 
         super().__init__(name=name, execution_engine=self._execution_engine_config)
 
-        self._data_connectors = {}
+        self._data_connectors: dict = {}
 
         self._init_data_connectors(
             introspection_configs=introspection,
