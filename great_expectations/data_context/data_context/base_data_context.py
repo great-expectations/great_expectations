@@ -1345,13 +1345,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         See `AbstractDataContext.create_expectation_suite` for more information.
         """
-        res = self._data_context.create_expectation_suite(
+        suite = self._data_context.create_expectation_suite(
             expectation_suite_name,
             overwrite_existing=overwrite_existing,
             **kwargs,
         )
         self._synchronize_self_with_underlying_data_context()
-        return res
+        return suite
 
     def get_expectation_suite(
         self,

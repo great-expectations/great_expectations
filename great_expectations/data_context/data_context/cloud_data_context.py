@@ -182,23 +182,24 @@ class CloudDataContext(AbstractDataContext):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
+        existing_suite_names = self.list_expectation_suite_names()
+        if expectation_suite_name in existing_suite_names and not overwrite_existing:
+            raise ge_exceptions.DataContextError(
+                f"expectation_suite '{expectation_suite_name}' already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
+            )
+
         expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
-        ge_cloud_id = expectation_suite.ge_cloud_id
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=ge_cloud_id,
         )
-        if (
-            self.expectations_store.has_key(key)  # noqa: W601
-            and not overwrite_existing
-        ):
-            raise ge_exceptions.DataContextError(
-                f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True."
-            )
-        self.expectations_store.set(key, expectation_suite, **kwargs)
+
+        response = self.expectations_store.set(key, expectation_suite, **kwargs)
+        if isinstance(response, GeCloudResourceRef):
+            expectation_suite.ge_cloud_id = response.ge_cloud_id
+
         return expectation_suite
 
     def delete_expectation_suite(
@@ -222,9 +223,9 @@ class CloudDataContext(AbstractDataContext):
             raise ge_exceptions.DataContextError(
                 f"expectation_suite with id {ge_cloud_id} does not exist."
             )
-        else:
-            self.expectations_store.remove_key(key)
-            return True
+
+        self.expectations_store.remove_key(key)
+        return True
 
     def get_expectation_suite(
         self,
@@ -245,7 +246,7 @@ class CloudDataContext(AbstractDataContext):
         )
         if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
-                f"expectation_suite {expectation_suite_name} not found"
+                f"expectation_suite with id {ge_cloud_id} not found"
             )
 
         expectations_schema_dict: dict = cast(dict, self.expectations_store.get(key))
@@ -272,21 +273,23 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             None
         """
-        ge_cloud_id = expectation_suite.ge_cloud_id
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=ge_cloud_id
-            if ge_cloud_id is not None
-            else str(expectation_suite.ge_cloud_id),
         )
+        ge_cloud_id = expectation_suite.ge_cloud_id
+        if ge_cloud_id:
+            key.ge_cloud_id = ge_cloud_id
+
         if (
-            self.expectations_store.has_key(key)  # noqa: W601
+            ge_cloud_id
+            and self.expectations_store.has_key(key)  # noqa: W601
             and not overwrite_existing
         ):
             raise ge_exceptions.DataContextError(
                 f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. "
                 f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
             )
+
         self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = (
             self._determine_if_expectation_suite_include_rendered_content(
@@ -295,7 +298,10 @@ class CloudDataContext(AbstractDataContext):
         )
         if include_rendered_content:
             expectation_suite.render()
-        self.expectations_store.set(key, expectation_suite, **kwargs)
+
+        response = self.expectations_store.set(key, expectation_suite, **kwargs)
+        if isinstance(response, GeCloudIdentifier):
+            expectation_suite.ge_cloud_id = response.ge_cloud_id
 
     @property
     def root_directory(self) -> Optional[str]:
