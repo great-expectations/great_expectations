@@ -81,6 +81,12 @@ def test_get_datasource_retrieves_from_cache(
     data_context_fixture_name: str,
     request,
 ) -> None:
+    """
+    What does this test and why?
+
+    For both persistence-enabled and disabled contexts, we should always be looking at the
+    cache for object retrieval.
+    """
     context = request.getfixturevalue(data_context_fixture_name)
 
     name = context.list_datasources()[0]["name"]
@@ -116,6 +122,14 @@ def test_get_datasource_cache_miss(
     data_context_fixture_name: str,
     request,
 ) -> None:
+    """
+    What does this test and why?
+
+    For persistence-enabled contexts, we should leverage the underlying store in the case
+    of a cache miss.
+
+    For persistence-disabled contexts, we only look at the cache.
+    """
     context = request.getfixturevalue(data_context_fixture_name)
 
     name = "my_fake_datasource_name"
@@ -145,6 +159,12 @@ def test_get_datasource_cache_miss(
 def test_DataContext_add_datasource_updates_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
 ) -> None:
+    """
+    What does this test and why?
+
+    For persistence-enabled contexts, we should update both the cache and the underlying
+    store upon adding a datasource.
+    """
     context = cloud_data_context_in_cloud_mode_with_datasource_pandas_engine
 
     name = "my_new_datasource"
@@ -172,6 +192,12 @@ def test_DataContext_add_datasource_updates_cache_and_store(
 def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
 ) -> None:
+    """
+    What does this test and why?
+
+    For persistence-enabled contexts, we should update both the cache and the underlying
+    store upon updating an existing datasource.
+    """
     context = cloud_data_context_in_cloud_mode_with_datasource_pandas_engine
 
     name = context.list_datasources()[0]["name"]
@@ -204,6 +230,12 @@ def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store
 def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
 ) -> None:
+    """
+    What does this test and why?
+
+    For persistence-enabled contexts, we should update both the cache and the underlying
+    store upon using update to create a new datasource.
+    """
     context = cloud_data_context_in_cloud_mode_with_datasource_pandas_engine
 
     name = "my_new_datasource"
@@ -228,6 +260,12 @@ def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
 def test_DataContext_delete_datasource_updates_cache(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
 ) -> None:
+    """
+    What does this test and why?
+
+    For persistence-enabled contexts, we should delete values in both the cache and the
+    underlying store.
+    """
     context = cloud_data_context_in_cloud_mode_with_datasource_pandas_engine
 
     name = context.list_datasources()[0]["name"]
@@ -238,7 +276,7 @@ def test_DataContext_delete_datasource_updates_cache(
     ) as mock_delete:
         context.delete_datasource(name)
 
-    assert mock_delete.called
+    mock_delete.assert_called_once()
     assert name not in context.datasources
 
 
@@ -246,6 +284,12 @@ def test_DataContext_delete_datasource_updates_cache(
 def test_BaseDataContext_add_datasource_updates_cache(
     in_memory_runtime_context: BaseDataContext,
 ) -> None:
+    """
+    What does this test and why?
+
+    For persistence-disabled contexts, we should only update the cache upon adding a
+    datasource.
+    """
     context = in_memory_runtime_context
 
     name = "my_new_datasource"
@@ -269,6 +313,12 @@ def test_BaseDataContext_add_datasource_updates_cache(
 def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
     in_memory_runtime_context: BaseDataContext,
 ) -> None:
+    """
+    What does this test and why?
+
+    For persistence-disabled contexts, we should only update the cache upon
+    updating an existing datasource.
+    """
     context = in_memory_runtime_context
 
     name = context.list_datasources()[0]["name"]
@@ -290,6 +340,12 @@ def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
 def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
     in_memory_runtime_context: BaseDataContext,
 ) -> None:
+    """
+    What does this test and why?
+
+    For persistence-disabled contexts, we should only update the cache upon
+    using update to create a new datasource.
+    """
     context = in_memory_runtime_context
 
     name = "my_new_datasource"
@@ -311,8 +367,8 @@ def test_BaseDataContext_delete_datasource_updates_cache(
     """
     What does this test and why?
 
-    With a DataContext that isn't set up for persistence (no `save_changes=True`),
-    we want to ensure that we're still removing the value from the cache.
+    For persistence-disabled contexts, we should only delete the value from
+    the cache.
     """
     context = in_memory_runtime_context
 
