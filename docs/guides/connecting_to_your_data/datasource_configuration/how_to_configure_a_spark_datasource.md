@@ -1,5 +1,5 @@
 ---
-title: How to configure a Spark datasource
+title: How to configure a Spark Datasource
 ---
 # [![Connect to data icon](../../../images/universal_map/Outlet-active.png)](../connect_to_data_overview.md) How to configure a Spark Datasource
 
