@@ -38,7 +38,7 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
         return config
 
 
-class ListDatasourceSerializer(AbstractConfigSerializer):
+class NamedDatasourceSerializer(AbstractConfigSerializer):
     def serialize(self, obj: DatasourceConfig) -> dict:
         """Serialize DatasourceConfig with datasource name but not data connector name to match existing context.list_datasources() functionality.
 

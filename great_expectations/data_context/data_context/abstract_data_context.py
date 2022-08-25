@@ -21,7 +21,9 @@ from typing import (
 )
 
 from great_expectations.core.serializer import AbstractConfigSerializer
-from great_expectations.datasource.datasource_serializer import ListDatasourceSerializer
+from great_expectations.datasource.datasource_serializer import (
+    NamedDatasourceSerializer,
+)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store import EvaluationParameterStore
@@ -639,7 +641,7 @@ class AbstractDataContext(ABC):
 
         datasource_name: str
         datasource_config: DatasourceConfig
-        serializer = ListDatasourceSerializer(schema=datasourceConfigSchema)
+        serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
         for datasource_name, datasource_config in self.config.datasources.items():
             datasource_config.name = datasource_name
