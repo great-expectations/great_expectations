@@ -26,7 +26,6 @@ from tests.core.test_serialization import generic_config_serialization_assertion
             {
                 "class_name": "Datasource",
                 "module_name": "great_expectations.datasource",
-                # TODO: AJB 20220818 Why is this not filtered out in the round trip?
                 "name": None,
                 "id_": None,
             },
@@ -90,7 +89,6 @@ from tests.core.test_serialization import generic_config_serialization_assertion
                         "name": "my_data_connector",
                     },
                 },
-                # TODO: AJB 20220817 Why is this not filtered out in the round trip?
                 "id_": None,
             },
             id="nested_data_connector_id",
