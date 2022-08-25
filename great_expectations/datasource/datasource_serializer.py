@@ -11,24 +11,10 @@ serialized_value = serializer.serialize(datasource_config)
 """
 from great_expectations.core.serializer import AbstractConfigSerializer
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.types.base import (
-    DatasourceConfig,
-    datasourceConfigSchema,
-)
-from great_expectations.marshmallow__shade import Schema
+from great_expectations.data_context.types.base import DatasourceConfig
 
 
 class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
-    def __init__(self, schema: Schema) -> None:
-        """
-        Args:
-            schema: Marshmallow schema defining raw serialized version of object.
-        """
-        super().__init__(schema=schema)
-
-        # Override schema
-        self.schema = datasourceConfigSchema
-
     def serialize(self, obj: DatasourceConfig) -> dict:
         """Serialize DatasourceConfig to dict appropriate for writing to yaml.
 
@@ -54,16 +40,6 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
 
 
 class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
-    def __init__(self, schema: Schema) -> None:
-        """
-        Args:
-            schema: Marshmallow schema defining raw serialized version of object.
-        """
-        super().__init__(schema=schema)
-
-        # Override schema
-        self.schema = datasourceConfigSchema
-
     def serialize(self, obj: DatasourceConfig) -> dict:
         """Serialize DatasourceConfig to json dict.
 
@@ -82,16 +58,6 @@ class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
 
 
 class ListDatasourceSerializer(AbstractConfigSerializer):
-    def __init__(self, schema: Schema) -> None:
-        """
-        Args:
-            schema: Marshmallow schema defining raw serialized version of object.
-        """
-        super().__init__(schema=schema)
-
-        # Override schema
-        self.schema = datasourceConfigSchema
-
     def serialize(self, obj: DatasourceConfig) -> dict:
         """Serialize DatasourceConfig with datasource name but not data connector name to match existing context.list_datasources() functionality.
 
