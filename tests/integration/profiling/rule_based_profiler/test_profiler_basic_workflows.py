@@ -334,6 +334,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "name": "my_column_min",
                         "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "single_batch_mode": False,
                         "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,

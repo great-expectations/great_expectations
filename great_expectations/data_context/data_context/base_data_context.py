@@ -1156,7 +1156,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
-        *,
         batch_request: Optional[BatchRequestBase] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[dict] = None,
@@ -1393,22 +1392,32 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        **kwargs,
-    ):
+        include_rendered_content: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> None:
         """Save the provided expectation suite into the DataContext.
 
         Args:
-            expectation_suite: the suite to save
-            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
-                be read from the suite
+            expectation_suite: The suite to save.
+            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
+                from the suite.
+            overwrite_existing: Whether to overwrite the suite if it already exists.
+            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
 
         Returns:
             None
         """
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+
         self._data_context.save_expectation_suite(
             expectation_suite,
             expectation_suite_name,
             overwrite_existing,
+            include_rendered_content,
             **kwargs,
         )
         self._synchronize_self_with_underlying_data_context()
@@ -2203,7 +2212,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config_version: float,
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
-        ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
         config_data = {
             "name": name,
@@ -2224,7 +2232,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             config=config,
             data_context=self,
             profiler_store=self.profiler_store,
-            ge_cloud_id=ge_cloud_id,
         )
         return profiler
 
