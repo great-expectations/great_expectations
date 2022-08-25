@@ -570,11 +570,6 @@ def test_file_data_context_variables_e2e(
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
 
 
-@pytest.mark.xfail(
-    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of the 0.15.20 release",
-    run=True,
-    strict=True,
-)
 @pytest.mark.e2e
 @pytest.mark.cloud
 def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
@@ -594,7 +589,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 
 
 @pytest.mark.xfail(
-    reason="GX Cloud E2E tests are currently failing due to a schema issue with DataContextVariables; xfailing for purposes of the 0.15.20 release",
+    reason="GX Cloud E2E tests are currently failing due to env vars not being recognized by Docker; xfailing for purposes of the 0.15.20 release",
     run=True,
     strict=True,
 )
