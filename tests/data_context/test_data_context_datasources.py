@@ -76,7 +76,7 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
         ),
     ],
 )
-@pytest.mark.integration
+@pytest.mark.unit
 def test_get_datasource_retrieves_from_cache(
     data_context_fixture_name: str,
     request,
@@ -117,7 +117,7 @@ def test_get_datasource_retrieves_from_cache(
         ),
     ],
 )
-@pytest.mark.integration
+@pytest.mark.unit
 def test_get_datasource_cache_miss(
     data_context_fixture_name: str,
     request,
@@ -155,7 +155,7 @@ def test_get_datasource_cache_miss(
     assert not mock_get.called
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_DataContext_add_datasource_updates_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
 ) -> None:
@@ -188,7 +188,7 @@ def test_DataContext_add_datasource_updates_cache_and_store(
     assert name in context.datasources
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
 ) -> None:
@@ -226,7 +226,7 @@ def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store
     assert retrieved_datasource.boto3_options == boto3_options
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
 ) -> None:
@@ -256,7 +256,7 @@ def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
     assert name in context.datasources
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_DataContext_delete_datasource_updates_cache(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
 ) -> None:
