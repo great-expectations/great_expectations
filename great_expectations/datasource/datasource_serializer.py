@@ -29,7 +29,7 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
         # Override schema
         self.schema = datasourceConfigSchema
 
-    def serialize(self, obj: DatasourceConfig) -> dict:
+    def serialize(self, obj: DatasourceConfig) -> dict:  # type: ignore[override]
         """Serialize DatasourceConfig to dict appropriate for writing to yaml.
 
         Args:
@@ -64,7 +64,7 @@ class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
         # Override schema
         self.schema = datasourceConfigSchema
 
-    def serialize(self, obj: DatasourceConfig) -> dict:
+    def serialize(self, obj: DatasourceConfig) -> dict:  # type: ignore[override]
         """Serialize DatasourceConfig to json dict.
 
         Args:

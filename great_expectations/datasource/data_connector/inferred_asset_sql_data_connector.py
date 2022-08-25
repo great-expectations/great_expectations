@@ -160,7 +160,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
         self._refresh_data_assets_cache(assets=introspected_assets)
 
-    def _introspect_db(
+    def _introspect_db(  # noqa: C901 - 16
         self,
         schema_name: str = None,
         ignore_information_schemas_and_system_tables: bool = True,

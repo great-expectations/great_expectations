@@ -35,7 +35,7 @@ class DatasourceStore(Store):
         super().__init__(
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            store_name=store_name,
+            store_name=store_name,  # type: ignore[arg-type]
         )
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
@@ -49,7 +49,7 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def list_keys(self) -> List[str]:
+    def list_keys(self) -> List[str]:  # type: ignore[override]
         """
         See parent 'Store.list_keys()' for more information
         """
@@ -71,7 +71,7 @@ class DatasourceStore(Store):
         """
         See parent 'Store.serialize()' for more information
         """
-        return self._serializer.serialize(value)
+        return self._serializer.serialize(value)  # type: ignore[return-value]
 
     def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
         """
@@ -119,7 +119,7 @@ class DatasourceStore(Store):
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
 
-        datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))
+        datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
         return datasource_config
 
     def delete_by_name(self, datasource_name: str) -> None:
@@ -142,7 +142,7 @@ class DatasourceStore(Store):
 
         self.remove_key(self._build_key_from_config(datasource_config))
 
-    def _build_key_from_config(
+    def _build_key_from_config(  # type: ignore[override]
         self, datasource_config: DatasourceConfig
     ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
         if hasattr(datasource_config, "id_"):
@@ -187,7 +187,7 @@ class DatasourceStore(Store):
         key: Union[
             GeCloudIdentifier, DataContextVariableKey
         ] = self._build_key_from_config(datasource_config)
-        return self.set(key, datasource_config)
+        return self.set(key, datasource_config)  # type: ignore[func-returns-value]
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
