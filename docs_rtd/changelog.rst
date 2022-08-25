@@ -35,6 +35,7 @@ Changelog
 * [MAINTENANCE] Update `list_` methods on `DataContext` to emit names along with object ids (#5826)
 * [MAINTENANCE] xfail Cloud E2E tests due to schema issue with `DataContextVariables` (#5828)
 * [MAINTENANCE] Clean up xfails in preparation for 0.15.20 release (#5835)
+* [MAINTENANCE] Add back xfails for E2E Cloud tests that fail on env var retrieval in Docker (#5837)
 
 0.15.19
 -----------------
