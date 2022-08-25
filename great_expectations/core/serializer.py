@@ -15,6 +15,7 @@ import abc
 from typing import Union
 
 from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.marshmallow__shade import Schema
 
 
@@ -59,3 +60,21 @@ class DictConfigSerializer(AbstractConfigSerializer):
             Representation of object as a Python dictionary using the defined Marshmallow schema.
         """
         return self.schema.dump(obj)
+
+
+class JsonConfigSerializer(AbstractConfigSerializer):
+    def serialize(self, obj: AbstractConfig) -> dict:
+        """Serialize config to json dict.
+
+        Args:
+            obj: AbstractConfig object to serialize.
+
+        Returns:
+            Representation of object as a dict suitable for serializing to json.
+        """
+
+        config: dict = self.schema.dump(obj)
+
+        json_serializable_dict: dict = convert_to_json_serializable(data=config)
+
+        return json_serializable_dict

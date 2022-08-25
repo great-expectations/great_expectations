@@ -10,7 +10,6 @@ serializer = YAMLReadyDictDatasourceConfigSerializer()
 serialized_value = serializer.serialize(datasource_config)
 """
 from great_expectations.core.serializer import AbstractConfigSerializer
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import DatasourceConfig
 
 
@@ -37,24 +36,6 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
             data_connector_config.pop("name", None)
 
         return config
-
-
-class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
-    def serialize(self, obj: DatasourceConfig) -> dict:
-        """Serialize DatasourceConfig to json dict.
-
-        Args:
-            obj: DatasourceConfig object to serialize.
-
-        Returns:
-            Representation of object as a dict suitable for serializing to json.
-        """
-
-        config: dict = self.schema.dump(obj)
-
-        json_serializable_dict: dict = convert_to_json_serializable(data=config)
-
-        return json_serializable_dict
 
 
 class ListDatasourceSerializer(AbstractConfigSerializer):

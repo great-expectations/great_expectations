@@ -9,6 +9,7 @@ from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
+    JsonDatasourceConfigSerializer,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.data_context import DataContext
@@ -25,7 +26,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.datasource.datasource_serializer import (
-    JsonDatasourceConfigSerializer,
     YAMLReadyDictDatasourceConfigSerializer,
 )
 
