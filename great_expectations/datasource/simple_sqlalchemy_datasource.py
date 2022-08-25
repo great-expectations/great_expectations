@@ -74,8 +74,8 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
                 **config
             )
             self._build_data_connector_from_config(
-                name,
-                data_connector_config,
+                name=name,
+                config=data_connector_config,
             )
 
         # Step-2: Build "DataConnector" objects for tables (using "ConfiguredAssetSqlDataConnector").
@@ -90,7 +90,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
                         "assets": {},
                     }
                     self._build_data_connector_from_config(
-                        data_connector_name, data_connector_config
+                        name=data_connector_name, config=data_connector_config
                     )
 
                 data_connector: ConfiguredAssetSqlDataConnector = self.data_connectors[
