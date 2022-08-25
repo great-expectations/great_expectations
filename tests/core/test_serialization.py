@@ -721,5 +721,4 @@ def generic_config_serialization_assertions(
     assert observed_dump == expected_serialized_config
 
     loaded_data = schema.load(observed_dump)
-    observed_load = DatasourceConfig(**loaded_data)
-    assert observed_load.to_json_dict() == expected_roundtrip_config
+    assert loaded_data.to_json_dict() == expected_roundtrip_config
