@@ -209,7 +209,7 @@ def mv_usage_stats_json(ctx):
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
     },
 )
-def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5, timeout=10):
+def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5):
     """Run tests. Runs unit tests by default."""
     # TODO: update this to also run the full e2e/integration tests (but unit-tests should always be the default mode)
     cmds = [
@@ -223,7 +223,6 @@ def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5, timeout=1
         cmds += [
             "-m",
             "unit",
-            # f"--timeout={timeout}",
         ]
     if cloud:
         cmds += ["--cloud"]

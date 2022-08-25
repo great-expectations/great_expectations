@@ -245,22 +245,12 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest-cov pytest-icdiff pytest-mock pytest-timeout pytest-azurepipelines invoke
+              pip install pytest-cov pytest-icdiff pytest-mock pytest-azurepipelines invoke
 
               # Run unit-tests
               invoke tests --ci --cloud
 
             displayName: 'Unit Tests'
-
-          - script: |
-              pip install coveralls
-              export CIRCLE_BRANCH=$BUILD_SOURCEBRANCH
-              coveralls
-            displayName: 'Unit Test coveralls'
-            env:
-              CIRCLECI: 1
-              CIRCLE_BUILD_NUM: $(Build.BuildNumber)
-              COVERALLS_REPO_TOKEN: $(coveralls_repo_token)
 
           - script: |
               # Install dependencies
