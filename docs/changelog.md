@@ -31,6 +31,7 @@ title: Changelog
 * [MAINTENANCE] Bugfix/snowflake temp table schema name (#5814)
 * [MAINTENANCE] Update `list_` methods on `DataContext` to emit names along with object ids (#5826)
 * [MAINTENANCE] xfail Cloud E2E tests due to schema issue with `DataContextVariables` (#5828)
+* [MAINTENANCE] Clean up xfails in preparation for 0.15.20 release (#5835)
 
 ### 0.15.19
 * [FEATURE] `DataAssistantResult` plot multiple metrics per expectation (#5556)
