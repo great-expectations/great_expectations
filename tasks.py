@@ -117,7 +117,9 @@ def type_coverage(ctx):
     try:
         check_type_hint_coverage.main()
     except AssertionError as err:
-        raise invoke.Exit(message=str(err), code=1)
+        raise invoke.Exit(
+            message=f"{err}\n\n  See {check_type_hint_coverage.__file__}", code=1
+        )
 
 
 @invoke.task(
@@ -138,6 +140,7 @@ def type_check(
     install_types=False,
     daemon=False,
     clear_cache=False,
+    report=False,
 ):
     """Run mypy static type-checking on select packages."""
     if clear_cache:
@@ -160,10 +163,12 @@ def type_check(
         *ge_pkgs,
     ]
     if install_types:
-        cmds.extend(["--install-types", "--non-interactive", "--no-strict-optional"])
+        cmds.extend(["--install-types", "--non-interactive"])
     if daemon:
         # see related issue https://github.com/python/mypy/issues/9475
         cmds.extend(["--follow-imports=normal"])
+    if report:
+        cmds.extend(["--txt-report", "type_cov", "--html-report", "type_cov"])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 

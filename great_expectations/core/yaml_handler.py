@@ -69,7 +69,7 @@ class YAMLHandler:
             Otherwise, None as the _handler.dump() works in place and will exercise the handler accordingly.
         """
         if stream:
-            return self._dump(data=data, stream=stream, **kwargs)
+            return self._dump(data=data, stream=stream, **kwargs)  # type: ignore[func-returns-value]
         return self._dump_and_return_value(data=data, **kwargs)
 
     def _dump(self, data: dict, stream, **kwargs) -> None:
