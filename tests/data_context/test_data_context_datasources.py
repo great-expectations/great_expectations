@@ -130,11 +130,11 @@ def test_delete_datasource_updates_cache(
 
     # If the value is in the cache, no store methods should be invoked
     with mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.get"
-    ) as mock_get:
+        "great_expectations.data_context.store.DatasourceStore.remove_key"
+    ) as mock_delete:
         context.delete_datasource(name)
 
-    assert not mock_get.called
+    assert not mock_delete.called
     assert name not in context.datasources
 
 
