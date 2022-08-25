@@ -541,7 +541,7 @@ def format_docstring_to_markdown(docstr: str) -> str:
 )
 @click.option(
     "--ignore-suppress",
-    "-c",
+    "-S",
     "ignore_suppress",
     is_flag=True,
     default=False,
@@ -549,7 +549,7 @@ def format_docstring_to_markdown(docstr: str) -> str:
 )
 @click.option(
     "--ignore-only-for",
-    "-c",
+    "-O",
     "ignore_only_for",
     is_flag=True,
     default=False,
