@@ -24,6 +24,9 @@ from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.datasource import Datasource
+from great_expectations.datasource.datasource_serializer import (
+    JsonDatasourceConfigSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +82,7 @@ class CloudDataContext(AbstractDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
+            serializer=JsonDatasourceConfigSerializer(schema=datasourceConfigSchema),
         )
         self._datasource_store = datasource_store
 
@@ -87,7 +91,7 @@ class CloudDataContext(AbstractDataContext):
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GE Cloud ids is returned instead.
         """
-        return [suite_key.ge_cloud_id for suite_key in self.list_expectation_suites()]
+        return [suite_key.resource_name for suite_key in self.list_expectation_suites()]
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:

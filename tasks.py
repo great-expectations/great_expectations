@@ -202,6 +202,37 @@ def mv_usage_stats_json(ctx):
     print(f"'{outfile}' copied to dbfs.")
 
 
+@invoke.task(
+    aliases=["test"],
+    help={
+        "slowest": "Report on the slowest n number of tests",
+        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
+    },
+)
+def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5):
+    """Run tests. Runs unit tests by default."""
+    # TODO: update this to also run the full e2e/integration tests (but unit-tests should always be the default mode)
+    cmds = [
+        "pytest",
+        f"--durations={slowest}",
+        "--cov=great_expectations",
+        "--cov-report term:skip-covered",  # modules with 100% will not be shown
+        "-vv",
+    ]
+    if unit:
+        cmds += [
+            "-m",
+            "unit",
+        ]
+    if cloud:
+        cmds += ["--cloud"]
+    if ci:
+        cmds += ["--cov-report", "xml"]
+    if html:
+        cmds += ["--cov-report", "html"]
+    ctx.run(" ".join(cmds), echo=True, pty=True)
+
+
 PYTHON_VERSION_DEFAULT: float = 3.8
 
 
