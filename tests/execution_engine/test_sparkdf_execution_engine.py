@@ -22,7 +22,15 @@ try:
     pyspark = pytest.importorskip("pyspark")
     # noinspection PyPep8Naming
     import pyspark.sql.functions as F
-    from pyspark.sql.types import IntegerType, LongType, Row, StringType
+    from pyspark.sql.types import (
+        DoubleType,
+        IntegerType,
+        LongType,
+        Row,
+        StringType,
+        StructField,
+        StructType,
+    )
 except ImportError:
     pyspark = None
     F = None
@@ -30,6 +38,9 @@ except ImportError:
     LongType = None
     StringType = None
     Row = None
+    DoubleType = None
+    StructType = None
+    StructField = None
 
 
 @pytest.fixture
@@ -87,6 +98,11 @@ def test_reader_fn_parameters(
     fn = engine._get_reader_fn(reader=spark_session.read, path=test_df_small_csv_path)
     assert "<bound method DataFrameReader.csv" in str(fn)
 
+    test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(
+        PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
+    ).dataframe
+    assert test_sparkdf_with_no_header_param.head() == Row(_c0="x", _c1="y")
+
     test_sparkdf_with_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
             path=test_df_small_csv_path,
@@ -96,10 +112,23 @@ def test_reader_fn_parameters(
     ).dataframe
     assert test_sparkdf_with_header_param.head() == Row(x="1", y="2")
 
-    test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(
-        PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
-    ).dataframe
-    assert test_sparkdf_with_no_header_param.head() == Row(_c0="x", _c1="y")
+    # defining schema
+    schema = StructType(
+        [
+            StructField("x", IntegerType(), True),
+            StructField("y", IntegerType(), True),
+        ]
+    )
+    test_sparkdf_with_header_param_and_schema = (
+        basic_spark_df_execution_engine.get_batch_data(
+            PathBatchSpec(
+                path=test_df_small_csv_path,
+                data_asset_name="DATA_ASSET",
+                reader_options={"header": True, "schema": schema},
+            )
+        ).dataframe
+    )
+    assert test_sparkdf_with_header_param_and_schema.head() == Row(x=1, y=2)
 
 
 def test_get_domain_records_with_column_domain(
@@ -1107,3 +1136,8 @@ def test_dataframe_property_given_loaded_batch(spark_session):
 
     # Ensuring Data not distorted
     assert engine.dataframe == df
+
+
+# Making sure the schema is there
+def test_schema_properly_added(spark_session):
+    pass

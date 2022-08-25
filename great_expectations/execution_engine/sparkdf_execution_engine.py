@@ -254,6 +254,7 @@ Please check your config."""
         elif isinstance(batch_spec, AzureBatchSpec):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
+            # see if we can add the schema information here. We would need a good way to test it though.
             path: str = batch_spec.path
             azure_url = AzureUrl(path)
             try:
@@ -284,9 +285,18 @@ Please check your config."""
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
+            schema: Optional[pyspark.sql.types.StructType] = reader_options.get(
+                "schema"
+            )
+
             path: str = batch_spec.path
             try:
-                reader: DataFrameReader = self.spark.read.options(**reader_options)
+                if schema:
+                    reader: DataFrameReader = self.spark.read.schema(schema).options(
+                        **reader_options
+                    )
+                else:
+                    reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
