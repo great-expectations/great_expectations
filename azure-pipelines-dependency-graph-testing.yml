@@ -253,6 +253,16 @@ stages:
             displayName: 'Unit Tests'
 
           - script: |
+              pip install coveralls
+              export CIRCLE_BRANCH=$BUILD_SOURCEBRANCH
+              coveralls
+            displayName: 'coveralls'
+            env:
+              CIRCLECI: 1
+              CIRCLE_BUILD_NUM: $(Build.BuildNumber)
+              COVERALLS_REPO_TOKEN: $(coveralls_repo_token)
+
+          - script: |
               # Install dependencies
               pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
