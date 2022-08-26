@@ -1356,13 +1356,28 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
+        include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
         """
-        See `AbstractDataContext.get_expectation_suite` for more information.
+        Args:
+            expectation_suite_name (str): The name of the Expectation Suite
+            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+                ExpectationConfiguration.
+            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
+
+        Returns:
+            An existing ExpectationSuite
         """
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_suite_include_rendered_content()
+            )
+
         res = self._data_context.get_expectation_suite(  # type: ignore[union-attr]
-            expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
+            expectation_suite_name=expectation_suite_name,
+            include_rendered_content=include_rendered_content,
+            ge_cloud_id=ge_cloud_id,
         )
         return res
 
@@ -1437,6 +1452,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         batch_identifier=None,
         validations_store_name=None,
         failed_only=False,
+        include_rendered_content=None,
     ):
         """Get validation results from a configured store.
 
@@ -1445,6 +1461,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
             validations_store_name: the name of the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
+            include_rendered_content: whether to re-populate the validation_result rendered_content
 
         Returns:
             validation_result
@@ -1483,6 +1500,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             if batch_identifier is None:
                 batch_identifier = filtered_key_list[-1].batch_identifier
 
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_validation_result_include_rendered_content()
+            )
+
         key = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
@@ -1492,11 +1514,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         results_dict = selected_store.get(key)
 
-        return (
+        validation_result = (
             results_dict.get_failed_validation_results()
             if failed_only
             else results_dict
         )
+
+        if include_rendered_content:
+            for expectation_validation_result in validation_result.results:
+                expectation_validation_result.render()
+
+        return validation_result
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,

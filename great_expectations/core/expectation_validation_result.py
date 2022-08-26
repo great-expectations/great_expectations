@@ -231,10 +231,7 @@ class ExpectationValidationResult(SerializableDictDot):
                 class_name=inline_renderer_config["class_name"],
             )
 
-        (
-            self.expectation_config.rendered_content,
-            self.rendered_content,
-        ) = inline_renderer.get_expectation_validation_result_rendered_content()
+        self.rendered_content = inline_renderer.get_rendered_content()
 
     @staticmethod
     def validate_result_dict(result):
