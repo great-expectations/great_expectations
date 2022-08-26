@@ -30,10 +30,10 @@ exclude = [
     # #################################################################################
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
-    'checkpoint/types',
-    'checkpoint/actions\.py',
-    'checkpoint/checkpoint\.py',
-    'checkpoint/configurator\.py',
+    'checkpoint/types',  # 34
+    'checkpoint/actions\.py',  # 18
+    'checkpoint/checkpoint\.py',  # 26
+    'checkpoint/configurator\.py', # 2
     'cli', # 157
     'core/usage_statistics', # 108
     'core/expectation_diagnostics', # 20
