@@ -254,9 +254,9 @@ Please check your config."""
         elif isinstance(batch_spec, AzureBatchSpec):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            # see if we can add the schema information here. We would need a good way to test it though.
             path: str = batch_spec.path
             azure_url = AzureUrl(path)
+            # TODO <WILL> 202208 - Add `schema` definition to Azure like PathBatchSpec below
             try:
                 credential = self._azure_options.get("credential")
                 storage_account_url = azure_url.account_url
@@ -286,12 +286,12 @@ Please check your config."""
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
             schema_json: Optional[dict] = reader_options.get("schema")
+
             schema: Optional[pyspark.sql.types.StructType] = None
             if schema_json:
                 schema: pyspark.sql.types.StructType = sparktypes.StructType.fromJson(
                     schema_json
                 )
-
             path: str = batch_spec.path
             try:
                 if schema:

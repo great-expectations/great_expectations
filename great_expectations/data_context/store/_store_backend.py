@@ -121,7 +121,6 @@ class StoreBackend(metaclass=ABCMeta):
         return value
 
     def set(self, key, value, **kwargs):
-        print("this is going to be the common place that we can do this?")
         self._validate_key(key)
         self._validate_value(value)
         # Allow the implementing setter to return something (e.g. a path used for its key)
