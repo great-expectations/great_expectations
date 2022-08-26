@@ -874,7 +874,7 @@ class DatasourceConfig(AbstractConfig):
         **kwargs,
     ) -> None:
 
-        super().__init__(id_=id, name=name)
+        super().__init__(id=id, name=name)
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name

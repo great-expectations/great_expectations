@@ -595,7 +595,7 @@ def test_checkpoint_config_print(
                             "data_asset_name": "users",
                             "data_connector_query": {"partition_index": -1},
                         },
-                        id_="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                        id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     ),
                 ],
             ),
@@ -645,7 +645,7 @@ def test_checkpoint_config_print(
                             "data_asset_name": "users",
                             "data_connector_query": {"partition_index": -1},
                         },
-                        id_="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                        id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     ),
                 ],
             ),
@@ -714,7 +714,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
         pytest.param(
             DatasourceConfig(
                 name="my_datasource",
-                id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
+                id="d3a14abd-d4cb-4343-806e-55b555b15c28",
                 class_name="Datasource",
             ),
             datasourceConfigSchema,
@@ -734,7 +734,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
                     "my_data_connector": DatasourceConfig(
                         class_name="RuntimeDataConnector",
                         batch_identifiers=["default_identifier_name"],
-                        id_="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                        id="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
                     )
                 },
             ),
