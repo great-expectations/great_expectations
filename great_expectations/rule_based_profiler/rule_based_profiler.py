@@ -1201,7 +1201,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 else key
             )
             raise ge_exceptions.ProfilerNotFoundError(
-                message=f'Non-existent Profiler configuration named "{id_}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Profiler configuration named "{id}".\n\nDetails: {exc_ik}'
             )
 
         config: dict = profiler_config.to_json_dict()
@@ -1250,7 +1250,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 else key
             )
             raise ge_exceptions.ProfilerNotFoundError(
-                message=f'Non-existent Profiler configuration named "{id_}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Profiler configuration named "{id}".\n\nDetails: {exc_ik}'
             )
 
     @staticmethod

@@ -94,7 +94,7 @@ def test_datasource_store_get_by_id(
         datasource_store_ge_cloud_backend.get(key=key)
 
         mock_get.assert_called_once_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id_}",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id}",
             params=None,
             **shared_called_with_request_kwargs,
         )
@@ -173,7 +173,7 @@ def test_datasource_store_delete_by_id(
         datasource_store_ge_cloud_backend.remove_key(key=key)
 
         mock_delete.assert_called_once_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id_}",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id}",
             json={
                 "data": {
                     "type": "datasource",
