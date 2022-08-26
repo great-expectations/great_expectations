@@ -4,6 +4,39 @@
 Changelog
 #########
 
+0.15.20
+-----------------
+* [FEATURE] `query.pair_column` Metric (#5743)
+* [FEATURE] Enhance execution time measurement utility, and save `DomainBuilder` execution time per Rule of Rule-Based Profiler (#5796)
+* [FEATURE] Support single-batch mode in MetricMultiBatchParameterBuilder (#5808)
+* [FEATURE] Inline `ExpectationSuite` Rendering (#5726)
+* [FEATURE] Better error for missing expectation (#5750) (thanks @tylertrussell)
+* [FEATURE] DataAssistants Example Notebook - Pandas (#5820)
+* [BUGFIX] Ensure name not persisted (#5813)
+* [DOCS] Change the selectable to a list (#5780) (thanks @itaise)
+* [DOCS] Fix how to create custom table expectation (#5807) (thanks @itaise)
+* [DOCS] DOC-363 how to configure a pandas datasource (#5779)
+* [MAINTENANCE] Remove xfail markers on cloud tests (#5793)
+* [MAINTENANCE] build-gallery enhancements (#5616)
+* [MAINTENANCE] Refactor `save_profiler` to remove explicit `name` and `ge_cloud_id` args (#5792)
+* [MAINTENANCE] Add v2_api flag for v2_api specific tests (#5803)
+* [MAINTENANCE] Clean up `ge_cloud_id` reference from `DataContext` `ExpectationSuite` CRUD (#5791)
+* [MAINTENANCE] Refactor convert_dictionary_to_parameter_node (#5805)
+* [MAINTENANCE] Remove `ge_cloud_id` from `DataContext.add_profiler()` signature (#5804)
+* [MAINTENANCE] Remove "copy.deepcopy()" calls from ValidationGraph (#5809)
+* [MAINTENANCE] Add vectorized is_between for common numpy dtypes (#5711)
+* [MAINTENANCE] Make partitioning directives of PartitionParameterBuilder configurable (#5810)
+* [MAINTENANCE] Write E2E Cloud test for `RuleBasedProfiler` creation and retrieval (#5815)
+* [MAINTENANCE] Change recursion to iteration for function in parameter_container.py (#5817)
+* [MAINTENANCE] add `pytest-mock` & `pytest-icdiff` plugins (#5819)
+* [MAINTENANCE] Surface cloud errors (#5797)
+* [MAINTENANCE] Clean up build_parameter_container_for_variables (#5823)
+* [MAINTENANCE] Bugfix/snowflake temp table schema name (#5814)
+* [MAINTENANCE] Update `list_` methods on `DataContext` to emit names along with object ids (#5826)
+* [MAINTENANCE] xfail Cloud E2E tests due to schema issue with `DataContextVariables` (#5828)
+* [MAINTENANCE] Clean up xfails in preparation for 0.15.20 release (#5835)
+* [MAINTENANCE] Add back xfails for E2E Cloud tests that fail on env var retrieval in Docker (#5837)
+
 0.15.19
 -----------------
 * [FEATURE] `DataAssistantResult` plot multiple metrics per expectation (#5556)

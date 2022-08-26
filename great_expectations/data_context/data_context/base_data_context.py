@@ -38,10 +38,10 @@ from great_expectations.rule_based_profiler.config.base import (
 )
 
 try:
-    from typing import Literal
+    from typing import Literal  # type: ignore[attr-defined]
 except ImportError:
     # Fallback for python < 3.8
-    from typing_extensions import Literal
+    from typing_extensions import Literal  # type: ignore[misc]
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
@@ -83,7 +83,10 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import (
+    GeCloudIdAwareRef,
+    GeCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -294,22 +297,22 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
         # initialize runtime_environment as empty dict if None
-        runtime_environment: dict = runtime_environment or {}
+        runtime_environment = runtime_environment or {}
         if self._ge_cloud_mode:
             self._data_context = CloudDataContext(
                 project_config=project_config,
                 runtime_environment=runtime_environment,
-                context_root_dir=context_root_dir,
-                ge_cloud_config=ge_cloud_config,
+                context_root_dir=context_root_dir,  # type: ignore[arg-type]
+                ge_cloud_config=ge_cloud_config,  # type: ignore[assignment,arg-type]
             )
         elif self._context_root_directory:
-            self._data_context = FileDataContext(
+            self._data_context = FileDataContext(  # type: ignore[assignment]
                 project_config=project_config,
-                context_root_dir=context_root_dir,
+                context_root_dir=context_root_dir,  # type: ignore[arg-type]
                 runtime_environment=runtime_environment,
             )
         else:
-            self._data_context = EphemeralDataContext(
+            self._data_context = EphemeralDataContext(  # type: ignore[assignment]
                 project_config=project_config, runtime_environment=runtime_environment
             )
 
@@ -318,16 +321,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # necessary properties / overrides
         self._synchronize_self_with_underlying_data_context()
 
-        self._variables = self._data_context.variables
+        self._variables = self._data_context.variables  # type: ignore[assignment,union-attr]
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
         # plugins are built.
-        self.validation_operators = {}
+        self.validation_operators: Dict = {}
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         if (
-            "validation_operators" in self.get_config().commented_map
+            "validation_operators" in self.get_config().commented_map  # type: ignore[union-attr]
             and self.config.validation_operators
         ):
             for (
@@ -358,28 +361,28 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         # NOTE: <DataContextRefactor> This remains a rather clunky way of ensuring that all necessary parameters and
         # values from self._data_context are persisted to self.
-        self._project_config = self._data_context._project_config
-        self.runtime_environment = self._data_context.runtime_environment or {}
-        self._config_variables = self._data_context.config_variables
-        self._in_memory_instance_id = self._data_context._in_memory_instance_id
-        self._stores = self._data_context._stores
-        self._datasource_store = self._data_context._datasource_store
-        self._data_context_id = self._data_context._data_context_id
-        self._usage_statistics_handler = self._data_context._usage_statistics_handler
-        self._cached_datasources = self._data_context._cached_datasources
+        self._project_config = self._data_context._project_config  # type: ignore[union-attr]
+        self.runtime_environment = self._data_context.runtime_environment or {}  # type: ignore[union-attr]
+        self._config_variables = self._data_context.config_variables  # type: ignore[union-attr]
+        self._in_memory_instance_id = self._data_context._in_memory_instance_id  # type: ignore[union-attr]
+        self._stores = self._data_context._stores  # type: ignore[union-attr]
+        self._datasource_store = self._data_context._datasource_store  # type: ignore[union-attr]
+        self._data_context_id = self._data_context._data_context_id  # type: ignore[union-attr]
+        self._usage_statistics_handler = self._data_context._usage_statistics_handler  # type: ignore[union-attr]
+        self._cached_datasources = self._data_context._cached_datasources  # type: ignore[union-attr]
         self._evaluation_parameter_dependencies_compiled = (
-            self._data_context._evaluation_parameter_dependencies_compiled
+            self._data_context._evaluation_parameter_dependencies_compiled  # type: ignore[union-attr]
         )
         self._evaluation_parameter_dependencies = (
-            self._data_context._evaluation_parameter_dependencies
+            self._data_context._evaluation_parameter_dependencies  # type: ignore[union-attr]
         )
-        self._assistants = self._data_context._assistants
+        self._assistants = self._data_context._assistants  # type: ignore[union-attr]
 
     def _save_project_config(self) -> None:
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)  # type: ignore[arg-type]
 
         try:
             with open(config_filepath, "w") as outfile:
@@ -398,7 +401,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             store (Store)
         """
 
-        self.config.stores[store_name] = store_config
+        self.config.stores[store_name] = store_config  # type: ignore[index]
         return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
@@ -417,7 +420,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self.config.validation_operators[
             validation_operator_name
         ] = validation_operator_config
-        config = self.variables.validation_operators[validation_operator_name]
+        config = self.variables.validation_operators[validation_operator_name]  # type: ignore[index]
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
             config=config,
@@ -446,7 +449,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
-        return list(self.variables.data_docs_sites.keys())
+        return list(self.variables.data_docs_sites.keys())  # type: ignore[union-attr]
 
     def get_docs_sites_urls(
         self,
@@ -479,7 +482,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         # Filter out sites that are not in site_names
         sites = (
-            {k: v for k, v in unfiltered_sites.items() if k in site_names}
+            {k: v for k, v in unfiltered_sites.items() if k in site_names}  # type: ignore[union-attr]
             if site_names
             else unfiltered_sites
         )
@@ -641,7 +644,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
 
         config_variables_filepath = os.path.join(
-            self.root_directory, config_variables_filepath
+            self.root_directory, config_variables_filepath  # type: ignore[arg-type]
         )
 
         os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
@@ -657,7 +660,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(
+    def delete_datasource(  # type: ignore[override]
         self, datasource_name: str, save_changes: bool = False
     ) -> None:
         """Delete a data source
@@ -831,12 +834,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
-        datasource = self.get_datasource(batch_kwargs.get("datasource"))
-        batch = datasource.get_batch(
+        datasource = self.get_datasource(batch_kwargs.get("datasource"))  # type: ignore[union-attr,arg-type]
+        batch = datasource.get_batch(  # type: ignore[union-attr]
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
         if data_asset_type is None:
-            data_asset_type = datasource.config.get("data_asset_type")
+            data_asset_type = datasource.config.get("data_asset_type")  # type: ignore[union-attr]
 
         validator = BridgeValidator(
             batch=batch,
@@ -1053,7 +1056,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             datasource_name = arg1
         try:
-            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(
+            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(  # type: ignore[assignment]
                 datasource_name=datasource_name
             )
             if issubclass(type(datasource), BaseDatasource):
@@ -1067,7 +1070,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 datasource_name = batch_kwargs.get("datasource")
                 if datasource_name is not None:
                     try:
-                        datasource: Union[
+                        datasource: Union[  # type: ignore[no-redef]
                             LegacyDatasource, BaseDatasource
                         ] = self.get_datasource(datasource_name=datasource_name)
                         if isinstance(datasource, LegacyDatasource):
@@ -1153,7 +1156,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
-        *,
         batch_request: Optional[BatchRequestBase] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[dict] = None,
@@ -1297,7 +1299,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._datasource_store.update_by_name(
                 datasource_name=datasource_name, datasource_config=datasource_config
             )
-        self.config.datasources[datasource_name] = datasource_config
+        self.config.datasources[datasource_name] = datasource_config  # type: ignore[assignment,index]
         self._cached_datasources[datasource_name] = datasource_config
 
     def add_batch_kwargs_generator(
@@ -1334,23 +1336,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             validation_operators.append(value)
         return validation_operators
 
-    def list_expectation_suite_names(self) -> List[str]:
-        return self._data_context.list_expectation_suite_names()
-
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> ExpectationSuite:
         """
         See `AbstractDataContext.create_expectation_suite` for more information.
         """
-        res = self._data_context.create_expectation_suite(
+        res = self._data_context.create_expectation_suite(  # type: ignore[union-attr]
             expectation_suite_name,
             overwrite_existing=overwrite_existing,
-            ge_cloud_id=ge_cloud_id,
             **kwargs,
         )
         self._synchronize_self_with_underlying_data_context()
@@ -1364,12 +1361,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         See `AbstractDataContext.get_expectation_suite` for more information.
         """
-        res = self._data_context.get_expectation_suite(
+        res = self._data_context.get_expectation_suite(  # type: ignore[union-attr]
             expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
         )
         return res
 
-    def delete_expectation_suite(
+    def delete_expectation_suite(  # type: ignore[override]
         self,
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
@@ -1377,7 +1374,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         See `AbstractDataContext.delete_expectation_suite` for more information.
         """
-        res = self._data_context.delete_expectation_suite(
+        res = self._data_context.delete_expectation_suite(  # type: ignore[union-attr]
             expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
         )
         self._synchronize_self_with_underlying_data_context()
@@ -1392,34 +1389,34 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        ge_cloud_id: Optional[str] = None,
-        **kwargs,
-    ):
+        include_rendered_content: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> None:
         """Save the provided expectation suite into the DataContext.
 
         Args:
-            expectation_suite: the suite to save
-            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
-                be read from the suite
+            expectation_suite: The suite to save.
+            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
+                from the suite.
+            overwrite_existing: Whether to overwrite the suite if it already exists.
+            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
 
         Returns:
             None
         """
-        if ge_cloud_id:
-            self._data_context.save_expectation_suite(
-                expectation_suite,
-                expectation_suite_name,
-                overwrite_existing,
-                ge_cloud_id,
-                **kwargs,
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
             )
-        else:
-            self._data_context.save_expectation_suite(
-                expectation_suite,
-                expectation_suite_name,
-                overwrite_existing,
-                **kwargs,
-            )
+        )
+
+        self._data_context.save_expectation_suite(  # type: ignore[union-attr]
+            expectation_suite,
+            expectation_suite_name,
+            overwrite_existing,
+            include_rendered_content,
+            **kwargs,
+        )
         self._synchronize_self_with_underlying_data_context()
 
     def store_validation_result_metrics(
@@ -1430,7 +1427,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     @property
     def root_directory(self) -> Optional[str]:
         if hasattr(self._data_context, "_context_root_directory"):
-            return self._data_context._context_root_directory
+            return self._data_context._context_root_directory  # type: ignore[union-attr]
+        return None
 
     def get_validation_result(
         self,
@@ -2079,7 +2077,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         See parent 'AbstractDataContext.add_checkpoint()' for more information
         """
-        checkpoint = self._data_context.add_checkpoint(
+        checkpoint = self._data_context.add_checkpoint(  # type: ignore[union-attr]
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -2212,7 +2210,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config_version: float,
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
-        ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
         config_data = {
             "name": name,
@@ -2229,19 +2226,20 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         config = RuleBasedProfilerConfig(**profiler_config)
 
-        return RuleBasedProfiler.add_profiler(
+        profiler = RuleBasedProfiler.add_profiler(
             config=config,
             data_context=self,
             profiler_store=self.profiler_store,
-            ge_cloud_id=ge_cloud_id,
         )
+        return profiler
 
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> None:
+    ) -> RuleBasedProfiler:
+        name = profiler.name
+        ge_cloud_id = profiler.ge_cloud_id
+
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
             key = GeCloudIdentifier(
@@ -2250,7 +2248,16 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         else:
             key = ConfigurationIdentifier(configuration_key=name)
 
-        self.profiler_store.set(key=key, value=profiler.config)
+        response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
+        if isinstance(response, GeCloudResourceRef):
+            ge_cloud_id = response.ge_cloud_id
+
+        # If an id is present, we want to prioritize that as our key for object retrieval
+        if ge_cloud_id:
+            name = None  # type: ignore[assignment]
+
+        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
+        return profiler
 
     def get_profiler(
         self,
@@ -2360,6 +2367,18 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ge_cloud_id=ge_cloud_id,
         )
 
+    def list_expectation_suites(self) -> Optional[List[str]]:
+        """
+        See parent 'AbstractDataContext.list_expectation_suites()` for more information.
+        """
+        return self._data_context.list_expectation_suites()  # type: ignore[union-attr]
+
+    def list_expectation_suite_names(self) -> List[str]:
+        """
+        See parent 'AbstractDataContext.list_expectation_suite_names()` for more information.
+        """
+        return self._data_context.list_expectation_suite_names()  # type: ignore[union-attr]
+
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,
@@ -2367,7 +2386,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: Union[
+        return_mode: Union[  # type: ignore[name-defined]
             Literal["instantiated_class"], Literal["report_object"]
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
@@ -2500,7 +2519,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             if class_name is None:
                 usage_stats_event_payload[
                     "diagnostic_info"
-                ] = usage_stats_event_payload.get("diagnostic_info", []) + [
+                ] = usage_stats_event_payload.get(
+                    "diagnostic_info", []
+                ) + [  # type: ignore[operator]
                     "__class_name_not_provided__"
                 ]
             elif (
@@ -2536,7 +2557,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             )
 
             substitutions: dict = {
-                **substituted_config_variables,
+                **substituted_config_variables,  # type: ignore[list-item]
                 **dict(os.environ),
                 **runtime_environment,
             }
@@ -2564,7 +2585,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return config
 
         except Exception as e:
-            usage_stats_event_payload: dict = {
+            usage_stats_event_payload = {
                 "diagnostic_info": ["__yaml_parse_error__"],
             }
             send_usage_message(
@@ -2592,11 +2613,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ),
         )
         store_name = instantiated_class.store_name or store_name
-        self.config.stores[store_name] = config
+        self.config.stores[store_name] = config  # type: ignore[index]
 
         anonymizer = Anonymizer(self.data_context_id)
         usage_stats_event_payload = anonymizer.anonymize(
-            store_name=store_name, store_obj=instantiated_class
+            store_name=store_name, store_obj=instantiated_class  # type: ignore[arg-type]
         )
         return instantiated_class, usage_stats_event_payload
 
@@ -2624,7 +2645,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if class_name == "SimpleSqlalchemyDatasource":
             # Use the raw config here, defaults will be added in the anonymizer
             usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class, name=datasource_name, config=config
+                obj=instantiated_class, name=datasource_name, config=config  # type: ignore[arg-type]
             )
         else:
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
@@ -2632,7 +2653,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             full_datasource_config = datasourceConfigSchema.dump(datasource_config)
             usage_stats_event_payload = anonymizer.anonymize(
                 obj=instantiated_class,
-                name=datasource_name,
+                name=datasource_name,  # type: ignore[arg-type]
                 config=full_datasource_config,
             )
         return instantiated_class, usage_stats_event_payload
@@ -2650,11 +2671,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         checkpoint_config: Union[CheckpointConfig, dict]
 
-        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)
-        checkpoint_config = checkpoint_config.to_json_dict()
+        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)  # type: ignore[assignment]
+        checkpoint_config = checkpoint_config.to_json_dict()  # type: ignore[union-attr]
         checkpoint_config.update({"name": checkpoint_name})
 
-        checkpoint_class_args: dict = filter_properties_dict(
+        checkpoint_class_args: dict = filter_properties_dict(  # type: ignore[assignment]
             properties=checkpoint_config,
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
@@ -2672,7 +2693,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         anonymizer = Anonymizer(self.data_context_id)
 
         usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config
+            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
         )
 
         return instantiated_class, usage_stats_event_payload
@@ -2706,7 +2727,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         anonymizer = Anonymizer(self.data_context_id)
 
         usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=data_connector_name, config=config
+            obj=instantiated_class, name=data_connector_name, config=config  # type: ignore[arg-type]
         )
         return instantiated_class, usage_stats_event_payload
 
@@ -2724,7 +2745,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiler_config: Union[
             RuleBasedProfilerConfig, dict
         ] = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
-        profiler_config = profiler_config.to_json_dict()
+        profiler_config = profiler_config.to_json_dict()  # type: ignore[union-attr]
         profiler_config.update({"name": profiler_name})
 
         instantiated_class = instantiate_class_from_config(
@@ -2739,7 +2760,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         anonymizer = Anonymizer(self.data_context_id)
 
         usage_stats_event_payload: dict = anonymizer.anonymize(
-            obj=instantiated_class, name=profiler_name, config=profiler_config
+            obj=instantiated_class, name=profiler_name, config=profiler_config  # type: ignore[arg-type]
         )
 
         return instantiated_class, usage_stats_event_payload
@@ -2784,7 +2805,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             store_name: str = name or config.get("name") or "my_temp_store"
             store_name = instantiated_class.store_name or store_name
             usage_stats_event_payload = anonymizer.anonymize(
-                store_name=store_name, store_obj=instantiated_class
+                store_name=store_name, store_obj=instantiated_class  # type: ignore[arg-type]
             )
         elif parent_class_from_config is not None and parent_class_from_config.endswith(
             "Datasource"
@@ -2802,12 +2823,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             if parent_class_from_config == "SimpleSqlalchemyDatasource":
                 # Use the raw config here, defaults will be added in the anonymizer
                 usage_stats_event_payload = anonymizer.anonymize(
-                    obj=instantiated_class, name=datasource_name, config=config
+                    obj=instantiated_class, name=datasource_name, config=config  # type: ignore[arg-type]
                 )
             else:
                 usage_stats_event_payload = anonymizer.anonymize(
                     obj=instantiated_class,
-                    name=datasource_name,
+                    name=datasource_name,  # type: ignore[arg-type]
                     config=full_datasource_config,
                 )
 
@@ -2817,13 +2838,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             checkpoint_config: Union[CheckpointConfig, dict]
-            checkpoint_config = CheckpointConfig.from_commented_map(
+            checkpoint_config = CheckpointConfig.from_commented_map(  # type: ignore[assignment]
                 commented_map=config
             )
-            checkpoint_config = checkpoint_config.to_json_dict()
+            checkpoint_config = checkpoint_config.to_json_dict()  # type: ignore[union-attr]
             checkpoint_config.update({"name": checkpoint_name})
             usage_stats_event_payload = anonymizer.anonymize(
-                obj=checkpoint_config, name=checkpoint_name, config=checkpoint_config
+                obj=checkpoint_config, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
             )
 
         elif parent_class_from_config is not None and parent_class_from_config.endswith(
@@ -2833,7 +2854,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 name or config.get("name") or "my_temp_data_connector"
             )
             usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class, name=data_connector_name, config=config
+                obj=instantiated_class, name=data_connector_name, config=config  # type: ignore[arg-type]
             )
 
         else:
@@ -2866,7 +2887,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             If initialize=True return an instantiated Datasource object, else None.
         """
 
-        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr]
             name=name,
             config=config,
             initialize=initialize,

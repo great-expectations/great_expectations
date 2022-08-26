@@ -1,5 +1,4 @@
 import logging
-import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -197,7 +196,7 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_definition: BatchDefinition,
         runtime_parameters: dict,
-    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
+    ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
             batch_definition=batch_definition,
             runtime_parameters=runtime_parameters,
@@ -313,6 +312,9 @@ class RuntimeDataConnector(DataConnector):
             return RuntimeDataBatchSpec(batch_spec)
         elif "query" in runtime_parameters:
             batch_spec["query"] = runtime_parameters.get("query")
+            batch_spec["temp_table_schema_name"] = runtime_parameters.get(
+                "temp_table_schema_name"
+            )
             return RuntimeQueryBatchSpec(batch_spec)
         elif "path" in runtime_parameters:
             path: str = runtime_parameters["path"]

@@ -2,7 +2,7 @@ import copy
 import datetime
 import itertools
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Union, cast
 
 import numpy as np
 
@@ -83,6 +83,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         "upper_bound",
     }
 
+    exclude_field_names: Set[
+        str
+    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "single_batch_mode",
+    }
+
     def __init__(
         self,
         name: str,
@@ -160,6 +166,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             metric_name=metric_name,
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
+            single_batch_mode=False,
             enforce_numeric_metric=enforce_numeric_metric,
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,

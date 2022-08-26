@@ -169,7 +169,7 @@ class BaseDatasource:
                 batch_data,
                 batch_spec,
                 batch_markers,
-            ) = data_connector.get_batch_data_and_metadata(
+            ) = data_connector.get_batch_data_and_metadata(  # type: ignore[call-arg]
                 batch_definition=batch_definition,
                 runtime_parameters=runtime_parameters,
             )
@@ -189,9 +189,9 @@ class BaseDatasource:
                 batch_definition.batch_spec_passthrough = (
                     batch_request.batch_spec_passthrough
                 )
-                batch_data: Any
-                batch_spec: PathBatchSpec
-                batch_markers: BatchMarkers
+                batch_data: Any  # type: ignore[no-redef]
+                batch_spec: PathBatchSpec  # type: ignore[no-redef]
+                batch_markers: BatchMarkers  # type: ignore[no-redef]
                 (
                     batch_data,
                     batch_spec,
@@ -227,7 +227,7 @@ class BaseDatasource:
             },
         )
         new_data_connector.data_context_root_directory = (
-            self._data_context_root_directory
+            self._data_context_root_directory  # type: ignore[assignment]
         )
 
         self.data_connectors[name] = new_data_connector
@@ -259,11 +259,11 @@ class BaseDatasource:
         """
         available_data_asset_names: dict = {}
         if data_connector_names is None:
-            data_connector_names = self.data_connectors.keys()
+            data_connector_names = self.data_connectors.keys()  # type: ignore[assignment]
         elif isinstance(data_connector_names, str):
             data_connector_names = [data_connector_names]
 
-        for data_connector_name in data_connector_names:
+        for data_connector_name in data_connector_names:  # type: ignore[union-attr]
             data_connector: DataConnector = self.data_connectors[data_connector_name]
             available_data_asset_names[
                 data_connector_name
@@ -298,11 +298,11 @@ class BaseDatasource:
 
         available_data_asset_names_and_types: dict = {}
         if data_connector_names is None:
-            data_connector_names = self.data_connectors.keys()
+            data_connector_names = self.data_connectors.keys()  # type: ignore[assignment]
         elif isinstance(data_connector_names, str):
             data_connector_names = [data_connector_names]
 
-        for data_connector_name in data_connector_names:
+        for data_connector_name in data_connector_names:  # type: ignore[union-attr]
             data_connector: DataConnector = self.data_connectors[data_connector_name]
             available_data_asset_names_and_types[
                 data_connector_name
@@ -386,7 +386,7 @@ class BaseDatasource:
         """
         Property for datasource id_
         """
-        return self._id_
+        return self._id_  # type: ignore[return-value]
 
     @property
     def execution_engine(self) -> ExecutionEngine:
