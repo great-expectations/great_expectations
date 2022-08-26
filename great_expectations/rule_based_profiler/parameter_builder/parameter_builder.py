@@ -133,6 +133,18 @@ class ParameterBuilder(ABC, Builder):
             variables=variables,
             parameters=parameters,
         )
+        print(
+            f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] FULLY_QUALIFIED_PARAMETER_NAMES:\n{fully_qualified_parameter_names} ; TYPE: {str(type(fully_qualified_parameter_names))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] RECOMPUTE_EXISTING_PARAMETER_VALUES:\n{recompute_existing_parameter_values} ; TYPE: {str(type(recompute_existing_parameter_values))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] SELF.RAW_FULLY_QUALIFIED_PARAMETER_NAME:\n{self.raw_fully_qualified_parameter_name} ; TYPE: {str(type(self.raw_fully_qualified_parameter_name))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] SELF.JSON_SERIALIZED_FULLY_QUALIFIED_PARAMETER_NAME:\n{self.json_serialized_fully_qualified_parameter_name} ; TYPE: {str(type(self.json_serialized_fully_qualified_parameter_name))}"
+        )
         if (
             recompute_existing_parameter_values
             or self.raw_fully_qualified_parameter_name
@@ -140,6 +152,9 @@ class ParameterBuilder(ABC, Builder):
             or self.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
+            print(
+                f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] GOING_TO_set_BATCH_LIST_IF_NULL_BATCH_REQUEST-BATCH_REQUEST:\n{batch_request} ; TYPE: {str(type(batch_request))}"
+            )
             self.set_batch_list_if_null_batch_request(
                 batch_list=batch_list,
                 batch_request=batch_request,
@@ -181,6 +196,7 @@ class ParameterBuilder(ABC, Builder):
                 parameter_container=parameters[domain.id],
                 parameter_values=parameter_values,
             )
+        print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] END")
 
     @property
     def name(self) -> str:
@@ -707,6 +723,9 @@ def resolve_evaluation_dependencies(
         "ParameterBuilder"  # noqa: F821
     ] = parameter_builder.evaluation_parameter_builders
 
+    print(
+        f"\n[ALEX_TEST] [RESOLVE_EVALUATION_DEPENDENCIES-EVALUATION_PARAMETER_BUILDERS-{evaluation_parameter_builders}] CALL-0"
+    )
     if not evaluation_parameter_builders:
         return
 
@@ -714,12 +733,18 @@ def resolve_evaluation_dependencies(
     # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
     # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name");
     # this list contains both, "raw" (for internal calculations) and "JSON-serialized" fully-qualified parameter names.
+    print(
+        f"\n[ALEX_TEST] [RESOLVE_EVALUATION_DEPENDENCIES-FULLY_QUALIFIED_PARAMETER_NAMES-{fully_qualified_parameter_names}] CALL-1"
+    )
     if fully_qualified_parameter_names is None:
         fully_qualified_parameter_names = get_fully_qualified_parameter_names(
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
+    print(
+        f"\n[ALEX_TEST] [RESOLVE_EVALUATION_DEPENDENCIES-FULLY_QUALIFIED_PARAMETER_NAMES-{fully_qualified_parameter_names}] CALL-2"
+    )
 
     # Step-3: Check for presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
     # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
