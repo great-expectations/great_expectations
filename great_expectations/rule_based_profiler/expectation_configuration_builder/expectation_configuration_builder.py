@@ -106,12 +106,18 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         recompute_existing_parameter_values: bool = False,
     ) -> None:
+        print(
+            f"\n[ALEX_TEST] [ExpectationConfigurationBuilder.RESOLVE_VALIDATION_DEPENDENCIES()] EXPECTATION_TYPE-[{self.expectation_type}]-BEGIN"
+        )
         validation_parameter_builders: List[ParameterBuilder] = (
             self.validation_parameter_builders or []
         )
 
         validation_parameter_builder: ParameterBuilder
         for validation_parameter_builder in validation_parameter_builders:
+            print(
+                f"\n[ALEX_TEST] [ExpectationConfigurationBuilder.RESOLVE_VALIDATION_DEPENDENCIES()] EXPECTATION_TYPE-[{self.expectation_type}]-BUILDING_PARAMETER-[{validation_parameter_builder.name}]-BEGIN"
+            )
             validation_parameter_builder.build_parameters(
                 domain=domain,
                 variables=variables,
@@ -120,6 +126,9 @@ class ExpectationConfigurationBuilder(ABC, Builder):
                 batch_list=batch_list,
                 batch_request=batch_request,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
+            )
+            print(
+                f"\n[ALEX_TEST] [ExpectationConfigurationBuilder.RESOLVE_VALIDATION_DEPENDENCIES()] EXPECTATION_TYPE-[{self.expectation_type}]-BUILDING_PARAMETER-[{validation_parameter_builder.name}]-END"
             )
 
     @abstractmethod

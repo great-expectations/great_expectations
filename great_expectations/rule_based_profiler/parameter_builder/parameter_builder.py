@@ -125,6 +125,7 @@ class ParameterBuilder(ABC, Builder):
             batch_request: Explicit batch_request used to supply data at runtime.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
         """
+        print(f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] BEGIN")
         fully_qualified_parameter_names: List[
             str
         ] = get_fully_qualified_parameter_names(
@@ -144,6 +145,9 @@ class ParameterBuilder(ABC, Builder):
                 batch_request=batch_request,
             )
 
+            print(
+                f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] GOING_TO_RESOLVE_EVALUATION_DEPENDENCIES"
+            )
             resolve_evaluation_dependencies(
                 parameter_builder=self,
                 domain=domain,
@@ -151,6 +155,9 @@ class ParameterBuilder(ABC, Builder):
                 parameters=parameters,
                 fully_qualified_parameter_names=fully_qualified_parameter_names,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
+            )
+            print(
+                f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] DONE_RESOLVING_EVALUATION_DEPENDENCIES"
             )
 
             if parameter_computation_impl is None:
@@ -718,6 +725,9 @@ def resolve_evaluation_dependencies(
     # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
     evaluation_parameter_builder: "ParameterBuilder"  # noqa: F821
     for evaluation_parameter_builder in evaluation_parameter_builders:
+        print(
+            f"\n[ALEX_TEST] [RESOLVE_EVALUATION_DEPENDENCIES-EVALUATION_PARAMETER_BUILDER-{evaluation_parameter_builder.name}] BEGIN"
+        )
         if (
             evaluation_parameter_builder.raw_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
@@ -745,3 +755,6 @@ def resolve_evaluation_dependencies(
                 parameters=parameters,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
+        print(
+            f"\n[ALEX_TEST] [RESOLVE_EVALUATION_DEPENDENCIES-EVALUATION_PARAMETER_BUILDER-{evaluation_parameter_builder.name}] END"
+        )
