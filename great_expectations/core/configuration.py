@@ -10,8 +10,8 @@ from great_expectations.types import SerializableDictDot
 class AbstractConfig(ABC, SerializableDictDot):
     """Abstract base class for Config objects. Sets the fields that must be included on a Config."""
 
-    def __init__(self, id_: Optional[str] = None, name: Optional[str] = None) -> None:
-        self.id_ = id_
+    def __init__(self, id: Optional[str] = None, name: Optional[str] = None) -> None:
+        self.id = id
         self.name = name
         super().__init__()
 
@@ -20,7 +20,7 @@ class AbstractConfig(ABC, SerializableDictDot):
         """
         Round trip a dictionary with a schema so that validation and serialization logic is applied.
 
-        Example: Loading a config with a `_id` field but serializing it as `id`.
+        Example: Loading a config with a `id_` field but serializing it as `id`.
         """
         _loaded = schema.load(target)
         _config = cls(**_loaded)

@@ -715,7 +715,7 @@ class ExpectationSuite(SerializableDictDot):
         for expectation_configuration in expectation_configurations:
             domain_type = expectation_configuration.get_domain_type()
             kwargs = expectation_configuration.kwargs
-            pprint.pprint(
+            pprint.pprint(  # type: ignore[call-arg]
                 object={
                     expectation_configuration.expectation_type: {
                         "domain": domain_type.value,
@@ -949,7 +949,7 @@ class ExpectationSuite(SerializableDictDot):
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """
         for expectation_configuration in self.expectations:
-            inline_renderer_config: "InlineRendererConfig" = {
+            inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
                 "class_name": "InlineRenderer",
                 "render_object": expectation_configuration,
             }

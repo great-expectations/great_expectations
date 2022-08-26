@@ -165,7 +165,7 @@ class UsageStatsEvents(enum.Enum):
                 f"_{'_'.join([item.upper() for item in other_items])}"
             )
         else:
-            other_items_str: str = ""
+            other_items_str = ""
         enum_name: str = f"CLI_{noun.upper()}_{verb.upper()}{other_items_str}"
 
         return getattr(cls, enum_name).value

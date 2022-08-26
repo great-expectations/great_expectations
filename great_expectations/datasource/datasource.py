@@ -179,7 +179,7 @@ class LegacyDatasource:
             )
         self._data_asset_type = data_asset_type
         self._datasource_config = kwargs
-        self._batch_kwargs_generators = {}
+        self._batch_kwargs_generators: dict = {}
 
         self._datasource_config["data_asset_type"] = data_asset_type
         if batch_kwargs_generators is not None:
