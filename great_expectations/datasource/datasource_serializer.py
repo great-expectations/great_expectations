@@ -11,10 +11,8 @@ serialized_value = serializer.serialize(datasource_config)
 """
 from typing import TYPE_CHECKING, cast
 
-
-from great_expectations.core.util import convert_to_json_serializable
-
 from great_expectations.core.serializer import AbstractConfigSerializer
+from great_expectations.core.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations.core.configuration import AbstractConfig
