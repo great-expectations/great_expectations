@@ -21,7 +21,11 @@ def test_init_dict_config_serializer(empty_abstract_config_schema: Schema):
     assert serializer.schema == empty_abstract_config_schema
 
 
-@pytest.mark.xfail(raises=(ImportError, NameError), reason="xfail until PR 5778 merges with JsonConfigSerializer", strict=True,)
+@pytest.mark.xfail(
+    raises=(ImportError, NameError),
+    reason="xfail until PR 5778 merges with JsonConfigSerializer",
+    strict=True,
+)
 def test_init_json_config_serializer(empty_abstract_config_schema: Schema):
 
     # Note: move this import statement to the top of the file once this test is meant to pass
