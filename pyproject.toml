@@ -75,8 +75,11 @@ exclude = [
     'rule_based_profiler/parameter_container\.py',  # 7
     'rule_based_profiler/builder\.py',  # 4
     'rule_based_profiler/domain\.py', # 4
-    'validation_operators', # 47
-    'validator', # 44
+    'validation_operators/types',  # 34
+    'validation_operators/validation_operators\.py',  # 16
+    'validator/exception_info\.py', # 1
+    'validator/validation_graph\.py',  # 2
+    'validator/validator\.py', # 54
     'util\.py', # 19
 ]
 
