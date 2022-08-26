@@ -384,7 +384,7 @@ class BaseDatasource:
     @property
     def id(self) -> str:
         """
-        Property for datasource id_
+        Property for datasource id
         """
         return self._id  # type: ignore[return-value]
 

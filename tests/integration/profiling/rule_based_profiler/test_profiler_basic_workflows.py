@@ -289,7 +289,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         data_context=context,
     )
 
-    # Config would normally go through schema validation to remove optional values (such as id_)
+    # Config would normally go through schema validation to remove optional values (such as id)
     # but for purposes of testing, we deem `to_json_dict` appropriate.
     res: dict = my_rbp.config.to_json_dict()
     assert res == {
@@ -307,7 +307,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
     # load profiler from store
     my_loaded_profiler: RuleBasedProfiler = context.get_profiler(name="my_rbp")
 
-    # Config would normally go through schema validation to remove optional values (such as id_)
+    # Config would normally go through schema validation to remove optional values (such as id)
     # but for purposes of testing, we deem `to_json_dict` appropriate.
     res = my_loaded_profiler.config.to_json_dict()
     assert res == {
