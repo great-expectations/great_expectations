@@ -82,8 +82,8 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
     )
     def _spark(cls, column, **kwargs):
         # TODO: <Alex>ALEX</Alex>
-        # return F.count(F.lit(1)).over(Window.partitionBy(column)) <= 1
+        return F.count(F.lit(1)).over(Window.partitionBy(column)) <= 1
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
-        return F.count(column).over(Window.partitionBy(column)) <= 1
+        # return F.count(column).over(Window.partitionBy(column)) <= 1
         # TODO: <Alex>ALEX</Alex>
