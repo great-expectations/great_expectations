@@ -34,7 +34,17 @@ exclude = [
     'checkpoint/actions\.py',  # 18
     'checkpoint/checkpoint\.py',  # 26
     'checkpoint/configurator\.py', # 2
-    'cli', # 157
+    'cli/upgrade_helpers',  # 76
+    'cli/batch_request\.py',  # 11
+    'cli/checkpoint\.py',  # 9
+    'cli/cli\.py',  # 10
+    'cli/datasource\.py',  # 12
+    'cli/docs\.py',  # 1
+    'cli/project\.py',  # 5
+    'cli/toolkit\.py',  # 27
+    'cli/store\.py',  # 2
+    'cli/suite\.py',  # 24
+    'cli/python_subprocess\.py', # 6
     'core/usage_statistics', # 108
     'core/expectation_diagnostics', # 20
     'core/batch\.py', # 29
