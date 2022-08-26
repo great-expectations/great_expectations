@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
-    def serialize(self, obj: AbstractConfig) -> dict:
+    def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize DatasourceConfig to dict appropriate for writing to yaml.
 
         Args:
@@ -43,7 +43,7 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
 
 
 class NamedDatasourceSerializer(AbstractConfigSerializer):
-    def serialize(self, obj: AbstractConfig) -> dict:
+    def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize DatasourceConfig with datasource name but not data connector name to match existing context.list_datasources() functionality.
 
         Args:
