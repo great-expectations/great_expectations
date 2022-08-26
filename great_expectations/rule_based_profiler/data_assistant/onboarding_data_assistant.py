@@ -773,7 +773,6 @@ class OnboardingDataAssistant(DataAssistant):
             "round_decimals": 1,
         }
         parameter_builders: List[ParameterBuilder] = [
-            # column_partition_parameter_builder_for_metrics,
             column_min_metric_multi_batch_parameter_builder_for_metrics,
             column_max_metric_multi_batch_parameter_builder_for_metrics,
             column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,

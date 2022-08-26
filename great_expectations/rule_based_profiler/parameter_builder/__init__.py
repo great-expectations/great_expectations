@@ -26,6 +26,6 @@ from great_expectations.rule_based_profiler.parameter_builder.simple_date_format
 from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (  # isort:skip
     ValueSetMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.partition_parameter_builder import (  # isort:skip
+from great_expectations.rule_based_profiler.parameter_builder.histogram_parameter_builder import (  # isort:skip
     HistogramParameterBuilder,
 )

@@ -38,7 +38,9 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if sort not in ["value", "count", "none"]:
             raise ValueError("sort must be either 'value', 'count', or 'none'")
         if collate is not None:
-            raise ValueError("collate parameter is not supported in PandasDataset")
+            raise ValueError(
+                "collate parameter is not supported in PandasExecutionEngine"
+            )
 
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN

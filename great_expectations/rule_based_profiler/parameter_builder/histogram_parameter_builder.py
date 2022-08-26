@@ -29,7 +29,18 @@ from great_expectations.util import (
 class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
     """
     Compute histogram/partition using specified metric (depending on bucketizaiton directive) for one Batch of data.
+
+    The histogram parameter builder handles building histograms from both continuous and discrete distributions.
+    A discrete distribution will be produced when `bucketize_data` is set to False.
+
+    If `bucketize_data` is set to true, then the parameter builder will first determine bins using the method
+    specified by the `bins` argument, and then compute the histogram using those bins.
     """
+
+    # NOTE - 20220823 - JPC - I believe supporting explicitly-provided bins could also make sense, but
+    # that it is not the dominant case for profiling data.
+    # Allowing that would align with the numpy.histogram api. However, it would overload the definition
+    # of the `bins` parameter (and its type) substantially.
 
     exclude_field_names: Set[
         str
@@ -74,8 +85,8 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
             data_context: BaseDataContext associated with this ParameterBuilder
         """
 
-        self._column_partition_metric_single_batch_parameter_builder_config = (
-            ParameterBuilderConfig(
+        if bucketize_data:
+            self._column_partition_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
                 module_name="great_expectations.rule_based_profiler.parameter_builder",
                 class_name="MetricSingleBatchParameterBuilder",
                 name="column_partition_metric_single_batch_parameter_builder",
@@ -91,9 +102,16 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
                 reduce_scalar_metric=False,
                 evaluation_parameter_builder_configs=None,
             )
-        )
-        self._column_value_counts_metric_single_batch_parameter_builder_config = (
-            ParameterBuilderConfig(
+            # TODO: because of the way this class declares its properties for exclusion in
+            # advance, we MUST specify a value of this property.
+            self._column_value_counts_metric_single_batch_parameter_builder_config = (
+                None
+            )
+            evaluation_parameter_builder_configs = [
+                self._column_partition_metric_single_batch_parameter_builder_config
+            ]
+        else:
+            self._column_value_counts_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
                 module_name="great_expectations.rule_based_profiler.parameter_builder",
                 class_name="MetricSingleBatchParameterBuilder",
                 name="column_value_counts_metric_single_batch_parameter_builder",
@@ -107,7 +125,13 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
                 reduce_scalar_metric=False,
                 evaluation_parameter_builder_configs=None,
             )
-        )
+            # TODO: because of the way this class declares its properties for exclusion in
+            # advance, we MUST specify a value of this property.
+            self._column_partition_metric_single_batch_parameter_builder_config = None
+            evaluation_parameter_builder_configs = [
+                self._column_value_counts_metric_single_batch_parameter_builder_config
+            ]
+
         self._column_values_nonnull_count_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="MetricSingleBatchParameterBuilder",
@@ -121,12 +145,9 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
             evaluation_parameter_builder_configs=None,
         )
 
-        if evaluation_parameter_builder_configs is None:
-            evaluation_parameter_builder_configs = [
-                self._column_partition_metric_single_batch_parameter_builder_config,
-                self._column_value_counts_metric_single_batch_parameter_builder_config,
-                self._column_values_nonnull_count_metric_single_batch_parameter_builder_config,
-            ]
+        evaluation_parameter_builder_configs += [
+            self._column_values_nonnull_count_metric_single_batch_parameter_builder_config,
+        ]
 
         super().__init__(
             name=name,
@@ -170,38 +191,6 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
 
         is_categorical: bool = not bucketize_data
 
-        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
-        # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=fully_qualified_column_partition_metric_single_batch_parameter_builder_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-        bins: MetricValue = column_partition_parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-        ]
-
-        if bins is None:
-            is_categorical = True
-        elif not is_categorical:
-            ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
-                data=bins,
-                parse_strings_as_datetimes=True,
-            )
-            bins_ndarray_as_float: MetricValue
-            if ndarray_is_datetime_type:
-                bins_ndarray_as_float = convert_ndarray_datetime_to_float_dtype(
-                    data=bins
-                )
-            else:
-                bins_ndarray_as_float = bins
-
-            is_categorical = ndarray_is_datetime_type or not np.all(
-                np.diff(bins_ndarray_as_float) > 0.0
-            )
-
         fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
         # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
@@ -216,42 +205,20 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
         details: dict
 
         weights: list
-
-        if is_categorical:
-            fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
-            # Obtain "column.value_counts" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-            column_value_counts_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+        if bucketize_data:
+            fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
+            # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
                 domain=domain,
-                parameter_reference=fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name,
+                parameter_reference=fully_qualified_column_partition_metric_single_batch_parameter_builder_name,
                 expected_return_type=None,
                 variables=variables,
                 parameters=parameters,
             )
-
-            values: list = list(
-                column_value_counts_parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-                ].index
-            )
-            weights = list(
-                np.asarray(
-                    column_value_counts_parameter_node[
-                        FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-                    ]
-                )
-                / column_values_nonnull_count_parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-                ]
-            )
-
-            partition_object = {
-                "values": values,
-                "weights": weights,
-            }
-            details = column_value_counts_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+            bins: MetricValue = column_partition_parameter_node[
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
             ]
-        else:
+
             self.metric_name = "column.histogram"
             self.metric_value_kwargs = {
                 "bins": tuple(bins),
@@ -293,6 +260,41 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
                 "tail_weights": [tail_weights, tail_weights],
             }
             details = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
+
+        else:
+            fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
+            # Obtain "column.value_counts" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            column_value_counts_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
+
+            values: list = list(
+                column_value_counts_parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+                ].index
+            )
+            weights = list(
+                np.asarray(
+                    column_value_counts_parameter_node[
+                        FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+                    ]
+                )
+                / column_values_nonnull_count_parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+                ]
+            )
+
+            partition_object = {
+                "values": values,
+                "weights": weights,
+            }
+            details = column_value_counts_parameter_node[
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+            ]
 
         return Attributes(
             {
