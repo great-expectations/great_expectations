@@ -2044,7 +2044,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiling_results["success"] = True
         return profiling_results
 
-    def list_checkpoints(self) -> List[str]:
+    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=self.ge_cloud_mode)
 
     def add_checkpoint(
