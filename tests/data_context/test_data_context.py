@@ -2334,7 +2334,7 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
                 "name": "data_dir_example_data_connector",
             }
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)
@@ -2694,7 +2694,7 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
                 "name": "default_runtime_data_connector_name",
             },
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert datasource_from_yaml.config == {
@@ -2723,7 +2723,7 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
                 "name": "default_runtime_data_connector_name",
             },
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
 
@@ -2874,7 +2874,7 @@ def test_add_datasource_from_yaml_with_substitution_variables(
                 "name": "data_dir_example_data_connector",
             }
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)

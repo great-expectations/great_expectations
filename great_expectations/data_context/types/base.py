@@ -376,7 +376,7 @@ class DataConnectorConfig(AbstractConfig):
         self,
         class_name,
         name: Optional[str] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         module_name=None,
         credentials=None,
         assets=None,
@@ -452,7 +452,7 @@ class DataConnectorConfig(AbstractConfig):
         if delimiter is not None:
             self.delimiter = delimiter
 
-        super().__init__(id_=id_, name=name)
+        super().__init__(id=id, name=name)
 
         # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
@@ -488,10 +488,9 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
         allow_none=True,
     )
 
-    id_ = fields.String(
+    id = fields.String(
         required=False,
         allow_none=True,
-        data_key="id",
     )
 
     class_name = fields.String(
@@ -859,7 +858,7 @@ class DatasourceConfig(AbstractConfig):
             str
         ] = None,  # Note: name is optional currently to avoid updating all documentation within
         # the scope of this work.
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         class_name: Optional[str] = None,
         module_name: str = "great_expectations.datasource",
         execution_engine=None,
@@ -880,7 +879,7 @@ class DatasourceConfig(AbstractConfig):
         **kwargs,
     ) -> None:
 
-        super().__init__(id_=id_, name=name)
+        super().__init__(id=id, name=name)
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
@@ -966,10 +965,9 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         required=False,
         allow_none=True,
     )
-    id_ = fields.String(
+    id = fields.String(
         required=False,
         allow_none=True,
-        data_key="id",
     )
 
     class_name = fields.String(
@@ -2291,8 +2289,8 @@ class DataContextConfig(BaseYamlConfig):
 
 
 class CheckpointValidationConfig(AbstractConfig):
-    def __init__(self, id_: Optional[str] = None, **kwargs: dict) -> None:
-        super().__init__(id_=id_)
+    def __init__(self, id: Optional[str] = None, **kwargs: dict) -> None:
+        super().__init__(id=id)
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -2302,7 +2300,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
-    id_ = fields.String(required=False, allow_none=False, data_key="id")
+    id = fields.String(required=False, allow_none=False)
 
     def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:  # type: ignore[override]
         """
