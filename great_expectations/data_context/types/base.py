@@ -485,7 +485,6 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     id = fields.String(
         required=False,
         allow_none=True,
-        
     )
 
     class_name = fields.String(
@@ -963,7 +962,6 @@ class DatasourceConfigSchema(AbstractConfigSchema):
     id = fields.String(
         required=False,
         allow_none=True,
-
     )
 
     class_name = fields.String(
