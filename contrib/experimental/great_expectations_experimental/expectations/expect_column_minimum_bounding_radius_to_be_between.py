@@ -64,7 +64,7 @@ class ColumnAggregateGeometryBoundingRadius(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnMininumBoundingRadiusToBeBetween(ColumnExpectation):
+class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnExpectation):
     """
     Expect that column values as geometry points to be contained within a bounding circle with a given radius (or diameter).
 
@@ -299,4 +299,4 @@ class ExpectColumnMininumBoundingRadiusToBeBetween(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnMininumBoundingRadiusToBeBetween().print_diagnostic_checklist()
+    ExpectColumnMinimumBoundingRadiusToBeBetween().print_diagnostic_checklist()
