@@ -46,9 +46,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
-    """
-    """
-
     def __init__(
         self,
         name: str,
