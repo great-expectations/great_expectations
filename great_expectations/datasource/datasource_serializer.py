@@ -67,6 +67,7 @@ class NamedDatasourceSerializer(AbstractConfigSerializer):
 
         return config
 
+
 class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
     def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize datasource config to json dict. Adds a load step to make sure
@@ -80,7 +81,9 @@ class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
         """
 
         raw_config: dict = self.schema.dump(obj)
-        loaded_obj: "AbstractConfig" = cast("DatasourceConfig", self.schema.load(raw_config))
+        loaded_obj: "AbstractConfig" = cast(
+            "DatasourceConfig", self.schema.load(raw_config)
+        )
         config: dict = self.schema.dump(loaded_obj)
 
         json_serializable_dict: dict = convert_to_json_serializable(data=config)

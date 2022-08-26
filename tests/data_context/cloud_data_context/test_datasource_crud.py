@@ -12,7 +12,9 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.datasource import BaseDatasource
-from great_expectations.datasource.datasource_serializer import JsonDatasourceConfigSerializer
+from great_expectations.datasource.datasource_serializer import (
+    JsonDatasourceConfigSerializer,
+)
 
 
 @pytest.mark.cloud
