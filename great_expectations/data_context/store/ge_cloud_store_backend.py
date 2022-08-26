@@ -540,6 +540,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
         return GeCloudIdentifier(
             resource_type=self.ge_cloud_resource_type,
-            ge_cloud_id=id_,
+            ge_cloud_id=id,
             resource_name=name,
         )

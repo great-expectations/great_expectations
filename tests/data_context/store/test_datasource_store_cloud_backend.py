@@ -82,7 +82,7 @@ def test_datasource_store_get_by_id(
         return MockResponse(
             {
                 "data": {
-                    "id": id_,
+                    "id": id,
                     "attributes": {"datasource_config": datasource_config},
                 }
             },
@@ -122,7 +122,7 @@ def test_datasource_store_get_by_name(
         return MockResponse(
             {
                 "data": {
-                    "id": id_,
+                    "id": id,
                     "attributes": {"datasource_config": datasource_config},
                 }
             },
@@ -177,7 +177,7 @@ def test_datasource_store_delete_by_id(
             json={
                 "data": {
                     "type": "datasource",
-                    "id": id_,
+                    "id": id,
                     "attributes": {"deleted": True},
                 }
             },
