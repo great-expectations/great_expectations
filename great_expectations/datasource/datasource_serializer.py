@@ -9,8 +9,12 @@ datasource_config = DatasourceConfig(...)
 serializer = YAMLReadyDictDatasourceConfigSerializer()
 serialized_value = serializer.serialize(datasource_config)
 """
-from great_expectations.core.configuration import AbstractConfig
+from typing import TYPE_CHECKING
+
 from great_expectations.core.serializer import AbstractConfigSerializer
+
+if TYPE_CHECKING:
+    from great_expectations.core.configuration import AbstractConfig
 
 
 class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
