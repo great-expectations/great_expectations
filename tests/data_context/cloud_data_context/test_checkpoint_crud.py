@@ -216,11 +216,11 @@ def test_cloud_backed_data_context_add_checkpoint(
     assert checkpoint.ge_cloud_id == checkpoint_id
     assert checkpoint.config.ge_cloud_id == checkpoint_id
 
-    assert checkpoint.config.validations[0]["id_"] == validation_id_1
-    assert checkpoint.validations[0]["id_"] == validation_id_1
+    assert checkpoint.config.validations[0]["id"] == validation_id_1
+    assert checkpoint.validations[0]["id"] == validation_id_1
 
-    assert checkpoint.config.validations[1]["id_"] == validation_id_2
-    assert checkpoint.validations[1]["id_"] == validation_id_2
+    assert checkpoint.config.validations[1]["id"] == validation_id_2
+    assert checkpoint.validations[1]["id"] == validation_id_2
 
 
 @pytest.mark.xfail(

@@ -193,10 +193,10 @@ class Store:
         )
 
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
-        id_: Optional[str] = None
-        if hasattr(config, "id_"):
-            id_ = config.id_
+        id: Optional[str] = None
+        if hasattr(config, "id"):
+            id = config.id
         name: Optional[str] = None
         if hasattr(config, "name"):
             name = config.name
-        return self.store_backend.build_key(name=name, id_=id_)
+        return self.store_backend.build_key(name=name, id=id)

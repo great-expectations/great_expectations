@@ -351,7 +351,7 @@ class CloudDataContext(AbstractDataContext):
             resource_ref: GeCloudResourceRef = self._datasource_store.create(  # type: ignore[assignment]
                 datasource_config
             )
-            datasource_config.id_ = resource_ref.ge_cloud_id
+            datasource_config.id = resource_ref.ge_cloud_id
 
         self.config.datasources[name] = datasource_config  # type: ignore[index,assignment]
 
@@ -363,7 +363,7 @@ class CloudDataContext(AbstractDataContext):
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
-        # Round trip through schema validation and config creation to ensure "id_" is present
+        # Round trip through schema validation and config creation to ensure "id" is present
         #
         # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
         # be refactored to into the config/schema. Also, downstream methods should be refactored

@@ -71,6 +71,6 @@ class ProfilerStore(ConfigurationStore):
         """
         ge_cloud_profiler_id = response_json["data"]["id"]
         profiler_config_dict = response_json["data"]["attributes"]["profiler"]
-        profiler_config_dict["id_"] = ge_cloud_profiler_id
+        profiler_config_dict["id"] = ge_cloud_profiler_id
 
         return profiler_config_dict
