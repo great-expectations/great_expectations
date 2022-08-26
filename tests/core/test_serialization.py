@@ -768,7 +768,7 @@ def test_dict_round_trip_serialization(
     assert round_tripped == config.to_json_dict()
 
     assert (
-        round_tripped.get("id_")
+        round_tripped.get("id")
         == observed_dump.get("id")
         == expected_serialized_config.get("id")
     )

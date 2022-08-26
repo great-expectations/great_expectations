@@ -296,7 +296,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         "class_name": "RuleBasedProfiler",
         "module_name": "great_expectations.rule_based_profiler",
         "name": "my_rbp",
-        "id_": None,
+        "id": None,
         "config_version": 1.0,
         "rules": None,
         "variables": {},
@@ -314,7 +314,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         "module_name": "great_expectations.rule_based_profiler",
         "class_name": "RuleBasedProfiler",
         "name": "my_rbp",
-        "id_": None,
+        "id": None,
         "config_version": 1.0,
         "variables": {},
         "rules": {

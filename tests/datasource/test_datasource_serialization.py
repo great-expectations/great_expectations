@@ -92,7 +92,7 @@ class TestDatasourceConfigSerialization:
         assert round_tripped == datasource_config.to_json_dict()
 
         assert (
-            round_tripped.get("id_")
+            round_tripped.get("id")
             == observed_dump.get("id")
             == expected_serialized_datasource_config.get("id")
         )

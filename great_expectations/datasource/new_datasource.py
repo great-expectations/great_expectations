@@ -61,7 +61,7 @@ class BaseDatasource:
             )
             self._datasource_config: dict = {
                 "execution_engine": execution_engine,
-                "id_": id_,
+                "id": id_,
                 "name": name,
             }
         except Exception as e:

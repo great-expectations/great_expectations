@@ -194,7 +194,7 @@ class Store:
 
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
         id: Optional[str] = None
-        if hasattr(config, "id_"):
+        if hasattr(config, "id"):
             id = config.id_
         name: Optional[str] = None
         if hasattr(config, "name"):

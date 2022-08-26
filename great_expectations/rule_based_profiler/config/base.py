@@ -675,7 +675,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
         unknown = INCLUDE
         fields = (
             "name",
-            "id_",
+            "id",
             "config_version",
             "module_name",
             "class_name",

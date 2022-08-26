@@ -156,7 +156,7 @@ class BaseCheckpoint(ConfigPeer):
         # (default to Checkpoint's default_validation_id if no validations were passed in the signature)
         if using_default_validation:
             for validation in validations:
-                validation["id_"] = self.config.default_validation_id
+                validation["id"] = self.config.default_validation_id
 
         # Use AsyncExecutor to speed up I/O bound validations by running them in parallel with multithreading (if
         # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
@@ -316,7 +316,7 @@ class BaseCheckpoint(ConfigPeer):
     ) -> None:
         if validation_dict is None:
             validation_dict = {}
-            validation_dict["id_"] = substituted_runtime_config.get(
+            validation_dict["id"] = substituted_runtime_config.get(
                 "default_validation_id"
             )
 
@@ -385,7 +385,7 @@ class BaseCheckpoint(ConfigPeer):
             if catch_exceptions_validation is not None:
                 operator_run_kwargs["catch_exceptions"] = catch_exceptions_validation
 
-            validation_id: Optional[str] = substituted_validation_dict.get("id_")
+            validation_id: Optional[str] = substituted_validation_dict.get("id")
 
             async_validation_operator_result = async_executor.submit(
                 action_list_validation_operator.run,

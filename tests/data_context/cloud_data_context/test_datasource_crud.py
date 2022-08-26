@@ -123,11 +123,11 @@ def test_base_data_context_in_cloud_mode_add_datasource(
             # Make sure the id was populated correctly into the created datasource object and config
             assert stored_datasource.id == datasource_id
             assert retrieved_datasource.id == datasource_id
-            assert retrieved_datasource.config["id_"] == datasource_id
+            assert retrieved_datasource.config["id"] == datasource_id
         else:
             assert stored_datasource.id is None
             assert retrieved_datasource.id is None
-            assert retrieved_datasource.config["id_"] is None
+            assert retrieved_datasource.config["id"] is None
 
         # Make sure the name is populated correctly into the created datasource
         assert retrieved_datasource.name == datasource_name
@@ -227,7 +227,7 @@ def test_data_context_in_cloud_mode_add_datasource(
         # Make sure the id was populated correctly into the created datasource object and config
         assert stored_datasource.id == datasource_id
         assert retrieved_datasource.id == datasource_id
-        assert retrieved_datasource.config["id_"] == datasource_id
+        assert retrieved_datasource.config["id"] == datasource_id
 
         # Make sure the name is populated correctly into the created datasource
         assert retrieved_datasource.name == datasource_name
@@ -330,7 +330,7 @@ def test_cloud_data_context_add_datasource(
         # Make sure the id was populated correctly into the created datasource object and config
         assert stored_datasource.id == datasource_id
         assert retrieved_datasource.id == datasource_id
-        assert retrieved_datasource.config["id_"] == datasource_id
+        assert retrieved_datasource.config["id"] == datasource_id
 
         # Make sure the name is populated correctly into the created datasource
         assert retrieved_datasource.name == datasource_name

@@ -90,7 +90,7 @@ class DatasourceStore(Store):
         This method takes full json response from GE cloud and outputs a dict appropriate for
         deserialization into a GE object
         """
-        datasource_ge_cloud_id: str = response_json["data"]["id_"]
+        datasource_ge_cloud_id: str = response_json["data"]["id"]
         datasource_config_dict: dict = response_json["data"]["attributes"][
             "datasource_config"
         ]
@@ -145,7 +145,7 @@ class DatasourceStore(Store):
     def _build_key_from_config(  # type: ignore[override]
         self, datasource_config: DatasourceConfig
     ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
-        if hasattr(datasource_config, "id_"):
+        if hasattr(datasource_config, "id"):
             id = datasource_config.id_
         else:
             id = None

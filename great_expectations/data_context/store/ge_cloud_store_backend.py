@@ -484,7 +484,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         data = {
             "data": {
                 "type": self.ge_cloud_resource_type,
-                "id_": ge_cloud_id,
+                "id": ge_cloud_id,
                 "attributes": {
                     "deleted": True,
                 },
