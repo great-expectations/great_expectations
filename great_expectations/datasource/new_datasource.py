@@ -32,7 +32,7 @@ class BaseDatasource:
         execution_engine=None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Build a new Datasource.
@@ -42,10 +42,10 @@ class BaseDatasource:
             execution_engine (ClassConfig): the type of compute engine to produce
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
-            id_: Identifier specific to this datasource.
+            id: Identifier specific to this datasource.
         """
         self._name = name
-        self._id_ = id_
+        self._id = id
 
         self._data_context_root_directory = data_context_root_directory
         if execution_engine is None:
@@ -61,7 +61,7 @@ class BaseDatasource:
             )
             self._datasource_config: dict = {
                 "execution_engine": execution_engine,
-                "id_": id_,
+                "id": id,
                 "name": name,
             }
         except Exception as e:
@@ -382,11 +382,11 @@ class BaseDatasource:
         return self._name
 
     @property
-    def id_(self) -> str:
+    def id(self) -> str:
         """
-        Property for datasource id_
+        Property for datasource id
         """
-        return self._id_  # type: ignore[return-value]
+        return self._id  # type: ignore[return-value]
 
     @property
     def execution_engine(self) -> ExecutionEngine:
@@ -415,7 +415,7 @@ class Datasource(BaseDatasource):
         data_connectors=None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Build a new Datasource with data connectors.
@@ -426,7 +426,7 @@ class Datasource(BaseDatasource):
             data_connectors: DataConnectors to add to the datasource
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
-            id_: Identifier specific to this datasource.
+            id: Identifier specific to this datasource.
         """
         self._name = name
 
@@ -435,7 +435,7 @@ class Datasource(BaseDatasource):
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory,
             concurrency=concurrency,
-            id_=id_,
+            id=id,
         )
 
         if data_connectors is None:

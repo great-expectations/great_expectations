@@ -10,8 +10,8 @@ from great_expectations.types import SerializableDictDot
 class AbstractConfig(ABC, SerializableDictDot):
     """Abstract base class for Config objects. Sets the fields that must be included on a Config."""
 
-    def __init__(self, id_: Optional[str] = None, name: Optional[str] = None) -> None:
-        self.id_ = id_
+    def __init__(self, id: Optional[str] = None, name: Optional[str] = None) -> None:
+        self.id = id
         self.name = name
         super().__init__()
 
