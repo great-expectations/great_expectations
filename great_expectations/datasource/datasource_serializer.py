@@ -9,27 +9,18 @@ datasource_config = DatasourceConfig(...)
 serializer = YAMLReadyDictDatasourceConfigSerializer()
 serialized_value = serializer.serialize(datasource_config)
 """
+from typing import TYPE_CHECKING, cast
+
 from great_expectations.core.serializer import AbstractConfigSerializer
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.types.base import (
-    DatasourceConfig,
-    datasourceConfigSchema,
-)
-from great_expectations.marshmallow__shade import Schema
+
+if TYPE_CHECKING:
+    from great_expectations.core.configuration import AbstractConfig
+    from great_expectations.data_context.types.base import DatasourceConfig
 
 
 class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
-    def __init__(self, schema: Schema) -> None:
-        """
-        Args:
-            schema: Marshmallow schema defining raw serialized version of object.
-        """
-        super().__init__(schema=schema)
-
-        # Override schema
-        self.schema = datasourceConfigSchema
-
-    def serialize(self, obj: DatasourceConfig) -> dict:  # type: ignore[override]
+    def serialize(self, obj: "AbstractConfig") -> dict:
         """Serialize DatasourceConfig to dict appropriate for writing to yaml.
 
         Args:
@@ -53,19 +44,32 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
         return config
 
 
-class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
-    def __init__(self, schema: Schema) -> None:
-        """
+class NamedDatasourceSerializer(AbstractConfigSerializer):
+    def serialize(self, obj: "AbstractConfig") -> dict:
+        """Serialize DatasourceConfig with datasource name but not data connector name to match existing context.list_datasources() functionality.
+
         Args:
-            schema: Marshmallow schema defining raw serialized version of object.
+            obj: DatasourceConfig object to serialize.
+
+        Returns:
+            Representation of object as a dict suitable for return in list_datasources().
         """
-        super().__init__(schema=schema)
 
-        # Override schema
-        self.schema = datasourceConfigSchema
+        config: dict = self.schema.dump(obj)
 
-    def serialize(self, obj: DatasourceConfig) -> dict:  # type: ignore[override]
-        """Serialize DatasourceConfig to json dict.
+        # Remove data connector config names
+        for data_connector_name, data_connector_config in config.get(
+            "data_connectors", {}
+        ).items():
+            data_connector_config.pop("name", None)
+
+        return config
+
+
+class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
+    def serialize(self, obj: "AbstractConfig") -> dict:
+        """Serialize datasource config to json dict. Adds a load step to make sure
+        load logic (e.g. add data connector names) is completed.
 
         Args:
             obj: DatasourceConfig object to serialize.
@@ -74,7 +78,11 @@ class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
             Representation of object as a dict suitable for serializing to json.
         """
 
-        config: dict = self.schema.dump(obj)
+        raw_config: dict = self.schema.dump(obj)
+        loaded_obj: "AbstractConfig" = cast(
+            "DatasourceConfig", self.schema.load(raw_config)
+        )
+        config: dict = self.schema.dump(loaded_obj)
 
         json_serializable_dict: dict = convert_to_json_serializable(data=config)
 
