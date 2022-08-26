@@ -80,6 +80,7 @@ from great_expectations.validator.validator import Validator
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
     UsageStatisticsHandler,
     send_usage_message,
+    usage_statistics_enabled_method,
 )
 
 logger = logging.getLogger(__name__)
@@ -1348,6 +1349,13 @@ class AbstractDataContext(ABC):
     @staticmethod
     def _get_global_usage_statistics_override() -> bool:
         """
+        Checks the following locations to see if usage_statistics is disabled in any of the following locations:
+            - environment_variable (GE_USAGE_STATS)
+            - file at GLOBAL_CONFIG_PATHS
+            - home folder
+            - /etc
+            - great_expectations.yml
+
         Checks environment variable to see if GE_USAGE_STATS exists as an environment variable
         If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
         Return True otherwise.
@@ -1355,12 +1363,12 @@ class AbstractDataContext(ABC):
         Returns:
             bool that tells you whether usage_statistics is on or off
         """
-        # NOTE: <DataContextRefactor> Refactor so that opt_out is no longer used, and we don't have to flip boolean in
-        # our minds.
+        usage_statistics_enabled: bool = True
+
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
-                return False
+                usage_statistics_enabled = False
             else:
                 logger.warning(
                     "GE_USAGE_STATS environment variable must be one of: {}".format(
@@ -1378,13 +1386,12 @@ class AbstractDataContext(ABC):
             config.BOOLEAN_STATES = states  # type: ignore[misc] # Cannot assign to class variable via instance
             config.read(config_path)
             try:
-                if config.getboolean("anonymous_usage_statistics", "enabled"):
-                    return True
-                else:
-                    return False
+                if not config.getboolean("anonymous_usage_statistics", "enabled"):
+                    usage_statistics_enabled = False
+
             except (ValueError, configparser.Error):
                 pass
-        return True
+        return usage_statistics_enabled
 
     def _get_data_context_id_override(self) -> Optional[str]:
         """

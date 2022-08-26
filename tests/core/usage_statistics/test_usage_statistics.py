@@ -206,7 +206,6 @@ def test_global_override_in_yml(tmp_path_factory, monkeypatch):
     )
 
 
-# Test precedence: environment variable > home folder > /etc > yml
 @pytest.mark.base_data_context
 def test_global_override_env_var_overrides_home_folder(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
