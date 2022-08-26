@@ -315,6 +315,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
             leave=True,
             bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
         ):
+            print(
+                f"\n[ALEX_TEST] [BaseRuleBasedProfiler.RUN()] RULE_[{rule.name}]_BEGIN"
+            )
             rule_state = rule.run(
                 variables=effective_variables,
                 batch_list=batch_list,
@@ -324,6 +327,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 rule_state=RuleState(),
             )
             self.rule_states.append(rule_state)
+            print(f"\n[ALEX_TEST] [BaseRuleBasedProfiler.RUN()] RULE_[{rule.name}]_END")
 
         return RuleBasedProfilerResult(
             fully_qualified_parameter_names_by_domain=self.get_fully_qualified_parameter_names_by_domain(),

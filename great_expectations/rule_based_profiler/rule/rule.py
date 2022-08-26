@@ -121,11 +121,15 @@ class Rule(SerializableDictDot):
         if rule_state is None:
             rule_state = RuleState()
 
+        print(f"\n[ALEX_TEST] [RULE.RUN()] RULE[{self.name}]-GET_DOMAINS_BEGIN")
         domains: List[Domain] = self._get_rule_domains(
             variables=variables,
             batch_list=batch_list,
             batch_request=batch_request,
             rule_state=rule_state,
+        )
+        print(
+            f"\n[ALEX_TEST] [RULE.RUN()] RULE[{self.name}]-GET_DOMAINS_END-GOT-{len(domains)}-DOMAINS"
         )
 
         rule_state.rule = self
@@ -144,11 +148,17 @@ class Rule(SerializableDictDot):
             leave=False,
             bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
         ):
+            print(
+                f"\n[ALEX_TEST] [RULE.RUN()-RULE[{self.name}]] DOMAIN_BEGIN:\n{domain} ; TYPE: {str(type(domain))}"
+            )
             rule_state.initialize_parameter_container_for_domain(domain=domain)
 
             parameter_builders: List[ParameterBuilder] = self.parameter_builders or []
             parameter_builder: ParameterBuilder
             for parameter_builder in parameter_builders:
+                print(
+                    f"\n[ALEX_TEST] [RULE.RUN()-RULE[{self.name}]] PARAMETER_BUILDER-[{parameter_builder.name}]-BEGIN"
+                )
                 parameter_builder.build_parameters(
                     domain=domain,
                     variables=variables,
@@ -158,6 +168,9 @@ class Rule(SerializableDictDot):
                     batch_request=batch_request,
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
                 )
+                print(
+                    f"\n[ALEX_TEST] [RULE.RUN()-RULE[{self.name}]] PARAMETER_BUILDER-[{parameter_builder.name}]-END"
+                )
 
             expectation_configuration_builders: List[
                 ExpectationConfigurationBuilder
@@ -166,6 +179,9 @@ class Rule(SerializableDictDot):
             expectation_configuration_builder: ExpectationConfigurationBuilder
 
             for expectation_configuration_builder in expectation_configuration_builders:
+                print(
+                    f"\n[ALEX_TEST] [RULE.RUN()-RULE[{self.name}]] EXPECTATION_CONFIGURATION_BUILDER-[{expectation_configuration_builder.expectation_type}]-BEGIN"
+                )
                 expectation_configuration_builder.resolve_validation_dependencies(
                     domain=domain,
                     variables=variables,
@@ -174,6 +190,12 @@ class Rule(SerializableDictDot):
                     batch_request=batch_request,
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
                 )
+                print(
+                    f"\n[ALEX_TEST] [RULE.RUN()-RULE[{self.name}]] EXPECTATION_CONFIGURATION_BUILDER-[{expectation_configuration_builder.expectation_type}]-END"
+                )
+            print(
+                f"\n[ALEX_TEST] [RULE.RUN()-RULE[{self.name}]] DOMAIN_END:\n{domain} ; TYPE: {str(type(domain))}"
+            )
 
         return rule_state
 

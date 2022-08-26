@@ -217,6 +217,9 @@ class DataConnector:
         raise NotImplementedError
 
     def self_check(self, pretty_print=True, max_examples=3):
+        # TODO: <Alex>ALEX</Alex>
+        max_examples = 3000
+        # TODO: <Alex>ALEX</Alex>
         """
         Checks the configuration of the current DataConnector by doing the following :
 
