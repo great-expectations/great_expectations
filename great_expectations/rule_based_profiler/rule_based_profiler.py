@@ -110,7 +110,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
         """
         name: str = profiler_config.name
-        id_: Optional[str] = None
+        id: Optional[str] = None
         if hasattr(profiler_config, "id_"):
             id = profiler_config.id_
         config_version: float = profiler_config.config_version
@@ -1195,7 +1195,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         try:
             profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
-            id_: Union[GeCloudIdentifier, ConfigurationIdentifier] = (
+            id: Union[GeCloudIdentifier, ConfigurationIdentifier] = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
@@ -1422,7 +1422,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Create a new Profiler using configured rules.
@@ -1432,7 +1432,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
 
         Args:
             name: The name of the RBP instance
-            id_: Identifier specific to this RBP instance.
+            id: Identifier specific to this RBP instance.
             config_version: The version of the RBP (currently only 1.0 is supported)
             variables: Any variables to be substituted within the rules
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and

@@ -35,7 +35,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         skip_inapplicable_tables: bool = True,
         introspection_directives: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         InferredAssetDataConnector for connecting to data on a SQL database

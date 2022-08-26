@@ -37,7 +37,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
         glob_directive: str = "**/*",
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         ConfiguredAssetDataConnector for connecting to DBFS. This class supports the configuration of default_regex

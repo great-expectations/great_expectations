@@ -52,7 +52,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         assets: Optional[Dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         self._assets: dict = {}
         if assets:

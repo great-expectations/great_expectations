@@ -489,7 +489,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ) -> None:

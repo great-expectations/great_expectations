@@ -375,7 +375,7 @@ class DataConnectorConfig(AbstractConfig):
     def __init__(  # noqa: C901 - 20
         self,
         class_name,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         module_name=None,
         credentials=None,
         assets=None,
@@ -2280,7 +2280,7 @@ class DataContextConfig(BaseYamlConfig):
 
 
 class CheckpointValidationConfig(AbstractConfig):
-    def __init__(self, id_: Optional[str] = None, **kwargs: dict) -> None:
+    def __init__(self, id: Optional[str] = None, **kwargs: dict) -> None:
         super().__init__(id=id)
 
         for k, v in kwargs.items():

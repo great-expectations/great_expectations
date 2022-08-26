@@ -43,7 +43,7 @@ class RuntimeDataConnector(DataConnector):
         batch_identifiers: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
         assets: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 

@@ -534,7 +534,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def build_key(
         self,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         name: Optional[str] = None,
     ) -> GeCloudIdentifier:
         """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""

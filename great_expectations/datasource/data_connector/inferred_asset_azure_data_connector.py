@@ -49,7 +49,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         delimiter: str = "/",
         azure_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         InferredAssetAzureDataConnector for connecting to Azure Blob Storage.

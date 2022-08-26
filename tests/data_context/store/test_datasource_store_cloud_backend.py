@@ -71,7 +71,7 @@ def test_datasource_store_get_by_id(
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource.
     """
 
-    id_: str = "example_id_normally_uuid"
+    id: str = "example_id_normally_uuid"
 
     key = GeCloudIdentifier(
         resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
@@ -114,7 +114,7 @@ def test_datasource_store_get_by_name(
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource with a name.
     """
 
-    id_: str = "example_id_normally_uuid"
+    id: str = "example_id_normally_uuid"
     datasource_name: str = "example_datasource_config_name"
 
     def mocked_response(*args, **kwargs):
@@ -161,7 +161,7 @@ def test_datasource_store_delete_by_id(
 
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource.
     """
-    id_: str = "example_id_normally_uuid"
+    id: str = "example_id_normally_uuid"
 
     key = GeCloudIdentifier(
         resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
@@ -208,7 +208,7 @@ def test_datasource_http_error_handling(
     method: str,
     args: list,
 ):
-    id_: str = "example_id_normally_uuid"
+    id: str = "example_id_normally_uuid"
 
     key = GeCloudIdentifier(
         resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
