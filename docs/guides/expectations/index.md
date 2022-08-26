@@ -5,7 +5,6 @@ title: "Create Expectations: Index"
 
 ## Core skills
 - [How to create and edit Expectations based on domain knowledge, without inspecting data directly](../../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md)
-- [How to create and edit Expectations in bulk](../../guides/expectations/how_to_create_and_edit_expectations_in_bulk.md)
 - [How to create and edit Expectations with the User Configurable Profiler](../../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md)
 - [How to create and edit Expectations with instant feedback from a sample Batch of data](../../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 - [How to quickly explore Expectations in a notebook](../../guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook.md)
@@ -28,6 +27,7 @@ title: "Create Expectations: Index"
 - [How to create a Custom Column Pair Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations.md)
 - [How to create a Custom Regex-Based Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations.md)
 - [How to create a Custom Set-Based Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations.md)
+- [How to create a Custom Query Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations.md)
 - [How to create custom parameterized Expectations](../../guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations.md)
 - [How to use a Custom Expectation](../../guides/expectations/creating_custom_expectations/how_to_use_custom_expectations.md)
 

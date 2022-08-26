@@ -2,18 +2,22 @@ import logging
 from typing import Dict, Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.types import (
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    AttributedResolvedMetrics,
-    Domain,
+from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricComputationResult,
     MetricValues,
+)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
@@ -38,7 +42,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         r"[A-Za-z0-9\.,;:!?()\"'%\-]+",  # general text
         r"^\s+",  # leading space
         r"\s+$",  # trailing space
-        r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  #  Matching URL (including http(s) protocol)
+        r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,255}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  # Matching URL (including http(s) protocol)
         r"<\/?(?:p|a|b|img)(?: \/)?>",  # HTML tags
         r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}",  # IPv4 IP address
         r"(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",  # IPv6 IP address,

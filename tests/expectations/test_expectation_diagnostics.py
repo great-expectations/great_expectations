@@ -104,6 +104,7 @@ edr = ExpectationDiagnostics(
     tests=[],
     backend_test_result_counts=[],
     errors=[],
+    coverage_score=5,
     maturity_checklist=ExpectationDiagnosticMaturityMessages(
         experimental=[
             ExpectationDiagnosticCheckMessage(

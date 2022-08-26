@@ -854,6 +854,6 @@ def check_if_datasource_name_exists(context: DataContext, datasource_name: str) 
     # TODO: 20210324 Anthony: Note reading the context from disk is a temporary fix to allow use in a notebook
     #  after test_yaml_config(). test_yaml_config() should update a copy of the in-memory data context rather than
     #  making changes directly to the in-memory context.
-    context_on_disk: DataContext = DataContext(context.root_directory)
+    context_on_disk = DataContext(context.root_directory)
 
     return datasource_name in [d["name"] for d in context_on_disk.list_datasources()]

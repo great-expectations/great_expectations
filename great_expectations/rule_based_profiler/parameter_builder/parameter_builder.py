@@ -1,16 +1,25 @@
 import copy
+import datetime
 import itertools
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
+import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,
+    MetricValue,
+    MetricValues,
+)
+from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
 )
@@ -23,20 +32,18 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricComputationResult,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
     PARAMETER_KEY,
     RAW_PARAMETER_KEY,
-    AttributedResolvedMetrics,
-    Builder,
-    Domain,
-    MetricComputationResult,
-    MetricValue,
-    MetricValues,
     ParameterContainer,
     build_parameter_container,
     get_fully_qualified_parameter_names,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -110,11 +117,11 @@ class ParameterBuilder(ABC, Builder):
     ) -> None:
         """
         Args:
-            domain: Domain object that is context for execution of this ParameterBuilder object.
+            domain: "Domain" object that is context for execution of this "ParameterBuilder" object.
             variables: attribute name/value pairs
-            parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
-            parameter_computation_impl: Object containing desired ParameterBuilder implementation.
-            batch_list: Explicit list of Batch objects to supply data at runtime.
+            parameters: Dictionary of "ParameterContainer" objects corresponding to all "Domain" objects in memory.
+            parameter_computation_impl: Object containing desired "ParameterBuilder" implementation.
+            batch_list: Explicit list of "Batch" objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
         """
@@ -132,7 +139,7 @@ class ParameterBuilder(ABC, Builder):
             or self.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
-            self.set_batch_list_or_batch_request(
+            self.set_batch_list_if_null_batch_request(
                 batch_list=batch_list,
                 batch_request=batch_request,
             )
@@ -232,6 +239,7 @@ class ParameterBuilder(ABC, Builder):
 
     def get_batch_ids(
         self,
+        limit: Optional[int] = None,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -240,6 +248,7 @@ class ParameterBuilder(ABC, Builder):
             data_context=self.data_context,
             batch_list=self.batch_list,
             batch_request=self.batch_request,
+            limit=limit,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -254,8 +263,10 @@ class ParameterBuilder(ABC, Builder):
         metric_value_kwargs: Optional[
             Union[Union[str, dict], List[Union[str, dict]]]
         ] = None,
+        limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
+        force_no_progress_bar: Optional[bool] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -268,13 +279,15 @@ class ParameterBuilder(ABC, Builder):
         :param metric_name: Name of metric of interest, being computed.
         :param metric_domain_kwargs: Metric Domain Kwargs is an essential parameter of the MetricConfiguration object.
         :param metric_value_kwargs: Metric Value Kwargs is an essential parameter of the MetricConfiguration object.
+        :param limit: Optional limit on number of "Batch" objects requested (supports single-Batch scenarios).
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
-        :param domain: Domain object scoping "$variable"/"$parameter"-style references in configuration and runtime.
+        :param force_no_progress_bar (bool) if True, prevent all "Calculating Metrics" output; (False by default).
+        :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.
-        :return: MetricComputationResult object, containing both: data samples in the format "N x R^m", where "N" (most
-        significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
+        :return: "MetricComputationResult" object, containing both: data samples in the format "N x R^m", where "N"
+        (most significant dimension) is the number of measurements (e.g., one per "Batch" of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
         if not metric_name:
@@ -284,6 +297,7 @@ specified (empty "metric_name" value detected)."""
             )
 
         batch_ids: Optional[List[str]] = self.get_batch_ids(
+            limit=limit,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -390,7 +404,8 @@ specified (empty "metric_name" value detected)."""
         )
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
-            metric_configurations=metrics_to_resolve
+            metric_configurations=metrics_to_resolve,
+            force_no_progress_bar=force_no_progress_bar,
         )
 
         # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.
@@ -557,14 +572,25 @@ specified (empty "metric_name" value detected)."""
             for metric_value_idx in metric_value_indices:
                 metric_value: MetricValue = metric_values[metric_value_idx]
                 if enforce_numeric_metric:
-                    if not np.issubdtype(metric_value.dtype, np.number):
+                    if isinstance(metric_value, (str, np.str_)):
+                        if not is_parseable_date(value=metric_value):
+                            raise ge_exceptions.ProfilerExecutionError(
+                                message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
+metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
+"""
+                            )
+                    elif not (
+                        isinstance(metric_value, datetime.datetime)
+                        or np.issubdtype(metric_value.dtype, np.number)
+                    ):
                         raise ge_exceptions.ProfilerExecutionError(
-                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(metric_value.dtype)}" was computed).
+                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
+metrics (value {metric_value} having numpy.dtype "{str(metric_value.dtype)}" and Python type \
+"{str(type(metric_value))}" was computed).
 """
                         )
 
-                    if np.isnan(metric_value):
+                    if pd.isnull(metric_value):
                         if not replace_nan_with_zero:
                             raise ValueError(
                                 f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
@@ -698,7 +724,7 @@ def resolve_evaluation_dependencies(
             or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
-            evaluation_parameter_builder.set_batch_list_or_batch_request(
+            evaluation_parameter_builder.set_batch_list_if_null_batch_request(
                 batch_list=parameter_builder.batch_list,
                 batch_request=parameter_builder.batch_request,
             )

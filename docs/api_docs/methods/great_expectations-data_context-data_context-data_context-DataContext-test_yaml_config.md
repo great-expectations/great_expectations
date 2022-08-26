@@ -1,7 +1,7 @@
 ---
 title: DataContext.test_yaml_config
 ---
-[Back to class documentation](../classes/great_expectations-data_context-data_context-data_context-DataContext)
+[Back to class documentation](../classes/great_expectations-data_context-data_context-data_context-DataContext.md)
 
 ### Fully qualified path
 
@@ -40,5 +40,5 @@ The instantiated component (e.g. a Datasource) OR a json object containing metad
 
 ## Relevant documentation (links)
 
-- [Data Context](../../terms/data_context)
-- [How to configure a new Checkpoint using test_yaml_config](../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
+- [Data Context](../../terms/data_context.md)
+- [How to configure a new Checkpoint using test_yaml_config](../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)

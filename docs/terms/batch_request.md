@@ -80,7 +80,7 @@ A `BatchRequest` can be defined by passing a dictionary with the necessary param
 ```python title="Python code
 from great_expectations.core.batch import BatchRequest
 
-batch_request_paramaters = {
+batch_request_parameters = {
   'datasource_name': 'getting_started_datasource',
   'data_connector_name': 'default_inferred_data_connector_name',
   'data_asset_name': 'yellow_tripdata_sample_2019-01.csv',

@@ -19,9 +19,9 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compression
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.split_and_sample.pandas_data_sampler import (
     PandasDataSampler,
@@ -199,7 +199,7 @@ Notes:
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
-        batch_markers: BatchMarkers = BatchMarkers(
+        batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"
@@ -377,7 +377,9 @@ Please check your config."""
         """
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
-        elif path.endswith(".parquet"):
+        elif (
+            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
+        ):
             return {"reader_method": "read_parquet"}
         elif path.endswith(".xlsx") or path.endswith(".xls"):
             return {"reader_method": "read_excel"}

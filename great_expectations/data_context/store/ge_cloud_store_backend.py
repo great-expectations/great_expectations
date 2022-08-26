@@ -1,47 +1,154 @@
+import json
 import logging
 from abc import ABCMeta
-from json import JSONDecodeError
-from typing import Dict, Optional
+from enum import Enum
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
 
+from great_expectations import __version__
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
+from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
-from great_expectations.util import (
-    filter_properties_dict,
-    hyphen,
-    pluralize,
-    singularize,
-)
+from great_expectations.util import bidict, filter_properties_dict, hyphen
+
+try:
+    from typing import TypedDict  # type: ignore[attr-defined]
+except ImportError:
+    from typing_extensions import TypedDict
 
 logger = logging.getLogger(__name__)
 
+SUPPORT_EMAIL = "support@greatexpectations.io"
+
+
+class ErrorDetail(TypedDict):
+    code: Optional[str]
+    detail: Optional[str]
+    source: Optional[str]
+
+
+class ErrorPayload(TypedDict):
+    errors: List[ErrorDetail]
+
+
+class PayloadDataField(TypedDict):
+    attributes: dict
+    id: str
+    type: str
+
+
+class ResponsePayload(TypedDict):
+    data: PayloadDataField
+
+
+AnyPayload = Union[ResponsePayload, ErrorPayload]
+
+
+def _get_user_friendly_error_message(
+    http_exc: requests.exceptions.HTTPError,
+) -> str:
+    # TODO: define a GeCloud service/client for this & other related behavior
+    support_message = []
+    response: requests.Response = http_exc.response
+
+    logger.warning(f"{http_exc.__class__.__name__}:{http_exc} - {response}")
+
+    request_id = response.headers.get("request-id", "")
+    if request_id:
+        support_message.append(f"Request-Id: {request_id}")
+
+    try:
+        error_json: ErrorPayload = http_exc.response.json()
+        errors = error_json.get("errors")
+        if errors:
+            support_message.append(json.dumps(errors))
+
+    except json.JSONDecodeError:
+        support_message.append(f"Please contact superconductive at {SUPPORT_EMAIL}")
+    return " ".join(support_message)
+
+
+class GeCloudRESTResource(str, Enum):
+    BATCH = "batch"
+    CHECKPOINT = "checkpoint"
+    # Chetan - 20220811 - CONTRACT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
+    CONTRACT = "contract"
+    DATASOURCE = "datasource"
+    DATA_ASSET = "data_asset"
+    DATA_CONTEXT = "data_context"
+    DATA_CONTEXT_VARIABLES = "data_context_variables"
+    EXPECTATION = "expectation"
+    EXPECTATION_SUITE = "expectation_suite"
+    EXPECTATION_VALIDATION_RESULT = "expectation_validation_result"
+    PROFILER = "profiler"
+    RENDERED_DATA_DOC = "rendered_data_doc"
+    # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
+    SUITE_VALIDATION_RESULT = "suite_validation_result"
+    VALIDATION_RESULT = "validation_result"
+
 
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
-    PAYLOAD_ATTRIBUTES_KEYS = {
-        "suite_validation_result": "result",
-        "contract": "checkpoint_config",
-        "datasource": "datasource_config",
-        "data_context": "data_context_config",
-        "expectation_suite": "suite",
-        "rendered_data_doc": "rendered_data_doc",
-        "data_context_variable": "value",
+    PAYLOAD_ATTRIBUTES_KEYS: Dict[GeCloudRESTResource, str] = {
+        GeCloudRESTResource.CHECKPOINT: "checkpoint_config",
+        # Chetan - 20220811 - CONTRACT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
+        GeCloudRESTResource.CONTRACT: "checkpoint_config",
+        GeCloudRESTResource.DATASOURCE: "datasource_config",
+        GeCloudRESTResource.DATA_CONTEXT: "data_context_config",
+        GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
+        GeCloudRESTResource.EXPECTATION_SUITE: "suite",
+        GeCloudRESTResource.PROFILER: "profiler",
+        GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
+        # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
+        GeCloudRESTResource.SUITE_VALIDATION_RESULT: "result",
+        GeCloudRESTResource.VALIDATION_RESULT: "result",
     }
 
-    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {
-        "expectation_suite": {"clause_id"},
-        "rendered_data_doc": {"source_type", "source_id"},
-        "suite_validation_result": {"contract_id", "expectation_suite_id"},
-        "data_context_variable": {"variable_type"},
+    ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GeCloudRESTResource, Set[str]] = {
+        GeCloudRESTResource.EXPECTATION_SUITE: {"clause_id"},
+        GeCloudRESTResource.RENDERED_DATA_DOC: {"source_type", "source_id"},
+        # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
+        GeCloudRESTResource.SUITE_VALIDATION_RESULT: {
+            "checkpoint_id",
+            "expectation_suite_id",
+        },
+        GeCloudRESTResource.VALIDATION_RESULT: {
+            "checkpoint_id",
+            "expectation_suite_id",
+        },
     }
+
+    RESOURCE_PLURALITY_LOOKUP_DICT: bidict = bidict(  # type: ignore[misc] # Keywords must be str
+        **{  # type: ignore[arg-type]
+            GeCloudRESTResource.BATCH: "batches",
+            GeCloudRESTResource.CHECKPOINT: "checkpoints",
+            # Chetan - 20220811 - CONTRACT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
+            GeCloudRESTResource.CONTRACT: "contracts",
+            GeCloudRESTResource.DATA_ASSET: "data_assets",
+            GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
+            GeCloudRESTResource.DATASOURCE: "datasources",
+            GeCloudRESTResource.EXPECTATION: "expectations",
+            GeCloudRESTResource.EXPECTATION_SUITE: "expectation_suites",
+            GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "expectation_validation_results",
+            GeCloudRESTResource.PROFILER: "profilers",
+            GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
+            # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
+            GeCloudRESTResource.SUITE_VALIDATION_RESULT: "suite_validation_results",
+            GeCloudRESTResource.VALIDATION_RESULT: "validation_results",
+        }
+    )
+
+    DEFAULT_BASE_URL: str = "https://app.greatexpectations.io/"
+
+    TIMEOUT: int = 20
 
     def __init__(
         self,
         ge_cloud_credentials: Dict,
-        ge_cloud_base_url: str = "https://app.greatexpectations.io/",
-        ge_cloud_resource_type: Optional[str] = None,
+        ge_cloud_base_url: str = DEFAULT_BASE_URL,
+        ge_cloud_resource_type: Optional[Union[str, GeCloudRESTResource]] = None,
         ge_cloud_resource_name: Optional[str] = None,
         suppress_store_backend_id: bool = True,
         manually_initialize_store_backend_id: str = "",
@@ -53,15 +160,26 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
-        assert ge_cloud_resource_type or ge_cloud_resource_name, (
-            "Must provide either ge_cloud_resource_type or " "ge_cloud_resource_name"
-        )
+        assert (
+            ge_cloud_resource_type or ge_cloud_resource_name
+        ), "Must provide either ge_cloud_resource_type or ge_cloud_resource_name"
+
         self._ge_cloud_base_url = ge_cloud_base_url
-        self._ge_cloud_resource_name = ge_cloud_resource_name or pluralize(
-            ge_cloud_resource_type
-        )
-        self._ge_cloud_resource_type = ge_cloud_resource_type or singularize(
+
+        self._ge_cloud_resource_name = (
             ge_cloud_resource_name
+            or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_type]
+        )
+
+        # While resource_types should be coming in as enums, configs represent the arg
+        # as strings and require manual casting.
+        if ge_cloud_resource_type and isinstance(ge_cloud_resource_type, str):
+            ge_cloud_resource_type = ge_cloud_resource_type.upper()
+            ge_cloud_resource_type = GeCloudRESTResource[ge_cloud_resource_type]
+
+        self._ge_cloud_resource_type = (
+            ge_cloud_resource_type
+            or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_name]
         )
 
         # TOTO: remove when account_id is deprecated
@@ -94,18 +212,31 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         filter_properties_dict(properties=self._config, inplace=True)
 
     @property
-    def auth_headers(self):
+    def headers(self) -> Dict[str, str]:
         return {
             "Content-Type": "application/vnd.api+json",
             "Authorization": f'Bearer {self.ge_cloud_credentials.get("access_token")}',
+            "Gx-Version": __version__,
         }
 
-    def _get(self, key):
+    def _get(self, key: Tuple[str, ...]) -> ResponsePayload:  # type: ignore[override]
         ge_cloud_url = self.get_url_for_key(key=key)
+        params: Optional[dict] = None
         try:
-            response = requests.get(ge_cloud_url, headers=self.auth_headers)
+            # if name is included in the key, add as a param
+            if len(key) > 2 and key[2]:
+                params = {"name": key[2]}
+                ge_cloud_url = ge_cloud_url.rstrip("/")
+
+            response = requests.get(
+                ge_cloud_url,
+                headers=self.headers,
+                params=params,
+                timeout=self.TIMEOUT,
+            )
+            response.raise_for_status()
             return response.json()
-        except JSONDecodeError as jsonError:
+        except json.JSONDecodeError as jsonError:
             logger.debug(
                 "Failed to parse GE Cloud Response into JSON",
                 str(response.text),
@@ -114,19 +245,28 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendError(
                 f"Unable to get object in GE Cloud Store Backend: {jsonError}"
             )
+        except requests.HTTPError as http_err:
+            raise StoreBackendError(
+                f"Unable to get object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_err)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to get object in GE Cloud Store Backend: This is likely a transient error. Please try again."
+            )
 
-    def _move(self) -> None:
+    def _move(self) -> None:  # type: ignore[override]
         pass
 
-    def _update(self, ge_cloud_id, value, **kwargs):
+    # TODO: GG 20220810 return the `ResponsePayload`
+    def _update(self, ge_cloud_id: str, value: Any) -> bool:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         data = {
             "data": {
-                "type": resource_type,
-                "id": ge_cloud_id,
+                "type": resource_type.value,
                 "attributes": {
                     attributes_key: value,
                     "organization_id": organization_id,
@@ -138,16 +278,43 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             self.ge_cloud_base_url,
             f"organizations/"
             f"{organization_id}/"
-            f"{hyphen(self.ge_cloud_resource_name)}/"
-            f"{ge_cloud_id}",
+            f"{hyphen(self.ge_cloud_resource_name)}",
         )
+
+        if ge_cloud_id:
+            data["data"]["id"] = ge_cloud_id
+            url = urljoin(f"{url}/", ge_cloud_id)
+
         try:
-            response = requests.patch(url, json=data, headers=self.auth_headers)
+            response = requests.put(
+                url, json=data, headers=self.headers, timeout=self.TIMEOUT
+            )
             response_status_code = response.status_code
 
-            if response_status_code < 300:
-                return True
-            return False
+            # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
+            # for the ExpectationSuite endpoint. As such, this is a temporary fork to
+            # ensure that legacy PATCH behavior is supported.
+            if (
+                response_status_code == 405
+                and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
+            ):
+                response = requests.patch(
+                    url, json=data, headers=self.headers, timeout=self.TIMEOUT
+                )
+                response_status_code = response.status_code
+
+            response.raise_for_status()
+            return True
+
+        except requests.HTTPError as http_exc:
+            raise StoreBackendError(
+                f"Unable to update object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to update object in GE Cloud Store Backend: This is likely a transient error. Please try again."
+            )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
@@ -155,12 +322,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @property
-    def allowed_set_kwargs(self):
+    def allowed_set_kwargs(self) -> Set[str]:
         return self.ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE.get(
             self.ge_cloud_resource_type, set()
         )
 
-    def validate_set_kwargs(self, kwargs):
+    def validate_set_kwargs(self, kwargs: dict) -> Union[bool, None]:
         kwarg_names = set(kwargs.keys())
         if len(kwarg_names) == 0:
             return True
@@ -169,14 +336,26 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not (kwarg_names <= self.allowed_set_kwargs):
             extra_kwargs = kwarg_names - self.allowed_set_kwargs
             raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')
+        return None
 
-    def _set(self, key, value, **kwargs):
+    def _set(  # type: ignore[override]
+        self,
+        key: Tuple[GeCloudRESTResource, ...],
+        value: Any,
+        **kwargs: dict,
+    ) -> Union[bool, GeCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
-        ge_cloud_id = key[1]
+        ge_cloud_resource = key[0]
+        ge_cloud_id: str = key[1]
 
         # if key has ge_cloud_id, perform _update instead
-        if ge_cloud_id:
-            return self._update(ge_cloud_id=ge_cloud_id, value=value, **kwargs)
+        # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
+        # and always necessitate a PUT.
+        if (
+            ge_cloud_id
+            or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES
+        ):
+            return self._update(ge_cloud_id=ge_cloud_id, value=value)
 
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
@@ -200,7 +379,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"organizations/" f"{organization_id}/" f"{hyphen(resource_name)}",
         )
         try:
-            response = requests.post(url, json=data, headers=self.auth_headers)
+            response = requests.post(
+                url, json=data, headers=self.headers, timeout=self.TIMEOUT
+            )
+            response.raise_for_status()
             response_json = response.json()
 
             object_id = response_json["data"]["id"]
@@ -210,7 +392,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 ge_cloud_id=object_id,
                 url=object_url,
             )
-        # TODO Show more detailed error messages
+        except requests.HTTPError as http_exc:
+            raise StoreBackendError(
+                f"Unable to set object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to set object in GE Cloud Store Backend: This is likely a transient error. Please try again."
+            )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
@@ -218,38 +408,56 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     @property
-    def ge_cloud_base_url(self):
+    def ge_cloud_base_url(self) -> str:
         return self._ge_cloud_base_url
 
     @property
-    def ge_cloud_resource_name(self):
+    def ge_cloud_resource_name(self) -> str:
         return self._ge_cloud_resource_name
 
     @property
-    def ge_cloud_resource_type(self):
-        return self._ge_cloud_resource_type
+    def ge_cloud_resource_type(self) -> GeCloudRESTResource:
+        return self._ge_cloud_resource_type  # type: ignore[return-value]
 
     @property
-    def ge_cloud_credentials(self):
+    def ge_cloud_credentials(self) -> dict:
         return self._ge_cloud_credentials
 
-    def list_keys(self):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GeCloudRESTResource, str, Optional[str]]]:  # type: ignore[override]
         url = urljoin(
             self.ge_cloud_base_url,
             f"organizations/"
             f"{self.ge_cloud_credentials['organization_id']}/"
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
+        resource_type = self.ge_cloud_resource_type
+        attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
+
         try:
-            response = requests.get(url, headers=self.auth_headers)
+            response = requests.get(url, headers=self.headers, timeout=self.TIMEOUT)
+            response.raise_for_status()
             response_json = response.json()
-            keys = [
-                (
-                    self.ge_cloud_resource_type,
-                    resource["id"],
+
+            # Chetan - 20220824 - Explicit fork due to ExpectationSuite using a different name field.
+            # Once 'expectation_suite_name' is renamed, this can be removed.
+            name_attr: str
+            if resource_type is GeCloudRESTResource.EXPECTATION_SUITE:
+                name_attr = "expectation_suite_name"
+            else:
+                name_attr = "name"
+
+            keys = []
+            for resource in response_json["data"]:
+                id: str = resource["id"]
+
+                resource_dict: dict = resource.get("attributes", {}).get(
+                    attributes_key, {}
                 )
-                for resource in response_json.get("data")
-            ]
+                resource_name: Optional[str] = resource_dict.get(name_attr)
+
+                key = (resource_type, id, resource_name)
+                keys.append(key)
+
             return keys
         except Exception as e:
             logger.debug(str(e))
@@ -257,7 +465,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to list keys in GE Cloud Store Backend: {e}"
             )
 
-    def get_url_for_key(self, key, protocol=None):
+    def get_url_for_key(  # type: ignore[override]
+        self, key: Tuple[str, ...], protocol: Optional[Any] = None
+    ) -> str:
         ge_cloud_id = key[1]
         url = urljoin(
             self.ge_cloud_base_url,
@@ -274,7 +484,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         data = {
             "data": {
                 "type": self.ge_cloud_resource_type,
-                "id": ge_cloud_id,
+                "id_": ge_cloud_id,
                 "attributes": {
                     "deleted": True,
                 },
@@ -289,22 +499,47 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{ge_cloud_id}",
         )
         try:
-            response = requests.patch(url, json=data, headers=self.auth_headers)
-            response_status_code = response.status_code
-
-            if response_status_code < 300:
-                return True
+            response = requests.delete(
+                url, json=data, headers=self.headers, timeout=self.TIMEOUT
+            )
+            response.raise_for_status()
+            return True
+        except requests.HTTPError as http_exc:
+            # TODO: GG 20220819 should we raise an error here instead of returning False
+            logger.warning(
+                f"Unable to delete object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+            )
             return False
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise StoreBackendError(
+                "Unable to delete object in GE Cloud Store Backend: This is likely a transient error. Please try again."
+            )
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
                 f"Unable to delete object in GE Cloud Store Backend: {e}"
             )
 
-    def _has_key(self, key):
+    def _has_key(self, key: Tuple[str, ...]) -> bool:  # type: ignore[override]
+        # self.list_keys() generates a list of length 2 tuples
+        if len(key) == 3:
+            key = key[:2]
         all_keys = self.list_keys()
         return key in all_keys
 
     @property
     def config(self) -> dict:
         return self._config
+
+    def build_key(
+        self,
+        id_: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> GeCloudIdentifier:
+        """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
+        return GeCloudIdentifier(
+            resource_type=self.ge_cloud_resource_type,
+            ge_cloud_id=id_,
+            resource_name=name,
+        )

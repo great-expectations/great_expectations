@@ -57,6 +57,12 @@ def test_expectation_self_check():
                 "samples": [],
             },
             {
+                "name": "atomic.prescriptive.kwargs",
+                "is_supported": True,
+                "is_standard": False,
+                "samples": [],
+            },
+            {
                 "name": "atomic.prescriptive.summary",
                 "is_supported": True,
                 "is_standard": False,
@@ -115,6 +121,7 @@ def test_expectation_self_check():
         "tests": [],
         "backend_test_result_counts": [],
         "errors": [],
+        "coverage_score": 0.0,
         "maturity_checklist": {
             "beta": [
                 {
@@ -538,7 +545,7 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "error_diagnostics",
         "validation_result",
     }
-    assert tests[3]["test_passed"] == False
+    assert tests[3]["test_passed"] is False
 
     assert set(tests[4].keys()) == {
         "test_title",
@@ -548,4 +555,4 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "error_diagnostics",
         "validation_result",
     }
-    assert tests[4]["test_passed"] == False
+    assert tests[4]["test_passed"] is False

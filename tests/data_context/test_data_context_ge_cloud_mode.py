@@ -3,7 +3,8 @@ from unittest import mock
 import pytest
 from ruamel import yaml
 
-from great_expectations.data_context import DataContext
+from great_expectations.data_context import BaseDataContext, DataContext
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import DataContextError, GeCloudError
 
@@ -12,7 +13,7 @@ from great_expectations.exceptions import DataContextError, GeCloudError
 def ge_cloud_data_context_config(
     ge_cloud_runtime_base_url,
     ge_cloud_runtime_organization_id,
-    ge_cloud_runtime_access_token,
+    ge_cloud_access_token,
 ):
     """
     This fixture is used to replicate a response retrieved from a GE Cloud API request.
@@ -56,7 +57,7 @@ def ge_cloud_data_context_config(
           ge_cloud_base_url: {ge_cloud_runtime_base_url}
           ge_cloud_resource_type: expectation_suite
           ge_cloud_credentials:
-            access_token: {ge_cloud_runtime_access_token}
+            access_token: {ge_cloud_access_token}
             organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
 
@@ -65,9 +66,9 @@ def ge_cloud_data_context_config(
         store_backend:
           class_name: GeCloudStoreBackend
           ge_cloud_base_url: {ge_cloud_runtime_base_url}
-          ge_cloud_resource_type: suite_validation_result
+          ge_cloud_resource_type: validation_result
           ge_cloud_credentials:
-            access_token: {ge_cloud_runtime_access_token}
+            access_token: {ge_cloud_access_token}
             organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
 
@@ -76,9 +77,9 @@ def ge_cloud_data_context_config(
         store_backend:
           class_name: GeCloudStoreBackend
           ge_cloud_base_url: {ge_cloud_runtime_base_url}
-          ge_cloud_resource_type: contract
+          ge_cloud_resource_type: checkpoint
           ge_cloud_credentials:
-            access_token: {ge_cloud_runtime_access_token}
+            access_token: {ge_cloud_access_token}
             organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
 
@@ -96,7 +97,7 @@ def ge_cloud_data_context_config(
           ge_cloud_base_url: {ge_cloud_runtime_base_url}
           ge_cloud_resource_type: rendered_data_doc
           ge_cloud_credentials:
-            access_token: {ge_cloud_runtime_access_token}
+            access_token: {ge_cloud_access_token}
             organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
         site_index_builder:
@@ -114,14 +115,11 @@ def ge_cloud_data_context_config(
 
 
 @pytest.mark.cloud
-def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error(
-    ge_cloud_data_context_config,
-    data_context_with_incomplete_global_config_in_dot_dir_only,
-):
+def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error():
     # Don't want to make a real request in a unit test so we simply patch the config fixture
     with mock.patch(
-        "great_expectations.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
-        return_value=ge_cloud_data_context_config,
+        "great_expectations.data_context.DataContext._get_ge_cloud_config_dict",
+        return_value={"base_url": None, "organization_id": None, "access_token": None},
     ):
         with pytest.raises(DataContextError):
             DataContext(context_root_dir="/my/context/root/dir", ge_cloud_mode=True)
@@ -131,9 +129,10 @@ def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_er
 @mock.patch("requests.get")
 def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     mock_request,
+    request_headers: dict,
     ge_cloud_runtime_base_url,
     ge_cloud_runtime_organization_id,
-    ge_cloud_runtime_access_token,
+    ge_cloud_access_token,
 ):
     # Ensure that the request goes through
     mock_request.return_value.status_code = 200
@@ -142,18 +141,13 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
             ge_cloud_mode=True,
             ge_cloud_base_url=ge_cloud_runtime_base_url,
             ge_cloud_organization_id=ge_cloud_runtime_organization_id,
-            ge_cloud_access_token=ge_cloud_runtime_access_token,
+            ge_cloud_access_token=ge_cloud_access_token,
         )
     except:  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
         pass
 
     called_with_url = f"{ge_cloud_runtime_base_url}/organizations/{ge_cloud_runtime_organization_id}/data-context-configuration"
-    called_with_header = {
-        "headers": {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {ge_cloud_runtime_access_token}",
-        }
-    }
+    called_with_header = {"headers": request_headers}
 
     # Only ever called once with the endpoint URL and auth token as args
     mock_request.assert_called_once()
@@ -167,7 +161,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
     mock_request,
     ge_cloud_runtime_base_url,
     ge_cloud_runtime_organization_id,
-    ge_cloud_runtime_access_token,
+    ge_cloud_access_token,
 ):
     # Ensure that the request fails
     mock_request.return_value.status_code = 401
@@ -177,5 +171,50 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
             ge_cloud_mode=True,
             ge_cloud_base_url=ge_cloud_runtime_base_url,
             ge_cloud_organization_id=ge_cloud_runtime_organization_id,
-            ge_cloud_access_token=ge_cloud_runtime_access_token,
+            ge_cloud_access_token=ge_cloud_access_token,
         )
+
+
+@pytest.mark.cloud
+@pytest.mark.unit
+@mock.patch("requests.get")
+def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
+    mock_request,
+    ge_cloud_base_url,
+    empty_base_data_context_in_cloud_mode_custom_base_url: BaseDataContext,
+    ge_cloud_runtime_organization_id,
+    ge_cloud_access_token,
+):
+
+    custom_base_url: str = "https://some_url.org"
+    # Ensure that the request goes through
+    mock_request.return_value.status_code = 200
+
+    context: BaseDataContext = empty_base_data_context_in_cloud_mode_custom_base_url
+
+    # Assertions that the context fixture is set up properly
+    assert not context.ge_cloud_config.base_url == GeCloudStoreBackend.DEFAULT_BASE_URL
+    assert not context.ge_cloud_config.base_url == ge_cloud_base_url
+    assert (
+        not context.ge_cloud_config.base_url == "https://app.test.greatexpectations.io"
+    )
+
+    # The DatasourceStore should not have the default base_url or commonly used test base urls
+    assert (
+        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        == GeCloudStoreBackend.DEFAULT_BASE_URL
+    )
+    assert (
+        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        == ge_cloud_base_url
+    )
+    assert (
+        not context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        == "https://app.test.greatexpectations.io"
+    )
+
+    # The DatasourceStore should have the custom base url set
+    assert (
+        context._datasource_store.store_backend.config["ge_cloud_base_url"]
+        == custom_base_url
+    )
