@@ -473,7 +473,7 @@ def load_data_into_postgres_database(sa):
 
 # this works for some reason
 def test_with_batch_spec_passthrough_and_schema_data_assistant_pandas(
-    spark_session, spark_df_taxi_data_schema, empty_data_context
+    empty_data_context,
 ):
     data_context = empty_data_context
     base_directory = file_relative_path(
@@ -518,7 +518,7 @@ def test_with_batch_spec_passthrough_and_schema_data_assistant_pandas(
         datasource_name="taxi_data",
         data_connector_name="configured_data_connector_multi_batch_asset",
         data_asset_name="yellow_tripdata_2019",
-        data_connector_query={"limit": 1},
+        data_connector_query={"limit": 2},
         # batch_spec_passthrough={
         #     "reader_method": "csv",
         #     "reader_options": {
