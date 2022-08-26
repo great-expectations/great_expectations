@@ -8,6 +8,7 @@ import pytest
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 from nbformat import NotebookNode
 
+from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions.exceptions import GreatExpectationsError
 
@@ -467,3 +468,133 @@ def load_data_into_postgres_database(sa):
             drop_existing_table=False,
             convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
         )
+
+
+# this works for some reason
+def test_with_batch_spec_passthrough_and_schema_data_assistant_pandas(
+    spark_session, spark_df_taxi_data_schema, empty_data_context
+):
+    data_context = empty_data_context
+    base_directory = file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "..",
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+        ),
+    )
+    datasource_config: dict = {
+        "name": "taxi_data",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "module_name": "great_expectations.execution_engine",
+            # "class_name": "SparkDFExecutionEngine",
+            "class_name": "PandasExecutionEngine",
+        },
+        "data_connectors": {
+            "configured_data_connector_multi_batch_asset": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "base_directory": base_directory,
+                "assets": {
+                    "yellow_tripdata_2019": {
+                        "group_names": ["year", "month"],
+                        "pattern": "yellow_tripdata_sample_(2019)-(\\d.*)\\.csv",
+                    },
+                },
+            },
+        },
+    }
+    # add_datasource only if it doesn't already exist in our configuration
+    try:
+        data_context.get_datasource(datasource_config["name"])
+    except ValueError:
+        data_context.add_datasource(**datasource_config)
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_data",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2019",
+        data_connector_query={"limit": 1},
+        # batch_spec_passthrough={
+        #     "reader_method": "csv",
+        #     "reader_options": {
+        #         "header": True,
+        #         "schema": spark_df_taxi_data_schema,
+        #     },
+        # },
+    )
+
+    batch_list = data_context.get_batch_list(batch_request=batch_request)
+    multi_batch_batch_request = batch_request
+    result = data_context.assistants.onboarding.run(
+        batch_request=multi_batch_batch_request
+    )
+    # print(result)
+
+
+# and this does not
+def test_spark_with_batch_spec_passthrough_and_schema_data_assistant_spark(
+    spark_session, spark_df_taxi_data_schema, empty_data_context
+):
+    data_context = empty_data_context
+    base_directory = file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "..",
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+        ),
+    )
+    datasource_config: dict = {
+        "name": "taxi_data",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "module_name": "great_expectations.execution_engine",
+            "class_name": "SparkDFExecutionEngine",
+            # "class_name": "PandasExecutionEngine",
+        },
+        "data_connectors": {
+            "configured_data_connector_multi_batch_asset": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "base_directory": base_directory,
+                "assets": {
+                    "yellow_tripdata_2019": {
+                        "group_names": ["year", "month"],
+                        "pattern": "yellow_tripdata_sample_(2019)-(\\d.*)\\.csv",
+                    },
+                },
+            },
+        },
+    }
+    # add_datasource only if it doesn't already exist in our configuration
+    try:
+        data_context.get_datasource(datasource_config["name"])
+    except ValueError:
+        data_context.add_datasource(**datasource_config)
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_data",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2019",
+        data_connector_query={"limit": 1},
+        batch_spec_passthrough={
+            "reader_method": "csv",
+            "reader_options": {
+                "header": True,
+                "schema": spark_df_taxi_data_schema,
+            },
+        },
+    )
+
+    batch_list = data_context.get_batch_list(batch_request=batch_request)
+    multi_batch_batch_request = batch_request
+    result = data_context.assistants.onboarding.run(
+        batch_request=multi_batch_batch_request
+    )
+    print(result)

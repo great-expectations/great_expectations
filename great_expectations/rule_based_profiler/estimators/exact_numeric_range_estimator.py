@@ -52,7 +52,14 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
         ) = convert_metric_values_to_float_dtype_best_effort(
             metric_values=metric_values
         )
-
+        # hacky
+        if not metric_values_converted:
+            return build_numeric_range_estimation_result(
+                metric_values=metric_values, min_value=0, max_value=0
+            )
+        # but we shouldn't even be here
+        print(f"metric_values_converted amin: {metric_values_converted}")
+        print(f"metric_values_converted amax: {metric_values_converted}")
         min_value: MetricValue = np.amin(a=metric_values_converted)
         max_value: MetricValue = np.amax(a=metric_values_converted)
 

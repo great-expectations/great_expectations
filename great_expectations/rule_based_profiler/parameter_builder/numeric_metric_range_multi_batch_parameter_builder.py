@@ -568,6 +568,7 @@ detected.
                 )
             else:
                 # Compute low and high estimates for vector of samples for given element of multi-dimensional metric.
+                # print(f"domain: {domain}")
                 numeric_range_estimation_result = (
                     numeric_range_estimator.get_numeric_range_estimate(
                         metric_values=metric_value_vector,
