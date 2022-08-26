@@ -225,7 +225,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             column_names=table_column_names,
         )
         print(
-            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._GET_DOMAINS()] STEP-6-METRIC_CONFIGURATIONS_BY_COLUMN_NAME=[{table_row_counts}]"
+            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._GET_DOMAINS()] STEP-6-METRIC_CONFIGURATIONS_BY_COLUMN_NAME=[{metric_configurations_by_column_name}]"
         )
 
         candidate_column_names: List[
