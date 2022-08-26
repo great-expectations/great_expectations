@@ -258,17 +258,15 @@ def column_function_partial(
 
 
 # TODO: <Alex>ALEX</Alex>
-def repartition_dataframe(df, column, chunk_size: int = 1):
-    if column:
-        return df.repartition(column)
-
-    n_entries: int = df.count()
-    n_partitions: int = round(n_entries / chunk_size)
-    n_partitions = 1 if n_partitions == 0 else n_partitions
-
-    return df.repartition(n_partitions)
-
-
+# def repartition_dataframe(df, column, chunk_size: int = 1):
+#     if column:
+#         return df.repartition(column)
+#
+#     n_entries: int = df.count()
+#     n_partitions: int = round(n_entries / chunk_size)
+#     n_partitions = 1 if n_partitions == 0 else n_partitions
+#
+#     return df.repartition(n_partitions)
 # TODO: <Alex>ALEX</Alex>
 
 
@@ -484,13 +482,13 @@ def column_condition_partial(
                     )
 
                 # TODO: <Alex>ALEX</Alex>
-                print(
-                    f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER.column_condition_partial()] NUM_PARTITIONS-[{column_name}]-BEFORE: {data.rdd.getNumPartitions()}"
-                )
-                data = repartition_dataframe(data, column_name)
-                print(
-                    f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER.column_condition_partial()] NUM_PARTITIONS-[{column_name}]-AFTER: {data.rdd.getNumPartitions()}"
-                )
+                # print(
+                #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER.column_condition_partial()] NUM_PARTITIONS-[{column_name}]-BEFORE: {data.rdd.getNumPartitions()}"
+                # )
+                # data = repartition_dataframe(data, column_name)
+                # print(
+                #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER.column_condition_partial()] NUM_PARTITIONS-[{column_name}]-AFTER: {data.rdd.getNumPartitions()}"
+                # )
                 # TODO: <Alex>ALEX</Alex>
                 column = data[column_name]
                 expected_condition = metric_fn(

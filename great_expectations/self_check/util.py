@@ -1702,6 +1702,17 @@ def build_spark_engine(
 
         df = spark.createDataFrame(data=data, schema=schema)
 
+    # TODO: <Alex>ALEX</Alex>
+    df.show()
+    print(
+        f"\n[ALEX_TEST] [SELF_CHECK/UTIL.PY:build_spark_engine()] NUM_PARTITIONS-[{df.columns}]-BEFORE: {df.rdd.getNumPartitions()}"
+    )
+    df = df.repartition(*df.columns)
+    print(
+        f"\n[ALEX_TEST] [SELF_CHECK/UTIL.PY:build_spark_engine()] NUM_PARTITIONS-[{df.columns}]-AFTER: {df.rdd.getNumPartitions()}"
+    )
+    df.show()
+    # TODO: <Alex>ALEX</Alex>
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
     execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
