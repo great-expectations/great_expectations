@@ -93,12 +93,18 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         # Compute "table.columns" metric value for each Batch object.
+        print(
+            f"\n[MeanTableColumnsSetMatchMultiBatchParameterBuilder._build_parameters()] [{self.name}] BEGIN"
+        )
         super().build_parameters(
             domain=domain,
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
             recompute_existing_parameter_values=recompute_existing_parameter_values,
+        )
+        print(
+            f"\n[MeanTableColumnsSetMatchMultiBatchParameterBuilder._build_parameters()] [{self.name}] PARAMETER_COMPUTED"
         )
 
         # Retrieve "table.columns" metric values for all Batch objects.
@@ -108,6 +114,9 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
+        )
+        print(
+            f"\n[MeanTableColumnsSetMatchMultiBatchParameterBuilder._build_parameters()] [{self.name}] GOT_PARAMETER_NODE"
         )
         table_columns_names_multi_batch_value: MetricValues = parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
@@ -134,6 +143,9 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
                     for one_batch_table_columns_names_set in multi_batch_table_columns_names_sets_as_list
                 ]
             )
+        )
+        print(
+            f"\n[MeanTableColumnsSetMatchMultiBatchParameterBuilder._build_parameters()] [{self.name}] PREPARING_RESULT-NEAR_END"
         )
 
         return Attributes(
