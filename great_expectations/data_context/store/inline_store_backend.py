@@ -171,7 +171,7 @@ class InlineStoreBackend(StoreBackend):
         id_: Optional[str] = None,
         name: Optional[str] = None,
     ) -> DataContextVariableKey:
-        """Get the store backend specific implementation of the key. id_ included for super class compatibility."""
+        """Get the store backend specific implementation of the key. id included for super class compatibility."""
         return DataContextVariableKey(
             resource_name=name,
         )

@@ -337,7 +337,7 @@ class CloudDataContext(AbstractDataContext):
             resource_ref: GeCloudResourceRef = self._datasource_store.create(  # type: ignore[assignment]
                 datasource_config
             )
-            datasource_config.id_ = resource_ref.ge_cloud_id
+            datasource_config.id = resource_ref.ge_cloud_id
 
         self.config.datasources[name] = datasource_config  # type: ignore[index,assignment]
 

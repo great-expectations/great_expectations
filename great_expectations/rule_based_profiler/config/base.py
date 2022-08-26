@@ -688,7 +688,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
         required=True,
         allow_none=False,
     )
-    id_ = fields.String(
+    id = fields.String(
         required=False,
         allow_none=False,
         data_key="id",

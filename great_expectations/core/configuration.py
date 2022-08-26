@@ -11,7 +11,7 @@ class AbstractConfig(ABC, SerializableDictDot):
     """Abstract base class for Config objects. Sets the fields that must be included on a Config."""
 
     def __init__(self, id_: Optional[str] = None, name: Optional[str] = None) -> None:
-        self.id_ = id_
+        self.id = id_
         self.name = name
         super().__init__()
 

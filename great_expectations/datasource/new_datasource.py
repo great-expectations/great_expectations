@@ -45,7 +45,7 @@ class BaseDatasource:
             id_: Identifier specific to this datasource.
         """
         self._name = name
-        self._id_ = id_
+        self._id = id_
 
         self._data_context_root_directory = data_context_root_directory
         if execution_engine is None:
@@ -386,7 +386,7 @@ class BaseDatasource:
         """
         Property for datasource id_
         """
-        return self._id_  # type: ignore[return-value]
+        return self._id  # type: ignore[return-value]
 
     @property
     def execution_engine(self) -> ExecutionEngine:

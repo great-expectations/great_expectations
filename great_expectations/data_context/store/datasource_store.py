@@ -146,9 +146,9 @@ class DatasourceStore(Store):
         self, datasource_config: DatasourceConfig
     ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
         if hasattr(datasource_config, "id_"):
-            id_ = datasource_config.id_
+            id = datasource_config.id_
         else:
-            id_ = None
+            id = None
         if hasattr(datasource_config, "name"):
             name = datasource_config.name
         else:
