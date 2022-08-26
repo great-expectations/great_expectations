@@ -44,6 +44,10 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> NumericRangeEstimationResult:
+        print(f"domain : {domain}")
+        print(f"variables: {variables}")
+        print(f"parameter: {parameters}")
+
         ndarray_is_datetime_type: bool
         metric_values_converted: np.ndarray
         (
@@ -53,11 +57,12 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
             metric_values=metric_values
         )
         # hacky
-        if not metric_values_converted:
+        if len(metric_values_converted) == 0:
             return build_numeric_range_estimation_result(
                 metric_values=metric_values, min_value=0, max_value=0
             )
         # but we shouldn't even be here
+        #
         print(f"metric_values_converted amin: {metric_values_converted}")
         print(f"metric_values_converted amax: {metric_values_converted}")
         min_value: MetricValue = np.amin(a=metric_values_converted)

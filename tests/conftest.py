@@ -394,28 +394,27 @@ def spark_df_taxi_data_schema(spark_session):
 
     schema = StructType(
         [
-            StructField("vendor_id", IntegerType(), True),
-            StructField("pickup_datetime", TimestampType(), True),
-            StructField("dropoff_datetime", TimestampType(), True),
-            StructField("passenger_count", IntegerType(), True),
-            StructField("trip_distance", DoubleType(), True),
-            StructField("rate_code_id", IntegerType(), True),
-            StructField("store_and_fwd_flag", StringType(), True),
-            StructField("pickup_location_id", IntegerType(), True),
-            StructField("dropoff_location_id", IntegerType(), True),
-            StructField("payment_type", IntegerType(), True),
-            StructField("fare_amount", DoubleType(), True),
-            StructField("extra", DoubleType(), True),
-            StructField("mta_tax", DoubleType(), True),
-            StructField("tip_amount", DoubleType(), True),
-            StructField("tolls_amount", DoubleType(), True),
-            StructField("improvement_surcharge", DoubleType(), True),
-            StructField("total_amount", DoubleType(), True),
-            StructField("congestion_surcharge", DoubleType(), True),
+            StructField("vendor_id", IntegerType(), True, None),
+            StructField("pickup_datetime", TimestampType(), True, None),
+            StructField("dropoff_datetime", TimestampType(), True, None),
+            StructField("passenger_count", IntegerType(), True, None),
+            StructField("trip_distance", DoubleType(), True, None),
+            StructField("rate_code_id", IntegerType(), True, None),
+            StructField("store_and_fwd_flag", StringType(), True, None),
+            StructField("pickup_location_id", IntegerType(), True, None),
+            StructField("dropoff_location_id", IntegerType(), True, None),
+            StructField("payment_type", IntegerType(), True, None),
+            StructField("fare_amount", DoubleType(), True, None),
+            StructField("extra", DoubleType(), True, None),
+            StructField("mta_tax", DoubleType(), True, None),
+            StructField("tip_amount", DoubleType(), True, None),
+            StructField("tolls_amount", DoubleType(), True, None),
+            StructField("improvement_surcharge", DoubleType(), True, None),
+            StructField("total_amount", DoubleType(), True, None),
+            StructField("congestion_surcharge", DoubleType(), True, None),
         ]
     )
-
-    return schema
+    return schema.jsonValue()
 
 
 @pytest.mark.order(index=3)

@@ -8,6 +8,7 @@ import pytest
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 from nbformat import NotebookNode
 
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions.exceptions import GreatExpectationsError
@@ -568,6 +569,17 @@ def test_spark_with_batch_spec_passthrough_and_schema_data_assistant_spark(
                         "group_names": ["year", "month"],
                         "pattern": "yellow_tripdata_sample_(2019)-(\\d.*)\\.csv",
                     },
+                    "yellow_tripdata_2020": {
+                        "group_names": ["year", "month"],
+                        "pattern": "yellow_tripdata_sample_(2020)-(\\d.*)\\.csv",
+                    },
+                },
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "schema": spark_df_taxi_data_schema,
+                    },
                 },
             },
         },
@@ -583,13 +595,13 @@ def test_spark_with_batch_spec_passthrough_and_schema_data_assistant_spark(
         data_connector_name="configured_data_connector_multi_batch_asset",
         data_asset_name="yellow_tripdata_2019",
         data_connector_query={"limit": 1},
-        batch_spec_passthrough={
-            "reader_method": "csv",
-            "reader_options": {
-                "header": True,
-                "schema": spark_df_taxi_data_schema,
-            },
-        },
+        # batch_spec_passthrough={
+        #     "reader_method": "csv",
+        #     "reader_options": {
+        #         "header": True,
+        #         "schema": spark_df_taxi_data_schema,
+        #     },
+        # },
     )
 
     batch_list = data_context.get_batch_list(batch_request=batch_request)
@@ -597,4 +609,50 @@ def test_spark_with_batch_spec_passthrough_and_schema_data_assistant_spark(
     result = data_context.assistants.onboarding.run(
         batch_request=multi_batch_batch_request
     )
-    print(result)
+
+    new_suite = result.get_expectation_suite(expectation_suite_name="temp_suite")
+    suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name="taxi_data_2019_suite"
+    )
+    resulting_configurations: List[
+        ExpectationConfiguration
+    ] = suite.add_expectation_configurations(
+        expectation_configurations=result.expectation_configurations
+    )
+    data_context.save_expectation_suite(expectation_suite=suite)
+
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_data",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2020",
+        data_connector_query={
+            "batch_filter_parameters": {"year": "2020", "month": "01"}
+        },
+        batch_spec_passthrough={
+            "reader_options": {
+                "schema": spark_df_taxi_data_schema,
+            }
+        },
+    )
+    checkpoint_config: dict = {
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "class_name": "SimpleCheckpoint",
+        "validations": [
+            {
+                "batch_request": single_batch_batch_request,
+                "expectation_suite_name": "taxi_data_2019_suite",
+            }
+        ],
+        "action_list": [
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+    }
+    data_context.add_checkpoint(**checkpoint_config)
+    results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
+    print(results.success)

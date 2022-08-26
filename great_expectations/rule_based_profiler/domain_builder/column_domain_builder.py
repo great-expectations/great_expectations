@@ -174,6 +174,7 @@ class ColumnDomainBuilder(DomainBuilder):
     def semantic_type_filter(self) -> Optional[SemanticTypeFilter]:
         return self._semantic_type_filter
 
+    # see if this is picking up on the right columns
     def get_effective_column_names(
         self,
         batch_ids: Optional[List[str]] = None,
@@ -269,7 +270,7 @@ class ColumnDomainBuilder(DomainBuilder):
                     effective_column_names,
                 )
             )
-
+        # marker : this is what we need to check whether it is right or wrong
         # Obtain semantic_type_filter_module_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         semantic_type_filter_module_name: Optional[
             str
@@ -362,6 +363,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
         return effective_column_names
 
+    # also look here
     def _get_domains(
         self,
         rule_name: str,

@@ -12,6 +12,7 @@ from great_expectations.rule_based_profiler.semantic_type_filter import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
+# this is where we are going to interpret the types
 class SimpleSemanticTypeFilter(SemanticTypeFilter):
     """
     This class provides default implementation methods, any of which can be overwritten with different mechanisms.
@@ -127,6 +128,11 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         column_type: str = str(column_types_dict_list[0]["type"]).upper()
 
         semantic_column_type: SemanticDomainTypes
+        # this is our friend!
+        # look here
+        print(
+            f"hello this is column: {column_type} and column type {column_types_dict_list}"
+        )
         if column_type in (
             {type_name.upper() for type_name in ProfilerTypeMapping.INT_TYPE_NAMES}
             | {type_name.upper() for type_name in ProfilerTypeMapping.FLOAT_TYPE_NAMES}
@@ -177,5 +183,6 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                 },
             )
         )
+        print(f"hello this is final semantic column type: {semantic_column_type} ")
 
         return inferred_semantic_column_type

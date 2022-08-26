@@ -285,9 +285,12 @@ Please check your config."""
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            schema: Optional[pyspark.sql.types.StructType] = reader_options.get(
-                "schema"
-            )
+            schema_json: Optional[dict] = reader_options.get("schema")
+            schema: Optional[pyspark.sql.types.StructType] = None
+            if schema_json:
+                schema: pyspark.sql.types.StructType = sparktypes.StructType.fromJson(
+                    schema_json
+                )
 
             path: str = batch_spec.path
             try:
