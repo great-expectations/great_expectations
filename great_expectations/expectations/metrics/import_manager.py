@@ -44,6 +44,7 @@ except ImportError:
     Window = None
 
 try:
+    from pyspark.sql import Column as pyspark_sql_Column
     from pyspark.sql import DataFrame as pyspark_sql_DataFrame
     from pyspark.sql import Row as pyspark_sql_Row
     from pyspark.sql import SparkSession as pyspark_sql_SparkSession

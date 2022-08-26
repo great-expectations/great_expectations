@@ -154,10 +154,10 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             value_counts = value_counts.orderBy(F.desc("count"))
         value_counts = value_counts.collect()
         # Numpy does not always infer the correct DataTypes for Spark df, so we cannot use vectorized approach.
-        idx, values = zip(*value_counts)
+        values, counts = zip(*value_counts)
         series = pd.Series(
-            values,
-            index=pd.Index(data=idx, name="value"),
+            counts,
+            index=pd.Index(data=values, name="value"),
             name="count",
         )
         return series
