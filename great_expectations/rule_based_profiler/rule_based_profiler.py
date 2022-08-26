@@ -112,7 +112,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         name: str = profiler_config.name
         id: Optional[str] = None
         if hasattr(profiler_config, "id"):
-            id = profiler_config.id_
+            id = profiler_config.id
         config_version: float = profiler_config.config_version
         variables: Optional[Dict[str, Any]] = profiler_config.variables
         rules: Optional[Dict[str, Dict[str, Any]]] = profiler_config.rules
