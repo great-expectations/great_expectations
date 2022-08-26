@@ -382,7 +382,7 @@ class BaseDatasource:
         return self._name
 
     @property
-    def id_(self) -> str:
+    def id(self) -> str:
         """
         Property for datasource id_
         """
