@@ -80,7 +80,6 @@ from great_expectations.validator.validator import Validator
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
     UsageStatisticsHandler,
     send_usage_message,
-    usage_statistics_enabled_method,
 )
 
 logger = logging.getLogger(__name__)
