@@ -691,7 +691,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     id = fields.String(
         required=False,
         allow_none=False,
-        data_key="id",
+        
     )
     config_version = fields.Float(
         required=True,

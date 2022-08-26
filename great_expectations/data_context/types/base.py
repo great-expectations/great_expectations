@@ -485,7 +485,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     id = fields.String(
         required=False,
         allow_none=True,
-        data_key="id",
+        
     )
 
     class_name = fields.String(
@@ -963,7 +963,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
     id = fields.String(
         required=False,
         allow_none=True,
-        data_key="id",
+
     )
 
     class_name = fields.String(
@@ -2291,7 +2291,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
-    id = fields.String(required=False, allow_none=False, data_key="id")
+    id = fields.String(required=False, allow_none=False)
 
     def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:  # type: ignore[override]
         """
