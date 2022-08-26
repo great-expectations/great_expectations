@@ -124,9 +124,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     "type": metadata["type"],
                     "table_name": table_name,
                     "include_schema_name": self.include_schema_name,
-                    "schema_name": metadata["schema_name"]
-                    if self.include_schema_name
-                    else None,
+                    "schema_name": metadata["schema_name"],
                     "splitter_method": self.splitter_method,
                     "splitter_kwargs": self.splitter_kwargs,
                     "sampling_method": self.sampling_method,
@@ -257,3 +255,31 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 raise e
 
         return tables
+
+    def _update_data_asset_name_from_config(
+        self, data_asset_name: str, data_asset_config: dict
+    ) -> str:
+        schema_name: str = data_asset_config.get("schema_name")
+        include_schema_name: bool = data_asset_config.get(
+            "include_schema_name", self.include_schema_name
+        )
+
+        if schema_name is not None and include_schema_name:
+            schema_name = f"{schema_name}."
+        else:
+            schema_name = ""
+
+        data_asset_name: str = f"{schema_name}{data_asset_name}"
+
+        data_asset_name_prefix: str = data_asset_config.get(
+            "data_asset_name_prefix", self.data_asset_name_prefix
+        )
+        data_asset_name_suffix: str = data_asset_config.get(
+            "data_asset_name_suffix", self.data_asset_name_suffix
+        )
+
+        data_asset_name: str = (
+            f"{data_asset_name_prefix}{data_asset_name}{data_asset_name_suffix}"
+        )
+
+        return data_asset_name

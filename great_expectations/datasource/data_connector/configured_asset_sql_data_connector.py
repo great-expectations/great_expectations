@@ -102,7 +102,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         self._assets = {}
 
-        self._refresh_data_assets_cache(assets=assets, clean_nulls=True)
+        self._refresh_data_assets_cache(assets=assets)
 
         self._data_references_cache = {}
 
@@ -287,7 +287,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _refresh_data_assets_cache(
         self,
         assets: Optional[Dict[str, dict]] = None,
-        clean_nulls: bool = True,
     ) -> None:
         self._assets = {}
 
