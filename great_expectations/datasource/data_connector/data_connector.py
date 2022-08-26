@@ -99,7 +99,7 @@ class DataConnector:
     def get_batch_data_and_metadata(
         self,
         batch_definition: BatchDefinition,
-    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
+    ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         """
         Uses batch_definition to retrieve batch_data and batch_markers by building a batch_spec from batch_definition,
         then using execution_engine to return batch_data and batch_markers

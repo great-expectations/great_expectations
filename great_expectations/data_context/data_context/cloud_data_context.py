@@ -1,5 +1,5 @@
 import logging
-from typing import List, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, List, Mapping, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -25,6 +25,9 @@ from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.datasource import Datasource
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -71,9 +74,9 @@ class CloudDataContext(AbstractDataContext):
         store_backend: dict = {"class_name": "GeCloudStoreBackend"}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),
+            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
             "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
-            "ge_cloud_base_url": self.ge_cloud_config.base_url,
+            "ge_cloud_base_url": self.ge_cloud_config.base_url,  # type: ignore[union-attr]
         }
 
         datasource_store = DatasourceStore(
@@ -89,7 +92,7 @@ class CloudDataContext(AbstractDataContext):
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GE Cloud ids is returned instead.
         """
-        return [suite_key.resource_name for suite_key in self.list_expectation_suites()]
+        return [suite_key.resource_name for suite_key in self.list_expectation_suites()]  # type: ignore[union-attr]
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -101,7 +104,7 @@ class CloudDataContext(AbstractDataContext):
 
     def _init_variables(self) -> CloudDataContextVariables:
         ge_cloud_base_url: str = self._ge_cloud_config.base_url
-        ge_cloud_organization_id: str = self._ge_cloud_config.organization_id
+        ge_cloud_organization_id: str = self._ge_cloud_config.organization_id  # type: ignore[union-attr,assignment]
         ge_cloud_access_token: str = self._ge_cloud_config.access_token
 
         variables = CloudDataContextVariables(
@@ -121,7 +124,7 @@ class CloudDataContext(AbstractDataContext):
         """
 
         # if in ge_cloud_mode, use ge_cloud_organization_id
-        return self.ge_cloud_config.organization_id
+        return self.ge_cloud_config.organization_id  # type: ignore[return-value,union-attr]
 
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
@@ -329,18 +332,18 @@ class CloudDataContext(AbstractDataContext):
         if save_changes:
 
             datasource_config["name"] = name
-            resource_ref: GeCloudResourceRef = self._datasource_store.create(
+            resource_ref: GeCloudResourceRef = self._datasource_store.create(  # type: ignore[assignment]
                 datasource_config
             )
             datasource_config.id_ = resource_ref.ge_cloud_id
 
-        self.config.datasources[name] = datasource_config
+        self.config.datasources[name] = datasource_config  # type: ignore[index,assignment]
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        config = dict(datasourceConfigSchema.dump(datasource_config))
 
-        substituted_config_dict: dict = substitute_all_config_variables(
+        substituted_config_dict = substitute_all_config_variables(
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
@@ -366,7 +369,7 @@ class CloudDataContext(AbstractDataContext):
                 if save_changes:
                     self._datasource_store.delete(datasource_config)
                 # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(name, None)
+                self.config.datasources.pop(name, None)  # type: ignore[union-attr]
                 raise e
 
         return datasource
@@ -397,7 +400,7 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
-    ) -> "Checkpoint":  # noqa: F821
+    ) -> "Checkpoint":
         """
         See `AbstractDataContext.add_checkpoint` for more information.
         """
@@ -406,7 +409,7 @@ class CloudDataContext(AbstractDataContext):
 
         checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
             data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,
+            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -438,6 +441,6 @@ class CloudDataContext(AbstractDataContext):
         )
 
         checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
-            checkpoint_config=checkpoint_config, data_context=self
+            checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
         return checkpoint

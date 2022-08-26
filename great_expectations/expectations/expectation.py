@@ -951,6 +951,9 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
+        force_no_progress_bar: bool = True,
+        ignore_suppress: bool = False,
+        ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
     ) -> ExpectationDiagnostics:
@@ -1023,6 +1026,9 @@ class Expectation(metaclass=MetaExpectation):
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
+            force_no_progress_bar=force_no_progress_bar,
+            ignore_suppress=ignore_suppress,
+            ignore_only_for=ignore_only_for,
             debug_logger=debug_logger,
             only_consider_these_backends=only_consider_these_backends,
         )
@@ -1315,6 +1321,8 @@ class Expectation(metaclass=MetaExpectation):
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
         raise_exceptions_for_backends: bool = False,
         force_no_progress_bar: bool = True,
+        ignore_suppress: bool = False,
+        ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
     ) -> List[ExpectationTestDiagnostics]:
@@ -1334,6 +1342,8 @@ class Expectation(metaclass=MetaExpectation):
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
+            ignore_suppress=ignore_suppress,
+            ignore_only_for=ignore_only_for,
             debug_logger=debug_logger,
             only_consider_these_backends=only_consider_these_backends,
         )
