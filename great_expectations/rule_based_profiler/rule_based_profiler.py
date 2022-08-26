@@ -118,7 +118,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rules: Optional[Dict[str, Dict[str, Any]]] = profiler_config.rules
 
         self._name = name
-        self._id = id_
+        self._id = id
         self._config_version = config_version
 
         self._profiler_config = profiler_config

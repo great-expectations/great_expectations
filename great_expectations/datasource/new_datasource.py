@@ -45,7 +45,7 @@ class BaseDatasource:
             id: Identifier specific to this datasource.
         """
         self._name = name
-        self._id = id_
+        self._id = id
 
         self._data_context_root_directory = data_context_root_directory
         if execution_engine is None:

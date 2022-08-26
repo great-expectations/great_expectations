@@ -203,7 +203,7 @@ class BaseCheckpoint(ConfigPeer):
                     if validation_result:
                         meta = validation_result.meta
                         id = str(self.ge_cloud_id) if self.ge_cloud_id else None
-                        meta["checkpoint_id"] = id_
+                        meta["checkpoint_id"] = id
 
                 checkpoint_run_results.update(run_results)
 

@@ -62,7 +62,7 @@ class DataConnector:
             )
 
         self._name = name
-        self._id = id_
+        self._id = id
         self._datasource_name = datasource_name
         self._execution_engine = execution_engine
 
