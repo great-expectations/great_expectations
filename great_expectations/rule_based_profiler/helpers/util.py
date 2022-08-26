@@ -339,7 +339,7 @@ def get_resolved_metrics_by_key(
         force_no_progress_bar=force_no_progress_bar,
     )
     print(
-        f"\n[ALEX_TEST] [GET_RESOLVED_METRICS_BY_KEY] DON_RUNNING_VALIDATOR_COMPUTE_METRICS"
+        f"\n[ALEX_TEST] [GET_RESOLVED_METRICS_BY_KEY] DONE_RUNNING_VALIDATOR_COMPUTE_METRICS"
     )
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
