@@ -12,6 +12,7 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.datasource import BaseDatasource
+from great_expectations.datasource.datasource_serializer import JsonDatasourceConfigSerializer
 
 
 @pytest.mark.cloud
@@ -96,9 +97,8 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 
         retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
 
-        expected_datasource_config = datasourceConfigSchema.dump(
-            datasource_config_with_name
-        )
+        serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
+        expected_datasource_config = serializer.serialize(datasource_config_with_name)
 
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
@@ -204,9 +204,8 @@ def test_data_context_in_cloud_mode_add_datasource(
         assert len(context.list_datasources()) == 1
 
         retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
-        expected_datasource_config = datasourceConfigSchema.dump(
-            datasource_config_with_name
-        )
+        serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
+        expected_datasource_config = serializer.serialize(datasource_config_with_name)
 
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
@@ -307,9 +306,8 @@ def test_cloud_data_context_add_datasource(
         assert len(context.list_datasources()) == 1
 
         retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
-        expected_datasource_config = datasourceConfigSchema.dump(
-            datasource_config_with_name
-        )
+        serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
+        expected_datasource_config = serializer.serialize(datasource_config_with_name)
 
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.

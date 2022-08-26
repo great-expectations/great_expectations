@@ -9,12 +9,16 @@ datasource_config = DatasourceConfig(...)
 serializer = YAMLReadyDictDatasourceConfigSerializer()
 serialized_value = serializer.serialize(datasource_config)
 """
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
+
+
+from great_expectations.core.util import convert_to_json_serializable
 
 from great_expectations.core.serializer import AbstractConfigSerializer
 
 if TYPE_CHECKING:
     from great_expectations.core.configuration import AbstractConfig
+    from great_expectations.data_context.types.base import DatasourceConfig
 
 
 class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
@@ -62,3 +66,23 @@ class NamedDatasourceSerializer(AbstractConfigSerializer):
             data_connector_config.pop("name", None)
 
         return config
+
+class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
+    def serialize(self, obj: "AbstractConfig") -> dict:
+        """Serialize datasource config to json dict. Adds a load step to make sure
+        load logic (e.g. add data connector names) is completed.
+
+        Args:
+            obj: DatasourceConfig object to serialize.
+
+        Returns:
+            Representation of object as a dict suitable for serializing to json.
+        """
+
+        raw_config: dict = self.schema.dump(obj)
+        loaded_obj: "AbstractConfig" = cast("DatasourceConfig", self.schema.load(raw_config))
+        config: dict = self.schema.dump(loaded_obj)
+
+        json_serializable_dict: dict = convert_to_json_serializable(data=config)
+
+        return json_serializable_dict
