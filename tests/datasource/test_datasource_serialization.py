@@ -27,7 +27,7 @@ from tests.core.test_serialization import generic_config_serialization_assertion
                 "class_name": "Datasource",
                 "module_name": "great_expectations.datasource",
                 "name": None,
-                "id_": None,
+                "id": None,
             },
             id="minimal",
         ),
@@ -45,7 +45,7 @@ from tests.core.test_serialization import generic_config_serialization_assertion
             },
             {
                 "name": "my_datasource",
-                "id_": "d3a14abd-d4cb-4343-806e-55b555b15c28",
+                "id": "d3a14abd-d4cb-4343-806e-55b555b15c28",
                 "class_name": "Datasource",
                 "module_name": "great_expectations.datasource",
             },
@@ -84,12 +84,12 @@ from tests.core.test_serialization import generic_config_serialization_assertion
                     "my_data_connector": {
                         "class_name": "RuntimeDataConnector",
                         "module_name": "great_expectations.datasource",
-                        "id_": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                        "id": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
                         "batch_identifiers": ["default_identifier_name"],
                         "name": "my_data_connector",
                     },
                 },
-                "id_": None,
+                "id": None,
             },
             id="nested_data_connector_id",
         ),
@@ -101,10 +101,10 @@ from tests.core.test_serialization import generic_config_serialization_assertion
                     "my_data_connector": DatasourceConfig(
                         class_name="RuntimeDataConnector",
                         batch_identifiers=["default_identifier_name"],
-                        id_="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                        id="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
                     )
                 },
-                id_="e25279d2-a809-4d1f-814c-76e892e645bf",
+                id="e25279d2-a809-4d1f-814c-76e892e645bf",
             ),
             {
                 "name": "my_datasource",
@@ -128,12 +128,12 @@ from tests.core.test_serialization import generic_config_serialization_assertion
                     "my_data_connector": {
                         "class_name": "RuntimeDataConnector",
                         "module_name": "great_expectations.datasource",
-                        "id_": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                        "id": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
                         "batch_identifiers": ["default_identifier_name"],
                         "name": "my_data_connector",
                     },
                 },
-                "id_": "e25279d2-a809-4d1f-814c-76e892e645bf",
+                "id": "e25279d2-a809-4d1f-814c-76e892e645bf",
             },
             id="datasource_id_and_nested_data_connector_id",
         ),
@@ -172,7 +172,7 @@ class TestDatasourceConfigSerialization:
             round_tripped.get("id")
             == observed_dump.get("id")
             == expected_serialized_datasource_config.get("id")
-            == expected_roundtrip_config.get("id_")
+            == expected_roundtrip_config.get("id")
         )
 
         if (
@@ -185,8 +185,8 @@ class TestDatasourceConfigSerialization:
             ) in datasource_config.data_connectors.items():
                 assert (
                     observed_dump["data_connectors"][data_connector_name]["id"]
-                    == round_tripped["data_connectors"][data_connector_name]["id_"]
-                    == data_connector_config.id_
+                    == round_tripped["data_connectors"][data_connector_name]["id"]
+                    == data_connector_config.id
                 )
 
 
