@@ -22,15 +22,6 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-ExpectationValidationResultRenderedContent = namedtuple(
-    "ExpectationValidationResultRenderedContent",
-    [
-        "ExpectationConfigurationRenderedContent",
-        "ExpectationValidationResultRenderedContent",
-    ],
-)
-
-
 class InlineRendererConfig(TypedDict):
     class_name: str
     render_object: Union[ExpectationConfiguration, ExpectationValidationResult]
