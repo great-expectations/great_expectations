@@ -143,6 +143,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
             parameters=None,
         )
+        print(
+            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._GET_DOMAINS()] STEP-0-MAP_METRIC_NAME=[{map_metric_name}]"
+        )
 
         # Obtain max_unexpected_values from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         max_unexpected_values: int = get_parameter_value_and_validate_return_type(
@@ -151,6 +154,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             expected_return_type=int,
             variables=variables,
             parameters=None,
+        )
+        print(
+            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._GET_DOMAINS()] STEP-1-MAX_UNEXPECTED_VALUES=[{max_unexpected_values}]"
         )
 
         # Obtain max_unexpected_ratio from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -163,6 +169,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
             parameters=None,
         )
+        print(
+            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._GET_DOMAINS()] STEP-2-MAX_UNEXPECTED_RATIO=[{max_unexpected_ratio}]"
+        )
 
         # Obtain min_max_unexpected_values_proportion from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         min_max_unexpected_values_proportion: float = (
@@ -173,6 +182,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
                 variables=variables,
                 parameters=None,
             )
+        )
+        print(
+            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._GET_DOMAINS()] STEP-3-MIN_MAX_UNEXPECTED_VALUES_PROPORTION=[{min_max_unexpected_values_proportion}]"
         )
 
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
@@ -185,11 +197,17 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             validator=validator,
             variables=variables,
         )
+        print(
+            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._GET_DOMAINS()] STEP-4-TABLE_COLUMN_NAMES=[{table_column_names}]"
+        )
 
         table_row_counts: Dict[str, int] = self.get_table_row_counts(
             validator=validator,
             batch_ids=batch_ids,
             variables=variables,
+        )
+        print(
+            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._GET_DOMAINS()] STEP-5-TABLE_ROW_COUNTS=[{table_row_counts}]"
         )
         mean_table_row_count_as_float: float = (
             1.0 * sum(table_row_counts.values()) / num_batch_ids
@@ -206,6 +224,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             batch_ids=batch_ids,
             column_names=table_column_names,
         )
+        print(
+            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._GET_DOMAINS()] STEP-6-METRIC_CONFIGURATIONS_BY_COLUMN_NAME=[{table_row_counts}]"
+        )
 
         candidate_column_names: List[
             str
@@ -216,6 +237,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             mean_table_row_count_as_float=mean_table_row_count_as_float,
             max_unexpected_ratio=max_unexpected_ratio,
             min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
+        )
+        print(
+            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._GET_DOMAINS()] STEP-7-CANDIDATE_COLUMN_NAMES=[{candidate_column_names}]"
         )
 
         column_name: str

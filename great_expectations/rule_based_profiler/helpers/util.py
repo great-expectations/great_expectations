@@ -327,6 +327,9 @@ def get_resolved_metrics_by_key(
 
     # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
     # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
+    print(
+        f"\n[ALEX_TEST] [GET_RESOLVED_METRICS_BY_KEY] ABOUT_TO_RUN_VALIDATOR_COMPUTE_METRICS"
+    )
     resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
         metric_configurations=[
             metric_configuration
@@ -334,6 +337,9 @@ def get_resolved_metrics_by_key(
             for metric_configuration in metric_configurations_for_key
         ],
         force_no_progress_bar=force_no_progress_bar,
+    )
+    print(
+        f"\n[ALEX_TEST] [GET_RESOLVED_METRICS_BY_KEY] DON_RUNNING_VALIDATOR_COMPUTE_METRICS"
     )
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).

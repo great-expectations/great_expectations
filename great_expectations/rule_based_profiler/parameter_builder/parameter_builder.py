@@ -153,7 +153,7 @@ class ParameterBuilder(ABC, Builder):
             not in fully_qualified_parameter_names
         ):
             print(
-                f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] GOING_TO_set_BATCH_LIST_IF_NULL_BATCH_REQUEST-BATCH_REQUEST:\n{batch_request} ; TYPE: {str(type(batch_request))}"
+                f"\n[ALEX_TEST] [PARAMETER_BUILDER.BUILD_PARAMETERS()-{self.name}] GOING_TO_SET_BATCH_LIST_IF_NULL_BATCH_REQUEST-BATCH_REQUEST:\n{batch_request} ; TYPE: {str(type(batch_request))}"
             )
             self.set_batch_list_if_null_batch_request(
                 batch_list=batch_list,
