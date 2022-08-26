@@ -196,7 +196,7 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_definition: BatchDefinition,
         runtime_parameters: dict,
-    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
+    ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
             batch_definition=batch_definition,
             runtime_parameters=runtime_parameters,

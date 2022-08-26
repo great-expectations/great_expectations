@@ -1781,7 +1781,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
     assert actual_expectation_suite == expected_expectation_suite
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
@@ -1859,7 +1859,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
     quentin_columnar_table_multi_batch_data_context,
@@ -2003,7 +2003,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
@@ -2057,7 +2057,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     )
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
@@ -2069,7 +2069,7 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_explici
     assert data_assistant_result.profiler_execution_time > 0.0
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
 ):
@@ -2081,7 +2081,7 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_implici
     assert data_assistant_result.profiler_execution_time > 0.0
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
