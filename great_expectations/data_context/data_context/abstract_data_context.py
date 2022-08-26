@@ -817,7 +817,8 @@ class AbstractDataContext(ABC):
             )
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(
-                expectation_suite_name, include_renderd_content=include_rendered_content
+                expectation_suite_name,
+                include_rendered_content=include_rendered_content,
             )
         if create_expectation_suite_with_name is not None:
             expectation_suite = self.create_expectation_suite(
