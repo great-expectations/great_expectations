@@ -501,7 +501,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         self.variables = variables
         self.rules = rules
 
-        AbstractConfig.__init__(self, id_=id_, name=name)
+        AbstractConfig.__init__(self, id=id, name=name)
         BaseYamlConfig.__init__(self, commented_map=commented_map)
 
     @classmethod

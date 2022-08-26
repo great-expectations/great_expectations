@@ -1432,7 +1432,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         """
         profiler_config = RuleBasedProfilerConfig(
             name=name,
-            id_=id_,
+            id=id,
             config_version=config_version,
             variables=variables,
             rules=rules,

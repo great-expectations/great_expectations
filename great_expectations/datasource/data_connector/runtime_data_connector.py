@@ -50,7 +50,7 @@ class RuntimeDataConnector(DataConnector):
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,

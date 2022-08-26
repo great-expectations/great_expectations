@@ -57,7 +57,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             base_directory=base_directory,
             assets=assets,

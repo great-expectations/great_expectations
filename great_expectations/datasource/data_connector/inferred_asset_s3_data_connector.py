@@ -70,7 +70,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             default_regex=default_regex,

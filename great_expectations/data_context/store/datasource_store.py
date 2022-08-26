@@ -155,7 +155,7 @@ class DatasourceStore(Store):
             name = None
         return self.store_backend.build_key(
             name=name,
-            id_=id_,
+            id=id,
         )
 
     def set_by_name(

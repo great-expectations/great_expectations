@@ -451,7 +451,7 @@ class DataConnectorConfig(AbstractConfig):
         if delimiter is not None:
             self.delimiter = delimiter
 
-        super().__init__(id_=id_)
+        super().__init__(id=id)
 
         # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
@@ -2251,7 +2251,7 @@ class DataContextConfig(BaseYamlConfig):
 
 class CheckpointValidationConfig(AbstractConfig):
     def __init__(self, id_: Optional[str] = None, **kwargs: dict) -> None:
-        super().__init__(id_=id_)
+        super().__init__(id=id)
 
         for k, v in kwargs.items():
             setattr(self, k, v)

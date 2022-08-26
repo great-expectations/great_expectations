@@ -59,7 +59,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             assets=assets,
             execution_engine=execution_engine,

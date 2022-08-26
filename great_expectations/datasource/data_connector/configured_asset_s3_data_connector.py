@@ -71,7 +71,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             assets=assets,
