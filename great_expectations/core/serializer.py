@@ -12,7 +12,6 @@ serialized_value = serializer.serialize(datasource_config)
 """
 
 import abc
-from typing import Union
 
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.util import convert_to_json_serializable
@@ -33,7 +32,7 @@ class AbstractConfigSerializer(abc.ABC):
         self.schema = schema
 
     @abc.abstractmethod
-    def serialize(self, obj: AbstractConfig) -> Union[str, dict, AbstractConfig]:
+    def serialize(self, obj: AbstractConfig) -> dict:
         """Serialize to serializer specific data type.
 
         Note, specific return type to be implemented in subclasses.

@@ -645,9 +645,9 @@ class AbstractDataContext(ABC):
 
         for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr,assignment]
             if isinstance(datasource_config, dict):
-                datasource_config["name"] = datasource_name
-            else:
-                datasource_config.name = datasource_name
+                datasource_config = DatasourceConfig(**datasource_config)
+            datasource_config.name = datasource_name
+
             masked_config: dict = (
                 self._serialize_substitute_and_sanitize_datasource_config(
                     serializer, datasource_config

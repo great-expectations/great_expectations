@@ -9,12 +9,12 @@ datasource_config = DatasourceConfig(...)
 serializer = YAMLReadyDictDatasourceConfigSerializer()
 serialized_value = serializer.serialize(datasource_config)
 """
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.serializer import AbstractConfigSerializer
-from great_expectations.data_context.types.base import DatasourceConfig
 
 
 class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
-    def serialize(self, obj: DatasourceConfig) -> dict:  # type: ignore[override]
+    def serialize(self, obj: AbstractConfig) -> dict:
         """Serialize DatasourceConfig to dict appropriate for writing to yaml.
 
         Args:
@@ -39,7 +39,7 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
 
 
 class NamedDatasourceSerializer(AbstractConfigSerializer):
-    def serialize(self, obj: DatasourceConfig) -> dict:  # type: ignore[override]
+    def serialize(self, obj: AbstractConfig) -> dict:
         """Serialize DatasourceConfig with datasource name but not data connector name to match existing context.list_datasources() functionality.
 
         Args:
