@@ -133,13 +133,19 @@ class OnboardingDataAssistant(DataAssistant):
 
         return [
             table_rule,
-            column_value_uniqueness_rule,
+            # TODO: <Alex>ALEX</Alex>
+            # column_value_uniqueness_rule,
+            # TODO: <Alex>ALEX</Alex>
             column_value_nullity_rule,
             column_value_nonnullity_rule,
             numeric_columns_rule,
             datetime_columns_rule,
-            text_columns_rule,
-            categorical_columns_rule,
+            # TODO: <Alex>ALEX</Alex>
+            # text_columns_rule,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # categorical_columns_rule,
+            # TODO: <Alex>ALEX</Alex>
         ]
 
     def _build_data_assistant_result(
