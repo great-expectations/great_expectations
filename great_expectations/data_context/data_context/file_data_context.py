@@ -36,7 +36,7 @@ class FileDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: Union[DataContextConfig, Mapping],
+        project_config: DataContextConfig,
         context_root_dir: str,
         runtime_environment: Optional[dict] = None,
     ) -> None:
