@@ -2397,7 +2397,23 @@ def _spark_map_condition_unexpected_count_value(
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
-    data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    column_list = []
+    if "column" in domain_kwargs:
+        column_list = [domain_kwargs["column"]]
+    elif "column_A" in domain_kwargs and "column_B" in domain_kwargs:
+        column_list = [
+            domain_kwargs["column_A"],
+            domain_kwargs["column_B"],
+        ]
+    elif "column_list" in domain_kwargs:
+        column_list = domain_kwargs["column_list"]
+    column_list = tuple(column_list)
+    data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     return filtered.count()
@@ -2434,7 +2450,12 @@ def _spark_column_map_condition_values(
         )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
-    data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    data = df.repartition(column_name).withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
@@ -2483,7 +2504,12 @@ def _spark_column_map_condition_value_counts(
         )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
-    data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    data = df.repartition(column_name).withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
@@ -2517,7 +2543,23 @@ def _spark_map_condition_rows(
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
-    data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    column_list = []
+    if "column" in domain_kwargs:
+        column_list = [domain_kwargs["column"]]
+    elif "column_A" in domain_kwargs and "column_B" in domain_kwargs:
+        column_list = [
+            domain_kwargs["column_A"],
+            domain_kwargs["column_B"],
+        ]
+    elif "column_list" in domain_kwargs:
+        column_list = domain_kwargs["column_list"]
+    column_list = tuple(column_list)
+    data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
@@ -2565,7 +2607,12 @@ def _spark_column_pair_map_condition_values(
             )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
-    data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
@@ -2666,7 +2713,12 @@ def _spark_multicolumn_map_condition_values(
             )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
-    data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # data = df.withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
+    # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     column_selector = [
