@@ -2398,27 +2398,27 @@ def _spark_map_condition_unexpected_count_value(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     # TODO: <Alex>ALEX</Alex>
-    # data = df.withColumn("__unexpected", unexpected_condition)
+    data = df.withColumn("__unexpected", unexpected_condition)
     # TODO: <Alex>ALEX</Alex>
     # TODO: <Alex>ALEX</Alex>
-    column_list = []
-    if "column" in domain_kwargs:
-        column_list = [domain_kwargs["column"]]
-    elif "column_A" in domain_kwargs and "column_B" in domain_kwargs:
-        column_list = [
-            domain_kwargs["column_A"],
-            domain_kwargs["column_B"],
-        ]
-    elif "column_list" in domain_kwargs:
-        column_list = domain_kwargs["column_list"]
-    column_list = tuple(column_list)
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MAP_CONDITION_UNEXPECTED_COUNT_VALUE()] NUM_PARTITIONS[{column_list}]-0:\n{df.rdd.getNumPartitions()}"
-    )
-    data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MAP_CONDITION_UNEXPECTED_COUNT_VALUE()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
-    )
+    # column_list = []
+    # if "column" in domain_kwargs:
+    #     column_list = [domain_kwargs["column"]]
+    # elif "column_A" in domain_kwargs and "column_B" in domain_kwargs:
+    #     column_list = [
+    #         domain_kwargs["column_A"],
+    #         domain_kwargs["column_B"],
+    #     ]
+    # elif "column_list" in domain_kwargs:
+    #     column_list = domain_kwargs["column_list"]
+    # column_list = tuple(column_list)
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MAP_CONDITION_UNEXPECTED_COUNT_VALUE()] NUM_PARTITIONS[{column_list}]-0:\n{df.rdd.getNumPartitions()}"
+    # )
+    # data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MAP_CONDITION_UNEXPECTED_COUNT_VALUE()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
+    # )
     # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
@@ -2457,17 +2457,17 @@ def _spark_column_map_condition_values(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     # TODO: <Alex>ALEX</Alex>
-    # data = df.withColumn("__unexpected", unexpected_condition)
+    data = df.withColumn("__unexpected", unexpected_condition)
     # TODO: <Alex>ALEX</Alex>
     # TODO: <Alex>ALEX</Alex>
-    column_list = [column_name]
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_MAP_CONDITION_VALUES()] NUM_PARTITIONS-0[{column_list}]:\n{df.rdd.getNumPartitions()}"
-    )
-    data = df.repartition(column_name).withColumn("__unexpected", unexpected_condition)
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_MAP_CONDITION_VALUES()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
-    )
+    # column_list = [column_name]
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_MAP_CONDITION_VALUES()] NUM_PARTITIONS-0[{column_list}]:\n{df.rdd.getNumPartitions()}"
+    # )
+    # data = df.repartition(column_name).withColumn("__unexpected", unexpected_condition)
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_MAP_CONDITION_VALUES()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
+    # )
     # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
@@ -2518,17 +2518,17 @@ def _spark_column_map_condition_value_counts(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     # TODO: <Alex>ALEX</Alex>
-    # data = df.withColumn("__unexpected", unexpected_condition)
+    data = df.withColumn("__unexpected", unexpected_condition)
     # TODO: <Alex>ALEX</Alex>
     # TODO: <Alex>ALEX</Alex>
-    column_list = [column_name]
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_MAP_CONDITION_VALUE_COUNTS()] NUM_PARTITIONS[{column_list}]-0:\n{df.rdd.getNumPartitions()}"
-    )
-    data = df.repartition(column_name).withColumn("__unexpected", unexpected_condition)
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_MAP_CONDITION_VALUE_COUNTS()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
-    )
+    # column_list = [column_name]
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_MAP_CONDITION_VALUE_COUNTS()] NUM_PARTITIONS[{column_list}]-0:\n{df.rdd.getNumPartitions()}"
+    # )
+    # data = df.repartition(column_name).withColumn("__unexpected", unexpected_condition)
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_MAP_CONDITION_VALUE_COUNTS()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
+    # )
     # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
@@ -2564,27 +2564,27 @@ def _spark_map_condition_rows(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     # TODO: <Alex>ALEX</Alex>
-    # data = df.withColumn("__unexpected", unexpected_condition)
+    data = df.withColumn("__unexpected", unexpected_condition)
     # TODO: <Alex>ALEX</Alex>
     # TODO: <Alex>ALEX</Alex>
-    column_list = []
-    if "column" in domain_kwargs:
-        column_list = [domain_kwargs["column"]]
-    elif "column_A" in domain_kwargs and "column_B" in domain_kwargs:
-        column_list = [
-            domain_kwargs["column_A"],
-            domain_kwargs["column_B"],
-        ]
-    elif "column_list" in domain_kwargs:
-        column_list = domain_kwargs["column_list"]
-    column_list = tuple(column_list)
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MAP_CONDITION_ROWS()] NUM_PARTITIONS[{column_list}]-0:\n{df.rdd.getNumPartitions()}"
-    )
-    data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MAP_CONDITION_ROWS()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
-    )
+    # column_list = []
+    # if "column" in domain_kwargs:
+    #     column_list = [domain_kwargs["column"]]
+    # elif "column_A" in domain_kwargs and "column_B" in domain_kwargs:
+    #     column_list = [
+    #         domain_kwargs["column_A"],
+    #         domain_kwargs["column_B"],
+    #     ]
+    # elif "column_list" in domain_kwargs:
+    #     column_list = domain_kwargs["column_list"]
+    # column_list = tuple(column_list)
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MAP_CONDITION_ROWS()] NUM_PARTITIONS[{column_list}]-0:\n{df.rdd.getNumPartitions()}"
+    # )
+    # data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MAP_CONDITION_ROWS()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
+    # )
     # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
@@ -2634,16 +2634,16 @@ def _spark_column_pair_map_condition_values(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     # TODO: <Alex>ALEX</Alex>
-    # data = df.withColumn("__unexpected", unexpected_condition)
+    data = df.withColumn("__unexpected", unexpected_condition)
     # TODO: <Alex>ALEX</Alex>
     # TODO: <Alex>ALEX</Alex>
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_PAIR_MAP_CONDITION_VALUES()] NUM_PARTITIONS[{column_list}]-0:\n{df.rdd.getNumPartitions()}"
-    )
-    data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_PAIR_MAP_CONDITION_VALUES()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
-    )
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_PAIR_MAP_CONDITION_VALUES()] NUM_PARTITIONS[{column_list}]-0:\n{df.rdd.getNumPartitions()}"
+    # )
+    # data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_COLUMN_PAIR_MAP_CONDITION_VALUES()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
+    # )
     # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
@@ -2746,16 +2746,16 @@ def _spark_multicolumn_map_condition_values(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     # TODO: <Alex>ALEX</Alex>
-    # data = df.withColumn("__unexpected", unexpected_condition)
+    data = df.withColumn("__unexpected", unexpected_condition)
     # TODO: <Alex>ALEX</Alex>
     # TODO: <Alex>ALEX</Alex>
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MULTICOLUMN_MAP_CONDITION_VALUES()] NUM_PARTITIONS[{column_list}]-0:\n{df.rdd.getNumPartitions()}"
-    )
-    data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
-    print(
-        f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MULTICOLUMN_MAP_CONDITION_VALUES()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
-    )
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MULTICOLUMN_MAP_CONDITION_VALUES()] NUM_PARTITIONS[{column_list}]-0:\n{df.rdd.getNumPartitions()}"
+    # )
+    # data = df.repartition(*column_list).withColumn("__unexpected", unexpected_condition)
+    # print(
+    #     f"\n[ALEX_TEST] [MAP_METRIC_PROVIDER._SPARK_MULTICOLUMN_MAP_CONDITION_VALUES()] NUM_PARTITIONS[{column_list}]-1:\n{data.rdd.getNumPartitions()}"
+    # )
     # TODO: <Alex>ALEX</Alex>
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
