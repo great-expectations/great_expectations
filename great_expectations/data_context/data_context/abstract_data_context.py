@@ -1275,7 +1275,7 @@ class AbstractDataContext(ABC):
             return os.path.join(self.root_directory, path)  # type: ignore[arg-type]
 
     def _apply_global_config_overrides(
-        self, config: Union[DataContextConfig, Mapping]
+        self, config: DataContextConfig
     ) -> DataContextConfig:
 
         """
@@ -1291,9 +1291,7 @@ class AbstractDataContext(ABC):
             DataContextConfig with the appropriate overrides
         """
         validation_errors: dict = {}
-        config_with_global_config_overrides: Union[
-            DataContextConfig, Mapping
-        ] = copy.deepcopy(config)
+        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
         usage_stats_enabled: bool = self._get_global_usage_statistics_override()
         if not usage_stats_enabled:
             logger.info(
