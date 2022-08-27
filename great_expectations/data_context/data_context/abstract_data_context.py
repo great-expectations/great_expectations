@@ -20,6 +20,11 @@ from typing import (
     cast,
 )
 
+from great_expectations.core.serializer import AbstractConfigSerializer
+from great_expectations.datasource.datasource_serializer import (
+    NamedDatasourceSerializer,
+)
+
 if TYPE_CHECKING:
     from great_expectations.data_context.store import EvaluationParameterStore
     from great_expectations.checkpoint import Checkpoint
@@ -602,6 +607,30 @@ class AbstractDataContext(ABC):
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
+    def _serialize_substitute_and_sanitize_datasource_config(
+        self, serializer: AbstractConfigSerializer, datasource_config: DatasourceConfig
+    ) -> dict:
+        """Serialize, then make substitutions and sanitize config (mask passwords), return as dict.
+
+        Args:
+            serializer: Serializer to use when converting config to dict for substitutions.
+            datasource_config: Datasource config to process.
+
+        Returns:
+            Dict of config with substitutions and sanitizations applied.
+        """
+        substitutions: dict = self._determine_substitutions()
+        datasource_dict: dict = serializer.serialize(datasource_config)
+
+        substituted_config: dict = cast(
+            dict,
+            substitute_all_config_variables(
+                datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            ),
+        )
+        masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
+        return masked_config
+
     def list_datasources(self) -> List[dict]:
         """List currently-configured datasources on this context. Masks passwords.
 
@@ -609,22 +638,21 @@ class AbstractDataContext(ABC):
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
         """
         datasources: List[dict] = []
-        substitutions: dict = self._determine_substitutions()
 
         datasource_name: str
-        datasource_config: DatasourceConfig
+        datasource_config: Union[dict, DatasourceConfig]
+        serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
+
         for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr,assignment]
-            datasource_dict: dict = cast(
-                dict, datasourceConfigSchema.dump(datasource_config)
+            if isinstance(datasource_config, dict):
+                datasource_config = DatasourceConfig(**datasource_config)
+            datasource_config.name = datasource_name
+
+            masked_config: dict = (
+                self._serialize_substitute_and_sanitize_datasource_config(
+                    serializer, datasource_config
+                )
             )
-            datasource_dict["name"] = datasource_name
-            substituted_config: dict = cast(
-                dict,
-                substitute_all_config_variables(
-                    datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-                ),
-            )
-            masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
             datasources.append(masked_config)
         return datasources
 

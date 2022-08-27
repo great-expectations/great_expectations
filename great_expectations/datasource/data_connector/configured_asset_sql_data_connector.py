@@ -60,7 +60,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         sampling_kwargs: Optional[dict] = None,
         assets: Optional[Dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         InferredAssetDataConnector for connecting to data on a SQL database
@@ -83,7 +83,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
