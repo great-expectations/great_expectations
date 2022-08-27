@@ -117,7 +117,9 @@ def type_coverage(ctx):
     try:
         check_type_hint_coverage.main()
     except AssertionError as err:
-        raise invoke.Exit(message=str(err), code=1)
+        raise invoke.Exit(
+            message=f"{err}\n\n  See {check_type_hint_coverage.__file__}", code=1
+        )
 
 
 @invoke.task(
@@ -138,6 +140,7 @@ def type_check(
     install_types=False,
     daemon=False,
     clear_cache=False,
+    report=False,
 ):
     """Run mypy static type-checking on select packages."""
     if clear_cache:
@@ -160,10 +163,12 @@ def type_check(
         *ge_pkgs,
     ]
     if install_types:
-        cmds.extend(["--install-types", "--non-interactive", "--no-strict-optional"])
+        cmds.extend(["--install-types", "--non-interactive"])
     if daemon:
         # see related issue https://github.com/python/mypy/issues/9475
         cmds.extend(["--follow-imports=normal"])
+    if report:
+        cmds.extend(["--txt-report", "type_cov", "--html-report", "type_cov"])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
@@ -200,6 +205,37 @@ def mv_usage_stats_json(ctx):
     cmd = cmd.format(outfile)
     ctx.run(cmd)
     print(f"'{outfile}' copied to dbfs.")
+
+
+@invoke.task(
+    aliases=["test"],
+    help={
+        "slowest": "Report on the slowest n number of tests",
+        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
+    },
+)
+def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5):
+    """Run tests. Runs unit tests by default."""
+    # TODO: update this to also run the full e2e/integration tests (but unit-tests should always be the default mode)
+    cmds = [
+        "pytest",
+        f"--durations={slowest}",
+        "--cov=great_expectations",
+        "--cov-report term:skip-covered",  # modules with 100% will not be shown
+        "-vv",
+    ]
+    if unit:
+        cmds += [
+            "-m",
+            "unit",
+        ]
+    if cloud:
+        cmds += ["--cloud"]
+    if ci:
+        cmds += ["--cov-report", "xml"]
+    if html:
+        cmds += ["--cov-report", "html"]
+    ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
 PYTHON_VERSION_DEFAULT: float = 3.8
