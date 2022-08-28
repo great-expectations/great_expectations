@@ -1,3 +1,6 @@
+from .expect_column_distinct_values_to_be_continuous import (
+    ExpectColumnDistinctValuesToBeContinuous,
+)
 from .expect_column_distinct_values_to_be_in_set import (
     ExpectColumnDistinctValuesToBeInSet,
 )
