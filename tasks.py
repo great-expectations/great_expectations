@@ -230,7 +230,7 @@ def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5, timeout=5
             "unit",
         ]
         try:
-            import pytest_timeout
+            import pytest_timeout  # noqa: F401
 
             cmds += [f"--timeout={timeout}"]
         except ImportError:
