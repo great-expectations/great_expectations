@@ -245,7 +245,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest-cov pytest-icdiff pytest-mock pytest-azurepipelines invoke
+              pip install -r requirements-dev-test.txt
 
               # Run unit-tests
               invoke tests --ci --cloud
