@@ -20,10 +20,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import (
-    convert_ndarray_datetime_to_float_dtype,
-    is_ndarray_datetime_dtype,
-)
 
 
 class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
@@ -59,7 +55,7 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
     def __init__(
         self,
         name: str,
-        bucketize_data: bool = True,
+        bucketize_data: Union[str, bool] = True,
         bins: str = "uniform",
         n_bins: int = 10,
         # NOTE 20220822 - I think that ideally, the value of `allow_relative_error` would have a per-engine default
@@ -84,6 +80,12 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: BaseDataContext associated with this ParameterBuilder
         """
+
+        self._bucketize_data = bucketize_data
+        bucketize_data = get_parameter_value_and_validate_return_type(
+            parameter_reference=self.bucketize_data,
+            expected_return_type=bool,
+        )
 
         if bucketize_data:
             self._column_partition_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
@@ -160,8 +162,6 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=data_context,
         )
-
-        self._bucketize_data = bucketize_data
 
     @property
     def bucketize_data(self) -> Union[str, bool]:
