@@ -366,13 +366,12 @@ class DataAssistant(metaclass=MetaDataAssistant):
             bucketize_data: Union[str, bool] = True,
         ) -> HistogramParameterBuilder:
             """
-            This method instantiates "PartitionParameterBuilder" class with specific arguments for given purpose.
+            This method instantiates "HistogramParameterBuilder" class with specific arguments for given purpose.
             """
             name: str = sanitize_parameter_name(name=f"{name}")
             return HistogramParameterBuilder(
                 name=name,
                 bucketize_data=bucketize_data,
-                evaluation_parameter_builder_configs=None,
                 data_context=None,
             )
 
