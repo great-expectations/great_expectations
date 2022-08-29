@@ -223,7 +223,7 @@ def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5, package=N
         "pytest",
         f"--durations={slowest}",
         "--cov=great_expectations",
-        "--cov-report term:skip-covered",  # modules with 100% will not be shown
+        "--cov-report term",
         "-vv",
     ]
     if unit:
