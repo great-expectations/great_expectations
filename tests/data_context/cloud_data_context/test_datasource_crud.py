@@ -20,7 +20,7 @@ from great_expectations.datasource import BaseDatasource
 from great_expectations.datasource.datasource_serializer import (
     JsonDatasourceConfigSerializer,
 )
-from tests.data_context.cloud_data_context.conftest import MockResponse
+from tests.data_context.conftest import MockResponse
 
 
 @pytest.fixture

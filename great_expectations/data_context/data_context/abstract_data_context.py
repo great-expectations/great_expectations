@@ -1719,29 +1719,18 @@ class AbstractDataContext(ABC):
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+        serialized_config: dict = serializer.serialize(datasource_config)
 
         substituted_config_dict: dict = substitute_all_config_variables(
-            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
-
-        # Round trip through schema validation and config creation to ensure "id_" is present
-        #
-        # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
-        # be refactored to into the config/schema. Also, downstream methods should be refactored
-        # to accept the config object (as opposed to a dict).
-        substituted_config: DatasourceConfig = datasourceConfigSchema.load(
-            substituted_config_dict
-        )
-        schema_validated_substituted_config_dict: dict = (
-            substituted_config.to_json_dict()
+            serialized_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
         datasource: Optional[Datasource] = None
         if initialize:
             try:
                 datasource: Datasource = self._instantiate_datasource_from_config(
-                    name=None, config=schema_validated_substituted_config_dict
+                    name=None, config=substituted_config_dict
                 )
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
