@@ -207,14 +207,26 @@ def mv_usage_stats_json(ctx):
     print(f"'{outfile}' copied to dbfs.")
 
 
+UNIT_TEST_DEFAULT_TIMEOUT = 0.5
+
+
 @invoke.task(
     aliases=["test"],
     help={
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
+        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT}",
     },
 )
-def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5, timeout=5):
+def tests(
+    ctx,
+    unit=True,
+    ci=False,
+    html=False,
+    cloud=True,
+    slowest=5,
+    timeout=UNIT_TEST_DEFAULT_TIMEOUT,
+):
     """Run tests. Runs unit tests by default."""
     # TODO: update this to also run the full e2e/integration tests (but unit-tests should always be the default mode)
     cmds = [
