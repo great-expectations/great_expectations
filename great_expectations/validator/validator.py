@@ -417,12 +417,12 @@ class Validator:
                     raise err
 
             include_rendered_content: bool
-            if self.include_rendered_content is None:
+            if self._include_rendered_content is None:
                 include_rendered_content = (
                     self._determine_if_expectation_validation_result_include_rendered_content()
                 )
             else:
-                include_rendered_content = self.include_rendered_content
+                include_rendered_content = self._include_rendered_content
 
             if include_rendered_content:
                 validation_result.render()
@@ -2010,12 +2010,12 @@ set as active.
             )
 
             include_rendered_content: bool
-            if self.include_rendered_content is None:
+            if self._include_rendered_content is None:
                 include_rendered_content = (
                     self._determine_if_expectation_validation_result_include_rendered_content()
                 )
             else:
-                include_rendered_content = self.include_rendered_content
+                include_rendered_content = self._include_rendered_content
 
             if include_rendered_content:
                 for validation_result in results:
