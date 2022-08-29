@@ -1345,7 +1345,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         See `AbstractDataContext.create_expectation_suite` for more information.
         """
-        suite = self._data_context.create_expectation_suite(
+        suite = self._data_context.create_expectation_suite(  # type: ignore[union-attr]
             expectation_suite_name,
             overwrite_existing=overwrite_existing,
             **kwargs,
