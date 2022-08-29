@@ -1523,6 +1523,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         if include_rendered_content:
             for expectation_validation_result in validation_result.results:
                 expectation_validation_result.render()
+                expectation_validation_result.expectation_config.render()
 
         return validation_result
 

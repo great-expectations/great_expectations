@@ -258,14 +258,6 @@ class Validator:
         self._show_progress_bars = enable
 
     @property
-    def include_rendered_content(self) -> bool:
-        return self._include_rendered_content
-
-    @include_rendered_content.setter
-    def include_rendered_content(self, enable: bool) -> None:
-        self._include_rendered_content = enable
-
-    @property
     def data_context(self) -> Optional["DataContext"]:  # noqa: F821
         return self._data_context
 
@@ -424,7 +416,15 @@ class Validator:
                 else:
                     raise err
 
-            if self.include_rendered_content:
+            include_rendered_content: bool
+            if self.include_rendered_content is None:
+                include_rendered_content = (
+                    self._determine_if_expectation_validation_result_include_rendered_content()
+                )
+            else:
+                include_rendered_content = self.include_rendered_content
+
+            if include_rendered_content:
                 validation_result.render()
                 validation_result.expectation_config.render()
 
@@ -2008,6 +2008,7 @@ set as active.
                 configurations=expectations_to_evaluate,
                 runtime_configuration=runtime_configuration,
             )
+
             include_rendered_content: bool
             if self.include_rendered_content is None:
                 include_rendered_content = (
