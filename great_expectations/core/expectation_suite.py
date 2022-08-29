@@ -1009,10 +1009,11 @@ class ExpectationSuiteSchema(Schema):
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
-        if isinstance(data, ExpectationSuite):
-            data.meta = convert_to_json_serializable(data.meta)
-        elif isinstance(data, dict):
-            data["meta"] = convert_to_json_serializable(data.get("meta"))
+        for key in data:
+            if key.startswith("_"):
+                continue
+            data[key] = convert_to_json_serializable(data[key])
+
         data = self.clean_empty(data)
         return data
 
