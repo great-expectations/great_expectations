@@ -390,8 +390,21 @@ def test_save_expectation_suite_overwrites_existing_suite(
     ) as mock_put, mock.patch("requests.patch", autospec=True) as mock_patch:
         context.save_expectation_suite(suite)
 
-    mock_put.assert_called_once()
-    mock_patch.assert_called_once()
+    expected_suite_json = {
+        "data_asset_type": None,
+        "expectation_suite_name": suite_name,
+        "expectations": [],
+        "ge_cloud_id": suite_id,
+    }
+
+    actual_put_suite_json = mock_put.call_args[1]["json"]["data"]["attributes"]["suite"]
+    actual_put_suite_json.pop("meta")
+    assert actual_put_suite_json == expected_suite_json
+
+    actual_patch_suite_json = mock_patch.call_args[1]["json"]["data"]["attributes"][
+        "suite"
+    ]
+    assert actual_patch_suite_json == expected_suite_json
 
 
 @pytest.mark.unit
