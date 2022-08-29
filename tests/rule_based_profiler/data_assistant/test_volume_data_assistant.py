@@ -15,10 +15,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.data_assistant import (
-    DataAssistant,
-    VolumeDataAssistant,
-)
+from great_expectations.rule_based_profiler.data_assistant import VolumeDataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
     NumericRangeEstimatorType,
 )
@@ -977,6 +974,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "replace_nan_with_zero": True,
                             "name": "table_row_count",
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                            "single_batch_mode": False,
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
                             "reduce_scalar_metric": True,
@@ -1017,6 +1015,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                             "metric_value_kwargs": None,
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                             "metric_domain_kwargs": None,
+                                            "single_batch_mode": False,
                                             "reduce_scalar_metric": True,
                                             "metric_name": "table.row_count",
                                         }
@@ -1073,6 +1072,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
+                            "single_batch_mode": False,
                             "reduce_scalar_metric": True,
                             "metric_name": "column.distinct_values.count",
                         },
@@ -1120,6 +1120,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                             "metric_value_kwargs": None,
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                             "metric_domain_kwargs": "$domain.domain_kwargs",
+                                            "single_batch_mode": False,
                                             "reduce_scalar_metric": True,
                                             "metric_name": "column.distinct_values.count",
                                         }
@@ -1780,7 +1781,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
     assert actual_expectation_suite == expected_expectation_suite
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
@@ -1858,7 +1859,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
     quentin_columnar_table_multi_batch_data_context,
@@ -2002,7 +2003,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
@@ -2056,7 +2057,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     )
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
@@ -2064,11 +2065,11 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_explici
     data_assistant_result: DataAssistantResult
     validator, data_assistant_result = quentin_explicit_instantiation_result_actual_time
 
-    # Execution time (in seconds) must have non-trivial value.
-    assert data_assistant_result.execution_time > 0.0
+    # Rule-Based Profiler execution time (in seconds) must have non-trivial value.
+    assert data_assistant_result.profiler_execution_time > 0.0
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
 ):
@@ -2076,11 +2077,11 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_implici
         quentin_implicit_invocation_result_actual_time
     )
 
-    # Execution time (in seconds) must have non-trivial value.
-    assert data_assistant_result.execution_time > 0.0
+    # Rule-Based Profiler execution time (in seconds) must have non-trivial value.
+    assert data_assistant_result.profiler_execution_time > 0.0
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):

@@ -579,11 +579,10 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
         data_context=context,
     )
 
-    profiler_name: str = "bobby_user_workflow"
+    profiler_name = profiler.name
 
     context.save_profiler(
         profiler=profiler,
-        name=profiler_name,
     )
 
     # Create notebook

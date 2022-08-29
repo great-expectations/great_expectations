@@ -149,11 +149,11 @@ class OnboardingDataAssistant(DataAssistant):
             _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,
+            rule_domain_builder_execution_time=data_assistant_result.rule_domain_builder_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
-            execution_time=data_assistant_result.execution_time,
             _usage_statistics_handler=data_assistant_result._usage_statistics_handler,
         )
 
@@ -615,7 +615,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         column_partition_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_partition_parameter_builder(
             name="column_values.partition",
-            bucketize_data=True,
+            bucketize_data=False,
         )
         column_min_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_min_metric_multi_batch_parameter_builder()
@@ -986,6 +986,7 @@ class OnboardingDataAssistant(DataAssistant):
                 metric_value_kwargs={
                     "sort": "value",
                 },
+                single_batch_mode=False,
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
                 reduce_scalar_metric=True,

@@ -1,10 +1,10 @@
 import copy
+import datetime
 import itertools
 import logging
 import re
 import uuid
 import warnings
-from dataclasses import field
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -39,7 +39,14 @@ from great_expectations.rule_based_profiler.parameter_container import (
     is_fully_qualified_parameter_name_literal_string_format,
 )
 from great_expectations.types import safe_deep_copy
-from great_expectations.util import numpy_quantile
+from great_expectations.util import (
+    convert_ndarray_datetime_to_float_dtype,
+    convert_ndarray_float_to_datetime_dtype,
+    convert_ndarray_float_to_datetime_tuple,
+    convert_ndarray_to_datetime_dtype_best_effort,
+    is_ndarray_datetime_dtype,
+    numpy_quantile,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -121,6 +128,7 @@ def get_batch_ids(
     data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
+    limit: Optional[int] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -140,6 +148,9 @@ def get_batch_ids(
         batch_list = data_context.get_batch_list(batch_request=batch_request)
 
     batch_ids: List[str] = [batch.id for batch in batch_list]
+
+    if limit is not None:
+        batch_ids = batch_ids[0:limit]
 
     num_batch_ids: int = len(batch_ids)
     if num_batch_ids == 0:
@@ -292,6 +303,7 @@ def get_parameter_value(
 def get_resolved_metrics_by_key(
     validator: "Validator",  # noqa: F821
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
+    force_no_progress_bar: bool = False,
 ) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
@@ -302,6 +314,7 @@ def get_resolved_metrics_by_key(
         Dictionary of the form {
             "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
         }
+        force_no_progress_bar: (bool) if True, prevent all "Calculating Metrics" output; (False by default).
 
     Returns:
         Dictionary of the form {
@@ -319,7 +332,8 @@ def get_resolved_metrics_by_key(
             metric_configuration
             for key, metric_configurations_for_key in metric_configurations_by_key.items()
             for metric_configuration in metric_configurations_for_key
-        ]
+        ],
+        force_no_progress_bar=force_no_progress_bar,
     )
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
@@ -566,18 +580,31 @@ def compute_quantiles(
     false_positive_rate: np.float64,
     quantile_statistic_interpolation_method: str,
 ) -> NumericRangeEstimationResult:
+    ndarray_is_datetime_type: bool
+    metric_values_converted: np.ndarray
+    (
+        ndarray_is_datetime_type,
+        metric_values_converted,
+    ) = convert_metric_values_to_float_dtype_best_effort(metric_values=metric_values)
+
     lower_quantile = numpy_quantile(
-        a=metric_values,
+        a=metric_values_converted,
         q=(false_positive_rate / 2.0),
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
     upper_quantile = numpy_quantile(
-        a=metric_values,
+        a=metric_values_converted,
         q=1.0 - (false_positive_rate / 2.0),
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
+
+    if ndarray_is_datetime_type:
+        lower_quantile, upper_quantile = convert_ndarray_float_to_datetime_tuple(
+            data=[lower_quantile, upper_quantile]
+        )
+
     return build_numeric_range_estimation_result(
         metric_values=metric_values,
         min_value=lower_quantile,
@@ -620,8 +647,15 @@ def compute_kde_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
 
+    ndarray_is_datetime_type: bool
+    metric_values_converted: np.ndarray
+    (
+        ndarray_is_datetime_type,
+        metric_values_converted,
+    ) = convert_metric_values_to_float_dtype_best_effort(metric_values=metric_values)
+
     metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
-        metric_values, bw_method=bw_method
+        metric_values_converted, bw_method=bw_method
     )
 
     metric_values_gaussian_sample: np.ndarray
@@ -635,16 +669,29 @@ def compute_kde_quantiles_point_estimate(
             n_resamples,
         )
 
-    lower_quantile_point_estimate: np.float64 = numpy_quantile(
+    lower_quantile_point_estimate: Union[
+        np.float64, datetime.datetime
+    ] = numpy_quantile(
         metric_values_gaussian_sample,
         q=lower_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
-    upper_quantile_point_estimate: np.float64 = numpy_quantile(
+    upper_quantile_point_estimate: Union[
+        np.float64, datetime.datetime
+    ] = numpy_quantile(
         metric_values_gaussian_sample,
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
+
+    if ndarray_is_datetime_type:
+        (
+            lower_quantile_point_estimate,
+            upper_quantile_point_estimate,
+        ) = convert_ndarray_float_to_datetime_tuple(
+            data=[lower_quantile_point_estimate, upper_quantile_point_estimate]
+        )
+
     return build_numeric_range_estimation_result(
         metric_values=metric_values,
         min_value=lower_quantile_point_estimate,
@@ -718,13 +765,20 @@ def compute_bootstrap_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2.0
 
+    ndarray_is_datetime_type: bool
+    metric_values_converted: np.ndarray
+    (
+        ndarray_is_datetime_type,
+        metric_values_converted,
+    ) = convert_metric_values_to_float_dtype_best_effort(metric_values=metric_values)
+
     sample_lower_quantile: np.ndarray = numpy_quantile(
-        a=metric_values,
+        a=metric_values_converted,
         q=lower_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
     sample_upper_quantile: np.ndarray = numpy_quantile(
-        a=metric_values,
+        a=metric_values_converted,
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
@@ -735,14 +789,16 @@ def compute_bootstrap_quantiles_point_estimate(
             np.random.PCG64(random_seed)
         )
         bootstraps = random_state.choice(
-            metric_values, size=(n_resamples, metric_values.size)
+            metric_values_converted, size=(n_resamples, metric_values_converted.size)
         )
     else:
         bootstraps = np.random.choice(
-            metric_values, size=(n_resamples, metric_values.size)
+            metric_values_converted, size=(n_resamples, metric_values_converted.size)
         )
 
-    lower_quantile_bias_corrected_point_estimate: np.float64 = _determine_quantile_bias_corrected_point_estimate(
+    lower_quantile_bias_corrected_point_estimate: Union[
+        np.float64, datetime.datetime
+    ] = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=lower_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
@@ -750,7 +806,9 @@ def compute_bootstrap_quantiles_point_estimate(
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_lower_quantile,
     )
-    upper_quantile_bias_corrected_point_estimate: np.float64 = _determine_quantile_bias_corrected_point_estimate(
+    upper_quantile_bias_corrected_point_estimate: Union[
+        np.float64, datetime.datetime
+    ] = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
@@ -758,10 +816,74 @@ def compute_bootstrap_quantiles_point_estimate(
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_upper_quantile,
     )
+
+    if ndarray_is_datetime_type:
+        (
+            lower_quantile_bias_corrected_point_estimate,
+            upper_quantile_bias_corrected_point_estimate,
+        ) = convert_ndarray_float_to_datetime_tuple(
+            data=[
+                lower_quantile_bias_corrected_point_estimate,
+                upper_quantile_bias_corrected_point_estimate,
+            ]
+        )
+
     return build_numeric_range_estimation_result(
         metric_values=metric_values,
         min_value=lower_quantile_bias_corrected_point_estimate,
         max_value=upper_quantile_bias_corrected_point_estimate,
+    )
+
+
+def build_numeric_range_estimation_result(
+    metric_values: np.ndarray,
+    min_value: Number,
+    max_value: Number,
+) -> NumericRangeEstimationResult:
+    """
+    Computes histogram of 1-dimensional set of data points and packages it together with value range as returned output.
+
+    Args:
+        metric_values: "numpy.ndarray" of "dtype.float" values with elements corresponding to "Batch" data samples.
+        min_value: pre-computed supremum of "metric_values" (properly conditioned for output).
+        max_value: pre-computed infimum of "metric_values" (properly conditioned for output).
+
+    Returns:
+        Structured "NumericRangeEstimationResult" object, containing histogram and value_range attributes.
+    """
+    ndarray_is_datetime_type: bool
+    metric_values_converted: np.ndarray
+    (
+        ndarray_is_datetime_type,
+        metric_values_converted,
+    ) = convert_metric_values_to_float_dtype_best_effort(metric_values=metric_values)
+
+    ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
+        data=metric_values, parse_strings_as_datetimes=True
+    )
+
+    histogram: Tuple[np.ndarray, np.ndarray]
+    bin_edges: np.ndarray
+    if ndarray_is_datetime_type:
+        histogram = np.histogram(a=metric_values_converted, bins=NUM_HISTOGRAM_BINS)
+        bin_edges = convert_ndarray_float_to_datetime_dtype(data=histogram[1])
+    else:
+        histogram = np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)
+        bin_edges = histogram[1]
+
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.vstack(
+            (
+                np.pad(
+                    array=histogram[0],
+                    pad_width=(0, 1),
+                    mode="constant",
+                    constant_values=0,
+                ),
+                bin_edges,
+            )
+        ),
+        value_range=np.asarray([min_value, max_value]),
     )
 
 
@@ -804,39 +926,38 @@ def _determine_quantile_bias_corrected_point_estimate(
     return quantile_bias_corrected_point_estimate
 
 
-def build_numeric_range_estimation_result(
+def convert_metric_values_to_float_dtype_best_effort(
     metric_values: np.ndarray,
-    min_value: Number,
-    max_value: Number,
-) -> NumericRangeEstimationResult:
+) -> Tuple[bool, np.ndarray]:
     """
-    Computes histogram of 1-dimensional set of data points and packages it together with value range as returned output.
+    Makes best effort attempt to discern element type of 1-D "np.ndarray" and convert it to "float" "np.ndarray" type.
 
-    Args:
-        metric_values: "numpy.ndarray" of "dtype.float" values with elements corresponding to "Batch" data samples.
-        min_value: pre-computed supremum of "metric_values" (properly conditioned for output).
-        max_value: pre-computed infimum of "metric_values" (properly conditioned for output).
-
-    Returns:
-        Structured "NumericRangeEstimationResult" object, containing histogram and value_range attributes.
+    Return:
+        Boolean flag -- True, if conversion of original "np.ndarray" to "datetime.datetime" occurred; False, otherwise.
     """
-    histogram: Tuple[np.ndarray, np.ndarray] = np.histogram(
-        a=metric_values, bins=NUM_HISTOGRAM_BINS
+    original_ndarray_is_datetime_type: bool
+    conversion_ndarray_to_datetime_type_performed: bool
+    metric_values_converted: np.ndaarray
+    (
+        original_ndarray_is_datetime_type,
+        conversion_ndarray_to_datetime_type_performed,
+        metric_values_converted,
+    ) = convert_ndarray_to_datetime_dtype_best_effort(
+        data=metric_values,
+        parse_strings_as_datetimes=True,
     )
-    return NumericRangeEstimationResult(
-        estimation_histogram=np.vstack(
-            (
-                np.pad(
-                    array=histogram[0],
-                    pad_width=(0, 1),
-                    mode="constant",
-                    constant_values=0,
-                ),
-                histogram[1],
-            )
-        ),
-        value_range=np.asarray([min_value, max_value]),
+    ndarray_is_datetime_type: bool = (
+        original_ndarray_is_datetime_type
+        or conversion_ndarray_to_datetime_type_performed
     )
+    if ndarray_is_datetime_type:
+        metric_values_converted = convert_ndarray_datetime_to_float_dtype(
+            data=metric_values_converted
+        )
+    else:
+        metric_values_converted = metric_values
+
+    return ndarray_is_datetime_type, metric_values_converted
 
 
 def get_validator_with_expectation_suite(
@@ -938,8 +1059,3 @@ def sanitize_parameter_name(name: str) -> str:
     This method provides display-friendly version of "name" argument.
     """
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
-
-
-def default_field(obj: Dict[Union[str, Tuple[str]], str]) -> field:
-    """Shorthand method of allowing mutable dataclass variables."""
-    return field(default_factory=lambda: copy.copy(obj))

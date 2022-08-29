@@ -1,4 +1,3 @@
-import copy
 from typing import Dict, List, Optional, Set, Tuple, Union, cast
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -44,11 +43,11 @@ class ValidationGraph:
 
     @property
     def edges(self):
-        return copy.deepcopy(self._edges)
+        return self._edges
 
     @property
     def edge_ids(self):
-        return {edge.id for edge in self.edges}
+        return {edge.id for edge in self._edges}
 
 
 class ExpectationValidationGraph:

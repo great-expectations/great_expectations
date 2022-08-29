@@ -33,6 +33,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        single_batch_mode: Union[str, bool] = False,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
@@ -49,6 +50,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            single_batch_mode: Facilitates "MetricSingleBatchParameterBuilder" subclasses in leveraging this class.
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
             replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
             otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
@@ -67,6 +69,8 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
+
+        self._single_batch_mode = single_batch_mode
 
         self._enforce_numeric_metric = enforce_numeric_metric
         self._replace_nan_with_zero = replace_nan_with_zero
@@ -94,6 +98,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         self._metric_value_kwargs = value
 
     @property
+    def single_batch_mode(self) -> Union[str, bool]:
+        return self._single_batch_mode
+
+    @property
     def enforce_numeric_metric(self) -> Union[str, bool]:
         return self._enforce_numeric_metric
 
@@ -118,10 +126,22 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
+        # Obtain single_batch_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        single_batch_mode: bool = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.single_batch_mode,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        limit: Optional[int] = 1 if single_batch_mode else None
+
         metric_computation_result: MetricComputationResult = self.get_metrics(
             metric_name=self.metric_name,
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=self.metric_value_kwargs,
+            limit=limit,
             enforce_numeric_metric=self.enforce_numeric_metric,
             replace_nan_with_zero=self.replace_nan_with_zero,
             domain=domain,

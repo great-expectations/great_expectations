@@ -19,7 +19,6 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.data_context.types.resource_identifiers import BatchIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import RuntimeDataConnector
@@ -103,6 +102,7 @@ def test_new_self_check_after_adding_named_asset_a(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
+    # noinspection PyUnusedLocal
     res: List[
         BatchDefinition
     ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
@@ -1192,3 +1192,28 @@ def test_batch_identifiers_datetime(
         _ = batch.id
     except TypeError:
         pytest.fail()
+
+
+def test_temp_table_schema_name_included_in_batch_spec(basic_datasource):
+    batch_identifiers = {
+        "custom_key_0": "staging",
+        "airflow_run_id": 1234567890,
+    }
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+
+    batch_definition = BatchDefinition(
+        datasource_name="my_datasource",
+        data_connector_name="test_runtime_data_connector",
+        data_asset_name="my_data_asset",
+        batch_identifiers=IDDict(batch_identifiers),
+    )
+
+    batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(
+        batch_definition=batch_definition,
+        runtime_parameters={"query": "my_query", "temp_table_schema_name": "my_schema"},
+    )
+    assert type(batch_spec) == RuntimeQueryBatchSpec
+    assert batch_spec["temp_table_schema_name"] == "my_schema"

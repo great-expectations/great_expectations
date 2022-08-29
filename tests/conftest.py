@@ -38,6 +38,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
+    DatasourceConfig,
     GeCloudConfig,
     InMemoryStoreBackendDefaults,
 )
@@ -168,6 +169,21 @@ def pytest_addoption(parser):
         help="If set, execute tests against trino",
     )
     parser.addoption(
+        "--redshift",
+        action="store_true",
+        help="If set, execute tests against redshift",
+    )
+    parser.addoption(
+        "--athena",
+        action="store_true",
+        help="If set, execute tests against athena",
+    )
+    parser.addoption(
+        "--snowflake",
+        action="store_true",
+        help="If set, execute tests against snowflake",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests for usage_statistics",
@@ -229,6 +245,9 @@ def build_test_backends_list_cfe(metafunc):
     include_aws: bool = metafunc.config.getoption("--aws")
     include_trino: bool = metafunc.config.getoption("--trino")
     include_azure: bool = metafunc.config.getoption("--azure")
+    include_redshift: bool = metafunc.config.getoption("--redshift")
+    include_athena: bool = metafunc.config.getoption("--athena")
+    include_snowflake: bool = metafunc.config.getoption("--snowflake")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -240,6 +259,9 @@ def build_test_backends_list_cfe(metafunc):
         include_aws=include_aws,
         include_trino=include_trino,
         include_azure=include_azure,
+        include_redshift=include_redshift,
+        include_athena=include_athena,
+        include_snowflake=include_snowflake,
     )
     return test_backend_names
 
@@ -297,7 +319,17 @@ def sa(test_backends):
     if not any(
         [
             dbms in test_backends
-            for dbms in ["postgresql", "sqlite", "mysql", "mssql", "bigquery", "trino"]
+            for dbms in [
+                "postgresql",
+                "sqlite",
+                "mysql",
+                "mssql",
+                "bigquery",
+                "trino",
+                "redshift",
+                "athena",
+                "snowflake",
+            ]
         ]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
@@ -2354,10 +2386,25 @@ stores:
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
+  default_profiler_store:
+    class_name: ProfilerStore
+    store_backend:
+      class_name: GeCloudStoreBackend
+      ge_cloud_base_url: {ge_cloud_base_url}
+      ge_cloud_resource_type: profiler
+      ge_cloud_credentials:
+        access_token: {ge_cloud_access_token}
+        organization_id: {ge_cloud_organization_id}
+      suppress_store_backend_id: True
+
 evaluation_parameter_store_name: default_evaluation_parameter_store
 expectations_store_name: default_expectations_store
 validations_store_name: default_validations_store
 checkpoint_store_name: default_checkpoint_store
+profiler_store_name: default_profiler_store
+
+include_rendered_content:
+    globally: True
 """
     data_context_config_dict = yaml.load(config_yaml_str)
     return DataContextConfig(**data_context_config_dict)
@@ -2489,7 +2536,7 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_pandas_engine(
+def cloud_base_data_context_in_cloud_mode_with_datasource_pandas_engine(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
 ):
     context: BaseDataContext = empty_base_data_context_in_cloud_mode
@@ -2505,15 +2552,20 @@ def cloud_data_context_with_datasource_pandas_engine(
                 - default_identifier_name
         """,
     )
-    context.add_datasource(
-        "my_datasource",
-        **config,
-    )
+    with mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
     return context
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_sqlalchemy_engine(
+def cloud_base_data_context_in_cloud_mode_with_datasource_sqlalchemy_engine(
     empty_base_data_context_in_cloud_mode: BaseDataContext, db_file
 ):
     context: BaseDataContext = empty_base_data_context_in_cloud_mode
@@ -2530,26 +2582,126 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
                 - default_identifier_name
         """,
     )
-    context.add_datasource(
-        "my_datasource",
-        **config,
-    )
+    with mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
     return context
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
+def cloud_data_context_with_datasource_pandas_engine(
+    empty_cloud_data_context: CloudDataContext, db_file
+):
+    context: CloudDataContext = empty_cloud_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    with mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
+    return context
+
+
+@pytest.fixture
+def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
+    empty_data_context_in_cloud_mode: DataContext, db_file
+):
+    context: DataContext = empty_data_context_in_cloud_mode
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    with mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
+    return context
+
+
+@pytest.fixture
 def profiler_name() -> str:
     return "my_first_profiler"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def profiler_store_name() -> str:
     return "profiler_store"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
+def profiler_rules() -> dict:
+    rules = {
+        "rule_1": {
+            "variables": {},
+            "domain_builder": {
+                "class_name": "TableDomainBuilder",
+            },
+            "parameter_builders": [
+                {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "name": "my_parameter",
+                    "metric_name": "my_metric",
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_arg": "$parameter.my_parameter.value[0]",
+                    "my_other_arg": "$parameter.my_parameter.value[1]",
+                    "meta": {
+                        "profiler_details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    return rules
+
+
+@pytest.fixture
 def profiler_config_with_placeholder_args(
     profiler_name: str,
+    profiler_rules: dict,
 ) -> RuleBasedProfilerConfig:
     """
     This fixture does not correspond to a practical profiler with rules, whose constituent components perform meaningful
@@ -2561,37 +2713,7 @@ def profiler_config_with_placeholder_args(
         variables={
             "false_positive_threshold": 1.0e-2,
         },
-        rules={
-            "rule_1": {
-                "variables": {},
-                "domain_builder": {
-                    "class_name": "TableDomainBuilder",
-                },
-                "parameter_builders": [
-                    {
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "name": "my_parameter",
-                        "metric_name": "my_metric",
-                    },
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                        "column_A": "$domain.domain_kwargs.column_A",
-                        "column_B": "$domain.domain_kwargs.column_B",
-                        "my_arg": "$parameter.my_parameter.value[0]",
-                        "my_other_arg": "$parameter.my_parameter.value[1]",
-                        "meta": {
-                            "profiler_details": {
-                                "my_parameter_estimator": "$parameter.my_parameter.details",
-                                "note": "Important remarks about estimation algorithm.",
-                            },
-                        },
-                    },
-                ],
-            },
-        },
+        rules=profiler_rules,
     )
 
 
@@ -2611,10 +2733,8 @@ def ge_cloud_profiler_id() -> str:
 
 
 @pytest.fixture
-def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
-    return GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_profiler_id
-    )
+def ge_cloud_profiler_key() -> GeCloudIdentifier:
+    return GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER)
 
 
 @pytest.fixture
@@ -7072,4 +7192,32 @@ def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builde
     )
     logger.info(
         "Set the random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
+    )
+
+
+@pytest.fixture
+def datasource_config_with_names() -> DatasourceConfig:
+    return DatasourceConfig(
+        name="my_datasource",
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        data_connectors={
+            "tripdata_monthly_configured": {
+                "name": "tripdata_monthly_configured",
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "base_directory": "/path/to/trip_data",
+                "assets": {
+                    "yellow": {
+                        "class_name": "Asset",
+                        "module_name": "great_expectations.datasource.data_connector.asset",
+                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                        "group_names": ["year", "month"],
+                    }
+                },
+            }
+        },
     )

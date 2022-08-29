@@ -37,11 +37,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
@@ -160,7 +156,7 @@ class BaseCheckpoint(ConfigPeer):
         # (default to Checkpoint's default_validation_id if no validations were passed in the signature)
         if using_default_validation:
             for validation in validations:
-                validation["id_"] = self.config.default_validation_id
+                validation["id"] = self.config.default_validation_id
 
         # Use AsyncExecutor to speed up I/O bound validations by running them in parallel with multithreading (if
         # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
@@ -206,8 +202,8 @@ class BaseCheckpoint(ConfigPeer):
                     validation_result = run_result.get("validation_result")
                     if validation_result:
                         meta = validation_result.meta
-                        id_ = str(self.ge_cloud_id) if self.ge_cloud_id else None
-                        meta["checkpoint_id"] = id_
+                        id = str(self.ge_cloud_id) if self.ge_cloud_id else None
+                        meta["checkpoint_id"] = id
 
                 checkpoint_run_results.update(run_results)
 
@@ -320,7 +316,7 @@ class BaseCheckpoint(ConfigPeer):
     ) -> None:
         if validation_dict is None:
             validation_dict = {}
-            validation_dict["id_"] = substituted_runtime_config.get(
+            validation_dict["id"] = substituted_runtime_config.get(
                 "default_validation_id"
             )
 
@@ -382,17 +378,14 @@ class BaseCheckpoint(ConfigPeer):
             )
             checkpoint_identifier = None
             if self.data_context.ge_cloud_mode:
-                checkpoint_identifier = GeCloudIdentifier(
-                    resource_type=GeCloudRESTResource.CHECKPOINT,
-                    ge_cloud_id=str(self.ge_cloud_id),
-                )
+                checkpoint_identifier = self.ge_cloud_id
 
             operator_run_kwargs = {}
 
             if catch_exceptions_validation is not None:
                 operator_run_kwargs["catch_exceptions"] = catch_exceptions_validation
 
-            validation_id: Optional[str] = substituted_validation_dict.get("id_")
+            validation_id: Optional[str] = substituted_validation_dict.get("id")
 
             async_validation_operator_result = async_executor.submit(
                 action_list_validation_operator.run,

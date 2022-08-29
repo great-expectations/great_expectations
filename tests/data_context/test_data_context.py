@@ -42,6 +42,7 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
+from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
@@ -279,6 +280,36 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
+@pytest.mark.integration
+def test_save_expectation_suite_include_rendered_content(
+    data_context_parameterized_expectation_suite,
+):
+    expectation_suite: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.create_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
+    )
+    expectation_suite.expectations.append(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    assert expectation_suite.expectations[0].rendered_content is None
+    data_context_parameterized_expectation_suite.save_expectation_suite(
+        expectation_suite,
+        include_rendered_content=True,
+    )
+    expectation_suite_saved: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
+    )
+    assert isinstance(
+        expectation_suite_saved.expectations[0].rendered_content[0],
+        RenderedAtomicContent,
+    )
+
+
 def test_compile_evaluation_parameter_dependencies(
     data_context_parameterized_expectation_suite: DataContext,
 ):
@@ -306,7 +337,8 @@ def test_compile_evaluation_parameter_dependencies(
     )
 
 
-def test_list_datasources(data_context_parameterized_expectation_suite):
+@pytest.mark.v2_api
+def test_list_datasources_v2_api(data_context_parameterized_expectation_suite):
     datasources = data_context_parameterized_expectation_suite.list_datasources()
 
     assert datasources == [
@@ -2300,10 +2332,9 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
                 "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
                 "base_directory": "../data",
                 "name": "data_dir_example_data_connector",
-                "id_": None,
             }
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)
@@ -2654,14 +2685,16 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "default_inferred_data_connector_name": {
                 "class_name": "InferredAssetSqlDataConnector",
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_inferred_data_connector_name",
             },
             "default_runtime_data_connector_name": {
                 "class_name": "RuntimeDataConnector",
                 "batch_identifiers": ["default_identifier_name"],
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_runtime_data_connector_name",
             },
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert datasource_from_yaml.config == {
@@ -2681,14 +2714,16 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "default_inferred_data_connector_name": {
                 "class_name": "InferredAssetSqlDataConnector",
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_inferred_data_connector_name",
             },
             "default_runtime_data_connector_name": {
                 "class_name": "RuntimeDataConnector",
                 "batch_identifiers": ["default_identifier_name"],
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_runtime_data_connector_name",
             },
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
 
@@ -2837,10 +2872,9 @@ def test_add_datasource_from_yaml_with_substitution_variables(
                 "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
                 "base_directory": "../data",
                 "name": "data_dir_example_data_connector",
-                "id_": None,
             }
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)

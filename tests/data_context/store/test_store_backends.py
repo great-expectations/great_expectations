@@ -1462,7 +1462,7 @@ def test_GeCloudStoreBackend(
             json={
                 "data": {
                     "type": "checkpoint",
-                    "id_": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },
@@ -1547,7 +1547,7 @@ def test_GeCloudStoreBackend(
             json={
                 "data": {
                     "type": "rendered_data_doc",
-                    "id_": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "id": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },
@@ -1616,6 +1616,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
         "datasources",
         "evaluation_parameter_store_name",
         "expectations_store_name",
+        "include_rendered_content",
         "notebooks",
         "plugins_directory",
         "progress_bars",

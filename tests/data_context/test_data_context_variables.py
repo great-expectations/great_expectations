@@ -27,6 +27,7 @@ from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     GeCloudConfig,
+    IncludeRenderedContentConfig,
     NotebookConfig,
     NotebookTemplateConfig,
     ProgressBarsConfig,
@@ -71,6 +72,11 @@ def data_context_config_dict() -> dict:
         "notebooks": None,
         "concurrency": None,
         "progress_bars": None,
+        "include_rendered_content": {
+            "expectation_suite": False,
+            "expectation_validation_result": False,
+            "globally": False,
+        },
     }
     return config
 
@@ -200,6 +206,15 @@ def progress_bars() -> ProgressBarsConfig:
     )
 
 
+@pytest.fixture
+def include_rendered_content() -> IncludeRenderedContentConfig:
+    return IncludeRenderedContentConfig(
+        globally=False,
+        expectation_validation_result=False,
+        expectation_suite=False,
+    )
+
+
 @pytest.mark.parametrize(
     "target_attr",
     [
@@ -255,6 +270,10 @@ def progress_bars() -> ProgressBarsConfig:
         pytest.param(
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars getter",
+        ),
+        pytest.param(
+            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
+            id="include_rendered_content getter",
         ),
     ],
 )
@@ -370,6 +389,11 @@ def test_data_context_variables_get_with_substitutions(
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars setter",
         ),
+        pytest.param(
+            include_rendered_content,
+            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
+            id="include_rendered_content setter",
+        ),
     ],
 )
 def test_data_context_variables_set(
@@ -441,6 +465,7 @@ def test_data_context_variables_save_config(
             "notebooks",
             "plugins_directory",
             "stores",
+            "include_rendered_content",
         ):
             expected_config_dict[attr] = data_context_config_dict[attr]
 
@@ -485,7 +510,10 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 
 @pytest.mark.integration
 def test_file_data_context_variables_e2e(
-    monkeypatch, file_data_context: FileDataContext, progress_bars: ProgressBarsConfig
+    monkeypatch,
+    file_data_context: FileDataContext,
+    progress_bars: ProgressBarsConfig,
+    include_rendered_content: IncludeRenderedContentConfig,
 ) -> None:
     """
     What does this test do and why?
@@ -498,10 +526,16 @@ def test_file_data_context_variables_e2e(
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
     """
-    # Prepare updated progress bars to set and serialize to disk
+    # Prepare updated progress_bars to set and serialize to disk
     updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
     updated_progress_bars.globally = False
     updated_progress_bars.profilers = True
+
+    # Prepare updated include_rendered_content to set and serialize to disk
+    updated_include_rendered_content: IncludeRenderedContentConfig = copy.deepcopy(
+        include_rendered_content
+    )
+    updated_include_rendered_content.expectation_validation_result = True
 
     # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
@@ -510,6 +544,9 @@ def test_file_data_context_variables_e2e(
 
     # Set attributes defined above
     file_data_context.variables.progress_bars = updated_progress_bars
+    file_data_context.variables.include_rendered_content = (
+        updated_include_rendered_content
+    )
     file_data_context.variables.plugins_directory = f"${env_var_name}"
     file_data_context.variables.save_config()
 
@@ -523,6 +560,10 @@ def test_file_data_context_variables_e2e(
         config_saved_to_disk: DataContextConfig = DataContextConfig(**contents)
 
     assert config_saved_to_disk.progress_bars == updated_progress_bars.to_dict()
+    assert (
+        config_saved_to_disk.include_rendered_content.to_dict()
+        == updated_include_rendered_content.to_dict()
+    )
     assert (
         file_data_context.variables.plugins_directory == value_associated_with_env_var
     )
@@ -547,6 +588,11 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     assert success is True
 
 
+@pytest.mark.xfail(
+    reason="GX Cloud E2E tests are currently failing due to env vars not being recognized by Docker; xfailing for purposes of the 0.15.20 release",
+    run=True,
+    strict=True,
+)
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")

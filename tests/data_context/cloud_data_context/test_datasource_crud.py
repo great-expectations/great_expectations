@@ -17,6 +17,9 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.datasource import BaseDatasource
+from great_expectations.datasource.datasource_serializer import (
+    JsonDatasourceConfigSerializer,
+)
 from tests.data_context.cloud_data_context.conftest import MockResponse
 
 
@@ -238,10 +241,9 @@ def test_cloud_backed_data_context_add_datasource(
 
         retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
 
-        # Round trip through schema to mimic updates made during store serialization process
-        expected_datasource_config = datasourceConfigSchema.dump(
-            DatasourceConfig(**datasource_config_with_name.to_json_dict())
-        )
+        # Serialize expected config to mimic updates made during store serialization process
+        serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
+        expected_datasource_config = serializer.serialize(datasource_config_with_name)
 
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
@@ -267,13 +269,13 @@ def test_cloud_backed_data_context_add_datasource(
 
         if save_changes:
             # Make sure the id was populated correctly into the created datasource object and config
-            assert stored_datasource.id_ == datasource_id
-            assert retrieved_datasource.id_ == datasource_id
-            assert retrieved_datasource.config["id_"] == datasource_id
+            assert stored_datasource.id == datasource_id
+            assert retrieved_datasource.id == datasource_id
+            assert retrieved_datasource.config["id"] == datasource_id
         else:
-            assert stored_datasource.id_ is None
-            assert retrieved_datasource.id_ is None
-            assert retrieved_datasource.config["id_"] is None
+            assert stored_datasource.id is None
+            assert retrieved_datasource.id is None
+            assert retrieved_datasource.config["id"] is None
 
         # Make sure the name is populated correctly into the created datasource
         assert retrieved_datasource.name == datasource_name

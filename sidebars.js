@@ -101,6 +101,9 @@ module.exports = {
           label: 'Core skills',
           items: [
             'guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use',
+            'guides/connecting_to_your_data/how_to_choose_between_working_with_a_single_or_multiple_batches_of_data',
+            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource',
+            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource',
             'guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector',
             'guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector',
             'guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector',

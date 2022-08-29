@@ -7,6 +7,7 @@ from great_expectations.core.data_context_key import (
     DataContextKey,
     DataContextVariableKey,
 )
+from great_expectations.core.serializer import AbstractConfigSerializer
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
@@ -26,15 +27,17 @@ class DatasourceStore(Store):
 
     def __init__(
         self,
+        serializer: AbstractConfigSerializer,
         store_name: Optional[str] = None,
         store_backend: Optional[dict] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         self._schema = DatasourceConfigSchema()
+        self._serializer = serializer
         super().__init__(
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            store_name=store_name,
+            store_name=store_name,  # type: ignore[arg-type]
         )
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
@@ -48,7 +51,7 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def list_keys(self) -> List[str]:
+    def list_keys(self) -> List[str]:  # type: ignore[override]
         """
         See parent 'Store.list_keys()' for more information
         """
@@ -66,14 +69,11 @@ class DatasourceStore(Store):
         """
         return self._store_backend.remove_key(key.to_tuple())
 
-    def serialize(self, value: DatasourceConfig) -> Union[str, DatasourceConfig]:
+    def serialize(self, value: DatasourceConfig) -> Union[str, dict, DatasourceConfig]:
         """
         See parent 'Store.serialize()' for more information
         """
-        if self.ge_cloud_mode:
-            # GeCloudStoreBackend expects a json str
-            return self._schema.dump(value)
-        return value
+        return self._serializer.serialize(value)  # type: ignore[return-value]
 
     def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
         """
@@ -121,7 +121,7 @@ class DatasourceStore(Store):
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
 
-        datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))
+        datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
         return datasource_config
 
     def delete_by_name(self, datasource_name: str) -> None:
@@ -144,12 +144,12 @@ class DatasourceStore(Store):
 
         self.remove_key(self._build_key_from_config(datasource_config))
 
-    def _build_key_from_config(
+    def _build_key_from_config(  # type: ignore[override]
         self, datasource_config: DatasourceConfig
     ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
         return self.store_backend.build_key(
             name=datasource_config.name,
-            id_=datasource_config.id_,
+            id=datasource_config.id,
         )
 
     def set_by_name(

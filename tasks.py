@@ -117,7 +117,9 @@ def type_coverage(ctx):
     try:
         check_type_hint_coverage.main()
     except AssertionError as err:
-        raise invoke.Exit(message=str(err), code=1)
+        raise invoke.Exit(
+            message=f"{err}\n\n  See {check_type_hint_coverage.__file__}", code=1
+        )
 
 
 @invoke.task(
@@ -138,6 +140,7 @@ def type_check(
     install_types=False,
     daemon=False,
     clear_cache=False,
+    report=False,
 ):
     """Run mypy static type-checking on select packages."""
     if clear_cache:
@@ -164,6 +167,8 @@ def type_check(
     if daemon:
         # see related issue https://github.com/python/mypy/issues/9475
         cmds.extend(["--follow-imports=normal"])
+    if report:
+        cmds.extend(["--txt-report", "type_cov", "--html-report", "type_cov"])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
@@ -203,14 +208,58 @@ def mv_usage_stats_json(ctx):
 
 
 @invoke.task(
+    aliases=["test"],
+    help={
+        "slowest": "Report on the slowest n number of tests",
+        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
+    },
+)
+def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5):
+    """Run tests. Runs unit tests by default."""
+    # TODO: update this to also run the full e2e/integration tests (but unit-tests should always be the default mode)
+    cmds = [
+        "pytest",
+        f"--durations={slowest}",
+        "--cov=great_expectations",
+        "--cov-report term:skip-covered",  # modules with 100% will not be shown
+        "-vv",
+    ]
+    if unit:
+        cmds += [
+            "-m",
+            "unit",
+        ]
+    if cloud:
+        cmds += ["--cloud"]
+    if ci:
+        cmds += ["--cov-report", "xml"]
+    if html:
+        cmds += ["--cov-report", "html"]
+    ctx.run(" ".join(cmds), echo=True, pty=True)
+
+
+PYTHON_VERSION_DEFAULT: float = 3.8
+
+
+@invoke.task(
     help={
         "name": "Docker image name.",
         "tag": "Docker image tag.",
         "build": "If True build the image, otherwise run it. Defaults to False.",
+        "detach": "Run container in background and print container ID. Defaults to False.",
+        "py": f"version of python to use. Default is {PYTHON_VERSION_DEFAULT}",
         "cmd": "Command for docker image. Default is bash.",
     }
 )
-def docker(ctx, name="gx38local", tag="latest", build=False, cmd="bash"):
+def docker(
+    ctx,
+    name="gx38local",
+    tag="latest",
+    build=False,
+    detach=False,
+    cmd="bash",
+    py=PYTHON_VERSION_DEFAULT,
+):
     """
     Build or run gx docker image.
     """
@@ -221,29 +270,40 @@ def docker(ctx, name="gx38local", tag="latest", build=False, cmd="bash"):
             "The docker task must be invoked from the same directory as the task.py file at the top of the repo.",
             code=1,
         )
+
+    cmds = ["docker"]
+
     if build:
-        cmds = [
-            "docker",
-            "buildx",
-            "build",
-            "-f",
-            "docker/Dockerfile.tests",
-            f"--tag {name}:{tag}",
-            *[f"--build-arg {arg}" for arg in ["SOURCE=local", "PYTHON_VERSION=3.8"]],
-            ".",
-        ]
+        cmds.extend(
+            [
+                "buildx",
+                "build",
+                "-f",
+                "docker/Dockerfile.tests",
+                f"--tag {name}:{tag}",
+                *[
+                    f"--build-arg {arg}"
+                    for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]
+                ],
+                ".",
+            ]
+        )
 
     else:
-        cmds = [
-            "docker",
-            "run",
-            "-it",
-            "--rm",
-            "--mount",
-            f"type=bind,source={filedir},target=/great_expectations",
-            "-w",
-            "/great_expectations",
-            f"{name}:{tag}",
-            f"{cmd}",
-        ]
+        cmds.append("run")
+        if detach:
+            cmds.append("--detach")
+        cmds.extend(
+            [
+                "-it",
+                "--rm",
+                "--mount",
+                f"type=bind,source={filedir},target=/great_expectations",
+                "-w",
+                "/great_expectations",
+                f"{name}:{tag}",
+                f"{cmd}",
+            ]
+        )
+
     ctx.run(" ".join(cmds), echo=True, pty=True)

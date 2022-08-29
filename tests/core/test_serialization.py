@@ -10,9 +10,17 @@ from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
+    AbstractConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
+    DatasourceConfig,
     checkpointConfigSchema,
+    datasourceConfigSchema,
+)
+from great_expectations.marshmallow__shade import Schema
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -587,7 +595,7 @@ def test_checkpoint_config_print(
                             "data_asset_name": "users",
                             "data_connector_query": {"partition_index": -1},
                         },
-                        id_="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                        id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     ),
                 ],
             ),
@@ -637,7 +645,7 @@ def test_checkpoint_config_print(
                             "data_asset_name": "users",
                             "data_connector_query": {"partition_index": -1},
                         },
-                        id_="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                        id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     ),
                 ],
             ),
@@ -686,3 +694,31 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
     assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
         checkpoint_config
     )
+
+
+def generic_config_serialization_assertions(
+    config: AbstractConfig,
+    schema: Schema,
+    expected_serialized_config: dict,
+    expected_roundtrip_config: dict,
+) -> None:
+    """Generic assertions for testing configuration serialization.
+
+    Args:
+        config: config object to check serialization.
+        schema: Marshmallow schema used for serializing / deserializing config object.
+        expected_serialized_config: expected when serializing a config via dump
+        expected_roundtrip_config: expected config after loading the dump
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError
+    """
+
+    observed_dump = schema.dump(config)
+    assert observed_dump == expected_serialized_config
+
+    loaded_data = schema.load(observed_dump)
+    assert loaded_data.to_json_dict() == expected_roundtrip_config

@@ -177,7 +177,7 @@ class DataAssistantRunner:
             Parameter(
                 name="estimation",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
-                default=None,
+                default="exact",
                 annotation=Optional[Union[str, NumericRangeEstimatorType]],
             ),
         ]
@@ -329,5 +329,10 @@ class DataAssistantRunner:
         klass: type = rule.domain_builder.__class__
         sig: Signature = signature(obj=klass.__init__)
         parameters: Dict[str, Parameter] = dict(sig.parameters)
-        attribute_names: List[str] = list(parameters.keys())[1:]
+        attribute_names: List[str] = list(
+            filter(
+                lambda element: element not in rule.domain_builder.exclude_field_names,
+                list(parameters.keys())[1:],
+            )
+        )
         return attribute_names

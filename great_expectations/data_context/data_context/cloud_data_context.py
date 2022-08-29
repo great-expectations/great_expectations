@@ -1,8 +1,9 @@
 import logging
-from typing import List, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, List, Mapping, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -23,6 +24,9 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.datasource import Datasource
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -69,15 +73,16 @@ class CloudDataContext(AbstractDataContext):
         store_backend: dict = {"class_name": "GeCloudStoreBackend"}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
-            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),
+            "ge_cloud_credentials": self.ge_cloud_config.to_dict(),  # type: ignore[union-attr]
             "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
-            "ge_cloud_base_url": self.ge_cloud_config.base_url,
+            "ge_cloud_base_url": self.ge_cloud_config.base_url,  # type: ignore[union-attr]
         }
 
         datasource_store = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
+            serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
         )
         self._datasource_store = datasource_store
 
@@ -86,7 +91,7 @@ class CloudDataContext(AbstractDataContext):
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GE Cloud ids is returned instead.
         """
-        return [suite_key.ge_cloud_id for suite_key in self.list_expectation_suites()]
+        return [suite_key.resource_name for suite_key in self.list_expectation_suites()]  # type: ignore[union-attr]
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -98,7 +103,7 @@ class CloudDataContext(AbstractDataContext):
 
     def _init_variables(self) -> CloudDataContextVariables:
         ge_cloud_base_url: str = self._ge_cloud_config.base_url
-        ge_cloud_organization_id: str = self._ge_cloud_config.organization_id
+        ge_cloud_organization_id: str = self._ge_cloud_config.organization_id  # type: ignore[union-attr,assignment]
         ge_cloud_access_token: str = self._ge_cloud_config.access_token
 
         variables = CloudDataContextVariables(
@@ -118,7 +123,7 @@ class CloudDataContext(AbstractDataContext):
         """
 
         # if in ge_cloud_mode, use ge_cloud_organization_id
-        return self.ge_cloud_config.organization_id
+        return self.ge_cloud_config.organization_id  # type: ignore[return-value,union-attr]
 
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
@@ -162,7 +167,6 @@ class CloudDataContext(AbstractDataContext):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
         **kwargs: Optional[dict],
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
@@ -181,6 +185,7 @@ class CloudDataContext(AbstractDataContext):
         expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
+        ge_cloud_id = expectation_suite.ge_cloud_id
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
@@ -190,8 +195,8 @@ class CloudDataContext(AbstractDataContext):
             and not overwrite_existing
         ):
             raise ge_exceptions.DataContextError(
-                "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(ge_cloud_id)
+                f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
             )
         self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
@@ -238,37 +243,36 @@ class CloudDataContext(AbstractDataContext):
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
         )
-        if self.expectations_store.has_key(key):  # noqa: W601
-            expectations_schema_dict: dict = cast(
-                dict, self.expectations_store.get(key)
-            )
-            # create the ExpectationSuite from constructor
-            return ExpectationSuite(**expectations_schema_dict, data_context=self)
-
-        else:
+        if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
                 f"expectation_suite {expectation_suite_name} not found"
             )
+
+        expectations_schema_dict: dict = cast(dict, self.expectations_store.get(key))
+        # create the ExpectationSuite from constructor
+        return ExpectationSuite(**expectations_schema_dict, data_context=self)
 
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        ge_cloud_id: Optional[str] = None,
+        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         """Save the provided expectation suite into the DataContext.
 
         Args:
-            expectation_suite: the suite to save
-            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
-                be read from the suite
-            ge_cloud_id: cloud id for saving expectation suite
-            overwrite_existing: should I over-write the Suite if it already exists?
+            expectation_suite: The suite to save.
+            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
+                from the suite.
+            overwrite_existing: Whether to overwrite the suite if it already exists.
+            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
+
         Returns:
             None
         """
+        ge_cloud_id = expectation_suite.ge_cloud_id
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id
@@ -284,6 +288,13 @@ class CloudDataContext(AbstractDataContext):
                 f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
             )
         self._evaluation_parameter_dependencies_compiled = False
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+        if include_rendered_content:
+            expectation_suite.render()
         self.expectations_store.set(key, expectation_suite, **kwargs)
 
     @property
@@ -323,17 +334,17 @@ class CloudDataContext(AbstractDataContext):
                 key=None, value=datasource_config
             )
 
-        self.config.datasources[name] = datasource_config
+        self.config.datasources[name] = datasource_config  # type: ignore[index,assignment]
 
         # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
         substitutions: dict = self._determine_substitutions()
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        config = dict(datasourceConfigSchema.dump(datasource_config))
 
-        substituted_config_dict: dict = substitute_all_config_variables(
+        substituted_config_dict = substitute_all_config_variables(
             config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
-        # Round trip through schema validation and config creation to ensure "id_" is present
+        # Round trip through schema validation and config creation to ensure "id" is present
         #
         # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
         # be refactored to into the config/schema. Also, downstream methods should be refactored
@@ -355,7 +366,7 @@ class CloudDataContext(AbstractDataContext):
                 if save_changes:
                     self._datasource_store.delete(datasource_config)
                 # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(name, None)
+                self.config.datasources.pop(name, None)  # type: ignore[union-attr]
                 raise e
 
         return datasource
@@ -386,7 +397,7 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
-    ) -> "Checkpoint":  # noqa: F821
+    ) -> "Checkpoint":
         """
         See `AbstractDataContext.add_checkpoint` for more information.
         """
@@ -395,7 +406,7 @@ class CloudDataContext(AbstractDataContext):
 
         checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
             data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,
+            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -427,6 +438,6 @@ class CloudDataContext(AbstractDataContext):
         )
 
         checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
-            checkpoint_config=checkpoint_config, data_context=self
+            checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
         return checkpoint
