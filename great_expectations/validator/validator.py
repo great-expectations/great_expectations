@@ -423,6 +423,11 @@ class Validator:
                     )
                 else:
                     raise err
+
+            if self.include_rendered_content:
+                validation_result.render()
+                validation_result.expectation_config.render()
+
             return validation_result
 
         inst_expectation.__name__ = name
