@@ -284,7 +284,7 @@ def test_onboarding_data_assistant_metrics_count(
     ) in bobby_onboarding_data_assistant_result.metrics_by_domain.items():
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
-    assert num_metrics == 184
+    assert num_metrics == 150
 
 
 @pytest.mark.integration
