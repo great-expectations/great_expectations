@@ -184,7 +184,6 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["ai/ml", "fair-ai", "hackathon-22"],
         "contributors": ["@luismdiaz01", "@derekma73"],
         "requirements": ["aequitas"],
