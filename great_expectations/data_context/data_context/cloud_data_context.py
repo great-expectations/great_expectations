@@ -197,7 +197,7 @@ class CloudDataContext(AbstractDataContext):
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
         )
 
-        response = self.expectations_store.set(key, expectation_suite, **kwargs)
+        response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GeCloudResourceRef):
             expectation_suite.ge_cloud_id = response.ge_cloud_id
 
@@ -292,7 +292,7 @@ class CloudDataContext(AbstractDataContext):
         if include_rendered_content:
             expectation_suite.render()
 
-        response = self.expectations_store.set(key, expectation_suite, **kwargs)
+        response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GeCloudResourceRef):
             expectation_suite.ge_cloud_id = response.ge_cloud_id
 
