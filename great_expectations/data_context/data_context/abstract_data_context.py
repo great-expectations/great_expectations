@@ -20,7 +20,10 @@ from typing import (
     cast,
 )
 
-from great_expectations.core.serializer import AbstractConfigSerializer
+from great_expectations.core.serializer import (
+    AbstractConfigSerializer,
+    DictConfigSerializer,
+)
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
@@ -1631,9 +1634,11 @@ class AbstractDataContext(ABC):
             else:
                 name = config["name"]
 
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(config)
+
         try:
             datasource: Datasource = self._build_datasource_from_config(
-                name=name, config=config
+                datasource_config
             )
         except Exception as e:
             raise ge_exceptions.DatasourceInitializationError(
@@ -1661,28 +1666,17 @@ class AbstractDataContext(ABC):
         # Load class to check if it is a subclass of LegacyDatasource to support custom v2 datasources
         class_ = load_class(class_name=config["class_name"], module_name=module_name)
 
-        unsupported_keys = ("id_",)
+        unsupported_keys = ("id",)
         if issubclass(class_, LegacyDatasource):
             for attr in unsupported_keys:
                 config.pop(attr, None)
 
-    def _build_datasource_from_config(
-        self, name: Union[str, None], config: Union[dict, DatasourceConfig]
-    ) -> Datasource:
+    def _build_datasource_from_config(self, config: DatasourceConfig) -> Datasource:
 
-        if name is None:
-            name = config.get("name")
-        # We convert from the type back to a dictionary for purposes of instantiation
-        # Round trip through schema validation and config creation to ensure "id_" is present
-        #
-        # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
-        # be refactored to into the config/schema. Also, downstream methods should be refactored
-        # to accept the config object (as opposed to a dict).
-        if isinstance(config, DatasourceConfig):
-            config: dict = datasourceConfigSchema.dump(config)
-            validated_config: DatasourceConfig = datasourceConfigSchema.load(config)
-            config: dict = validated_config.to_json_dict()
-        config.update({"name": name})  # type: ignore[union-attr]
+        # serialize to dict for compatibility with the following code
+        serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+        config: dict = serializer.serialize(config)
+
         # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
         if config["class_name"] in [
             "BaseDatasource",
