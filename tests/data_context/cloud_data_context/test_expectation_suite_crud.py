@@ -117,6 +117,48 @@ def mocked_post_response(
     return _mocked_post_response
 
 
+@pytest.fixture
+def mocked_get_response(
+    mock_response_factory: Callable,
+    suite_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
+) -> Callable[[], MockResponse]:
+    suite_id = suite_names_and_ids[0][1]
+
+    def _mocked_get_response(*args, **kwargs):
+        return mock_response_factory(
+            {
+                "data": {
+                    "attributes": {
+                        "clause_id": "3199e1eb-3f68-473a-aca5-5e12324c3b92",
+                        "created_at": "2021-12-02T16:53:31.015139",
+                        "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
+                        "deleted": False,
+                        "deleted_at": None,
+                        "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
+                        "rendered_data_doc_id": None,
+                        "suite": {
+                            "data_asset_type": None,
+                            "expectation_suite_name": "my_mock_suite",
+                            "expectations": [
+                                {
+                                    "expectation_type": "expect_column_to_exist",
+                                    "ge_cloud_id": "869771ee-a728-413d-96a6-8efc4dc70318",
+                                    "kwargs": {"column": "infinities"},
+                                    "meta": {},
+                                },
+                            ],
+                            "ge_cloud_id": suite_id,
+                        },
+                    },
+                    "id": suite_id,
+                }
+            },
+            200,
+        )
+
+    return _mocked_get_response
+
+
 @pytest.mark.unit
 @pytest.mark.cloud
 def test_list_expectation_suites(
@@ -229,9 +271,12 @@ def test_delete_expectation_suite_deletes_suite_in_cloud(
     with mock.patch(
         "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
         return_value=True,
-    ), mock.patch("requests.delete", autospec=True) as mock_delete:
+    ) as mock_has_key, mock.patch("requests.delete", autospec=True) as mock_delete:
         context.delete_expectation_suite(ge_cloud_id=suite_id)
 
+    mock_has_key.assert_called_once_with(
+        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+    )
     assert mock_delete.call_args[1]["json"] == {
         "data": {
             "type": GeCloudRESTResource.EXPECTATION_SUITE,
@@ -253,37 +298,80 @@ def test_delete_expectation_suite_nonexistent_suite_raises_error(
     with mock.patch(
         "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
         return_value=False,
-    ), pytest.raises(DataContextError) as e:
+    ) as mock_has_key, pytest.raises(DataContextError) as e:
         context.delete_expectation_suite(ge_cloud_id=suite_id)
 
+    mock_has_key.assert_called_once_with(
+        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+    )
     assert f"expectation_suite with id {suite_id} does not exist" in str(e.value)
 
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_get_expectation_suite_retrieves_suite_from_cloud():
+def test_get_expectation_suite_retrieves_suite_from_cloud(
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
+    suite_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
+    mocked_get_response: Callable[[], MockResponse],
+) -> None:
+    context = empty_base_data_context_in_cloud_mode
+
+    suite_id = suite_names_and_ids[0][1]
+
+    with mock.patch(
+        "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
+        return_value=True,
+    ) as mock_has_key, mock.patch(
+        "requests.get", autospec=True, side_effect=mocked_get_response
+    ):
+        suite = context.get_expectation_suite(ge_cloud_id=suite_id)
+
+    mock_has_key.assert_called_once_with(
+        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+    )
+    assert str(suite.ge_cloud_id) == str(suite_id)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_get_expectation_suite_nonexistent_suite_raises_error(
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
+) -> None:
+    context = empty_base_data_context_in_cloud_mode
+
+    suite_id = "abc123"
+
+    with mock.patch(
+        "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
+        return_value=False,
+    ) as mock_has_key, pytest.raises(DataContextError) as e:
+        context.get_expectation_suite(ge_cloud_id=suite_id)
+
+    mock_has_key.assert_called_once_with(
+        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+    )
+    assert f"expectation_suite with id {suite_id} not found" in str(e.value)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_save_expectation_suite_saves_suite_to_cloud(
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
+) -> None:
     pass
 
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_get_expectation_suite_nonexistent_suite_raises_error():
+def test_save_expectation_suite_overwrites_existing_suite(
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
+) -> None:
     pass
 
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_save_expectation_suite_saves_suite_to_cloud():
-    pass
-
-
-@pytest.mark.unit
-@pytest.mark.cloud
-def test_save_expectation_suite_overwrites_existing_suite():
-    pass
-
-
-@pytest.mark.unit
-@pytest.mark.cloud
-def test_save_expectation_suite_namespace_collision_raises_error():
+def test_save_expectation_suite_namespace_collision_raises_error(
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
+) -> None:
     pass

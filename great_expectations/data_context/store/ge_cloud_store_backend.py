@@ -522,11 +522,11 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:  # type: ignore[override]
-        # self.list_keys() generates a list of length 2 tuples
-        if len(key) == 3:
-            key = key[:2]
-        all_keys = self.list_keys()
-        return key in all_keys
+        # Due to list_keys being inconsistently sized (due to the possible of resource names),
+        # we solely rely on the equality of ids to determine the result of this method
+        id = key[1]
+        all_ids = set(map(lambda key: key[1], self.list_keys()))
+        return id in all_ids
 
     @property
     def config(self) -> dict:
