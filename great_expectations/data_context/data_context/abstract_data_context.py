@@ -1670,7 +1670,6 @@ class AbstractDataContext(ABC):
         save_changes: bool = False,
     ) -> Optional[Datasource]:
         """ """
-        # THIS IS WHERE THE LOADING OF THE DATASOURCE IS
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )

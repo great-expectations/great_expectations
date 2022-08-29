@@ -269,6 +269,7 @@ class ColumnDomainBuilder(DomainBuilder):
                     effective_column_names,
                 )
             )
+
         # Obtain semantic_type_filter_module_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         semantic_type_filter_module_name: Optional[
             str
@@ -361,7 +362,6 @@ class ColumnDomainBuilder(DomainBuilder):
 
         return effective_column_names
 
-    # also look here
     def _get_domains(
         self,
         rule_name: str,
