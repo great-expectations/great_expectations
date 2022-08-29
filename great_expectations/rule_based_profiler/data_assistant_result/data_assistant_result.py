@@ -23,7 +23,6 @@ import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 from IPython.display import HTML, display
-from packaging import version
 
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as ge_exceptions
