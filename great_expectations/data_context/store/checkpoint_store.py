@@ -59,17 +59,15 @@ class CheckpointStore(ConfigurationStore):
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
         test_checkpoint_configuration = CheckpointConfig(
-            **{"name": test_checkpoint_name}
+            **{"name": test_checkpoint_name}  # type: ignore[arg-type]
         )
         if self.ge_cloud_mode:
-            test_key: GeCloudIdentifier = self.key_class(
+            test_key: GeCloudIdentifier = self.key_class(  # type: ignore[call-arg,assignment]
                 resource_type=GeCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
         else:
-            test_key: ConfigurationIdentifier = self.key_class(
-                configuration_key=test_checkpoint_name
-            )
+            test_key = self.key_class(configuration_key=test_checkpoint_name)  # type: ignore[call-arg,assignment]
 
         if pretty_print:
             print(f"Attempting to add a new test key {test_key} to Checkpoint store...")
@@ -106,11 +104,13 @@ class CheckpointStore(ConfigurationStore):
         )
         return os.path.isdir(checkpoints_directory_path)
 
-    def list_checkpoints(self, ge_cloud_mode: bool) -> List[str]:
-        keys: Union[List[str], List[ConfigurationIdentifier]] = self.list_keys()
+    def list_checkpoints(
+        self, ge_cloud_mode: bool
+    ) -> Union[List[str], List[ConfigurationIdentifier]]:
+        keys: Union[List[str], List[ConfigurationIdentifier]] = self.list_keys()  # type: ignore[assignment]
         if ge_cloud_mode:
             return keys
-        return [k.configuration_key for k in keys]
+        return [k.configuration_key for k in keys]  # type: ignore[union-attr]
 
     def delete_checkpoint(
         self,
@@ -124,7 +124,7 @@ class CheckpointStore(ConfigurationStore):
             self.remove_key(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
             raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
             )
 
     def get_checkpoint(
@@ -134,10 +134,10 @@ class CheckpointStore(ConfigurationStore):
             name=name, ge_cloud_id=ge_cloud_id
         )
         try:
-            checkpoint_config: CheckpointConfig = self.get(key=key)
+            checkpoint_config: CheckpointConfig = self.get(key=key)  # type: ignore[assignment]
         except ge_exceptions.InvalidKeyError as exc_ik:
             raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
             )
         except ValidationError as exc_ve:
             raise ge_exceptions.InvalidCheckpointConfigError(
@@ -172,11 +172,11 @@ class CheckpointStore(ConfigurationStore):
         key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=ge_cloud_id
         )
-        checkpoint_config: CheckpointConfig = checkpoint.get_config()
-        checkpoint_ref = self.set(key=key, value=checkpoint_config)
+        checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment,func-returns-value]
+        checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
             ge_cloud_id = checkpoint_ref.ge_cloud_id
-            checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)
+            checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)  # type: ignore[misc]
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
         """Create a checkpoint config in the store using a store_backend-specific key.
