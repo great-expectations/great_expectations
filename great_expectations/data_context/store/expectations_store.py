@@ -184,7 +184,9 @@ class ExpectationsStore(Store):
         if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             return self._expectationSuiteSchema.dump(value)
-        return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
+        return self._expectationSuiteSchema.dumps(
+            value, indent=2, sort_keys=True, default=str
+        )
 
     def deserialize(self, value):
         if isinstance(value, dict):
