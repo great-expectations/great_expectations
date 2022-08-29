@@ -5144,6 +5144,69 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
             assert isinstance(rendered_content, RenderedAtomicContent)
 
 
+def test_newstyle_checkpoint_result_validations_include_rendered_content_data_context_variable(
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
+    sa,
+):
+    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    context.include_rendered_content.globally = True
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        "validations": [
+            {
+                "batch_request": batch_request,
+            }
+        ],
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+
+    result: CheckpointResult = checkpoint.run()
+    validation_result_identifier: ValidationResultIdentifier = (
+        result.list_validation_result_identifiers()[0]
+    )
+    expectation_validation_result: ExpectationValidationResult = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
+    for result in expectation_validation_result.results:
+        for rendered_content in result.rendered_content:
+            assert isinstance(rendered_content, RenderedAtomicContent)
+
+
 @pytest.mark.integration
 @pytest.mark.cloud
 @pytest.mark.parametrize(

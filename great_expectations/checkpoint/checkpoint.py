@@ -337,9 +337,13 @@ class BaseCheckpoint(ConfigPeer):
             expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
                 "expectation_suite_ge_cloud_id"
             )
-            include_rendered_content: bool = substituted_validation_dict.get(
-                "include_rendered_content", False
+            include_rendered_content: Optional[bool] = substituted_validation_dict.get(
+                "include_rendered_content"
             )
+            if include_rendered_content is None:
+                include_rendered_content = (
+                    self._data_context._determine_if_expectation_validation_result_include_rendered_content()
+                )
 
             validator: Validator = self.data_context.get_validator(
                 batch_request=batch_request,
