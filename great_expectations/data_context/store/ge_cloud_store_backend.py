@@ -523,10 +523,16 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:  # type: ignore[override]
         # Due to list_keys being inconsistently sized (due to the possible of resource names),
-        # we solely rely on the equality of ids to determine the result of this method
-        id = key[1]
-        all_ids = set(map(lambda key: key[1], self.list_keys()))
-        return id in all_ids
+        # we remove any resource names and assert against key ids.
+
+        def _shorten_key(key) -> Tuple[str, str]:
+            if len(key) == 2:
+                key = key[:2]
+            return key
+
+        key = _shorten_key(key)
+        all_keys = set(map(lambda key: _shorten_key(key), self.list_keys()))
+        return key in all_keys
 
     @property
     def config(self) -> dict:
