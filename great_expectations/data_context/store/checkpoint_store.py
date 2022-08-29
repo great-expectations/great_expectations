@@ -154,10 +154,10 @@ class CheckpointStore(ConfigurationStore):
         return checkpoint_config
 
     def add_checkpoint(
-        self, checkpoint: "Checkpoint", name: Optional[str], ge_cloud_id: Optional[str]
+        self, checkpoint: "Checkpoint", name: Optional[str], ge_cloud_id: Optional[str], ge_cloud_mode: bool = False
     ) -> None:
         key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=ge_cloud_id
+            name=name, ge_cloud_id=ge_cloud_id, ge_cloud_mode=ge_cloud_mode
         )
         checkpoint_config: CheckpointConfig = checkpoint.get_config()
         checkpoint_ref = self.set(key=key, value=checkpoint_config)

@@ -3181,7 +3181,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
 
-        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
+        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id, ge_cloud_mode=self.ge_cloud_mode)
         return checkpoint
 
     def get_checkpoint(

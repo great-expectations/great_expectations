@@ -153,15 +153,15 @@ class ConfigurationStore(Store):
 
     @staticmethod
     def determine_key(
-        name: Optional[str], ge_cloud_id: Optional[str]
+        name: Optional[str], ge_cloud_id: Optional[str], ge_cloud_mode: bool = False
     ) -> Union[GeCloudIdentifier, ConfigurationIdentifier]:
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id."
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        if ge_cloud_id or ge_cloud_mode:
+            key = GeCloudIdentifier(resource_type="checkpoint", ge_cloud_id=ge_cloud_id)
         else:
             key = ConfigurationIdentifier(configuration_key=name)
 
