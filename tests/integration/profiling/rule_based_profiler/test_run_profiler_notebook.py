@@ -540,6 +540,8 @@ def test_with_batch_spec_passthrough_and_schema_data_assistant_pandas(
 def test_spark_with_batch_spec_passthrough_and_schema_data_assistant_spark(
     spark_session, spark_df_taxi_data_schema, empty_data_context
 ):
+    from great_expectations.expectations.metrics.import_manager import F
+
     data_context = empty_data_context
     base_directory = file_relative_path(
         __file__,
@@ -605,12 +607,23 @@ def test_spark_with_batch_spec_passthrough_and_schema_data_assistant_spark(
     )
 
     batch_list = data_context.get_batch_list(batch_request=batch_request)
+    # batch_list[0].data.dataframe.show(truncate=False)
+    # my_df_0 = batch_list[0].data.dataframe
+    # my_df_1 = my_df_0.select(F.col("store_and_fwd_flag"))
+    # my_df_2 = my_df_0.filter(F.col("store_and_fwd_flag").isNull())
+    # my_df_3 = my_df_0.filter(F.length(F.col("store_and_fwd_flag")) < 1)
+    #
+    # # check whether a column is null
+    # #my_df_1.show()
+    # my_df_3.show()
+
+    # do any metrics have an exception?
     multi_batch_batch_request = batch_request
     result = data_context.assistants.onboarding.run(
         batch_request=multi_batch_batch_request
     )
     #
-    new_suite = result.get_expectation_suite(expectation_suite_name="temp_suite")
+    # new_suite = result.get_expectation_suite(expectation_suite_name="temp_suite")
     # suite: ExpectationSuite = ExpectationSuite(
     #     expectation_suite_name="taxi_data_2019_suite"
     # )

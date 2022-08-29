@@ -135,14 +135,14 @@ class OnboardingDataAssistant(DataAssistant):
         categorical_columns_rule: Rule = self._build_categorical_columns_rule()
 
         return [
-            table_rule,
-            column_value_uniqueness_rule,
-            column_value_nullity_rule,
-            column_value_nonnullity_rule,
-            numeric_columns_rule,
-            datetime_columns_rule,
+            # table_rule,
+            # column_value_uniqueness_rule,
+            # column_value_nullity_rule,
+            # column_value_nonnullity_rule,
+            # numeric_columns_rule,
+            # datetime_columns_rule,
             text_columns_rule,
-            categorical_columns_rule,
+            # categorical_columns_rule,
         ]
 
     def _build_data_assistant_result(
@@ -776,12 +776,12 @@ class OnboardingDataAssistant(DataAssistant):
         )
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
+        column_max_length_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.get_column_max_length_metric_multi_batch_parameter_builder()
+        )
 
         column_min_length_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_min_length_metric_multi_batch_parameter_builder()
-        )
-        column_max_length_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_max_length_metric_multi_batch_parameter_builder()
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.

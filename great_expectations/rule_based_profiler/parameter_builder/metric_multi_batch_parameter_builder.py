@@ -136,7 +136,8 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         )
 
         limit: Optional[int] = 1 if single_batch_mode else None
-
+        # this is teh call
+        print("hello hello hello")
         metric_computation_result: MetricComputationResult = self.get_metrics(
             metric_name=self.metric_name,
             metric_domain_kwargs=self.metric_domain_kwargs,
