@@ -2331,9 +2331,10 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
                 "module_name": "great_expectations.datasource.data_connector",
                 "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
                 "base_directory": "../data",
+                "name": "data_dir_example_data_connector",
             }
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)
@@ -2684,14 +2685,16 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "default_inferred_data_connector_name": {
                 "class_name": "InferredAssetSqlDataConnector",
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_inferred_data_connector_name",
             },
             "default_runtime_data_connector_name": {
                 "class_name": "RuntimeDataConnector",
                 "batch_identifiers": ["default_identifier_name"],
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_runtime_data_connector_name",
             },
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert datasource_from_yaml.config == {
@@ -2711,14 +2714,16 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "default_inferred_data_connector_name": {
                 "class_name": "InferredAssetSqlDataConnector",
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_inferred_data_connector_name",
             },
             "default_runtime_data_connector_name": {
                 "class_name": "RuntimeDataConnector",
                 "batch_identifiers": ["default_identifier_name"],
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_runtime_data_connector_name",
             },
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
 
@@ -2866,9 +2871,10 @@ def test_add_datasource_from_yaml_with_substitution_variables(
                 "module_name": "great_expectations.datasource.data_connector",
                 "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
                 "base_directory": "../data",
+                "name": "data_dir_example_data_connector",
             }
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)
