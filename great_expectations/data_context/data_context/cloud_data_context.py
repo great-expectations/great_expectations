@@ -276,20 +276,12 @@ class CloudDataContext(AbstractDataContext):
         """
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+            ge_cloud_id=expectation_suite.ge_cloud_id,
+            resource_name=expectation_suite.expectation_suite_name,
         )
-        ge_cloud_id = expectation_suite.ge_cloud_id
-        if ge_cloud_id:
-            key.ge_cloud_id = ge_cloud_id
 
-        if (
-            ge_cloud_id
-            and self.expectations_store.has_key(key)  # noqa: W601
-            and not overwrite_existing
-        ):
-            raise ge_exceptions.DataContextError(
-                f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. "
-                f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
-            )
+        if not overwrite_existing:
+            self._validate_suite_unique_constaints_before_save(key)
 
         self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = (
@@ -301,8 +293,28 @@ class CloudDataContext(AbstractDataContext):
             expectation_suite.render()
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)
-        if isinstance(response, GeCloudIdentifier):
+        if isinstance(response, GeCloudResourceRef):
             expectation_suite.ge_cloud_id = response.ge_cloud_id
+
+    def _validate_suite_unique_constaints_before_save(
+        self, key: GeCloudIdentifier
+    ) -> None:
+        ge_cloud_id = key.ge_cloud_id
+        suite_name = key.resource_name
+
+        if ge_cloud_id:
+            if self.expectations_store.has_key(key):  # noqa: W601
+                raise ge_exceptions.DataContextError(
+                    f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. "
+                    f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
+                )
+        else:
+            existing_suite_names = self.list_expectation_suite_names()
+            if suite_name in existing_suite_names:
+                raise ge_exceptions.DataContextError(
+                    f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "
+                    "expectation_suite, set overwrite_existing=True."
+                )
 
     @property
     def root_directory(self) -> Optional[str]:

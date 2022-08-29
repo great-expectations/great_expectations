@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -357,21 +358,92 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 @pytest.mark.cloud
 def test_save_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
+    mocked_post_response: Callable[[], MockResponse],
 ) -> None:
-    pass
+    context = empty_base_data_context_in_cloud_mode
+
+    suite_name = "my_suite"
+    suite_id = None
+    suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
+
+    assert suite.ge_cloud_id is None
+
+    with mock.patch("requests.post", autospec=True, side_effect=mocked_post_response):
+        context.save_expectation_suite(suite)
+
+    assert suite.ge_cloud_id is not None
 
 
 @pytest.mark.unit
 @pytest.mark.cloud
 def test_save_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
+    suite_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
 ) -> None:
-    pass
+    context = empty_base_data_context_in_cloud_mode
+
+    suite_name, suite_id = suite_names_and_ids[0]
+    suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
+
+    with mock.patch(
+        "requests.put", autospec=True, return_value=mock.Mock(status_code=405)
+    ) as mock_put, mock.patch("requests.patch", autospec=True) as mock_patch:
+        context.save_expectation_suite(suite)
+
+    mock_put.assert_called_once()
+    mock_patch.assert_called_once()
 
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_save_expectation_suite_namespace_collision_raises_error(
+def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
 ) -> None:
-    pass
+    context = empty_base_data_context_in_cloud_mode
+
+    suite_name = "my_suite"
+    suite_id = None
+    suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
+
+    existing_suite_names = [suite_name]
+
+    with mock.patch(
+        "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.list_expectation_suite_names",
+        return_value=existing_suite_names,
+    ), pytest.raises(DataContextError) as e:
+        context.save_expectation_suite(
+            expectation_suite=suite, overwrite_existing=False
+        )
+
+    assert f"expectation_suite '{suite_name}' already exists" in str(e.value)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
+    empty_base_data_context_in_cloud_mode: BaseDataContext,
+) -> None:
+    context = empty_base_data_context_in_cloud_mode
+
+    suite_name = "my_suite"
+    suite_id = "abc123"
+    suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
+
+    with mock.patch(
+        "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
+        return_value=True,
+    ) as mock_has_key, pytest.raises(DataContextError) as e:
+        context.save_expectation_suite(
+            expectation_suite=suite, overwrite_existing=False
+        )
+
+    mock_has_key.assert_called_once_with(
+        GeCloudIdentifier(
+            GeCloudRESTResource.EXPECTATION_SUITE,
+            ge_cloud_id=suite_id,
+            resource_name=suite_name,
+        )
+    )
+    assert f"expectation_suite with GE Cloud ID {suite_id} already exists" in str(
+        e.value
+    )
