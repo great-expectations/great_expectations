@@ -637,34 +637,6 @@ def datasource_config() -> DatasourceConfig:
 
 
 @pytest.fixture
-def datasource_config_with_names() -> DatasourceConfig:
-    return DatasourceConfig(
-        name="my_datasource",
-        class_name="Datasource",
-        execution_engine={
-            "class_name": "PandasExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        data_connectors={
-            "tripdata_monthly_configured": {
-                "name": "tripdata_monthly_configured",
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector",
-                "base_directory": "/path/to/trip_data",
-                "assets": {
-                    "yellow": {
-                        "class_name": "Asset",
-                        "module_name": "great_expectations.datasource.data_connector.asset",
-                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
-                        "group_names": ["year", "month"],
-                    }
-                },
-            }
-        },
-    )
-
-
-@pytest.fixture
 def shared_called_with_request_kwargs(request_headers) -> dict:
     """
     Standard request kwargs that all GeCloudStoreBackend http calls are made with.

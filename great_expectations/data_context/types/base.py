@@ -375,6 +375,7 @@ class DataConnectorConfig(AbstractConfig):
     def __init__(  # noqa: C901 - 20
         self,
         class_name,
+        name: Optional[str] = None,
         id: Optional[str] = None,
         module_name=None,
         credentials=None,
@@ -451,7 +452,7 @@ class DataConnectorConfig(AbstractConfig):
         if delimiter is not None:
             self.delimiter = delimiter
 
-        super().__init__(id=id)
+        super().__init__(id=id, name=name)
 
         # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
@@ -481,6 +482,11 @@ class DataConnectorConfig(AbstractConfig):
 class DataConnectorConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
+
+    name = fields.String(
+        required=False,
+        allow_none=True,
+    )
 
     id = fields.String(
         required=False,
@@ -1047,6 +1053,11 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
+        # Add names to data connectors
+        for data_connector_name, data_connector_config in data.get(
+            "data_connectors", {}
+        ).items():
+            data_connector_config["name"] = data_connector_name
         return DatasourceConfig(**data)
 
 
