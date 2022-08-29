@@ -23,6 +23,7 @@ import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 from IPython.display import HTML, display
+from packaging import version
 
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as ge_exceptions
@@ -2335,14 +2336,15 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        if expectation_type is None:
-            input_dropdown_initial_state: pd.DataFrame = df.groupby(
-                [batch_plot_component.name], as_index=False
-            ).max()
-            input_dropdown_initial_state[
-                batch_plot_component.batch_identifiers + [domain_plot_component.name]
-            ] = " "
-            df = pd.concat([input_dropdown_initial_state, df], axis=0)
+        input_dropdown_initial_state: pd.DataFrame = (
+            DataAssistantResult._determine_input_dropdown_initial_state(
+                df=df, batch_plot_component=batch_plot_component
+            )
+        )
+        input_dropdown_initial_state[
+            batch_plot_component.batch_identifiers + [domain_plot_component.name]
+        ] = " "
+        df = pd.concat([input_dropdown_initial_state, df], axis=0)
 
         columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
@@ -2425,14 +2427,15 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        if expectation_type is None:
-            input_dropdown_initial_state: pd.DataFrame = df.groupby(
-                [batch_plot_component.name], as_index=False
-            ).max()
-            input_dropdown_initial_state[
-                batch_plot_component.batch_identifiers + [domain_plot_component.name]
-            ] = " "
-            df = pd.concat([input_dropdown_initial_state, df], axis=0)
+        input_dropdown_initial_state: pd.DataFrame = (
+            DataAssistantResult._determine_input_dropdown_initial_state(
+                df=df, batch_plot_component=batch_plot_component
+            )
+        )
+        input_dropdown_initial_state[
+            batch_plot_component.batch_identifiers + [domain_plot_component.name]
+        ] = " "
+        df = pd.concat([input_dropdown_initial_state, df], axis=0)
 
         columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
@@ -2492,14 +2495,15 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        if expectation_type is None:
-            input_dropdown_initial_state: pd.DataFrame = df.groupby(
-                [batch_plot_component.name], as_index=False
-            ).max()
-            input_dropdown_initial_state[
-                batch_plot_component.batch_identifiers + [domain_plot_component.name]
-            ] = " "
-            df = pd.concat([input_dropdown_initial_state, df], axis=0)
+        input_dropdown_initial_state: pd.DataFrame = (
+            DataAssistantResult._determine_input_dropdown_initial_state(
+                df=df, batch_plot_component=batch_plot_component
+            )
+        )
+        input_dropdown_initial_state[
+            batch_plot_component.batch_identifiers + [domain_plot_component.name]
+        ] = " "
+        df = pd.concat([input_dropdown_initial_state, df], axis=0)
 
         columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
@@ -2598,9 +2602,11 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = df.groupby(
-            [batch_plot_component.name], as_index=False
-        ).max()
+        input_dropdown_initial_state: pd.DataFrame = (
+            DataAssistantResult._determine_input_dropdown_initial_state(
+                df=df, batch_plot_component=batch_plot_component
+            )
+        )
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers
             + [
@@ -2761,9 +2767,11 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = df.groupby(
-            [batch_plot_component.name], as_index=False
-        ).max()
+        input_dropdown_initial_state: pd.DataFrame = (
+            DataAssistantResult._determine_input_dropdown_initial_state(
+                df=df, batch_plot_component=batch_plot_component
+            )
+        )
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers
             + [
@@ -2911,9 +2919,11 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = df.groupby(
-            [batch_plot_component.name], as_index=False
-        ).max()
+        input_dropdown_initial_state: pd.DataFrame = (
+            DataAssistantResult._determine_input_dropdown_initial_state(
+                df=df, batch_plot_component=batch_plot_component
+            )
+        )
         input_dropdown_initial_state[
             batch_plot_component.batch_identifiers
             + [
@@ -3970,6 +3980,13 @@ class DataAssistantResult(SerializableDictDot):
         metric_names: Set[str], iterable: Iterable[str]
     ) -> bool:
         return all([metric_name in iterable for metric_name in metric_names])
+
+    @staticmethod
+    def _determine_input_dropdown_initial_state(
+        df: pd.DataFrame, batch_plot_component: BatchPlotComponent
+    ) -> pd.DataFrame:
+        test = df.groupby([batch_plot_component.name], as_index=False).max()
+        return test
 
     @staticmethod
     def _get_expect_domain_values_ordinal_chart(
