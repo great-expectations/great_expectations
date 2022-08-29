@@ -38,7 +38,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         }
 
         # Remove the id_ key for SimpleSqlalchemyDatasource
-        kwargs.pop("id_", None)
+        kwargs.pop("id", None)
 
         self._execution_engine_config.update(**kwargs)
 
