@@ -38,7 +38,7 @@ def profiler_with_id(profiler_id: str, profiler_rules: dict) -> RuleBasedProfile
     return RuleBasedProfiler(
         "my_profiler",
         config_version=1.0,
-        id_=profiler_id,
+        id=profiler_id,
         rules=profiler_rules,
     )
 

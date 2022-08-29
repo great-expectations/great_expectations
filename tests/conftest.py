@@ -38,6 +38,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
+    DatasourceConfig,
     GeCloudConfig,
     InMemoryStoreBackendDefaults,
 )
@@ -7191,4 +7192,32 @@ def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builde
     )
     logger.info(
         "Set the random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
+    )
+
+
+@pytest.fixture
+def datasource_config_with_names() -> DatasourceConfig:
+    return DatasourceConfig(
+        name="my_datasource",
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        data_connectors={
+            "tripdata_monthly_configured": {
+                "name": "tripdata_monthly_configured",
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "base_directory": "/path/to/trip_data",
+                "assets": {
+                    "yellow": {
+                        "class_name": "Asset",
+                        "module_name": "great_expectations.datasource.data_connector.asset",
+                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                        "group_names": ["year", "month"],
+                    }
+                },
+            }
+        },
     )
