@@ -480,7 +480,6 @@ class TupleS3StoreBackend(TupleStoreBackend):
             prefix = prefix.strip("/")
         self.prefix = prefix
         self.role_arn = role_arn
-        self.role_assumed = False
         if boto3_options is None:
             boto3_options = {}
         self._boto3_options = boto3_options
