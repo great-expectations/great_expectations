@@ -60,8 +60,8 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
         #    )
         # but we shouldn't even be here
         #
-        print(f"metric_values_converted amin: {metric_values_converted}")
-        print(f"metric_values_converted amax: {metric_values_converted}")
+        # print(f"metric_values_converted amin: {metric_values_converted}")
+        # print(f"metric_values_converted amax: {metric_values_converted}")
         min_value: MetricValue = np.amin(a=metric_values_converted)
         max_value: MetricValue = np.amax(a=metric_values_converted)
 
