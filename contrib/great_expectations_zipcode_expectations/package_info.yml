@@ -13,7 +13,7 @@
 # in our official docs.
 
 general:
-  package_name: great_expectations_zipcode_expectations
+  package_name: Great Expectations Zipcode Expectations
   icon: ~ # May be a relative path to `assets/` or a URL
   description: A collection of Expectations to validate zipcode data with Great Expectations.
 

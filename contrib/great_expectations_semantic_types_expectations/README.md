@@ -17,4 +17,4 @@ This package contains a number of Expectations to support validation of Semantic
 
 Author: [Great Expectations](https://github.com/great_expectations/great_expectations)
 
-[PyPi Link](https://pypi/python.org/pypi/great_expectations_semantic_types_expectations)
+[PyPi Link](https://python.org/pypi/great_expectations_semantic_types_expectations)

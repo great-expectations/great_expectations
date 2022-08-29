@@ -15,4 +15,4 @@ This package contains a number of Expectations to support validation of Geospati
 
 Author: [Great Expectations](https://github.com/great_expectations/great_expectations)
 
-[PyPi Link](https://pypi/python.org/pypi/great_expectations_geospatial_expectations)
+[PyPi Link](https://python.org/pypi/great_expectations_geospatial_expectations)

@@ -14,4 +14,4 @@ Great Expectations facilitates ethical AI by making it faster and easier to turn
 
 Author: [Great Expectations](https://github.com/great_expectations/great_expectations)
 
-[PyPi Link](https://pypi/python.org/pypi/great_expectations_ethical_ai_expectations)
+[PyPi Link](https://python.org/pypi/great_expectations_ethical_ai_expectations)
