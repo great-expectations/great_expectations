@@ -189,8 +189,6 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
             parameters=parameters,
         )
 
-        is_categorical: bool = not bucketize_data
-
         fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
         # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
