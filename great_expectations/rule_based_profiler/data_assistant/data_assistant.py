@@ -681,6 +681,7 @@ configuration included.
 
 
 def build_map_metric_rule(
+    data_assistant_class_name: str,
     rule_name: str,
     expectation_type: str,
     map_metric_name: str,
@@ -759,7 +760,7 @@ def build_map_metric_rule(
         )
     else:
         raise ValueError(
-            f"""Metric "{map_metric_name}" is not supported as part of "{self.__class__.__name__}" implementation."""
+            f"""Metric "{map_metric_name}" is not supported as part of "{data_assistant_class_name}" implementation."""
         )
 
     # Step-3: Set up "MeanUnexpectedMapMetricMultiBatchParameterBuilder" to compute "condition" for emitting "ExpectationConfiguration" (based on "Domain" data).

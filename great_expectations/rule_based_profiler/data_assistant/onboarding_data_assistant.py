@@ -76,6 +76,7 @@ class OnboardingDataAssistant(DataAssistant):
         )
 
         column_value_uniqueness_rule: Rule = build_map_metric_rule(
+            data_assistant_class_name=self.__class__.__name__,
             rule_name="column_value_uniqueness_rule",
             expectation_type="expect_column_values_to_be_unique",
             map_metric_name="column_values.unique",
@@ -93,6 +94,7 @@ class OnboardingDataAssistant(DataAssistant):
             min_max_unexpected_values_proportion=9.75e-1,
         )
         column_value_nullity_rule: Rule = build_map_metric_rule(
+            data_assistant_class_name=self.__class__.__name__,
             rule_name="column_value_nullity_rule",
             expectation_type="expect_column_values_to_be_null",
             map_metric_name="column_values.null",
@@ -110,6 +112,7 @@ class OnboardingDataAssistant(DataAssistant):
             min_max_unexpected_values_proportion=9.75e-1,
         )
         column_value_nonnullity_rule: Rule = build_map_metric_rule(
+            data_assistant_class_name=self.__class__.__name__,
             rule_name="column_value_nonnullity_rule",
             expectation_type="expect_column_values_to_not_be_null",
             map_metric_name="column_values.nonnull",
