@@ -221,7 +221,8 @@ def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5):
         "pytest",
         f"--durations={slowest}",
         "--cov=great_expectations",
-        "--cov-report term:skip-covered",  # modules with 100% will not be shown
+        "--cov-report term:skip-covered",  # modules with 100% will not be shown'
+        "--cov-config=pyproject.toml",
         "-vv",
     ]
     if unit:

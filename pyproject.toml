@@ -112,3 +112,9 @@ testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`
 # https://pytest-mock.readthedocs.io/en/latest/configuration.html#use-standalone-mock-package
 mock_use_standalone_module = true
+
+[tool.coverage]
+[tool.coverage.run]
+omit = [
+    "great_expectations/marshmallow__shade",
+    ]
