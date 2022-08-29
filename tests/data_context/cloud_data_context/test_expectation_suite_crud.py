@@ -1,4 +1,5 @@
-from typing import Callable, Tuple
+from collections import namedtuple
+from typing import Any, Callable, cast
 from unittest import mock
 
 import pytest
@@ -15,43 +16,28 @@ from great_expectations.data_context.types.resource_identifiers import GeCloudId
 from great_expectations.exceptions.exceptions import DataContextError
 from tests.data_context.conftest import MockResponse
 
-
-@pytest.fixture
-def suite_id_1() -> str:
-    return "9db8721d-52e3-4263-90b3-ddb83a7aca04"
+SuiteIdentifierTuple = namedtuple("SuiteIdentifierTuple", ["id", "name"])
 
 
 @pytest.fixture
-def suite_name_1() -> str:
-    return "Test Suite 1"
+def suite_1() -> SuiteIdentifierTuple:
+    id = "9db8721d-52e3-4263-90b3-ddb83a7aca04"
+    name = "Test Suite 1"
+    return SuiteIdentifierTuple(id=id, name=name)
 
 
 @pytest.fixture
-def suite_id_2() -> str:
-    return "88972771-1774-4e7c-b76a-0c30063bea55"
-
-
-@pytest.fixture
-def suite_name_2() -> str:
-    return "Test Suite 2"
-
-
-@pytest.fixture
-def suite_names_and_ids(
-    suite_id_1: str, suite_id_2: str, suite_name_1: str, suite_name_2: str
-) -> Tuple[Tuple[str, str], Tuple[str, str]]:
-    suite_1 = (suite_name_1, suite_id_1)
-    suite_2 = (suite_name_2, suite_id_2)
-    return suite_1, suite_2
+def suite_2() -> SuiteIdentifierTuple:
+    id = "88972771-1774-4e7c-b76a-0c30063bea55"
+    name = "Test Suite 2"
+    return SuiteIdentifierTuple(id=id, name=name)
 
 
 @pytest.fixture
 def mock_get_all_suites_json(
-    suite_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]]
+    suite_1: SuiteIdentifierTuple,
+    suite_2: SuiteIdentifierTuple,
 ) -> dict:
-    suite_1, suite_2 = suite_names_and_ids
-    suite_name_1, suite_id_1 = suite_1
-    suite_name_2, suite_id_2 = suite_2
     mock_json = {
         "data": [
             {
@@ -65,7 +51,7 @@ def mock_get_all_suites_json(
                     "rendered_data_doc_id": None,
                     "suite": {
                         "data_asset_type": None,
-                        "expectation_suite_name": suite_name_1,
+                        "expectation_suite_name": suite_1.name,
                         "expectations": [
                             {
                                 "expectation_type": "expect_column_to_exist",
@@ -74,12 +60,12 @@ def mock_get_all_suites_json(
                                 "meta": {},
                             },
                         ],
-                        "ge_cloud_id": suite_id_1,
+                        "ge_cloud_id": suite_1.id,
                         "meta": {"great_expectations_version": "0.15.19"},
                     },
                     "updated_at": "2022-08-18T18:34:17.561984",
                 },
-                "id": suite_id_1,
+                "id": suite_1.id,
                 "type": "expectation_suite",
             },
             {
@@ -93,7 +79,7 @@ def mock_get_all_suites_json(
                     "rendered_data_doc_id": None,
                     "suite": {
                         "data_asset_type": None,
-                        "expectation_suite_name": suite_name_2,
+                        "expectation_suite_name": suite_2.name,
                         "expectations": [
                             {
                                 "expectation_type": "expect_column_to_exist",
@@ -102,12 +88,12 @@ def mock_get_all_suites_json(
                                 "meta": {},
                             },
                         ],
-                        "ge_cloud_id": suite_id_2,
+                        "ge_cloud_id": suite_2.id,
                         "meta": {"great_expectations_version": "0.15.19"},
                     },
                     "updated_at": "2022-08-18T18:34:17.561984",
                 },
-                "id": suite_id_2,
+                "id": suite_2.id,
                 "type": "expectation_suite",
             },
         ]
@@ -118,9 +104,9 @@ def mock_get_all_suites_json(
 @pytest.fixture
 def mocked_post_response(
     mock_response_factory: Callable,
-    suite_id_1: str,
+    suite_1: SuiteIdentifierTuple,
 ) -> Callable[[], MockResponse]:
-    suite_id = suite_id_1
+    suite_id = suite_1.id
 
     def _mocked_post_response(*args, **kwargs):
         return mock_response_factory(
@@ -138,9 +124,9 @@ def mocked_post_response(
 @pytest.fixture
 def mocked_get_response(
     mock_response_factory: Callable,
-    suite_id_1: str,
+    suite_1: SuiteIdentifierTuple,
 ) -> Callable[[], MockResponse]:
-    suite_id = suite_id_1
+    suite_id = suite_1.id
 
     def _mocked_get_response(*args, **kwargs):
         return mock_response_factory(
@@ -182,7 +168,8 @@ def mocked_get_response(
 def test_list_expectation_suites(
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GeCloudConfig,
-    suite_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
+    suite_1: SuiteIdentifierTuple,
+    suite_2: SuiteIdentifierTuple,
     mock_get_all_suites_json: dict,
 ) -> None:
     project_path_name = "foo/bar/baz"
@@ -194,10 +181,6 @@ def test_list_expectation_suites(
         ge_cloud_mode=True,
     )
 
-    suite_1, suite_2 = suite_names_and_ids
-    suite_name_1, suite_id_1 = suite_1
-    suite_name_2, suite_id_2 = suite_2
-
     with mock.patch("requests.get", autospec=True) as mock_get:
         mock_get.return_value = mock.Mock(
             status_code=200, json=lambda: mock_get_all_suites_json
@@ -207,13 +190,13 @@ def test_list_expectation_suites(
     assert suites == [
         GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=suite_id_1,
-            resource_name=suite_name_1,
+            ge_cloud_id=suite_1.id,
+            resource_name=suite_1.name,
         ),
         GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=suite_id_2,
-            resource_name=suite_name_2,
+            ge_cloud_id=suite_2.id,
+            resource_name=suite_2.name,
         ),
     ]
 
@@ -280,10 +263,10 @@ def test_create_expectation_suite_namespace_collision_raises_error(
 @pytest.mark.cloud
 def test_delete_expectation_suite_deletes_suite_in_cloud(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
-    suite_id_1: str,
+    suite_1: SuiteIdentifierTuple,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
-    suite_id = suite_id_1
+    suite_id = suite_1.id
 
     with mock.patch(
         "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
@@ -307,10 +290,10 @@ def test_delete_expectation_suite_deletes_suite_in_cloud(
 @pytest.mark.cloud
 def test_delete_expectation_suite_nonexistent_suite_raises_error(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
-    suite_id_1: str,
+    suite_1: SuiteIdentifierTuple,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
-    suite_id = suite_id_1
+    suite_id = suite_1.id
 
     with mock.patch(
         "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
@@ -328,11 +311,11 @@ def test_delete_expectation_suite_nonexistent_suite_raises_error(
 @pytest.mark.cloud
 def test_get_expectation_suite_retrieves_suite_from_cloud(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
-    suite_id_1: str,
+    suite_1: SuiteIdentifierTuple,
     mocked_get_response: Callable[[], MockResponse],
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
-    suite_id = suite_id_1
+    suite_id = suite_1.id
 
     with mock.patch(
         "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
@@ -393,12 +376,11 @@ def test_save_expectation_suite_saves_suite_to_cloud(
 @pytest.mark.cloud
 def test_save_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
-    suite_name_1: str,
-    suite_id_1: str,
+    suite_1: SuiteIdentifierTuple,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
-    suite_name = suite_name_1
-    suite_id = suite_id_1
+    suite_name = suite_1.name
+    suite_id = suite_1.id
 
     suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
 
@@ -452,12 +434,12 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 @pytest.mark.cloud
 def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
-    suite_id_1: str,
+    suite_1: SuiteIdentifierTuple,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
     suite_name = "my_suite"
-    suite_id = suite_id_1
+    suite_id = suite_1.id
     suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
 
     with mock.patch(
