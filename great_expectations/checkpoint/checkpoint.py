@@ -37,7 +37,10 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    CheckpointValidationConfig,
+)
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
@@ -484,7 +487,7 @@ is run), with each validation having its own defined "action_list" attribute.
             return []
 
     @property
-    def validations(self) -> List[Dict]:
+    def validations(self) -> List[CheckpointValidationConfig]:
         try:
             return self.config.validations
         except AttributeError:
