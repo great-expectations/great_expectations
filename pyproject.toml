@@ -61,7 +61,6 @@ exclude = [
     'execution_engine/sqlalchemy_execution_engine\.py',  # 8
     'execution_engine/sqlalchemy_batch_data\.py',  # 1
     'execution_engine/execution_engine\.py',  # 7
-    'marshmallow__shade', # 19
     'render/renderer', # 78
     'render/view',  # 11
     'render/types',  # 4
