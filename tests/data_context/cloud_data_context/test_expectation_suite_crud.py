@@ -17,12 +17,29 @@ from tests.data_context.conftest import MockResponse
 
 
 @pytest.fixture
-def suite_names_and_ids() -> Tuple[Tuple[str, str], Tuple[str, str]]:
-    suite_name_1 = "Test Suite 1"
-    suite_id_1 = "9db8721d-52e3-4263-90b3-ddb83a7aca04"
-    suite_name_2 = "Test Suite 2"
-    suite_id_2 = "88972771-1774-4e7c-b76a-0c30063bea55"
+def suite_id_1() -> str:
+    return "9db8721d-52e3-4263-90b3-ddb83a7aca04"
 
+
+@pytest.fixture
+def suite_name_1() -> str:
+    return "Test Suite 1"
+
+
+@pytest.fixture
+def suite_id_2() -> str:
+    return "88972771-1774-4e7c-b76a-0c30063bea55"
+
+
+@pytest.fixture
+def suite_name_2() -> str:
+    return "Test Suite 2"
+
+
+@pytest.fixture
+def suite_names_and_ids(
+    suite_id_1: str, suite_id_2: str, suite_name_1: str, suite_name_2: str
+) -> Tuple[Tuple[str, str], Tuple[str, str]]:
     suite_1 = (suite_name_1, suite_id_1)
     suite_2 = (suite_name_2, suite_id_2)
     return suite_1, suite_2
@@ -101,9 +118,9 @@ def mock_get_all_suites_json(
 @pytest.fixture
 def mocked_post_response(
     mock_response_factory: Callable,
-    suite_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
+    suite_id_1: str,
 ) -> Callable[[], MockResponse]:
-    suite_id = suite_names_and_ids[0][1]
+    suite_id = suite_id_1
 
     def _mocked_post_response(*args, **kwargs):
         return mock_response_factory(
@@ -121,9 +138,9 @@ def mocked_post_response(
 @pytest.fixture
 def mocked_get_response(
     mock_response_factory: Callable,
-    suite_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
+    suite_id_1: str,
 ) -> Callable[[], MockResponse]:
-    suite_id = suite_names_and_ids[0][1]
+    suite_id = suite_id_1
 
     def _mocked_get_response(*args, **kwargs):
         return mock_response_factory(
@@ -263,11 +280,10 @@ def test_create_expectation_suite_namespace_collision_raises_error(
 @pytest.mark.cloud
 def test_delete_expectation_suite_deletes_suite_in_cloud(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
-    suite_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
+    suite_id_1: str,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
-
-    suite_id = suite_names_and_ids[0][1]
+    suite_id = suite_id_1
 
     with mock.patch(
         "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
@@ -291,10 +307,10 @@ def test_delete_expectation_suite_deletes_suite_in_cloud(
 @pytest.mark.cloud
 def test_delete_expectation_suite_nonexistent_suite_raises_error(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
+    suite_id_1: str,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
-
-    suite_id = "abc123"
+    suite_id = suite_id_1
 
     with mock.patch(
         "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
@@ -312,12 +328,11 @@ def test_delete_expectation_suite_nonexistent_suite_raises_error(
 @pytest.mark.cloud
 def test_get_expectation_suite_retrieves_suite_from_cloud(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
-    suite_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
+    suite_id_1: str,
     mocked_get_response: Callable[[], MockResponse],
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
-
-    suite_id = suite_names_and_ids[0][1]
+    suite_id = suite_id_1
 
     with mock.patch(
         "great_expectations.data_context.store.expectations_store.ExpectationsStore.has_key",
@@ -378,11 +393,13 @@ def test_save_expectation_suite_saves_suite_to_cloud(
 @pytest.mark.cloud
 def test_save_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
-    suite_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
+    suite_name_1: str,
+    suite_id_1: str,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
+    suite_name = suite_name_1
+    suite_id = suite_id_1
 
-    suite_name, suite_id = suite_names_and_ids[0]
     suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
 
     with mock.patch(
@@ -435,11 +452,12 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 @pytest.mark.cloud
 def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
+    suite_id_1: str,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
     suite_name = "my_suite"
-    suite_id = "abc123"
+    suite_id = suite_id_1
     suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
 
     with mock.patch(

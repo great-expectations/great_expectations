@@ -531,7 +531,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return key
 
         key = _shorten_key(key)
-        all_keys = set(map(lambda key: _shorten_key(key), self.list_keys()))
+        all_keys = set(map(_shorten_key, self.list_keys()))
         return key in all_keys
 
     @property
