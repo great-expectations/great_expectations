@@ -416,15 +416,7 @@ class Validator:
                 else:
                     raise err
 
-            include_rendered_content: bool
-            if self._include_rendered_content is None:
-                include_rendered_content = (
-                    self._determine_if_expectation_validation_result_include_rendered_content()
-                )
-            else:
-                include_rendered_content = self._include_rendered_content
-
-            if include_rendered_content:
+            if self._include_rendered_content:
                 validation_result.render()
                 validation_result.expectation_config.render()
 
@@ -2009,15 +2001,7 @@ set as active.
                 runtime_configuration=runtime_configuration,
             )
 
-            include_rendered_content: bool
-            if self._include_rendered_content is None:
-                include_rendered_content = (
-                    self._determine_if_expectation_validation_result_include_rendered_content()
-                )
-            else:
-                include_rendered_content = self._include_rendered_content
-
-            if include_rendered_content:
+            if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
                     validation_result.expectation_config.render()
