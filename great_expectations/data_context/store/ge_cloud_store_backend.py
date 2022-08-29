@@ -484,7 +484,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         data = {
             "data": {
                 "type": self.ge_cloud_resource_type,
-                "id_": ge_cloud_id,
+                "id": ge_cloud_id,
                 "attributes": {
                     "deleted": True,
                 },
@@ -534,12 +534,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def build_key(
         self,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         name: Optional[str] = None,
     ) -> GeCloudIdentifier:
         """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
         return GeCloudIdentifier(
             resource_type=self.ge_cloud_resource_type,
-            ge_cloud_id=id_,
+            ge_cloud_id=id,
             resource_name=name,
         )

@@ -489,7 +489,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ) -> None:
@@ -501,7 +501,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         self.variables = variables
         self.rules = rules
 
-        AbstractConfig.__init__(self, id_=id_, name=name)
+        AbstractConfig.__init__(self, id=id, name=name)
         BaseYamlConfig.__init__(self, commented_map=commented_map)
 
     @classmethod
@@ -675,7 +675,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
         unknown = INCLUDE
         fields = (
             "name",
-            "id_",
+            "id",
             "config_version",
             "module_name",
             "class_name",
@@ -688,10 +688,9 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
         required=True,
         allow_none=False,
     )
-    id_ = fields.String(
+    id = fields.String(
         required=False,
-        allow_none=False,
-        data_key="id",
+        allow_none=True,
     )
     config_version = fields.Float(
         required=True,
