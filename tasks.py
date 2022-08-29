@@ -257,7 +257,7 @@ def tests(
     if html:
         cmds += ["--cov-report", "html"]
     if package:
-        cmds += [f"tests/{package}"]
+        cmds += [f"tests/{package.replace('.', '/')}"]  # allow `foo.bar`` format
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
