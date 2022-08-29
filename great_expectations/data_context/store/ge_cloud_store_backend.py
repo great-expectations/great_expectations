@@ -526,7 +526,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # we remove any resource names and assert against key ids.
 
         def _shorten_key(key) -> Tuple[str, str]:
-            if len(key) == 2:
+            if len(key) > 2:
                 key = key[:2]
             return key
 
