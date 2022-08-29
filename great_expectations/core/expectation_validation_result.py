@@ -12,6 +12,8 @@ except ImportError:
 
 from uuid import UUID
 
+from marshmallow import Schema, fields, post_dump, post_load, pre_dump
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import BatchDefinition, BatchMarkers
@@ -27,13 +29,6 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.marshmallow__shade import (
-    Schema,
-    fields,
-    post_dump,
-    post_load,
-    pre_dump,
-)
 from great_expectations.render.types import (
     RenderedAtomicContent,
     RenderedAtomicContentSchema,
