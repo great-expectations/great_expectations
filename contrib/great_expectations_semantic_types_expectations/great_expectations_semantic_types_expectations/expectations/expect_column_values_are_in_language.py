@@ -113,8 +113,6 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
                     "in": {"column": "mostly_english", "language": "en", "mostly": 0.6},
                     "out": {
                         "success": True,
-                        "unexpected_index_list": [3],
-                        "unexpected_list": [4, 5],
                     },
                 },
                 {
@@ -124,8 +122,6 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
                     "in": {"column": "mostly_spanish", "language": "en", "mostly": 0.6},
                     "out": {
                         "success": False,
-                        "unexpected_index_list": [0, 1, 2],
-                        "unexpected_list": [4, 5],
                     },
                 },
                 {
@@ -135,8 +131,6 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
                     "in": {"column": "mostly_spanish", "language": "es", "mostly": 0.6},
                     "out": {
                         "success": True,
-                        "unexpected_index_list": [3],
-                        "unexpected_list": [4, 5],
                     },
                 },
             ],

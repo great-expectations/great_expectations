@@ -84,7 +84,7 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
                     "Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36",
                     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
                     "Mozilla/5.0 (CrKey armv7l 1.5.16041) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.0 Safari/537.36"
-                    "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+                    "Mozilla/5.0 (compatible; Bingbot/2.0; +http://www.bing.com/bingbot.htm)",
                 ]
             },
             "tests": [
@@ -95,10 +95,6 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
                     "in": {"column": "user_agents", "mostly": 0.9},
                     "out": {
                         "success": True,
-                        "unexpected_index_list": [9],
-                        "unexpected_list": [
-                            "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
-                        ],
                     },
                 },
                 {
@@ -108,10 +104,6 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
                     "in": {"column": "user_agents", "mostly": 1.0},
                     "out": {
                         "success": False,
-                        "unexpected_index_list": [9],
-                        "unexpected_list": [
-                            "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
-                        ],
                     },
                 },
             ],

@@ -60,7 +60,26 @@ class ColumnValuesContainValidEmail(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
+    """Expects values in given column to be valid email addresses."""
+
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
+
+    def validate_configuration(self, configuration) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+
+        super().validate_configuration(configuration)
+        if configuration is None:
+            configuration = self.configuration
+
     examples = [
         {
             "data": {
@@ -79,7 +98,7 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
                     "great@expectations.email",
                 ],
                 "valid_emails": [
-                    "Janedoe@company.org",
+                    "janedoe@company.org",
                     "someone123@stuff.net",
                     "mycompany@mycompany.com",
                 ],
@@ -138,16 +157,10 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
                     "in": {"column": "fail_case_4"},
                     "out": {
                         "success": False,
-                        "unexpected_index_list": [0, 1, 2],
-                        "unexpected_list": [
-                            "aaaa@a123.e",
-                            "aaaa@a123.a",
-                            "aaaa@a123.d",
-                        ],
                     },
                 },
                 {
-                    "title": "pass_test",
+                    "title": "pass_test_1",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "pass_case_1"},
@@ -158,7 +171,7 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
                     },
                 },
                 {
-                    "title": "pass_test",
+                    "title": "pass_test_2",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "pass_case_2"},
@@ -175,8 +188,6 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
                     "in": {"column": "valid_emails"},
                     "out": {
                         "success": True,
-                        "unexpected_index_list": [],
-                        "unexpected_list": [],
                     },
                 },
                 {
