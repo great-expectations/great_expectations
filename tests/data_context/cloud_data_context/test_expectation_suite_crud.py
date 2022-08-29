@@ -1,5 +1,4 @@
-from collections import namedtuple
-from typing import Any, Callable, Generator, cast
+from typing import Callable, NamedTuple
 from unittest import mock
 
 import pytest
@@ -16,7 +15,10 @@ from great_expectations.data_context.types.resource_identifiers import GeCloudId
 from great_expectations.exceptions.exceptions import DataContextError
 from tests.data_context.conftest import MockResponse
 
-SuiteIdentifierTuple = namedtuple("SuiteIdentifierTuple", ["id", "name"])
+
+class SuiteIdentifierTuple(NamedTuple):
+    id: str
+    name: str
 
 
 @pytest.fixture
