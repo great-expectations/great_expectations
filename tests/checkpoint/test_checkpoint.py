@@ -5144,6 +5144,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
             assert isinstance(rendered_content, RenderedAtomicContent)
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_result_validations_include_rendered_content_data_context_variable(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
