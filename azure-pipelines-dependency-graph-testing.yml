@@ -260,7 +260,7 @@ stages:
             env:
               CIRCLECI: 1
               CIRCLE_BUILD_NUM: $(Build.BuildNumber)
-              COVERALLS_REPO_TOKEN: $(coveralls_repo_token)
+              COVERALLS_REPO_TOKEN: $(common_secrets.coveralls)
 
           - script: |
               # Install dependencies
