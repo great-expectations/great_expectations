@@ -217,7 +217,11 @@ def mv_usage_stats_json(ctx):
     },
 )
 def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5, package=None):
-    """Run tests. Runs unit tests by default."""
+    """
+    Run tests. Runs unit tests by default.
+
+    Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage.
+    """
     # TODO: update this to also run the full e2e/integration tests (but unit-tests should always be the default mode)
     cmds = [
         "pytest",
