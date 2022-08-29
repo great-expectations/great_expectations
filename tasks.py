@@ -212,9 +212,11 @@ def mv_usage_stats_json(ctx):
     help={
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
+        "html": "Create html coverage report",
+        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
     },
 )
-def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5):
+def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5, package=None):
     """Run tests. Runs unit tests by default."""
     # TODO: update this to also run the full e2e/integration tests (but unit-tests should always be the default mode)
     cmds = [
@@ -235,6 +237,8 @@ def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5):
         cmds += ["--cov-report", "xml"]
     if html:
         cmds += ["--cov-report", "html"]
+    if package:
+        cmds += [f"tests/{package}"]
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
