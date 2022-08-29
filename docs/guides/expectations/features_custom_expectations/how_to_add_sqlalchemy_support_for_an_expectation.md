@@ -149,7 +149,7 @@ and the Spark backend covered in our guide on [how to add Spark support for Cust
 you should see the following in your Diagnostic Checklist:
 
 ```console
-✔ Has core logic that passes tests for all applicable Execution Engines
+✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 ```
 
 <div style={{"text-align":"center"}}>
@@ -164,13 +164,13 @@ This guide will leave you with core functionality sufficient for [contribution](
 
 If you're interested in having your contribution accepted at a Beta level, your Custom Expectation will need to support SQLAlchemy, Spark, and Pandas.
 
-For full acceptance into the Great Expectations codebase at a Production level, we require that your Custom Expectation meets our code standards, including linting, test coverage, and style. 
+For full acceptance into the Great Expectations codebase at a Production level, we require that your Custom Expectation meets our code standards, test coverage and style. 
 If you believe your Custom Expectation is otherwise ready for contribution at a Production level, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls), and we will work with you to ensure your Custom Expectation meets these standards.
 
 :::note
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full scripts used in this page, see them on GitHub:
-- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
-- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
+- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
 :::

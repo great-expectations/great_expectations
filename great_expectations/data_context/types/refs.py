@@ -3,7 +3,7 @@ class GeCloudIdAwareRef:
     This class serves as a base class for refs tied to a Great Expectations Cloud ID.
     """
 
-    def __init__(self, ge_cloud_id: str):
+    def __init__(self, ge_cloud_id: str) -> None:
         self._ge_cloud_id = ge_cloud_id
 
     @property
@@ -16,7 +16,7 @@ class GeCloudResourceRef(GeCloudIdAwareRef):
     This class represents a reference to a Great Expectations object persisted to Great Expectations Cloud.
     """
 
-    def __init__(self, resource_type: str, ge_cloud_id: str, url: str):
+    def __init__(self, resource_type: str, ge_cloud_id: str, url: str) -> None:
         self._resource_type = resource_type
         self._url = url
         super().__init__(ge_cloud_id=ge_cloud_id)

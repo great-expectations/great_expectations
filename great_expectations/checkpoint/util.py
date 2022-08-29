@@ -206,9 +206,15 @@ def get_substituted_validation_dict(
             validation_dict.get("runtime_configuration", {}),
             dedup=True,
         ),
+        "include_rendered_content": validation_dict.get("include_rendered_content")
+        or substituted_runtime_config.get("include_rendered_content")
+        or False,
     }
-    if validation_dict.get("name") is not None:
-        substituted_validation_dict["name"] = validation_dict["name"]
+
+    for attr in ("name", "id"):
+        if validation_dict.get(attr) is not None:
+            substituted_validation_dict[attr] = validation_dict[attr]
+
     validate_validation_dict(substituted_validation_dict)
     return substituted_validation_dict
 
@@ -457,7 +463,7 @@ def get_validations_with_batch_request_as_dict(
     return validations
 
 
-def validate_validation_dict(validation_dict: dict):
+def validate_validation_dict(validation_dict: dict) -> None:
     if validation_dict.get("batch_request") is None:
         raise ge_exceptions.CheckpointError("validation batch_request cannot be None")
     if not validation_dict.get("expectation_suite_name"):

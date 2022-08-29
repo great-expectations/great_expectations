@@ -8,7 +8,7 @@ import sys
 import uuid
 from collections import OrderedDict
 from collections.abc import Mapping
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
 import dateutil.parser
@@ -24,10 +24,17 @@ from great_expectations.types.base import SerializableDotDict
 
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
-
+from great_expectations.util import convert_decimal_to_float
 
 logger = logging.getLogger(__name__)
 
+
+try:
+    from shapely.geometry import LineString, Point, Polygon
+except ImportError:
+    Point = None
+    Polygon = None
+    LineString = None
 
 try:
     import sqlalchemy
@@ -130,7 +137,26 @@ def in_databricks() -> bool:
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
-def convert_to_json_serializable(data):
+def determine_progress_bar_method_by_environment() -> Callable:
+    """
+    As tqdm has specific methods for progress bar creation and iteration,
+    we require a utility to determine which method to use.
+
+    If in a Jupyter notebook, we want to use `tqdm.notebook.tqdm`. Otherwise,
+    we default to the standard `tqdm.tqdm`. Please see the docs for more information: https://tqdm.github.io/
+
+    Returns:
+        The appropriate tqdm method for the environment in question.
+    """
+    from tqdm import tqdm
+    from tqdm.notebook import tqdm as tqdm_notebook
+
+    if in_jupyter_notebook():
+        return tqdm_notebook
+    return tqdm
+
+
+def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
     """
     Helper function to convert an object to one that is json serializable
     Args:
@@ -185,6 +211,10 @@ def convert_to_json_serializable(data):
         return data.isoformat()
 
     if isinstance(data, (uuid.UUID, bytes)):
+        return str(data)
+
+    # noinspection PyTypeChecker
+    if Polygon and isinstance(data, (Point, Polygon, LineString)):
         return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
@@ -243,11 +273,7 @@ def convert_to_json_serializable(data):
         return dict(data)
 
     if isinstance(data, decimal.Decimal):
-        if requires_lossy_conversion(data):
-            logger.warning(
-                f"Using lossy conversion for decimal {data} to float object to support serialization."
-            )
-        return float(data)
+        return convert_decimal_to_float(d=data)
 
     if isinstance(data, RunIdentifier):
         return data.to_json_dict()
@@ -258,7 +284,7 @@ def convert_to_json_serializable(data):
         )
 
 
-def ensure_json_serializable(data):
+def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     """
     Helper function to convert an object to one that is json serializable
     Args:
@@ -358,13 +384,8 @@ def ensure_json_serializable(data):
 
     else:
         raise InvalidExpectationConfigurationError(
-            "%s is of type %s which cannot be serialized to json"
-            % (str(data), type(data).__name__)
+            f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
         )
-
-
-def requires_lossy_conversion(d):
-    return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
 
 
 def substitute_all_strftime_format_strings(
@@ -458,7 +479,7 @@ class AzureUrl:
         "wasbs://{container}@{account_name}.blob.core.windows.net/{path}"
     )
 
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         search = re.search(
             AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url
         )
@@ -512,7 +533,7 @@ class GCSUrl:
 
     OBJECT_URL_TEMPLATE: str = "gs://{bucket_or_name}/{path}"
 
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         search = re.search(GCSUrl.URL_REGEX_PATTERN, url)
         assert (
             search is not None
@@ -557,7 +578,7 @@ class S3Url:
     's3://bucket/hello/world#foo?bar=2'
     """
 
-    def __init__(self, url):
+    def __init__(self, url) -> None:
         self._parsed = urlparse(url, allow_fragments=False)
 
     @property
@@ -648,9 +669,11 @@ def get_or_create_spark_application(
         spark_config = {}
     else:
         spark_config = copy.deepcopy(spark_config)
+
     name: Optional[str] = spark_config.get("spark.app.name")
     if not name:
         name = "default_great_expectations_spark_application"
+
     spark_config.update({"spark.app.name": name})
 
     spark_session: Optional[SparkSession] = get_or_create_spark_session(
@@ -677,7 +700,7 @@ def get_or_create_spark_application(
         spark_session = get_or_create_spark_session(spark_config=spark_config)
         if spark_session is None:
             raise ValueError("SparkContext could not be started.")
-        # noinspection PyProtectedMember
+        # noinspection PyProtectedMember,PyUnresolvedReferences
         sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
 
     if sc_stopped:
@@ -716,13 +739,16 @@ def get_or_create_spark_session(
         app_name: Optional[str] = spark_config.get("spark.app.name")
         if app_name:
             builder.appName(app_name)
+
         for k, v in spark_config.items():
             if k != "spark.app.name":
                 builder.config(k, v)
+
         spark_session = builder.getOrCreate()
-        # noinspection PyProtectedMember
+        # noinspection PyProtectedMember,PyUnresolvedReferences
         if spark_session.sparkContext._jsc.sc().isStopped():
             raise ValueError("SparkContext stopped unexpectedly.")
+
     except AttributeError:
         logger.error(
             "Unable to load spark context; install optional spark dependency for support."

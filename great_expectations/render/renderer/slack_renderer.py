@@ -7,7 +7,7 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 class SlackRenderer(Renderer):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def render(
@@ -126,7 +126,7 @@ class SlackRenderer(Renderer):
                 }
                 query["blocks"].append(dataset_element)
 
-        documentation_url = "https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html"
+        documentation_url = "https://docs.greatexpectations.io/docs/terms/data_docs"
         footer_section = {
             "type": "context",
             "elements": [

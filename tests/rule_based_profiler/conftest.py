@@ -5,22 +5,22 @@ import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    Domain,
     ParameterContainer,
     ParameterNode,
-    RuleState,
 )
+from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
+from great_expectations.rule_based_profiler.rule_state import RuleState
 
 yaml = YAML()
 
@@ -78,6 +78,7 @@ def table_Users_domain():
         domain_type=MetricDomainTypes.TABLE,
         domain_kwargs=None,
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -90,6 +91,7 @@ def column_Age_domain():
             "column": "Age",
         },
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -102,6 +104,7 @@ def column_Date_domain():
             "column": "Date",
         },
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -114,6 +117,7 @@ def column_Description_domain():
             "column": "Description",
         },
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -127,6 +131,7 @@ def column_pair_Age_Date_domain():
             "column_B": "Date",
         },
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -143,6 +148,7 @@ def multi_column_Age_Date_Description_domain():
             ],
         },
         details=None,
+        rule_name="my_rule",
     )
 
 
@@ -472,7 +478,7 @@ def variables_multi_part_name_parameter_container():
             "variables": variables_multi_part_name_parameter_node,  # $variables.false_positive_threshold
         }
     )
-    variables: ParameterContainer = ParameterContainer(
+    variables = ParameterContainer(
         parameter_nodes={
             "variables": root_variables_node,
         }
@@ -490,8 +496,9 @@ def rule_without_variables(
     single_part_name_parameter_container,
     multi_part_name_parameter_container,
 ):
-    rule: Rule = Rule(
+    rule = Rule(
         name="rule_without_variables",
+        variables=None,
         domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
         expectation_configuration_builders=[
             DefaultExpectationConfigurationBuilder(
@@ -530,9 +537,7 @@ def rule_state_with_domains_and_parameters(
 def rule_output_for_rule_state_with_domains_and_parameters(
     rule_state_with_domains_and_parameters,
 ):
-    rule_output: RuleOutput = RuleOutput(
-        rule_state=rule_state_with_domains_and_parameters
-    )
+    rule_output = RuleOutput(rule_state=rule_state_with_domains_and_parameters)
     return rule_output
 
 
@@ -553,7 +558,7 @@ def profiler_with_placeholder_args(
 
 @pytest.fixture
 def profiler_config_with_placeholder_args_custom_values() -> RuleBasedProfilerConfig:
-    config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    config = RuleBasedProfilerConfig(
         name="my_profiler",
         config_version=1.0,
         rules={

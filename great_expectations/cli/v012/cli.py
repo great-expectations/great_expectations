@@ -33,7 +33,7 @@ except ImportError:
     default=False,
     help="Set great_expectations to use verbose output.",
 )
-def cli(verbose):
+def cli(verbose) -> None:
     """
     Welcome to the great_expectations CLI!
 
@@ -67,7 +67,7 @@ cli.add_command(store)
 cli.add_command(checkpoint)
 
 
-def main():
+def main() -> None:
     cli()
 
 

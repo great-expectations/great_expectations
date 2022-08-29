@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.marshmallow__shade import ValidationError
@@ -26,7 +27,7 @@ def test_add_profiler(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     args = profiler_config_with_placeholder_args.to_json_dict()
-    for attr in ("class_name", "module_name"):
+    for attr in ("class_name", "module_name", "id"):
         args.pop(attr, None)
 
     profiler = empty_data_context.add_profiler(**args)
@@ -38,7 +39,7 @@ def test_add_profiler_with_invalid_config_raises_error(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     args = profiler_config_with_placeholder_args.to_json_dict()
-    for attr in ("class_name", "module_name"):
+    for attr in ("class_name", "module_name", "id"):
         args.pop(attr, None)
 
     # Setting invalid configuration to check that it is caught by DataContext wrapper method
@@ -98,11 +99,13 @@ def test_run_profiler_on_data_emits_proper_usage_stats(
         mock_profiler_store.__get__ = mock.Mock(return_value=populated_profiler_store)
         empty_data_context_stats_enabled.run_profiler_on_data(
             name=profiler_name,
-            batch_request={
-                "datasource_name": "my_datasource",
-                "data_connector_name": "my_data_connector",
-                "data_asset_name": "my_data_asset",
-            },
+            batch_request=BatchRequest(
+                **{
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_data_connector",
+                    "data_asset_name": "my_data_asset",
+                }
+            ),
         )
 
     assert mock_emit.call_count == 1

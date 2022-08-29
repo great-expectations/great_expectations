@@ -14,6 +14,8 @@ from pyparsing import (
 )
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.types import SerializableDictDot
 
 try:
     import pyspark.sql.functions as F
@@ -26,7 +28,7 @@ except ImportError:
     sa = None
 
 
-def _set_notnull(s, l, t):
+def _set_notnull(s, l, t) -> None:
     t["notnull"] = True
 
 
@@ -42,9 +44,9 @@ le = Literal("<=")
 eq = Literal("==")
 ops = (gt ^ lt ^ ge ^ le ^ eq).setResultsName("op")
 fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?").setResultsName("fnumber")
-condition_value = Suppress('"') + Word(f"{alphanums}.").setResultsName(
+condition_value = Suppress('"') + Word(f"{alphanums}._").setResultsName(
     "condition_value"
-) + Suppress('"') ^ Suppress("'") + Word(f"{alphanums}.").setResultsName(
+) + Suppress('"') ^ Suppress("'") + Word(f"{alphanums}._").setResultsName(
     "condition_value"
 ) + Suppress(
     "'"
@@ -77,7 +79,7 @@ class RowConditionParserType(enum.Enum):
 
 
 @dataclass
-class RowCondition:
+class RowCondition(SerializableDictDot):
     """Condition that can be used to filter rows in a data set.
 
     Attributes:
@@ -87,6 +89,21 @@ class RowCondition:
 
     condition: str
     condition_type: RowConditionParserType
+
+    def to_dict(self) -> dict:
+        """
+        Returns dictionary equivalent of this object.
+        """
+        return {
+            "condition": self.condition,
+            "condition_type": self.condition_type.value,
+        }
+
+    def to_json_dict(self) -> dict:
+        """
+        Returns JSON dictionary equivalent of this object.
+        """
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 def _parse_great_expectations_condition(row_condition: str):

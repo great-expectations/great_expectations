@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class Sorter:
-    def __init__(self, name: str, orderby: str = "asc"):
+    def __init__(self, name: str, orderby: str = "asc") -> None:
         self._name = name
         if orderby is None or orderby == "asc":
             reverse: bool = False

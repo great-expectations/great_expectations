@@ -32,7 +32,7 @@ def convert_to_string_and_escape(var):
 
 
 class ColumnSectionRenderer(Renderer):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     @classmethod
@@ -56,7 +56,9 @@ class ColumnSectionRenderer(Renderer):
 
 
 class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
-    def __init__(self, properties_table_renderer=None, runtime_environment=None):
+    def __init__(
+        self, properties_table_renderer=None, runtime_environment=None
+    ) -> None:
         super().__init__()
         if properties_table_renderer is None:
             properties_table_renderer = {
@@ -175,7 +177,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         )
 
     @classmethod
-    def _render_expectation_types(cls, evrs, content_blocks):
+    def _render_expectation_types(cls, evrs, content_blocks) -> None:
         # NOTE: The evr-fetching function is an kinda similar to the code other_section_
         # renderer.ProfilingResultsOverviewSectionRenderer._render_expectation_types
 
@@ -392,7 +394,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return ExceptionListContentBlockRenderer.render(evrs, include_column_name=False)
 
     @classmethod
-    def _render_unrecognized(cls, evrs, content_blocks):
+    def _render_unrecognized(cls, evrs, content_blocks) -> None:
         unrendered_blocks = []
         new_block = None
         for evr in evrs:
@@ -427,7 +429,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
 
 class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
-    def __init__(self, table_renderer=None):
+    def __init__(self, table_renderer=None) -> None:
         super().__init__()
         if table_renderer is None:
             table_renderer = {
@@ -490,7 +492,7 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
 
 
 class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
-    def __init__(self, bullet_list_renderer=None):
+    def __init__(self, bullet_list_renderer=None) -> None:
         super().__init__()
         if bullet_list_renderer is None:
             bullet_list_renderer = {

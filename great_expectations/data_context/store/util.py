@@ -29,7 +29,7 @@ def build_configuration_store(
         f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}"
     )
 
-    if store_backend is not None and issubclass(type(store_backend), StoreBackend):
+    if store_backend is not None and isinstance(store_backend, StoreBackend):
         store_backend = store_backend.config
     elif not isinstance(store_backend, dict):
         raise ge_exceptions.DataContextError(
@@ -45,7 +45,7 @@ def build_configuration_store(
         "overwrite_existing": overwrite_existing,
         "store_backend": store_backend,
     }
-    configuration_store: ConfigurationStore = build_store_from_config(
+    configuration_store: ConfigurationStore = build_store_from_config(  # type: ignore[assignment]
         store_config=store_config,
         module_name=module_name,
         runtime_environment=None,
@@ -77,7 +77,7 @@ def save_config_to_store_backend(
     store_backend: Union[StoreBackend, dict],
     configuration_key: str,
     configuration: BaseYamlConfig,
-):
+) -> None:
     config_store: ConfigurationStore = build_configuration_store(
         class_name=class_name,
         module_name=module_name,
@@ -85,7 +85,7 @@ def save_config_to_store_backend(
         store_backend=store_backend,
         overwrite_existing=True,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=configuration_key,
     )
     config_store.set(key=key, value=configuration)
@@ -105,10 +105,10 @@ def load_config_from_store_backend(
         store_backend=store_backend,
         overwrite_existing=False,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=configuration_key,
     )
-    return config_store.get(key=key)
+    return config_store.get(key=key)  # type: ignore[return-value]
 
 
 def delete_config_from_store_backend(
@@ -117,7 +117,7 @@ def delete_config_from_store_backend(
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     configuration_key: str,
-):
+) -> None:
     config_store: ConfigurationStore = build_configuration_store(
         class_name=class_name,
         module_name=module_name,
@@ -125,7 +125,7 @@ def delete_config_from_store_backend(
         store_backend=store_backend,
         overwrite_existing=True,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=configuration_key,
     )
     config_store.remove_key(key=key)
@@ -136,13 +136,13 @@ def save_checkpoint_config_to_store_backend(
     store_backend: Union[StoreBackend, dict],
     checkpoint_name: str,
     checkpoint_configuration: CheckpointConfig,
-):
+) -> None:
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend,
         overwrite_existing=True,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
     )
     config_store.set(key=key, value=checkpoint_configuration)
@@ -157,11 +157,11 @@ def load_checkpoint_config_from_store_backend(
         store_name=store_name,
         store_backend=store_backend,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
     )
     try:
-        return config_store.get(key=key)
+        return config_store.get(key=key)  # type: ignore[return-value]
     except ge_exceptions.InvalidBaseYamlConfigError as exc:
         logger.error(exc.messages)
         raise ge_exceptions.InvalidCheckpointConfigError(
@@ -173,12 +173,12 @@ def delete_checkpoint_config_from_store_backend(
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     checkpoint_name: str,
-):
+) -> None:
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend,
     )
-    key: ConfigurationIdentifier = ConfigurationIdentifier(
+    key = ConfigurationIdentifier(
         configuration_key=checkpoint_name,
     )
     config_store.remove_key(key=key)

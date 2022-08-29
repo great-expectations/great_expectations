@@ -11,7 +11,7 @@ from great_expectations.marshmallow__shade import Schema, fields, post_load
 class RunIdentifier(DataContextKey):
     """A RunIdentifier identifies a run (collection of validations) by run_name and run_time."""
 
-    def __init__(self, run_name=None, run_time=None):
+    def __init__(self, run_name=None, run_time=None) -> None:
         super().__init__()
         assert run_name is None or isinstance(
             run_name, str
@@ -33,7 +33,7 @@ class RunIdentifier(DataContextKey):
 
         if not run_time:
             try:
-                run_time = parse(run_name)
+                run_time = parse(run_name)  # type: ignore[arg-type]
             except (ValueError, TypeError):
                 run_time = None
 

@@ -8,14 +8,14 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
-    parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
@@ -87,48 +87,47 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "profiler_config",
     )
 
-    row_count_range_estimator_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="NumericMetricRangeMultiBatchParameterBuilder",
-            name="row_count_range_estimator",
-            metric_name="table.row_count",
-            metric_domain_kwargs=None,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-            estimator=f"{VARIABLES_KEY}estimator",
-            num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
-            bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
-            round_decimals=f"{VARIABLES_KEY}round_decimals",
-            truncate_values=f"{VARIABLES_KEY}truncate_values",
-            evaluation_parameter_builder_configs=None,
-            json_serialize=True,
-        )
+    table_row_count_range_estimator_parameter_builder_config = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="NumericMetricRangeMultiBatchParameterBuilder",
+        name="table_row_count_range_estimator",
+        metric_name="table.row_count",
+        metric_multi_batch_parameter_builder_name=None,
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        enforce_numeric_metric=True,
+        replace_nan_with_zero=True,
+        reduce_scalar_metric=True,
+        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        estimator=f"{VARIABLES_KEY}estimator",
+        n_resamples=f"{VARIABLES_KEY}n_resamples",
+        random_seed=f"{VARIABLES_KEY}random_seed",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
+        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
+        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
+        truncate_values=f"{VARIABLES_KEY}truncate_values",
+        round_decimals=f"{VARIABLES_KEY}round_decimals",
+        evaluation_parameter_builder_configs=None,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        row_count_range_estimator_parameter_builder_config,
+        table_row_count_range_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
-        class_name="RuleBasedProfilerConfig",
-        module_name="great_expectations.rule_based_profiler",
-        variables={
-            "false_positive_rate": 0.05,
-            "estimator": "bootstrap",
-            "num_bootstrap_samples": 9999,
-            "bootstrap_random_seed": None,
-            "round_decimals": 0,
-            "truncate_values": {
-                "lower_bound": 0,
-                "upper_bound": None,
-            },
-        },
+        variables={},
         rules={
             "default_expect_table_row_count_to_be_between_rule": {
+                "variables": {
+                    "estimator": "exact",
+                    "include_estimator_samples_histogram_in_details": False,
+                    "truncate_values": {
+                        "lower_bound": 0,
+                        "upper_bound": None,
+                    },
+                    "round_decimals": 0,
+                },
                 "domain_builder": {
                     "class_name": "TableDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
@@ -139,10 +138,10 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "min_value": f"{PARAMETER_KEY}{row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-                        "max_value": f"{PARAMETER_KEY}{row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+                        "min_value": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+                        "max_value": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{table_row_count_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     }
                 ],
@@ -203,8 +202,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             [
                 "min_value",
                 "max_value",
-                "row_condition",
-                "condition_parser",
                 "strict_min",
                 "strict_max",
             ],
@@ -218,10 +215,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "max_value": {
                 "schema": {"type": "number"},
                 "value": params.get("max_value"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
             },
             "strict_min": {
                 "schema": {"type": "boolean"},
@@ -244,21 +237,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
 
@@ -284,8 +262,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             [
                 "min_value",
                 "max_value",
-                "row_condition",
-                "condition_parser",
                 "strict_min",
                 "strict_max",
             ],
@@ -302,19 +278,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 template_str = f"Must have {at_most_str} $max_value rows."
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
 
         return [
             RenderedStringTemplateContent(

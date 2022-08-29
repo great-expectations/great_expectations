@@ -10,6 +10,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import ProfilerError
@@ -68,7 +69,7 @@ class UserConfigurableProfiler:
         semantic_types_dict: Optional[Dict[str, List[str]]] = None,
         table_expectations_only: bool = False,
         value_set_threshold: str = "MANY",
-    ):
+    ) -> None:
         """
         The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
         instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
@@ -106,7 +107,7 @@ class UserConfigurableProfiler:
                         one of "one", "two", "very_few" or "few". The default value is "many". For the purposes of
                         comparing whether two tables are identical, it might make the most sense to set this to "unique"
         """
-        self.column_info = {}
+        self.column_info: Dict = {}
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
 
@@ -219,12 +220,13 @@ class UserConfigurableProfiler:
 
         """
         expectation_suite: ExpectationSuite
-        if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
+        if len(self.profile_dataset.get_expectation_suite().expectations) > 0:  # type: ignore[union-attr]
+            # Only `Validator`` has `get_expectation_suite()`
             # noinspection PyProtectedMember
             suite_name: str = (
-                self.profile_dataset._expectation_suite.expectation_suite_name
+                self.profile_dataset._expectation_suite.expectation_suite_name  # type: ignore[union-attr]
             )
-            self.profile_dataset._expectation_suite = ExpectationSuite(
+            self.profile_dataset._expectation_suite = ExpectationSuite(  # type: ignore[union-attr]
                 expectation_suite_name=suite_name, data_context=None
             )
 
@@ -237,7 +239,7 @@ class UserConfigurableProfiler:
 
         return expectation_suite
 
-    def _send_usage_stats_message(self):
+    def _send_usage_stats_message(self) -> None:
         profile_dataset_type: str = str(type(self.profile_dataset))
         if "Dataset" in profile_dataset_type:
             profile_dataset_type = "Dataset"
@@ -275,7 +277,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         }
         send_usage_message(
             data_context=self.profile_dataset._data_context,
-            event="legacy_profiler.build_suite",
+            event=UsageStatsEvents.LEGACY_PROFILER_BUILD_SUITE.value,
             event_payload=event_payload,
             api_version="v2",
             success=True,
@@ -643,8 +645,8 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 num_unique, pct_unique
             )
         )
-
-        return cardinality.name
+        # Return type mypy issue can be fixed by adding a str mixin to `OrderedProfilerCardinality`
+        return cardinality.name  # type: ignore[return-value]
 
     def _add_semantic_types_by_column_from_config_to_column_info(self, column_name):
         """
@@ -672,6 +674,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             for semantic_type, column_list in self.semantic_types_dict.items():
                 if column_name in column_list:
                     semantic_types.append(semantic_type.upper())
+
             column_info_entry["semantic_types"] = semantic_types
             if all(
                 i in column_info_entry.get("semantic_types")
@@ -812,7 +815,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
 
         return profile_dataset
 
-    def _build_expectations_numeric(self, profile_dataset, column):
+    def _build_expectations_numeric(self, profile_dataset, column):  # noqa: C901 - 17
         """
         Adds a set of numeric expectations for a given column
         Args:
@@ -1110,7 +1113,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
 
         return profile_dataset
 
-    def _build_expectations_for_all_column_types(self, profile_dataset, column):
+    def _build_expectations_for_all_column_types(self, profile_dataset, column) -> None:
         """
         Adds these expectations for all included columns irrespective of type. Includes:
             - `expect_column_values_to_not_be_null` (or `expect_column_values_to_be_null`)
@@ -1190,7 +1193,7 @@ nan: {pct_unique}
                 )
 
         if "expect_column_values_to_be_in_type_list" not in self.excluded_expectations:
-            col_type = self.column_info.get(column).get("type")
+            col_type = self.column_info.get(column, {}).get("type")
             if col_type != "UNKNOWN":
                 type_list = profiler_data_types_with_mapping.get(col_type)
                 profile_dataset.expect_column_values_to_be_in_type_list(
@@ -1202,7 +1205,7 @@ nan: {pct_unique}
                     f"Skipping expect_column_values_to_be_in_type_list for this column."
                 )
 
-    def _build_expectations_table(self, profile_dataset):
+    def _build_expectations_table(self, profile_dataset) -> None:
         """
         Adds two table level expectations to the dataset
         Args:

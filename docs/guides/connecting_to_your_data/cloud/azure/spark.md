@@ -7,7 +7,6 @@ import Congratulations from '../../components/congratulations.md'
 import Prerequisites from '../../components/prerequisites.jsx'
 import WhereToRunCode from '../../components/where_to_run_code.md'
 import SparkDataContextNote from '../../components/spark_data_context_note.md'
-import SparkAdditionalNotes from '../../components/spark_additional_notes.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
@@ -138,8 +137,6 @@ Then load data into the `Validator`.
 <Congratulations />
 
 ## Additional Notes
-
-<SparkAdditionalNotes />
 
 To view the full scripts used in this page, see them on GitHub:
 

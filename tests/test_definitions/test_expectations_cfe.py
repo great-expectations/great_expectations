@@ -1,8 +1,6 @@
 import glob
 import json
 import os
-import random
-import string
 
 import pandas as pd
 import pytest
@@ -16,14 +14,15 @@ from great_expectations.self_check.util import (
     BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list_cfe,
     evaluate_json_test_cfe,
+    generate_sqlite_db_path,
     get_test_validator_with_data,
     mssqlDialect,
     mysqlDialect,
     postgresqlDialect,
     sqliteDialect,
+    trinoDialect,
 )
 from tests.conftest import build_test_backends_list_cfe
-from tests.test_definitions.test_expectations import tmp_dir
 
 
 def pytest_generate_tests(metafunc):
@@ -71,21 +70,7 @@ def pytest_generate_tests(metafunc):
                     else:
                         skip_expectation = False
                         if isinstance(d["data"], list):
-                            sqlite_db_path = os.path.abspath(
-                                os.path.join(
-                                    tmp_dir,
-                                    "sqlite_db"
-                                    + "".join(
-                                        [
-                                            random.choice(
-                                                string.ascii_letters + string.digits
-                                            )
-                                            for _ in range(8)
-                                        ]
-                                    )
-                                    + ".db",
-                                )
-                            )
+                            sqlite_db_path = generate_sqlite_db_path()
                             for dataset in d["data"]:
                                 datasets.append(
                                     get_test_validator_with_data(
@@ -166,6 +151,32 @@ def pytest_generate_tests(metafunc):
                                     )
                                     and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
                                     == "bigquery"
+                                ):
+                                    generate_test = True
+                                elif (
+                                    "bigquery_cfe" in only_for
+                                    and BigQueryDialect is not None
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "bigquery"
+                                ):
+                                    # <WILL> : Marker to get the test to only run for CFE
+                                    # expect_column_values_to_be_unique:negative_case_all_null_values_bigquery_nones
+                                    # works in different ways between CFE (V3) and V2 Expectations. This flag allows for
+                                    # the test to only be run in the CFE case
+                                    generate_test = True
+                                elif (
+                                    "trino" in test["only_for"]
+                                    and BigQueryDialect is not None
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "trino"
                                 ):
                                     generate_test = True
 
@@ -282,6 +293,36 @@ def pytest_generate_tests(metafunc):
                                     == "bigquery"
                                 )
                                 or (
+                                    "bigquery_cfe" in suppress_test_for
+                                    and BigQueryDialect is not None
+                                    and validator_with_data
+                                    and isinstance(
+                                        validator_with_data.execution_engine.active_batch_data,
+                                        SqlAlchemyBatchData,
+                                    )
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "bigquery"
+                                )
+                                or (
+                                    "trino" in suppress_test_for
+                                    and trinoDialect is not None
+                                    and validator_with_data
+                                    and isinstance(
+                                        validator_with_data.execution_engine.active_batch_data,
+                                        SqlAlchemyBatchData,
+                                    )
+                                    and hasattr(
+                                        validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                                        "name",
+                                    )
+                                    and validator_with_data.execution_engine.active_batch_data.sql_engine_dialect.name
+                                    == "trino"
+                                )
+                                or (
                                     "pandas" in suppress_test_for
                                     and validator_with_data
                                     and isinstance(
@@ -334,6 +375,7 @@ def pytest_generate_tests(metafunc):
 
 
 @pytest.mark.order(index=0)
+@pytest.mark.integration
 def test_case_runner_cfe(test_case):
     if test_case["skip"]:
         pytest.skip()

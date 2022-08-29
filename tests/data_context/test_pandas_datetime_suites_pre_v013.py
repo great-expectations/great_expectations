@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 
 import pandas as pd
 
-from great_expectations.data_context.data_context import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import PandasDataset
 
 

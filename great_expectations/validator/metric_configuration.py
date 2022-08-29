@@ -2,6 +2,7 @@ import json
 from typing import Tuple
 
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.util import convert_to_json_serializable
 
 
 class MetricConfiguration:
@@ -11,7 +12,7 @@ class MetricConfiguration:
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict = None,
         metric_dependencies: dict = None,
-    ):
+    ) -> None:
         self._metric_name = metric_name
         if not isinstance(metric_domain_kwargs, IDDict):
             metric_domain_kwargs = IDDict(metric_domain_kwargs)
@@ -56,7 +57,7 @@ class MetricConfiguration:
         return self._metric_dependencies
 
     @metric_dependencies.setter
-    def metric_dependencies(self, metric_dependencies):
+    def metric_dependencies(self, metric_dependencies) -> None:
         self._metric_dependencies = metric_dependencies
 
     @property
@@ -68,12 +69,14 @@ class MetricConfiguration:
         )
 
     def to_json_dict(self) -> dict:
-        json_dict: dict = {
-            "metric_name": self.metric_name,
-            "metric_domain_kwargs": self.metric_domain_kwargs,
-            "metric_domain_kwargs_id": self.metric_domain_kwargs_id,
-            "metric_value_kwargs": self.metric_value_kwargs,
-            "metric_value_kwargs_id": self.metric_value_kwargs_id,
-            "id": self.id,
-        }
+        json_dict: dict = convert_to_json_serializable(
+            data={
+                "metric_name": self.metric_name,
+                "metric_domain_kwargs": self.metric_domain_kwargs,
+                "metric_domain_kwargs_id": self.metric_domain_kwargs_id,
+                "metric_value_kwargs": self.metric_value_kwargs,
+                "metric_value_kwargs_id": self.metric_value_kwargs_id,
+                "id": self.id,
+            }
+        )
         return json_dict

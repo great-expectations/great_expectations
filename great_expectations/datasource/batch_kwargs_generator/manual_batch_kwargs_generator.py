@@ -38,7 +38,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
 
     recognized_batch_parameters = {"data_asset_name", "partition_id"}
 
-    def __init__(self, name="default", datasource=None, assets=None):
+    def __init__(self, name="default", datasource=None, assets=None) -> None:
         logger.debug(f"Constructing ManualBatchKwargsGenerator {name!r}")
         super().__init__(name, datasource=datasource)
 

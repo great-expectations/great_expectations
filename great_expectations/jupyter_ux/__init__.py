@@ -60,13 +60,12 @@ If you did not create the data source during init, here is how to add it now: <a
                     """
 <p>
 Found more than one data source in the great_expectations.yml of your project:
-<b>{1:s}</b>
+<b>{:s}</b>
 </p>
 <p>
 Uncomment the next cell and set data_source_name to one of these names.
 </p>
 """.format(
-                        data_source_type,
                         ",".join(
                             [
                                 datasource["name"]
@@ -181,7 +180,7 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
     # warnings.filterwarnings('ignore')
 
 
-def show_available_data_asset_names(context, data_source_name=None):
+def show_available_data_asset_names(context, data_source_name=None) -> None:
     """List asset names found in the current context."""
     # TODO: Needs tests.
     styles = """

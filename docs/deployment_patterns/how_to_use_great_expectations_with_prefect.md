@@ -8,9 +8,9 @@ This guide will help you run a Great Expectations with [Prefect](https://prefect
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../tutorials/getting_started/intro.md)
-- [Created an Expectation Suite](../tutorials/getting_started/create_your_first_expectations.md)
-- [Connecting to Data](../tutorials/getting_started/connect_to_data.md)
+- [Set up a working deployment of Great Expectations](../tutorials/getting_started/tutorial_overview.md)
+- [Created an Expectation Suite](../tutorials/getting_started/tutorial_create_expectations.md)
+- [Connecting to Data](../tutorials/getting_started/tutorial_connect_to_data.md)
 - [Prefect Quick Start guide](https://docs.prefect.io/core/getting_started/quick-start.html)
 
 </Prerequisites>

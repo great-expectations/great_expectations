@@ -45,7 +45,7 @@ class ValidationAction:
     The Data Context is passed to this class in its constructor.
     """
 
-    def __init__(self, data_context):
+    def __init__(self, data_context) -> None:
         self.data_context = data_context
 
     def run(
@@ -95,7 +95,7 @@ class NoOpAction(ValidationAction):
     def __init__(
         self,
         data_context,
-    ):
+    ) -> None:
         super().__init__(data_context)
 
     def _run(
@@ -107,7 +107,7 @@ class NoOpAction(ValidationAction):
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-    ):
+    ) -> None:
         print("Happily doing nothing")
 
 
@@ -149,7 +149,7 @@ class SlackNotificationAction(ValidationAction):
         slack_channel=None,
         notify_on="all",
         notify_with=None,
-    ):
+    ) -> None:
         """Construct a SlackNotificationAction
 
         Args:
@@ -272,7 +272,7 @@ class PagerdutyAlertAction(ValidationAction):
         api_key,
         routing_key,
         notify_on="failure",
-    ):
+    ) -> None:
         """Construct a PagerdutyAlertAction
 
         Args:
@@ -378,7 +378,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         renderer,
         microsoft_teams_webhook,
         notify_on="all",
-    ):
+    ) -> None:
         """Construct a MicrosoftTeamsNotificationAction
 
         Args:
@@ -496,7 +496,7 @@ class OpsgenieAlertAction(ValidationAction):
         region=None,
         priority="P3",
         notify_on="failure",
-    ):
+    ) -> None:
         """Construct a OpsgenieAlertAction
 
         Args:
@@ -626,7 +626,7 @@ class EmailAction(ValidationAction):
         use_ssl=None,
         notify_on="all",
         notify_with=None,
-    ):
+    ) -> None:
         """Construct an EmailAction
         Args:
             data_context:
@@ -770,7 +770,7 @@ class StoreValidationResultAction(ValidationAction):
         self,
         data_context,
         target_store_name=None,
-    ):
+    ) -> None:
         """
 
         :param data_context: Data Context
@@ -813,9 +813,9 @@ class StoreValidationResultAction(ValidationAction):
                 )
             )
 
-        contract_ge_cloud_id = None
+        checkpoint_ge_cloud_id = None
         if self.data_context.ge_cloud_mode and checkpoint_identifier:
-            contract_ge_cloud_id = checkpoint_identifier.ge_cloud_id
+            checkpoint_ge_cloud_id = checkpoint_identifier.ge_cloud_id
 
         expectation_suite_ge_cloud_id = None
         if self.data_context.ge_cloud_mode and expectation_suite_identifier:
@@ -826,7 +826,7 @@ class StoreValidationResultAction(ValidationAction):
         return_val = self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
-            contract_id=contract_ge_cloud_id,
+            checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
         if self.data_context.ge_cloud_mode:
@@ -856,7 +856,7 @@ class StoreEvaluationParametersAction(ValidationAction):
 
     """
 
-    def __init__(self, data_context, target_store_name=None):
+    def __init__(self, data_context, target_store_name=None) -> None:
         """
 
         Args:
@@ -923,7 +923,7 @@ class StoreMetricsAction(ValidationAction):
 
     def __init__(
         self, data_context, requested_metrics, target_store_name="metrics_store"
-    ):
+    ) -> None:
         """
 
         Args:
@@ -1013,7 +1013,7 @@ class UpdateDataDocsAction(ValidationAction):
 
     """
 
-    def __init__(self, data_context, site_names=None, target_site_names=None):
+    def __init__(self, data_context, site_names=None, target_site_names=None) -> None:
         """
         :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
@@ -1063,7 +1063,7 @@ class UpdateDataDocsAction(ValidationAction):
             )
 
         # TODO Update for RenderedDataDocs
-        # build_data_docs will return the index page for the validation results, but we want to return the url for the valiation result using the code below
+        # build_data_docs will return the index page for the validation results, but we want to return the url for the validation result using the code below
         self.data_context.build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[
@@ -1098,7 +1098,7 @@ class CloudNotificationAction(ValidationAction):
         self,
         data_context: "DataContext",
         checkpoint_ge_cloud_id: str,
-    ):
+    ) -> None:
         super().__init__(data_context)
         self.checkpoint_ge_cloud_id = checkpoint_ge_cloud_id
 
@@ -1131,7 +1131,7 @@ class CloudNotificationAction(ValidationAction):
 
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
-            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/contracts/"
+            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/checkpoints/"
             f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
         )
         auth_headers = {
@@ -1148,7 +1148,7 @@ class SNSNotificationAction(ValidationAction):
 
     def __init__(
         self, data_context: "DataContext", sns_topic_arn: str, sns_message_subject
-    ):
+    ) -> None:
         super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject

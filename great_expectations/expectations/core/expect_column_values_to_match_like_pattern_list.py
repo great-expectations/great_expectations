@@ -71,7 +71,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs
-    ):
+    ) -> None:
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (

@@ -1,3 +1,4 @@
+import ast
 import itertools
 import logging
 import traceback
@@ -6,12 +7,12 @@ from typing import Any, Dict, List
 
 import numpy as np
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
@@ -22,6 +23,11 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
 logger = logging.getLogger(__name__)
+
+try:
+    from trino.exceptions import TrinoUserError
+except ImportError:
+    TrinoUserError = None
 
 try:
     from sqlalchemy.exc import ProgrammingError
@@ -71,6 +77,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 f"If specified for pandas, allow_relative_error must be one an allowed value for the 'interpolation'"
                 f"parameter of .quantile() (one of {interpolation_options})"
             )
+
         return column.quantile(quantiles, interpolation=allow_relative_error).tolist()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -117,6 +124,13 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )
+        elif dialect.name.lower() == "trino":
+            return _get_column_quantiles_trino(
+                column=column,
+                quantiles=quantiles,
+                selectable=selectable,
+                sqlalchemy_engine=sqlalchemy_engine,
+            )
         elif dialect.name.lower() == "snowflake":
             # NOTE: 20201216 - JPC - snowflake has a representation/precision limitation
             # in its percentile_disc implementation that causes an error when we do
@@ -141,6 +155,13 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
                 table_row_count=table_row_count,
+            )
+        elif dialect.name.lower() == "awsathena":
+            return _get_column_quantiles_athena(
+                column=column,
+                quantiles=quantiles,
+                selectable=selectable,
+                sqlalchemy_engine=sqlalchemy_engine,
             )
         else:
             return _get_column_quantiles_generic_sqlalchemy(
@@ -168,19 +189,22 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
-        allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
         quantiles = metric_value_kwargs["quantiles"]
         column = accessor_domain_kwargs["column"]
-        if allow_relative_error is False:
+
+        allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
+        if not allow_relative_error:
             allow_relative_error = 0.0
+
         if (
             not isinstance(allow_relative_error, float)
-            or allow_relative_error < 0
-            or allow_relative_error > 1
+            or allow_relative_error < 0.0
+            or allow_relative_error > 1.0
         ):
             raise ValueError(
-                "SparkDFDataset requires relative error to be False or to be a float between 0 and 1."
+                "SparkDFExecutionEngine requires relative error to be False or to be a float between 0 and 1."
             )
+
         return df.approxQuantile(column, list(quantiles), allow_relative_error)
 
 
@@ -288,6 +312,27 @@ def _get_column_quantiles_mysql(
         raise pe
 
 
+def _get_column_quantiles_trino(
+    column, quantiles: Iterable, selectable, sqlalchemy_engine
+) -> list:
+    # Trino does not have the percentile_disc func, but instead has approx_percentile
+    sql_approx: str = f"approx_percentile({column}, ARRAY{list(quantiles)})"
+    selects_approx: List[TextClause] = [sa.text(sql_approx)]
+    quantiles_query: Select = sa.select(selects_approx).select_from(selectable)
+
+    try:
+        quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
+        return list(quantiles_results)[0]
+    except (ProgrammingError, TrinoUserError) as pe:
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe
+
+
 def _get_column_quantiles_sqlite(
     column, quantiles: Iterable, selectable, sqlalchemy_engine, table_row_count
 ) -> list:
@@ -319,6 +364,34 @@ def _get_column_quantiles_sqlite(
                 [list(quantile_result) for quantile_result in quantiles_results]
             )
         )
+    except ProgrammingError as pe:
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe
+
+
+def _get_column_quantiles_athena(
+    column,
+    quantiles: Iterable,
+    selectable,
+    sqlalchemy_engine,
+) -> list:
+    approx_percentiles = f"approx_percentile({column}, ARRAY{list(quantiles)})"
+    selects_approx: List[TextClause] = [sa.text(approx_percentiles)]
+    quantiles_query_approx: Select = sa.select(selects_approx).select_from(selectable)
+    try:
+        quantiles_results: Row = sqlalchemy_engine.execute(
+            quantiles_query_approx
+        ).fetchone()
+        # the ast literal eval is needed because the method is returning a json string and not a dict
+        results = ast.literal_eval(quantiles_results[0])
+        return results
+
+        return results
     except ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
@@ -362,7 +435,7 @@ def _get_column_quantiles_generic_sqlalchemy(
             quantiles_query_approx: Select = sa.select(selects_approx).select_from(
                 selectable
             )
-            if allow_relative_error:
+            if allow_relative_error or sqlalchemy_engine.driver == "psycopg2":
                 try:
                     quantiles_results: Row = sqlalchemy_engine.execute(
                         quantiles_query_approx

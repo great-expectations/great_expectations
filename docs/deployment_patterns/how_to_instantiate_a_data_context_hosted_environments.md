@@ -56,7 +56,7 @@ In order to use an Expectation Suite you've created to validate data, follow thi
 Step 4: Use Data Docs
 ----------------------
 
-Finally, if you would like to build and view Data Docs in your environment, please follow the guides for configuring Data Docs: [Options for hosting Data Docs](../tutorials/getting_started/customize_your_deployment.md#options-for-hosting-data-docs)
+Finally, if you would like to build and view Data Docs in your environment, please follow the guides for configuring Data Docs: [Options for hosting Data Docs](../reference/customize_your_deployment.md#options-for-hosting-data-docs)
 
 Additional notes
 ----------------

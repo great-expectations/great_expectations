@@ -77,7 +77,6 @@ class BatchAnonymizer(BaseAnonymizer):
             "query_parameters",
             "offset",
             "snowflake_transient_table",
-            "bigquery_temp_table",
             "data_asset_name",
         ]
 

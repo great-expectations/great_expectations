@@ -8,9 +8,9 @@ By default, <TechnicalTag tag="validation_result" text="Validation Results" /> a
 
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- [Configured an Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
-- [Configured a Checkpoint](../../../tutorials/getting_started/validate_your_data.md).
+- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
+- [Configured an Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md).
+- [Configured a Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md).
 - [Configured an Azure Storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
 - Create the Azure Blob container. If you also wish to [host and share Data Docs on Azure Blob Storage](../../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may set up this first and then use the ``$web`` existing container to store your <TechnicalTag tag="expectation" text="Expectations" />.
 - Identify the prefix (folder) where Validation Results will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
@@ -65,6 +65,12 @@ stores:
 If the container is called ``$web`` (for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
 :::
 
+:::note
+Various authentication and configuration options are available as documented in [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
+:::
+
+
+
 ### 4. Copy existing Validation Results JSON files to the Azure blob (This step is optional)
 
 One way to copy Validation Results into Azure Blob Storage is by using the ``az storage blob upload`` command, which is part of the Azure SDK. The following example will copy one Validation Result from a local folder to the Azure blob.   Information on other ways to copy Validation Result JSON files, like the Azure Storage browser in the Azure Portal, can be found in the [Documentation for Azure](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal).
@@ -106,5 +112,5 @@ great_expectations store list
 
 ### 6. Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](../../../tutorials/getting_started/validate_your_data.md) to store results in the new Validation Results Store on Azure Blob then visualize the results by [re-building Data Docs](../../../tutorials/getting_started/check_out_data_docs.md).
+[Run a Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md) to store results in the new Validation Results Store on Azure Blob then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
 

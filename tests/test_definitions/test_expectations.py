@@ -4,7 +4,6 @@ import logging
 import os
 import random
 import string
-import tempfile
 from collections import OrderedDict
 
 import pandas as pd
@@ -15,6 +14,7 @@ from great_expectations.self_check.util import (
     BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list,
     evaluate_json_test,
+    generate_sqlite_db_path,
     get_dataset,
     mssqlDialect,
     mysqlDialect,
@@ -24,7 +24,6 @@ from great_expectations.self_check.util import (
 from tests.conftest import build_test_backends_list
 
 logger = logging.getLogger(__name__)
-tmp_dir = str(tempfile.mkdtemp())
 
 
 def pytest_generate_tests(metafunc):
@@ -45,9 +44,14 @@ def pytest_generate_tests(metafunc):
         )
         backends = build_test_backends_list(metafunc)
         for c in backends:
+            if c in [
+                "trino",
+            ]:
+                continue
             for filename in test_configuration_files:
                 file = open(filename)
                 # Use OrderedDict so that python2 will use the correct order of columns in all cases
+                # noinspection PyTypeChecker
                 test_configuration = json.load(file, object_pairs_hook=OrderedDict)
 
                 for d in test_configuration["datasets"]:
@@ -74,21 +78,7 @@ def pytest_generate_tests(metafunc):
                     else:
                         skip_expectation = False
                         if isinstance(d["data"], list):
-                            sqlite_db_path = os.path.abspath(
-                                os.path.join(
-                                    tmp_dir,
-                                    "sqlite_db"
-                                    + "".join(
-                                        [
-                                            random.choice(
-                                                string.ascii_letters + string.digits
-                                            )
-                                            for _ in range(8)
-                                        ]
-                                    )
-                                    + ".db",
-                                )
-                            )
+                            sqlite_db_path = generate_sqlite_db_path()
                             for dataset in d["data"]:
                                 datasets.append(
                                     get_dataset(
@@ -160,6 +150,20 @@ def pytest_generate_tests(metafunc):
                                     == "bigquery"
                                 ):
                                     generate_test = True
+                                elif (
+                                    "bigquery_v2" in only_for
+                                    and BigQueryDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and hasattr(data_asset.engine.dialect, "name")
+                                    and data_asset.engine.dialect.name.lower()
+                                    == "bigquery"
+                                ):
+                                    # <WILL> : Marker to get the test to only run for the V2 API
+                                    # expect_column_values_to_be_unique:positive_case_all_null_values_bigquery_nones
+                                    # works in different ways between CFE (V3) and V2 Expectations. This flag allows for
+                                    # the test to only be run in the V2 case
+                                    generate_test = True
+
                             elif isinstance(data_asset, PandasDataset):
                                 major, minor, *_ = pd.__version__.split(".")
                                 if "pandas" in only_for:
@@ -275,6 +279,7 @@ def pytest_generate_tests(metafunc):
 
 
 @pytest.mark.order(index=1)
+@pytest.mark.integration
 def test_case_runner(test_case):
     if test_case["skip"]:
         pytest.skip()

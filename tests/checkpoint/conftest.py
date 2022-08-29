@@ -19,10 +19,7 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "col1", "min_value": 1, "max_value": 2},
     )
-    # NOTE Will 20211208 _add_expectation() method, although being called by an ExpectationSuite instance, is being
-    # called within a fixture, and so will call the private method _add_expectation() and prevent it from sending a
-    # usage_event.
-    suite._add_expectation(expectation, send_usage_event=False)
+    suite.add_expectation(expectation, send_usage_event=False)
     context.save_expectation_suite(suite)
     return context
 
@@ -75,7 +72,7 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     datasource_config: str = f"""

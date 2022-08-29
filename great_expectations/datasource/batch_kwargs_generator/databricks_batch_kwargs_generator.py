@@ -8,7 +8,7 @@ from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql import SparkSession
+    from pyspark.sql import SparkSession  # noqa: F401
 except ImportError:
     logger.debug(
         "Unable to load spark context; install optional spark dependency for support."
@@ -18,7 +18,7 @@ except ImportError:
 class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
     """Meant to be used in a Databricks notebook"""
 
-    def __init__(self, name="default", datasource=None, database="default"):
+    def __init__(self, name="default", datasource=None, database="default") -> None:
         super().__init__(name, datasource=datasource)
         self.database = database
         try:

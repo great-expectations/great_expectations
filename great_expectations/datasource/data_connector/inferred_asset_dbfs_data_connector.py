@@ -32,7 +32,8 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
         glob_directive: str = "*",
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+        id: Optional[str] = None,
+    ) -> None:
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
         and sorters for filtering and sorting data_references.
@@ -51,6 +52,7 @@ class InferredAssetDBFSDataConnector(InferredAssetFilesystemDataConnector):
 
         super().__init__(
             name=name,
+            id=id,
             datasource_name=datasource_name,
             base_directory=base_directory,
             execution_engine=execution_engine,

@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 import traceback
+from typing import Optional, Tuple, Type
 
 from dateutil.parser import parse
 
@@ -17,13 +18,19 @@ from great_expectations.data_context.store import (
     TupleS3StoreBackend,
     ValidationsStore,
 )
+from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 
 
 class UpgradeHelperV11(BaseUpgradeHelper):
-    def __init__(self, data_context=None, context_root_dir=None, **kwargs):
+    def __init__(
+        self,
+        data_context: Optional[DataContext] = None,
+        context_root_dir: Optional[str] = None,
+        **kwargs: dict,
+    ) -> None:
         assert (
             data_context or context_root_dir
         ), "Please provide a data_context object or a context_root_dir."
@@ -91,7 +98,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
 
         self._generate_upgrade_checklist()
 
-    def _generate_upgrade_checklist(self):
+    def _generate_upgrade_checklist(self) -> None:
         for (store_name, store) in self.data_context.stores.items():
             if not isinstance(store, (ValidationsStore, MetricStore)):
                 continue
@@ -108,7 +115,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             for site_name, site_config in sites.items():
                 self._process_docs_site_for_checklist(site_name, site_config)
 
-    def _process_docs_site_for_checklist(self, site_name, site_config):
+    def _process_docs_site_for_checklist(
+        self, site_name: str, site_config: dict
+    ) -> None:
         site_html_store = HtmlSiteStore(
             store_backend=site_config.get("store_backend"),
             runtime_environment={
@@ -138,7 +147,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 }
             )
 
-    def _process_validations_store_for_checklist(self, store_name, store):
+    def _process_validations_store_for_checklist(
+        self, store_name: str, store: Type[StoreBackend]
+    ) -> None:
         store_backend = store.store_backend
         if isinstance(store_backend, DatabaseStoreBackend):
             self.upgrade_log["skipped_validations_stores"][
@@ -163,7 +174,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 }
             )
 
-    def _process_metrics_store_for_checklist(self, store_name, store):
+    def _process_metrics_store_for_checklist(
+        self, store_name: str, store: Type[StoreBackend]
+    ) -> None:
         store_backend = store.store_backend
         if isinstance(store_backend, DatabaseStoreBackend):
             self.upgrade_log["skipped_metrics_stores"][
@@ -184,7 +197,12 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 }
             )
 
-    def _upgrade_store_backend(self, store_backend, store_name=None, site_name=None):
+    def _upgrade_store_backend(
+        self,
+        store_backend: Type[StoreBackend],
+        store_name: Optional[str] = None,
+        site_name: Optional[str] = None,
+    ) -> None:
         assert store_name or site_name, "Must pass either store_name or site_name."
         assert not (
             store_name and site_name
@@ -265,13 +283,13 @@ class UpgradeHelperV11(BaseUpgradeHelper):
 
     def _update_upgrade_log(
         self,
-        store_backend,
-        source_key=None,
-        dest_key=None,
-        store_name=None,
-        site_name=None,
-        exception_message=None,
-    ):
+        store_backend: Type[StoreBackend],
+        source_key: Optional[tuple] = None,
+        dest_key: Optional[tuple] = None,
+        store_name: Optional[str] = None,
+        site_name: Optional[str] = None,
+        exception_message: Optional[str] = None,
+    ) -> None:
         assert store_name or site_name, "Must pass either store_name or site_name."
         assert not (
             store_name and site_name
@@ -318,8 +336,12 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 ].append(log_dict)
 
     def _update_validation_result_json(
-        self, source_key, dest_key, run_name, store_backend
-    ):
+        self,
+        source_key: tuple,
+        dest_key: tuple,
+        run_name: str,
+        store_backend: Type[StoreBackend],
+    ) -> None:
         new_run_id_dict = {
             "run_name": run_name,
             "run_time": self.validation_run_times[run_name],
@@ -329,7 +351,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         store_backend.set(dest_key, json.dumps(validation_json_dict))
         store_backend.remove_key(source_key)
 
-    def _get_tuple_filesystem_store_backend_run_time(self, source_key, store_backend):
+    def _get_tuple_filesystem_store_backend_run_time(
+        self, source_key: tuple, store_backend: Type[StoreBackend]
+    ) -> None:
         run_name = source_key[-2]
         try:
             self.validation_run_times[run_name] = parse(run_name).strftime(
@@ -346,7 +370,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             ).strftime("%Y%m%dT%H%M%S.%fZ")
             self.validation_run_times[run_name] = path_mod_iso_str
 
-    def _get_tuple_s3_store_backend_run_time(self, source_key, store_backend):
+    def _get_tuple_s3_store_backend_run_time(
+        self, source_key: tuple, store_backend: Type[StoreBackend]
+    ) -> None:
         import boto3
 
         s3 = boto3.resource("s3")
@@ -367,7 +393,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
 
             self.validation_run_times[run_name] = source_object_last_mod
 
-    def _get_tuple_gcs_store_backend_run_time(self, source_key, store_backend):
+    def _get_tuple_gcs_store_backend_run_time(
+        self, source_key: tuple, store_backend: Type[StoreBackend]
+    ) -> None:
         from google.cloud import storage
 
         gcs = storage.Client(project=store_backend.project)
@@ -388,7 +416,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
 
             self.validation_run_times[run_name] = source_blob_created_time
 
-    def _get_skipped_store_and_site_names(self):
+    def _get_skipped_store_and_site_names(self) -> tuple:
         validations_stores_with_database_backends = [
             store_dict.get("store_name")
             for store_dict in self.upgrade_log["skipped_validations_stores"][
@@ -432,7 +460,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             doc_sites_with_unsupported_backends,
         )
 
-    def manual_steps_required(self):
+    def manual_steps_required(self) -> bool:
         (
             skip_with_database_backends,
             skip_with_unsupported_backends,
@@ -446,7 +474,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             ]
         )
 
-    def get_upgrade_overview(self):
+    def get_upgrade_overview(self) -> Tuple[str, bool]:
         (
             skip_with_database_backends,
             skip_with_unsupported_backends,
@@ -578,7 +606,7 @@ Would you like to proceed with the project upgrade?\
 """
         return upgrade_overview, True
 
-    def _save_upgrade_log(self):
+    def _save_upgrade_log(self) -> str:
         current_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y%m%dT%H%M%S.%fZ"
         )
@@ -597,7 +625,7 @@ Would you like to proceed with the project upgrade?\
 
         return dest_path
 
-    def _generate_upgrade_report(self):
+    def _generate_upgrade_report(self) -> Tuple[str, str, bool]:
         upgrade_log_path = self._save_upgrade_log()
         skipped_stores_or_sites = any(self._get_skipped_store_and_site_names())
         exception_occurred = False
@@ -649,7 +677,7 @@ A log detailing the upgrade can be found here:
 """
         return upgrade_report, increment_version, exception_occurred
 
-    def upgrade_project(self):
+    def upgrade_project(self) -> Tuple[str, str, bool]:
         try:
             for (store_name, store_backend) in self.upgrade_checklist[
                 "validations_store_backends"

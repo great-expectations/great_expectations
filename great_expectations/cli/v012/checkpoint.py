@@ -58,7 +58,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 @click.group(short_help="Checkpoint operations")
-def checkpoint():
+def checkpoint() -> None:
     """
     Checkpoint operations
 
@@ -85,7 +85,7 @@ def checkpoint():
     help="The project's great_expectations directory.",
 )
 @mark.cli_as_experimental
-def checkpoint_new(checkpoint, suite, directory, datasource):
+def checkpoint_new(checkpoint, suite, directory, datasource) -> None:
     """Create a new checkpoint for easy deployments. (Experimental)"""
     suite_name = suite
     usage_event = "cli.checkpoint.new"
@@ -180,7 +180,7 @@ def _load_checkpoint_yml_template() -> dict:
     help="The project's great_expectations directory.",
 )
 @mark.cli_as_experimental
-def checkpoint_list(directory):
+def checkpoint_list(directory) -> None:
     """List configured checkpoints. (Experimental)"""
     context = toolkit.load_data_context_with_error_handling(directory)
     checkpoints = context.list_checkpoints()
@@ -219,7 +219,7 @@ def checkpoint_list(directory):
     help="The project's great_expectations directory.",
 )
 @mark.cli_as_experimental
-def checkpoint_run(checkpoint, directory):
+def checkpoint_run(checkpoint, directory) -> None:
     """Run a checkpoint. (Experimental)"""
     usage_event = "cli.checkpoint.run"
     context = toolkit.load_data_context_with_error_handling(
@@ -299,7 +299,7 @@ def print_validation_operator_results_details(
     help="The project's great_expectations directory.",
 )
 @mark.cli_as_experimental
-def checkpoint_script(checkpoint, directory):
+def checkpoint_script(checkpoint, directory) -> None:
     """
     Create a python script to run a checkpoint. (Experimental)
 

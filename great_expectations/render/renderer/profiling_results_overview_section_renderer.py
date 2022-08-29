@@ -33,7 +33,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
     @classmethod
-    def _render_header(cls, evrs, content_blocks):
+    def _render_header(cls, evrs, content_blocks) -> None:
         content_blocks.append(
             RenderedHeaderContent(
                 **{
@@ -57,7 +57,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
     @classmethod
-    def _render_dataset_info(cls, evrs, content_blocks):
+    def _render_dataset_info(cls, evrs, content_blocks) -> None:
         expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(
             evrs["results"], "expect_table_row_count_to_be_between"
         )
@@ -121,7 +121,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
     @classmethod
-    def _render_variable_types(cls, evrs, content_blocks):
+    def _render_variable_types(cls, evrs, content_blocks) -> None:
 
         column_types = cls._get_column_types(evrs)
         # TODO: check if we have the information to make this statement. Do all columns have type expectations?
@@ -154,7 +154,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
     @classmethod
-    def _render_expectation_types(cls, evrs, content_blocks):
+    def _render_expectation_types(cls, evrs, content_blocks) -> None:
 
         type_counts = defaultdict(int)
 

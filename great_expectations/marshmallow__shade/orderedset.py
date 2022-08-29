@@ -24,7 +24,7 @@ from collections.abc import MutableSet
 
 
 class OrderedSet(MutableSet):
-    def __init__(self, iterable=None):
+    def __init__(self, iterable=None) -> None:
         self.end = end = []
         end += [None, end, end]  # sentinel node for doubly linked list
         self.map = {}  # key --> [key, prev, next]
@@ -37,26 +37,26 @@ class OrderedSet(MutableSet):
     def __contains__(self, key):
         return key in self.map
 
-    def add(self, key):
+    def add(self, key) -> None:
         if key not in self.map:
             end = self.end
             curr = end[1]
             curr[2] = end[1] = self.map[key] = [key, curr, end]
 
-    def discard(self, key):
+    def discard(self, key) -> None:
         if key in self.map:
             key, prev, next = self.map.pop(key)
             prev[2] = next
             next[1] = prev
 
-    def __iter__(self):
+    def __iter__(self) -> None:
         end = self.end
         curr = end[2]
         while curr is not end:
             yield curr[0]
             curr = curr[2]
 
-    def __reversed__(self):
+    def __reversed__(self) -> None:
         end = self.end
         curr = end[1]
         while curr is not end:

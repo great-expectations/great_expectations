@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class DateTimeSorter(Sorter):
-    def __init__(self, name: str, orderby: str = "asc", datetime_format="%Y%m%d"):
+    def __init__(
+        self, name: str, orderby: str = "asc", datetime_format="%Y%m%d"
+    ) -> None:
         super().__init__(name=name, orderby=orderby)
 
         if datetime_format and not isinstance(datetime_format, str):

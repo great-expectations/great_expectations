@@ -34,11 +34,12 @@ trigger:
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
+  isManual: $[eq(variables['Build.Reason'], 'Manual')]
 
 stages:
   - stage: user_install_linux
     dependsOn: []
-    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
       - template: azure/user-install-matrix.yml
         parameters:
@@ -46,7 +47,7 @@ stages:
 
   - stage: dev_install_linux
     dependsOn: user_install_linux
-    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
       - template: azure/dev-install-matrix.yml
         parameters:
@@ -54,7 +55,7 @@ stages:
 
   - stage: user_install_macOS
     dependsOn: []
-    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
       - template: azure/user-install-matrix.yml
         parameters:
@@ -62,7 +63,7 @@ stages:
 
   - stage: dev_install_macOS
     dependsOn: user_install_macOS
-    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
       - template: azure/dev-install-matrix.yml
         parameters:
@@ -70,7 +71,7 @@ stages:
 
   - stage: user_install_windows
     dependsOn: []
-    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
       - template: azure/user-install-matrix.yml
         parameters:
@@ -78,7 +79,7 @@ stages:
 
   - stage: dev_install_windows
     dependsOn: user_install_windows
-    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
       - template: azure/dev-install-matrix.yml
         parameters:

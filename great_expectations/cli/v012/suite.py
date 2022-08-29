@@ -31,7 +31,7 @@ except ImportError:
 
 
 @click.group()
-def suite():
+def suite() -> None:
     """Expectation Suite operations"""
     pass
 
@@ -63,7 +63,7 @@ Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"s
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
+def suite_edit(suite, datasource, directory, jupyter, batch_kwargs) -> None:
     """
     Generate a Jupyter notebook for editing an existing Expectation Suite.
 
@@ -95,7 +95,7 @@ def _suite_edit(
     batch_kwargs,
     usage_event,
     suppress_usage_message=False,
-):
+) -> None:
     # suppress_usage_message flag is for the situation where _suite_edit is called by _suite_new().
     # when called by _suite_new(), the flag will be set to False, otherwise it will default to True
     batch_kwargs_json = batch_kwargs
@@ -253,7 +253,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
     default=True,
 )
 @mark.cli_as_beta
-def suite_demo(suite, directory, view):
+def suite_demo(suite, directory, view) -> None:
     """
     Create a new demo Expectation Suite.
 
@@ -291,7 +291,7 @@ def suite_demo(suite, directory, view):
     default=None,
     help="Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary",
 )
-def suite_new(suite, directory, jupyter, batch_kwargs):
+def suite_new(suite, directory, jupyter, batch_kwargs) -> None:
     """
     Create a new empty Expectation Suite.
 
@@ -403,7 +403,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
     help="The project's great_expectations directory.",
 )
 @mark.cli_as_experimental
-def suite_delete(suite, directory):
+def suite_delete(suite, directory) -> None:
     """
     Delete an expectation suite from the expectation store.
     """
@@ -447,7 +447,7 @@ def suite_delete(suite, directory):
     default=True,
 )
 @mark.cli_as_experimental
-def suite_scaffold(suite, directory, jupyter):
+def suite_scaffold(suite, directory, jupyter) -> None:
     """Scaffold a new Expectation Suite."""
     _suite_scaffold(suite, directory, jupyter)
 

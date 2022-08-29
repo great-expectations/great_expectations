@@ -57,7 +57,7 @@ Usage::
 
 
 class DocInherit:
-    def __init__(self, mthd):
+    def __init__(self, mthd) -> None:
         self.mthd = mthd
         self.name = mthd.__name__
         self.mthd_doc = mthd.__doc__
@@ -79,7 +79,7 @@ class DocInherit:
         return f
 
 
-def recursively_convert_to_json_serializable(test_obj):
+def recursively_convert_to_json_serializable(test_obj):  # noqa: C901 - complexity 20
     """
     Helper function to convert a dict object to one that is serializable
 
@@ -188,12 +188,11 @@ def recursively_convert_to_json_serializable(test_obj):
 
     else:
         raise TypeError(
-            "%s is of type %s which cannot be serialized."
-            % (str(test_obj), type(test_obj).__name__)
+            f"{str(test_obj)} is of type {type(test_obj).__name__} which cannot be serialized."
         )
 
 
-def ensure_row_condition_is_correct(row_condition_string):
+def ensure_row_condition_is_correct(row_condition_string) -> None:
     """Ensure no quote nor \\\\n are introduced in row_condition string.
 
     Otherwise it may cause an issue at the reload of the expectation.

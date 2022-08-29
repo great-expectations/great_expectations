@@ -12,7 +12,7 @@ You can read more about the core classes that make Great Expectations run in our
 
 <Prerequisites>
 
-- [Configured and loaded a Data Context](../../tutorials/getting_started/initialize_a_data_context.md)
+- [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
 - [Configured a Datasource and Data Connector](../../reference/datasources.md)
   
 </Prerequisites>

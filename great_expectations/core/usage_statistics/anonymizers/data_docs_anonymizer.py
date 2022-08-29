@@ -37,11 +37,6 @@ class DataDocsAnonymizer(BaseAnonymizer):
         anonymized_site_index_builder = self._anonymize_site_builder_info(
             site_builder_config=site_index_builder_config
         )
-        # Note AJB-20201218 show_cta_footer was removed in v 0.9.9 via PR #1249
-        if "show_cta_footer" in site_index_builder_config:
-            anonymized_site_index_builder[
-                "show_cta_footer"
-            ] = site_index_builder_config.get("show_cta_footer")
         anonymized_info_dict[
             "anonymized_site_index_builder"
         ] = anonymized_site_index_builder

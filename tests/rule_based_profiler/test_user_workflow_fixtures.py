@@ -30,14 +30,14 @@ def test_bobby_fixture_generation(
     assert len(profiler_config) > 0
     assert isinstance(profiler_config, str)
     assert isinstance(
-        bobby_columnar_table_multi_batch["test_configuration_oneshot_estimator"][
+        bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
             "expected_expectation_suite"
         ],
         ExpectationSuite,
     )
     assert (
         len(
-            bobby_columnar_table_multi_batch["test_configuration_oneshot_estimator"][
+            bobby_columnar_table_multi_batch["test_configuration_quantiles_estimator"][
                 "expected_expectation_suite"
             ].expectations
         )

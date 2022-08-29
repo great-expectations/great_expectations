@@ -19,6 +19,7 @@ from great_expectations.cli.cli_messages import (
     SECTION_SEPARATOR,
 )
 from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.exceptions import (
     DataContextError,
@@ -40,7 +41,7 @@ except ImportError:
     default=True,
 )
 @click.pass_context
-def init(ctx, usage_stats):
+def init(ctx: click.Context, usage_stats: bool) -> None:
     """
     Initialize a new Great Expectations project.
 
@@ -104,7 +105,7 @@ def init(ctx, usage_stats):
             )
             send_usage_message(
                 data_context=context,
-                event="cli.init.create",
+                event=UsageStatsEvents.CLI_INIT_CREATE.value,
                 success=True,
             )
         except DataContextError as e:
@@ -117,5 +118,5 @@ def init(ctx, usage_stats):
     sys.exit(0)
 
 
-def _get_full_path_to_ge_dir(target_directory):
+def _get_full_path_to_ge_dir(target_directory: str) -> str:
     return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))

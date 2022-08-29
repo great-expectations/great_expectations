@@ -72,9 +72,6 @@ class BaseAnonymizer(ABC):
                 object_module_name = object_config.get("module_name")
                 object_class = load_class(object_class_name, object_module_name)
 
-            object_class_name = object_class.__name__
-            object_module_name = object_class.__module__
-
             # Utilize candidate list if provided.
             if classes_to_check:
                 for class_to_check in classes_to_check:

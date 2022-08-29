@@ -64,7 +64,8 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         max_results: Optional[int] = None,
         gcs_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+        id: Optional[str] = None,
+    ) -> None:
         """
         ConfiguredAssetDataConnector for connecting to GCS.
 
@@ -86,6 +87,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
 
         super().__init__(
             name=name,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             assets=assets,

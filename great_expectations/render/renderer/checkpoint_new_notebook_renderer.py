@@ -7,7 +7,7 @@ from great_expectations.render.renderer.notebook_renderer import BaseNotebookRen
 
 
 class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
-    def __init__(self, context: DataContext, checkpoint_name: str):
+    def __init__(self, context: DataContext, checkpoint_name: str) -> None:
         super().__init__(context=context)
         self.context = context
         self.checkpoint_name = checkpoint_name
@@ -35,7 +35,7 @@ class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
                     break
         return datasource_candidate
 
-    def _add_header(self):
+    def _add_header(self) -> None:
         self.add_markdown_cell(
             f"""# Create Your Checkpoint
 Use this notebook to configure a new Checkpoint and add it to your project:
@@ -43,7 +43,7 @@ Use this notebook to configure a new Checkpoint and add it to your project:
 **Checkpoint Name**: `{self.checkpoint_name}`"""
         )
 
-    def _add_imports(self):
+    def _add_imports(self) -> None:
         self.add_code_cell(
             """from ruamel.yaml import YAML
 import great_expectations as ge
@@ -55,7 +55,7 @@ context = ge.get_context()
             lint=True,
         )
 
-    def _add_optional_customize_your_config(self):
+    def _add_optional_customize_your_config(self) -> None:
         self.add_markdown_cell(
             """# Customize Your Configuration
 The following cells show examples for listing your current configuration. You can replace values in the sample configuration with these values to customize your Checkpoint."""
@@ -67,7 +67,7 @@ pprint(context.get_available_data_asset_names())""",
         )
         self.add_code_cell("context.list_expectation_suite_names()")
 
-    def _add_sample_checkpoint_config(self):
+    def _add_sample_checkpoint_config(self) -> None:
         self.add_markdown_cell(
             """# Create a Checkpoint Configuration
 
@@ -132,7 +132,7 @@ validations:
                 "Sorry, we were unable to create a sample configuration. Perhaps you don't have a Datasource or Expectation Suite configured."
             )
 
-    def _add_test_and_save_your_checkpoint_configuration(self):
+    def _add_test_and_save_your_checkpoint_configuration(self) -> None:
         self.add_markdown_cell(
             """# Test Your Checkpoint Configuration
 Here we will test your Checkpoint configuration to make sure it is valid.
@@ -146,7 +146,7 @@ If you instead wish to use python instead of yaml to configure your Checkpoint, 
             lint=True,
         )
 
-    def _add_review_checkpoint(self):
+    def _add_review_checkpoint(self) -> None:
         self.add_markdown_cell(
             """# Review Your Checkpoint
 
@@ -154,7 +154,7 @@ You can run the following cell to print out the full yaml configuration. For exa
         )
         self.add_code_cell('print(my_checkpoint.get_config(mode="yaml"))', lint=True)
 
-    def _add_add_checkpoint(self):
+    def _add_add_checkpoint(self) -> None:
         self.add_markdown_cell(
             """# Add Your Checkpoint
 
@@ -165,7 +165,7 @@ Run the following cell to save this Checkpoint to your Checkpoint Store."""
             lint=True,
         )
 
-    def _add_optional_run_checkpoint(self):
+    def _add_optional_run_checkpoint(self) -> None:
         self.add_markdown_cell(
             """# Run Your Checkpoint & Open Data Docs(Optional)
 

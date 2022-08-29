@@ -9,6 +9,14 @@
       "a" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 11],
       "b" : [1, 2, 3, 4, 5, null, null, null, null, null]
     },
+    "data_alt" : {
+      "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "z" : [1, 2, 3, 4, 5, null, null, null, null],
+      "a" : [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "b" : [1, 2, 3, 4, 5, null, null, null, null]
+    },
     "schemas": {
       "spark": {
         "w": "IntegerType",
@@ -49,6 +57,7 @@
       "title" : "basic_negative_example_compare_numbers",
       "include_in_gallery": true,
       "exact_match_out" : false,
+      "suppress_test_for": ["trino"],
       "in": {
         "column_A": "a",
         "column_B": "x"
@@ -78,6 +87,7 @@
     },{
       "title" : "positive_example_with_mostly_compare_numbers",
       "exact_match_out" : false,
+      "suppress_test_for": ["trino"],
       "in": {
         "column_A": "a",
         "column_B": "x",

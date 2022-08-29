@@ -17,7 +17,7 @@ class Metric:
     column name.
     """
 
-    def __init__(self, metric_name, metric_kwargs, metric_value):
+    def __init__(self, metric_name, metric_kwargs, metric_value) -> None:
         self._metric_name = metric_name
         if not isinstance(metric_kwargs, IDDict):
             metric_kwargs = IDDict(metric_kwargs)
@@ -40,7 +40,7 @@ class Metric:
 class MetricIdentifier(DataContextKey):
     """A MetricIdentifier serves as a key to store and retrieve Metrics."""
 
-    def __init__(self, metric_name, metric_kwargs_id):
+    def __init__(self, metric_name, metric_kwargs_id) -> None:
         self._metric_name = metric_name
         self._metric_kwargs_id = metric_kwargs_id
 
@@ -87,7 +87,9 @@ class MetricIdentifier(DataContextKey):
 class BatchMetric(Metric):
     """A BatchMetric is a metric associated with a particular Batch of data."""
 
-    def __init__(self, metric_name, metric_kwargs, batch_identifier, metric_value):
+    def __init__(
+        self, metric_name, metric_kwargs, batch_identifier, metric_value
+    ) -> None:
         super().__init__(metric_name, metric_kwargs, metric_value)
         self._batch_identifier = batch_identifier
 
@@ -105,7 +107,7 @@ class ValidationMetric(Metric):
         metric_name,
         metric_kwargs,
         metric_value,
-    ):
+    ) -> None:
         super().__init__(metric_name, metric_kwargs, metric_value)
         if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
             expectation_suite_identifier = ExpectationSuiteIdentifier(
@@ -155,7 +157,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         expectation_suite_identifier,
         metric_name,
         metric_kwargs_id,
-    ):
+    ) -> None:
         super().__init__(metric_name, metric_kwargs_id)
         if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
             expectation_suite_identifier = ExpectationSuiteIdentifier(

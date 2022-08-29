@@ -10,7 +10,7 @@ def send_usage_message(
     event_payload: Optional[dict] = None,
     api_version: str = "v3",
     success: bool = False,
-):
+) -> None:
     if not event:
         event = None
 

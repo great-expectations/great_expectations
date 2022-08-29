@@ -67,7 +67,7 @@ class SimpleCheckpointConfigurator:
         notify_on: str = "all",
         notify_with: Union[str, List[str]] = "all",
         **kwargs,
-    ):
+    ) -> None:
         """
         After instantiation, call the .build() method to get a new Checkpoint.
 
@@ -217,7 +217,7 @@ class SimpleCheckpointConfigurator:
         if self.site_names in ["all", None]:
             return
 
-    def _validate_notify_on(self):
+    def _validate_notify_on(self) -> None:
         if self.notify_on not in ["all", "success", "failure"]:
             raise ValueError("notify_on must be one of: 'all', 'failure', 'success'")
 
@@ -229,11 +229,11 @@ class SimpleCheckpointConfigurator:
         if not is_list_of_strings(self.notify_with):
             raise ValueError("notify_with must be a list of site names")
 
-    def _validate_slack_webhook(self):
+    def _validate_slack_webhook(self) -> None:
         if self.slack_webhook and not is_sane_slack_webhook(self.slack_webhook):
             raise ValueError("Please provide a valid slack webhook")
 
-    def _validate_slack_configuration(self):
+    def _validate_slack_configuration(self) -> None:
         """Guide the user toward correct configuration."""
         if isinstance(self.notify_with, list) and self.slack_webhook is None:
             raise ValueError(

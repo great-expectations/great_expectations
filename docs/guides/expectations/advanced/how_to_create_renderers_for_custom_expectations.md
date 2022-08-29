@@ -16,11 +16,11 @@ This guide will help you implement renderers for your custom Expectations, allow
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
 - Implemented a custom Expectation.
-- Set up a [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md) site.
-- Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md) containing your custom Expectation.
+- [Set up a Data Docs](../../../terms/data_docs.md) site.
+- Configured an [Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) containing your custom Expectation.
 - Ran one [Checkpoint](../../../guides/validation/how_to_validate_data_by_running_a_checkpoint.md) to validate data.
     
 </Prerequisites>

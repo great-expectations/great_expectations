@@ -38,7 +38,7 @@ class MetaDataset(DataAsset):
     """
 
     @classmethod
-    def column_map_expectation(cls, func):
+    def column_map_expectation(cls, func) -> None:
         """Constructs an expectation using column-map semantics.
 
         The column_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
@@ -229,7 +229,7 @@ class Dataset(MetaDataset):
         "get_column_count_in_range",
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         # NOTE: using caching makes the strong assumption that the user will not modify the core data store
         # (e.g. self.spark_df) over the lifetime of the dataset instance
         self.caching = kwargs.pop("caching", True)
@@ -247,11 +247,11 @@ class Dataset(MetaDataset):
         is suitable really when a constructor knows to take its own type. In general, this should be overridden"""
         return cls(dataset)
 
-    def get_row_count(self):
+    def get_row_count(self) -> None:
         """Returns: int, table row count"""
         raise NotImplementedError
 
-    def get_column_count(self):
+    def get_column_count(self) -> None:
         """Returns: int, table column count"""
         raise NotImplementedError
 
@@ -259,15 +259,15 @@ class Dataset(MetaDataset):
         """Returns: List[str], list of column names"""
         raise NotImplementedError
 
-    def get_column_nonnull_count(self, column):
+    def get_column_nonnull_count(self, column) -> None:
         """Returns: int"""
         raise NotImplementedError
 
-    def get_column_mean(self, column):
+    def get_column_mean(self, column) -> None:
         """Returns: float"""
         raise NotImplementedError
 
-    def get_column_value_counts(self, column, sort="value", collate=None):
+    def get_column_value_counts(self, column, sort="value", collate=None) -> None:
         """Get a series containing the frequency counts of unique values from the named column.
 
         Args:
@@ -284,27 +284,27 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def get_column_sum(self, column):
+    def get_column_sum(self, column) -> None:
         """Returns: float"""
         raise NotImplementedError
 
-    def get_column_max(self, column, parse_strings_as_datetimes=False):
+    def get_column_max(self, column, parse_strings_as_datetimes=False) -> None:
         """Returns: Any"""
         raise NotImplementedError
 
-    def get_column_min(self, column, parse_strings_as_datetimes=False):
+    def get_column_min(self, column, parse_strings_as_datetimes=False) -> None:
         """Returns: Any"""
         raise NotImplementedError
 
-    def get_column_unique_count(self, column):
+    def get_column_unique_count(self, column) -> None:
         """Returns: int"""
         raise NotImplementedError
 
-    def get_column_modes(self, column):
+    def get_column_modes(self, column) -> None:
         """Returns: List[Any], list of modes (ties OK)"""
         raise NotImplementedError
 
-    def get_column_median(self, column):
+    def get_column_median(self, column) -> None:
         """Returns: Any"""
         raise NotImplementedError
 
@@ -322,7 +322,7 @@ class Dataset(MetaDataset):
         """
         raise NotImplementedError
 
-    def get_column_stdev(self, column):
+    def get_column_stdev(self, column) -> None:
         """Returns: float"""
         raise NotImplementedError
 
@@ -384,7 +384,7 @@ class Dataset(MetaDataset):
             raise ValueError("Invalid parameter for bins argument")
         return bins
 
-    def get_column_hist(self, column, bins):
+    def get_column_hist(self, column, bins) -> None:
         """Get a histogram of column values
         Args:
             column: the column for which to generate the histogram
@@ -395,7 +395,7 @@ class Dataset(MetaDataset):
 
     def get_column_count_in_range(
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
-    ):
+    ) -> None:
         """Returns: int"""
         raise NotImplementedError
 
@@ -407,7 +407,7 @@ class Dataset(MetaDataset):
         bins_B=None,
         n_bins_A=None,
         n_bins_B=None,
-    ):
+    ) -> None:
         """Get crosstab of column_A and column_B, binning values if necessary"""
         raise NotImplementedError
 
@@ -974,7 +974,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect each column value to be unique.
 
         This expectation detects duplicates. All duplicated values are counted as exceptions.
@@ -1026,7 +1026,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column values to not be null.
 
         To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an
@@ -1081,7 +1081,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column values to be null.
 
         expect_column_values_to_be_null is a \
@@ -1134,7 +1134,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect a column to contain values of a specified data type.
 
         expect_column_values_to_be_of_type is a :func:`column_aggregate_expectation \
@@ -1201,7 +1201,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect a column to contain values from a specified type list.
 
         expect_column_values_to_be_in_type_list is a :func:`column_aggregate_expectation \
@@ -1272,7 +1272,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         # noinspection PyUnresolvedReferences
         """Expect each column value to be in a given set.
 
@@ -1351,7 +1351,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         # noinspection PyUnresolvedReferences
         """Expect column entries to not be in the set.
 
@@ -1434,7 +1434,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be between a minimum value and a maximum value (inclusive).
 
         expect_column_values_to_be_between is a \
@@ -1506,7 +1506,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column values to be increasing.
 
         By default, this expectation only works for numeric or datetime data.
@@ -1570,7 +1570,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column values to be decreasing.
 
         By default, this expectation only works for numeric or datetime data.
@@ -1640,7 +1640,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
@@ -1706,7 +1706,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be strings with length equal to the provided value.
 
         This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
@@ -1763,7 +1763,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be strings that match a given regular expression. Valid matches can be found \
         anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
         "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
@@ -1823,7 +1823,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
         any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
         "fish", "dog", and the following as unexpected: "cat", "hat".
@@ -1884,7 +1884,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect the column entries to be strings that can be matched to either any of or all of a list of regular
         expressions. Matches can be anywhere in the string.
 
@@ -1947,7 +1947,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect the column entries to be strings that do not match any of a list of regular expressions. Matches can
         be anywhere in the string.
 
@@ -2009,7 +2009,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be strings representing a date or time with a given format.
 
         expect_column_values_to_match_strftime_format is a \
@@ -2059,7 +2059,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be parsable using dateutil.
 
         expect_column_values_to_be_dateutil_parseable is a \
@@ -2107,7 +2107,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be data written in JavaScript Object Notation.
 
         expect_column_values_to_be_json_parseable is a \
@@ -2160,7 +2160,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column entries to be JSON objects matching a given JSON schema.
 
         expect_column_values_to_match_json_schema is a \
@@ -2222,7 +2222,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect the column values to be distributed similarly to a scipy distribution. \
 
@@ -3841,7 +3841,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """Expect column values to be distributed similarly to the provided continuous partition. This expectation \
         compares continuous distributions using a bootstrapped Kolmogorov-Smirnov test. It returns `success=True` if \
         values in the column match the distribution of the provided partition.
@@ -4464,7 +4464,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect the values in column A to be the same as column B.
 
@@ -4510,7 +4510,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect values in column A to be greater than column B.
 
@@ -4559,7 +4559,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect paired values from columns A and B to belong to a set of valid pairs.
 
@@ -4610,7 +4610,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         NOTE: This method is deprecated. Please use expect_select_column_values_to_be_unique_within_record instead
         Expect the values for each record to be unique across the columns listed.
@@ -4664,7 +4664,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect the values for each record to be unique across the columns listed.
         Note that records can be duplicated.
@@ -4717,7 +4717,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """
         Expect that the columns are unique together, e.g. a multi-column primary key
         Note that all instances of any duplicates are considered failed
@@ -4767,7 +4767,7 @@ class Dataset(MetaDataset):
         include_config=True,
         catch_exceptions=None,
         meta=None,
-    ):
+    ) -> None:
         """ Multi-Column Map Expectation
 
         Expects that the sum of row values is the same for each row, summing only values in columns specified in

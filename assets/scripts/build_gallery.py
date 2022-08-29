@@ -6,10 +6,12 @@ import os
 import re
 import sys
 import traceback
+from glob import glob
 from io import StringIO
-from subprocess import CalledProcessError, CompletedProcess, run
-from typing import Dict
+from subprocess import CalledProcessError, CompletedProcess, check_output, run
+from typing import Dict, List
 
+import click
 import pkg_resources
 
 logger = logging.getLogger(__name__)
@@ -73,6 +75,82 @@ def execute_shell_command(command: str) -> int:
     return status_code
 
 
+def get_expectation_file_info_dict(
+    include_core: bool = True,
+    include_contrib: bool = True,
+    only_these_expectations: List[str] = [],
+) -> dict:
+    rx = re.compile(r".*?([A-Za-z]+?Expectation\b).*")
+    result = {}
+    files_found = []
+    oldpwd = os.getcwd()
+    os.chdir(f"..{os.path.sep}..")
+    repo_path = os.getcwd()
+    logger.debug(
+        "Finding Expectation files in the repo and getting their create/update times"
+    )
+
+    if include_core:
+        files_found.extend(
+            glob(
+                os.path.join(
+                    repo_path,
+                    "great_expectations",
+                    "expectations",
+                    "core",
+                    "expect_*.py",
+                ),
+                recursive=True,
+            )
+        )
+    if include_contrib:
+        files_found.extend(
+            glob(
+                os.path.join(repo_path, "contrib", "**", "expect_*.py"),
+                recursive=True,
+            )
+        )
+
+    for file_path in sorted(files_found):
+        file_path = file_path.replace(f"{repo_path}{os.path.sep}", "")
+        name = os.path.basename(file_path).replace(".py", "")
+        if only_these_expectations and name not in only_these_expectations:
+            continue
+
+        updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
+        created_at_cmd = (
+            f'git log --diff-filter=A --format="%ai %ar" -- {repr(file_path)}'
+        )
+        result[name] = {
+            "updated_at": check_output(updated_at_cmd, shell=True)
+            .decode("utf-8")
+            .strip(),
+            "created_at": check_output(created_at_cmd, shell=True)
+            .decode("utf-8")
+            .strip(),
+            "path": file_path,
+        }
+        logger.debug(
+            f"{name} was created {result[name]['created_at']} and updated {result[name]['updated_at']}"
+        )
+        with open(file_path, "r") as fp:
+            text = fp.read()
+
+        exp_type_set = set()
+        for line in re.split("\r?\n", text):
+            match = rx.match(line)
+            if match:
+                if not line.strip().startswith("#"):
+                    exp_type_set.add(match.group(1))
+        result[name]["exp_type"] = sorted(exp_type_set)[0]
+        logger.debug(
+            f"Expectation type {sorted(exp_type_set)[0]} for {name} in {file_path}"
+        )
+
+    os.chdir(oldpwd)
+    return result
+
+
 def get_contrib_requirements(filepath: str) -> Dict:
     """
     Parse the python file from filepath to identify a "library_metadata" dictionary in any defined classes, and return a requirements_info object that includes a list of pip-installable requirements for each class that defines them.
@@ -108,19 +186,30 @@ def get_contrib_requirements(filepath: str) -> Dict:
                 if "library_metadata" in target_ids:
                     library_metadata = ast.literal_eval(node.value)
                     requirements = library_metadata.get("requirements", [])
+                    if type(requirements) == str:
+                        requirements = [requirements]
                     requirements_info[current_class] = requirements
                     requirements_info["requirements"] += requirements
 
     return requirements_info
 
 
-def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Dict:
+def build_gallery(
+    include_core: bool = True,
+    include_contrib: bool = True,
+    ignore_suppress: bool = False,
+    ignore_only_for: bool = False,
+    only_these_expectations: List[str] = [],
+    only_consider_these_backends: List[str] = [],
+) -> Dict:
     """
     Build the gallery object by running diagnostics for each Expectation and returning the resulting reports.
 
     Args:
         include_core: if true, include Expectations defined in the core module
-        include_contrib_experimental: if true, include Expectations defined in contrib_experimental:
+        include_contrib: if true, include Expectations defined in contrib:
+        only_these_expectations: list of specific Expectations to include
+        only_consider_these_backends: list of backends to consider running tests against
 
     Returns:
         None
@@ -133,19 +222,28 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
     installed_packages_txt = sorted(f"{i.key}=={i.version}" for i in installed_packages)
     logger.debug(f"Found the following packages: {installed_packages_txt}")
 
+    expectation_file_info = get_expectation_file_info_dict(
+        include_core=include_core,
+        include_contrib=include_contrib,
+        only_these_expectations=only_these_expectations,
+    )
     import great_expectations
 
+    core_expectations = (
+        great_expectations.expectations.registry.list_registered_expectation_implementations()
+    )
     if include_core:
         print("\n\n\n=== (Core) ===")
         logger.info("Getting base registered expectations list")
-        core_expectations = (
-            great_expectations.expectations.registry.list_registered_expectation_implementations()
-        )
         logger.debug(f"Found the following expectations: {sorted(core_expectations)}")
         for expectation in core_expectations:
+            if only_these_expectations and expectation not in only_these_expectations:
+                # logger.debug(f"Skipping {expectation} since it's not requested")
+                continue
             requirements_dict[expectation] = {"group": "core"}
 
     just_installed = set()
+    failed_to_import_set = set()
 
     if include_contrib:
         print("\n\n\n=== (Contrib) ===")
@@ -170,14 +268,24 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
                     sys.path.append(os.path.dirname(root))
             for filename in files:
                 if filename.endswith(".py") and filename.startswith("expect_"):
+                    if (
+                        only_these_expectations
+                        and filename.replace(".py", "") not in only_these_expectations
+                    ):
+                        # logger.debug(f"Skipping {filename} since it's not requested")
+                        continue
                     logger.debug(f"Getting requirements for module {filename}")
                     contrib_subdir_name = os.path.basename(os.path.dirname(root))
                     requirements_dict[filename[:-3]] = get_contrib_requirements(
                         os.path.join(root, filename)
                     )
                     requirements_dict[filename[:-3]]["group"] = contrib_subdir_name
+        logger.info("Done finding contrib modules")
 
     for expectation in sorted(requirements_dict):
+        # Temp
+        if expectation == "expect_column_kl_divergence_to_be_less_than":
+            continue
         group = requirements_dict[expectation]["group"]
         print(f"\n\n\n=== {expectation} ({group}) ===")
         requirements = requirements_dict[expectation].get("requirements", [])
@@ -205,21 +313,27 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
                     importlib.import_module(f"expectations.{expectation}", group)
                 else:
                     importlib.import_module(f"{group}.expectations")
-            except ModuleNotFoundError as e:
+            except (ModuleNotFoundError, ImportError, Exception) as e:
                 logger.error(f"Failed to load expectation: {expectation}")
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
                     f"\n\n----------------\n{expectation} ({group})\n"
                 )
                 expectation_tracebacks.write(traceback.format_exc())
+                failed_to_import_set.add(expectation)
                 continue
 
         logger.debug(f"Running diagnostics for expectation: {expectation}")
-        impl = great_expectations.expectations.registry.get_expectation_impl(
-            expectation
-        )
         try:
-            diagnostics = impl().run_diagnostics(return_only_gallery_examples=True)
+            impl = great_expectations.expectations.registry.get_expectation_impl(
+                expectation
+            )
+            diagnostics = impl().run_diagnostics(
+                ignore_suppress=ignore_suppress,
+                ignore_only_for=ignore_only_for,
+                debug_logger=logger,
+                only_consider_these_backends=only_consider_these_backends,
+            )
             checklist_string = diagnostics.generate_checklist()
             expectation_checklists.write(
                 f"\n\n----------------\n{expectation} ({group})\n"
@@ -239,6 +353,15 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
         else:
             try:
                 gallery_info[expectation] = diagnostics.to_json_dict()
+                gallery_info[expectation]["created_at"] = expectation_file_info[
+                    expectation
+                ]["created_at"]
+                gallery_info[expectation]["updated_at"] = expectation_file_info[
+                    expectation
+                ]["updated_at"]
+                gallery_info[expectation]["exp_type"] = expectation_file_info[
+                    expectation
+                ].get("exp_type")
             except TypeError as e:
                 logger.error(f"Failed to create JSON for: {expectation}")
                 print(traceback.format_exc())
@@ -257,10 +380,30 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
             execute_shell_command(f'pip uninstall -y "{req}"')
 
     expectation_filenames_set = set(requirements_dict.keys())
-    registered_expectations_set = set(
+    full_registered_expectations_set = set(
         great_expectations.expectations.registry.list_registered_expectation_implementations()
     )
-    non_matched_filenames = expectation_filenames_set - registered_expectations_set
+    if only_these_expectations:
+        registered_expectations_set = (
+            set(only_these_expectations) & full_registered_expectations_set
+        )
+        expectation_filenames_set = (
+            set(only_these_expectations) & expectation_filenames_set
+        )
+    elif not include_core:
+        registered_expectations_set = full_registered_expectations_set - set(
+            core_expectations
+        )
+    else:
+        registered_expectations_set = full_registered_expectations_set
+    non_matched_filenames = (
+        expectation_filenames_set - registered_expectations_set - failed_to_import_set
+    )
+    if failed_to_import_set:
+        expectation_tracebacks.write(f"\n\n----------------\n(Not a traceback)\n")
+        expectation_tracebacks.write("Expectations that failed to import:\n")
+        for expectation in sorted(failed_to_import_set):
+            expectation_tracebacks.write(f"- {expectation}\n")
     if non_matched_filenames:
         expectation_tracebacks.write(f"\n\n----------------\n(Not a traceback)\n")
         expectation_tracebacks.write(
@@ -278,7 +421,7 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
         for exp_name in bad_names:
             expectation_tracebacks.write(f"- {exp_name}\n")
 
-    if include_core:
+    if include_core and not only_these_expectations:
         core_dir = os.path.join(
             os.path.dirname(__file__),
             "..",
@@ -379,21 +522,80 @@ def format_docstring_to_markdown(docstr: str) -> str:
     return clean_docstr
 
 
-if __name__ == "__main__":
-    gallery_info = build_gallery(include_core=True, include_contrib=True)
+@click.command()
+@click.option(
+    "--no-core",
+    "-C",
+    "no_core",
+    is_flag=True,
+    default=False,
+    help="Do not include core Expectations",
+)
+@click.option(
+    "--no-contrib",
+    "-c",
+    "no_contrib",
+    is_flag=True,
+    default=False,
+    help="Do not include contrib/package Expectations",
+)
+@click.option(
+    "--ignore-suppress",
+    "-S",
+    "ignore_suppress",
+    is_flag=True,
+    default=False,
+    help="Ignore the suppress_test_for list on Expectation sample tests",
+)
+@click.option(
+    "--ignore-only-for",
+    "-O",
+    "ignore_only_for",
+    is_flag=True,
+    default=False,
+    help="Ignore the only_for list on Expectation sample tests",
+)
+@click.option(
+    "--outfile-name",
+    "-o",
+    "outfile_name",
+    default="expectation_library_v2.json",
+    help="Name for the generated JSON file",
+)
+@click.option(
+    "--backends",
+    "-b",
+    "backends",
+    help="Backends to consider running tests against (comma-separated)",
+)
+@click.argument("args", nargs=-1)
+def main(**kwargs):
+    """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2.json
+
+    - args: snake_name of specific Expectations to include (useful for testing)
+    """
+    backends = []
+    if kwargs["backends"]:
+        backends = [name.strip() for name in kwargs["backends"].split(",")]
+    gallery_info = build_gallery(
+        include_core=not kwargs["no_core"],
+        include_contrib=not kwargs["no_contrib"],
+        ignore_suppress=kwargs["ignore_suppress"],
+        ignore_only_for=kwargs["ignore_only_for"],
+        only_these_expectations=kwargs["args"],
+        only_consider_these_backends=backends,
+    )
     tracebacks = expectation_tracebacks.getvalue()
     checklists = expectation_checklists.getvalue()
     if tracebacks != "":
-        print("\n\n\n" + "#" * 30 + "   T R A C E B A C K S   " + "#" * 30 + "\n")
-        print(tracebacks)
-        print(
-            "\n\n" + "#" * 30 + "   E N D   T R A C E B A C K S   " + "#" * 30 + "\n\n"
-        )
-        with open("./gallery-errors.txt", "w") as outfile:
+        with open("./gallery-tracebacks.txt", "w") as outfile:
             outfile.write(tracebacks)
     if checklists != "":
-        print(checklists)
         with open("./checklists.txt", "w") as outfile:
             outfile.write(checklists)
-    with open("./expectation_library_v2.json", "w") as outfile:
+    with open(f"./{kwargs['outfile_name']}", "w") as outfile:
         json.dump(gallery_info, outfile, indent=4)
+
+
+if __name__ == "__main__":
+    main()

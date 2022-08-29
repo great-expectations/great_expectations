@@ -11,7 +11,7 @@ class ExceptionInfo(SerializableDotDict):
         exception_traceback: str,
         exception_message: str,
         raised_exception: bool = True,
-    ):
+    ) -> None:
         super().__init__(
             exception_traceback=exception_traceback,
             exception_message=exception_message,

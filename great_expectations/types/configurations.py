@@ -4,7 +4,7 @@ from great_expectations.marshmallow__shade import Schema, fields
 class ClassConfig:
     """Defines information sufficient to identify a class to be (dynamically) loaded for a DataContext."""
 
-    def __init__(self, class_name, module_name=None):
+    def __init__(self, class_name, module_name=None) -> None:
         self._class_name = class_name
         self._module_name = module_name
 

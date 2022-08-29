@@ -3,18 +3,23 @@ from typing import Dict
 import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
+    ParameterBuilder,
     SimpleDateFormatStringParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
     DEFAULT_CANDIDATE_STRINGS,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+    ParameterNode,
+)
 
 
 def test_simple_date_format_parameter_builder_instantiation(
@@ -38,15 +43,18 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
-    date_format_string_parameter: SimpleDateFormatStringParameterBuilder = (
+    date_format_string_parameter: ParameterBuilder = (
         SimpleDateFormatStringParameterBuilder(
             name="my_simple_date_format_string_parameter_builder",
             data_context=data_context,
         )
     )
 
-    domain: Domain = Domain(domain_type=MetricDomainTypes.COLUMN)
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        rule_name="my_rule",
+    )
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -59,7 +67,7 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
 
     assert (
         str(e.value)
-        == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of batch identifiers."
+        == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of Batch identifiers."
     )
 
 
@@ -80,7 +88,6 @@ def test_simple_date_format_parameter_builder_alice(
         SimpleDateFormatStringParameterBuilder(
             name="my_date_format",
             metric_domain_kwargs=metric_domain_kwargs,
-            batch_request=batch_request,
             data_context=data_context,
         )
     )
@@ -88,10 +95,12 @@ def test_simple_date_format_parameter_builder_alice(
     assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
     assert date_format_string_parameter._threshold == 1.0
 
-    domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+    domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -101,6 +110,7 @@ def test_simple_date_format_parameter_builder_alice(
     date_format_string_parameter.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     # noinspection PyTypeChecker
@@ -175,14 +185,14 @@ def test_simple_date_format_parameter_builder_alice(
         },
     }
 
-    actual_value: dict = get_parameter_value_and_validate_return_type(
+    parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         parameter_reference=fully_qualified_parameter_name_for_value,
         expected_return_type=dict,
         domain=domain,
         parameters=parameters,
     )
 
-    assert actual_value == expected_value
+    assert parameter_node == expected_value
 
 
 def test_simple_date_format_parameter_builder_bobby(
@@ -210,7 +220,6 @@ def test_simple_date_format_parameter_builder_bobby(
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_strings=candidate_strings,
             threshold=threshold,
-            batch_request=batch_request,
             data_context=data_context,
         )
     )
@@ -218,10 +227,12 @@ def test_simple_date_format_parameter_builder_bobby(
     assert date_format_string_parameter._candidate_strings == set(candidate_strings)
     assert date_format_string_parameter._threshold == 0.9
 
-    domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+    domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -231,6 +242,7 @@ def test_simple_date_format_parameter_builder_bobby(
     date_format_string_parameter.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     assert (
@@ -243,14 +255,14 @@ def test_simple_date_format_parameter_builder_bobby(
     )
     expected_value: str = "%Y-%m-%d %H:%M:%S"
 
-    actual_value: str = get_parameter_value_and_validate_return_type(
+    parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         parameter_reference=fully_qualified_parameter_name_for_value,
         expected_return_type=str,
         domain=domain,
         parameters=parameters,
     )
 
-    assert actual_value == expected_value
+    assert parameter_node == expected_value
 
     fully_qualified_parameter_name_for_meta: str = (
         "$parameter.my_simple_date_format_string_parameter_builder.details"

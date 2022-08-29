@@ -24,11 +24,36 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 )
 from great_expectations.util import deep_filter_properties_iterable, lint_code
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.render.renderer.v3.test_suite_profile_notebook_renderer import (
+    EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER,
+)
 from tests.render.test_util import (
     find_code_in_notebook,
     load_notebook_from_path,
     run_notebook,
 )
+
+PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER: str = """\
+profiler = UserConfigurableProfiler(
+    profile_dataset=validator,
+    excluded_expectations=None,
+    ignored_columns=exclude_column_names,
+    not_null_only=False,
+    primary_or_compound_key=None,
+    semantic_types_dict=None,
+    table_expectations_only=False,
+    value_set_threshold="MANY",
+)
+suite = profiler.build_suite()
+validator.expectation_suite = suite
+"""
+PROFILER_CODE_CELL_ONBOARDING_DATA_ASSISTANT: str = """\
+data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+    batch_request=batch_request,
+    exclude_column_names=exclude_column_names,
+)
+validator.expectation_suite = data_assistant_result.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+"""
 
 
 def test_suite_help_output(caplog):
@@ -3113,19 +3138,9 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     )
     assert len(cells_of_interest_dict) == 1
 
-    profiler_code_cell: str = """\
-profiler = UserConfigurableProfiler(
-    profile_dataset=validator,
-    excluded_expectations=None,
-    ignored_columns=ignored_columns,
-    not_null_only=False,
-    primary_or_compound_key=False,
-    semantic_types_dict=None,
-    table_expectations_only=False,
-    value_set_threshold="MANY",
-)
-suite = profiler.build_suite()"""
-    profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
+    profiler_code_cell: str = lint_code(
+        code=PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER
+    ).rstrip("\n")
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
         nb=load_notebook_from_path(notebook_path=expected_notebook_path),
@@ -3143,35 +3158,29 @@ suite = profiler.build_suite()"""
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
+    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+    expected_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER
+
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert suite.expectations == [
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_table_columns_to_match_ordered_list",
-                "kwargs": {
-                    "column_list": [
-                        "Unnamed: 0",
-                        "Name",
-                        "PClass",
-                        "Age",
-                        "Sex",
-                        "Survived",
-                        "SexCode",
-                    ]
-                },
-                "meta": {},
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_table_row_count_to_be_between",
-                "kwargs": {"max_value": 1313, "min_value": 1313},
-                "meta": {},
-            }
-        ),
-    ]
+
+    expectation_configurations: List[ExpectationConfiguration] = []
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in suite.expectations:
+        kwargs: dict = expectation_configuration.kwargs
+        key: str
+        value: Any
+        kwargs = {
+            key: sorted(value) if isinstance(value, (list, set, tuple)) else value
+            for key, value in kwargs.items()
+        }
+        expectation_configuration.kwargs = kwargs
+        expectation_configurations.append(expectation_configuration)
+
+    assert expectation_configurations == expected_expectation_configurations
 
     assert mock_subprocess.call_count == 0
 
@@ -3354,19 +3363,9 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     )
     assert len(cells_of_interest_dict) == 1
 
-    profiler_code_cell: str = """\
-profiler = UserConfigurableProfiler(
-    profile_dataset=validator,
-    excluded_expectations=None,
-    ignored_columns=ignored_columns,
-    not_null_only=False,
-    primary_or_compound_key=False,
-    semantic_types_dict=None,
-    table_expectations_only=False,
-    value_set_threshold="MANY",
-)
-suite = profiler.build_suite()"""
-    profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
+    profiler_code_cell: str = lint_code(
+        code=PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER
+    ).rstrip("\n")
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
         nb=load_notebook_from_path(notebook_path=expected_notebook_path),
@@ -3384,35 +3383,29 @@ suite = profiler.build_suite()"""
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
+    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+    expected_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER
+
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert suite.expectations == [
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_table_columns_to_match_ordered_list",
-                "kwargs": {
-                    "column_list": [
-                        "Unnamed: 0",
-                        "Name",
-                        "PClass",
-                        "Age",
-                        "Sex",
-                        "Survived",
-                        "SexCode",
-                    ]
-                },
-                "meta": {},
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_table_row_count_to_be_between",
-                "kwargs": {"max_value": 1313, "min_value": 1313},
-                "meta": {},
-            }
-        ),
-    ]
+
+    expectation_configurations: List[ExpectationConfiguration] = []
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in suite.expectations:
+        kwargs: dict = expectation_configuration.kwargs
+        key: str
+        value: Any
+        kwargs = {
+            key: sorted(value) if isinstance(value, (list, set, tuple)) else value
+            for key, value in kwargs.items()
+        }
+        expectation_configuration.kwargs = kwargs
+        expectation_configurations.append(expectation_configuration)
+
+    assert expectation_configurations == expected_expectation_configurations
 
     assert mock_subprocess.call_count == 1
     call_args: List[str] = mock_subprocess.call_args[0][0]
@@ -3604,9 +3597,12 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = f"""\
-suite = context.run_profiler_with_dynamic_arguments(
+result = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
-    expectation_suite=validator.expectation_suite
+    batch_request=batch_request,
+)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
 )
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
@@ -3728,9 +3724,12 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = f"""\
-suite = context.run_profiler_with_dynamic_arguments(
+result = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
-    expectation_suite=validator.expectation_suite
+    batch_request=batch_request,
+)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
 )
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")

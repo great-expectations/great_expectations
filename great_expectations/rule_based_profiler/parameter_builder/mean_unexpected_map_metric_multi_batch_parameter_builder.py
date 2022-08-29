@@ -1,35 +1,40 @@
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Union
 
 import numpy as np
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
-    MetricMultiBatchParameterBuilder,
+from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricValues,
 )
-from great_expectations.rule_based_profiler.types import (
-    PARAMETER_KEY,
-    Domain,
+from great_expectations.rule_based_profiler.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    RAW_PARAMETER_KEY,
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.types.attributes import Attributes
 
 
 class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
     MetricMultiBatchParameterBuilder
 ):
     """
-    Compute mean unexpected count ratio (as a fraction) of a specified map-style metric across all specified batches.
+    Compute mean unexpected count ratio (as a fraction) of specified map-style metric across every Batch of data given.
     """
 
     exclude_field_names: Set[
         str
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "metric_name",
+        "single_batch_mode",
         "enforce_numeric_metric",
         "replace_nan_with_zero",
         "reduce_scalar_metric",
@@ -46,13 +51,8 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         Args:
             name: the name of this parameter -- this is user-specified parameter name (from configuration);
@@ -67,10 +67,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -81,9 +78,6 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             replace_nan_with_zero=True,
             reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
         )
 
@@ -108,12 +102,13 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+        recompute_existing_parameter_values: bool = False,
+    ) -> Attributes:
         """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-        details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         # Obtain total_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         total_count_parameter_builder_name: str = (
@@ -127,7 +122,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         )
 
         fully_qualified_total_count_parameter_builder_name: str = (
-            f"{PARAMETER_KEY}{total_count_parameter_builder_name}"
+            f"{RAW_PARAMETER_KEY}{total_count_parameter_builder_name}"
         )
         # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         total_count_parameter_node: ParameterNode = (
@@ -139,7 +134,9 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 parameters=parameters,
             )
         )
-        total_count_values: MetricValues = total_count_parameter_node.value
+        total_count_values: MetricValues = total_count_parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+        ]
 
         # Obtain null_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         null_count_parameter_builder_name: Optional[
@@ -164,7 +161,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             null_count_values = np.zeros(shape=(num_batch_ids,))
         else:
             fully_qualified_null_count_parameter_builder_name: str = (
-                f"{PARAMETER_KEY}{null_count_parameter_builder_name}"
+                f"{RAW_PARAMETER_KEY}{null_count_parameter_builder_name}"
             )
             # Obtain null_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
             null_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
@@ -174,7 +171,9 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 variables=variables,
                 parameters=parameters,
             )
-            null_count_values = null_count_parameter_node.value
+            null_count_values = null_count_parameter_node[
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+            ]
 
         nonnull_count_values: np.ndarray = total_count_values - null_count_values
 
@@ -184,24 +183,31 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
+            recompute_existing_parameter_values=recompute_existing_parameter_values,
         )
 
         # Retrieve "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self.fully_qualified_parameter_name,
+            parameter_reference=self.raw_fully_qualified_parameter_name,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
-        unexpected_count_values: MetricValues = parameter_node.value
+        unexpected_count_values: MetricValues = parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+        ]
 
         unexpected_count_ratio_values: np.ndarray = (
             unexpected_count_values / nonnull_count_values
         )
         mean_unexpected_count_ratio: np.float64 = np.mean(unexpected_count_ratio_values)
 
-        return (
-            mean_unexpected_count_ratio,
-            parameter_node.details,
+        return Attributes(
+            {
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: mean_unexpected_count_ratio,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                ],
+            }
         )

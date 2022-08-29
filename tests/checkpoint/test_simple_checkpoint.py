@@ -16,6 +16,10 @@ from great_expectations.checkpoint.checkpoint import (
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
+)
+from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.util import deep_filter_properties_iterable
 
 
@@ -434,6 +438,7 @@ def test_simple_checkpoint_persisted_to_store(
         "batch_request": {},
         "class_name": "Checkpoint",
         "config_version": 1.0,
+        "default_validation_id": None,
         "evaluation_parameters": {},
         "expectation_suite_ge_cloud_id": None,
         "expectation_suite_name": None,
@@ -3013,7 +3018,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     result = checkpoint.run()
-    assert result["success"] == False
+    assert result["success"] is False
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
@@ -3106,7 +3111,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     result = checkpoint.run()
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 1
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -3122,7 +3127,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 2
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -3210,7 +3215,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     context.add_checkpoint(**checkpoint_config)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
-    assert result["success"] == False
+    assert result["success"] is False
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
@@ -3302,7 +3307,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     context.add_checkpoint(**checkpoint_config)
 
     result = context.run_checkpoint(checkpoint_name="my_checkpoint")
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 1
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -3321,7 +3326,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
         checkpoint_name="my_checkpoint",
         validations=[{"batch_request": runtime_batch_request}],
     )
-    assert result["success"] == False
+    assert result["success"] is False
     assert len(result.run_results.values()) == 2
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -3461,3 +3466,47 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_validations_into_checkpo
         match='batch_data found in validations cannot be saved to CheckpointStore "checkpoint_store"',
     ):
         context.add_checkpoint(**checkpoint_config)
+
+
+@pytest.mark.integration
+def test_simple_checkpoint_result_validations_include_rendered_content(
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
+    sa,
+):
+    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    expectation_suite_name = "my_expectation_suite"
+    include_rendered_content = True
+
+    # add checkpoint config
+    checkpoint_config = {
+        "class_name": "SimpleCheckpoint",
+        "validations": [
+            {
+                "batch_request": batch_request,
+                "expectation_suite_name": expectation_suite_name,
+                "include_rendered_content": include_rendered_content,
+            }
+        ],
+    }
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint", data_context=context, **checkpoint_config
+    )
+
+    result: CheckpointResult = checkpoint.run()
+
+    validation_result_identifier: ValidationResultIdentifier = (
+        result.list_validation_result_identifiers()[0]
+    )
+    expectation_validation_result: ExpectationValidationResult = result.run_results[
+        validation_result_identifier
+    ]["validation_result"]
+    for result in expectation_validation_result.results:
+        for rendered_content in result.rendered_content:
+            assert isinstance(rendered_content, RenderedAtomicContent)

@@ -10,7 +10,7 @@ import warnings
 from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
-from typing import List
+from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
 
@@ -27,6 +27,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
@@ -44,7 +45,7 @@ class DataAsset:
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "DataAsset"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """
         Initialize the DataAsset.
 
@@ -142,8 +143,8 @@ class DataAsset:
             self
         )
 
-    @classmethod
-    def expectation(cls, method_arg_names):
+    @classmethod  # noqa: C901 - complexity 24
+    def expectation(cls, method_arg_names):  # noqa: C901
         """Manages configuration and running of expectation objects.
 
         Expectation builds and saves a new expectation configuration to the DataAsset object. It is the core decorator \
@@ -329,7 +330,10 @@ class DataAsset:
 
                 return_obj = recursively_convert_to_json_serializable(return_obj)
 
-                if self._data_context is not None:
+                # NOTE: <DataContextRefactor> Indirect way to checking whether _data_context is a ExplorerDataContext
+                if self._data_context is not None and hasattr(
+                    self._data_context, "update_return_obj"
+                ):
                     return_obj = self._data_context.update_return_obj(self, return_obj)
 
                 return return_obj
@@ -339,8 +343,10 @@ class DataAsset:
         return outer_wrapper
 
     def _initialize_expectations(
-        self, expectation_suite=None, expectation_suite_name=None
-    ):
+        self,
+        expectation_suite: Union[Dict, ExpectationSuite, None] = None,
+        expectation_suite_name: Optional[str] = None,
+    ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
             `include_config`: False,
@@ -368,7 +374,7 @@ class DataAsset:
                 expectation_suite_dict: dict = expectationSuiteSchema.load(
                     expectation_suite
                 )
-                expectation_suite: ExpectationSuite = ExpectationSuite(
+                expectation_suite = ExpectationSuite(
                     **expectation_suite_dict, data_context=self._data_context
                 )
             else:
@@ -404,7 +410,7 @@ class DataAsset:
             "result_format": "BASIC",
         }
 
-    def append_expectation(self, expectation_config):
+    def append_expectation(self, expectation_config) -> None:
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
         # deprecated-v0.12.0
         warnings.warn(
@@ -465,7 +471,7 @@ class DataAsset:
             remove_multiple_matches=remove_multiple_matches,
         )
 
-    def set_config_value(self, key, value):
+    def set_config_value(self, key, value) -> None:
         self._config[key] = value
 
     def get_config_value(self, key):
@@ -487,7 +493,7 @@ class DataAsset:
     def batch_parameters(self):
         return self._batch_parameters
 
-    def discard_failing_expectations(self):
+    def discard_failing_expectations(self) -> None:
         res = self.validate(only_return_failures=True).results
         if any(res):
             for item in res:
@@ -516,7 +522,7 @@ class DataAsset:
         """
         return self.default_expectation_args
 
-    def set_default_expectation_argument(self, argument, value):
+    def set_default_expectation_argument(self, argument, value) -> None:
         """Set a default expectation argument for this data_asset
 
         Args:
@@ -555,7 +561,7 @@ class DataAsset:
             suppress_warnings,
         )
 
-    def get_expectation_suite(
+    def get_expectation_suite(  # noqa: C901 - complexity 17
         self,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
@@ -612,9 +618,8 @@ class DataAsset:
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (
-                " Omitting %d expectation(s) that failed when last run; set "
+                f" Omitting {discards['failed_expectations']} expectation(s) that failed when last run; set "
                 "discard_failed_expectations=False to include them."
-                % discards["failed_expectations"]
             )
 
         for expectation in expectations:
@@ -666,7 +671,7 @@ class DataAsset:
         discard_include_config_kwargs=True,
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False,
-    ):
+    ) -> None:
         """Writes ``_expectation_config`` to a JSON file.
 
            Writes the DataAsset's expectation config to the specified JSON ``filepath``. Failing expectations \
@@ -716,7 +721,7 @@ class DataAsset:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    def validate(
+    def validate(  # noqa: C901 - complexity 36
         self,
         expectation_suite=None,
         run_id=None,
@@ -845,19 +850,18 @@ class DataAsset:
                         expectation_suite_dict: dict = expectationSuiteSchema.loads(
                             infile.read()
                         )
-                        expectation_suite: ExpectationSuite = ExpectationSuite(
+                        expectation_suite = ExpectationSuite(
                             **expectation_suite_dict, data_context=self._data_context
                         )
                 except ValidationError:
                     raise
                 except OSError:
                     raise GreatExpectationsError(
-                        "Unable to load expectation suite: IO error while reading %s"
-                        % expectation_suite
+                        f"Unable to load expectation suite: IO error while reading {expectation_suite}"
                     )
             elif isinstance(expectation_suite, dict):
                 expectation_suite_dict: dict = expectation_suite
-                expectation_suite: ExpectationSuite = ExpectationSuite(
+                expectation_suite = ExpectationSuite(
                     **expectation_suite_dict, data_context=None
                 )
             elif not isinstance(expectation_suite, ExpectationSuite):
@@ -868,7 +872,7 @@ class DataAsset:
                 if getattr(data_context, "_usage_statistics_handler", None):
                     handler = data_context._usage_statistics_handler
                     handler.send_usage_message(
-                        event="data_asset.validate",
+                        event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
                         event_payload=handler.anonymizer.anonymize(obj=self),
                         success=False,
                     )
@@ -901,9 +905,6 @@ class DataAsset:
 
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
-            suite_ge_version = expectation_suite.meta.get(
-                "great_expectations_version"
-            ) or expectation_suite.meta.get("great_expectations.__version__")
 
             ###
             # This is an early example of what will become part of the ValidationOperator
@@ -1028,7 +1029,7 @@ class DataAsset:
             if getattr(data_context, "_usage_statistics_handler", None):
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
-                    event="data_asset.validate",
+                    event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
                     event_payload=handler.anonymizer.anonymize(obj=self),
                     success=False,
                 )
@@ -1039,7 +1040,7 @@ class DataAsset:
         if getattr(data_context, "_usage_statistics_handler", None):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event="data_asset.validate",
+                event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
                 event_payload=handler.anonymizer.anonymize(obj=self),
                 success=True,
             )
@@ -1060,7 +1061,7 @@ class DataAsset:
         else:
             return default_value
 
-    def set_evaluation_parameter(self, parameter_name, parameter_value):
+    def set_evaluation_parameter(self, parameter_name, parameter_value) -> None:
         """Provide a value to be stored in the data_asset evaluation_parameters object and used to evaluate
         parameterized expectations.
 
@@ -1079,7 +1080,7 @@ class DataAsset:
         batch_markers=None,
         batch_parameters=None,
         citation_date=None,
-    ):
+    ) -> None:
         if batch_kwargs is None:
             batch_kwargs = self.batch_kwargs
         if batch_markers is None:
@@ -1100,7 +1101,7 @@ class DataAsset:
         return self._expectation_suite.expectation_suite_name
 
     @expectation_suite_name.setter
-    def expectation_suite_name(self, expectation_suite_name):
+    def expectation_suite_name(self, expectation_suite_name) -> None:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite.expectation_suite_name = expectation_suite_name
 

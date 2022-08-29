@@ -1,14 +1,33 @@
 import copy
 import datetime
+import hashlib
 import logging
+import math
+import os
+import random
+import re
+import string
 import traceback
 import warnings
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
+
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.execution_engine.bundled_metric_configuration import (
+    BundledMetricConfiguration,
+)
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
+    SqlAlchemyDataSampler,
+)
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
+    SqlAlchemyDataSplitter,
+)
+
 del get_versions  # isort:skip
 
 
@@ -18,7 +37,6 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
@@ -60,21 +78,31 @@ except ImportError:
     sa = None
 
 try:
+    from sqlalchemy.engine import Dialect, Row
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import TextClause, quoted_name
+    from sqlalchemy.sql.elements import (
+        BooleanClauseList,
+        Label,
+        TextClause,
+        quoted_name,
+    )
 except ImportError:
+    Row = None
+    Dialect = None
     reflection = None
     DefaultDialect = None
     Selectable = None
+    BooleanClauseList = None
     TextClause = None
     quoted_name = None
     OperationalError = None
+    Label = None
 
 
 try:
-    import psycopg2
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
+    import psycopg2  # noqa: F401
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 
@@ -202,7 +230,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
-    ):
+    ) -> None:
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
 
@@ -236,6 +264,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._connection_string = connection_string
         self._url = url
         self._create_temp_table = create_temp_table
+        os.environ["SF_PARTNER"] = "great_expectations_oss"
 
         if engine is not None:
             if credentials is not None:
@@ -267,14 +296,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
 
         # these are two backends where temp_table_creation is not supported we set the default value to False.
-        if self.engine.dialect.name.lower() in [
+        if self.dialect_name in [
             "trino",
             "awsathena",  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
         ]:
             self._create_temp_table = False
 
         # Get the dialect **for purposes of identifying types**
-        if self.engine.dialect.name.lower() in [
+        if self.dialect_name in [
             "postgresql",
             "mysql",
             "sqlite",
@@ -286,24 +315,24 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
-        elif self.engine.dialect.name.lower() == "snowflake":
+        elif self.dialect_name == "snowflake":
             self.dialect_module = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
-        elif self.engine.dialect.name.lower() == "dremio":
+        elif self.dialect_name == "dremio":
             # WARNING: Dremio Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_dremio.pyodbc"
             )
-        elif self.engine.dialect.name.lower() == "redshift":
+        elif self.dialect_name == "redshift":
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
             )
-        elif self.engine.dialect.name.lower() == "bigquery":
+        elif self.dialect_name == "bigquery":
             self.dialect_module = import_library_module(
                 module_name=_BIGQUERY_MODULE_NAME
             )
-        elif self.engine.dialect.name.lower() == "teradatasql":
+        elif self.dialect_name == "teradatasql":
             # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
@@ -316,7 +345,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
         # Connection can be handled separately.
         self._engine_backup = None
-        if self.engine and self.engine.dialect.name.lower() in [
+        if self.engine and self.dialect_name in [
             "sqlite",
             "mssql",
             "snowflake",
@@ -325,6 +354,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
+            if self._engine_backup.dialect.name.lower() == "sqlite" and not isinstance(
+                self._engine_backup, sa.engine.base.Connection
+            ):
+                raw_connection = self._engine_backup.raw_connection()
+                raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
+                raw_connection.create_function(
+                    "md5",
+                    2,
+                    lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[
+                        -1 * d :
+                    ],
+                )
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -332,7 +373,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event="execution_engine.sqlalchemy.connect",
+                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
                 event_payload={
                     "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
@@ -356,6 +397,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+        self._data_splitter = SqlAlchemyDataSplitter(dialect=self.dialect_name)
+        self._data_sampler = SqlAlchemyDataSampler()
+
     @property
     def credentials(self) -> Optional[dict]:
         return self._credentials
@@ -367,6 +411,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     @property
     def url(self) -> Optional[str]:
         return self._url
+
+    @property
+    def dialect(self) -> Dialect:
+        return self.engine.dialect
+
+    @property
+    def dialect_name(self) -> str:
+        """Retrieve the string name of the engine dialect in lowercase e.g. "postgresql".
+
+        Returns:
+            String representation of the sql dialect.
+        """
+        return self.engine.dialect.name.lower()
 
     def _build_engine(self, credentials: dict, **kwargs) -> "sa.engine.Engine":
         """
@@ -398,8 +455,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
+    @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
-        self, drivername: str, credentials: dict
+        drivername: str,
+        credentials: dict,
     ) -> Tuple["sa.engine.url.URL", Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
@@ -462,7 +521,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute)
         """
-        batch_id = domain_kwargs.get("batch_id")
+        data_object: SqlAlchemyBatchData
+
+        batch_id: Optional[str] = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.active_batch_data:
@@ -484,6 +545,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
             if domain_kwargs["table"] != data_object.selectable.name:
+                # noinspection PyProtectedMember
                 selectable = sa.Table(
                     domain_kwargs["table"],
                     sa.MetaData(),
@@ -816,51 +878,79 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def resolve_metric_bundle(
         self,
-        metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
-    ) -> dict:
+        metric_fn_bundle: Iterable[BundledMetricConfiguration],
+    ) -> Dict[Tuple[str, str, str], Any]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
 
             Args:
-                metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]): \
-                    A Dictionary containing a MetricProvider's MetricConfiguration (its unique identifier), its metric provider function
-                    (the function that actually executes the metric), and the arguments to pass to the metric provider function.
-                    A dictionary of metrics defined in the registry and corresponding arguments
+                metric_fn_bundle (Iterable[BundledMetricConfiguration]): \
+                    "BundledMetricConfiguration" contains MetricProvider's MetricConfiguration (its unique identifier),
+                    its metric provider function (the function that actually executes the metric), and arguments to pass
+                    to metric provider function (dictionary of metrics defined in registry and corresponding arguments).
 
             Returns:
-                A dictionary of metric names and their corresponding now-queried values.
+                A dictionary of "MetricConfiguration" IDs and their corresponding now-queried (fully resolved) values.
         """
-        resolved_metrics = {}
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+
+        res: List[Row]
 
         # We need a different query for each domain (where clause).
         queries: Dict[Tuple, dict] = {}
-        for (
-            metric_to_resolve,
-            engine_fn,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-            metric_provider_kwargs,
-        ) in metric_fn_bundle:
+
+        query: dict
+
+        domain_id: Tuple[str, str, str]
+
+        bundled_metric_configuration: BundledMetricConfiguration
+        for bundled_metric_configuration in metric_fn_bundle:
+            bundled_metric_configuration: BundledMetricConfiguration
+            metric_to_resolve: MetricConfiguration = (
+                bundled_metric_configuration.metric_configuration
+            )
+            metric_fn: Any = bundled_metric_configuration.metric_fn
+            compute_domain_kwargs: dict = (
+                bundled_metric_configuration.compute_domain_kwargs
+            )
+
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
-            domain_id = compute_domain_kwargs.to_id()
+
+            domain_id = IDDict.convert_dictionary_to_id_dict(
+                data=convert_to_json_serializable(data=compute_domain_kwargs)
+            ).to_id()
             if domain_id not in queries:
                 queries[domain_id] = {
                     "select": [],
                     "ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
-            queries[domain_id]["select"].append(
-                engine_fn.label(metric_to_resolve.metric_name)
-            )
+
+            if self.engine.dialect.name == "clickhouse":
+                queries[domain_id]["select"].append(
+                    metric_fn.label(
+                        metric_to_resolve.metric_name.join(
+                            random.choices(string.ascii_lowercase, k=2)
+                        )
+                    )
+                )
+            else:
+                queries[domain_id]["select"].append(
+                    metric_fn.label(metric_to_resolve.metric_name)
+                )
+
             queries[domain_id]["ids"].append(metric_to_resolve.id)
+
         for query in queries.values():
-            domain_kwargs = query["domain_kwargs"]
-            selectable = self.get_domain_records(
+            domain_kwargs: dict = query["domain_kwargs"]
+            selectable: Any = self.get_domain_records(
                 domain_kwargs=domain_kwargs,
             )
+
             assert len(query["select"]) == len(query["ids"])
+
             try:
                 """
                 If a custom query is passed, selectable will be TextClause and not formatted
@@ -877,8 +967,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     res = self.engine.execute(
                         sa.select(query["select"]).select_from(selectable)
                     ).fetchall()
+
                 logger.debug(
-                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
+                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"
                 )
             except OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
@@ -886,14 +977,22 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 exception_message += f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message)
                 raise ExecutionEngineError(message=exception_message)
+
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
             assert len(query["ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
-            for idx, id in enumerate(query["ids"]):
-                resolved_metrics[id] = convert_to_json_serializable(res[0][idx])
+
+            idx: int
+            metric_id: Tuple[str, str, str]
+            for idx, metric_id in enumerate(query["ids"]):
+                # Converting SQL query execution results into JSON-serializable format produces simple data types,
+                # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
+                resolved_metrics[metric_id] = convert_to_json_serializable(
+                    data=res[0][idx]
+                )
 
         return resolved_metrics
 
@@ -921,189 +1020,96 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.engine.dispose()
 
-    ### Splitter methods for partitioning tables ###
+    def _get_splitter_method(self, splitter_method_name: str) -> Callable:
+        """Get the appropriate splitter method from the method name.
 
-    def _split_on_whole_table(self, table_name: str, batch_identifiers: dict) -> bool:
-        """'Split' by returning the whole table"""
+        Args:
+            splitter_method_name: name of the splitter to retrieve.
 
-        # return sa.column(column_name) == batch_identifiers[column_name]
-        return 1 == 1
+        Returns:
+            splitter method.
+        """
+        return self._data_splitter.get_splitter_method(splitter_method_name)
 
-    def _split_on_column_value(
-        self, table_name: str, column_name: str, batch_identifiers: dict
-    ) -> bool:
-        """Split using the values in the named column"""
+    def execute_split_query(self, split_query: Selectable) -> List[Row]:
+        """Use the execution engine to run the split query and fetch all of the results.
 
-        return sa.column(column_name) == batch_identifiers[column_name]
+        Args:
+            split_query: Query to be executed as a sqlalchemy Selectable.
 
-    def _split_on_converted_datetime(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-        date_format_string: str = "%Y-%m-%d",
-    ) -> bool:
-        """Convert the values in the named column to the given date_format, and split on that"""
-
-        return (
-            sa.func.strftime(
-                date_format_string,
-                sa.column(column_name),
+        Returns:
+            List of row results.
+        """
+        if self.dialect_name == "awsathena":
+            # Note: Athena does not support casting to string, only to varchar
+            # but sqlalchemy currently generates a query as `CAST(colname AS STRING)` instead
+            # of `CAST(colname AS VARCHAR)` with other dialects.
+            split_query: str = str(
+                split_query.compile(self.engine, compile_kwargs={"literal_binds": True})
             )
-            == batch_identifiers[column_name]
-        )
 
-    def _split_on_divided_integer(
-        self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict
-    ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
+            pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
+            split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
-        return (
-            sa.cast(sa.column(column_name) / divisor, sa.Integer)
-            == batch_identifiers[column_name]
-        )
+        return self.engine.execute(split_query).fetchall()
 
-    def _split_on_mod_integer(
-        self, table_name: str, column_name: str, mod: int, batch_identifiers: dict
-    ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
+    def get_data_for_batch_identifiers(
+        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
+    ) -> List[dict]:
+        """Build data used to construct batch identifiers for the input table using the provided splitter config.
 
-        return sa.column(column_name) % mod == batch_identifiers[column_name]
+        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
 
-    def _split_on_multi_column_values(
-        self, table_name: str, column_names: List[str], batch_identifiers: dict
-    ) -> bool:
-        """Split on the joint values in the named columns"""
+        Args:
+            table_name: Table to split.
+            splitter_method_name: Desired splitter method to use.
+            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
 
-        return sa.and_(
-            *(
-                sa.column(column_name) == column_value
-                for column_name, column_value in batch_identifiers.items()
-            )
-        )
-
-    def _split_on_hashed_column(
-        self,
-        table_name: str,
-        column_name: str,
-        hash_digits: int,
-        batch_identifiers: dict,
-    ) -> bool:
-        """Split on the hashed value of the named column"""
-
-        return (
-            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
-            == batch_identifiers[column_name]
-        )
-
-    ### Sampling methods ###
-
-    # _sample_using_limit
-    # _sample_using_random
-    # _sample_using_mod
-    # _sample_using_a_list
-    # _sample_using_md5
-
-    def _sample_using_mod(
-        self,
-        column_name: str,
-        mod: int,
-        value: int,
-    ) -> bool:
-        """Take the mod of named column, and only keep rows that match the given value"""
-        return sa.column(column_name) % mod == value
-
-    def _sample_using_a_list(
-        self,
-        column_name: str,
-        value_list: list,
-    ) -> bool:
-        """Match the values in the named column against value_list, and only keep the matches"""
-        return sa.column(column_name).in_(value_list)
-
-    def _sample_using_md5(
-        self,
-        column_name: str,
-        hash_digits: int = 1,
-        hash_value: str = "f",
-    ) -> bool:
-        """Hash the values in the named column, and split on that"""
-        return (
-            sa.func.right(
-                sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits
-            )
-            == hash_value
+        Returns:
+            List of dicts of the form [{column_name: {"key": value}}]
+        """
+        return self._data_splitter.get_data_for_batch_identifiers(
+            execution_engine=self,
+            table_name=table_name,
+            splitter_method_name=splitter_method_name,
+            splitter_kwargs=splitter_kwargs,
         )
 
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
-        table_name: str = batch_spec["table_name"]
         if "splitter_method" in batch_spec:
-            splitter_fn = getattr(self, batch_spec["splitter_method"])
+            splitter_fn: Callable = self._get_splitter_method(
+                splitter_method_name=batch_spec["splitter_method"]
+            )
             split_clause = splitter_fn(
-                table_name=table_name,
                 batch_identifiers=batch_spec["batch_identifiers"],
                 **batch_spec["splitter_kwargs"],
             )
 
         else:
-            split_clause = True
+            if self.dialect_name == "sqlite":
+                split_clause = sa.text("1 = 1")
+            else:
+                split_clause = sa.true()
 
-        if "sampling_method" in batch_spec:
-            if batch_spec["sampling_method"] == "_sample_using_limit":
-                # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
-                # so the business logic for building the query needs to be different.
-                if self.engine.dialect.name.lower() == "oracle":
-                    # limit doesn't compile properly for oracle so we will append rownum to query string later
-                    raw_query = (
-                        sa.select("*")
-                        .select_from(
-                            sa.table(
-                                table_name, schema=batch_spec.get("schema_name", None)
-                            )
-                        )
-                        .where(split_clause)
-                    )
-                    query = str(
-                        raw_query.compile(
-                            self.engine, compile_kwargs={"literal_binds": True}
-                        )
-                    )
-                    query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
-                    return query
-                else:
-                    return (
-                        sa.select("*")
-                        .select_from(
-                            sa.table(
-                                table_name, schema=batch_spec.get("schema_name", None)
-                            )
-                        )
-                        .where(split_clause)
-                        .limit(batch_spec["sampling_kwargs"]["n"])
-                    )
-            elif batch_spec["sampling_method"] == "_sample_using_random":
-                num_rows: int = self.engine.execute(
-                    sa.select([sa.func.count()])
-                    .select_from(
-                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                    )
-                    .where(split_clause)
-                ).scalar()
-                p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
-                sample_size: int = round(p * num_rows)
-                return (
-                    sa.select("*")
-                    .select_from(
-                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                    )
-                    .where(split_clause)
-                    .order_by(sa.func.random())
-                    .limit(sample_size)
+        table_name: str = batch_spec["table_name"]
+        sampling_method: Optional[str] = batch_spec.get("sampling_method")
+        if sampling_method is not None:
+            if sampling_method in [
+                "_sample_using_limit",
+                "sample_using_limit",
+                "_sample_using_random",
+                "sample_using_random",
+            ]:
+                sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
+                return sampler_fn(
+                    execution_engine=self,
+                    batch_spec=batch_spec,
+                    where_clause=split_clause,
                 )
             else:
-                sampler_fn = getattr(self, batch_spec["sampling_method"])
+                sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
                 return (
                     sa.select("*")
                     .select_from(
@@ -1112,10 +1118,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.and_(
                             split_clause,
-                            sampler_fn(**batch_spec["sampling_kwargs"]),
+                            sampler_fn(batch_spec),
                         )
                     )
                 )
+
         return (
             sa.select("*")
             .select_from(
@@ -1137,7 +1144,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         batch_data: Optional[SqlAlchemyBatchData] = None
-        batch_markers: BatchMarkers = BatchMarkers(
+        batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"
@@ -1149,7 +1156,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_table_name: str = batch_spec.get("table_name", None)
 
         temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
-        temp_table_name: Optional[str] = batch_spec.get("bigquery_temp_table")
+
+        if batch_spec.get("bigquery_temp_table"):
+            # deprecated-v0.15.3
+            warnings.warn(
+                "BigQuery tables that are created as the result of a query are no longer created as "
+                "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
+                "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
+                "v0.15.3 and will be removed in v0.18.",
+                DeprecationWarning,
+            )
 
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
@@ -1164,25 +1180,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=self,
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
-                temp_table_name=temp_table_name,
                 create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            if self.engine.dialect.name.lower() == "oracle":
-                selectable: str = self._build_selectable_from_batch_spec(
-                    batch_spec=batch_spec
-                )
-            else:
-                selectable: Selectable = self._build_selectable_from_batch_spec(
-                    batch_spec=batch_spec
-                )
-
+            selectable: Union[Selectable, str] = self._build_selectable_from_batch_spec(
+                batch_spec=batch_spec
+            )
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,
-                temp_table_name=temp_table_name,
                 create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,

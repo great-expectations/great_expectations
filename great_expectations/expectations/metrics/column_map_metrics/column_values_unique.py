@@ -46,7 +46,14 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         # the column we will be performing the expectation on, and the query is performed against it.
         dialect = kwargs.get("_dialect", None)
         sql_engine = kwargs.get("_sqlalchemy_engine", None)
-        if sql_engine and dialect and dialect.dialect.name == "mysql":
+        try:
+            dialect_name = dialect.dialect.name
+        except AttributeError:
+            try:
+                dialect_name = dialect.name
+            except AttributeError:
+                dialect_name = ""
+        if sql_engine and dialect and dialect_name == "mysql":
             temp_table_name = generate_temporary_table_name()
             temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
                 new_temp_table=temp_table_name,

@@ -1,10 +1,13 @@
+# <snippet>
 import os
-
-from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
+# </snippet>
+
+yaml = YAMLHandler()
 # NOTE: The following code is only for testing and depends on an environment
 # variable to set the gcp_project. You can replace the value with your own
 # GCP project information
@@ -17,8 +20,11 @@ bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
+# <snippet>
 context = ge.get_context()
+# </snippet>
 
+# <snippet>
 datasource_yaml = f"""
 name: my_bigquery_datasource
 class_name: Datasource
@@ -34,6 +40,7 @@ data_connectors:
        class_name: InferredAssetSqlDataConnector
        include_schema_name: true
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -42,20 +49,22 @@ datasource_yaml = datasource_yaml.replace(
     CONNECTION_STRING,
 )
 
+# <snippet>
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
+# <snippet>
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 
-# Test for RuntimeBatchRequest using a query. bigquery_temp_table name is passed in as batch_spec_passthrough
+# Test for RuntimeBatchRequest using a query.
+# <snippet>
 batch_request = RuntimeBatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
-    batch_spec_passthrough={
-        "bigquery_temp_table": "ge_temp"
-    },  # this is the name of the table you would like to use a 'temp_table'
 )
 
 context.create_expectation_suite(
@@ -65,18 +74,16 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 
-# Test for BatchRequest naming a table. bigquery_temp_table name is passed in as batch_spec_passthrough
+# Test for BatchRequest naming a table.
 batch_request = BatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="demo.taxi_data",  # this is the name of the table you want to retrieve
-    batch_spec_passthrough={
-        "bigquery_temp_table": "ge_temp"
-    },  # this is the name of the table you would like to use a 'temp_table'
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True

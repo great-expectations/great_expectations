@@ -9,8 +9,8 @@ This guide will help you create a new <TechnicalTag tag="expectation_suite" text
 
 <Prerequisites>
 
-- Configured a [Data Context](../../tutorials/getting_started/initialize_a_data_context.md).
-- Configured a [Datasource](../../tutorials/getting_started/connect_to_data.md)
+- [Configured a Data Context](../../tutorials/getting_started/tutorial_setup.md).
+- Configured a [Datasource](../../tutorials/getting_started/tutorial_connect_to_data.md)
 
 </Prerequisites>
 
@@ -132,7 +132,7 @@ checkpoint_config = {
     ],
 }
 checkpoint = SimpleCheckpoint(
-    f"_tmp_checkpoint_{expectation_suite_name}", context, **checkpoint_config
+    f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}", context, **checkpoint_config
 )
 checkpoint_result = checkpoint.run()
 

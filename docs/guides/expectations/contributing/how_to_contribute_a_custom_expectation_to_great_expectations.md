@@ -24,22 +24,22 @@ document on [levels of maturity for Expectations](../../../contributing/contribu
 If you call the `print_diagnostic_checklist()` method on your Custom Expectation, you should see a checklist similar to this one:
 
 ```
-✔ Has a library_metadata object
+✔ Has a valid library_metadata object
 ✔ Has a docstring, including a one-line short description
   ...
 ✔ Has at least one positive and negative example case, and all test cases pass
 ✔ Has core logic and passes tests on at least one Execution Engine
   ...
+✔ Passes all linting checks
 ✔ Has basic input validation and type checking
 ✔ Has both statement Renderers: prescriptive and diagnostic
 ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
   ...
-✔ Passes all linting checks
   Has a full suite of tests, as determined by project code standards
   Has passed a manual review by a code owner for code standards and style guides
 ```
 
-If you've satisified at least the first four checks, you're ready to make a contribution!
+If you've satisfied at least the first five checks, you're ready to make a contribution!
 
 :::info
 Not quite there yet? See our guides on [creating Custom Expectations](../creating_custom_expectations/overview.md) for help!
@@ -51,7 +51,7 @@ For more information on our code standards and contribution, see our guide on [L
 
 We want to verify that your Custom Expectation is properly credited and accurately described. 
 
-Ensure that your Custom Expectation's `library_metadata` has correct information for the following:
+Ensure that your Custom Expectation's `library_metadata` has the following keys, and verify that the information listed is correct:
 
 - `contributors`: You and anyone else who helped you create this Custom Expectation.
 - `tags`: These are simple descriptors of your Custom Expectation's functionality and domain (`statistics`, `flexible comparisons`, `geography`, etc.).
@@ -61,7 +61,7 @@ Ensure that your Custom Expectation's `library_metadata` has correct information
 <summary>Packages?</summary>
 If you're interested in learning more about Custom Expectation Packages, see our <a href='/docs/contributing/contributing_package'>guide on packaging your Custom Expectations</a>.
 <br/><br/>
-Not contributing to a specifc package? Your Custom Expectation will be automatically published in the <a href="https://pypi.org/project/great-expectations-experimental/">PyPI package <inlineCode>great-expectations-experimental</inlineCode></a>. 
+Not contributing to a specific package? Your Custom Expectation will be automatically published in the <a href="https://pypi.org/project/great-expectations-experimental/">PyPI package <inlineCode>great-expectations-experimental</inlineCode></a>. 
 This package contains all of our Experimental community-contributed Custom Expectations, and is separate from the core <inlineCode>great-expectations</inlineCode> package.
 </details>
 

@@ -100,7 +100,8 @@ If you now run your file, `print_diagnostic_checklist()` will attempt to execute
 If your input is successfully validated, and the rest the logic in your Custom Expectation is already complete, you will see the following in your Diagnostic Checklist:
 
 ```console
-✔ Has basic input validation and type checking
+ ✔ Has basic input validation and type checking
+    ✔ Custom 'assert' statements in validate_configuration
 ```
 
 <div style={{"text-align":"center"}}>
@@ -119,5 +120,5 @@ If you would like to contribute your Custom Expectation to the Great Expectation
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
 :::

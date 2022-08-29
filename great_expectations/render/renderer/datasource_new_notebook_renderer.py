@@ -47,7 +47,7 @@ Give your datasource a unique name:"""
         datasource_yaml: str,
         datasource_name: str = "my_datasource",
         sql_credentials_snippet: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(context=context)
         self.datasource_type = datasource_type
         self.datasource_yaml = datasource_yaml
@@ -56,7 +56,7 @@ Give your datasource a unique name:"""
             datasource_name = "my_datasource"
         self.datasource_name = datasource_name
 
-    def _add_header(self):
+    def _add_header(self) -> None:
         self.add_markdown_cell(
             f"""# Create a new {self.datasource_type.value} Datasource
 Use this notebook to configure a new {self.datasource_type.value} Datasource and add it to your project."""
@@ -67,7 +67,7 @@ from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource,
 context = ge.get_context()""",
         )
 
-    def _add_docs_cell(self):
+    def _add_docs_cell(self) -> None:
         self.add_markdown_cell(self.DOCS_INTRO)
         self.add_code_cell(f'datasource_name = "{self.datasource_name}"')
 
@@ -76,7 +76,7 @@ context = ge.get_context()""",
         elif self.datasource_type == DatasourceTypes.SQL:
             self.add_markdown_cell(self.SQL_DOCS)
 
-    def _add_sql_credentials_cell(self):
+    def _add_sql_credentials_cell(self) -> None:
         self.add_code_cell(self.sql_credentials_code_snippet)
 
     def _add_template_cell(self, lint: bool = True) -> None:
@@ -138,6 +138,7 @@ context.list_datasources()""",
     def render_to_disk(
         self,
         notebook_file_path: str,
+        **kwargs: dict,
     ) -> None:
         self.render()
         self.write_notebook_to_disk(self._notebook, notebook_file_path)

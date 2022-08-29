@@ -92,16 +92,16 @@ We’re committed to supporting and growing the community around Great Expectati
 Open source doesn’t always have the best reputation for being friendly and welcoming, and that makes us sad. Everyone belongs in open source, and Great Expectations is dedicated to making you feel welcome.
 
 #### Get in touch with the Great Expectations team
-Join our public slack channel here: [join slack](https://greatexpectations.io/slack). We’re not always available, but we’re there and responsive an awful lot of the time.
+Join our public slack channel here: [join slack](https://greatexpectations.io/slack). We’re not always available, but we’re there and responsive an awful lot of the time. Please read our [Slack Guidelines](https://github.com/great-expectations/great_expectations/blob/develop/SLACK_GUIDELINES.md)
 
 #### Ask a question
-Slack is good for that, too: [join slack](https://greatexpectations.io/slack).
+Slack is good for that, too: [join slack](https://greatexpectations.io/slack) and read [How to write a good question in Slack](https://github.com/great-expectations/great_expectations/discussions/4951). You can also use [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions/4951).
 
 #### File a bug report or feature request
 If you have bugfix or feature request, please [upvote an existing issue](https://github.com/great-expectations/great_expectations/issues) or [open a new issue](https://github.com/great-expectations/great_expectations/issues/new) on GitHub and we’ll see what we can do.
 
 #### Contribute code or documentation
-We welcome contributions to Great Expectations. Please start with our [Contributing guide](./contributing/contributing.md) and don’t be shy with questions!
+We welcome contributions to Great Expectations. Please start with our [Contributing guide](./contributing/contributing_overview.md) and don’t be shy with questions!
 
 #### Not interested in managing your own configuration or infrastructure? 
 Learn more about Great Expectations Cloud — our fully managed SaaS offering. Sign up for [our weekly cloud workshop](https://greatexpectations.io/cloud)! You’ll get to see our newest features and apply for our private Alpha program!

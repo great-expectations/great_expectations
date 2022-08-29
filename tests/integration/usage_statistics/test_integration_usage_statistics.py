@@ -98,7 +98,6 @@ def valid_usage_statistics_message() -> dict:
                     },
                     "anonymized_site_index_builder": {
                         "parent_class": "DefaultSiteIndexBuilder",
-                        "show_cta_footer": True,
                     },
                 }
             ],
@@ -128,6 +127,8 @@ def valid_usage_statistics_message() -> dict:
     }
 
 
+# <WILL> This is being handled in GREAT-1117
+@pytest.mark.xfail
 def test_send_malformed_data(
     valid_usage_statistics_message: dict,
     requests_session_with_retries: requests.Session,

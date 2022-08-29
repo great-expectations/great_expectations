@@ -61,7 +61,7 @@ try:
     registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
     bigquery_types_tuple = None
     try:
-        from sqlalchemy_bigquery import GEOGRAPHY
+        from sqlalchemy_bigquery import GEOGRAPHY  # noqa: F401
 
         BIGQUERY_GEO_SUPPORT = True
     except ImportError:

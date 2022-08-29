@@ -8,7 +8,7 @@ This guide will help you add an Athena instance (or a database) as a <TechnicalT
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
+  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
   - Installed the pyathena package for the Athena SQLAlchemy dialect (``pip install "pyathena[SQLAlchemy]"``)
 
 </Prerequisites>
@@ -52,4 +52,3 @@ The Jupyter Notebook will guide you through the remaining steps of creating a Da
 ## Additional notes
 
 Environment variables can be used to store the SQLAlchemy URL instead of the file, if preferred - search documentation for "Managing Environment and Secrets".
-

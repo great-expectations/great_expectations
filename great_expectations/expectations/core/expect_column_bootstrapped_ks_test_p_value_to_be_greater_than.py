@@ -39,7 +39,7 @@ class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(TableExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass
 
     @classmethod
@@ -51,5 +51,5 @@ class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(TableExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass

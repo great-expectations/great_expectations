@@ -2,7 +2,7 @@ from great_expectations.execution_engine.execution_engine import BatchData
 
 
 class SparkDFBatchData(BatchData):
-    def __init__(self, execution_engine, dataframe):
+    def __init__(self, execution_engine, dataframe) -> None:
         super().__init__(execution_engine)
         self._dataframe = dataframe
 

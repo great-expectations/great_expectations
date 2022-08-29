@@ -16,7 +16,7 @@ class CustomListSorter(Sorter):
 
     def __init__(
         self, name: str, orderby: str = "asc", reference_list: List[str] = None
-    ):
+    ) -> None:
         super().__init__(name=name, orderby=orderby)
 
         self._reference_list = self._validate_reference_list(

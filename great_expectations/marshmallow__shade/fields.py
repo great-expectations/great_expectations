@@ -219,7 +219,7 @@ class Field(FieldABC):
         check_key = attr if attribute is None else attribute
         return accessor_func(obj, check_key, default)
 
-    def _validate(self, value):
+    def _validate(self, value) -> None:
         """Perform validation on ``value``. Raise a :exc:`ValidationError` if validation
         does not succeed.
         """
@@ -256,7 +256,7 @@ class Field(FieldABC):
             msg = msg.format(**kwargs)
         return ValidationError(msg)
 
-    def fail(self, key: str, **kwargs):
+    def fail(self, key: str, **kwargs) -> None:
         """Helper method that raises a `ValidationError` with an error message
         from ``self.error_messages``.
 
@@ -271,7 +271,7 @@ class Field(FieldABC):
         )
         raise self.make_error(key=key, **kwargs)
 
-    def _validate_missing(self, value):
+    def _validate_missing(self, value) -> None:
         """Validate missing values. Raise a :exc:`ValidationError` if
         `value` should be considered missing.
         """
@@ -338,7 +338,7 @@ class Field(FieldABC):
 
     # Methods for concrete classes to override.
 
-    def _bind_to_schema(self, field_name, schema):
+    def _bind_to_schema(self, field_name, schema) -> None:
         """Update field with values from its parent schema. Called by
         :meth:`Schema._bind_field <marshmallow.Schema._bind_field>`.
 
@@ -472,7 +472,7 @@ class Nested(Field):
         many: bool = False,
         unknown: str = None,
         **kwargs,
-    ):
+    ) -> None:
         # Raise error if only or exclude is passed as string, not list of strings
         if only is not None and not is_collection(only):
             raise StringNotCollectionError('"only" should be a collection of strings.')
@@ -563,7 +563,7 @@ class Nested(Field):
         many = schema.many or self.many
         return schema.dump(nested_obj, many=many)
 
-    def _test_collection(self, value):
+    def _test_collection(self, value) -> None:
         many = self.schema.many or self.many
         if many and not utils.is_collection(value):
             raise self.make_error("type", input=value, type=value.__class__.__name__)
@@ -620,7 +620,7 @@ class Pluck(Nested):
         nested: typing.Union[SchemaABC, type, str, typing.Callable[[], SchemaABC]],
         field_name: str,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(nested, only=(field_name,), **kwargs)
         self.field_name = field_name
 
@@ -668,7 +668,7 @@ class List(Field):
     #: Default error messages.
     default_error_messages = {"invalid": "Not a valid list."}
 
-    def __init__(self, cls_or_instance: typing.Union[Field, type], **kwargs):
+    def __init__(self, cls_or_instance: typing.Union[Field, type], **kwargs) -> None:
         super().__init__(**kwargs)
         try:
             self.inner = resolve_field_instance(cls_or_instance)
@@ -681,7 +681,7 @@ class List(Field):
             self.only = self.inner.only
             self.exclude = self.inner.exclude
 
-    def _bind_to_schema(self, field_name, schema):
+    def _bind_to_schema(self, field_name, schema) -> None:
         super()._bind_to_schema(field_name, schema)
         self.inner = copy.deepcopy(self.inner)
         self.inner._bind_to_schema(field_name, self)
@@ -737,7 +737,7 @@ class Tuple(Field):
     #: Default error messages.
     default_error_messages = {"invalid": "Not a valid tuple."}
 
-    def __init__(self, tuple_fields, *args, **kwargs):
+    def __init__(self, tuple_fields, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if not utils.is_collection(tuple_fields):
             raise ValueError(
@@ -757,7 +757,7 @@ class Tuple(Field):
 
         self.validate_length = Length(equal=len(self.tuple_fields))
 
-    def _bind_to_schema(self, field_name, schema):
+    def _bind_to_schema(self, field_name, schema) -> None:
         super()._bind_to_schema(field_name, schema)
         new_tuple_fields = []
         for field in self.tuple_fields:
@@ -863,7 +863,7 @@ class Number(Field):
         "too_large": "Number too large.",
     }
 
-    def __init__(self, *, as_string: bool = False, **kwargs):
+    def __init__(self, *, as_string: bool = False, **kwargs) -> None:
         self.as_string = as_string
         super().__init__(**kwargs)
 
@@ -914,7 +914,7 @@ class Integer(Number):
     #: Default error messages.
     default_error_messages = {"invalid": "Not a valid integer."}
 
-    def __init__(self, *, strict: bool = False, **kwargs):
+    def __init__(self, *, strict: bool = False, **kwargs) -> None:
         self.strict = strict
         super().__init__(**kwargs)
 
@@ -945,7 +945,9 @@ class Float(Number):
         "special": "Special numeric values (nan or infinity) are not permitted."
     }
 
-    def __init__(self, *, allow_nan: bool = False, as_string: bool = False, **kwargs):
+    def __init__(
+        self, *, allow_nan: bool = False, as_string: bool = False, **kwargs
+    ) -> None:
         self.allow_nan = allow_nan
         super().__init__(as_string=as_string, **kwargs)
 
@@ -1009,7 +1011,7 @@ class Decimal(Number):
         allow_nan: bool = False,
         as_string: bool = False,
         **kwargs,
-    ):
+    ) -> None:
         self.places = (
             decimal.Decimal((0, (1,), -places)) if places is not None else None
         )
@@ -1098,7 +1100,7 @@ class Boolean(Field):
 
     def __init__(
         self, *, truthy: typing.Set = None, falsy: typing.Set = None, **kwargs
-    ):
+    ) -> None:
         super().__init__(**kwargs)
 
         if truthy is not None:
@@ -1174,14 +1176,14 @@ class DateTime(Field):
         "format": '"{input}" cannot be formatted as a {obj_type}.',
     }
 
-    def __init__(self, format: str = None, **kwargs):
+    def __init__(self, format: str = None, **kwargs) -> None:
         super().__init__(**kwargs)
         # Allow this to be None. It may be set later in the ``_serialize``
         # or ``_deserialize`` methods. This allows a Schema to dynamically set the
         # format, e.g. from a Meta option
         self.format = format
 
-    def _bind_to_schema(self, field_name, schema):
+    def _bind_to_schema(self, field_name, schema) -> None:
         super()._bind_to_schema(field_name, schema)
         self.format = (
             self.format
@@ -1239,7 +1241,9 @@ class NaiveDateTime(DateTime):
 
     AWARENESS = "naive"
 
-    def __init__(self, format: str = None, *, timezone: dt.timezone = None, **kwargs):
+    def __init__(
+        self, format: str = None, *, timezone: dt.timezone = None, **kwargs
+    ) -> None:
         super().__init__(format=format, **kwargs)
         self.timezone = timezone
 
@@ -1272,7 +1276,7 @@ class AwareDateTime(DateTime):
 
     def __init__(
         self, format: str = None, *, default_timezone: dt.timezone = None, **kwargs
-    ):
+    ) -> None:
         super().__init__(format=format, **kwargs)
         self.default_timezone = default_timezone
 
@@ -1377,7 +1381,7 @@ class TimeDelta(Field):
         "format": "{input!r} cannot be formatted as a timedelta.",
     }
 
-    def __init__(self, precision: str = SECONDS, **kwargs):
+    def __init__(self, precision: str = SECONDS, **kwargs) -> None:
         precision = precision.lower()
         units = (
             self.DAYS,
@@ -1442,7 +1446,7 @@ class Mapping(Field):
         keys: typing.Union[Field, type] = None,
         values: typing.Union[Field, type] = None,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(**kwargs)
         if keys is None:
             self.key_field = None
@@ -1469,7 +1473,7 @@ class Mapping(Field):
                 self.only = self.value_field.only
                 self.exclude = self.value_field.exclude
 
-    def _bind_to_schema(self, field_name, schema):
+    def _bind_to_schema(self, field_name, schema) -> None:
         super()._bind_to_schema(field_name, schema)
         if self.value_field:
             self.value_field = copy.deepcopy(self.value_field)
@@ -1589,7 +1593,7 @@ class Url(String):
         schemes: types.StrSequenceOrSet = None,
         require_tld: bool = True,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(**kwargs)
 
         self.relative = relative
@@ -1615,7 +1619,7 @@ class Email(String):
     #: Default error messages.
     default_error_messages = {"invalid": "Not a valid email address."}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         # Insert validation into self.validators so that multiple errors can be stored.
         validator = validate.Email(error=self.error_messages["invalid"])
@@ -1645,7 +1649,9 @@ class Method(Field):
 
     _CHECK_ATTRIBUTE = False
 
-    def __init__(self, serialize: str = None, deserialize: str = None, **kwargs):
+    def __init__(
+        self, serialize: str = None, deserialize: str = None, **kwargs
+    ) -> None:
         # Set dump_only and load_only based on arguments
         kwargs["dump_only"] = bool(serialize) and not bool(deserialize)
         kwargs["load_only"] = bool(deserialize) and not bool(serialize)
@@ -1707,7 +1713,7 @@ class Function(Field):
             typing.Callable[[typing.Any, typing.Dict], typing.Any],
         ] = None,
         **kwargs,
-    ):
+    ) -> None:
         # Set dump_only and load_only based on arguments
         kwargs["dump_only"] = bool(serialize) and not bool(deserialize)
         kwargs["load_only"] = bool(deserialize) and not bool(serialize)
@@ -1745,7 +1751,7 @@ class Constant(Field):
 
     _CHECK_ATTRIBUTE = False
 
-    def __init__(self, constant: typing.Any, **kwargs):
+    def __init__(self, constant: typing.Any, **kwargs) -> None:
         super().__init__(**kwargs)
         self.constant = constant
         self.missing = constant
@@ -1767,7 +1773,7 @@ class Inferred(Field):
         Users should not need to use this class directly.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # We memoize the fields to avoid creating and binding new fields
         # every time on serialization.

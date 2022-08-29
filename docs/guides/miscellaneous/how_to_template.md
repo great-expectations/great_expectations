@@ -51,7 +51,7 @@ Next, do {concise description of what the user is going to do} using either {cho
 
 <Tabs
   groupId="tab1-or-tab2"
-  defaultValue='tab1'
+  defaultValue='cli'
   values={[
   {label: 'Using the CLI', value:'cli'},
   {label: 'Using Python', value:'python'},

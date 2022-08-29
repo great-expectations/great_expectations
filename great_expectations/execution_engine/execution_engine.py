@@ -3,13 +3,17 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
+from great_expectations.execution_engine.bundled_metric_configuration import (
+    BundledMetricConfiguration,
+)
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
     RowCondition,
@@ -33,7 +37,7 @@ class NoOpDict:
 
 
 class BatchData:
-    def __init__(self, execution_engine):
+    def __init__(self, execution_engine) -> None:
         self._execution_engine = execution_engine
 
     @property
@@ -50,13 +54,6 @@ class MetricFunctionTypes(Enum):
     MAP_VALUES = "value"  # "map_values"
     WINDOW_VALUES = "value"  # "window_values"
     AGGREGATE_VALUE = "value"  # "aggregate_value"
-
-
-class MetricDomainTypes(Enum):
-    COLUMN = "column"
-    COLUMN_PAIR = "column_pair"
-    MULTICOLUMN = "multicolumn"
-    TABLE = "table"
 
 
 class DataConnectorStorageDataReferenceResolver:
@@ -161,7 +158,7 @@ class ExecutionEngine(ABC):
         batch_spec_defaults=None,
         batch_data_dict=None,
         validator=None,
-    ):
+    ) -> None:
         self.name = name
         self._validator = validator
 
@@ -179,8 +176,7 @@ class ExecutionEngine(ABC):
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
-                "Unrecognized batch_spec_default(s): %s"
-                % str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)
+                f"Unrecognized batch_spec_default(s): {str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}"
             )
 
         self._batch_spec_defaults = {
@@ -208,7 +204,7 @@ class ExecutionEngine(ABC):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def configure_validator(self, validator):
+    def configure_validator(self, validator) -> None:
         """Optionally configure the validator as appropriate for the execution engine."""
         pass
 
@@ -228,7 +224,7 @@ class ExecutionEngine(ABC):
             return None
 
     @active_batch_data_id.setter
-    def active_batch_data_id(self, batch_id):
+    def active_batch_data_id(self, batch_id) -> None:
         if batch_id in self.loaded_batch_data_dict.keys():
             self._active_batch_data_id = batch_id
         else:
@@ -241,8 +237,8 @@ class ExecutionEngine(ABC):
         """The data from the currently-active batch."""
         if self.active_batch_data_id is None:
             return None
-        else:
-            return self.loaded_batch_data_dict.get(self.active_batch_data_id)
+
+        return self.loaded_batch_data_dict.get(self.active_batch_data_id)
 
     @property
     def loaded_batch_data_dict(self):
@@ -288,7 +284,7 @@ class ExecutionEngine(ABC):
         self._batch_data_dict[batch_id] = batch_data
         self._active_batch_data_id = batch_id
 
-    def _load_batch_data_from_dict(self, batch_data_dict):
+    def _load_batch_data_from_dict(self, batch_data_dict) -> None:
         """
         Loads all data in batch_data_dict into load_batch_data
         """
@@ -317,7 +313,18 @@ class ExecutionEngine(ABC):
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
-        metric_fn_bundle = []
+        metric_fn_bundle: List[BundledMetricConfiguration] = []
+
+        metric_fn_type: MetricFunctionTypes
+        metric_class: "MetricProvider"  # noqa: F821
+        metric_fn: Any
+        compute_domain_kwargs: dict
+        accessor_domain_kwargs: dict
+        metric_provider_kwargs: dict
+        metric_to_resolve: MetricConfiguration
+        metric_dependencies: dict
+        k: Tuple[str, str, str]
+        v: MetricConfiguration
         for metric_to_resolve in metrics_to_resolve:
             metric_dependencies = {}
             for k, v in metric_to_resolve.metric_dependencies.items():
@@ -352,13 +359,14 @@ class ExecutionEngine(ABC):
                     raise ge_exceptions.MetricError(
                         message=f'Missing metric dependency: {str(e)} for metric "{metric_to_resolve.metric_name}".'
                     )
+
                 metric_fn_bundle.append(
-                    (
-                        metric_to_resolve,
-                        metric_fn,
-                        compute_domain_kwargs,
-                        accessor_domain_kwargs,
-                        metric_provider_kwargs,
+                    BundledMetricConfiguration(
+                        metric_configuration=metric_to_resolve,
+                        metric_fn=metric_fn,
+                        compute_domain_kwargs=compute_domain_kwargs,
+                        accessor_domain_kwargs=accessor_domain_kwargs,
+                        metric_provider_kwargs=metric_provider_kwargs,
                     )
                 )
                 continue
@@ -366,7 +374,6 @@ class ExecutionEngine(ABC):
             metric_fn_type = getattr(
                 metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
             )
-
             if metric_fn_type not in [
                 MetricPartialFunctionTypes.MAP_FN,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
@@ -395,18 +402,24 @@ class ExecutionEngine(ABC):
             try:
                 # an engine-specific way of computing metrics together
                 # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
-                new_resolved = self.resolve_metric_bundle(metric_fn_bundle)
+                new_resolved: Dict[
+                    Tuple[str, str, str], Any
+                ] = self.resolve_metric_bundle(metric_fn_bundle)
                 resolved_metrics.update(new_resolved)
             except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
-                    message=str(e), failed_metrics=[x[0] for x in metric_fn_bundle]
+                    message=str(e),
+                    failed_metrics=[x.metric_configuration for x in metric_fn_bundle],
                 )
+
         if self._caching:
             self._metric_cache.update(resolved_metrics)
 
         return resolved_metrics
 
-    def resolve_metric_bundle(self, metric_fn_bundle):
+    def resolve_metric_bundle(
+        self, metric_fn_bundle
+    ) -> Dict[Tuple[str, str, str], Any]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
@@ -478,7 +491,8 @@ class ExecutionEngine(ABC):
             column = column_name
         else:
             column = domain_kwargs["column"]
-        row_condition: RowCondition = RowCondition(
+
+        row_condition = RowCondition(
             condition=f'col("{column}").notnull()',
             condition_type=RowConditionParserType.GE,
         )
@@ -607,6 +621,7 @@ class ExecutionEngine(ABC):
                 logger.warning(
                     f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
                 )
+
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod

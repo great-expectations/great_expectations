@@ -1,15 +1,16 @@
 from typing import Any, Dict, Optional
 
 import numpy as np
+import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
@@ -27,7 +28,9 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Median Implementation"""
-        return column.median()
+        column_null_elements_cond: pd.Series = column.isnull()
+        column_nonnull_elements: pd.Series = column[~column_null_elements_cond]
+        return column_nonnull_elements.median()
 
     @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     def _sqlalchemy(
@@ -52,6 +55,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None
+
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)

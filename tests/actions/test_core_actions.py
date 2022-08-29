@@ -617,6 +617,7 @@ def test_EmailAction(
 #
 
 
+@pytest.mark.cloud
 @mock.patch.object(Session, "post", return_value=MockCloudResponse(200))
 def test_cloud_notification_action(
     mock_post_method,
@@ -632,7 +633,7 @@ def test_cloud_notification_action(
     )
     expected_ge_cloud_url = urljoin(
         cloud_action.data_context.ge_cloud_config.base_url,
-        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
+        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/checkpoints/"
         f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
     )
     expected_headers = {
@@ -650,6 +651,7 @@ def test_cloud_notification_action(
     )
 
 
+@pytest.mark.cloud
 @mock.patch.object(Session, "post", return_value=MockCloudResponse(418))
 def test_cloud_notification_action_bad_response(
     mock_post_method,
@@ -665,7 +667,7 @@ def test_cloud_notification_action_bad_response(
     )
     expected_ge_cloud_url = urljoin(
         cloud_action.data_context.ge_cloud_config.base_url,
-        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
+        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/checkpoints/"
         f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
     )
     expected_headers = {
@@ -689,6 +691,7 @@ def test_cloud_notification_action_bad_response(
     )
 
 
+@pytest.mark.cloud
 def test_cloud_sns_notification_action(
     sns,
     validation_result_suite,

@@ -15,7 +15,7 @@ This guide will help you quickly get a taste of Great Expectations, without even
 :::
 
 :::info
-Unlike most how-to guides, these instructions do *not* assume that you have already configured a Data Context by running `great_expectations init`. Once you're comfortable with these basic concepts, you will almost certainly want to unlock the full power of Great Expectations by configuring a Data Context. Please check out the instructions in the [Getting started tutorial](../../tutorials/getting_started/intro.md) when you're ready to start.
+Unlike most how-to guides, these instructions do *not* assume that you have already configured a Data Context by running `great_expectations init`. Once you're comfortable with these basic concepts, you will almost certainly want to unlock the full power of Great Expectations by configuring a Data Context. Please check out the instructions in the [Getting started tutorial](../../tutorials/getting_started/tutorial_overview.md) when you're ready to start.
 :::
 
 ## Steps
@@ -48,7 +48,7 @@ my_df = ge.read_csv(
 
 Similarly wrapped versions of other pandas methods (`read_excel`, `read_table`, `read_parquet`, `read_pickle`, `read_json`, etc.) are also available. Please see the `great_expectations.utils` module for details.
 
-If you wish to load data from somewhere else (e.g. from a SQL database or blob store), please fetch a copy of the data locally. Alternatively, you can [configure a Data Context with Datasources](../../tutorials/getting_started/connect_to_data.md), which will allow you to take advantage of more of Great Expectations' advanced features.
+If you wish to load data from somewhere else (e.g. from a SQL database or blob store), please fetch a copy of the data locally. Alternatively, you can [configure a Data Context with Datasources](../../tutorials/getting_started/tutorial_connect_to_data.md), which will allow you to take advantage of more of Great Expectations' advanced features.
 
 As alternatives, if you have already instantiated :
 

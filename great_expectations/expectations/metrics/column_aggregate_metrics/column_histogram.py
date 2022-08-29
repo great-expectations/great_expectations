@@ -3,7 +3,9 @@ import logging
 from typing import Any, Dict
 
 import numpy as np
+import pandas as pd
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import (
     convert_to_json_serializable,
     get_sql_dialect_floating_point_infinity_value,
@@ -13,7 +15,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
 )
@@ -41,7 +42,10 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         )
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
-        hist, bin_edges = np.histogram(df[column], bins, density=False)
+        column_series: pd.Series = df[column]
+        column_null_elements_cond: pd.Series = column_series.isnull()
+        column_nonnull_elements: pd.Series = column_series[~column_null_elements_cond]
+        hist, bin_edges = np.histogram(column_nonnull_elements, bins, density=False)
         return list(hist)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
@@ -91,15 +95,19 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             )
             idx += 1
 
+        negative_boundary: float
+        positive_boundary: float
         for idx in range(idx, len(bins) - 2):
+            negative_boundary = float(bins[idx])
+            positive_boundary = float(bins[idx + 1])
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
                         [
                             (
                                 sa.and_(
-                                    bins[idx] <= sa.column(column),
-                                    sa.column(column) < bins[idx + 1],
+                                    negative_boundary <= sa.column(column),
+                                    sa.column(column) < positive_boundary,
                                 ),
                                 1,
                             )
@@ -120,20 +128,23 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                 schema="api_cast", negative=False
             )
         ):
+            negative_boundary = float(bins[-2])
             case_conditions.append(
                 sa.func.sum(
-                    sa.case([(bins[-2] <= sa.column(column), 1)], else_=0)
+                    sa.case([(negative_boundary <= sa.column(column), 1)], else_=0)
                 ).label(f"bin_{str(len(bins) - 1)}")
             )
         else:
+            negative_boundary = float(bins[-2])
+            positive_boundary = float(bins[-1])
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
                         [
                             (
                                 sa.and_(
-                                    bins[-2] <= sa.column(column),
-                                    sa.column(column) <= bins[-1],
+                                    negative_boundary <= sa.column(column),
+                                    sa.column(column) <= positive_boundary,
                                 ),
                                 1,
                             )

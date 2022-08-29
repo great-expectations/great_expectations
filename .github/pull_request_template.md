@@ -1,4 +1,4 @@
-Please annotate your PR title to describe what the PR does, then give a brief bulleted description of your PR below. PR titles should begin with [BUGFIX], [FEATURE],  [DOCS], or [MAINTENANCE]. If a new feature introduces breaking changes for the Great Expectations API or configuration files, please also add [BREAKING]. You can read about the tags in our [contributor checklist](https://docs.greatexpectations.io/en/latest/contributing/contribution_checklist.html).
+Please annotate your PR title to describe what the PR does, then give a brief bulleted description of your PR below. PR titles should begin with [BUGFIX], [FEATURE],  [DOCS], or [MAINTENANCE]. If a new feature introduces breaking changes for the Great Expectations API or configuration files, please also add [BREAKING]. You can read about the tags in our [contributor checklist](https://docs.greatexpectations.io/docs/contributing/contributing_checklist).
 
 Changes proposed in this pull request:
 -
@@ -6,7 +6,7 @@ Changes proposed in this pull request:
 -
 
 
-After submitting your PR, CI checks will run and @ge-cla-bot will check for your CLA signature.
+After submitting your PR, CI checks will run and @cla-bot will check for your CLA signature.
 
 For a PR with nontrivial changes, we review with both design-centric and code-centric lenses.
 

@@ -9,7 +9,7 @@ from great_expectations.core.usage_statistics.util import send_usage_message
 
 
 @click.group()
-def docs():
+def docs() -> None:
     """Data Docs operations"""
     pass
 
@@ -39,7 +39,7 @@ def docs():
     help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
     default=False,
 )
-def docs_build(directory, site_name, view=True, assume_yes=False):
+def docs_build(directory, site_name, view=True, assume_yes=False) -> None:
     """Build Data Docs for a project."""
     context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
@@ -58,7 +58,7 @@ def docs_build(directory, site_name, view=True, assume_yes=False):
     default=None,
     help="The project's great_expectations directory.",
 )
-def docs_list(directory):
+def docs_list(directory) -> None:
     """List known Data Docs Sites."""
     context = toolkit.load_data_context_with_error_handling(directory)
 
@@ -100,7 +100,7 @@ def docs_list(directory):
     is_flag=True,
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
-def clean_data_docs(directory, site_name=None, all=None):
+def clean_data_docs(directory, site_name=None, all=None) -> None:
     """Delete data docs"""
     context = toolkit.load_data_context_with_error_handling(directory)
     failed = True
@@ -141,7 +141,7 @@ def _build_intro_string(docs_sites_strings):
     return list_intro_string
 
 
-def build_docs(context, site_name=None, view=True, assume_yes=False):
+def build_docs(context, site_name=None, view=True, assume_yes=False) -> None:
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 

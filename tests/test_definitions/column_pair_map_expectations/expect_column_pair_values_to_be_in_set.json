@@ -9,6 +9,14 @@
       "a" : [1, 1, 1, 1, 1, 2, 2, 2, 2, null],
       "b" : [1, 2, 1, 2, 1, 2, 1, 2, 1, null]
     },
+    "data_alt" : {
+      "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "z" : [1, 2, 3, 4, 5, null, null, null, null],
+      "a" : [1, 1, 1, 1, 1, 2, 2, 2, 2],
+      "b" : [1, 2, 1, 2, 1, 2, 1, 2, 1]
+    },
     "schemas": {
       "spark": {
         "w": "IntegerType",
@@ -51,6 +59,7 @@
       "title": "negative_test_with_nulls",
       "include_in_gallery": true,
       "exact_match_out" : false,
+      "suppress_test_for": ["trino"],
       "in": {
         "column_A": "x",
         "column_B": "z",

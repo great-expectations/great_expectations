@@ -19,17 +19,36 @@ module.exports = {
   ],
 
   themeConfig: {
+    algolia: {
+      // If Algolia did not provide you any appId, use 'BH4D9OD16A'
+      appId: 'B4HD9FJQCB',
+
+      // Public API key: it is safe to commit it
+      apiKey: '16dae2c1fabc515311cada8ace06060a',
+
+      indexName: 'docs-greatexpectations',
+
+      searchPagePath: 'search',
+
+      // Optional: see doc section below
+      // contextualSearch: true,
+
+       // Optional: Specify domains where the navigation should occur through window.location instead on history.push. Useful when our Algolia config crawls multiple documentation sites and we want to navigate with window.location.href to them.
+      // externalUrlRegex: 'external\\.com|domain\\.com',
+
+       // Optional: see doc section below
+      // appId: 'YOUR_APP_ID',
+
+       // Optional: Algolia search parameters
+      // searchParameters: {},
+
+      //... other Algolia params
+    },
     prism: {
       theme: require('prism-react-renderer/themes/vsDark')
     },
     colorMode: {
       disableSwitch: true
-    },
-    gtag: {
-      // You can also use your "G-" Measurement ID here.
-      trackingID: 'UA-138955219-1',
-      // Optional fields.
-      anonymizeIP: true // Should IPs be anonymized?
     },
     zoomSelector: '.markdown :not(em) > img',
     announcementBar: {
@@ -61,8 +80,8 @@ module.exports = {
               href: 'https://github.com/great-expectations/great_expectations'
             },
             {
-              label: 'Discuss',
-              href: 'https://discuss.greatexpectations.io/'
+              label: 'Discussions',
+              href: 'https://github.com/great-expectations/great_expectations/discussions/'
             },
             {
               label: 'Newsletter',
@@ -118,8 +137,8 @@ module.exports = {
               href: 'https://greatexpectations.io/slack'
             },
             {
-              label: 'Discuss',
-              href: 'https://discuss.greatexpectations.io/'
+              label: 'Discussions',
+              href: 'https://github.com/great-expectations/great_expectations/discussions/'
             },
             {
               label: 'Twitter',
@@ -150,18 +169,11 @@ module.exports = {
         theme: {
           customCss: require.resolve('./src/css/custom.css')
         },
-        lastVersion: 'current',
-        versions: {
-          // Example configuration:
-          // <WILL> may have to be fixed
-          current: {
-            label: 'docs',
-            path: 'docs'
-          },
-          '0.13.9': {
-            label: '0.13.9-docs',
-            path: '0.13.9'
-          }
+        gtag: {
+          // You can also use your "G-" Measurement ID here.
+          trackingID: 'UA-138955219-1',
+          // Optional fields.
+          anonymizeIP: true // Should IPs be anonymized?
         }
       }
     ]

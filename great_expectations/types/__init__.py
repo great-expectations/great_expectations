@@ -6,6 +6,7 @@ from typing import Optional, Set
 import pandas as pd
 
 from .base import SerializableDotDict
+from .color_palettes import ColorPalettes, Colors
 from .configurations import ClassConfig
 
 logger = logging.getLogger(__name__)
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 try:
     import pyspark
 except ImportError:
-    pyspark = None
+    pyspark = None  # type: ignore
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
@@ -71,10 +72,10 @@ class DictDot:
             return list(self.__dict__.keys())[item]
         return getattr(self, item)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value) -> None:
         setattr(self, key, value)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key) -> None:
         delattr(self, key)
 
     def __contains__(self, key):
@@ -97,7 +98,7 @@ class DictDot:
             return self.__getitem__(item=key)
         return self.__dict__.get(key, default_value)
 
-    def to_raw_dict(self):
+    def to_raw_dict(self) -> dict:
         """Convert this object into a standard dictionary, recursively.
 
         This is often convenient for serialization, and in cases where an untyped version of the object is required.
@@ -201,15 +202,18 @@ class DictDot:
 
         keys_for_exclusion: list = []
 
-        def assert_valid_keys(keys: Set[str], purpose: str):
+        def assert_valid_keys(keys: Set[str], purpose: str) -> None:
             name: str
             for name in keys:
                 try:
                     _ = self[name]
                 except AttributeError:
-                    raise ValueError(
-                        f'Property "{name}", marked for {purpose} on object "{str(type(self))}", does not exist.'
-                    )
+                    try:
+                        _ = self[f"_{name}"]
+                    except AttributeError:
+                        raise ValueError(
+                            f'Property "{name}", marked for {purpose} on object "{str(type(self))}", does not exist.'
+                        )
 
         if include_keys:
             # Make sure that all properties, marked for inclusion, actually exist on the object.

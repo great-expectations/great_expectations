@@ -12,7 +12,7 @@ This guide will help you pass an in-memory DataFrame to an existing <TechnicalTa
 
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
+- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
 
 </Prerequisites>
 

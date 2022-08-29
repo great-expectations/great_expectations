@@ -15,7 +15,7 @@ class BaseNotebookRenderer(Renderer):
     Abstract base class for methods that help with rendering a jupyter notebook.
     """
 
-    def __init__(self, context: Optional[DataContext] = None):
+    def __init__(self, context: Optional[DataContext] = None) -> None:
         super().__init__()
         self.context = context
         # Add cells to this notebook, then render by implementing a
@@ -30,6 +30,7 @@ class BaseNotebookRenderer(Renderer):
         Args:
             code: Code to render into the notebook cell
             lint: Whether to lint the code before adding it
+            enforce_py_syntax: Directive to convert code to Python-compliant format
 
         Returns:
             Nothing, adds a cell to the class instance notebook
@@ -68,17 +69,14 @@ class BaseNotebookRenderer(Renderer):
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
-    def render(self):
+    def render(self, **kwargs: dict) -> nbformat.NotebookNode:
         """
         Render a notebook from parameters.
         """
         raise NotImplementedError
 
-    def render_to_disk(
-        self,
-        notebook_file_path: str,
-    ) -> None:
+    def render_to_disk(self, notebook_file_path: str, **kwargs: dict) -> None:
         """
-        Render a notebook to disk from arguments
+        Render a notebook to disk from arguments.
         """
         raise NotImplementedError

@@ -24,7 +24,7 @@ except ImportError:
 
 
 @click.group()
-def validation_operator():
+def validation_operator() -> None:
     """Validation Operator operations"""
     pass
 
@@ -115,7 +115,9 @@ Please consider using either:
   - `checkpoint new` if you wish to configure a new checkpoint interactively
   - `checkpoint run` if you wish to run a saved checkpoint</yellow>"""
 )
-def validation_operator_run(name, run_name, validation_config_file, suite, directory):
+def validation_operator_run(
+    name, run_name, validation_config_file, suite, directory
+) -> None:
     # Note though the long lines here aren't pythonic, they look best if Click does the line wraps.
     """
     Run a validation operator against some data.

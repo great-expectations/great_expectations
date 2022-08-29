@@ -27,7 +27,7 @@ introspection:  # Each key in the "introspection" section is an InferredAssetSql
         include_schema_name: true
         included_tables:  # only include tables in this list when inferring data asset_names
             - main.yellow_tripdata_sample_2019_01  # format: schema_name.table_name
-        splitter_method: _split_on_converted_datetime
+        splitter_method: split_on_converted_datetime
         splitter_kwargs:
             column_name: pickup_datetime
             date_format_string: "%Y-%m-%d"
@@ -39,7 +39,7 @@ introspection:  # Each key in the "introspection" section is an InferredAssetSql
         include_schema_name: true
         included_tables:  # only include tables in this list when inferring data asset_names
             - main.yellow_tripdata_sample_2019_01  # format: schema_name.table_name
-        splitter_method: _split_on_converted_datetime
+        splitter_method: split_on_converted_datetime
         splitter_kwargs:
             column_name: pickup_datetime
             date_format_string: "%Y-%m-%d %H"
@@ -59,7 +59,7 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
                 schema_name: main
                 data_asset_name_prefix: taxi__
                 data_asset_name_suffix: __asset
-                splitter_method: _split_on_column_value
+                splitter_method: split_on_column_value
                 splitter_kwargs:
                     column_name: passenger_count
 
@@ -68,7 +68,7 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
                 schema_name: main
                 data_asset_name_prefix: taxi__
                 data_asset_name_suffix: __asset
-                splitter_method: _split_on_column_value
+                splitter_method: split_on_column_value
                 splitter_kwargs:
                     column_name: passenger_count
                 sampling_method: _sample_using_random

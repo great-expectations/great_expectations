@@ -176,7 +176,7 @@ def write_package_to_disk(
         package: The GreatExpectationsContribPackageManifest you wish to serialize.
         path: The relative path to the target package JSON file.
     """
-    json_dict = asdict(package)
+    json_dict = package.to_json_dict()
     data = json.dumps(json_dict, indent=4)
     with open(path, "w") as f:
         f.write(data)

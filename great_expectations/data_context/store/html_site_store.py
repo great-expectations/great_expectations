@@ -100,7 +100,7 @@ class HtmlSiteStore:
 
     _key_class = SiteSectionIdentifier
 
-    def __init__(self, store_backend=None, runtime_environment=None):
+    def __init__(self, store_backend=None, runtime_environment=None) -> None:
         store_backend_module_name = store_backend.get(
             "module_name", "great_expectations.data_context.store"
         )
@@ -237,7 +237,7 @@ class HtmlSiteStore:
         # backends that write to the same directory structure.
         # It's a pretty reasonable way for HtmlSiteStore to do its job---you just have to remember that it
         # can't necessarily set and list_keys like most other Stores.
-        self.keys = set()
+        self.keys = set()  # type: ignore[var-annotated]
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
@@ -302,7 +302,7 @@ class HtmlSiteStore:
             if only_if_exists:
                 return (
                     store_backend.get_public_url_for_key(key)
-                    if store_backend.has_key(key)
+                    if store_backend.has_key(key)  # noqa: W601
                     else None
                 )
             else:
@@ -311,7 +311,7 @@ class HtmlSiteStore:
             if only_if_exists:
                 return (
                     store_backend.get_url_for_key(key)
-                    if store_backend.has_key(key)
+                    if store_backend.has_key(key)  # noqa: W601
                     else None
                 )
             else:
@@ -366,7 +366,7 @@ class HtmlSiteStore:
             content_type="text/html; " "charset=utf-8",
         )
 
-    def clean_site(self):
+    def clean_site(self) -> None:
         for _, target_store_backend in self.store_backends.items():
             keys = target_store_backend.list_keys()
             for key in keys:

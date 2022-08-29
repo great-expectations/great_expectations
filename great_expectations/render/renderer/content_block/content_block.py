@@ -389,7 +389,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
 
     @classmethod
-    def _process_content_block(cls, content_block, has_failed_evr, render_object=None):
+    def _process_content_block(
+        cls, content_block, has_failed_evr, render_object=None
+    ) -> None:
         header = cls._get_header()
         if header != "":
             content_block.header = header

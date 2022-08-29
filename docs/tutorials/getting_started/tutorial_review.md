@@ -79,8 +79,8 @@ You installed Great Expectations and initialized your Data Context.
 
 Your specific use case will no doubt differ from that of our tutorial.  However, the four steps you'll need to perform in order to get Great Expectations working for you will be the same.  Setup, connect to data, create Expectations, and validate data.  That's all there is to it!  As long as you can perform these four steps you can have Great Expectations working to validate data for you.
 
-For those who only need to know the basics in order to make Great Expectations work our documentation includes Core Concepts for each step.
+For those who only need to know the basics in order to make Great Expectations work our documentation include an Overview reference for each step.
 
-For those who prefer working from examples, we have "How to" guides which show working examples of how to configure objects from Great Expectations according to specific use cases.
+For those who prefer working from examples, we have "How to" guides which show working examples of how to configure objects from Great Expectations according to specific use cases.  You can find these in the table of contents under the category that corresponds to when you would need to do so.  Or, if you want a broad overview of the options for customizing your deployment we also provide a [reference document on ways to customize your deployment](../../reference/customize_your_deployment.md).
 
-Finally, we have [Reference Architectures](../../deployment_patterns/index.md).  These show you how to perform all four steps for implementing Great Expectations with a specific environment and data type.
+
