@@ -300,21 +300,20 @@ class CloudDataContext(AbstractDataContext):
         self, key: GeCloudIdentifier
     ) -> None:
         ge_cloud_id = key.ge_cloud_id
-        suite_name = key.resource_name
-
         if ge_cloud_id:
             if self.expectations_store.has_key(key):  # noqa: W601
                 raise ge_exceptions.DataContextError(
                     f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. "
                     f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
                 )
-        else:
-            existing_suite_names = self.list_expectation_suite_names()
-            if suite_name in existing_suite_names:
-                raise ge_exceptions.DataContextError(
-                    f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True."
-                )
+
+        suite_name = key.resource_name
+        existing_suite_names = self.list_expectation_suite_names()
+        if suite_name in existing_suite_names:
+            raise ge_exceptions.DataContextError(
+                f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
+            )
 
     @property
     def root_directory(self) -> Optional[str]:
