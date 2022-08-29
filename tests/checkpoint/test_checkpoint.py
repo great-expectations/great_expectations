@@ -5217,7 +5217,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
                 ],
                 validations=[
                     CheckpointValidationConfig(
-                        id_="f22601d9-00b7-4d54-beb6-605d87a74e40",
+                        id="f22601d9-00b7-4d54-beb6-605d87a74e40",
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_basic_data_connector",
@@ -5246,7 +5246,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
                 ],
                 validations=[
                     CheckpointValidationConfig(
-                        id_="f22601d9-00b7-4d54-beb6-605d87a74e40",
+                        id="f22601d9-00b7-4d54-beb6-605d87a74e40",
                         batch_request={
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_basic_data_connector",
