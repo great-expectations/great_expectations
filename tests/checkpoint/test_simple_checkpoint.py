@@ -3510,3 +3510,6 @@ def test_simple_checkpoint_result_validations_include_rendered_content(
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
+
+
+# TODO: adding a schema based test here

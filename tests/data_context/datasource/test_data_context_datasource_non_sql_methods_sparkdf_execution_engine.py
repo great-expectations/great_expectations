@@ -28,7 +28,7 @@ def schema_for_spark_testset(spark_session):
             StructField("z", IntegerType(), True),
         ]
     )
-    return schema
+    return schema.jsonValue()
 
 
 @pytest.fixture
@@ -204,7 +204,7 @@ data_connectors:
     assert isinstance(batch.data, SparkDFBatchData)
     assert batch.data.dataframe.count() == 2
     assert len(batch.data.dataframe.columns) == 3
-    assert batch.data.dataframe.schema == schema_for_spark_testset
+    assert batch.data.dataframe.schema.jsonValue() == schema_for_spark_testset
 
 
 def test_get_batch_list_from_new_style_datasource_with_runtime_data_connector(
@@ -365,7 +365,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     assert isinstance(batch.data, SparkDFBatchData)
     assert batch.data.dataframe.count() == 2
     assert len(batch.data.dataframe.columns) == 3
-    assert batch.data.dataframe.schema == schema_for_spark_testset
+    assert batch.data.dataframe.schema.jsonValue() == schema_for_spark_testset
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter(
@@ -454,7 +454,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "name": "Test",
         "year": "2021",
     }
-    assert batch.data.dataframe.schema == schema_for_spark_testset
+    assert batch.data.dataframe.schema.jsonValue() == schema_for_spark_testset
 
     # second batch
     batch: Batch = batch_list[1]
@@ -464,7 +464,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "name": "Test",
         "year": "2010",
     }
-    assert batch.data.dataframe.schema == schema_for_spark_testset
+    assert batch.data.dataframe.schema.jsonValue() == schema_for_spark_testset
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter_limit_param_ignored(
@@ -561,7 +561,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "name": "Test",
         "year": "2021",
     }
-    assert batch.data.dataframe.schema == schema_for_spark_testset
+    assert batch.data.dataframe.schema.jsonValue() == schema_for_spark_testset
 
     # second batch
     batch: Batch = batch_list[1]
@@ -571,7 +571,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "name": "Test",
         "year": "2010",
     }
-    assert batch.data.dataframe.schema == schema_for_spark_testset
+    assert batch.data.dataframe.schema.jsonValue() == schema_for_spark_testset
 
     # third batch
     batch: Batch = batch_list[2]
@@ -581,7 +581,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "name": "Test",
         "year": "2000",
     }
-    assert batch.data.dataframe.schema == schema_for_spark_testset
+    assert batch.data.dataframe.schema.jsonValue() == schema_for_spark_testset
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_in_get_batch_list_with_batch_request(
@@ -672,7 +672,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "name": "Test",
         "year": "2021",
     }
-    assert batch.data.dataframe.schema == schema_for_spark_testset
+    assert batch.data.dataframe.schema.jsonValue() == schema_for_spark_testset
 
     # second batch
     batch: Batch = batch_list[1]
@@ -682,4 +682,4 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "name": "Test",
         "year": "2010",
     }
-    assert batch.data.dataframe.schema == schema_for_spark_testset
+    assert batch.data.dataframe.schema.jsonValue() == schema_for_spark_testset

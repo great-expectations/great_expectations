@@ -5281,3 +5281,6 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
 
     actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
     assert expected_validation_id == actual_validation_id
+
+
+# add spark schema test here
