@@ -169,7 +169,7 @@ class DatasourceStore(Store):
     def set(
         self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
     ) -> DatasourceConfig:
-        """Create a datasource config in the store using a store_backend-specific key, then get and return that config.
+        """Create a datasource config in the store using a store_backend-specific key.
 
         Args:
             key: Optional key to use when setting value.
@@ -183,10 +183,6 @@ class DatasourceStore(Store):
             key = self._build_key_from_config(value)
 
         super().set(key, value)
-
-        datasource_config_from_store: DatasourceConfig = self.get(key.to_tuple())
-
-        return datasource_config_from_store
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
