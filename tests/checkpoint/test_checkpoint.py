@@ -1,14 +1,12 @@
 import logging
 import os
 import pickle
-import shutil
 import unittest
 from typing import List, Optional, Union
 from unittest import mock
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations as ge
@@ -25,6 +23,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -42,7 +41,7 @@ from great_expectations.util import (
     filter_properties_dict,
 )
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 

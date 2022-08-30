@@ -3539,16 +3539,8 @@ def test_running_spark_simplecheckpoint(
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
-                "expectation_suite_name": "taxi_data_2019_suite",
+                "expectation_suite_name": "my_expectation_suite",
             }
-        ],
-        "action_list": [
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
         ],
     }
     context.add_checkpoint(**checkpoint_config)
@@ -3579,7 +3571,7 @@ def run_spark_checkpoint_with_schema(
         "validations": [
             {
                 "batch_request": single_batch_batch_request,
-                "expectation_suite_name": "taxi_data_2019_suite",
+                "expectation_suite_name": "my_expectation_suite",
             }
         ],
         "action_list": [

@@ -5,7 +5,10 @@ import pytest
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
+
+yaml = YAMLHandler()
 
 
 @pytest.fixture
