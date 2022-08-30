@@ -3386,13 +3386,16 @@ class DataAssistantResult(SerializableDictDot):
             plot_mode=plot_mode,
         )
 
-        return self._chart_column_values(
-            expectation_type=expectation_type,
-            column_dfs=column_dfs,
-            metric_names=metric_names,
-            plot_mode=plot_mode,
-            sequential=sequential,
-        )
+        if len(column_dfs) > 0:
+            return self._chart_column_values(
+                expectation_type=expectation_type,
+                column_dfs=column_dfs,
+                metric_names=metric_names,
+                plot_mode=plot_mode,
+                sequential=sequential,
+            )
+        else:
+            return []
 
     def _create_return_charts_for_column_domain_expectation(
         self,

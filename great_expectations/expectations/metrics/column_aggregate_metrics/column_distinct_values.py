@@ -74,14 +74,9 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
 class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count"
 
-    @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
-        cls,
-        metrics: Dict[str, Any],
-        **kwargs,
-    ) -> int:
-        column_distinct_values = metrics["column.distinct_values"]
-        return len(column_distinct_values)
+    @column_aggregate_value(engine=PandasExecutionEngine)
+    def _pandas(cls, column, **kwargs) -> pd.Series:
+        return column.nunique()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
@@ -99,48 +94,14 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     ):
         return F.countDistinct(column)
 
-    @classmethod
-    def _get_evaluation_dependencies(
-        cls,
-        metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[Dict] = None,
-    ):
-        """Returns a dictionary of given metric names and their corresponding configuration,
-        specifying the metric types and their respective domains"""
-        dependencies: dict = super()._get_evaluation_dependencies(
-            metric=metric,
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )
-        if (
-            metric.metric_name == "column.distinct_values.count"
-            and execution_engine == PandasExecutionEngine
-        ):
-            dependencies["column.distinct_values.count"] = MetricConfiguration(
-                metric_name="column.distinct_values",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs=None,
-            )
-        return dependencies
-
 
 class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count.under_threshold"
     condition_keys = ("threshold",)
 
-    @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
-        cls,
-        metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
-        **kwargs,
-    ) -> bool:
-        column_distinct_values_count = metrics["column.distinct_values.count"]
-        threshold = metric_value_kwargs["threshold"]
-        return column_distinct_values_count < threshold
+    @column_aggregate_value(engine=PandasExecutionEngine)
+    def _pandas(cls, column, threshold, **kwargs) -> pd.Series:
+        return column.nunique() < threshold
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
