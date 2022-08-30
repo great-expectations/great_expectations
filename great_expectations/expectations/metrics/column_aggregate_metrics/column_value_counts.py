@@ -86,21 +86,21 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if collate is not None:
             raise ValueError("collate parameter is not supported in PandasDataset")
 
-        selectable: sa.select.Selectable
+        selectable: sa.sql.expression.Selectable
         accessor_domain_kwargs: Dict[str, str]
         selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column: str = accessor_domain_kwargs["column"]
 
-        query: sa.select = (
+        query: sa.sql.expression.Select = (
             sa.select(
                 [
                     sa.column(column).label("value"),
                     sa.func.count(sa.column(column)).label("count"),
                 ]
             )
-            .where(sa.column(column) is not None)
+            .where(sa.column(column).is_not(None))
             .group_by(sa.column(column))
         )
         if sort == "value":

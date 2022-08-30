@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
 
@@ -19,6 +19,7 @@ from great_expectations.expectations.metrics.import_manager import (
     F,
     pyspark_sql_Column,
     pyspark_sql_DataFrame,
+    pyspark_sql_Row,
     sa,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
@@ -39,16 +40,16 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         metric_domain_kwargs: Dict[str, str],
         **kwargs,
     ) -> Set[Any]:
-        selectable: sa.select.Selectable
+        selectable: sa.sql.expression.Selectable
         accessor_domain_kwargs: Dict[str, str]
         (selectable, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column_name: str = accessor_domain_kwargs["column"]
-        column = sa.column(column_name)
+        column: sa.sql.expression.ColumnClause = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
 
-        distinct_values = sqlalchemy_engine.execute(
+        distinct_values: List[sa.engine.Row] = sqlalchemy_engine.execute(
             sa.select([column])
             .where(column.is_not(None))
             .distinct()
@@ -70,7 +71,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column_name: str = accessor_domain_kwargs["column"]
-        distinct_values = (
+        distinct_values: List[pyspark_sql_Row] = (
             df.distinct()
             .where(F.col(column_name).isNotNull())
             .rdd.flatMap(lambda x: x)
@@ -91,7 +92,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         cls,
         column: sa.sql.expression.ColumnClause,
         **kwargs,
-    ) -> sa.sql.functions.count:
+    ) -> sa.func.count:
         return sa.func.count(sa.distinct(column))
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
