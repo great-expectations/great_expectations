@@ -10,7 +10,6 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
@@ -18,10 +17,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql_Column,
-    sa,
-)
+from great_expectations.expectations.metrics.import_manager import pyspark_sql_Column
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.self_check.util import (
     build_pandas_engine,
