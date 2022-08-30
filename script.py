@@ -81,9 +81,9 @@ def _check_for_unmarked(func: ast.FunctionDef) -> bool:
     if not name.startswith("test_"):
         return False
 
-    decorators = func.decorator_list
-    if decorators:
-        return False
+    # decorators = func.decorator_list
+    # if decorators:
+    #     return False
 
     return True
 
@@ -100,19 +100,27 @@ def insert_marks(
             if not duration or duration < THRESHOLD:
                 continue  # Skip tests that aren't run or have 0.00 duration
 
+            contains_pytest_import = False
+
             # Find where to insert mark
             with open(file) as f:
                 contents = f.readlines()
 
                 idx = -1
                 for i, line in enumerate(contents):
-                    if test_name in line:
-                        idx = i - 2
+                    if contains_pytest_import is False and "import pytest" in line:
+                        contains_pytest_import = True
+                    if line.startswith(f"def {test_name}("):
+                        idx = i - 1
+                        break
 
                 # Update contents with mark
-                if idx > 0:
+                if idx > 0 and MARKER not in contents[idx]:
                     print(test_name, duration)
-                    contents[idx] = MARKER
+                    contents[idx] += f"{MARKER}\n"
+
+            if not contains_pytest_import:
+                contents.insert(0, "import pytest\n")
 
             # Insert updated contents
             with open(file, "w") as f:
