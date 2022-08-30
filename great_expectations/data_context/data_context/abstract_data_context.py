@@ -1635,6 +1635,7 @@ class AbstractDataContext(ABC):
                 name = config["name"]
 
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(config)
+        datasource_config.name = name
 
         try:
             datasource: Datasource = self._build_datasource_from_config(
