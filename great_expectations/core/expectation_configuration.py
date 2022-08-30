@@ -2,7 +2,7 @@ import copy
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
@@ -20,7 +20,9 @@ from great_expectations.core.util import (
     ensure_json_serializable,
     nested_update,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
+    ClassInstantiationError,
     ExpectationNotFoundError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
@@ -32,6 +34,9 @@ from great_expectations.render.types import (
     RenderedAtomicContentSchema,
 )
 from great_expectations.types import SerializableDictDot
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
 
@@ -1418,6 +1423,30 @@ class ExpectationConfiguration(SerializableDictDot):
         raise ValueError(
             'Unable to determine "domain_type" of this "ExpectationConfiguration" object from "kwargs" and heuristics.'
         )
+
+    def render(self) -> None:
+        """
+        Renders content using the atomic prescriptive renderer for this Expectation Configuration to
+            ExpectationConfiguration.rendered_content.
+        """
+        inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
+            "class_name": "InlineRenderer",
+            "render_object": self,
+        }
+        module_name = "great_expectations.render.renderer.inline_renderer"
+        inline_renderer = instantiate_class_from_config(
+            config=inline_renderer_config,
+            runtime_environment={},
+            config_defaults={"module_name": module_name},
+        )
+        if not inline_renderer:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=inline_renderer_config["class_name"],
+            )
+
+        self.rendered_content = inline_renderer.get_rendered_content()
 
 
 class ExpectationConfigurationSchema(Schema):
