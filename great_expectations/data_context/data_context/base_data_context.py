@@ -43,6 +43,8 @@ except ImportError:
     # Fallback for python < 3.8
     from typing_extensions import Literal  # type: ignore[misc]
 
+from marshmallow import ValidationError
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -102,7 +104,6 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import (
@@ -1345,13 +1346,13 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         See `AbstractDataContext.create_expectation_suite` for more information.
         """
-        res = self._data_context.create_expectation_suite(  # type: ignore[union-attr]
+        suite = self._data_context.create_expectation_suite(  # type: ignore[union-attr]
             expectation_suite_name,
             overwrite_existing=overwrite_existing,
             **kwargs,
         )
         self._synchronize_self_with_underlying_data_context()
-        return res
+        return suite
 
     def get_expectation_suite(
         self,
