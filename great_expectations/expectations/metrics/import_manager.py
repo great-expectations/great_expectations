@@ -52,6 +52,7 @@ try:
 except ImportError:
     logger.debug("No spark SQLContext available.")
     SQLContext = None
+    pyspark_sql_Column = None
     pyspark_sql_DataFrame = None
     pyspark_sql_Row = None
     pyspark_sql_SparkSession = None
