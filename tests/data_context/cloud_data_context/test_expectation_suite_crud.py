@@ -57,12 +57,12 @@ def mock_get_all_suites_json(
                         "expectations": [
                             {
                                 "expectation_type": "expect_column_to_exist",
-                                "ge_cloud_id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
+                                "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
                                 "kwargs": {"column": "infinities"},
                                 "meta": {},
                             },
                         ],
-                        "ge_cloud_id": suite_1.id,
+                        "id": suite_1.id,
                         "meta": {"great_expectations_version": "0.15.19"},
                     },
                     "updated_at": "2022-08-18T18:34:17.561984",
@@ -85,12 +85,12 @@ def mock_get_all_suites_json(
                         "expectations": [
                             {
                                 "expectation_type": "expect_column_to_exist",
-                                "ge_cloud_id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
+                                "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
                                 "kwargs": {"column": "infinities"},
                                 "meta": {},
                             },
                         ],
-                        "ge_cloud_id": suite_2.id,
+                        "id": suite_2.id,
                         "meta": {"great_expectations_version": "0.15.19"},
                     },
                     "updated_at": "2022-08-18T18:34:17.561984",
@@ -148,12 +148,12 @@ def mocked_get_response(
                             "expectations": [
                                 {
                                     "expectation_type": "expect_column_to_exist",
-                                    "ge_cloud_id": "869771ee-a728-413d-96a6-8efc4dc70318",
+                                    "id": "869771ee-a728-413d-96a6-8efc4dc70318",
                                     "kwargs": {"column": "infinities"},
                                     "meta": {},
                                 },
                             ],
-                            "ge_cloud_id": suite_id,
+                            "id": suite_id,
                         },
                     },
                     "id": suite_id,
@@ -214,12 +214,12 @@ def test_list_expectation_suites(
     assert suites == [
         GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=suite_1.id,
+            id=suite_1.id,
             resource_name=suite_1.name,
         ),
         GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=suite_2.id,
+            id=suite_2.id,
             resource_name=suite_2.name,
         ),
     ]
@@ -241,7 +241,7 @@ def test_create_expectation_suite_saves_suite_to_cloud(
         mock_list_expectation_suite_names.return_value = existing_suite_names
         suite = context.create_expectation_suite(suite_name)
 
-    assert suite.ge_cloud_id is not None
+    assert suite.id is not None
 
 
 @pytest.mark.unit
@@ -260,7 +260,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
         mock_list_expectation_suite_names.return_value = existing_suite_names
         suite = context.create_expectation_suite(suite_name, overwrite_existing=True)
 
-    assert suite.ge_cloud_id is not None
+    assert suite.id is not None
 
 
 @pytest.mark.unit
@@ -293,10 +293,10 @@ def test_delete_expectation_suite_deletes_suite_in_cloud(
 
     with mock.patch("requests.delete", autospec=True) as mock_delete:
         mock_expectations_store_has_key.return_value = True
-        context.delete_expectation_suite(ge_cloud_id=suite_id)
+        context.delete_expectation_suite(id=suite_id)
 
     mock_expectations_store_has_key.assert_called_once_with(
-        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, id=suite_id)
     )
     assert mock_delete.call_args[1]["json"] == {
         "data": {
@@ -319,10 +319,10 @@ def test_delete_expectation_suite_nonexistent_suite_raises_error(
 
     with pytest.raises(DataContextError) as e:
         mock_expectations_store_has_key.return_value = False
-        context.delete_expectation_suite(ge_cloud_id=suite_id)
+        context.delete_expectation_suite(id=suite_id)
 
     mock_expectations_store_has_key.assert_called_once_with(
-        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, id=suite_id)
     )
     assert f"expectation_suite with id {suite_id} does not exist" in str(e.value)
 
@@ -340,12 +340,12 @@ def test_get_expectation_suite_retrieves_suite_from_cloud(
 
     with mock.patch("requests.get", autospec=True, side_effect=mocked_get_response):
         mock_expectations_store_has_key.return_value = True
-        suite = context.get_expectation_suite(ge_cloud_id=suite_id)
+        suite = context.get_expectation_suite(id=suite_id)
 
     mock_expectations_store_has_key.assert_called_once_with(
-        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, id=suite_id)
     )
-    assert str(suite.ge_cloud_id) == str(suite_id)
+    assert str(suite.id) == str(suite_id)
 
 
 @pytest.mark.unit
@@ -360,10 +360,10 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 
     with pytest.raises(DataContextError) as e:
         mock_expectations_store_has_key.return_value = False
-        context.get_expectation_suite(ge_cloud_id=suite_id)
+        context.get_expectation_suite(id=suite_id)
 
     mock_expectations_store_has_key.assert_called_once_with(
-        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, ge_cloud_id=suite_id)
+        GeCloudIdentifier(GeCloudRESTResource.EXPECTATION_SUITE, id=suite_id)
     )
     assert f"expectation_suite with id {suite_id} not found" in str(e.value)
 
@@ -378,14 +378,14 @@ def test_save_expectation_suite_saves_suite_to_cloud(
 
     suite_name = "my_suite"
     suite_id = None
-    suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
+    suite = ExpectationSuite(suite_name, id=suite_id)
 
-    assert suite.ge_cloud_id is None
+    assert suite.id is None
 
     with mock.patch("requests.post", autospec=True, side_effect=mocked_post_response):
         context.save_expectation_suite(suite)
 
-    assert suite.ge_cloud_id is not None
+    assert suite.id is not None
 
 
 @pytest.mark.unit
@@ -398,7 +398,7 @@ def test_save_expectation_suite_overwrites_existing_suite(
     suite_name = suite_1.name
     suite_id = suite_1.id
 
-    suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
+    suite = ExpectationSuite(suite_name, id=suite_id)
 
     with mock.patch(
         "requests.put", autospec=True, return_value=mock.Mock(status_code=405)
@@ -409,7 +409,7 @@ def test_save_expectation_suite_overwrites_existing_suite(
         "data_asset_type": None,
         "expectation_suite_name": suite_name,
         "expectations": [],
-        "ge_cloud_id": suite_id,
+        "id": suite_id,
     }
 
     actual_put_suite_json = mock_put.call_args[1]["json"]["data"]["attributes"]["suite"]
@@ -432,7 +432,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 
     suite_name = "my_suite"
     suite_id = None
-    suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
+    suite = ExpectationSuite(suite_name, id=suite_id)
 
     existing_suite_names = [suite_name]
 
@@ -456,7 +456,7 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
 
     suite_name = "my_suite"
     suite_id = suite_1.id
-    suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
+    suite = ExpectationSuite(suite_name, id=suite_id)
 
     with pytest.raises(DataContextError) as e:
         mock_expectations_store_has_key.return_value = True
@@ -467,7 +467,7 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     mock_expectations_store_has_key.assert_called_once_with(
         GeCloudIdentifier(
             GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=suite_id,
+            id=suite_id,
             resource_name=suite_name,
         )
     )

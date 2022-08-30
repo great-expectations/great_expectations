@@ -948,7 +948,7 @@ class ExpectationConfiguration(SerializableDictDot):
         kwargs: dict,
         meta: Optional[dict] = None,
         success_on_last_run: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
         expectation_context: Optional[ExpectationContext] = None,
         rendered_content: Optional[List[RenderedAtomicContent]] = None,
     ) -> None:
@@ -969,7 +969,7 @@ class ExpectationConfiguration(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
-        self._ge_cloud_id = ge_cloud_id
+        self._id = id
         self._expectation_context = expectation_context
         self._rendered_content = rendered_content
 
@@ -1039,12 +1039,12 @@ class ExpectationConfiguration(SerializableDictDot):
         return self
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
-        return self._ge_cloud_id
+    def id(self) -> Optional[str]:
+        return self._id
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value: str) -> None:
-        self._ge_cloud_id = value
+    @id.setter
+    def id(self, value: str) -> None:
+        self._id = value
 
     @property
     def expectation_context(self) -> Optional[ExpectationContext]:
@@ -1435,7 +1435,7 @@ class ExpectationConfigurationSchema(Schema):
         required=False,
         allow_none=True,
     )
-    ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema, required=False, allow_none=True
     )
@@ -1445,7 +1445,7 @@ class ExpectationConfigurationSchema(Schema):
         )
     )
 
-    REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context", "rendered_content"]
+    REMOVE_KEYS_IF_NONE = ["id", "expectation_context", "rendered_content"]
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:

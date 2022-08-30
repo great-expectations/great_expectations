@@ -4,7 +4,7 @@
   "expectations": [
     {
       "expectation_type": "expect_table_columns_to_match_ordered_list",
-      "ge_cloud_id": null,
+      "id": null,
       "kwargs": {
         "column_list": [
           "_c0",
@@ -20,7 +20,7 @@
     },
     {
       "expectation_type": "expect_table_row_count_to_be_between",
-      "ge_cloud_id": null,
+      "id": null,
       "kwargs": {
         "max_value": 1313,
         "min_value": 1313
@@ -28,7 +28,7 @@
       "meta": {}
     }
   ],
-  "ge_cloud_id": null,
+  "id": null,
   "meta": {
     "citations": [
       {

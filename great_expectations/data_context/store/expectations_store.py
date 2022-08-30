@@ -170,7 +170,7 @@ class ExpectationsStore(Store):
         """
         ge_cloud_expectation_suite_id = response_json["data"]["id"]
         expectation_suite_dict = response_json["data"]["attributes"]["suite"]
-        expectation_suite_dict["ge_cloud_id"] = ge_cloud_expectation_suite_id
+        expectation_suite_dict["id"] = ge_cloud_expectation_suite_id
 
         return expectation_suite_dict
 
@@ -219,7 +219,7 @@ class ExpectationsStore(Store):
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
                 resource_type=GeCloudRESTResource.CHECKPOINT,
-                ge_cloud_id=str(uuid.uuid4()),
+                id=str(uuid.uuid4()),
             )
         else:
             test_key: ExpectationSuiteIdentifier = self.key_class(test_key_name)

@@ -2315,7 +2315,7 @@ def data_context_with_query_store(
 
 
 @pytest.fixture
-def ge_cloud_id():
+def id():
     # Fake id but adheres to the format required of a UUID
     return "731ee1bd-604a-4851-9ee8-bca8ffb32bce"
 

@@ -259,7 +259,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         pass
 
     # TODO: GG 20220810 return the `ResponsePayload`
-    def _update(self, ge_cloud_id: str, value: Any) -> bool:
+    def _update(self, id: str, value: Any) -> bool:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -281,9 +281,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
 
-        if ge_cloud_id:
-            data["data"]["id"] = ge_cloud_id
-            url = urljoin(f"{url}/", ge_cloud_id)
+        if id:
+            data["data"]["id"] = id
+            url = urljoin(f"{url}/", id)
 
         try:
             response = requests.put(
@@ -346,16 +346,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     ) -> Union[bool, GeCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
         ge_cloud_resource = key[0]
-        ge_cloud_id: str = key[1]
+        id: str = key[1]
 
-        # if key has ge_cloud_id, perform _update instead
+        # if key has id, perform _update instead
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
-        if (
-            ge_cloud_id
-            or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES
-        ):
-            return self._update(ge_cloud_id=ge_cloud_id, value=value)
+        if id or ge_cloud_resource is GeCloudRESTResource.DATA_CONTEXT_VARIABLES:
+            return self._update(id=id, value=value)
 
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
@@ -389,7 +386,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
             return GeCloudResourceRef(
                 resource_type=resource_type,
-                ge_cloud_id=object_id,
+                id=object_id,
                 url=object_url,
             )
         except requests.HTTPError as http_exc:
@@ -468,10 +465,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def get_url_for_key(  # type: ignore[override]
         self, key: Tuple[str, ...], protocol: Optional[Any] = None
     ) -> str:
-        ge_cloud_id = key[1]
+        id = key[1]
         url = urljoin(
             self.ge_cloud_base_url,
-            f"organizations/{self.ge_cloud_credentials['organization_id']}/{hyphen(self.ge_cloud_resource_name)}/{ge_cloud_id}",
+            f"organizations/{self.ge_cloud_credentials['organization_id']}/{hyphen(self.ge_cloud_resource_name)}/{id}",
         )
         return url
 
@@ -479,12 +476,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
-        ge_cloud_id = key[1]
+        id = key[1]
 
         data = {
             "data": {
                 "type": self.ge_cloud_resource_type,
-                "id": ge_cloud_id,
+                "id": id,
                 "attributes": {
                     "deleted": True,
                 },
@@ -496,7 +493,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"organizations/"
             f"{self.ge_cloud_credentials['organization_id']}/"
             f"{hyphen(self.ge_cloud_resource_name)}/"
-            f"{ge_cloud_id}",
+            f"{id}",
         )
         try:
             response = requests.delete(
@@ -546,6 +543,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
         return GeCloudIdentifier(
             resource_type=self.ge_cloud_resource_type,
-            ge_cloud_id=id,
+            id=id,
             resource_name=name,
         )

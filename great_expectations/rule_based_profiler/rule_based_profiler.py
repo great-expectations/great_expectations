@@ -141,11 +141,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self._rule_states = []
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
+    def id(self) -> Optional[str]:
         return self._id
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, id: str) -> None:
+    @id.setter
+    def id(self, id: str) -> None:
         self._id = id
 
     def _init_profiler_rules(
@@ -1051,7 +1051,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
     ) -> RuleBasedProfilerResult:
@@ -1059,7 +1059,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             data_context=data_context,
             profiler_store=profiler_store,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
         return profiler.run(
@@ -1081,13 +1081,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> RuleBasedProfilerResult:
         profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
             data_context=data_context,
             profiler_store=profiler_store,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
         rule: Rule
@@ -1142,7 +1142,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         response = profiler_store.set(key=key, value=config)
         if isinstance(response, GeCloudResourceRef):
-            new_profiler.ge_cloud_id = response.ge_cloud_id
+            new_profiler.id = response.id
 
         return new_profiler
 
@@ -1177,17 +1177,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         data_context: "BaseDataContext",  # noqa: F821
         profiler_store: "ProfilerStore",  # noqa: F821
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> "RuleBasedProfiler":  # noqa: F821
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id (but not both)"
+        assert bool(name) ^ bool(id), "Must provide either name or id (but not both)"
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
-            )
+        if id:
+            key = GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER, id=id)
         else:
             key = ConfigurationIdentifier(
                 configuration_key=name,
@@ -1227,17 +1223,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def delete_profiler(
         profiler_store: "ProfilerStore",  # noqa: F821
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id (but not both)"
+        assert bool(name) ^ bool(id), "Must provide either name or id (but not both)"
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
-            )
+        if id:
+            key = GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER, id=id)
         else:
             key = ConfigurationIdentifier(configuration_key=name)
 

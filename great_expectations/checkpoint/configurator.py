@@ -157,7 +157,7 @@ class SimpleCheckpointConfigurator:
             "name": self.name,
             "class_name": "Checkpoint",
             "action_list": action_list,
-            "ge_cloud_id": self.other_kwargs.pop("ge_cloud_id", None),
+            "id": self.other_kwargs.pop("id", None),
         }
         config_kwargs.update(specific_config_kwargs_overrides)
 

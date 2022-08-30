@@ -204,13 +204,13 @@ class GeCloudIdentifier(DataContextKey):
     def __init__(
         self,
         resource_type: "GeCloudRESTResource",
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
         resource_name: Optional[str] = None,
     ) -> None:
         super().__init__()
 
         self._resource_type = resource_type
-        self._ge_cloud_id = ge_cloud_id or ""
+        self._id = id or ""
         self._resource_name = resource_name or ""
 
     @property
@@ -222,19 +222,19 @@ class GeCloudIdentifier(DataContextKey):
         self._resource_type = value
 
     @property
-    def ge_cloud_id(self):
-        return self._ge_cloud_id
+    def id(self):
+        return self._id
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value) -> None:
-        self._ge_cloud_id = value
+    @id.setter
+    def id(self, value) -> None:
+        self._id = value
 
     @property
     def resource_name(self) -> str:
         return self._resource_name
 
     def to_tuple(self):
-        return (self.resource_type, self.ge_cloud_id, self.resource_name)
+        return (self.resource_type, self.id, self.resource_name)
 
     def to_fixed_length_tuple(self):
         return self.to_tuple()
@@ -243,17 +243,15 @@ class GeCloudIdentifier(DataContextKey):
     def from_tuple(cls, tuple_):
         # Only add resource name if it exists in the tuple_
         if len(tuple_) == 3:
-            return cls(
-                resource_type=tuple_[0], ge_cloud_id=tuple_[1], resource_name=tuple_[2]
-            )
-        return cls(resource_type=tuple_[0], ge_cloud_id=tuple_[1])
+            return cls(resource_type=tuple_[0], id=tuple_[1], resource_name=tuple_[2])
+        return cls(resource_type=tuple_[0], id=tuple_[1])
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
         return cls.from_tuple(tuple_)
 
     def __repr__(self):
-        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.id}"
         if self.resource_name:
             repr += f"::{self.resource_name}"
         return repr

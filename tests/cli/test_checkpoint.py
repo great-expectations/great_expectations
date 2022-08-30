@@ -854,8 +854,8 @@ validations:
         index: -1
     expectation_suite_name: Titanic.warning
 profilers: []
-ge_cloud_id:
-expectation_suite_ge_cloud_id:
+id:
+expectation_suite_id:
 """
     assert checkpoint_config == expected_checkpoint_config
 

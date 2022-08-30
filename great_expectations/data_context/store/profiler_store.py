@@ -36,7 +36,7 @@ class ProfilerStore(ConfigurationStore):
         if self.ge_cloud_mode:
             test_key = self.key_class(  # type: ignore[assignment,call-arg]
                 resource_type=GeCloudRESTResource.PROFILER,
-                ge_cloud_id=str(uuid.uuid4()),
+                id=str(uuid.uuid4()),
             )
         else:
             test_key = self.key_class(configuration_key=test_profiler_name)  # type: ignore[assignment,call-arg]

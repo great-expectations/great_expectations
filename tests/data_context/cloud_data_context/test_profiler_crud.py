@@ -120,7 +120,7 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     ) as mock_get:
         return_profiler = context.save_profiler(profiler=profiler_with_id)
 
-    profiler_id = profiler_with_id.ge_cloud_id
+    profiler_id = profiler_with_id.id
     expected_profiler_config = ruleBasedProfilerConfigSchema.dump(
         profiler_with_id.config
     )
@@ -146,7 +146,7 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
         **shared_called_with_request_kwargs,
     )
 
-    assert return_profiler.ge_cloud_id == profiler_with_id.ge_cloud_id
+    assert return_profiler.id == profiler_with_id.id
 
 
 @pytest.mark.cloud
@@ -200,7 +200,7 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
         **shared_called_with_request_kwargs,
     )
 
-    assert return_profiler.ge_cloud_id == profiler_id
+    assert return_profiler.id == profiler_id
 
 
 @pytest.mark.xfail(
@@ -225,11 +225,11 @@ def test_cloud_backed_data_context_add_profiler_e2e(
         name=name, config_version=config_version, rules=rules
     )
 
-    ge_cloud_id = profiler.ge_cloud_id
+    id = profiler.id
 
-    profiler_stored_in_cloud = context.get_profiler(ge_cloud_id=ge_cloud_id)
+    profiler_stored_in_cloud = context.get_profiler(id=id)
 
-    assert profiler.ge_cloud_id == profiler_stored_in_cloud.ge_cloud_id
+    assert profiler.id == profiler_stored_in_cloud.id
     assert profiler.to_json_dict() == profiler_stored_in_cloud.to_json_dict()
 
 
@@ -369,12 +369,12 @@ def test_list_profilers(
     assert profilers == [
         GeCloudIdentifier(
             resource_type=GeCloudRESTResource.PROFILER,
-            ge_cloud_id=profiler_id_1,
+            id=profiler_id_1,
             resource_name=profiler_name_1,
         ),
         GeCloudIdentifier(
             resource_type=GeCloudRESTResource.PROFILER,
-            ge_cloud_id=profiler_id_2,
+            id=profiler_id_2,
             resource_name=profiler_name_2,
         ),
     ]

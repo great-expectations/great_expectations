@@ -90,11 +90,11 @@ class DatasourceStore(Store):
         This method takes full json response from GE cloud and outputs a dict appropriate for
         deserialization into a GE object
         """
-        datasource_ge_cloud_id: str = response_json["data"]["id"]
+        datasource_id: str = response_json["data"]["id"]
         datasource_config_dict: dict = response_json["data"]["attributes"][
             "datasource_config"
         ]
-        datasource_config_dict["ge_cloud_id"] = datasource_ge_cloud_id
+        datasource_config_dict["id"] = datasource_id
 
         return datasource_config_dict
 

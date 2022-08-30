@@ -32,5 +32,5 @@ validations:
         bigquery_temp_table: ge_temp
     expectation_suite_name: test_bigquery_suite
 profilers: []
-ge_cloud_id:
-expectation_suite_ge_cloud_id:
+id:
+expectation_suite_id:

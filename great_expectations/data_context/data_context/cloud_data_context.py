@@ -199,14 +199,14 @@ class CloudDataContext(AbstractDataContext):
 
         response: Union[bool, GeCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GeCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.ge_cloud_id
+            expectation_suite.id = response.id
 
         return expectation_suite
 
     def delete_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ):
         """Delete specified expectation suite from data_context expectation store.
 
@@ -218,11 +218,11 @@ class CloudDataContext(AbstractDataContext):
         """
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
         if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
-                f"expectation_suite with id {ge_cloud_id} does not exist."
+                f"expectation_suite with id {id} does not exist."
             )
 
         self.expectations_store.remove_key(key)
@@ -231,23 +231,23 @@ class CloudDataContext(AbstractDataContext):
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GE Cloud ID
         Args:
             expectation_suite_name (str): the name for the Expectation Suite
-            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
+            id (str): the GE Cloud ID for the Expectation Suite
 
         Returns:
             expectation_suite
         """
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
         if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
-                f"expectation_suite with id {ge_cloud_id} not found"
+                f"expectation_suite with id {id} not found"
             )
 
         expectations_schema_dict: dict = cast(dict, self.expectations_store.get(key))
@@ -276,7 +276,7 @@ class CloudDataContext(AbstractDataContext):
         """
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=expectation_suite.ge_cloud_id,
+            id=expectation_suite.id,
             resource_name=expectation_suite.expectation_suite_name,
         )
 
@@ -294,16 +294,16 @@ class CloudDataContext(AbstractDataContext):
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GeCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.ge_cloud_id
+            expectation_suite.id = response.id
 
     def _validate_suite_unique_constaints_before_save(
         self, key: GeCloudIdentifier
     ) -> None:
-        ge_cloud_id = key.ge_cloud_id
-        if ge_cloud_id:
+        id = key.id
+        if id:
             if self.expectations_store.has_key(key):  # noqa: W601
                 raise ge_exceptions.DataContextError(
-                    f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. "
+                    f"expectation_suite with GE Cloud ID {id} already exists. "
                     f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
                 )
 
@@ -352,7 +352,7 @@ class CloudDataContext(AbstractDataContext):
             resource_ref: GeCloudResourceRef = self._datasource_store.create(  # type: ignore[assignment]
                 datasource_config
             )
-            datasource_config.id = resource_ref.ge_cloud_id
+            datasource_config.id = resource_ref.id
 
         self.config.datasources[name] = datasource_config  # type: ignore[index,assignment]
 
@@ -414,8 +414,8 @@ class CloudDataContext(AbstractDataContext):
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
+        expectation_suite_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> "Checkpoint":
         """
@@ -448,8 +448,8 @@ class CloudDataContext(AbstractDataContext):
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=ge_cloud_id,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            id=id,
+            expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
         )
 

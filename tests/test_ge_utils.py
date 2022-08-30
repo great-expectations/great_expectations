@@ -317,11 +317,11 @@ def test_linter_leaves_clean_code():
 @pytest.mark.unit
 def test_convert_json_string_to_be_python_compliant_null_replacement(caplog):
     text = """
-    "ge_cloud_id": null,
+    "id": null,
     "expectation_context": {"description": null},
     """
     expected = """
-    "ge_cloud_id": None,
+    "id": None,
     "expectation_context": {"description": None},
     """
 
@@ -329,10 +329,7 @@ def test_convert_json_string_to_be_python_compliant_null_replacement(caplog):
         res = convert_json_string_to_be_python_compliant(text)
 
     assert res == expected
-    assert (
-        "Replaced 'ge_cloud_id: null' with 'ge_cloud_id: None' before writing to file"
-        in caplog.text
-    )
+    assert "Replaced 'id: null' with 'id: None' before writing to file" in caplog.text
     assert (
         "Replaced 'description: null' with 'description: None' before writing to file"
         in caplog.text

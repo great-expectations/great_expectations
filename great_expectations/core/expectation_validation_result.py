@@ -385,7 +385,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         evaluation_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
         meta: Optional[ExpectationSuiteValidationResultMeta] = None,
-        ge_cloud_id: Optional[UUID] = None,
+        id: Optional[UUID] = None,
     ) -> None:
         self.success = success
         if results is None:
@@ -514,7 +514,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
     evaluation_parameters = fields.Dict()
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
-    ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    id = fields.UUID(required=False, allow_none=True)
     checkpoint_name = fields.String(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal

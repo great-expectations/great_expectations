@@ -160,9 +160,7 @@ class ValidationsStore(Store):
         """
         ge_cloud_suite_validation_result_id = response_json["data"]["id"]
         suite_validation_result_dict = response_json["data"]["attributes"]["result"]
-        suite_validation_result_dict[
-            "ge_cloud_id"
-        ] = ge_cloud_suite_validation_result_id
+        suite_validation_result_dict["id"] = ge_cloud_suite_validation_result_id
 
         return suite_validation_result_dict
 
@@ -207,7 +205,7 @@ class ValidationsStore(Store):
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
                 resource_type=GeCloudRESTResource.CHECKPOINT,
-                ge_cloud_id=str(uuid.uuid4()),
+                id=str(uuid.uuid4()),
             )
 
         else:

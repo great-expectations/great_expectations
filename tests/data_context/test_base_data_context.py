@@ -172,7 +172,7 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
     def _closure(context: DataContext) -> Tuple[Validator, str]:
         # Create a suite to be used in Validator instantiation
         suites = context.list_expectation_suites()
-        expectation_suite_ge_cloud_id = suites[0].ge_cloud_id
+        expectation_suite_id = suites[0].id
 
         # To ensure we don't accidentally impact parallel test runs in Azure, we randomly generate a suite name in this E2E test.
         # To limit the number of generated suites, we limit the randomization to 20 numbers.
@@ -180,12 +180,12 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
         suite_name = f"oss_e2e_test_suite_{rand_suffix}"
 
         # Start off each test run with a clean slate
-        if expectation_suite_ge_cloud_id in context.list_expectation_suite_names():
-            context.delete_expectation_suite(ge_cloud_id=expectation_suite_ge_cloud_id)
+        if expectation_suite_id in context.list_expectation_suite_names():
+            context.delete_expectation_suite(id=expectation_suite_id)
 
         suite = context.create_expectation_suite(
             suite_name,
-            ge_cloud_id=expectation_suite_ge_cloud_id,
+            id=expectation_suite_id,
             overwrite_existing=True,
         )
 
@@ -211,7 +211,7 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
 
         context.save_expectation_suite(
             expectation_suite=suite,
-            ge_cloud_id=expectation_suite_ge_cloud_id,
+            id=expectation_suite_id,
             overwrite_existing=True,
         )
 
@@ -239,13 +239,13 @@ def prepare_validator_for_cloud_e2e() -> Callable[[DataContext], Tuple[Validator
         # Create Validator and ensure that persistence is Cloud-backed
         validator = context.get_validator(
             batch_request=batch_request,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            expectation_suite_id=expectation_suite_id,
         )
 
         # Ensure that the Expectations set above propogate down successfully
         assert len(validator.expectation_suite.expectations) == 4
 
-        return validator, expectation_suite_ge_cloud_id
+        return validator, expectation_suite_id
 
     return _closure
 
@@ -308,7 +308,7 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
 
     (
         validator,
-        expectation_suite_ge_cloud_id,
+        expectation_suite_id,
     ) = prepare_validator_for_cloud_e2e(context)
 
     assert len(validator.expectation_suite.expectations) == 4
@@ -319,19 +319,15 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     assert len(validator.expectation_suite.expectations) == 5
 
     # Confirm that the suite is present before saving
-    assert expectation_suite_ge_cloud_id in context.list_expectation_suite_names()
-    suite_on_context = context.get_expectation_suite(
-        ge_cloud_id=expectation_suite_ge_cloud_id
-    )
-    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert expectation_suite_id in context.list_expectation_suite_names()
+    suite_on_context = context.get_expectation_suite(id=expectation_suite_id)
+    assert str(expectation_suite_id) == str(suite_on_context.id)
 
     validator.save_expectation_suite()
     assert len(validator.expectation_suite.expectations) == 5
 
     # Confirm that the suite is present after saving
-    assert expectation_suite_ge_cloud_id in context.list_expectation_suite_names()
-    suite_on_context = context.get_expectation_suite(
-        ge_cloud_id=expectation_suite_ge_cloud_id
-    )
-    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert expectation_suite_id in context.list_expectation_suite_names()
+    suite_on_context = context.get_expectation_suite(id=expectation_suite_id)
+    assert str(expectation_suite_id) == str(suite_on_context.id)
     assert len(suite_on_context.expectations) == 5
