@@ -90,7 +90,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        column: sa.sql.expression.ColumnClause,
+        column: "sa.sql.expression.ColumnClause",
         **kwargs,
     ) -> sa.func.count:
         return sa.func.count(sa.distinct(column))
