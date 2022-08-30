@@ -4235,6 +4235,344 @@ def test_distinct_metric_pd():
     assert metrics[column_distinct_values_count_threshold_metric.id] is True
 
 
+def test_batch_aggregate_metrics_pd():
+    import datetime
+
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    "2021-01-01",
+                    "2021-01-31",
+                    "2021-02-28",
+                    "2021-03-20",
+                    "2021-02-21",
+                    "2021-05-01",
+                    "2021-06-18",
+                ],
+                "b": [
+                    "2021-06-18",
+                    "2021-05-01",
+                    "2021-02-21",
+                    "2021-03-20",
+                    "2021-02-28",
+                    "2021-01-31",
+                    "2021-01-01",
+                ],
+            }
+        )
+    )
+
+    metrics: dict = {}
+    table_columns_metric: MetricConfiguration
+    results: dict
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+
+    start = datetime.datetime.now()
+    with pytest.warns(DeprecationWarning) as records:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(
+                desired_metric_1,
+                desired_metric_2,
+                desired_metric_3,
+                desired_metric_4,
+            ),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(records) == 4
+    for record in records:
+        assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+            record.message
+        )
+    end = datetime.datetime.now()
+    print(end - start)
+    assert results[desired_metric_1.id] == pd.Timestamp(year=2021, month=6, day=18)
+    assert results[desired_metric_2.id] == pd.Timestamp(year=2021, month=1, day=1)
+    assert results[desired_metric_3.id] == pd.Timestamp(year=2021, month=6, day=18)
+    assert results[desired_metric_4.id] == pd.Timestamp(year=2021, month=1, day=1)
+
+
+def test_batch_aggregate_metrics_sa(caplog, sa):
+    import datetime
+
+    engine = build_sa_engine(
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
+    )
+
+    metrics: dict = {}
+    table_columns_metric: MetricConfiguration
+    results: dict
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min.aggregate_fn",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_1,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_2,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_3,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_4,
+            "table.columns": table_columns_metric,
+        },
+    )
+    caplog.clear()
+    caplog.set_level(logging.DEBUG, logger="great_expectations")
+    start = datetime.datetime.now()
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+    end = datetime.datetime.now()
+    print("t1")
+    print(end - start)
+    assert results[desired_metric_1.id] == 3
+    assert results[desired_metric_2.id] == 1
+    assert results[desired_metric_3.id] == 4
+    assert results[desired_metric_4.id] == 4
+
+    # Check that all four of these metrics were computed on a single domain
+    found_message = False
+    for record in caplog.records:
+        if (
+            record.message
+            == "SqlAlchemyExecutionEngine computed 4 metrics on domain_id ()"
+        ):
+            found_message = True
+    assert found_message
+
+
+def test_batch_aggregate_metrics_spark(caplog, spark_session):
+    import datetime
+
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]},
+        ),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min.aggregate_fn",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={"metric_partial_fn": desired_metric_1},
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={"metric_partial_fn": desired_metric_2},
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={"metric_partial_fn": desired_metric_3},
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=None,
+        metric_dependencies={"metric_partial_fn": desired_metric_4},
+    )
+    start = datetime.datetime.now()
+    caplog.clear()
+    caplog.set_level(logging.DEBUG, logger="great_expectations")
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
+    end = datetime.datetime.now()
+    print(end - start)
+    assert results[desired_metric_1.id] == 3
+    assert results[desired_metric_2.id] == 1
+    assert results[desired_metric_3.id] == 4
+    assert results[desired_metric_4.id] == 4
+
+    # Check that all four of these metrics were computed on a single domain
+    found_message = False
+    for record in caplog.records:
+        if (
+            record.message
+            == "SparkDFExecutionEngine computed 4 metrics on domain_id ()"
+        ):
+            found_message = True
+    assert found_message
+
+
 def test_map_multicolumn_sum_equal_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
