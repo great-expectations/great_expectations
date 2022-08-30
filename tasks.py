@@ -272,7 +272,6 @@ def tests(
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
-
 PYTHON_VERSION_DEFAULT: float = 3.8
 
 
