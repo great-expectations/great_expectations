@@ -86,6 +86,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     def _sqlalchemy(
         cls,
         metrics: Dict[str, Any],
+        **kwargs,
     ) -> int:
         observed_distinct_values = metrics["column.distinct_values"]
         return len(observed_distinct_values)
@@ -94,6 +95,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     def _spark(
         cls,
         metrics: Dict[str, Any],
+        **kwargs,
     ) -> int:
         observed_distinct_values = metrics["column.distinct_values"]
         return len(observed_distinct_values)
@@ -136,6 +138,7 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
         cls,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
+        **kwargs,
     ) -> bool:
         observed_distinct_values_count = metrics["column.distinct_values.count"]
         threshold = metric_value_kwargs["threshold"]
@@ -146,6 +149,7 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
         cls,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
+        **kwargs,
     ) -> bool:
         observed_distinct_values_count = metrics["column.distinct_values.count"]
         threshold = metric_value_kwargs["threshold"]

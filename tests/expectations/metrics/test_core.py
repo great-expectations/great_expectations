@@ -4033,30 +4033,12 @@ def test_distinct_metric_spark(
     expected_metric_values = {1, 2, 3}
     assert metrics[column_distinct_values_metric.id] == expected_metric_values
 
-    column_distinct_values_count_metric_partial_fn = MetricConfiguration(
-        metric_name="column.distinct_values.count.aggregate_fn",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
-    )
-
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(column_distinct_values_count_metric_partial_fn,),
-        metrics=metrics,
-    )
-    assert isinstance(
-        results[column_distinct_values_count_metric_partial_fn.id][0],
-        pyspark_sql_Column,
-    )
-
     column_distinct_values_count_metric = MetricConfiguration(
         metric_name="column.distinct_values.count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
         metric_dependencies={
-            "metric_partial_fn": column_distinct_values_count_metric_partial_fn,
+            "column.distinct_values": column_distinct_values_metric,
         },
     )
 
@@ -4066,31 +4048,12 @@ def test_distinct_metric_spark(
     metrics.update(results)
     assert metrics[column_distinct_values_count_metric.id] == 3
 
-    column_distinct_values_count_threshold_metric_partial_fn = MetricConfiguration(
-        metric_name="column.distinct_values.count.under_threshold.aggregate_fn",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"threshold": 5},
-        metric_dependencies={
-            "metric_partial_fn": column_distinct_values_count_metric_partial_fn,
-            "table.columns": table_columns_metric,
-        },
-    )
-
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(column_distinct_values_count_threshold_metric_partial_fn,),
-        metrics=metrics,
-    )
-    assert isinstance(
-        results[column_distinct_values_count_threshold_metric_partial_fn.id][0],
-        pyspark_sql_Column,
-    )
-
     column_distinct_values_count_threshold_metric = MetricConfiguration(
         metric_name="column.distinct_values.count.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"threshold": 5},
         metric_dependencies={
-            "metric_partial_fn": column_distinct_values_count_threshold_metric_partial_fn,
+            "column.distinct_values.count": column_distinct_values_count_metric,
         },
     )
 
