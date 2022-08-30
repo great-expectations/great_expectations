@@ -216,7 +216,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
         "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
-        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT}",
+        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",
         "html": "Create html coverage report",
         "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
     },
