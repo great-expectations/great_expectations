@@ -25,8 +25,8 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs) -> np.ndarray:
-        return column.unique()
+    def _pandas(cls, column, **kwargs) -> Set[Any]:
+        return set(column.unique())
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(

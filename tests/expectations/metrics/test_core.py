@@ -4197,7 +4197,7 @@ def test_distinct_metric_pd():
         metrics_to_resolve=(column_distinct_values_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert (metrics[column_distinct_values_metric.id] & [1, 2, 3]).all
+    assert metrics[column_distinct_values_metric.id] == {1, 2, 3}
 
     column_distinct_values_count_metric = MetricConfiguration(
         metric_name="column.distinct_values.count",
