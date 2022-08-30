@@ -207,12 +207,16 @@ def mv_usage_stats_json(ctx):
     print(f"'{outfile}' copied to dbfs.")
 
 
+UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
+
+
 @invoke.task(
     aliases=["test"],
     help={
         "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
+        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",
         "html": "Create html coverage report",
         "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
     },
@@ -225,6 +229,7 @@ def tests(
     html=False,
     cloud=True,
     slowest=5,
+    timeout=UNIT_TEST_DEFAULT_TIMEOUT,
     package=None,
 ):
     """
@@ -249,7 +254,13 @@ def tests(
         "-m",
         f"'{marker_text}'",
     ]
+    if unit:
+        try:
+            import pytest_timeout  # noqa: F401
 
+            cmds += [f"--timeout={timeout}"]
+        except ImportError:
+            print("`pytest-timeout` is not installed, cannot use --timeout")
     if cloud:
         cmds += ["--cloud"]
     if ci:
