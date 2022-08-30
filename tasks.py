@@ -213,24 +213,29 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
 @invoke.task(
     aliases=["test"],
     help={
+        "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
         "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
+        "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
         "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",
         "html": "Create html coverage report",
         "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
+        "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
     },
 )
 def tests(
     ctx,
     unit=True,
     integration=False,
+    ignore_markers=False,
     ci=False,
     html=False,
     cloud=True,
     slowest=5,
     timeout=UNIT_TEST_DEFAULT_TIMEOUT,
     package=None,
+    full_cov=False,
 ):
     """
     Run tests. Runs unit tests by default.
@@ -245,22 +250,27 @@ def tests(
 
     marker_text = " and ".join(markers)
 
+    cov_param = "--cov=great_expectations"
+    if package and not full_cov:
+        cov_param += f"/{package.replace('.', '/')}"
+
     cmds = [
         "pytest",
         f"--durations={slowest}",
-        "--cov=great_expectations",
+        cov_param,
         "--cov-report term",
         "-vv",
-        "-m",
-        f"'{marker_text}'",
     ]
-    if unit:
+    if not ignore_markers:
+        cmds += ["-m", f"'{marker_text}'"]
+    if unit and not ignore_markers:
         try:
             import pytest_timeout  # noqa: F401
 
             cmds += [f"--timeout={timeout}"]
         except ImportError:
             print("`pytest-timeout` is not installed, cannot use --timeout")
+
     if cloud:
         cmds += ["--cloud"]
     if ci:
