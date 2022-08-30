@@ -210,31 +210,54 @@ def mv_usage_stats_json(ctx):
 @invoke.task(
     aliases=["test"],
     help={
+        "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
+        "html": "Create html coverage report",
+        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
     },
 )
-def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5):
-    """Run tests. Runs unit tests by default."""
-    # TODO: update this to also run the full e2e/integration tests (but unit-tests should always be the default mode)
+def tests(
+    ctx,
+    unit=True,
+    integration=False,
+    ci=False,
+    html=False,
+    cloud=True,
+    slowest=5,
+    package=None,
+):
+    """
+    Run tests. Runs unit tests by default.
+
+    Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage (or lack thereof).
+    """
+    markers = []
+    if integration:
+        markers += ["integration"]
+        unit = False
+    markers += ["unit" if unit else "not unit"]
+
+    marker_text = " and ".join(markers)
+
     cmds = [
         "pytest",
         f"--durations={slowest}",
         "--cov=great_expectations",
-        "--cov-report term:skip-covered",  # modules with 100% will not be shown
+        "--cov-report term",
         "-vv",
+        "-m",
+        f"'{marker_text}'",
     ]
-    if unit:
-        cmds += [
-            "-m",
-            "unit",
-        ]
+
     if cloud:
         cmds += ["--cloud"]
     if ci:
         cmds += ["--cov-report", "xml"]
     if html:
         cmds += ["--cov-report", "html"]
+    if package:
+        cmds += [f"tests/{package.replace('.', '/')}"]  # allow `foo.bar`` format
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
