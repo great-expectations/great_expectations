@@ -4264,8 +4264,10 @@ def test_batch_aggregate_metrics_pd():
     )
 
     metrics: dict = {}
+
     table_columns_metric: MetricConfiguration
     results: dict
+
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
@@ -4343,8 +4345,10 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
     )
 
     metrics: dict = {}
+
     table_columns_metric: MetricConfiguration
     results: dict
+
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
@@ -4471,6 +4475,9 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
     )
 
     metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
