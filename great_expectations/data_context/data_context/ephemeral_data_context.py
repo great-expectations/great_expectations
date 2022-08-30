@@ -118,4 +118,4 @@ class EphemeralDataContext(AbstractDataContext):
         )
         if include_rendered_content:
             expectation_suite.render()
-        return self.expectations_store.set(key, expectation_suite, **kwargs)
+        return self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[arg-type]

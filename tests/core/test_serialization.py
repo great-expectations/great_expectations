@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import pandas as pd
 import pytest
+from marshmallow import Schema
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
@@ -17,7 +18,6 @@ from great_expectations.data_context.types.base import (
     checkpointConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.marshmallow__shade import Schema
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -595,7 +595,7 @@ def test_checkpoint_config_print(
                             "data_asset_name": "users",
                             "data_connector_query": {"partition_index": -1},
                         },
-                        id_="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                        id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     ),
                 ],
             ),
@@ -645,7 +645,7 @@ def test_checkpoint_config_print(
                             "data_asset_name": "users",
                             "data_connector_query": {"partition_index": -1},
                         },
-                        id_="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                        id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     ),
                 ],
             ),
@@ -696,79 +696,29 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
     )
 
 
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "config,schema,expected_serialized_config",
-    [
-        pytest.param(
-            DatasourceConfig(
-                class_name="Datasource",
-            ),
-            datasourceConfigSchema,
-            {
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-            },
-            id="DatasourceConfig-minimal",
-        ),
-        pytest.param(
-            DatasourceConfig(
-                name="my_datasource",
-                id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
-                class_name="Datasource",
-            ),
-            datasourceConfigSchema,
-            {
-                "name": "my_datasource",
-                "id": "d3a14abd-d4cb-4343-806e-55b555b15c28",
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-            },
-            id="DatasourceConfig-minimal_with_name_and_id",
-        ),
-        pytest.param(
-            DatasourceConfig(
-                name="my_datasource",
-                class_name="Datasource",
-                data_connectors={
-                    "my_data_connector": DatasourceConfig(
-                        class_name="RuntimeDataConnector",
-                        batch_identifiers=["default_identifier_name"],
-                        id_="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
-                    )
-                },
-            ),
-            datasourceConfigSchema,
-            {
-                "name": "my_datasource",
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "my_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "module_name": "great_expectations.datasource",
-                        "id": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
-                        "batch_identifiers": ["default_identifier_name"],
-                    },
-                },
-            },
-            id="DatasourceConfig-nested_data_connector_id",
-        ),
-    ],
-)
-def test_dict_round_trip_serialization(
+def generic_config_serialization_assertions(
     config: AbstractConfig,
     schema: Schema,
     expected_serialized_config: dict,
-):
-    observed_dump = datasourceConfigSchema.dump(config)
+    expected_roundtrip_config: dict,
+) -> None:
+    """Generic assertions for testing configuration serialization.
 
-    round_tripped = config._dict_round_trip(schema, observed_dump)
+    Args:
+        config: config object to check serialization.
+        schema: Marshmallow schema used for serializing / deserializing config object.
+        expected_serialized_config: expected when serializing a config via dump
+        expected_roundtrip_config: expected config after loading the dump
 
-    assert round_tripped == config.to_json_dict()
+    Returns:
+        None
 
-    assert (
-        round_tripped.get("id_")
-        == observed_dump.get("id")
-        == expected_serialized_config.get("id")
-    )
+    Raises:
+        AssertionError
+    """
+
+    observed_dump = schema.dump(config)
+    assert observed_dump == expected_serialized_config
+
+    loaded_data = schema.load(observed_dump)
+    assert loaded_data.to_json_dict() == expected_roundtrip_config

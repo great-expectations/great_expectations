@@ -45,7 +45,7 @@ class FilePathDataConnector(DataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
@@ -63,7 +63,7 @@ class FilePathDataConnector(DataConnector):
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,

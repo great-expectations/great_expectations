@@ -30,33 +30,58 @@ exclude = [
     # #################################################################################
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
-    'checkpoint', # 75
-    'cli', # 157
-    'core/usage_statistics', # 1
+    'checkpoint/types',  # 34
+    'checkpoint/actions\.py',  # 18
+    'checkpoint/checkpoint\.py',  # 26
+    'checkpoint/configurator\.py', # 2
+    'cli/upgrade_helpers',  # 76
+    'cli/batch_request\.py',  # 11
+    'cli/checkpoint\.py',  # 9
+    'cli/cli\.py',  # 10
+    'cli/datasource\.py',  # 12
+    'cli/docs\.py',  # 1
+    'cli/project\.py',  # 5
+    'cli/toolkit\.py',  # 27
+    'cli/store\.py',  # 2
+    'cli/suite\.py',  # 24
+    'cli/python_subprocess\.py', # 6
+    'core/usage_statistics', # 108
     'core/expectation_diagnostics', # 20
-    'core/__init__\.py', # 1
-    'core/id_dict\.py', # 1
-    'core/async_executor\.py', # 2
     'core/batch\.py', # 29
-    'core/batch_spec\.py', # 2
-    'core/config_peer\.py', # 1
-    'core/evaluation_parameters\.py', # 6
     'core/expectation_configuration\.py', # 21
     'core/expectation_validation_result\.py', # 9
-    'core/run_identifier\.py', # 1
-    'core/yaml_handler\.py', # 1
-    'datasource', # 93
-    'dataset',  # 19
-    'data_context/data_context/abstract_data_context.py', # 84
-    'data_context/data_context/base_data_context.py', # 76
-    'data_context/data_context/cloud_data_context.py', # 17
-    'execution_engine', # 100
-    'marshmallow__shade', # 19
-    '.*render', # 72
+    'datasource/batch_kwargs_generator', # 16
+    'datasource/data_connector', # 60
+    'dataset/sparkdf_dataset\.py', # 3
+    'dataset/sqlalchemy_dataset\.py', # 16
+    'execution_engine/split_and_sample',  # 65
+    'execution_engine/pandas_execution_engine\.py',  # 9
+    'execution_engine/sparkdf_execution_engine\.py',  # 8
+    'execution_engine/sqlalchemy_dialect.py', # 1
+    'execution_engine/sqlalchemy_execution_engine\.py',  # 8
+    'execution_engine/sqlalchemy_batch_data\.py',  # 1
+    'execution_engine/execution_engine\.py',  # 7
+    'render/renderer', # 78
+    'render/view',  # 11
+    'render/types',  # 4
     'expectations/expectation', # 188
-    'rule_based_profiler', # 446
-    'validation_operators', # 47
-    'validator', # 44
+    'rule_based_profiler/helpers', # 16
+    'rule_based_profiler/config',  # 13
+    'rule_based_profiler/data_assistant',  # 124
+    'rule_based_profiler/domain_builder', # 62
+    'rule_based_profiler/estimators',  # 23
+    'rule_based_profiler/expectation_configuration_builder',  # 13
+    'rule_based_profiler/parameter_builder',  # 161
+    'rule_based_profiler/rule',  # 51
+    'rule_based_profiler/attributed_resolved_metrics\.py',  # 4
+    'rule_based_profiler/parameter_container\.py',  # 7
+    'rule_based_profiler/builder\.py',  # 4
+    'rule_based_profiler/domain\.py', # 4
+    'validation_operators/types',  # 34
+    'validation_operators/validation_operators\.py',  # 16
+    'validator/exception_info\.py', # 1
+    'validator/validation_graph\.py',  # 2
+    'validator/validator\.py', # 54
     'util\.py', # 19
 ]
 
@@ -85,4 +110,4 @@ markers = [
 testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`
 # https://pytest-mock.readthedocs.io/en/latest/configuration.html#use-standalone-mock-package
-mock_use_standalone_module = true
+mock_use_standalone_module = false
