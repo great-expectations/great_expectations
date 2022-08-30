@@ -110,6 +110,6 @@ def test_profiler_store_serialization_self_check(caplog):
 
     # TODO: AJB 20220830
     assert caplog.messages[0].startswith(
-        ""
+        "this should be some messages"
     )
 
