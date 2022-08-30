@@ -18,6 +18,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 
+@pytest.mark.slow  # 1.08s
 def test_instantiation_value_set_multi_batch_parameter_builder(
     alice_columnar_table_single_batch_context,
 ):
@@ -32,6 +33,7 @@ def test_instantiation_value_set_multi_batch_parameter_builder(
     )
 
 
+@pytest.mark.slow  # 1.07s
 def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
     alice_columnar_table_single_batch_context,
 ):
@@ -49,6 +51,7 @@ def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
     )
 
 
+@pytest.mark.slow  # 1.19s
 def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     alice_columnar_table_single_batch_context,
 ):
@@ -121,6 +124,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     assert parameter_node.details == expected_parameter_value["details"]
 
 
+@pytest.mark.slow  # 1.20s
 def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     alice_columnar_table_single_batch_context,
 ):

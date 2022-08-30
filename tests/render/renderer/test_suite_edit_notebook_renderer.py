@@ -1412,6 +1412,7 @@ def test_complex_suite(warning_suite, empty_data_context):
     assert obs == expected
 
 
+@pytest.mark.slow  # 5.42s
 def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_docs):
     """
     To set this test up we:
