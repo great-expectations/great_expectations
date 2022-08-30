@@ -59,10 +59,12 @@ Ensure that your Custom Expectation's `library_metadata` has the following keys,
 
 <details>
 <summary>Packages?</summary>
-If you're interested in learning more about Custom Expectation Packages, see our <a href='/docs/contributing/contributing_package'>guide on packaging your Custom Expectations</a>.
+Great Expectations maintains a number of Custom Expectation Packages, containing thematically related Custom Expectations. 
+These packages can be explored in the <a href="https://github.com/great-expectations/great_expectations/tree/develop/contrib"><inlineCode>contrib</inlineCode> directory of Great Expectations,</a> and can be found on PyPI.
+Your Custom Expectation may fit one of these packages; if so, we encourage you to contribute your Custom Expectation directly to one of these packages.
 <br/><br/>
 Not contributing to a specific package? Your Custom Expectation will be automatically published in the <a href="https://pypi.org/project/great-expectations-experimental/">PyPI package <inlineCode>great-expectations-experimental</inlineCode></a>. 
-This package contains all of our Experimental community-contributed Custom Expectations, and is separate from the core <inlineCode>great-expectations</inlineCode> package.
+This package contains all of our Experimental community-contributed Custom Expectations not submitted to another extant package, and is separate from the core <inlineCode>great-expectations</inlineCode> package.
 </details>
 
 ### 3. Open a Pull Request
@@ -74,7 +76,7 @@ As a part of this process, we ask you to:
 - Sign our [Contributor License Agreement (CLA)](../../../contributing/contributing_misc.md#contributor-license-agreement-cla)
 - Provide some information for our reviewers to expedite your contribution process, including:
   - A `[CONTRIB]` tag in your title
-  - Titleing your Pull Request with the name of your Custom Expectation
+  - Titling your Pull Request with the name of your Custom Expectation
   - A brief summary of the functionality and use-cases for your Custom Expectation
   - A description of any previous discussion or coordination related to this Pull Request
 - Update your branch with the most recent code from the Great Expectations main repository
