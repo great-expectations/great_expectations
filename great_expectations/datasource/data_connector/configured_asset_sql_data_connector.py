@@ -292,8 +292,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             data_asset_config: dict
             for data_asset_name, data_asset_config in assets.items():
                 aux_config: dict = {
-                    # Assets of "ConfiguredAssetSqlDataConnector" are only of type "table" (adding for consistency).
-                    "type": data_asset_config.get("type", "table"),
+                    "type": data_asset_config.get("type"),
                     "table_name": data_asset_config.get("table_name", data_asset_name),
                     "splitter_method": data_asset_config.get(
                         "splitter_method", self.splitter_method
