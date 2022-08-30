@@ -225,12 +225,14 @@ def tests(
     ctx,
     unit=True,
     integration=False,
+    ignore_markers=False,
     ci=False,
     html=False,
     cloud=True,
     slowest=5,
     timeout=UNIT_TEST_DEFAULT_TIMEOUT,
     package=None,
+    full_cov=False,
 ):
     """
     Run tests. Runs unit tests by default.
@@ -245,15 +247,19 @@ def tests(
 
     marker_text = " and ".join(markers)
 
+    cov_param = "--cov=great_expectations"
+    if package and not full_cov:
+        cov_param += f"/{package.replace('.', '/')}"
+
     cmds = [
         "pytest",
         f"--durations={slowest}",
-        "--cov=great_expectations",
+        cov_param,
         "--cov-report term",
         "-vv",
-        "-m",
-        f"'{marker_text}'",
     ]
+    if not ignore_markers:
+        cmds += ["-m", marker_text]
     if unit:
         try:
             import pytest_timeout  # noqa: F401
