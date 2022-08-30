@@ -3,6 +3,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+import pyspark.sql.types
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
@@ -113,22 +114,25 @@ def test_reader_fn_parameters(
     assert test_sparkdf_with_header_param.head() == Row(x="1", y="2")
 
     # defining schema
-    schema = StructType(
+    schema: pyspark.sql.types.StructType = StructType(
         [
             StructField("x", IntegerType(), True),
             StructField("y", IntegerType(), True),
         ]
     )
+    schema_dict: dict = schema.jsonValue()
+
     test_sparkdf_with_header_param_and_schema = (
         basic_spark_df_execution_engine.get_batch_data(
             PathBatchSpec(
                 path=test_df_small_csv_path,
                 data_asset_name="DATA_ASSET",
-                reader_options={"header": True, "schema": schema},
+                reader_options={"header": True, "schema": schema_dict},
             )
         ).dataframe
     )
     assert test_sparkdf_with_header_param_and_schema.head() == Row(x=1, y=2)
+    assert test_sparkdf_with_header_param_and_schema.schema.jsonValue() == schema_dict
 
 
 def test_get_domain_records_with_column_domain(
@@ -1138,6 +1142,20 @@ def test_dataframe_property_given_loaded_batch(spark_session):
     assert engine.dataframe == df
 
 
-# Making sure the schema is there
 def test_schema_properly_added(spark_session):
-    pass
+
+    schema: pyspark.sql.types.StructType = StructType(
+        [
+            StructField("a", IntegerType(), True),
+        ]
+    )
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {"a": [1, 5, 22, 3, 5, 10]},
+        ),
+        batch_id="1234",
+        schema=schema,
+    )
+    df = engine.dataframe
+    assert df.schema == schema

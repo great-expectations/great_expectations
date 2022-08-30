@@ -416,7 +416,7 @@ def spark_df_taxi_data_schema(spark_session):
         ]
     )
     # return schema
-    return schema.jsonValue()
+    return schema
 
 
 @pytest.mark.order(index=3)

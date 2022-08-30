@@ -35,6 +35,11 @@ from great_expectations.types import DictDot, SerializableDictDot, safe_deep_cop
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
 
+try:
+    from pyspark.sql.types import StructType
+except ImportError:
+    StructType = None  # type: ignore
+
 if TYPE_CHECKING:
     from io import TextIOWrapper
 
@@ -1049,6 +1054,32 @@ class DatasourceConfigSchema(AbstractConfigSchema):
 sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
                 """
             )
+
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        """
+        Docstring for
+        Returns:
+        """
+        # check whether spark exists
+        if StructType is None:
+            return
+
+        for data_connector_name, data_connector_config in data.get(
+            "data_connectors", {}
+        ).items():
+            batch_spec_passthrough: dict = data_connector_config.get(
+                "batch_spec_passthrough"
+            )
+            if batch_spec_passthrough:
+                reader_options: dict = batch_spec_passthrough.get("reader_options")
+                if reader_options:
+                    schema = reader_options.get("schema")
+                    if schema and isinstance(schema, StructType):
+                        data_connector_config["batch_spec_passthrough"][
+                            "reader_options"
+                        ]["schema"] = schema.jsonValue()
+        return data
 
     # noinspection PyUnusedLocal
     @post_load
@@ -2451,7 +2482,7 @@ class CheckpointConfigSchema(Schema):
         data = copy.deepcopy(data)
         for key, value in data.items():
             data[key] = convert_to_json_serializable(data=value)
-
+        # this is where we would need to check
         return data
 
     # noinspection PyUnusedLocal

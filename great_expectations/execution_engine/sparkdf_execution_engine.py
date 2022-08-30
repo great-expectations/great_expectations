@@ -285,13 +285,18 @@ Please check your config."""
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            schema_json: Optional[dict] = reader_options.get("schema")
+            schema: Optional[
+                Union[pyspark.sql.types.StructType, dict]
+            ] = reader_options.get("schema")
 
-            schema: Optional[pyspark.sql.types.StructType] = None
-            if schema_json:
-                schema: pyspark.sql.types.StructType = sparktypes.StructType.fromJson(
-                    schema_json
+            # schema can be a dict if it has been through serialization step,
+            # either as part of the datasource configuration, or checkpoint config
+            if isinstance(schema, dict):
+                schema_converted: pyspark.sql.types.StructType = (
+                    sparktypes.StructType.fromJson(schema)
                 )
+                schema = schema_converted
+
             path: str = batch_spec.path
             try:
                 if schema:

@@ -13,7 +13,8 @@ from great_expectations.checkpoint.checkpoint import (
     LegacyCheckpoint,
     SimpleCheckpoint,
 )
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core import ExpectationValidationResult
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -399,6 +400,7 @@ def test_simple_checkpoint_has_no_update_data_docs_action_when_site_names_is_non
     ]
 
 
+# test that this works with schema
 def test_simple_checkpoint_persisted_to_store(
     context_with_data_source_and_empty_suite, webhook, one_validation
 ):
@@ -3512,4 +3514,84 @@ def test_simple_checkpoint_result_validations_include_rendered_content(
             assert isinstance(rendered_content, RenderedAtomicContent)
 
 
-# TODO: adding a schema based test here
+### SparkDF Tests
+
+### SparkDF Tests
+@pytest.mark.integration
+def test_running_spark_simplecheckpoint(
+    context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
+):
+    context = context_with_single_csv_spark_and_suite
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2020",
+        batch_spec_passthrough={
+            "reader_options": {
+                "header": True,
+            }
+        },
+    )
+    checkpoint_config: dict = {
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "class_name": "SimpleCheckpoint",
+        "validations": [
+            {
+                "batch_request": single_batch_batch_request,
+                "expectation_suite_name": "taxi_data_2019_suite",
+            }
+        ],
+        "action_list": [
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+    }
+    context.add_checkpoint(**checkpoint_config)
+    results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+    assert results.success is True
+
+
+@pytest.mark.integration
+def run_spark_checkpoint_with_schema(
+    context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
+):
+    context = context_with_single_csv_spark_and_suite
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2020",
+        batch_spec_passthrough={
+            "reader_options": {
+                "header": True,
+                "schema": spark_df_taxi_data_schema,
+            }
+        },
+    )
+    checkpoint_config: dict = {
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "class_name": "SimpleCheckpoint",
+        "validations": [
+            {
+                "batch_request": single_batch_batch_request,
+                "expectation_suite_name": "taxi_data_2019_suite",
+            }
+        ],
+        "action_list": [
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+    }
+    context.add_checkpoint(**checkpoint_config)
+    results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+
+    assert results.success is True

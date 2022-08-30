@@ -1,6 +1,7 @@
 import logging
 import os
 import pickle
+import shutil
 import unittest
 from typing import List, Optional, Union
 from unittest import mock
@@ -14,8 +15,11 @@ import great_expectations as ge
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuiteValidationResult,
+)
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -31,6 +35,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -5283,4 +5288,108 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     assert expected_validation_id == actual_validation_id
 
 
-# add spark schema test here
+### SparkDF Tests
+@pytest.mark.integration
+def test_running_spark_checkpoint(
+    context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
+):
+    context = context_with_single_csv_spark_and_suite
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2020",
+        batch_spec_passthrough={
+            "reader_options": {
+                "header": True,
+            }
+        },
+    )
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        "validations": [
+            {
+                "batch_request": single_batch_batch_request,
+            }
+        ],
+    }
+    context.add_checkpoint(**checkpoint_config)
+    results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+    assert results.success is True
+
+
+@pytest.mark.integration
+def run_spark_checkpoint_with_schema(
+    context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
+):
+    context = context_with_single_csv_spark_and_suite
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2020",
+        batch_spec_passthrough={
+            "reader_options": {
+                "header": True,
+                "schema": spark_df_taxi_data_schema,
+            }
+        },
+    )
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        "validations": [
+            {
+                "batch_request": single_batch_batch_request,
+            }
+        ],
+    }
+    context.add_checkpoint(**checkpoint_config)
+    results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+
+    assert results.success is True

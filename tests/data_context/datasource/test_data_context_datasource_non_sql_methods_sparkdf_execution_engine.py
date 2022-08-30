@@ -658,7 +658,8 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         },
     )
 
-    # Add the limit here in the call to get_batch_list instead of in the BatchRequest. The limit is ignored since we passed a BatchRequest via batch_request
+    # Add the limit here in the call to get_batch_list instead of in the BatchRequest.
+    # The limit is ignored since we passed a BatchRequest via batch_request
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=batch_request, limit=2
     )

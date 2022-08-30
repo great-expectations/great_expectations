@@ -481,6 +481,9 @@ def test_checkpoint_config_print(
     )
 
 
+# add tests here with correct pyspark object
+
+
 @pytest.mark.parametrize(
     "checkpoint_config,expected_serialized_checkpoint_config",
     [
