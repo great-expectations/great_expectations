@@ -262,7 +262,7 @@ def tests(
         "-vv",
     ]
     if not ignore_markers:
-        cmds += ["-m", marker_text]
+        cmds += ["-m", f"'{marker_text}'"]
     if unit:
         try:
             import pytest_timeout  # noqa: F401
