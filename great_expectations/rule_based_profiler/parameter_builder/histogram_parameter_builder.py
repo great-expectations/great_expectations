@@ -173,7 +173,7 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
-        is_categorical: bool = not self.bucketize_data
+        is_categorical: bool = not self._bucketize_data
 
         bins: Optional[MetricValue] = None
 
