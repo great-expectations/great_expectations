@@ -1,6 +1,5 @@
 from typing import Any, Dict, Optional, Set
 
-import numpy as np
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
@@ -16,7 +15,12 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import (
+    F,
+    pyspark_sql_Column,
+    pyspark_sql_DataFrame,
+    sa,
+)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -25,16 +29,18 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs) -> Set[Any]:
+    def _pandas(cls, column: pd.Series, **kwargs) -> Set[Any]:
         return set(column.unique())
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
+        metric_domain_kwargs: Dict[str, str],
         **kwargs,
     ) -> Set[Any]:
+        selectable: sa.select.Selectable
+        accessor_domain_kwargs: Dict[str, str]
         (selectable, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
@@ -55,9 +61,11 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
+        metric_domain_kwargs: Dict[str, str],
         **kwargs,
     ) -> Set[Any]:
+        df: pyspark_sql_DataFrame
+        accessor_domain_kwargs: Dict[str, str]
         (df, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
@@ -75,23 +83,23 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs) -> pd.Series:
+    def _pandas(cls, column: pd.Series, **kwargs) -> int:
         return column.nunique()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        column,
+        column: sa.column,
         **kwargs,
-    ):
+    ) -> sa.sql.functions.count:
         return sa.func.count(sa.distinct(column))
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        column,
+        column: pyspark_sql_Column,
         **kwargs,
-    ):
+    ) -> pyspark_sql_Column:
         return F.countDistinct(column)
 
 
@@ -100,30 +108,30 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
     condition_keys = ("threshold",)
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, threshold, **kwargs) -> pd.Series:
+    def _pandas(cls, column: pd.Series, threshold: int, **kwargs) -> bool:
         return column.nunique() < threshold
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metric_value_kwargs: Dict[str, int],
+        metrics: Dict[str, int],
         **kwargs,
     ) -> bool:
-        observed_distinct_values_count = metrics["column.distinct_values.count"]
-        threshold = metric_value_kwargs["threshold"]
-        return observed_distinct_values_count < threshold
+        return (
+            metrics["column.distinct_values.count"] < metric_value_kwargs["threshold"]
+        )
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
+        metric_value_kwargs: Dict[str, int],
+        metrics: Dict[str, int],
         **kwargs,
     ) -> bool:
-        observed_distinct_values_count = metrics["column.distinct_values.count"]
-        threshold = metric_value_kwargs["threshold"]
-        return observed_distinct_values_count < threshold
+        return (
+            metrics["column.distinct_values.count"] < metric_value_kwargs["threshold"]
+        )
 
     @classmethod
     def _get_evaluation_dependencies(
