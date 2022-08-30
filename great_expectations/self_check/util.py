@@ -2917,13 +2917,16 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                         + str(result["result"]["unexpected_list"])
                     )
                 except AssertionError as e:
-                    if type(result["result"]["unexpected_list"][0]) == list:
-                        unexpected_list_tup = [
-                            tuple(x) for x in result["result"]["unexpected_list"]
-                        ]
-                        assert (
-                            unexpected_list_tup == value
-                        ), f"{unexpected_list_tup} != {value}"
+                    if result["result"]["unexpected_list"]:
+                        if type(result["result"]["unexpected_list"][0]) == list:
+                            unexpected_list_tup = [
+                                tuple(x) for x in result["result"]["unexpected_list"]
+                            ]
+                            assert (
+                                unexpected_list_tup == value
+                            ), f"{unexpected_list_tup} != {value}"
+                        else:
+                            raise
                     else:
                         raise
 
