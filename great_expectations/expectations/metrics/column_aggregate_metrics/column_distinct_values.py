@@ -21,11 +21,10 @@ from great_expectations.expectations.metrics.import_manager import (
     pyspark_sql_DataFrame,
     pyspark_sql_Row,
     sa,
+    sa_func_count,
     sa_sql_expression_ColumnClause,
-    sa_sql_expression_Select,
     sa_sql_expression_Selectable,
     sqlalchemy_engine_Engine,
-    sqlalchemy_engine_Row,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -97,7 +96,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         cls,
         column: sa_sql_expression_ColumnClause,
         **kwargs,
-    ) -> sa.func.count:
+    ) -> sa_func_count:
         return sa.func.count(sa.distinct(column))
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)

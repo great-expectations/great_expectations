@@ -9,12 +9,14 @@ spark_import_warning_required = False
 
 try:
     import sqlalchemy as sa
+    import sqlalchemy.func.count as sa_func_count
     import sqlalchemy.sql.expression.ColumnClause as sa_sql_expression_ColumnClause
     import sqlalchemy.sql.expression.Select as sa_sql_expression_Select
     import sqlalchemy.sql.expression.Selectable as sa_sql_expression_Selectable
 except ImportError:
     logger.debug("No SqlAlchemy module available.")
     sa = None
+    sa_func_count = None
     sa_sql_expression_ColumnClause = None
     sa_sql_expression_Select = None
     sa_sql_expression_Selectable = None
