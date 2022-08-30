@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 def send_slack_notification(
-        query, slack_webhook=None, slack_channel=None, slack_token=None
+    query, slack_webhook=None, slack_channel=None, slack_token=None
 ):
     session = requests.Session()
     url = slack_webhook
@@ -44,7 +44,7 @@ def send_slack_notification(
     try:
         response = session.post(url=url, headers=headers, json=query)
         if slack_webhook:
-            ok_status = response.text == 'ok'
+            ok_status = response.text == "ok"
         else:
             ok_status = response.json()["ok"]
     except requests.ConnectionError:
@@ -138,16 +138,16 @@ def send_webhook_notifications(query, webhook, target_platform):
 
 # noinspection SpellCheckingInspection
 def send_email(
-        title,
-        html,
-        smtp_address,
-        smtp_port,
-        sender_login,
-        sender_password,
-        sender_alias,
-        receiver_emails_list,
-        use_tls,
-        use_ssl,
+    title,
+    html,
+    smtp_address,
+    smtp_port,
+    sender_login,
+    sender_password,
+    sender_alias,
+    receiver_emails_list,
+    use_tls,
+    use_ssl,
 ):
     msg = MIMEMultipart()
     msg["From"] = sender_alias
@@ -183,7 +183,7 @@ def send_email(
 
 
 def get_substituted_validation_dict(
-        substituted_runtime_config: dict, validation_dict: dict
+    substituted_runtime_config: dict, validation_dict: dict
 ) -> dict:
     substituted_validation_dict = {
         "batch_request": get_substituted_batch_request(
@@ -191,11 +191,11 @@ def get_substituted_validation_dict(
             validation_batch_request=validation_dict.get("batch_request"),
         ),
         "expectation_suite_name": validation_dict.get("expectation_suite_name")
-                                  or substituted_runtime_config.get("expectation_suite_name"),
+        or substituted_runtime_config.get("expectation_suite_name"),
         "expectation_suite_ge_cloud_id": validation_dict.get(
             "expectation_suite_ge_cloud_id"
         )
-                                         or substituted_runtime_config.get("expectation_suite_ge_cloud_id"),
+        or substituted_runtime_config.get("expectation_suite_ge_cloud_id"),
         "action_list": get_updated_action_list(
             base_action_list=substituted_runtime_config.get("action_list"),
             other_action_list=validation_dict.get("action_list", {}),
@@ -211,8 +211,8 @@ def get_substituted_validation_dict(
             dedup=True,
         ),
         "include_rendered_content": validation_dict.get("include_rendered_content")
-                                    or substituted_runtime_config.get("include_rendered_content")
-                                    or False,
+        or substituted_runtime_config.get("include_rendered_content")
+        or False,
     }
 
     for attr in ("name", "id"):
@@ -225,8 +225,8 @@ def get_substituted_validation_dict(
 
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_substituted_batch_request(
-        substituted_runtime_config: dict,
-        validation_batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+    substituted_runtime_config: dict,
+    validation_batch_request: Optional[Union[BatchRequestBase, dict]] = None,
 ) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     substituted_runtime_batch_request = substituted_runtime_config.get("batch_request")
 
@@ -407,7 +407,7 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
 
 
 def get_updated_action_list(
-        base_action_list: list, other_action_list: list
+    base_action_list: list, other_action_list: list
 ) -> List[dict]:
     if base_action_list is None:
         base_action_list = []
@@ -438,16 +438,16 @@ def get_updated_action_list(
 
 
 def batch_request_in_validations_contains_batch_data(
-        validations: Optional[List[dict]] = None,
+    validations: Optional[List[dict]] = None,
 ) -> bool:
     if validations is not None:
         for idx, val in enumerate(validations):
             if (
-                    val.get("batch_request") is not None
-                    and isinstance(val.get("batch_request"), (dict, DictDot))
-                    and val["batch_request"].get("runtime_parameters") is not None
-                    and val["batch_request"]["runtime_parameters"].get("batch_data")
-                    is not None
+                val.get("batch_request") is not None
+                and isinstance(val.get("batch_request"), (dict, DictDot))
+                and val["batch_request"].get("runtime_parameters") is not None
+                and val["batch_request"]["runtime_parameters"].get("batch_data")
+                is not None
             ):
                 return True
 
@@ -455,7 +455,7 @@ def batch_request_in_validations_contains_batch_data(
 
 
 def get_validations_with_batch_request_as_dict(
-        validations: Optional[list] = None,
+    validations: Optional[list] = None,
 ) -> Optional[list]:
     if validations:
         for value in validations:
@@ -500,7 +500,7 @@ def send_cloud_notification(url: str, headers: dict):
 
 
 def send_sns_notification(
-        sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs
+    sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs
 ) -> str:
     """
     Send JSON results to an SNS topic with a schema of:
