@@ -5,15 +5,15 @@ from collections import namedtuple
 from typing import Dict, List
 
 DURATION_PATTERN = r"(\d*\.\d*)s\s*(\w*)\s*([\w\/\.]*)::(\w*)"
-THRESHOLD = 0.1
-MARKER = "@pytest.mark.unit"
+THRESHOLD = 1.0
+MARKER = "@pytest.mark.slow"
 
 
 DurationEntry = namedtuple("DurationEntry", ["duration", "stage", "file", "test"])
 
 
 def parse_durations_file(file: str) -> List[DurationEntry]:
-    with open("temp") as f:
+    with open(file) as f:
         contents = f.read()
 
     r = re.compile(DURATION_PATTERN)
@@ -97,7 +97,7 @@ def insert_marks(
             test_name = node.name
 
             duration = durations_dict.get(file, {}).get(test_name)
-            if not duration or duration > THRESHOLD:
+            if not duration or duration < THRESHOLD:
                 continue  # Skip tests that aren't run or have 0.00 duration
 
             # Find where to insert mark
@@ -111,6 +111,7 @@ def insert_marks(
 
                 # Update contents with mark
                 if idx > 0:
+                    print(test_name, duration)
                     contents[idx] = MARKER
 
             # Insert updated contents
