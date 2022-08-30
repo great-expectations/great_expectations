@@ -8,6 +8,17 @@ import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
+from marshmallow import (
+    INCLUDE,
+    Schema,
+    ValidationError,
+    fields,
+    post_dump,
+    post_load,
+    pre_dump,
+    validates_schema,
+)
+from marshmallow.validate import OneOf
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
@@ -20,17 +31,6 @@ from great_expectations.core.util import (
     convert_to_json_serializable,
     get_datetime_string_from_strftime_format,
 )
-from great_expectations.marshmallow__shade import (
-    INCLUDE,
-    Schema,
-    ValidationError,
-    fields,
-    post_dump,
-    post_load,
-    pre_dump,
-    validates_schema,
-)
-from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable

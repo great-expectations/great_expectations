@@ -43,6 +43,7 @@ class GEDependencies:
             "jsonpatch",
             "jsonschema",
             "makefun",
+            "marshmallow",
             "mistune",
             "nbformat",
             "notebook",

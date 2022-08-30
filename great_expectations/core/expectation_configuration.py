@@ -5,6 +5,7 @@ from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import jsonpatch
+from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from pyparsing import ParseResults
 
 from great_expectations.core.evaluation_parameters import (
@@ -28,13 +29,6 @@ from great_expectations.exceptions import (
     ParserError,
 )
 from great_expectations.expectations.registry import get_expectation_impl
-from great_expectations.marshmallow__shade import (
-    Schema,
-    ValidationError,
-    fields,
-    post_dump,
-    post_load,
-)
 from great_expectations.render.types import (
     RenderedAtomicContent,
     RenderedAtomicContentSchema,

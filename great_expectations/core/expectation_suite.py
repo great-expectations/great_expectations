@@ -6,6 +6,8 @@ import uuid
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
+from marshmallow import Schema, ValidationError, fields, pre_dump
+
 import great_expectations as ge
 from great_expectations import __version__ as ge_version
 from great_expectations.core.evaluation_parameters import (
@@ -30,12 +32,6 @@ from great_expectations.exceptions import (
     ClassInstantiationError,
     DataContextError,
     InvalidExpectationConfigurationError,
-)
-from great_expectations.marshmallow__shade import (
-    Schema,
-    ValidationError,
-    fields,
-    pre_dump,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
@@ -1013,10 +1009,11 @@ class ExpectationSuiteSchema(Schema):
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
-        if isinstance(data, ExpectationSuite):
-            data.meta = convert_to_json_serializable(data.meta)
-        elif isinstance(data, dict):
-            data["meta"] = convert_to_json_serializable(data.get("meta"))
+        for key in data:
+            if key.startswith("_"):
+                continue
+            data[key] = convert_to_json_serializable(data[key])
+
         data = self.clean_empty(data)
         return data
 
