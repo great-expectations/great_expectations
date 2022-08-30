@@ -12,9 +12,9 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import InferredAssetDataConnector from './pandas_components/inferred_asset_data_connector.md'
 import ConfiguredAssetDataConnector from './pandas_components/configured_asset_data_connector.md'
 <UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/>
-import TipCustomDataConnectorModuleName from './components/tip_custom_data_connector_module_name.mdx'
-import FilesystemBaseDirectory from './components/base_directory_for_filesystem.mdx'
-import IntroForSingleOrMultiBatchConfiguration from './components/intro_for_single_or_multi_batch_configuration.mdx'
+import TipCustomDataConnectorModuleName from './components/_tip_custom_data_connector_module_name.mdx'
+import PartFilesystemBaseDirectory from './components/_part_base_directory_for_filesystem.mdx'
+import PartIntroForSingleOrMultiBatchConfiguration from './components/_part_intro_for_single_or_multi_batch_configuration.mdx'
 import RuntimeAssetDataConnector from './pandas_components/runtime_asset_data_connector.md'
 
 This guide will walk you through the process of configuring a Pandas Datasource from scratch, verifying that your configuration is valid, and adding it to your Data Context.  By the end of this guide you will have a Pandas Datasource which you can use in future workflows for creating Expectations and validating data.
@@ -229,7 +229,7 @@ For this example, you will be using the `InferredAssetFilesystemDataConnector` a
 
 <TipCustomDataConnectorModuleName />
 
-<FilesystemBaseDirectory />
+<PartFilesystemBaseDirectory />
 
 With these values added, along with a blank dictionary for `default_regex` (we will define it in the next step), your full configuration should now look like:
 
@@ -345,7 +345,7 @@ For this example, you will be using the `ConfiguredAssetFilesystemDataConnector`
 
 <TipCustomDataConnectorModuleName />
 
-<FilesystemBaseDirectory />
+<PartFilesystemBaseDirectory />
 
 With these values added, along with a blank dictionary for `assets` (we will define entries for it in the next step), your full configuration should now look like:
 
@@ -456,7 +456,7 @@ In an Inferred Asset Data Connector for filesystem data, a regular expression is
 
 The `pattern` in `default_regex` will be matched against the files in your `base_directory`, and everything that matches against the first group in your regex will become a Batch in a Data Asset that possesses the name of the matching text.  Any files that have a matching string for the first group will become Batches in the same Data Asset.
 
-<IntroForSingleOrMultiBatchConfiguration />
+<PartIntroForSingleOrMultiBatchConfiguration />
 
 <InferredAssetDataConnector/>
 
@@ -469,7 +469,7 @@ In a Configured Asset Data Connector for filesystem data, each entry in the `ass
 
 The `pattern` in each `assets` entry will be matched against the files in your `base_directory`, and everything that matches against the `pattern`'s value will become a Batch in a Data Asset with a name matching the key for this entry in the `assets` dictionary.
 
-<IntroForSingleOrMultiBatchConfiguration />
+<PartIntroForSingleOrMultiBatchConfiguration />
 
 <ConfiguredAssetDataConnector/>
 

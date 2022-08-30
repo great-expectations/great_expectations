@@ -117,7 +117,9 @@ def type_coverage(ctx):
     try:
         check_type_hint_coverage.main()
     except AssertionError as err:
-        raise invoke.Exit(message=str(err), code=1)
+        raise invoke.Exit(
+            message=f"{err}\n\n  See {check_type_hint_coverage.__file__}", code=1
+        )
 
 
 @invoke.task(
@@ -138,6 +140,7 @@ def type_check(
     install_types=False,
     daemon=False,
     clear_cache=False,
+    report=False,
 ):
     """Run mypy static type-checking on select packages."""
     if clear_cache:
@@ -160,10 +163,12 @@ def type_check(
         *ge_pkgs,
     ]
     if install_types:
-        cmds.extend(["--install-types", "--non-interactive", "--no-strict-optional"])
+        cmds.extend(["--install-types", "--non-interactive"])
     if daemon:
         # see related issue https://github.com/python/mypy/issues/9475
         cmds.extend(["--follow-imports=normal"])
+    if report:
+        cmds.extend(["--txt-report", "type_cov", "--html-report", "type_cov"])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
@@ -200,6 +205,60 @@ def mv_usage_stats_json(ctx):
     cmd = cmd.format(outfile)
     ctx.run(cmd)
     print(f"'{outfile}' copied to dbfs.")
+
+
+@invoke.task(
+    aliases=["test"],
+    help={
+        "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
+        "slowest": "Report on the slowest n number of tests",
+        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
+        "html": "Create html coverage report",
+        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
+    },
+)
+def tests(
+    ctx,
+    unit=True,
+    integration=False,
+    ci=False,
+    html=False,
+    cloud=True,
+    slowest=5,
+    package=None,
+):
+    """
+    Run tests. Runs unit tests by default.
+
+    Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage (or lack thereof).
+    """
+    markers = []
+    if integration:
+        markers += ["integration"]
+        unit = False
+    markers += ["unit" if unit else "not unit"]
+
+    marker_text = " and ".join(markers)
+
+    cmds = [
+        "pytest",
+        f"--durations={slowest}",
+        "--cov=great_expectations",
+        "--cov-report term",
+        "-vv",
+        "-m",
+        f"'{marker_text}'",
+    ]
+
+    if cloud:
+        cmds += ["--cloud"]
+    if ci:
+        cmds += ["--cov-report", "xml"]
+    if html:
+        cmds += ["--cov-report", "html"]
+    if package:
+        cmds += [f"tests/{package.replace('.', '/')}"]  # allow `foo.bar`` format
+    ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
 PYTHON_VERSION_DEFAULT: float = 3.8

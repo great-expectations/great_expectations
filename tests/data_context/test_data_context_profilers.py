@@ -1,12 +1,12 @@
 from unittest import mock
 
 import pytest
+from marshmallow import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
@@ -27,7 +27,7 @@ def test_add_profiler(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     args = profiler_config_with_placeholder_args.to_json_dict()
-    for attr in ("class_name", "module_name", "id_"):
+    for attr in ("class_name", "module_name", "id"):
         args.pop(attr, None)
 
     profiler = empty_data_context.add_profiler(**args)
@@ -39,7 +39,7 @@ def test_add_profiler_with_invalid_config_raises_error(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     args = profiler_config_with_placeholder_args.to_json_dict()
-    for attr in ("class_name", "module_name", "id_"):
+    for attr in ("class_name", "module_name", "id"):
         args.pop(attr, None)
 
     # Setting invalid configuration to check that it is caught by DataContext wrapper method
