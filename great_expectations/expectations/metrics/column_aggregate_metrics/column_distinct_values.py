@@ -21,6 +21,11 @@ from great_expectations.expectations.metrics.import_manager import (
     pyspark_sql_DataFrame,
     pyspark_sql_Row,
     sa,
+    sa_sql_expression_ColumnClause,
+    sa_sql_expression_Select,
+    sa_sql_expression_Selectable,
+    sqlalchemy_engine_Engine,
+    sqlalchemy_engine_Row,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -40,16 +45,16 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         metric_domain_kwargs: Dict[str, str],
         **kwargs,
     ) -> Set[Any]:
-        selectable: sa.sql.expression.Selectable
+        selectable: sa_sql_expression_Selectable
         accessor_domain_kwargs: Dict[str, str]
         (selectable, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column_name: str = accessor_domain_kwargs["column"]
-        column: sa.sql.expression.ColumnClause = sa.column(column_name)
+        column: sa_sql_expression_ColumnClause = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
 
-        distinct_values: List[sa.engine.Row] = sqlalchemy_engine.execute(
+        distinct_values: List[sqlalchemy_engine_Engine] = sqlalchemy_engine.execute(
             sa.select([column])
             .where(column.is_not(None))
             .distinct()
@@ -90,7 +95,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        column: "sa.sql.expression.ColumnClause",
+        column: sa_sql_expression_ColumnClause,
         **kwargs,
     ) -> sa.func.count:
         return sa.func.count(sa.distinct(column))

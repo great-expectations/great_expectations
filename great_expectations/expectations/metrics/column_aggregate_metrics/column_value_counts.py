@@ -17,6 +17,9 @@ from great_expectations.expectations.metrics.import_manager import (
     pyspark_sql_DataFrame,
     pyspark_sql_Row,
     sa,
+    sa_sql_expression_Select,
+    sa_sql_expression_Selectable,
+    sqlalchemy_engine_Row,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
@@ -86,14 +89,14 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if collate is not None:
             raise ValueError("collate parameter is not supported in PandasDataset")
 
-        selectable: sa.sql.expression.Selectable
+        selectable: sa_sql_expression_Selectable
         accessor_domain_kwargs: Dict[str, str]
         selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column: str = accessor_domain_kwargs["column"]
 
-        query: sa.sql.expression.Select = (
+        query: sa_sql_expression_Select = (
             sa.select(
                 [
                     sa.column(column).label("value"),
@@ -114,7 +117,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
                 query = query.order_by(sa.column(column))
         elif sort == "count":
             query = query.order_by(sa.column("count").desc())
-        results: List[sa.engine.Row] = execution_engine.engine.execute(
+        results: List[sqlalchemy_engine_Row] = execution_engine.engine.execute(
             query.select_from(selectable)
         ).fetchall()
         results_array: np.ndarray = np.asarray(results)
