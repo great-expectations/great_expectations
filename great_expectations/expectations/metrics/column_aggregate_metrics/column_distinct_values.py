@@ -23,7 +23,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 class ColumnDistinctValues(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values"
 
-    @metric_value(engine=PandasExecutionEngine)
+    @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs) -> np.ndarray:
         return column.unique()
 
