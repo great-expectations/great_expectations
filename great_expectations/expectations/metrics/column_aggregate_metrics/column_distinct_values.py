@@ -47,10 +47,8 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
             .distinct()
             .select_from(selectable)
         ).fetchall()
-        pandas_df = pd.DataFrame(
-            distinct_values, columns=["distinct_values"]
-        ).convert_dtypes()
-        return set(pandas_df["distinct_values"])
+        # Vectorized operation is not faster here due to overhead of converting to and from numpy array
+        return {row[0] for row in distinct_values}
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
