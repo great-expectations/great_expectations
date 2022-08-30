@@ -25,6 +25,8 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
+from pprint import pprint
+
 
 @pytest.fixture
 def dataframe_for_unexpected_rows():
@@ -214,6 +216,7 @@ def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_row
     )
     result = expectation.validate(validator)
 
+    pprint(convert_to_json_serializable(result.result))
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "unexpected_count": 2,
@@ -258,6 +261,53 @@ def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_
         "partial_unexpected_list": [3, 10],
         "unexpected_list": [3, 10],
         "unexpected_rows": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
+        "partial_unexpected_index_list": [3, 5],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_pandas_unexpected_index_columns_complete_result_format(
+    dataframe_for_unexpected_rows,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "include_unexpected_index_columns": True,
+                "include_unexpected_rows": True,
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=dataframe_for_unexpected_rows)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    pprint(convert_to_json_serializable(result.result))
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_index_list": [3, 5],
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "unexpected_list": [3, 10],
+        "unexpected_index_columns": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
         "partial_unexpected_index_list": [3, 5],
         "partial_unexpected_counts": [
             {"value": 3, "count": 1},

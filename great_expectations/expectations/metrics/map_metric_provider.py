@@ -1875,6 +1875,9 @@ def _pandas_map_condition_rows(
 
     df = df[boolean_mapped_unexpected_values]
 
+
+
+
     if result_format["result_format"] == "COMPLETE":
         return df
 
@@ -2808,6 +2811,15 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=_pandas_map_condition_rows,
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_index_columns",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_pandas_map_condition_rows,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
                     if domain_type == MetricDomainTypes.COLUMN:
                         register_metric(
                             metric_name=f"{metric_name}.unexpected_values",
@@ -2877,6 +2889,15 @@ class MapMetricProvider(MetricProvider):
                     )
                     register_metric(
                         metric_name=f"{metric_name}.unexpected_rows",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_sqlalchemy_map_condition_rows,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_index_columns",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -2996,6 +3017,15 @@ class MapMetricProvider(MetricProvider):
                     )
                     register_metric(
                         metric_name=f"{metric_name}.unexpected_rows",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_spark_map_condition_rows,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_index_columns",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -3175,6 +3205,7 @@ class MapMetricProvider(MetricProvider):
             ".unexpected_value_counts",
             ".unexpected_index_list",
             ".unexpected_rows",
+            ".unexpected_index_columns",
             ".filtered_row_count",
         ]:
             if metric_name.endswith(metric_suffix):

@@ -45,6 +45,7 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
             "result_format": result_format,
             "partial_unexpected_count": 20,
             "include_unexpected_rows": False,
+            "include_unexpected_index_columns": False,
         }
     else:
         if (
@@ -55,11 +56,30 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
                 "When using `include_unexpected_rows`, `result_format` must be explicitly specified"
             )
 
+        # if (
+        #     "include_unexpected_rows" in result_format
+        #     or "include_unexpected_rows" in result_format
+        # ) and "result_format" not in result_format:
+        #     expectations = [
+        #         "include_unexpected_rows",
+        #         "unexpected_index_columns",
+        #     ]
+        #     expectation_settings = [
+        #         exp for exp in expectations if exp in result_format.keys()
+        #     ]
+        #     # FIXME: Naming and logic here is icky
+        #     # TODO: Would unexpected_index_column_rows be a more accurate name?
+        #     raise ValueError(
+        #         f"When using `{expectation_settings}`, `result_format` must be explicitly specified"
+        #     )
         if "partial_unexpected_count" not in result_format:
             result_format["partial_unexpected_count"] = 20
 
         if "include_unexpected_rows" not in result_format:
             result_format["include_unexpected_rows"] = False
+
+        if "include_unexpected_index_columns" not in result_format:
+            result_format["include_unexpected_index_columns"] = False
 
     return result_format
 
