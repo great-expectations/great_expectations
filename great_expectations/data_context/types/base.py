@@ -8,6 +8,17 @@ import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
+from marshmallow import (
+    INCLUDE,
+    Schema,
+    ValidationError,
+    fields,
+    post_dump,
+    post_load,
+    pre_dump,
+    validates_schema,
+)
+from marshmallow.validate import OneOf
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
@@ -20,17 +31,6 @@ from great_expectations.core.util import (
     convert_to_json_serializable,
     get_datetime_string_from_strftime_format,
 )
-from great_expectations.marshmallow__shade import (
-    INCLUDE,
-    Schema,
-    ValidationError,
-    fields,
-    post_dump,
-    post_load,
-    pre_dump,
-    validates_schema,
-)
-from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
@@ -375,7 +375,8 @@ class DataConnectorConfig(AbstractConfig):
     def __init__(  # noqa: C901 - 20
         self,
         class_name,
-        id_: Optional[str] = None,
+        name: Optional[str] = None,
+        id: Optional[str] = None,
         module_name=None,
         credentials=None,
         assets=None,
@@ -451,7 +452,7 @@ class DataConnectorConfig(AbstractConfig):
         if delimiter is not None:
             self.delimiter = delimiter
 
-        super().__init__(id_=id_)
+        super().__init__(id=id, name=name)
 
         # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
@@ -482,10 +483,14 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
-    id_ = fields.String(
+    name = fields.String(
         required=False,
         allow_none=True,
-        data_key="id",
+    )
+
+    id = fields.String(
+        required=False,
+        allow_none=True,
     )
 
     class_name = fields.String(
@@ -853,7 +858,7 @@ class DatasourceConfig(AbstractConfig):
             str
         ] = None,  # Note: name is optional currently to avoid updating all documentation within
         # the scope of this work.
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         class_name: Optional[str] = None,
         module_name: str = "great_expectations.datasource",
         execution_engine=None,
@@ -874,7 +879,7 @@ class DatasourceConfig(AbstractConfig):
         **kwargs,
     ) -> None:
 
-        super().__init__(id_=id_, name=name)
+        super().__init__(id=id, name=name)
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
@@ -960,10 +965,9 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         required=False,
         allow_none=True,
     )
-    id_ = fields.String(
+    id = fields.String(
         required=False,
         allow_none=True,
-        data_key="id",
     )
 
     class_name = fields.String(
@@ -1049,6 +1053,11 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
+        # Add names to data connectors
+        for data_connector_name, data_connector_config in data.get(
+            "data_connectors", {}
+        ).items():
+            data_connector_config["name"] = data_connector_name
         return DatasourceConfig(**data)
 
 
@@ -2280,8 +2289,8 @@ class DataContextConfig(BaseYamlConfig):
 
 
 class CheckpointValidationConfig(AbstractConfig):
-    def __init__(self, id_: Optional[str] = None, **kwargs: dict) -> None:
-        super().__init__(id_=id_)
+    def __init__(self, id: Optional[str] = None, **kwargs: dict) -> None:
+        super().__init__(id=id)
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -2291,7 +2300,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
-    id_ = fields.String(required=False, allow_none=False, data_key="id")
+    id = fields.String(required=False, allow_none=False)
 
     def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:  # type: ignore[override]
         """

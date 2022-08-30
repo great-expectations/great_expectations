@@ -45,7 +45,7 @@ class DataConnector:
         datasource_name: str,
         execution_engine: ExecutionEngine,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Base class for DataConnectors
@@ -62,7 +62,7 @@ class DataConnector:
             )
 
         self._name = name
-        self._id = id_
+        self._id = id
         self._datasource_name = datasource_name
         self._execution_engine = execution_engine
 
@@ -99,7 +99,7 @@ class DataConnector:
     def get_batch_data_and_metadata(
         self,
         batch_definition: BatchDefinition,
-    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
+    ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         """
         Uses batch_definition to retrieve batch_data and batch_markers by building a batch_spec from batch_definition,
         then using execution_engine to return batch_data and batch_markers

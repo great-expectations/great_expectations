@@ -211,7 +211,7 @@ def get_substituted_validation_dict(
         or False,
     }
 
-    for attr in ("name", "id_"):
+    for attr in ("name", "id"):
         if validation_dict.get(attr) is not None:
             substituted_validation_dict[attr] = validation_dict[attr]
 

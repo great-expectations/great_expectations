@@ -2,17 +2,13 @@ import logging
 import warnings
 from string import Template
 
+from marshmallow import Schema, ValidationError, fields, post_load
+
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
-from great_expectations.marshmallow__shade import (
-    Schema,
-    ValidationError,
-    fields,
-    post_load,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +91,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         except ValidationError as err:
             raise GreatExpectationsError(
                 f"Unable to load asset configuration in TableBatchKwargsGenerator '{name}': "
-                "validation error: {str(err)}."
+                f"validation error: {str(err)}."
             )
 
         if datasource is not None:
@@ -109,7 +105,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 )
                 self.inspector = None
 
-    def _get_iterator(
+    def _get_iterator(  # noqa: C901 - 19
         self,
         data_asset_name,
         query_parameters=None,
@@ -165,7 +161,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 len(split_data_asset_name) == 3
                 and self.engine.dialect.name.lower() == "bigquery"
             ):
-                project_id = split_data_asset_name[0]
+                project_id = split_data_asset_name[0]  # noqa: F841
                 schema_name = split_data_asset_name[1]
                 table_name = data_asset_name
             else:
