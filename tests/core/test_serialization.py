@@ -4,6 +4,7 @@ from decimal import Decimal
 
 import pandas as pd
 import pytest
+from marshmallow import Schema
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
@@ -17,7 +18,6 @@ from great_expectations.data_context.types.base import (
     checkpointConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.marshmallow__shade import Schema
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
