@@ -207,7 +207,7 @@ class CloudDataContext(AbstractDataContext):
         self,
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ):
+    ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
 
         Args:
@@ -225,21 +225,23 @@ class CloudDataContext(AbstractDataContext):
                 f"expectation_suite with id {ge_cloud_id} does not exist."
             )
 
-        self.expectations_store.remove_key(key)
-        return True
+        return self.expectations_store.remove_key(key)
 
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
+        include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GE Cloud ID
         Args:
-            expectation_suite_name (str): the name for the Expectation Suite
-            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
+            expectation_suite_name (str): The name of the Expectation Suite
+            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+                ExpectationConfiguration.
+            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
 
         Returns:
-            expectation_suite
+            An existing ExpectationSuite
         """
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
@@ -251,8 +253,19 @@ class CloudDataContext(AbstractDataContext):
             )
 
         expectations_schema_dict: dict = cast(dict, self.expectations_store.get(key))
+
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_suite_include_rendered_content()
+            )
+
         # create the ExpectationSuite from constructor
-        return ExpectationSuite(**expectations_schema_dict, data_context=self)
+        expectation_suite = ExpectationSuite(
+            **expectations_schema_dict, data_context=self
+        )
+        if include_rendered_content:
+            expectation_suite.render()
+        return expectation_suite
 
     def save_expectation_suite(
         self,
