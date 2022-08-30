@@ -1371,7 +1371,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self,
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ) -> ExpectationSuite:
+    ) -> bool:
         """
         See `AbstractDataContext.delete_expectation_suite` for more information.
         """

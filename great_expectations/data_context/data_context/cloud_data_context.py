@@ -207,7 +207,7 @@ class CloudDataContext(AbstractDataContext):
         self,
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ):
+    ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
 
         Args:
@@ -225,8 +225,7 @@ class CloudDataContext(AbstractDataContext):
                 f"expectation_suite with id {ge_cloud_id} does not exist."
             )
 
-        self.expectations_store.remove_key(key)
-        return True
+        return self.expectations_store.remove_key(key)
 
     def get_expectation_suite(
         self,
