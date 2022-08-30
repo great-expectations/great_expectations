@@ -76,6 +76,22 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
     radius, in miles, of the given zipcode.
     """
 
+    def validate_configuration(self, configuration) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+
+        super().validate_configuration(configuration)
+        if configuration is None:
+            configuration = self.configuration
+
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
@@ -205,11 +221,6 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
                     },
                     "out": {
                         "success": False,
-                        "unexpected_index_list": [4, 5],
-                        "unexpected_list": [
-                            30319,
-                            30342,
-                        ],
                     },
                 },
             ],
@@ -218,7 +229,6 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": [
             "experimental",
             "hackathon-20200123",
