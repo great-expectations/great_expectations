@@ -13,6 +13,7 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
+    column_aggregate_partial,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
@@ -76,27 +77,30 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
 class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count"
 
-    @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs) -> pd.Series:
-        return column.nunique()
+    @metric_value(engine=PandasExecutionEngine)
+    def _pandas(
+        cls,
+        metrics: Dict[str, Any],
+        **kwargs,
+    ) -> int:
+        column_distinct_values = metrics["column.distinct_values"]
+        return len(column_distinct_values)
 
-    @metric_value(engine=SqlAlchemyExecutionEngine)
+    @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        metrics: Dict[str, Any],
+        column,
         **kwargs,
-    ) -> int:
-        observed_distinct_values = metrics["column.distinct_values"]
-        return len(observed_distinct_values)
+    ):
+        return sa.func.count(sa.distinct(column))
 
-    @metric_value(engine=SparkDFExecutionEngine)
+    @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        metrics: Dict[str, Any],
+        column,
         **kwargs,
-    ) -> int:
-        observed_distinct_values = metrics["column.distinct_values"]
-        return len(observed_distinct_values)
+    ):
+        return F.countDistinct(column)
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -114,7 +118,10 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        if metric.metric_name == "column.distinct_values.count":
+        if (
+            metric.metric_name == "column.distinct_values.count"
+            and execution_engine == PandasExecutionEngine
+        ):
             dependencies["column.distinct_values.count"] = MetricConfiguration(
                 metric_name="column.distinct_values",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
@@ -127,9 +134,16 @@ class ColumnDistinctValuesCountUnderThreshold(ColumnAggregateMetricProvider):
     metric_name = "column.distinct_values.count.under_threshold"
     condition_keys = ("threshold",)
 
-    @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, threshold, **kwargs) -> bool:
-        return column.nunique() < threshold
+    @metric_value(engine=PandasExecutionEngine)
+    def _pandas(
+        cls,
+        metric_value_kwargs: Dict,
+        metrics: Dict[str, Any],
+        **kwargs,
+    ) -> bool:
+        column_distinct_values_count = metrics["column.distinct_values.count"]
+        threshold = metric_value_kwargs["threshold"]
+        return column_distinct_values_count < threshold
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
