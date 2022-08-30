@@ -4029,8 +4029,7 @@ def test_distinct_metric_spark(
         metrics=metrics,
     )
     metrics.update(results)
-    expected_metric_values = {1, 2, 3}
-    assert metrics[column_distinct_values_metric.id] == expected_metric_values
+    assert metrics[column_distinct_values_metric.id] == {1, 2, 3}
 
     column_distinct_values_count_metric_partial_fn = MetricConfiguration(
         metric_name="column.distinct_values.count.aggregate_fn",
@@ -4118,8 +4117,7 @@ def test_distinct_metric_sa(
         metrics=metrics,
     )
     metrics.update(results)
-    expected_metric_values = {1, 2, 3}
-    assert metrics[column_distinct_values_metric.id] == expected_metric_values
+    assert metrics[column_distinct_values_metric.id] == {1, 2, 3}
 
     column_distinct_values_count_metric_partial_fn = MetricConfiguration(
         metric_name="column.distinct_values.count.aggregate_fn",

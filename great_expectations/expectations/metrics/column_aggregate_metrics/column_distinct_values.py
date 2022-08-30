@@ -68,10 +68,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
             .rdd.flatMap(lambda x: x)
             .collect()
         )
-        pandas_df = pd.DataFrame(
-            distinct_values, columns=["distinct_values"]
-        ).convert_dtypes()
-        return set(pandas_df["distinct_values"])
+        return set(distinct_values)
 
 
 class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
