@@ -4203,6 +4203,7 @@ def test_distinct_metric_pd():
         metric_value_kwargs=None,
         metric_dependencies={
             "column.distinct_values": column_distinct_values_metric,
+            "table.columns": table_columns_metric,
         },
     )
 
@@ -4218,6 +4219,7 @@ def test_distinct_metric_pd():
         metric_value_kwargs={"threshold": 5},
         metric_dependencies={
             "column.distinct_values.count": column_distinct_values_count_metric,
+            "table.columns": table_columns_metric,
         },
     )
 
