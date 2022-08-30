@@ -263,13 +263,14 @@ def tests(
     ]
     if not ignore_markers:
         cmds += ["-m", f"'{marker_text}'"]
-    if unit:
+    if unit and not ignore_markers:
         try:
             import pytest_timeout  # noqa: F401
 
             cmds += [f"--timeout={timeout}"]
         except ImportError:
             print("`pytest-timeout` is not installed, cannot use --timeout")
+
     if cloud:
         cmds += ["--cloud"]
     if ci:
