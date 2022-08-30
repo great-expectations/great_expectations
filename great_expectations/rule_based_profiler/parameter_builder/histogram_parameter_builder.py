@@ -53,6 +53,9 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
         n_bins: int = 10,
         # NOTE 20220822 - I think that ideally, the value of `allow_relative_error` would have a per-engine default.
         allow_relative_error: bool = False,
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
+        ] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> None:
         """
@@ -65,9 +68,13 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
             to "ColumnPartition" (great_expectations/expectations/metrics/column_aggregate_metrics/column_partition.py).
             n_bins: Number of bins for histogram computation (ignored and recomputed if "bins" argument is "auto").
             allow_relative_error: Used for partitionong strategy values that involve quantiles (all except "uniform").
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: BaseDataContext associated with this ParameterBuilder
         """
-        evaluation_parameter_builder_configs: List[ParameterBuilderConfig] = []
+        if evaluation_parameter_builder_configs is None:
+            evaluation_parameter_builder_configs = []
 
         # Present approach appears elaborate, because it defines "evaluation_parameter_builder_configs" parsimoniously.
         if bucketize_data:
