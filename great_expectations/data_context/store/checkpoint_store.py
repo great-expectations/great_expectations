@@ -48,10 +48,7 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_config_dict = response_json["data"]["attributes"][
             "checkpoint_config"
         ]
-        checkpoint_config_dict["ge_cloud_id"] = ge_cloud_checkpoint_id
-
-        # Checkpoints accept a `ge_cloud_id` but not an `id`
-        checkpoint_config_dict.pop("id", None)
+        checkpoint_config_dict["id"] = ge_cloud_checkpoint_id
 
         return checkpoint_config_dict
 
@@ -177,7 +174,7 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
             ge_cloud_id = checkpoint_ref.ge_cloud_id
-            checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)  # type: ignore[misc]
+            checkpoint.id = uuid.UUID(ge_cloud_id)  # type: ignore[misc]
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
         """Create a checkpoint config in the store using a store_backend-specific key.

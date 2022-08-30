@@ -394,6 +394,7 @@ class CloudDataContext(AbstractDataContext):
     def add_checkpoint(
         self,
         name: str,
+        id: Optional[str] = None,
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
@@ -414,7 +415,6 @@ class CloudDataContext(AbstractDataContext):
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
-        ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> "Checkpoint":
@@ -428,6 +428,7 @@ class CloudDataContext(AbstractDataContext):
             data_context=self,
             checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
             name=name,
+            id=id,
             config_version=config_version,
             template_name=template_name,
             module_name=module_name,
@@ -448,7 +449,6 @@ class CloudDataContext(AbstractDataContext):
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
             default_validation_id=default_validation_id,
         )

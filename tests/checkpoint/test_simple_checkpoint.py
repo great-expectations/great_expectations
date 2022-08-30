@@ -442,7 +442,7 @@ def test_simple_checkpoint_persisted_to_store(
         "evaluation_parameters": {},
         "expectation_suite_ge_cloud_id": None,
         "expectation_suite_name": None,
-        "ge_cloud_id": None,
+        "id": None,
         "module_name": "great_expectations.checkpoint",
         "name": "foo",
         "notify_on": None,

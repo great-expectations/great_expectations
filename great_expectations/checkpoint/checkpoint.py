@@ -202,7 +202,7 @@ class BaseCheckpoint(ConfigPeer):
                     validation_result = run_result.get("validation_result")
                     if validation_result:
                         meta = validation_result.meta
-                        id = str(self.ge_cloud_id) if self.ge_cloud_id else None
+                        id = str(self.id) if self.id else None
                         meta["checkpoint_id"] = id
 
                 checkpoint_run_results.update(run_results)
@@ -378,7 +378,7 @@ class BaseCheckpoint(ConfigPeer):
             )
             checkpoint_identifier = None
             if self.data_context.ge_cloud_mode:
-                checkpoint_identifier = self.ge_cloud_id
+                checkpoint_identifier = self.id
 
             operator_run_kwargs = {}
 
@@ -491,9 +491,9 @@ is run), with each validation having its own defined "action_list" attribute.
             return []
 
     @property
-    def ge_cloud_id(self) -> Optional[UUID]:
+    def id(self) -> Optional[str]:
         try:
-            return self.config.ge_cloud_id
+            return self.config.id
         except AttributeError:
             return None
 
@@ -542,7 +542,7 @@ class Checkpoint(BaseCheckpoint):
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[UUID] = None,
+        id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[UUID] = None,
         default_validation_id: Optional[str] = None,
     ) -> None:
@@ -575,7 +575,7 @@ constructor arguments.
             profilers=profilers,
             validation_operator_name=validation_operator_name,
             batches=batches,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
             default_validation_id=default_validation_id,
         )
@@ -664,6 +664,7 @@ constructor arguments.
         data_context: "DataContext",  # noqa: F821
         checkpoint_store_name: str,
         name: str,
+        id: Optional[str] = None,
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
@@ -684,7 +685,6 @@ constructor arguments.
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
-        ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> "Checkpoint":
@@ -709,6 +709,7 @@ constructor arguments.
 
         checkpoint_config = {
             "name": name,
+            "id": id,
             "config_version": config_version,
             "template_name": template_name,
             "module_name": module_name,
@@ -729,7 +730,6 @@ constructor arguments.
             "slack_webhook": slack_webhook,
             "notify_on": notify_on,
             "notify_with": notify_with,
-            "ge_cloud_id": ge_cloud_id,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "default_validation_id": default_validation_id,
         }
@@ -1070,7 +1070,7 @@ class SimpleCheckpoint(Checkpoint):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[UUID] = None,
+        id: Optional[str] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
         site_names: Union[str, List[str]] = "all",
         slack_webhook: Optional[str] = None,
@@ -1081,6 +1081,7 @@ class SimpleCheckpoint(Checkpoint):
     ) -> None:
         checkpoint_config: CheckpointConfig = self._configurator_class(
             name=name,
+            id=id,
             data_context=data_context,
             config_version=config_version,
             template_name=template_name,
@@ -1096,7 +1097,6 @@ class SimpleCheckpoint(Checkpoint):
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         ).build()
 
@@ -1113,7 +1113,7 @@ class SimpleCheckpoint(Checkpoint):
             runtime_configuration=checkpoint_config.runtime_configuration,
             validations=validations,
             profilers=checkpoint_config.profilers,
-            ge_cloud_id=checkpoint_config.ge_cloud_id,
+            id=checkpoint_config.id,
             expectation_suite_ge_cloud_id=checkpoint_config.expectation_suite_ge_cloud_id,
         )
 

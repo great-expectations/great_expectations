@@ -2327,11 +2327,12 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
         return sorted_data
 
 
-class CheckpointConfigSchema(Schema):
+class CheckpointConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
         fields = (
             "name",
+            "id",
             "config_version",
             "template_name",
             "module_name",
@@ -2353,7 +2354,6 @@ class CheckpointConfigSchema(Schema):
             "slack_webhook",
             "notify_on",
             "notify_with",
-            "ge_cloud_id",
             "expectation_suite_ge_cloud_id",
         )
         ordered = True
@@ -2369,8 +2369,9 @@ class CheckpointConfigSchema(Schema):
         "default_validation_id",
     ]
 
-    ge_cloud_id = fields.UUID(required=False, allow_none=True)
     name = fields.String(required=False, allow_none=True)
+    id = fields.String(required=False, allow_none=True)
+
     config_version = fields.Number(
         validate=lambda x: (0 < x < 100) or x is None,
         error_messages={"invalid": "config version must " "be a number or None."},
@@ -2465,13 +2466,14 @@ class CheckpointConfigSchema(Schema):
         return data
 
 
-class CheckpointConfig(BaseYamlConfig):
+class CheckpointConfig(BaseYamlConfig, AbstractConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = CheckpointConfigSchema
 
     def __init__(
         self,
         name: Optional[str] = None,
+        id: Optional[str] = None,
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
@@ -2488,7 +2490,6 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
-        ge_cloud_id: Optional[Union[UUID, str]] = None,
         # the following four args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
@@ -2496,7 +2497,6 @@ class CheckpointConfig(BaseYamlConfig):
         notify_with: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[Union[UUID, str]] = None,
     ) -> None:
-        self._name = name
         self._config_version = config_version
         if self.config_version is None:
             class_name = class_name or "LegacyCheckpoint"
@@ -2516,7 +2516,6 @@ class CheckpointConfig(BaseYamlConfig):
             self._validations = validations or []
             self._default_validation_id = default_validation_id
             self._profilers = profilers or []
-            self._ge_cloud_id = ge_cloud_id
             # the following attributes are used by SimpleCheckpoint
             self._site_names = site_names
             self._slack_webhook = slack_webhook
@@ -2526,7 +2525,8 @@ class CheckpointConfig(BaseYamlConfig):
         self._module_name = module_name or "great_expectations.checkpoint"
         self._class_name = class_name
 
-        super().__init__(commented_map=commented_map)
+        BaseYamlConfig.__init__(self, commented_map=commented_map)
+        AbstractConfig.__init__(self, id=id, name=name)
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
@@ -2554,28 +2554,12 @@ class CheckpointConfig(BaseYamlConfig):
         self._batches = value  # type: ignore[has-type]
 
     @property
-    def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
-        return self._ge_cloud_id
-
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value: Union[UUID, str]) -> None:
-        self._ge_cloud_id = value
-
-    @property
     def expectation_suite_ge_cloud_id(self) -> Optional[Union[UUID, str]]:
         return self._expectation_suite_ge_cloud_id
 
     @expectation_suite_ge_cloud_id.setter
     def expectation_suite_ge_cloud_id(self, value: Union[UUID, str]) -> None:
         self._expectation_suite_ge_cloud_id = value
-
-    @property
-    def name(self) -> str:
-        return self._name  # type: ignore[return-value]
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value
 
     @property
     def template_name(self) -> str:
