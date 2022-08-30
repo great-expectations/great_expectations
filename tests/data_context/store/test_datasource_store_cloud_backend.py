@@ -1,4 +1,5 @@
-from unittest.mock import PropertyMock, patch
+from typing import Dict
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
@@ -11,8 +12,8 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
-
-from ..cloud_data_context.conftest import MockResponse
+from great_expectations.exceptions import StoreBackendError
+from tests.data_context.conftest import MockResponse
 
 
 @pytest.mark.cloud
@@ -182,3 +183,43 @@ def test_datasource_store_delete_by_id(
             },
             **shared_called_with_request_kwargs,
         )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "http_verb,method,args",
+    [
+        ("get", "get", []),
+        ("put", "set", ["foobar"]),
+        pytest.param(
+            "delete",
+            "delete",
+            [],
+            marks=pytest.mark.xfail(
+                reason="We do not raise errors on delete fail", strict=True
+            ),
+        ),
+    ],
+)
+def test_datasource_http_error_handling(
+    datasource_store_ge_cloud_backend: DatasourceStore,
+    mock_http_unavailable: Dict[str, Mock],
+    http_verb: str,
+    method: str,
+    args: list,
+):
+    id_: str = "example_id_normally_uuid"
+
+    key = GeCloudIdentifier(
+        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
+    )
+    with pytest.raises(
+        StoreBackendError, match=r"Unable to \w+ object in GE Cloud Store Backend: .*"
+    ) as exc_info:
+
+        backend_method = getattr(datasource_store_ge_cloud_backend, method)
+        backend_method(key, *args)
+
+    print(f"Exception details:\n\t{exc_info.type}\n\t{exc_info.value}")
+
+    mock_http_unavailable[http_verb].assert_called_once()

@@ -1,12 +1,16 @@
+import json
 import os
 import shutil
-from typing import Dict
-from unittest.mock import PropertyMock, patch
+import unittest.mock
+from typing import Any, Callable, Dict, Optional, Union, cast
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
+import requests
 
 import great_expectations as ge
 from great_expectations.data_context.store import GeCloudStoreBackend
+from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
@@ -633,9 +637,119 @@ def datasource_config() -> DatasourceConfig:
 
 
 @pytest.fixture
+def datasource_config_with_names() -> DatasourceConfig:
+    return DatasourceConfig(
+        name="my_datasource",
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        data_connectors={
+            "tripdata_monthly_configured": {
+                "name": "tripdata_monthly_configured",
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "base_directory": "/path/to/trip_data",
+                "assets": {
+                    "yellow": {
+                        "class_name": "Asset",
+                        "module_name": "great_expectations.datasource.data_connector.asset",
+                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                        "group_names": ["year", "month"],
+                    }
+                },
+            }
+        },
+    )
+
+
+@pytest.fixture
 def shared_called_with_request_kwargs(request_headers) -> dict:
     """
     Standard request kwargs that all GeCloudStoreBackend http calls are made with.
     Use in combination with `assert_called_with()`
     """
     return dict(timeout=GeCloudStoreBackend.TIMEOUT, headers=request_headers)
+
+
+JSONData = Union[AnyPayload, Dict[str, Any]]
+RequestError = Union[requests.exceptions.HTTPError, requests.exceptions.Timeout]
+
+
+class MockResponse:
+    # TODO: GG 08232022 update signature to accept arbitrary content types
+    def __init__(
+        self,
+        json_data: JSONData,
+        status_code: int,
+        headers: Optional[Dict[str, str]] = None,
+        exc_to_raise: Optional[RequestError] = None,
+    ) -> None:
+        self._json_data = json_data
+        self.status_code = status_code
+        self.headers = headers or {
+            "content-type": "application/json" if json_data else "text/html"
+        }
+        self._exc_to_raise = exc_to_raise
+
+    def json(self):
+        if self.headers.get("content-type") == "application/json":
+            return self._json_data
+        raise json.JSONDecodeError("Uh oh - check content-type", "foobar", 1)
+
+    def raise_for_status(self):
+        if self._exc_to_raise:
+            raise self._exc_to_raise
+        if self.status_code >= 400:
+            raise requests.exceptions.HTTPError(
+                f"Mock {self.status_code} HTTPError", response=self
+            )
+        return None
+
+    def __repr__(self):
+        return f"<Response [{self.status_code}]>"
+
+
+@pytest.fixture
+def mock_response_factory() -> Callable[
+    [JSONData, int, Optional[RequestError]], MockResponse
+]:
+    def _make_mock_response(
+        json_data: JSONData,
+        status_code: int,
+        exc_to_raise: Optional[RequestError] = None,
+    ) -> MockResponse:
+        return MockResponse(
+            json_data=json_data, status_code=status_code, exc_to_raise=exc_to_raise
+        )
+
+    return _make_mock_response
+
+
+@pytest.fixture
+def mock_http_unavailable(mock_response_factory: Callable):
+    """Mock all request http calls to return a 503 Unavailable response."""
+
+    def mocked_response(*args, **kwargs):
+
+        return MockResponse(
+            {"code": 503, "detail": "API is unavailable"},
+            503,
+        )
+
+    # should have been able to do this by mocking `requests.request` but this didn't work
+    with unittest.mock.patch.multiple(
+        "requests",
+        autospec=True,
+        get=unittest.mock.DEFAULT,
+        post=unittest.mock.DEFAULT,
+        put=unittest.mock.DEFAULT,
+        patch=unittest.mock.DEFAULT,
+        delete=unittest.mock.DEFAULT,
+    ) as mock_requests:
+        for name, mock in cast(Dict[str, Mock], mock_requests).items():
+            mock.side_effect = mocked_response
+            print(f"Mocking `requests.{name}` with `{mocked_response.__name__}()`")
+
+        yield mock_requests

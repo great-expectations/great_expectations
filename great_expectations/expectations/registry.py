@@ -309,6 +309,9 @@ def get_expectation_impl(expectation_name: str):
         )
         expectation_name = renamed[expectation_name]
 
+    if expectation_name not in _registered_expectations:
+        raise ge_exceptions.ExpectationNotFoundError(f"{expectation_name} not found")
+
     return _registered_expectations.get(expectation_name)
 
 
