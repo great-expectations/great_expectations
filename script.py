@@ -117,7 +117,7 @@ def insert_marks(
                 # Update contents with mark
                 if idx > 0 and MARKER not in contents[idx]:
                     print(test_name, duration)
-                    contents[idx] += f"{MARKER}\n"
+                    contents[idx] += f"{MARKER} # {duration}\n"
 
             if not contains_pytest_import:
                 contents.insert(0, "import pytest\n")
