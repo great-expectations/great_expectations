@@ -104,6 +104,6 @@ if __name__ == "__main__":
         assert (
             len(payload) > 0
         ), "Something went wrong; there should packages in the payload!"
-        write_results_to_disk(os.path.join(pwd, "./package_manifests.json"), payload)
+        write_results_to_disk(os.path.join(pwd, "./package_manifests2.json"), payload)
     finally:
         os.chdir(pwd)
