@@ -609,6 +609,12 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
             dialect_supported = True
 
     try:
+        if hasattr(dialect, "RedshiftDialect"):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+    try:
         # noinspection PyUnresolvedReferences
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             dialect_supported = True
@@ -618,6 +624,13 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     try:
         # noinspection PyUnresolvedReferences
         if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+
+    try:
+        if hasattr(dialect, "SnowflakeDialect"):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass
