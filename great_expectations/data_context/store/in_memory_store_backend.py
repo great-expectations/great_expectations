@@ -1,5 +1,7 @@
 from typing import Optional
 
+from great_expectations.data_context.types.resource_identifiers import ConfigurationIdentifier
+
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
@@ -65,6 +67,9 @@ class InMemoryStoreBackend(StoreBackend):
         return key in self._store
 
     def remove_key(self, key) -> None:
+        # TODO: AJB 20220830 is this the right place to do this? What about other backends?
+        if isinstance(key, ConfigurationIdentifier):
+            key = key.to_tuple()
         del self._store[key]
 
     @property

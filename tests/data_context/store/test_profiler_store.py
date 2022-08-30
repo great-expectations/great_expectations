@@ -98,3 +98,18 @@ def test_profiler_store_integration(
         "keys": [],
         "len_keys": 0,
     }
+
+
+# TODO: AJB 20220830 Parametrize for multiple store backends
+def test_profiler_store_serialization_self_check(caplog):
+    profiler_store = ProfilerStore(
+        store_name="some_name"
+    )
+
+    profiler_store.serialization_self_check(True)
+
+    # TODO: AJB 20220830
+    assert caplog.messages[0].startswith(
+        ""
+    )
+
