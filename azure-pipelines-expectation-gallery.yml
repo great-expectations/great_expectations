@@ -84,7 +84,6 @@ stages:
         timeoutInMinutes: 300
         variables:
           python.version: '3.7'
-          GE_pytest_pip_opts: '"cookiecutter==1.7.3" "google-cloud-bigquery-storage" --requirement requirements-dev.txt --constraint constraints-dev.txt'
           GE_pytest_opts: ''
 
         services:
@@ -103,9 +102,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install $(GE_pytest_pip_opts)
-              pip install --requirement requirements.txt
-              pip install  --editable .
+              pip install "google-cloud-bigquery-storage" -r requirements-dev-all-contrib-expectations.txt -e "contrib/cli" -e ".[dev]" -c constraints-dev.txt
             displayName: 'Install dependencies'
 
           - script: |
@@ -209,7 +206,7 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show gallery tracebacks'
 
-          - bash: grep "to df.to_sql" testing-times.txt
+          - bash: grep "to df.to_sql" testing-times.txt || echo "No df.to_sql calls were made"
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show DataFrame to SQL times'
 
@@ -220,14 +217,6 @@ stages:
           - bash: grep "to evaluate_json" testing-times.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times for individual tests'
-
-          - script: |
-              cd ../../contrib/cli
-              pwd
-              pip install .
-              cd -
-            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Install contrib CLI tool'
 
           - bash: python ./build_package_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/

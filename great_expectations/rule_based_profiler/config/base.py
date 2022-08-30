@@ -2,19 +2,12 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Type, Union
 
+from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, post_load
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import BaseYamlConfig
-from great_expectations.marshmallow__shade import (
-    INCLUDE,
-    Schema,
-    ValidationError,
-    fields,
-    post_dump,
-    post_load,
-)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
@@ -489,7 +482,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ) -> None:
@@ -501,7 +494,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         self.variables = variables
         self.rules = rules
 
-        AbstractConfig.__init__(self, id_=id_, name=name)
+        AbstractConfig.__init__(self, id=id, name=name)
         BaseYamlConfig.__init__(self, commented_map=commented_map)
 
     @classmethod
@@ -675,7 +668,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
         unknown = INCLUDE
         fields = (
             "name",
-            "id_",
+            "id",
             "config_version",
             "module_name",
             "class_name",
@@ -688,10 +681,9 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
         required=True,
         allow_none=False,
     )
-    id_ = fields.String(
+    id = fields.String(
         required=False,
-        allow_none=False,
-        data_key="id",
+        allow_none=True,
     )
     config_version = fields.Float(
         required=True,

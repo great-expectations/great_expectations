@@ -197,6 +197,8 @@ def get_contrib_requirements(filepath: str) -> Dict:
 def build_gallery(
     include_core: bool = True,
     include_contrib: bool = True,
+    ignore_suppress: bool = False,
+    ignore_only_for: bool = False,
     only_these_expectations: List[str] = [],
     only_consider_these_backends: List[str] = [],
 ) -> Dict:
@@ -322,11 +324,13 @@ def build_gallery(
                 continue
 
         logger.debug(f"Running diagnostics for expectation: {expectation}")
-        impl = great_expectations.expectations.registry.get_expectation_impl(
-            expectation
-        )
         try:
+            impl = great_expectations.expectations.registry.get_expectation_impl(
+                expectation
+            )
             diagnostics = impl().run_diagnostics(
+                ignore_suppress=ignore_suppress,
+                ignore_only_for=ignore_only_for,
                 debug_logger=logger,
                 only_consider_these_backends=only_consider_these_backends,
             )
@@ -536,6 +540,22 @@ def format_docstring_to_markdown(docstr: str) -> str:
     help="Do not include contrib/package Expectations",
 )
 @click.option(
+    "--ignore-suppress",
+    "-S",
+    "ignore_suppress",
+    is_flag=True,
+    default=False,
+    help="Ignore the suppress_test_for list on Expectation sample tests",
+)
+@click.option(
+    "--ignore-only-for",
+    "-O",
+    "ignore_only_for",
+    is_flag=True,
+    default=False,
+    help="Ignore the only_for list on Expectation sample tests",
+)
+@click.option(
     "--outfile-name",
     "-o",
     "outfile_name",
@@ -560,6 +580,8 @@ def main(**kwargs):
     gallery_info = build_gallery(
         include_core=not kwargs["no_core"],
         include_contrib=not kwargs["no_contrib"],
+        ignore_suppress=kwargs["ignore_suppress"],
+        ignore_only_for=kwargs["ignore_only_for"],
         only_these_expectations=kwargs["args"],
         only_consider_these_backends=backends,
     )

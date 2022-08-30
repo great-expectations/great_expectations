@@ -96,7 +96,7 @@ class AsyncExecutor(AbstractContextManager):
         """
         if self._execute_concurrently:
             return AsyncResult(
-                future=self._thread_pool_executor.submit(fn, *args, **kwargs)
+                future=self._thread_pool_executor.submit(fn, *args, **kwargs)  # type: ignore[union-attr]
             )
         else:
             return AsyncResult(value=fn(*args, **kwargs))
@@ -137,4 +137,4 @@ def patch_https_connection_pool(concurrency_config: ConcurrencyConfig) -> None:
             kwargs.update(maxsize=concurrency_config.max_database_query_concurrency)
             super().__init__(*args, **kwargs)
 
-    poolmanager.pool_classes_by_scheme["https"] = HTTPSConnectionPoolWithHigherMaxSize
+    poolmanager.pool_classes_by_scheme["https"] = HTTPSConnectionPoolWithHigherMaxSize  # type: ignore[attr-defined]
