@@ -98,10 +98,6 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              # Install dependencies
-              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
-              pip install pytest-cov pytest-azurepipelines
-
               # Run dgtest
               pytest tests -vv --durations=0
               # dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
