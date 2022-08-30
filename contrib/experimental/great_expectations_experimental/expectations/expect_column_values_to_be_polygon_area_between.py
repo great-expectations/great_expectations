@@ -163,7 +163,7 @@ class ExpectColumnValuesToBePolygonAreaBetween(ColumnMapExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@mmi333",
         ],
-        "requirements": ["geopandas", "shapely"],
+        "requirements": ["geopandas", "pyogrio", "shapely"],
     }
 
     # This is the id string of the Metric used by this Expectation.
