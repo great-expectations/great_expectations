@@ -1,7 +1,6 @@
 class ProfilerTypeMapping:
     """Useful backend type mapping for building profilers."""
 
-    # TODO: <Alex>ALEX</Alex>
     INT_TYPE_NAMES = [
         "INTEGER",
         "integer",
@@ -130,4 +129,3 @@ class ProfilerTypeMapping:
         "JSON",
         "json",
     ]
-    # TODO: <Alex>ALEX</Alex>
