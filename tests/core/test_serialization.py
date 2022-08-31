@@ -701,7 +701,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
     )
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_checkpoint_config_and_nested_objects_are_serialized_spark(spark_session):
     """
     Why was this test split out?
@@ -769,6 +769,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(spark_session
     )
 
 
+@pytest.mark.integration
 def test_serialization_of_datasource_with_nested_objects_spark(spark_session):
     datasource_config: DatasourceConfig = DatasourceConfig(
         name="taxi_data",
