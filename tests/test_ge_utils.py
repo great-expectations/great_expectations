@@ -215,6 +215,7 @@ def test_validate_using_data_context_path(
 
 
 @pytest.mark.unit
+@pytest.mark.slow  # 1.61s
 def test_validate_invalid_parameters(
     dataset, basic_expectation_suite, data_context_parameterized_expectation_suite
 ):

@@ -1,6 +1,7 @@
 import os
 
 import nbformat
+import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
@@ -10,6 +11,7 @@ from great_expectations.render.renderer.suite_scaffold_notebook_renderer import 
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
 
+@pytest.mark.slow  # 5.26s
 def test_notebook_execution_with_pandas_backend(
     titanic_data_context_no_data_docs_no_checkpoint_store,
 ):

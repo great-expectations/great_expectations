@@ -290,6 +290,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
         ),
     ],
 )
+@pytest.mark.slow  # 1.92s
 def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_name(
     column_Age_domain,
     column_Date_domain,

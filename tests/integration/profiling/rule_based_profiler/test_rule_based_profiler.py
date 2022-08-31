@@ -1,6 +1,7 @@
 import os
 from unittest import mock
 
+import pytest
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -128,6 +129,7 @@ def test_batches_are_accessible(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 2.04s
 def test_profile_includes_citations(
     mock_emit,
     alice_columnar_table_single_batch_context,
@@ -180,6 +182,7 @@ def test_profile_includes_citations(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 2.16s
 def test_profile_get_expectation_suite(
     mock_emit,
     alice_columnar_table_single_batch_context,

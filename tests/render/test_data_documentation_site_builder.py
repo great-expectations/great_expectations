@@ -96,6 +96,7 @@ def assert_how_to_buttons(
 @pytest.mark.filterwarnings(
     "ignore:String run_ids*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
+@pytest.mark.slow  # 3.60s
 def test_configuration_driven_site_builder(
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
@@ -361,6 +362,7 @@ def test_configuration_driven_site_builder(
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
+@pytest.mark.slow  # 3.10s
 def test_configuration_driven_site_builder_skip_and_clean_missing(
     site_builder_data_context_with_html_store_titanic_random,
 ):
@@ -502,6 +504,7 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
 @pytest.mark.filterwarnings(
     "ignore:name is deprecated as a batch_parameter*:DeprecationWarning:great_expectations.data_context.data_context"
 )
+@pytest.mark.slow  # 2.13s
 def test_configuration_driven_site_builder_without_how_to_buttons(
     site_builder_data_context_with_html_store_titanic_random,
 ):
@@ -629,6 +632,7 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
 
 
 @freeze_time("09/24/2019 23:18:36")
+@pytest.mark.slow  # 1.65s
 def test_site_builder_usage_statistics_enabled(
     site_builder_data_context_with_html_store_titanic_random,
 ):
@@ -674,6 +678,7 @@ def test_site_builder_usage_statistics_enabled(
 
 
 @freeze_time("09/24/2019 23:18:36")
+@pytest.mark.slow  # 1.67s
 def test_site_builder_usage_statistics_disabled(
     site_builder_data_context_with_html_store_titanic_random,
 ):
