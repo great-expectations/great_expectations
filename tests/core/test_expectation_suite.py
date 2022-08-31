@@ -4,12 +4,12 @@ from copy import copy, deepcopy
 from typing import Any, Dict, List
 
 import pytest
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.util import filter_properties_dict
 
 
@@ -631,7 +631,7 @@ class DataContextSendUsageMessageSpy:
     [
         pytest.param(True, id="success=True"),
         pytest.param(False, id="success=False"),
-    ]
+    ],
 )
 def test_expectation_suite_send_usage_message(success: bool):
     """Ensure usage stats event is sent on expectation suite."""
@@ -639,9 +639,7 @@ def test_expectation_suite_send_usage_message(success: bool):
     dc_message_spy = DataContextSendUsageMessageSpy()
 
     suite = ExpectationSuite(
-        expectation_suite_name="warning",
-        expectations=[],
-        meta={"notes": "This is an expectation suite."},
+        expectation_suite_name="suite_name",
         data_context=dc_message_spy,
     )
 
@@ -654,5 +652,3 @@ def test_expectation_suite_send_usage_message(success: bool):
         "event_payload": {},
         "success": success,
     }
-
-
