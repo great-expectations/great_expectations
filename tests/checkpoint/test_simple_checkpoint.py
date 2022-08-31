@@ -471,6 +471,7 @@ def test_simple_checkpoint_defaults_run_and_no_run_params_raises_checkpoint_erro
     )
 
 
+@pytest.mark.slow  # 1.10s
 def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
@@ -487,6 +488,7 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_
     assert result.success
 
 
+@pytest.mark.slow  # 1.09s
 def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
@@ -559,6 +561,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
     )
 
 
+@pytest.mark.slow  # 1.52s
 def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
@@ -641,6 +644,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
     )
 
 
+@pytest.mark.slow  # 1.11s
 def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
@@ -730,6 +734,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
 
 
 # noinspection PyUnusedLocal
+@pytest.mark.slow  # 1.23s
 def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     simple_checkpoint_defaults,
@@ -848,6 +853,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     )
 
 
+@pytest.mark.slow  # 1.50s
 def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_checkpoint_loaded_from_store(
     context_with_data_source_and_empty_suite,
     simple_checkpoint_defaults,
@@ -888,6 +894,7 @@ def one_validation():
     }
 
 
+@pytest.mark.slow  # 1.12s
 def test_simple_checkpoint_defaults_run_with_top_level_batch_request_and_suite(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults
 ):
@@ -923,6 +930,7 @@ def test_simple_checkpoint_error_with_invalid_top_level_batch_request(
         )
 
 
+@pytest.mark.slow  # 1.61s
 def test_simple_checkpoint_defaults_run_multiple_validations_without_persistence(
     context_with_data_source_and_empty_suite,
     simple_checkpoint_defaults,
@@ -941,6 +949,7 @@ def test_simple_checkpoint_defaults_run_multiple_validations_without_persistence
     assert result.success
 
 
+@pytest.mark.slow  # 1.62s
 def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_checkpoint_loaded_from_store(
     context_with_data_source_and_empty_suite,
     simple_checkpoint_defaults,
@@ -1469,6 +1478,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
+@pytest.mark.slow  # 1.08s
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1932,6 +1942,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
+@pytest.mark.slow  # 1.06s
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_checkpoint_run_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -2059,6 +2070,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
+@pytest.mark.slow  # 1.07s
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_checkpoint_run_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -2544,6 +2556,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
+@pytest.mark.slow  # 1.13s
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_context_run_checkpoint_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -2679,6 +2692,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     assert result["success"]
 
 
+@pytest.mark.slow  # 1.16s
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_context_run_checkpoint_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -2955,6 +2969,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
         checkpoint.run(batch_request=runtime_batch_request)
 
 
+@pytest.mark.slow  # 1.73s
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
@@ -3048,6 +3063,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
 
+@pytest.mark.slow  # 2.32s
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
@@ -3155,6 +3171,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
 
+@pytest.mark.slow  # 1.87s
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
@@ -3247,6 +3264,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
 
+@pytest.mark.slow  # 2.44s
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
@@ -3469,6 +3487,7 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_validations_into_checkpo
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 1.16s
 def test_simple_checkpoint_result_validations_include_rendered_content(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
