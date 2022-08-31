@@ -131,7 +131,9 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
     try:
         # redshift
         # noinspection PyUnresolvedReferences
-        if issubclass(dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+        if hasattr(dialect, "RedshiftDialect") or issubclass(
+            dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+        ):
             if positive:
                 return BinaryExpression(column, literal(regex), custom_op("~"))
             else:
@@ -609,6 +611,12 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
             dialect_supported = True
 
     try:
+        if hasattr(dialect, "RedshiftDialect"):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+    try:
         # noinspection PyUnresolvedReferences
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             dialect_supported = True
@@ -618,6 +626,12 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     try:
         # noinspection PyUnresolvedReferences
         if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+    try:
+        if hasattr(dialect, "SnowflakeDialect"):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass

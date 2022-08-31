@@ -142,9 +142,13 @@ def get_expectation_file_info_dict(
             if match:
                 if not line.strip().startswith("#"):
                     exp_type_set.add(match.group(1))
-        result[name]["exp_type"] = sorted(exp_type_set)[0]
+        if file_path.startswith("great_expectations"):
+            _prefix = "Core "
+        else:
+            _prefix = "Contrib "
+        result[name]["exp_type"] = _prefix + sorted(exp_type_set)[0]
         logger.debug(
-            f"Expectation type {sorted(exp_type_set)[0]} for {name} in {file_path}"
+            f"Expectation type {_prefix}{sorted(exp_type_set)[0]} for {name} in {file_path}"
         )
 
     os.chdir(oldpwd)
@@ -284,7 +288,10 @@ def build_gallery(
 
     for expectation in sorted(requirements_dict):
         # Temp
-        if expectation == "expect_column_kl_divergence_to_be_less_than":
+        if expectation in [
+            "expect_column_kl_divergence_to_be_less_than",  # Infinity values break JSON
+            "expect_column_values_to_be_valid_arn",  # Contrib Expectation where pretty much no test passes on any backend
+        ]:
             continue
         group = requirements_dict[expectation]["group"]
         print(f"\n\n\n=== {expectation} ({group}) ===")
