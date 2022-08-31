@@ -19,7 +19,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 @pytest.mark.slow  # 1.09s
-def test_instantiation_partition_parameter_builder(
+def test_instantiation_histogram_parameter_builder(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -47,7 +47,7 @@ def test_instantiation_partition_parameter_builder(
 
 
 @pytest.mark.slow  # 1.53s
-def test_partition_parameter_builder_alice_continuous(
+def test_histogram_parameter_builder_alice_continuous(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -116,7 +116,7 @@ def test_partition_parameter_builder_alice_continuous(
 
 
 @pytest.mark.slow  # 1.43s
-def test_partition_parameter_builder_alice_categorical(
+def test_histogram_parameter_builder_alice_categorical(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -184,7 +184,7 @@ def test_partition_parameter_builder_alice_categorical(
 
 
 @pytest.mark.slow  # 1.45s
-def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
+def test_histogram_parameter_builder_alice_continuous_changed_to_categorical(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -256,7 +256,7 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
 
 
 @pytest.mark.slow  # 1.12s
-def test_partition_parameter_builder_alice_continuous_check_serialized_keys(
+def test_histogram_parameter_builder_alice_continuous_check_serialized_keys(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
