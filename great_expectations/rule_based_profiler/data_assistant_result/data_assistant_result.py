@@ -1473,7 +1473,9 @@ class DataAssistantResult(SerializableDictDot):
             An interactive chart
         """
         batch_name: str = "batch"
-        all_columns: List[str] = list(column_dfs[0].df.columns)
+        all_columns: List[str] = DataAssistantResult._get_all_columns_from_column_dfs(
+            column_dfs=column_dfs
+        )
         batch_identifiers: List[str] = [
             column
             for column in all_columns
@@ -1564,7 +1566,9 @@ class DataAssistantResult(SerializableDictDot):
         allow_relative_error: str = "allow_relative_error"
 
         batch_name: str = "batch"
-        all_columns: List[str] = list(column_dfs[0].df.columns)
+        all_columns: List[str] = DataAssistantResult._get_all_columns_from_column_dfs(
+            column_dfs=column_dfs
+        )
         batch_identifiers: List[str] = [
             column
             for column in all_columns
@@ -3912,6 +3916,15 @@ class DataAssistantResult(SerializableDictDot):
         metric_names: Set[str], iterable: Iterable[str]
     ) -> bool:
         return all([metric_name in iterable for metric_name in metric_names])
+
+    @staticmethod
+    def _get_all_columns_from_column_dfs(
+        column_dfs: List[ColumnDataFrame],
+    ) -> List[str]:
+        column_set: Set[str] = set()
+        for column_df in column_dfs:
+            column_set.update(column_df.df.columns)
+        return list(column_set)
 
     @staticmethod
     def _get_expect_domain_values_ordinal_chart(
