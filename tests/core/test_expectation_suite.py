@@ -9,6 +9,7 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.util import filter_properties_dict
 
 
@@ -236,6 +237,7 @@ def profiler_config():
     return yaml.load(yaml_config)
 
 
+@pytest.mark.unit
 def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_suite):
     """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
     are the same."""
@@ -249,6 +251,7 @@ def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_
     assert baseline_suite != equivalent_suite  # ne works properly
 
 
+@pytest.mark.unit
 def test_expectation_suite_equivalence(
     baseline_suite,
     identical_suite,
@@ -266,6 +269,7 @@ def test_expectation_suite_equivalence(
     assert not single_expectation_suite.isEquivalentTo(baseline_suite)
 
 
+@pytest.mark.unit
 def test_expectation_suite_dictionary_equivalence(baseline_suite):
     assert (
         baseline_suite.isEquivalentTo(
@@ -328,6 +332,7 @@ def test_expectation_suite_dictionary_equivalence(baseline_suite):
     )
 
 
+@pytest.mark.unit
 def test_expectation_suite_copy(baseline_suite):
     suite_copy = copy(baseline_suite)
     assert suite_copy == baseline_suite
@@ -341,6 +346,7 @@ def test_expectation_suite_copy(baseline_suite):
     )  # copy on deep attributes does propagate
 
 
+@pytest.mark.unit
 def test_expectation_suite_deepcopy(baseline_suite):
     suite_deepcopy = deepcopy(baseline_suite)
     assert suite_deepcopy == baseline_suite
@@ -353,27 +359,28 @@ def test_expectation_suite_deepcopy(baseline_suite):
     assert baseline_suite.expectations[0].meta["notes"] == "This is an expectation."
 
 
-def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided(
-    empty_data_context,
-):
-    context: DataContext = empty_data_context
-    suite = ExpectationSuite("foo", data_context=context)
+@pytest.mark.unit
+def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided():
+    suite = ExpectationSuite("foo")
     assert "great_expectations_version" in suite.meta.keys()
 
 
-def test_suite_does_not_overwrite_existing_version_metadata(empty_data_context):
-    context: DataContext = empty_data_context
+@pytest.mark.unit
+def test_suite_does_not_overwrite_existing_version_metadata():
     suite = ExpectationSuite(
-        "foo", meta={"great_expectations_version": "0.0.0"}, data_context=context
+        "foo",
+        meta={"great_expectations_version": "0.0.0"},
     )
     assert "great_expectations_version" in suite.meta.keys()
     assert suite.meta["great_expectations_version"] == "0.0.0"
 
 
+@pytest.mark.unit
 def test_suite_with_metadata_includes_ge_version_metadata(baseline_suite):
     assert "great_expectations_version" in baseline_suite.meta.keys()
 
 
+@pytest.mark.unit
 def test_add_citation(baseline_suite):
     assert (
         "citations" not in baseline_suite.meta
@@ -383,6 +390,7 @@ def test_add_citation(baseline_suite):
     assert baseline_suite.meta["citations"][0].get("comment") == "hello!"
 
 
+@pytest.mark.unit
 def test_add_citation_with_profiler_config(baseline_suite, profiler_config):
     assert (
         "citations" not in baseline_suite.meta
@@ -395,11 +403,13 @@ def test_add_citation_with_profiler_config(baseline_suite, profiler_config):
     assert baseline_suite.meta["citations"][0].get("profiler_config") == profiler_config
 
 
+@pytest.mark.unit
 def test_get_citations_with_no_citations(baseline_suite):
     assert "citations" not in baseline_suite.meta
     assert baseline_suite.get_citations() == []
 
 
+@pytest.mark.unit
 def test_get_citations_not_sorted(baseline_suite):
     assert "citations" not in baseline_suite.meta
 
@@ -422,6 +432,7 @@ def test_get_citations_not_sorted(baseline_suite):
     ]
 
 
+@pytest.mark.unit
 def test_get_citations_sorted(baseline_suite):
     assert "citations" not in baseline_suite.meta
 
@@ -453,6 +464,7 @@ def test_get_citations_sorted(baseline_suite):
     ]
 
 
+@pytest.mark.unit
 def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_suite):
     assert "citations" not in baseline_suite.meta
 
@@ -487,6 +499,7 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
     ]
 
 
+@pytest.mark.unit
 def test_get_citations_with_multiple_citations_containing_profiler_config(
     baseline_suite, profiler_config
 ):
@@ -527,14 +540,17 @@ def test_get_citations_with_multiple_citations_containing_profiler_config(
     ]
 
 
+@pytest.mark.unit
 def test_get_table_expectations_returns_empty_list_on_empty_suite(empty_suite):
     assert empty_suite.get_table_expectations() == []
 
 
+@pytest.mark.unit
 def test_get_table_expectations_returns_empty_list_on_suite_without_any(baseline_suite):
     assert baseline_suite.get_table_expectations() == []
 
 
+@pytest.mark.unit
 def test_get_table_expectations(
     suite_with_table_and_column_expectations, table_exp1, table_exp2, table_exp3
 ):
@@ -542,10 +558,12 @@ def test_get_table_expectations(
     assert obs == [table_exp1, table_exp2, table_exp3]
 
 
+@pytest.mark.unit
 def test_get_column_expectations_returns_empty_list_on_empty_suite(empty_suite):
     assert empty_suite.get_column_expectations() == []
 
 
+@pytest.mark.unit
 def test_get_column_expectations(
     suite_with_table_and_column_expectations, exp1, exp2, exp3, exp4
 ):
@@ -553,6 +571,7 @@ def test_get_column_expectations(
     assert obs == [exp1, exp2, exp3, exp4]
 
 
+@pytest.mark.unit
 def test_get_expectations_by_expectation_type(
     suite_with_table_and_column_expectations,
     exp1,
@@ -579,6 +598,7 @@ def test_get_expectations_by_expectation_type(
     ]
 
 
+@pytest.mark.unit
 def test_get_expectations_by_domain_type(
     suite_with_table_and_column_expectations,
     exp1,
@@ -603,3 +623,51 @@ def test_get_expectations_by_domain_type(
         exp4,
         column_pair_expectation,
     ]
+
+
+class DataContextSendUsageMessageSpy:
+    def __init__(self):
+        self.messages = []
+
+    def send_usage_message(
+        self,
+        event,
+        event_payload,
+        success,
+    ):
+        self.messages.append(
+            {
+                "event": event,
+                "event_payload": event_payload,
+                "success": success,
+            }
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "success",
+    [
+        pytest.param(True, id="success=True"),
+        pytest.param(False, id="success=False"),
+    ],
+)
+def test_expectation_suite_send_usage_message(success: bool):
+    """Ensure usage stats event is sent on expectation suite."""
+
+    dc_message_spy = DataContextSendUsageMessageSpy()
+
+    suite = ExpectationSuite(
+        expectation_suite_name="suite_name",
+        data_context=dc_message_spy,
+    )
+
+    suite.send_usage_event(success=success)
+
+    assert dc_message_spy.messages
+    assert len(dc_message_spy.messages) == 1
+    assert dc_message_spy.messages[0] == {
+        "event": UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION.value,
+        "event_payload": {},
+        "success": success,
+    }

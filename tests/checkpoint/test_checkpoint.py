@@ -561,6 +561,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     assert len(data_context.list_checkpoints()) == 0
 
 
+@pytest.mark.slow  # 1.74s
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
@@ -917,6 +918,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     assert len(data_context.list_checkpoints()) == 0
 
 
+@pytest.mark.slow  # 1.75s
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
@@ -1059,6 +1061,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     assert len(data_context.list_checkpoints()) == 0
 
 
+@pytest.mark.slow  # 3.10s
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
@@ -1273,6 +1276,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     assert len(data_context.list_checkpoints()) == 0
 
 
+@pytest.mark.slow  # 1.05s
 def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     filesystem_csv_data_context_with_validation_operators,
 ):
@@ -1330,6 +1334,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
 
+@pytest.mark.slow  # 1.25s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1445,6 +1450,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     assert validation_result.meta["checkpoint_name"] == checkpoint_name
 
 
+@pytest.mark.slow  # 1.15s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1616,6 +1622,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.31s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_pandasdf(
     mock_emit,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -2115,6 +2122,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.slow  # 1.08s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_query_in_validations(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
@@ -2458,6 +2466,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.slow  # 1.09s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -3495,6 +3504,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.slow  # 1.11s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -4110,6 +4120,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.slow  # 1.18s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -4521,6 +4532,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
         checkpoint.run(batch_request=runtime_batch_request)
 
 
+@pytest.mark.slow  # 1.75s
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
@@ -4612,6 +4624,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
 
+@pytest.mark.slow  # 2.35s
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
@@ -4717,6 +4730,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
 
+@pytest.mark.slow  # 1.91s
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
@@ -4809,6 +4823,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
 
+@pytest.mark.slow  # 2.46s
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
@@ -5031,6 +5046,7 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_validations_into_check
         context.add_checkpoint(**checkpoint_config)
 
 
+@pytest.mark.slow  # 1.19s
 def test_newstyle_checkpoint_result_can_be_pickled(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
@@ -5081,6 +5097,7 @@ def test_newstyle_checkpoint_result_can_be_pickled(
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_newstyle_checkpoint_result_validations_include_rendered_content(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
@@ -5146,6 +5163,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 1.22s
 def test_newstyle_checkpoint_result_validations_include_rendered_content_data_context_variable(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
