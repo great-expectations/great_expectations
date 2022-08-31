@@ -71,6 +71,7 @@ def send_opsgenie_alert(query, suite_name, settings):
         "message": f"Great Expectations suite {suite_name} failed",
         "description": query,
         "priority": settings["priority"],  # allow this to be modified in settings
+        "tags": settings["tags"],
     }
 
     session = requests.Session()
