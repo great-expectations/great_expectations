@@ -2,6 +2,7 @@ import os
 from unittest import mock
 
 import nbformat
+import pytest
 from click.testing import CliRunner
 from nbconvert.preprocessors import ExecutePreprocessor
 
@@ -112,6 +113,7 @@ def test_cli_datasource_list_on_project_with_one_datasource(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.84s
 def test_cli_datasource_new(
     mock_subprocess,
     mock_emit,
@@ -297,6 +299,7 @@ def test_cli_datasource_new_no_jupyter_writes_notebook(
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 5.39s
 def test_cli_datasource_new_with_name_param(
     mock_subprocess, caplog, monkeypatch, empty_data_context, filesystem_csv_2
 ):
@@ -374,6 +377,7 @@ def test_cli_datasource_new_with_name_param(
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 5.19s
 def test_cli_datasource_new_from_misc_directory(
     mock_subprocess,
     caplog,

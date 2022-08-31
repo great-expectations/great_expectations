@@ -779,6 +779,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
 
     # Ensuring a metric provider error is raised if metric does not exist
     with pytest.raises(ge_exceptions.MetricProviderError) as e:
+        # noinspection PyUnusedLocal
         res = engine.resolve_metrics(
             metrics_to_resolve=(
                 desired_metric_1,
@@ -788,6 +789,74 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
             )
         )
         print(e)
+
+
+def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa):
+    """
+    Insures that even when "compute_domain_kwargs" has multiple keys, it will be JSON-serialized for "IDDict.to_id()".
+    """
+    engine = build_sa_engine(
+        pd.DataFrame(
+            {
+                "names": [
+                    "Ada Lovelace",
+                    "Alan Kay",
+                    "Donald Knuth",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                    "John McCarthy",
+                    "Marvin Minsky",
+                    "Ray Ozzie",
+                ]
+            }
+        ),
+        sa,
+        batch_id="1234",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.length.max.aggregate_fn",
+        metric_domain_kwargs={
+            "column": "names",
+            "batch_id": "1234",
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+        metric_value_kwargs=None,
+    )
+
+    try:
+        results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    except ge_exceptions.MetricProviderError as e:
+        assert False, str(e)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.length.max",
+        metric_domain_kwargs={
+            "batch_id": "1234",
+        },
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": desired_metric,
+        },
+    )
+
+    try:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(desired_metric,), metrics=results
+        )
+        assert results == {desired_metric.id: 16}
+    except ge_exceptions.MetricProviderError as e:
+        assert False, str(e)
 
 
 def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):

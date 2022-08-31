@@ -97,6 +97,7 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_no_datacon
     assert obs is None
 
 
+@pytest.mark.slow  # 2.27s
 def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconnector_that_has_no_assets(
     assetless_dataconnector_context,
 ):
@@ -310,6 +311,7 @@ validations:
     }
 
 
+@pytest.mark.slow  # 1.10s
 def test_render_checkpoint_new_notebook_with_available_data_asset(
     deterministic_asset_dataconnector_context,
     titanic_expectation_suite,
