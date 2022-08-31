@@ -14,8 +14,9 @@ serialized_value = serializer.serialize(datasource_config)
 import abc
 from typing import TYPE_CHECKING
 
+from marshmallow import Schema
+
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.marshmallow__shade import Schema
 
 if TYPE_CHECKING:
     from great_expectations.core.configuration import AbstractConfig

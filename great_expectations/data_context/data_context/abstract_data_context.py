@@ -814,6 +814,12 @@ class AbstractDataContext(ABC):
         This method applies only to the new (V3) Datasource schema.
         """
 
+        include_rendered_content = (
+            self._determine_if_expectation_validation_result_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+
         if (
             sum(
                 bool(x)
@@ -834,13 +840,17 @@ class AbstractDataContext(ABC):
 
         if expectation_suite_ge_cloud_id is not None:
             expectation_suite = self.get_expectation_suite(
-                ge_cloud_id=expectation_suite_ge_cloud_id
+                include_rendered_content=include_rendered_content,
+                ge_cloud_id=expectation_suite_ge_cloud_id,
             )
         if expectation_suite_name is not None:
-            expectation_suite = self.get_expectation_suite(expectation_suite_name)
+            expectation_suite = self.get_expectation_suite(
+                expectation_suite_name,
+                include_rendered_content=include_rendered_content,
+            )
         if create_expectation_suite_with_name is not None:
             expectation_suite = self.create_expectation_suite(
-                expectation_suite_name=create_expectation_suite_with_name
+                expectation_suite_name=create_expectation_suite_with_name,
             )
 
         if (
@@ -895,12 +905,6 @@ class AbstractDataContext(ABC):
                         **kwargs,
                     )
                 )
-
-        include_rendered_content = (
-            self._determine_if_expectation_validation_result_include_rendered_content(
-                include_rendered_content=include_rendered_content
-            )
-        )
 
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,  # type: ignore[arg-type]
@@ -1112,26 +1116,39 @@ class AbstractDataContext(ABC):
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
+        include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GE Cloud ID
         Args:
-            expectation_suite_name (str): the name for the Expectation Suite
-            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
+            expectation_suite_name (str): The name of the Expectation Suite
+            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+                ExpectationConfiguration.
+            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
 
         Returns:
-            expectation_suite
+            An existing ExpectationSuite
         """
         key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name  # type: ignore[arg-type]
         )
+
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_suite_include_rendered_content()
+            )
 
         if self.expectations_store.has_key(key):  # type: ignore[arg-type] # noqa: W601
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
             )
             # create the ExpectationSuite from constructor
-            return ExpectationSuite(**expectations_schema_dict, data_context=self)
+            expectation_suite = ExpectationSuite(
+                **expectations_schema_dict, data_context=self
+            )
+            if include_rendered_content:
+                expectation_suite.render()
+            return expectation_suite
 
         else:
             raise ge_exceptions.DataContextError(

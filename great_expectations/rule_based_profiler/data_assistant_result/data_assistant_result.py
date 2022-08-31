@@ -2335,16 +2335,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        if expectation_type is None:
-            input_dropdown_initial_state: pd.DataFrame = df.groupby(
-                [batch_plot_component.name], as_index=False
-            ).max()
-            input_dropdown_initial_state[
-                batch_plot_component.batch_identifiers + [domain_plot_component.name]
-            ] = " "
-            df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2425,16 +2416,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        if expectation_type is None:
-            input_dropdown_initial_state: pd.DataFrame = df.groupby(
-                [batch_plot_component.name], as_index=False
-            ).max()
-            input_dropdown_initial_state[
-                batch_plot_component.batch_identifiers + [domain_plot_component.name]
-            ] = " "
-            df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2492,16 +2474,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        if expectation_type is None:
-            input_dropdown_initial_state: pd.DataFrame = df.groupby(
-                [batch_plot_component.name], as_index=False
-            ).max()
-            input_dropdown_initial_state[
-                batch_plot_component.batch_identifiers + [domain_plot_component.name]
-            ] = " "
-            df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2598,19 +2571,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = df.groupby(
-            [batch_plot_component.name], as_index=False
-        ).max()
-        input_dropdown_initial_state[
-            batch_plot_component.batch_identifiers
-            + [
-                domain_plot_component.name,
-            ]
-            + expectation_kwargs_initial_dropdown_state
-        ] = " "
-        df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2761,19 +2722,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = df.groupby(
-            [batch_plot_component.name], as_index=False
-        ).max()
-        input_dropdown_initial_state[
-            batch_plot_component.batch_identifiers
-            + [
-                domain_plot_component.name,
-            ]
-            + expectation_kwargs_initial_dropdown_state
-        ] = " "
-        df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2911,19 +2860,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = df.groupby(
-            [batch_plot_component.name], as_index=False
-        ).max()
-        input_dropdown_initial_state[
-            batch_plot_component.batch_identifiers
-            + [
-                domain_plot_component.name,
-            ]
-            + expectation_kwargs_initial_dropdown_state
-        ] = " "
-        df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )

@@ -149,6 +149,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
+@pytest.mark.slow  # 1.10s
 def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -793,6 +794,7 @@ provided.
         )
 
 
+@pytest.mark.slow  # 2.51s
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_zero(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -1040,6 +1042,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
+@pytest.mark.slow  # 1.12s
 def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstrap_marginal_info_at_boundary(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -1162,6 +1165,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
     assert kde_value[1] > bootstrap_value[1]
 
 
+@pytest.mark.slow  # 1.12s
 def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
