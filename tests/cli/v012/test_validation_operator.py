@@ -1,6 +1,7 @@
 import json
 import os
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -299,6 +300,7 @@ def test_validation_operator_list_with_zero_validation_operators(
     )
 
 
+@pytest.mark.slow  # 1.03s
 def test_validation_operator_list_with_one_validation_operator(
     caplog, filesystem_csv_data_context_with_validation_operators
 ):
@@ -328,6 +330,7 @@ def test_validation_operator_list_with_one_validation_operator(
     )
 
 
+@pytest.mark.slow  # 1.53s
 def test_validation_operator_list_with_multiple_validation_operators(
     caplog, filesystem_csv_data_context_with_validation_operators
 ):
