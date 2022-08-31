@@ -86,7 +86,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     def _spark(
         cls,
-        execution_engine: SqlAlchemyExecutionEngine,
+        execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
