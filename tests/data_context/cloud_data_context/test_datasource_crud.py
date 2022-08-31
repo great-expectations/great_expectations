@@ -100,7 +100,7 @@ def _add_datasource_helper(
         # Don't add the `save_changes` param for DataContext
         name_and_save_changes_params_base: dict = {}
     else:
-        name_and_save_changes_params_base: dict = {"save_changes": save_changes}
+        name_and_save_changes_params_base = {"save_changes": save_changes}
 
     name_and_save_changes_params: dict = name_and_save_changes_params_base.copy()
     if config_type == ConfigType.NAME_SUPPLIED_SEPARATELY:
