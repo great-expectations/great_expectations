@@ -96,6 +96,7 @@ EGREGIOUS FORMATTING ERROR
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.61s
 def test_expectations_store_with_filesystem_store_backend(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):

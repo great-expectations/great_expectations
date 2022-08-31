@@ -1670,6 +1670,7 @@ def test_volume_data_assistant_result_serialization(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.06s
 def test_volume_data_assistant_result_get_expectation_suite(
     mock_emit,
     bobby_volume_data_assistant_result_usage_stats_enabled: VolumeDataAssistantResult,
@@ -1721,6 +1722,7 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 3.72s
 def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_instantiation(
     quentin_explicit_instantiation_result_frozen_time,
     quentin_expected_metrics_by_domain,
@@ -1783,6 +1785,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
 
 @pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.slow  # 3.53s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
     quentin_expected_metrics_by_domain,
@@ -1861,6 +1864,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 @pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.slow  # 3.03s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
@@ -2005,6 +2009,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 @pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.slow  # 3.30s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -2031,6 +2036,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     )
 
 
+@pytest.mark.slow  # 3.31s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -2058,6 +2064,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 4.97s
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
@@ -2070,6 +2077,7 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_explici
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 3.37s
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
 ):
@@ -2082,6 +2090,7 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_implici
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 3.46s
 def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
@@ -2107,6 +2116,7 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 13.77s
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2132,6 +2142,7 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 11.07s
 def test_volume_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2153,6 +2164,7 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution(
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 11.91s
 def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2174,6 +2186,7 @@ def test_volume_data_assistant_plot_prescriptive_notebook_execution(
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 11.57s
 def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2197,6 +2210,7 @@ def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 12.09s
 def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2440,6 +2454,7 @@ def test_volume_data_assistant_plot_return_tooltip(
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 11.63s
 def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2461,6 +2476,7 @@ def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 12.09s
 def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):

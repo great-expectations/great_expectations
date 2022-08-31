@@ -117,6 +117,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
     assert regex_pattern_string_parameter.CANDIDATE_REGEX != candidate_regexes
 
 
+@pytest.mark.slow  # 1.34s
 def test_regex_pattern_string_parameter_builder_alice(
     alice_columnar_table_single_batch_context,
 ):
