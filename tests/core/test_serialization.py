@@ -14,13 +14,7 @@ from great_expectations.data_context.types.base import (
     AbstractConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
-    DatasourceConfig,
     checkpointConfigSchema,
-    datasourceConfigSchema,
-)
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -29,6 +23,7 @@ from great_expectations.util import (
 )
 
 
+@pytest.mark.unit
 def test_lossy_serialization_warning(caplog):
     caplog.set_level(logging.WARNING, logger="great_expectations.core")
 
@@ -47,6 +42,7 @@ def test_lossy_serialization_warning(caplog):
     assert len(caplog.messages) == 0
 
 
+@pytest.mark.unit
 def test_lossy_conversion():
     d = Decimal("12345.678901234567890123456789")
     assert requires_lossy_conversion(d)
@@ -81,6 +77,7 @@ def test_serialization_of_spark_df(spark_session):
     assert convert_to_json_serializable(sdf) == {"a": [1, 2, 3], "b": [4, 5, 6]}
 
 
+@pytest.mark.unit
 def test_batch_request_deepcopy():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -106,6 +103,7 @@ def test_batch_request_deepcopy():
     )
 
 
+@pytest.mark.integration
 def test_checkpoint_config_deepcopy(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
@@ -239,6 +237,7 @@ def test_checkpoint_config_deepcopy(
     )
 
 
+@pytest.mark.integration
 def test_checkpoint_config_print(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
@@ -682,6 +681,7 @@ def test_checkpoint_config_print(
         ),
     ],
 )
+@pytest.mark.unit
 def test_checkpoint_config_and_nested_objects_are_serialized(
     checkpoint_config: CheckpointConfig, expected_serialized_checkpoint_config: dict
 ) -> None:

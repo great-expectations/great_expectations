@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 try:
     from typing import TypedDict
@@ -34,6 +34,9 @@ from great_expectations.render.types import (
     RenderedAtomicContentSchema,
 )
 from great_expectations.types import SerializableDictDot
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
 
@@ -209,7 +212,7 @@ class ExpectationValidationResult(SerializableDictDot):
         - atomic diagnostic renderer for the expectation configuration associated with this
           ExpectationValidationResult to self.rendered_content.
         """
-        inline_renderer_config: Dict[str, Union[str, ExpectationValidationResult]] = {
+        inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
             "class_name": "InlineRenderer",
             "render_object": self,
         }
@@ -226,10 +229,7 @@ class ExpectationValidationResult(SerializableDictDot):
                 class_name=inline_renderer_config["class_name"],
             )
 
-        (
-            self.expectation_config.rendered_content,
-            self.rendered_content,
-        ) = inline_renderer.get_expectation_validation_result_rendered_content()
+        self.rendered_content = inline_renderer.get_rendered_content()
 
     @staticmethod
     def validate_result_dict(result):

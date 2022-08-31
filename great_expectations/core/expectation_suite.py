@@ -963,7 +963,7 @@ class ExpectationSuite(SerializableDictDot):
                 )
 
             expectation_configuration.rendered_content = (
-                inline_renderer.get_expectation_configuration_rendered_content()
+                inline_renderer.get_rendered_content()
             )
 
 
