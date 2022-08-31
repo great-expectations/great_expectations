@@ -17,7 +17,11 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import AzureUrl, get_or_create_spark_application
+from great_expectations.core.util import (
+    AzureUrl,
+    convert_to_json_serializable,
+    get_or_create_spark_application,
+)
 from great_expectations.exceptions import (
     BatchSpecError,
     ExecutionEngineError,
@@ -657,7 +661,9 @@ Please check your config."""
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
 
-            domain_id = compute_domain_kwargs.to_id()
+            domain_id = IDDict.convert_dictionary_to_id_dict(
+                data=convert_to_json_serializable(data=compute_domain_kwargs)
+            ).to_id()
             if domain_id not in aggregates:
                 aggregates[domain_id] = {
                     "column_aggregates": [],
@@ -688,6 +694,10 @@ Please check your config."""
 
             res = df.agg(*aggregate_cols).collect()
 
+            logger.debug(
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"
+            )
+
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
@@ -695,14 +705,14 @@ Please check your config."""
                 res[0]
             ), "unexpected number of metrics returned"
 
-            logger.debug(
-                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
-            )
-
             idx: int
             metric_id: Tuple[str, str, str]
             for idx, metric_id in enumerate(aggregate["ids"]):
-                resolved_metrics[metric_id] = res[0][idx]
+                # Converting DataFrame.collect() results into JSON-serializable format produces simple data types,
+                # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
+                resolved_metrics[metric_id] = convert_to_json_serializable(
+                    data=res[0][idx]
+                )
 
         return resolved_metrics
 
