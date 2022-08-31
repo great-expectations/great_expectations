@@ -1,7 +1,6 @@
 import copy
 import logging
 from decimal import Decimal
-from typing import Dict, Iterable, Tuple
 
 import pandas as pd
 import pytest
@@ -19,11 +18,9 @@ from great_expectations.data_context.types.base import (
     DataConnectorConfig,
     DatasourceConfig,
     ExecutionEngineConfig,
-    ExecutionEngineConfigSchema,
     checkpointConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
@@ -773,7 +770,6 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(spark_session
 
 
 def test_serialization_of_datasource_with_nested_objects_spark(spark_session):
-    conf: Iterable[Tuple[str, str]] = spark_session.sparkContext.getConf().getAll()
     datasource_config: DatasourceConfig = DatasourceConfig(
         name="taxi_data",
         class_name="Datasource",
