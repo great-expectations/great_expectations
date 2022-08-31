@@ -360,7 +360,7 @@ class CloudDataContext(AbstractDataContext):
         datasource_config.name = name
 
         if save_changes:
-            datasource_config = self._datasource_store.set(
+            self._datasource_store.set(
                 key=None, value=datasource_config
             )
 
