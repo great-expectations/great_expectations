@@ -104,7 +104,7 @@ markers = [
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
     "integration: mark test as an integration test.",
-    "slow: mark tests taking longer than our slow threshold.",
+    "slow: mark tests taking longer than 1 second.",
     "unit: mark a test as a unit test.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors)",
 ]
