@@ -1268,6 +1268,17 @@ class Expectation(metaclass=MetaExpectation):
                                 kwargs=test.input,
                             )
 
+            # There is no sample test where `success` is True, or there are no tests
+            for example in examples:
+                tests = example.tests
+                if tests:
+                    for test in tests:
+                        if test.input:
+                            return ExpectationConfiguration(
+                                expectation_type=self.expectation_type,
+                                kwargs=test.input,
+                            )
+
     @staticmethod
     def is_expectation_self_initializing(name: str) -> bool:
         """
