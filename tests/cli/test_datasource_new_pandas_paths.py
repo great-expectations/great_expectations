@@ -72,7 +72,6 @@ def _run_cli_datasource_new_path_test(
                     "module_name": "great_expectations.datasource.data_connector",
                     "base_directory": f"../../{base_path}",
                     "class_name": "InferredAssetFilesystemDataConnector",
-                    "name": "default_inferred_data_connector_name",
                 },
                 "default_runtime_data_connector_name": {
                     "assets": {
@@ -84,7 +83,6 @@ def _run_cli_datasource_new_path_test(
                     },
                     "class_name": "RuntimeDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
-                    "name": "default_runtime_data_connector_name",
                 },
             },
         }
