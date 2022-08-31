@@ -821,7 +821,6 @@ def test_serialization_of_datasource_with_nested_objects_spark(spark_session):
         "name": "taxi_data",
     }
 
-    """DatasourceConfigSchema and nested objects like schema appropriately with/without optional params."""
     observed_dump = datasourceConfigSchema.dump(obj=datasource_config)
     assert observed_dump == expected_serialized_datasource_config
 
