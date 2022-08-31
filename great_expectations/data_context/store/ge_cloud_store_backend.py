@@ -6,15 +6,14 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
+from marshmallow import Schema
 
 from great_expectations import __version__
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import datasourceConfigSchema
-from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
-from great_expectations.marshmallow__shade import Schema
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
 try:
