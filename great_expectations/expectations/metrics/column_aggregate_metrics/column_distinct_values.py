@@ -44,6 +44,11 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         metric_domain_kwargs: Dict[str, str],
         **kwargs,
     ) -> Set[Any]:
+        """
+        Past implementations of column.distinct_values depended on column.value_counts.
+        This was causing performance issues due to the complex query used in column.value_counts and subsequent
+        in-memory operations.
+        """
         selectable: sa_sql_expression_Selectable
         accessor_domain_kwargs: Dict[str, str]
         (selectable, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
@@ -69,6 +74,11 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         metric_domain_kwargs: Dict[str, str],
         **kwargs,
     ) -> Set[Any]:
+        """
+        Past implementations of column.distinct_values depended on column.value_counts.
+        This was causing performance issues due to the complex query used in column.value_counts and subsequent
+        in-memory operations.
+        """
         df: pyspark_sql_DataFrame
         accessor_domain_kwargs: Dict[str, str]
         (df, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
@@ -97,6 +107,11 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         column: sa_sql_expression_ColumnClause,
         **kwargs,
     ) -> sa_func_count:
+        """
+        Past implementations of column.distinct_values.count depended on column.value_counts and column.distinct_values.
+        This was causing performance issues due to the complex query used in column.value_counts and subsequent
+        in-memory operations.
+        """
         return sa.func.count(sa.distinct(column))
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
@@ -105,6 +120,11 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         column: pyspark_sql_Column,
         **kwargs,
     ) -> pyspark_sql_Column:
+        """
+        Past implementations of column.distinct_values.count depended on column.value_counts and column.distinct_values.
+        This was causing performance issues due to the complex query used in column.value_counts and subsequent
+        in-memory operations.
+        """
         return F.countDistinct(column)
 
 
