@@ -3386,6 +3386,8 @@ class DataAssistantResult(SerializableDictDot):
             plot_mode=plot_mode,
         )
 
+        # if all metrics in metric_names failed to resolve, the list will be empty and we return without attempting
+        # to chart column values
         if len(column_dfs) > 0:
             return self._chart_column_values(
                 expectation_type=expectation_type,
