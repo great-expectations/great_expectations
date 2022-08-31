@@ -1598,6 +1598,8 @@ class Expectation(metaclass=MetaExpectation):
         execution_engines = {}
         for provider in execution_engine_names:
             all_true = True
+            if not metric_diagnostics_list:
+                all_true = False
             for metric_diagnostics in metric_diagnostics_list:
                 try:
                     has_provider = (
@@ -1606,6 +1608,7 @@ class Expectation(metaclass=MetaExpectation):
                     )
                     if not has_provider:
                         all_true = False
+                        break
                 except KeyError:
                     # https://github.com/great-expectations/great_expectations/blob/abd8f68a162eaf9c33839d2c412d8ba84f5d725b/great_expectations/expectations/core/expect_table_row_count_to_equal_other_table.py#L174-L181
                     # expect_table_row_count_to_equal_other_table does tricky things and replaces
