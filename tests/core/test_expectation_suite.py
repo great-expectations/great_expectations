@@ -241,7 +241,6 @@ def profiler_config():
 def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_suite):
     """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
     are the same."""
-    assert baseline_suite is baseline_suite  # no difference
     assert (
         baseline_suite is not identical_suite
     )  # different instances, but same content
