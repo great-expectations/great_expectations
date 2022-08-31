@@ -2,23 +2,17 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Type, Union
 
+from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, post_load
 from ruamel.yaml.comments import CommentedMap
 
+from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import BaseYamlConfig
-from great_expectations.marshmallow__shade import (
-    INCLUDE,
-    Schema,
-    ValidationError,
-    fields,
-    post_dump,
-    post_load,
-)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_PREFIX,
     ParameterContainer,
 )
@@ -115,10 +109,7 @@ class DomainBuilderConfig(SerializableDictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".',
             )
 
     def to_json_dict(self) -> dict:
@@ -189,7 +180,6 @@ class ParameterBuilderConfig(SerializableDictDot):
         class_name: str,
         module_name: Optional[str] = None,
         evaluation_parameter_builder_configs: Optional[list] = None,
-        json_serialize: bool = True,
         **kwargs,
     ) -> None:
         self.module_name = module_name
@@ -199,15 +189,10 @@ class ParameterBuilderConfig(SerializableDictDot):
 
         self.evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
 
-        self.json_serialize = json_serialize
-
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{ self.__class__.__name__}".',
             )
 
     def to_json_dict(self) -> dict:
@@ -282,11 +267,6 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=False,
         allow_none=True,
     )
-    json_serialize = fields.Boolean(
-        required=False,
-        allow_none=True,
-        missing=True,
-    )
 
 
 class ExpectationConfigurationBuilderConfig(SerializableDictDot):
@@ -311,10 +291,7 @@ class ExpectationConfigurationBuilderConfig(SerializableDictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 
     def to_json_dict(self) -> dict:
@@ -499,26 +476,26 @@ class RuleConfigSchema(NotNullSchema):
     )
 
 
-class RuleBasedProfilerConfig(BaseYamlConfig):
+class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
     def __init__(
         self,
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
+        id: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ) -> None:
         self.module_name = "great_expectations.rule_based_profiler"
         self.class_name = "RuleBasedProfiler"
 
-        self.name = name
-
         self.config_version = config_version
 
         self.variables = variables
         self.rules = rules
 
-        super().__init__(commented_map=commented_map)
+        AbstractConfig.__init__(self, id=id, name=name)
+        BaseYamlConfig.__init__(self, commented_map=commented_map)
 
     @classmethod
     def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
@@ -681,7 +658,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         return rule_dict
 
 
-class RuleBasedProfilerConfigSchema(Schema):
+class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     """
     Schema classes for configurations which extend from BaseYamlConfig must extend top-level Marshmallow Schema class.
     Schema classes for their constituent configurations which extend DictDot leve must extend NotNullSchema class.
@@ -691,6 +668,7 @@ class RuleBasedProfilerConfigSchema(Schema):
         unknown = INCLUDE
         fields = (
             "name",
+            "id",
             "config_version",
             "module_name",
             "class_name",
@@ -702,6 +680,10 @@ class RuleBasedProfilerConfigSchema(Schema):
     name = fields.String(
         required=True,
         allow_none=False,
+    )
+    id = fields.String(
+        required=False,
+        allow_none=True,
     )
     config_version = fields.Float(
         required=True,

@@ -2,11 +2,11 @@ from typing import List
 
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder import (
     MapMetricColumnDomainBuilder,
 )
-from great_expectations.rule_based_profiler.types import Domain
 
 
 def test_column_values_unique_single_batch(alice_columnar_table_single_batch_context):

@@ -50,8 +50,11 @@ class SqlAlchemyDataSampler(DataSampler):
         """
 
         # Split clause should be permissive of all values if not supplied.
-        if not where_clause:
-            where_clause = True
+        if where_clause is None:
+            if execution_engine.dialect_name == "sqlite":
+                where_clause = sa.text("1 = 1")
+            else:
+                where_clause = sa.true()
 
         table_name: str = batch_spec["table_name"]
 
@@ -108,7 +111,8 @@ class SqlAlchemyDataSampler(DataSampler):
                 .limit(batch_spec["sampling_kwargs"]["n"])
             )
 
-    def _validate_mssql_limit_param(self, n: Union[str, int]) -> None:
+    @staticmethod
+    def _validate_mssql_limit_param(n: Union[str, int]) -> None:
         """Validate that the mssql limit param is passed as an int or a string representation of an int.
 
         Args:
@@ -127,8 +131,8 @@ class SqlAlchemyDataSampler(DataSampler):
                 "parseable as an integer."
             )
 
+    @staticmethod
     def sample_using_random(
-        self,
         execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
         batch_spec: BatchSpec,
         where_clause: Optional[Selectable] = None,
@@ -231,7 +235,6 @@ class SqlAlchemyDataSampler(DataSampler):
         """Hash the values in the named column using md5, and only keep rows that match the given hash_value.
 
         Args:
-            df: dataframe to sample
             batch_spec: should contain keys `column_name` and optionally `hash_digits`
                 (default is 1 if not provided), `hash_value` (default is "f" if not provided)
 

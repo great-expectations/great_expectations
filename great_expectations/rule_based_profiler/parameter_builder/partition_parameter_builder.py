@@ -3,28 +3,32 @@ from typing import Dict, List, Optional, Set, Union
 import numpy as np
 
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
+from great_expectations.rule_based_profiler.metric_computation_result import MetricValue
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricSingleBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    Domain,
-    MetricValue,
+    RAW_PARAMETER_KEY,
     ParameterContainer,
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import (
+    convert_ndarray_datetime_to_float_dtype,
+    is_ndarray_datetime_dtype,
+)
 
 
 class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
     """
-    Compute histogram/partition using specified metric (depending on bucketizaiton directive) for one Batch od data.
+    Compute histogram/partition using specified metric (depending on bucketizaiton directive) for one Batch of data.
     """
 
     exclude_field_names: Set[
@@ -45,10 +49,12 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
         self,
         name: str,
         bucketize_data: Union[str, bool] = True,
+        bins: str = "uniform",
+        n_bins: int = 10,
+        allow_relative_error: bool = False,
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> None:
         """
@@ -57,45 +63,51 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             bucketize_data: If True (default), then data is continuous (non-categorical); hence, must bucketize it.
+            bins: Partitioning strategy (one of "uniform", "ntile", "quantile", "percentile", or "auto"); please refer
+            to "ColumnPartition" (great_expectations/expectations/metrics/column_aggregate_metrics/column_partition.py).
+            n_bins: Number of bins for histogram computation (ignored and recomputed if "bins" argument is "auto").
+            allow_relative_error: Used for partitionong strategy values that involve quantiles (all except "uniform").
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: BaseDataContext associated with this ParameterBuilder
         """
 
-        self._column_partition_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricSingleBatchParameterBuilder",
-            name="column_partition_metric_single_batch_parameter_builder",
-            metric_name="column.partition",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs={
-                "bins": "auto",
-                "allow_relative_error": False,
-            },
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=False,
-            evaluation_parameter_builder_configs=None,
-            json_serialize=True,
+        self._column_partition_metric_single_batch_parameter_builder_config = (
+            ParameterBuilderConfig(
+                module_name="great_expectations.rule_based_profiler.parameter_builder",
+                class_name="MetricSingleBatchParameterBuilder",
+                name="column_partition_metric_single_batch_parameter_builder",
+                metric_name="column.partition",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs={
+                    "bins": bins,
+                    "n_bins": n_bins,
+                    "allow_relative_error": allow_relative_error,
+                },
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=False,
+                evaluation_parameter_builder_configs=None,
+            )
         )
-        self._column_value_counts_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricSingleBatchParameterBuilder",
-            name="column_value_counts_metric_single_batch_parameter_builder",
-            metric_name="column.value_counts",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs={
-                "sort": "value",
-            },
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=False,
-            evaluation_parameter_builder_configs=None,
-            json_serialize=False,
+        self._column_value_counts_metric_single_batch_parameter_builder_config = (
+            ParameterBuilderConfig(
+                module_name="great_expectations.rule_based_profiler.parameter_builder",
+                class_name="MetricSingleBatchParameterBuilder",
+                name="column_value_counts_metric_single_batch_parameter_builder",
+                metric_name="column.value_counts",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs={
+                    "sort": "value",
+                },
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=False,
+                evaluation_parameter_builder_configs=None,
+            )
         )
-        self._column_values_nonnull_count_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        self._column_values_nonnull_count_metric_single_batch_parameter_builder_config = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="MetricSingleBatchParameterBuilder",
             name="column_values_nonnull_count_metric_single_batch_parameter_builder",
@@ -106,7 +118,6 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=None,
-            json_serialize=False,
         )
 
         if evaluation_parameter_builder_configs is None:
@@ -125,7 +136,6 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -159,7 +169,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
 
         is_categorical: bool = not bucketize_data
 
-        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
+        fully_qualified_column_partition_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
         # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -174,10 +184,24 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
 
         if bins is None:
             is_categorical = True
-        else:
-            is_categorical = is_categorical or not np.all(np.diff(bins) > 0.0)
+        elif not is_categorical:
+            ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
+                data=bins,
+                parse_strings_as_datetimes=True,
+            )
+            bins_ndarray_as_float: MetricValue
+            if ndarray_is_datetime_type:
+                bins_ndarray_as_float = convert_ndarray_datetime_to_float_dtype(
+                    data=bins
+                )
+            else:
+                bins_ndarray_as_float = bins
 
-        fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
+            is_categorical = ndarray_is_datetime_type or not np.all(
+                np.diff(bins_ndarray_as_float) > 0.0
+            )
+
+        fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
         # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -193,7 +217,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
         weights: list
 
         if is_categorical:
-            fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
+            fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{RAW_PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
             # Obtain "column.value_counts" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
             column_value_counts_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
                 domain=domain,
@@ -238,7 +262,6 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
                 variables=variables,
                 parameters=parameters,
                 parameter_computation_impl=super()._build_parameters,
-                json_serialize=False,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
 
@@ -246,7 +269,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             parameter_node: ParameterNode = (
                 get_parameter_value_and_validate_return_type(
                     domain=domain,
-                    parameter_reference=self.fully_qualified_parameter_name,
+                    parameter_reference=self.raw_fully_qualified_parameter_name,
                     expected_return_type=None,
                     variables=variables,
                     parameters=parameters,

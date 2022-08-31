@@ -139,25 +139,23 @@ def test_ConfigOnlyDataContext_v013__initialization(
     )
 
 
+@pytest.mark.unit
 def test__normalize_absolute_or_relative_path(
     tmp_path_factory, basic_data_context_v013_config
 ):
-    config_path = str(
-        tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
+    full_test_path = tmp_path_factory.mktemp(
+        "test__normalize_absolute_or_relative_path__dir"
     )
+    test_dir = full_test_path.parts[-1]
+    config_path = str(full_test_path)
     context = BaseDataContext(
         basic_data_context_v013_config,
         config_path,
     )
 
-    pattern_string = os.path.join(
-        "^.*test__normalize_absolute_or_relative_path__dir\\d*", "yikes$"
+    assert context._normalize_absolute_or_relative_path("yikes").endswith(
+        f"{test_dir}/yikes"
     )
-    pattern = re.compile(pattern_string)
-    assert (
-        pattern.match(context._normalize_absolute_or_relative_path("yikes")) is not None
-    )
-
     assert (
         "test__normalize_absolute_or_relative_path__dir"
         not in context._normalize_absolute_or_relative_path("/yikes")
@@ -189,13 +187,13 @@ def test_load_config_variables_file(
         context = BaseDataContext(
             basic_data_context_v013_config, context_root_dir=base_path
         )
-        config_vars = context._load_config_variables_file()
+        config_vars = context.config_variables
         assert config_vars["env"] == "dev"
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
         context = BaseDataContext(
             basic_data_context_v013_config, context_root_dir=base_path
         )
-        config_vars = context._load_config_variables_file()
+        config_vars = context.config_variables
         assert config_vars["env"] == "prod"
     except Exception:
         raise
@@ -231,6 +229,7 @@ def test_get_config(empty_data_context):
         "checkpoint_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",
+        "include_rendered_content",
     }
 
 

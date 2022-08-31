@@ -33,7 +33,7 @@ except ImportError:
     logger.debug("Unable to import sqlalchemy.")
 
 
-if sqlalchemy != None:
+if sqlalchemy is not None:
     try:
         import google.auth
 
@@ -45,7 +45,7 @@ if sqlalchemy != None:
         )
     except ImportError:
         datasource_initialization_exceptions = (
-            sqlalchemy.exc.OperationalError,
+            sqlalchemy.exc.OperationalError,  # type: ignore[assignment]
             sqlalchemy.exc.DatabaseError,
             sqlalchemy.exc.ArgumentError,
         )

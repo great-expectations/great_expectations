@@ -64,6 +64,8 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+src/dgtest/
+type_cov/
 
 # Translations
 *.mo
@@ -118,6 +120,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+.dmypy.json
 
 # vim backup files
 *~
@@ -137,3 +140,7 @@ DO_NOT_COMMIT
 
 # Hive Metastore from Spark
 metastore_db
+
+# dependency management
+Pipfile
+Pipfile.lock

@@ -1,5 +1,7 @@
 import copy
 import cProfile
+import datetime
+import decimal
 import importlib
 import io
 import json
@@ -7,10 +9,10 @@ import logging
 import os
 import pstats
 import re
+import sys
 import time
 import uuid
 from collections import OrderedDict
-from datetime import datetime
 from functools import wraps
 from gc import get_referrers
 from inspect import (
@@ -24,9 +26,10 @@ from inspect import (
     getmodule,
     signature,
 )
+from numbers import Number
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -34,12 +37,7 @@ from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
 
-from great_expectations.core.expectation_suite import (
-    ExpectationSuite,
-    expectationSuiteSchema,
-)
 from great_expectations.exceptions import (
-    GreatExpectationsError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -73,62 +71,33 @@ except ImportError:
     Table = None
     Select = None
 
-SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
-    "batch": "batches",
-    "checkpoint": "checkpoints",
-    "data_asset": "data_assets",
-    "datasource": "datasources",
-    "expectation": "expectations",
-    "expectation_suite": "expectation_suites",
-    "suite_validation_result": "suite_validation_results",
-    "expectation_validation_result": "expectation_validation_results",
-    "contract": "contracts",
-    "rendered_data_doc": "rendered_data_docs",
-    "data_context_variable": "data_context_variables",
-}
-
-PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
-    "batches": "batch",
-    "checkpoints": "checkpoint",
-    "data_assets": "data_asset",
-    "datasources": "datasource",
-    "expectations": "expectation",
-    "expectation_suites": "expectation_suite",
-    "suite_validation_results": "suite_validation_result",
-    "expectation_validation_results": "expectation_validation_result",
-    "contracts": "contract",
-    "rendered_data_docs": "rendered_data_doc",
-    "data_context_variables": "data_context_variable",
-}
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
-def pluralize(singular_ge_noun: str) -> str:
+class bidict(dict):
     """
-    Pluralizes a Great Expectations singular noun
+    Bi-directional hashmap: https://stackoverflow.com/a/21894086
     """
-    try:
-        return SINGULAR_TO_PLURAL_LOOKUP_DICT[singular_ge_noun.lower()]
-    except KeyError:
-        raise GreatExpectationsError(
-            f"Unable to pluralize '{singular_ge_noun}'. Please update "
-            f"great_expectations.util.SINGULAR_TO_PLURAL_LOOKUP_DICT"
-        )
 
+    def __init__(self, *args: List[Any], **kwargs: Dict[str, Any]) -> None:
+        super().__init__(*args, **kwargs)
+        self.inverse = {}
+        for key, value in self.items():
+            self.inverse.setdefault(value, []).append(key)
 
-def singularize(plural_ge_noun: str) -> str:
-    """
-    Singularizes a Great Expectations plural noun
-    """
-    try:
-        return PLURAL_TO_SINGULAR_LOOKUP_DICT[plural_ge_noun.lower()]
-    except KeyError:
-        raise GreatExpectationsError(
-            f"Unable to singularize '{plural_ge_noun}'. Please update "
-            f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
-        )
+    def __setitem__(self, key: str, value: Any) -> None:
+        if key in self:
+            self.inverse[self[key]].remove(key)
+        super().__setitem__(key, value)
+        self.inverse.setdefault(value, []).append(key)
+
+    def __delitem__(self, key: str):
+        self.inverse.setdefault(self[key], []).remove(key)
+        if self[key] in self.inverse and not self.inverse[self[key]]:
+            del self.inverse[self[key]]
+        super().__delitem__(key)
 
 
 def camel_to_snake(name: str) -> str:
@@ -183,8 +152,27 @@ def profile(func: Callable = None) -> Callable:
 def measure_execution_time(
     execution_time_holder_object_reference_name: str = "execution_time_holder",
     execution_time_property_name: str = "execution_time",
+    method: str = "process_time",
     pretty_print: bool = True,
+    include_arguments: bool = True,
 ) -> Callable:
+    """
+    Parameterizes template "execution_time_decorator" function with options, supplied as arguments.
+
+    Args:
+        execution_time_holder_object_reference_name: Handle, provided in "kwargs", holds execution time property setter.
+        execution_time_property_name: Property attribute nane, provided in "kwargs", sets execution time value.
+        method: Name of method in "time" module (default: "process_time") to be used for recording timestamps.
+        pretty_print: If True (default), prints execution time summary to standard output; if False, "silent" mode.
+        include_arguments: If True (default), prints arguments of function, whose execution time is measured.
+
+    Note: Method "time.perf_counter()" keeps going during sleep, while method "time.process_time()" does not.
+    Using "time.process_time()" is the better suited method for measuring code computational efficiency.
+
+    Returns:
+        Callable -- configured "execution_time_decorator" function.
+    """
+
     def execution_time_decorator(func: Callable) -> Callable:
         @wraps(func)
         def compute_delta_t(*args, **kwargs) -> Any:
@@ -200,11 +188,11 @@ def measure_execution_time(
             Returns:
                 Any (output value of original function being decorated).
             """
-            time_begin: float = time.perf_counter()
+            time_begin: float = (getattr(time, method))()
             try:
                 return func(*args, **kwargs)
             finally:
-                time_end: float = time.perf_counter()
+                time_end: float = (getattr(time, method))()
                 delta_t: float = time_end - time_begin
                 if kwargs is None:
                     kwargs = {}
@@ -220,11 +208,19 @@ def measure_execution_time(
                     )
 
                 if pretty_print:
-                    bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-                    call_args: OrderedDict = bound_args.arguments
-                    print(
-                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} seconds."
-                    )
+                    if include_arguments:
+                        bound_args: BoundArguments = signature(func).bind(
+                            *args, **kwargs
+                        )
+                        call_args: OrderedDict = bound_args.arguments
+                        print(
+                            f"""Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} \
+seconds."""
+                        )
+                    else:
+                        print(
+                            f"Total execution time of function {func.__name__}(): {delta_t} seconds."
+                        )
 
         return compute_delta_t
 
@@ -902,28 +898,36 @@ def validate(
             from great_expectations.data_context import DataContext
 
             data_context = DataContext(data_context)
+
         expectation_suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
         )
     else:
+        from great_expectations.core.expectation_suite import (
+            ExpectationSuite,
+            expectationSuiteSchema,
+        )
+
         if isinstance(expectation_suite, dict):
             expectation_suite_dict: dict = expectationSuiteSchema.load(
                 expectation_suite
             )
-            expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite = ExpectationSuite(
                 **expectation_suite_dict, data_context=data_context
             )
+
         if data_asset_name is not None:
             raise ValueError(
                 "When providing an expectation suite, data_asset_name cannot also be provided."
             )
+
         if expectation_suite_name is not None:
             raise ValueError(
                 "When providing an expectation suite, expectation_suite_name cannot also be provided."
             )
+
         logger.info(
-            "Validating data_asset_name %s with expectation_suite_name %s"
-            % (data_asset_name, expectation_suite.expectation_suite_name)
+            f"Validating data_asset_name {data_asset_name} with expectation_suite_name {expectation_suite.expectation_suite_name}"
         )
 
     # If the object is already a DataAsset type, then this is purely a convenience method
@@ -972,6 +976,7 @@ def validate(
     data_asset_ = _convert_to_dataset_class(
         data_asset, dataset_class=data_asset_class, expectation_suite=expectation_suite
     )
+
     return data_asset_.validate(*args, data_context=data_context, **kwargs)
 
 
@@ -1087,7 +1092,7 @@ def filter_properties_dict(
         delete_fields: list of keys that must be deleted, with the understanding that all other entries will be retained
         clean_nulls: If True, then in addition to other filtering directives, delete entries, whose values are None
         clean_falsy: If True, then in addition to other filtering directives, delete entries, whose values are Falsy
-        (If the "clean_falsy" argument is specified at "True", then "clean_nulls" is assumed to be "True" as well.)
+        (If the "clean_falsy" argument is specified as "True", then "clean_nulls" is assumed to be "True" as well.)
         inplace: If True, then modify the source properties dictionary; otherwise, make a copy for filtering purposes
         keep_falsy_numerics: If True, then in addition to other filtering directives, do not delete zero-valued numerics
 
@@ -1186,7 +1191,7 @@ def filter_properties_dict(
 
 
 def deep_filter_properties_iterable(
-    properties: Optional[Union[dict, list, set, tuple]] = None,
+    properties: Optional[Any] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
@@ -1253,7 +1258,8 @@ def deep_filter_properties_iterable(
             )
 
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
-        properties = list(
+        properties_type: type = type(properties)
+        properties = properties_type(
             filter(
                 lambda v: not _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=v,
@@ -1298,8 +1304,7 @@ def is_numeric(value: Any) -> bool:
 
 def is_int(value: Any) -> bool:
     try:
-        # noinspection PyUnusedLocal
-        num: int = int(value)
+        int(value)
     except (TypeError, ValueError):
         return False
     return True
@@ -1307,8 +1312,7 @@ def is_int(value: Any) -> bool:
 
 def is_float(value: Any) -> bool:
     try:
-        # noinspection PyUnusedLocal
-        num: float = float(value)
+        float(value)
     except (TypeError, ValueError):
         return False
     return True
@@ -1330,6 +1334,74 @@ def is_nan(value: Any) -> bool:
         return np.isnan(value)
     except TypeError:
         return True
+
+
+def convert_decimal_to_float(d: decimal.Decimal) -> float:
+    """
+    This method convers "decimal.Decimal" to standard "float" type.
+    """
+    if requires_lossy_conversion(d=d):
+        logger.warning(
+            f"Using lossy conversion for decimal {d} to float object to support serialization."
+        )
+
+    # noinspection PyTypeChecker
+    return float(d)
+
+
+def requires_lossy_conversion(d: decimal.Decimal) -> bool:
+    """
+    This method determines whether or not conversion from "decimal.Decimal" to standard "float" type cannot be lossless.
+    """
+    return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
+
+
+def isclose(
+    operand_a: Union[datetime.datetime, datetime.timedelta, Number],
+    operand_b: Union[datetime.datetime, datetime.timedelta, Number],
+    rtol: float = 1.0e-5,  # controls relative weight of "operand_b" (when its magnitude is large)
+    atol: float = 1.0e-8,  # controls absolute accuracy (based on floating point machine precision)
+    equal_nan: bool = False,
+) -> bool:
+    """
+    Checks whether or not two numbers (or timestamps) are approximately close to one another.
+
+    According to "https://numpy.org/doc/stable/reference/generated/numpy.isclose.html",
+        For finite values, isclose uses the following equation to test whether two floating point values are equivalent:
+        "absolute(a - b) <= (atol + rtol * absolute(b))".
+
+    This translates to:
+        "absolute(operand_a - operand_b) <= (atol + rtol * absolute(operand_b))", where "operand_a" is "target" quantity
+    under evaluation for being close to a "control" value, and "operand_b" serves as the "control" ("reference") value.
+
+    The values of the absolute tolerance ("atol") parameter is chosen as a sufficiently small constant for most floating
+    point machine representations (e.g., 1.0e-8), so that even if the "control" value is small in magnitude and "target"
+    and "control" are close in absolute value, then the accuracy of the assessment can still be high up to the precision
+    of the "atol" value (here, 8 digits as the default).  However, when the "control" value is large in magnitude, the
+    relative tolerance ("rtol") parameter carries a greater weight in the comparison assessment, because the acceptable
+    deviation between the two quantities can be relatively larger for them to be deemed as "close enough" in this case.
+    """
+    if isinstance(operand_a, str) and isinstance(operand_b, str):
+        return operand_a == operand_b
+
+    if isinstance(operand_a, datetime.datetime) and isinstance(
+        operand_b, datetime.datetime
+    ):
+        operand_a = operand_a.timestamp()
+        operand_b = operand_b.timestamp()
+    elif isinstance(operand_a, datetime.timedelta) and isinstance(
+        operand_b, datetime.timedelta
+    ):
+        operand_a = operand_a.total_seconds()
+        operand_b = operand_b.total_seconds()
+
+    return np.isclose(
+        a=np.float64(operand_a),
+        b=np.float64(operand_b),
+        rtol=rtol,
+        atol=atol,
+        equal_nan=equal_nan,
+    )
 
 
 def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
@@ -1361,11 +1433,85 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
-        # noinspection PyUnusedLocal
-        parsed_date: datetime = parse(value, fuzzy=fuzzy)
+        _ = parse(value, fuzzy=fuzzy)
+        return True
     except (TypeError, ValueError):
-        return False
-    return True
+        try:
+            _ = datetime.datetime.fromisoformat(value)
+            return True
+        except (TypeError, ValueError):
+            return False
+
+
+def is_ndarray_datetime_dtype(
+    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+) -> bool:
+    """
+    Determine whether or not all elements of 1-D "np.ndarray" argument are "datetime.datetime" type objects.
+    """
+    value: Any
+    result: bool = all(isinstance(value, datetime.datetime) for value in data)
+    return result or (
+        parse_strings_as_datetimes
+        and all(is_parseable_date(value=value, fuzzy=fuzzy) for value in data)
+    )
+
+
+def convert_ndarray_to_datetime_dtype_best_effort(
+    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+) -> Tuple[bool, bool, np.ndarray]:
+    """
+    Attempt to parse all elements of 1-D "np.ndarray" argument into "datetime.datetime" type objects.
+
+    Returns:
+        Boolean flag -- True if all elements of original "data" were "datetime.datetime" type objects; False, otherwise.
+        Boolean flag -- True, if conversion was performed; False, otherwise.
+        Output "np.ndarray" (converted, if necessary).
+    """
+    if is_ndarray_datetime_dtype(
+        data=data, parse_strings_as_datetimes=False, fuzzy=fuzzy
+    ):
+        return True, False, data
+
+    value: Any
+    if is_ndarray_datetime_dtype(
+        data=data, parse_strings_as_datetimes=parse_strings_as_datetimes, fuzzy=fuzzy
+    ):
+        try:
+            return (
+                False,
+                True,
+                np.asarray([parse(value, fuzzy=fuzzy) for value in data]),
+            )
+        except (TypeError, ValueError):
+            pass
+
+    return False, False, data
+
+
+def convert_ndarray_datetime_to_float_dtype(data: np.ndarray) -> np.ndarray:
+    """
+    Convert all elements of 1-D "np.ndarray" argument from "datetime.datetime" type to "timestamp" "float" type objects.
+    """
+    value: Any
+    return np.asarray([value.timestamp() for value in data])
+
+
+def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
+    """
+    Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type objects.
+    """
+    value: Any
+    return np.asarray([datetime.datetime.fromtimestamp(value) for value in data])
+
+
+def convert_ndarray_float_to_datetime_tuple(
+    data: np.ndarray,
+) -> Tuple[datetime.datetime, ...]:
+    """
+    Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type tuple elements.
+    """
+    return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
 def get_context():
@@ -1446,6 +1592,19 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
     return selectable
 
 
+def get_sqlalchemy_subquery_type():
+    """
+    Beginning from SQLAlchemy 1.4, `sqlalchemy.sql.Alias` has been deprecated in favor of `sqlalchemy.sql.Subquery`.
+    This helper method ensures that the appropriate type is returned.
+
+    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
+    """
+    try:
+        return sa.sql.Subquery
+    except AttributeError:
+        return sa.sql.Alias
+
+
 def get_sqlalchemy_domain_data(domain_data):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
@@ -1465,10 +1624,11 @@ def import_make_url():
         from sqlalchemy.engine.url import make_url
     else:
         from sqlalchemy.engine import make_url
+
     return make_url
 
 
-def get_pyathena_potential_type(type_module, type_):
+def get_pyathena_potential_type(type_module, type_) -> str:
     if version.parse(type_module.pyathena.__version__) >= version.parse("2.5.0"):
         # introduction of new column type mapping in 2.5
         potential_type = type_module.AthenaDialect()._get_column_type(type_)
@@ -1478,6 +1638,15 @@ def get_pyathena_potential_type(type_module, type_):
         # < 2.5 column type mapping
         potential_type = type_module._TYPE_MAPPINGS.get(type_)
 
+    return potential_type
+
+
+def get_trino_potential_type(type_module: ModuleType, type_: str) -> object:
+    """
+    Leverage on Trino Package to return sqlalchemy sql type
+    """
+    # noinspection PyUnresolvedReferences
+    potential_type = type_module.parse_sqltype(type_)
     return potential_type
 
 
@@ -1491,14 +1660,14 @@ def pandas_series_between_inclusive(
     if version.parse(pd.__version__) >= version.parse("1.3.0"):
         metric_series = series.between(min_value, max_value, inclusive="both")
     else:
-        metric_series = series.between(min_value, max_value, inclusive=True)
+        metric_series = series.between(min_value, max_value)
 
     return metric_series
 
 
 def numpy_quantile(
     a: np.ndarray, q: float, method: str, axis: Optional[int] = None
-) -> np.ndarray:
+) -> Union[np.float64, np.ndarray]:
     """
     As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
@@ -1518,4 +1687,5 @@ def numpy_quantile(
             axis=axis,
             interpolation=method,
         )
+
     return quantile

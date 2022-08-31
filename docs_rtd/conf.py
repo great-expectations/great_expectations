@@ -17,10 +17,8 @@
 #
 
 import os
-import re
 import sys
 import uuid
-from collections import namedtuple
 
 from sphinx.ext.autodoc import between
 

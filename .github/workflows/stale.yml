@@ -1,28 +1,70 @@
-name: stalebot
+---
+# Reference: https://github.com/actions/stale#all-options
+
+name: StaleBot
 
 on:
- issues:
-   types: [reopened]
- schedule:
-   - cron: "0 0 * * *"
+  workflow_dispatch:  # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#defining-inputs-for-manually-triggered-workflows
+  # schedule:
+    # - cron: '30 1 * * *'
 
 jobs:
   stale:
     runs-on: ubuntu-latest
-    env:
-      ACTIONS_STEP_DEBUG: true
     steps:
-    - uses: actions/stale@v2
+    - uses: actions/stale@v5
       with:
+        # General
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-issue-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-        stale-pr-message: 'Is this still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?\n\nThis issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
-        days-before-stale: 90
-        days-before-close: 7
-        stale-issue-label: stale
-        stale-pr-label: stale
-        exempt-issue-label: stalebot-exempt
-        exempt-pr-labels: stalebot-exempt
-        operations-per-run: 30
-        main: 'lib/main.js'
-        debug-only: false
+        operations-per-run: 1000
+        days-before-stale: 30
+        days-before-close: 60
+        days-before-pr-stale: -1
+        days-before-pr-close: -1
+
+        # Scope
+        only-pr-labels: community
+        only-issue-labels: community
+        exempt-issue-labels: core-team, core-engineering-queue, documentation, triage, "help wanted", "DevRel Triage"
+        # exempt-pr-labels: "example label"  # This needs to be reviewed if we move to staling PRs
+
+        # Issue messages
+        stale-issue-message: >
+          Is this issue still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?
+
+
+          This issue has been automatically marked as stale because it has not had recent activity.
+
+
+          It will be closed if no further activity occurs. Thank you for your contributions 🙇
+
+        close-issue-message: >
+          We are closing this issue due to inactivity.
+
+
+          This action is done automatically by StaleBot.
+
+
+          Please validate this is still an issue, and create a new issue with up-to-date information if any problem presists 🙂
+
+
+          Please reach out if you need anything further. 🙂
+
+        # PR Messages
+        stale-pr-message: >
+          Is this PR still relevant? If so, what is blocking it? Is there anything you can do to help move it forward?
+
+
+          This issue has been automatically marked as stale because it has not had recent activity.
+
+
+          It will be closed if no further activity occurs. Thank you for your contributions 🙇
+
+        close-pr-message: >
+          We are closing this PR due to inacitvity.
+
+
+          This action is done automatically by StaleBot.
+
+
+          Please reach out if you need anything further. 🙂

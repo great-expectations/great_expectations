@@ -72,9 +72,15 @@ def _run_cli_datasource_new_path_test(
                     "class_name": "InferredAssetFilesystemDataConnector",
                 },
                 "default_runtime_data_connector_name": {
+                    "assets": {
+                        "my_runtime_asset_name": {
+                            "batch_identifiers": ["runtime_batch_identifier_name"],
+                            "class_name": "Asset",
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                        }
+                    },
                     "class_name": "RuntimeDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
-                    "batch_identifiers": ["default_identifier_name"],
                 },
             },
         }

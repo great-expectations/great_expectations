@@ -1,7 +1,8 @@
 from typing import Dict, Optional
 
 from great_expectations import DataContext
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -9,8 +10,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     PartitionParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
@@ -57,19 +57,19 @@ def test_partition_parameter_builder_alice_continuous(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        bins="auto",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
         data_context=data_context,
     )
 
     metric_domain_kwargs: dict = {"column": "user_id"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -103,7 +103,7 @@ def test_partition_parameter_builder_alice_continuous(
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=parameter_builder.json_serialized_fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
@@ -126,19 +126,19 @@ def test_partition_parameter_builder_alice_categorical(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=False,
+        bins="auto",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
         data_context=data_context,
     )
 
     metric_domain_kwargs: dict = {"column": "event_type"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -171,7 +171,7 @@ def test_partition_parameter_builder_alice_categorical(
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=parameter_builder.json_serialized_fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
@@ -194,19 +194,19 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        bins="auto",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
         data_context=data_context,
     )
 
     metric_domain_kwargs: dict = {"column": "event_ts"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -243,7 +243,7 @@ def test_partition_parameter_builder_alice_continuous_changed_to_categorical(
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=parameter_builder.json_serialized_fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
@@ -260,8 +260,8 @@ def test_partition_parameter_builder_alice_continuous_check_serialized_keys(
     parameter_builder: ParameterBuilder = PartitionParameterBuilder(
         name="my_name",
         bucketize_data=True,
+        bins="auto",
         evaluation_parameter_builder_configs=None,
-        json_serialize=True,
         data_context=data_context,
     )
 
@@ -272,5 +272,4 @@ def test_partition_parameter_builder_alice_continuous_check_serialized_keys(
         "name",
         "bucketize_data",
         "evaluation_parameter_builder_configs",
-        "json_serialize",
     }

@@ -53,7 +53,7 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
-yaml_handler: YAMLHandler = YAMLHandler()
+yaml_handler = YAMLHandler()
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -449,20 +449,38 @@ def delete_config_from_filesystem(
     )
 
 
+# noinspection PyPep8Naming
 def get_snowflake_connection_url() -> str:
     """Get snowflake connection url from environment variables.
 
     Returns:
-        String of the snowflake connection url.
+        String of the snowflake connection URL.
     """
-    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
     sfUser = os.environ.get("SNOWFLAKE_USER")
     sfPswd = os.environ.get("SNOWFLAKE_PW")
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
     sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
     sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
     sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"
 
-    return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+    return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
+
+
+def get_redshift_connection_url() -> str:
+    """Get Amazon Redshift connection url from environment variables.
+
+    Returns:
+        String of the Amazon Redshift connection URL.
+    """
+    host = os.environ.get("REDSHIFT_HOST")
+    port = os.environ.get("REDSHIFT_PORT")
+    user = os.environ.get("REDSHIFT_USERNAME")
+    pswd = os.environ.get("REDSHIFT_PASSWORD")
+    db = os.environ.get("REDSHIFT_DATABASE")
+    ssl = os.environ.get("REDSHIFT_SSLMODE")
+
+    return f"redshift+psycopg2://{user}:{pswd}@{host}:{port}/{db}?sslmode={ssl}"
 
 
 def get_bigquery_table_prefix() -> str:
@@ -535,8 +553,9 @@ def load_and_concatenate_csvs(
     dfs: List[pd.DataFrame] = []
     for csv_path in csv_paths:
         df = pd.read_csv(csv_path)
-        for column_name_to_convert in convert_column_names_to_datetime:
-            df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+        convert_string_columns_to_datetime(
+            df=df, column_names_to_convert=convert_column_names_to_datetime
+        )
         if not load_full_dataset:
             # Improving test performance by only loading the first 10 rows of our test data into the db
             df = df.head(10)
@@ -548,6 +567,21 @@ def load_and_concatenate_csvs(
     return all_dfs_concatenated
 
 
+def convert_string_columns_to_datetime(
+    df: pd.DataFrame, column_names_to_convert: Optional[List[str]] = None
+) -> None:
+    """
+    Converts specified columns (e.g., "pickup_datetime" and "dropoff_datetime") to datetime column type.
+    Side-effect: Passed DataFrame is modified (in-place).
+    """
+    if column_names_to_convert is None:
+        column_names_to_convert = []
+
+    column_name_to_convert: str
+    for column_name_to_convert in column_names_to_convert:
+        df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+
+
 def load_data_into_test_database(
     table_name: str,
     connection_string: str,
@@ -557,6 +591,7 @@ def load_data_into_test_database(
     convert_colnames_to_datetime: Optional[List[str]] = None,
     random_table_suffix: bool = False,
     to_sql_method: Optional[str] = None,
+    drop_existing_table: bool = True,
 ) -> LoadedTable:
     """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
 
@@ -572,7 +607,7 @@ def load_data_into_test_database(
         random_table_suffix: If true, add 8 random characters to the table suffix and remove other tables with the
             same prefix.
         to_sql_method: Method to pass to method param of pd.to_sql()
-
+        drop_existing_table: boolean value. If set to false, will append to existing table
     Returns:
         LoadedTable which for convenience, contains the pandas dataframe that was used to load the data.
     """
@@ -627,9 +662,15 @@ def load_data_into_test_database(
     else:
         try:
             connection = engine.connect()
-            print(f"Dropping table {table_name}")
-            connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-            print(f"Creating table {table_name} and adding data from {csv_paths}")
+            if drop_existing_table:
+                print(f"Dropping table {table_name}")
+                connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+                print(f"Creating table {table_name} and adding data from {csv_paths}")
+            else:
+                print(
+                    f"Adding to existing table {table_name} and adding data from {csv_paths}"
+                )
+
             all_dfs_concatenated.to_sql(
                 name=table_name,
                 con=engine,
@@ -877,6 +918,8 @@ def get_connection_string_and_dialect(
     dialect: str = db_config["dialect"]
     if dialect == "snowflake":
         connection_string: str = get_snowflake_connection_url()
+    elif dialect == "redshift":
+        connection_string: str = get_redshift_connection_url()
     elif dialect == "bigquery":
         connection_string: str = get_bigquery_connection_url()
     elif dialect == "awsathena":
@@ -919,9 +962,11 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
                 strings.remove(string_to_remove)
                 if not strings:
                     return True
+
         return False
 
     success: bool = _find_string(obj)
     if not success:
         logger.info(f"Could not find the following target strings: {strings}")
+
     return success
