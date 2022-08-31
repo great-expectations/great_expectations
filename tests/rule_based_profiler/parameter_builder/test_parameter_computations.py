@@ -2,6 +2,7 @@ from typing import Dict, Union
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
@@ -22,6 +23,7 @@ RTOL: float = 1.0e-7
 ATOL: float = 1.0e-2
 
 
+@pytest.mark.slow  # 6.20s
 def test_bootstrap_point_estimate_efficacy(
     bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
 ):

@@ -401,6 +401,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
         ),
     ],
 )
+@pytest.mark.slow  # 5.82s
 def test_inline_renderer_rendered_content_return_value(
     alice_columnar_table_single_batch_context: DataContext,
     expectation_configuration: ExpectationConfiguration,

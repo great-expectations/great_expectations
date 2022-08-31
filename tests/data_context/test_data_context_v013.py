@@ -503,6 +503,7 @@ data_connectors:
     )
 
 
+@pytest.mark.slow  # 1.06s
 def test_in_memory_data_context_configuration(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):

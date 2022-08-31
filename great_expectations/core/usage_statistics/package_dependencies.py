@@ -184,6 +184,7 @@ class GEDependencies:
         "py-moneyed",
         "pydnsbl",
         "pygeos",
+        "pyogrio",
         "python-geohash",
         "python-stdnum",
         "pyvat",

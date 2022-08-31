@@ -1,5 +1,7 @@
 from unittest import mock
 
+import pytest
+
 from great_expectations import DataContext
 from great_expectations.cli.datasource import (
     BigqueryCredentialYamlHelper,
@@ -661,6 +663,7 @@ data_connectors:
     )
 
 
+@pytest.mark.slow  # 1.45s
 def test_check_if_datasource_name_exists(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):

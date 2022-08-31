@@ -979,8 +979,10 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         _debug = lambda x: x
+        _error = lambda x: x
         if debug_logger:
             _debug = lambda x: debug_logger.debug(f"(run_diagnostics) {x}")
+            _error = lambda x: debug_logger.error(f"(run_diagnostics) {x}")
 
         errors: List[ExpectationErrorDiagnostics] = []
 
@@ -1007,6 +1009,11 @@ class Expectation(metaclass=MetaExpectation):
         _expectation_config: ExpectationConfiguration = (
             self._get_expectation_configuration_from_examples(examples)
         )
+        if not _expectation_config:
+            _error(
+                f"Was NOT able to get Expectation configuration for {self.expectation_type}. "
+                "Is there at least one sample test where 'success' is True?"
+            )
         metric_diagnostics_list: List[
             ExpectationMetricDiagnostics
         ] = self._get_metric_diagnostics_list(
@@ -1059,18 +1066,18 @@ class Expectation(metaclass=MetaExpectation):
         # Set a coverage_score
         _total_passed = 0
         _total_failed = 0
-        _num_backends = 0.0001
+        _num_backends = 0
         _num_engines = sum([x for x in introspected_execution_engines.values() if x])
         for result in backend_test_result_counts:
             _num_backends += 1
             _total_passed += result.num_passed
             _total_failed += result.num_failed
-        coverage_score = _num_engines * (
-            (_total_passed / _num_backends) - (1.5 * _total_failed)
+        coverage_score = (
+            _num_backends + _num_engines + _total_passed - (1.5 * _total_failed)
         )
         _debug(
             f"coverage_score: {coverage_score} for {self.expectation_type} ... "
-            f"engines: {_num_engines}, backends: {round(_num_backends)}, "
+            f"engines: {_num_engines}, backends: {_num_backends}, "
             f"passing tests: {_total_passed}, failing tests:{_total_failed}"
         )
 
@@ -1256,6 +1263,17 @@ class Expectation(metaclass=MetaExpectation):
                 if tests:
                     for test in tests:
                         if test.output.get("success"):
+                            return ExpectationConfiguration(
+                                expectation_type=self.expectation_type,
+                                kwargs=test.input,
+                            )
+
+            # There is no sample test where `success` is True, or there are no tests
+            for example in examples:
+                tests = example.tests
+                if tests:
+                    for test in tests:
+                        if test.input:
                             return ExpectationConfiguration(
                                 expectation_type=self.expectation_type,
                                 kwargs=test.input,
@@ -1580,6 +1598,8 @@ class Expectation(metaclass=MetaExpectation):
         execution_engines = {}
         for provider in execution_engine_names:
             all_true = True
+            if not metric_diagnostics_list:
+                all_true = False
             for metric_diagnostics in metric_diagnostics_list:
                 try:
                     has_provider = (
@@ -1588,6 +1608,7 @@ class Expectation(metaclass=MetaExpectation):
                     )
                     if not has_provider:
                         all_true = False
+                        break
                 except KeyError:
                     # https://github.com/great-expectations/great_expectations/blob/abd8f68a162eaf9c33839d2c412d8ba84f5d725b/great_expectations/expectations/core/expect_table_row_count_to_equal_other_table.py#L174-L181
                     # expect_table_row_count_to_equal_other_table does tricky things and replaces
