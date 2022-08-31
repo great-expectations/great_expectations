@@ -1,8 +1,10 @@
 import copy
 import logging
 from decimal import Decimal
+from typing import Dict, Iterable, Tuple
 
 import pandas as pd
+import pyspark.sql.types
 import pytest
 from marshmallow import Schema
 
@@ -12,10 +14,15 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
     AbstractConfig,
+    AssetConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
+    DataConnectorConfig,
+    DatasourceConfig,
     checkpointConfigSchema,
+    datasourceConfigSchema,
 )
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
@@ -75,6 +82,52 @@ def test_serialization_of_spark_df(spark_session):
     df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
     sdf = spark_session.createDataFrame(df)
     assert convert_to_json_serializable(sdf) == {"a": [1, 2, 3], "b": [4, 5, 6]}
+
+
+def test_serialization_of_datasource_with_spark_schema(spark_session):
+    from pyspark.sql.types import IntegerType, StructField, StructType
+
+    schema: pyspark.sql.types.StructType = StructType(
+        [
+            StructField("a", IntegerType(), True, None),
+            StructField("b", IntegerType(), True, None),
+        ]
+    )
+    conf: Iterable[Tuple[str, str]] = spark_session.sparkContext.getConf().getAll()
+    spark_config: Dict[str, str] = dict(conf)
+    datasource_config: DatasourceConfig = DatasourceConfig(
+        name="taxi_data",
+        config_version=1,
+        execution_engine=SparkDFExecutionEngine(spark_config=spark_config),
+        data_connectors={
+            "configured_asset_connector": DataConnectorConfig(
+                class_name="ConfiguredAssetFilesystemDataConnector",
+                module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                assets=[
+                    AssetConfig(
+                        name="asset",
+                        batch_spec_passthrough={
+                            "reader_options": {
+                                "header": True,
+                                "schema": schema,
+                            },
+                        },
+                    )
+                ],
+            )
+        },
+    )
+    expected_serialized_datasource_config: dict = {}
+
+    """DatasourceConfigSchema and nested objects like schema appropriately with/without optional params."""
+    observed_dump = datasourceConfigSchema.dump(obj=datasource_config)
+    assert observed_dump == expected_serialized_datasource_config
+
+    # loaded_data = DatasourceConfigSchema.load(observed_dump)
+    # observed_load = DatasourceConfig(**loaded_data)
+    # assert DatasourceConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
+    #     datasource_config
+    # )
 
 
 @pytest.mark.unit
@@ -688,6 +741,104 @@ def test_checkpoint_config_print(
 def test_checkpoint_config_and_nested_objects_are_serialized(
     checkpoint_config: CheckpointConfig, expected_serialized_checkpoint_config: dict
 ) -> None:
+    """CheckpointConfig and nested objects like CheckpointValidationConfig should be serialized appropriately with/without optional params."""
+    observed_dump = checkpointConfigSchema.dump(checkpoint_config)
+    assert observed_dump == expected_serialized_checkpoint_config
+
+    loaded_data = checkpointConfigSchema.load(observed_dump)
+    observed_load = CheckpointConfig(**loaded_data)
+    assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
+        checkpoint_config
+    )
+
+
+@pytest.mark.unit
+def test_checkpoint_config_and_spark_schema_serialized(spark_session):
+    """
+    Why was this test split out?
+
+    This test is split out from test_checkpoint_config_and_nested_objects_are_serialized because it has
+    an additional dependency on spark_session, which we dont want to impose on the rest of the tests
+    """
+
+    from pyspark.sql.types import IntegerType, StructField, StructType
+
+    schema: pyspark.sql.types.StructType = StructType(
+        [
+            StructField("a", IntegerType(), True, None),
+            StructField("b", IntegerType(), True, None),
+        ]
+    )
+
+    checkpoint_config: CheckpointConfig = CheckpointConfig(
+        name="my_nested_checkpoint",
+        config_version=1,
+        template_name="my_nested_checkpoint_template",
+        expectation_suite_name="users.delivery",
+        validations=[
+            CheckpointValidationConfig(
+                batch_request={
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_data_connector",
+                    "data_asset_name": "users",
+                    "data_connector_query": {"partition_index": -1},
+                    "batch_spec_passthrough": {"reader_options": {"schema": schema}},
+                },
+                id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+            ),
+        ],
+    )
+    expected_serialized_checkpoint_config: dict = {
+        "action_list": [],
+        "batch_request": {},
+        "class_name": "Checkpoint",
+        "config_version": 1.0,
+        "evaluation_parameters": {},
+        "expectation_suite_ge_cloud_id": None,
+        "expectation_suite_name": "users.delivery",
+        "ge_cloud_id": None,
+        "module_name": "great_expectations.checkpoint",
+        "name": "my_nested_checkpoint",
+        "profilers": [],
+        "run_name_template": None,
+        "runtime_configuration": {},
+        "template_name": "my_nested_checkpoint_template",
+        "validations": [
+            {
+                "batch_request": {
+                    "data_asset_name": "users",
+                    "data_connector_name": "my_data_connector",
+                    "data_connector_query": {
+                        "partition_index": -1,
+                    },
+                    "batch_spec_passthrough": {
+                        "reader_options": {
+                            "schema": {
+                                "fields": [
+                                    {
+                                        "metadata": {},
+                                        "name": "a",
+                                        "nullable": True,
+                                        "type": "integer",
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "b",
+                                        "nullable": True,
+                                        "type": "integer",
+                                    },
+                                ],
+                                "type": "struct",
+                            }
+                        }
+                    },
+                    "datasource_name": "my_datasource",
+                },
+                "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
+            },
+        ],
+    }
+
     """CheckpointConfig and nested objects like CheckpointValidationConfig should be serialized appropriately with/without optional params."""
     observed_dump = checkpointConfigSchema.dump(checkpoint_config)
     assert observed_dump == expected_serialized_checkpoint_config

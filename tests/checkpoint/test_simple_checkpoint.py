@@ -400,7 +400,6 @@ def test_simple_checkpoint_has_no_update_data_docs_action_when_site_names_is_non
     ]
 
 
-# test that this works with schema
 def test_simple_checkpoint_persisted_to_store(
     context_with_data_source_and_empty_suite, webhook, one_validation
 ):

@@ -890,7 +890,10 @@ class DatasourceConfig(AbstractConfig):
         self._module_name = module_name
         if execution_engine is not None:
             self.execution_engine = execution_engine
-        if data_connectors is not None and isinstance(data_connectors, dict):
+        if data_connectors is not None and (
+            isinstance(data_connectors, dict)
+            or isinstance(data_connectors, DataConnectorConfig)
+        ):
             self.data_connectors = data_connectors
 
         # NOTE - AJB - 20201202: This should use the datasource class build_configuration method as in DataContext.add_datasource()
@@ -1067,17 +1070,18 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
         for data_connector_name, data_connector_config in data.get(
             "data_connectors", {}
         ).items():
-            batch_spec_passthrough: dict = data_connector_config.get(
-                "batch_spec_passthrough"
-            )
-            if batch_spec_passthrough:
-                reader_options: dict = batch_spec_passthrough.get("reader_options")
-                if reader_options:
-                    schema = reader_options.get("schema")
-                    if schema and isinstance(schema, StructType):
-                        data_connector_config["batch_spec_passthrough"][
-                            "reader_options"
-                        ]["schema"] = schema.jsonValue()
+            asset_config = data_connector_config.get("assets", [])
+            for asset in asset_config:
+                batch_spec_passthrough: dict = asset.get("batch_spec_passthrough")
+                if batch_spec_passthrough:
+                    reader_options: dict = batch_spec_passthrough.get("reader_options")
+                    if reader_options:
+                        schema = reader_options.get("schema")
+                        if schema and isinstance(schema, StructType):
+                            asset["batch_spec_passthrough"]["reader_options"][
+                                "schema"
+                            ] = schema.jsonValue()
+                            data
         return data
 
     # noinspection PyUnusedLocal
@@ -2340,7 +2344,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
 
         As such, this override of parent behavior is meant to keep ALL values provided
         to the config in the output dict. To get rid of this function, we need to
-        explicitly name all possible values in CheckpoingValidationConfigSchema as
+        explicitly name all possible values in CheckpointValidationConfigSchema as
         schema fields.
         """
         data = super().dump(obj, many=many)
@@ -2355,6 +2359,13 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
 
         sorted_data = dict(sorted(data.items()))
         return sorted_data
+
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        data = copy.deepcopy(data)
+        for key, value in data.items():
+            data[key] = convert_to_json_serializable(data=value)
+        return data
 
 
 class CheckpointConfigSchema(Schema):
