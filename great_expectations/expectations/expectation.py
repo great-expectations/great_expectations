@@ -1072,7 +1072,9 @@ class Expectation(metaclass=MetaExpectation):
             _num_backends += 1
             _total_passed += result.num_passed
             _total_failed += result.num_failed
-        coverage_score = _num_backends + _num_engines + _total_passed - (1.5 * _total_failed)
+        coverage_score = (
+            _num_backends + _num_engines + _total_passed - (1.5 * _total_failed)
+        )
         _debug(
             f"coverage_score: {coverage_score} for {self.expectation_type} ... "
             f"engines: {_num_engines}, backends: {_num_backends}, "
