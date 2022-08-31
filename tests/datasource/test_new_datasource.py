@@ -1013,7 +1013,7 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_batch_request(
     batch_list = basic_datasource.get_batch_list_from_batch_request(
         batch_request=multi_batch_batch_request
     )
-    assert batch_list[0].data.dataframe.schema.jsonValue() == spark_df_taxi_data_schema
+    assert batch_list[0].data.dataframe.schema == spark_df_taxi_data_schema
 
 
 def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
@@ -1077,4 +1077,4 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
     batch_list = basic_datasource.get_batch_list_from_batch_request(
         batch_request=multi_batch_batch_request
     )
-    assert batch_list[0].data.dataframe.schema.jsonValue() == spark_df_taxi_data_schema
+    assert batch_list[0].data.dataframe.schema == spark_df_taxi_data_schema

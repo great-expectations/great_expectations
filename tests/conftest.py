@@ -415,7 +415,6 @@ def spark_df_taxi_data_schema(spark_session):
             StructField("congestion_surcharge", DoubleType(), True, None),
         ]
     )
-    # return schema
     return schema
 
 

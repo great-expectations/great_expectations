@@ -1058,8 +1058,7 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         """
-        Docstring for
-        Returns:
+        TODO : Docstring of why this exists
         """
         # check whether spark exists
         if StructType is None:
@@ -2482,7 +2481,6 @@ class CheckpointConfigSchema(Schema):
         data = copy.deepcopy(data)
         for key, value in data.items():
             data[key] = convert_to_json_serializable(data=value)
-        # this is where we would need to check
         return data
 
     # noinspection PyUnusedLocal

@@ -3514,9 +3514,6 @@ def test_simple_checkpoint_result_validations_include_rendered_content(
             assert isinstance(rendered_content, RenderedAtomicContent)
 
 
-### SparkDF Tests
-
-### SparkDF Tests
 @pytest.mark.integration
 def test_running_spark_simplecheckpoint(
     context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema

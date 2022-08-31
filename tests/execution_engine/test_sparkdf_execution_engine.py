@@ -120,7 +120,7 @@ def test_reader_fn_parameters(
             StructField("y", IntegerType(), True),
         ]
     )
-    schema_dict: dict = schema.jsonValue()
+    schema_dict: dict = schema
 
     test_sparkdf_with_header_param_and_schema = (
         basic_spark_df_execution_engine.get_batch_data(
@@ -132,7 +132,7 @@ def test_reader_fn_parameters(
         ).dataframe
     )
     assert test_sparkdf_with_header_param_and_schema.head() == Row(x=1, y=2)
-    assert test_sparkdf_with_header_param_and_schema.schema.jsonValue() == schema_dict
+    assert test_sparkdf_with_header_param_and_schema.schema == schema_dict
 
 
 def test_get_domain_records_with_column_domain(
