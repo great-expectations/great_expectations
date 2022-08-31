@@ -6,13 +6,14 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
-from marshmallow import Schema
 
 from great_expectations import __version__
 from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.serializer import AbstractConfigSerializer
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import datasourceConfigSchema
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.datasource.datasource_serializer import JsonDatasourceConfigSerializer
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
@@ -215,7 +216,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         # TODO: AJB 20220829 use appropriate serializer instead of schema
         if ge_cloud_resource_type == GeCloudRESTResource.DATASOURCE:
-            self._schema: Schema = datasourceConfigSchema
+            self._serializer: AbstractConfigSerializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
 
     @property
     def headers(self) -> Dict[str, str]:
@@ -372,7 +373,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         ge_cloud_resource: GeCloudRESTResource = key.resource_type
         ge_cloud_id: str = key.ge_cloud_id
 
-        serialized_value: dict = self._schema.dump(value)
+        serialized_value: dict = self._serializer.serialize(value)
 
         # if key has ge_cloud_id, perform _update instead
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
