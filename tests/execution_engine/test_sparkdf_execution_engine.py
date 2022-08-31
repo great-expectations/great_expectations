@@ -1094,6 +1094,76 @@ def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
         print(e)
 
 
+def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
+    spark_session,
+):
+    """
+    Insures that even when "compute_domain_kwargs" has multiple keys, it will be JSON-serialized for "IDDict.to_id()".
+    """
+    engine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {
+                "names": [
+                    "Ada Lovelace",
+                    "Alan Kay",
+                    "Donald Knuth",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                    "John McCarthy",
+                    "Marvin Minsky",
+                    "Ray Ozzie",
+                ]
+            }
+        ),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.length.max.aggregate_fn",
+        metric_domain_kwargs={
+            "column": "names",
+            "batch_id": "my_id",
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+        metric_value_kwargs=None,
+    )
+
+    try:
+        results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    except ge_exceptions.MetricProviderError as e:
+        assert False, str(e)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.length.max",
+        metric_domain_kwargs={
+            "batch_id": "my_id",
+        },
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": desired_metric,
+        },
+    )
+
+    try:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(desired_metric,), metrics=results
+        )
+        assert results == {desired_metric.id: 16}
+    except ge_exceptions.MetricProviderError as e:
+        assert False, str(e)
+
+
 # Making sure dataframe property is functional
 def test_dataframe_property_given_loaded_batch(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
