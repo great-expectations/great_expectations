@@ -27,10 +27,14 @@ class ProfilerTypeMapping:
         "INT64",
         "TINYINT",
         "BYTEINT",
+        "ByteType()",
         "SMALLINT",
         "BIGINT",
         "IntegerType",
+        "IntegerType()",
         "LongType",
+        "LongType()",
+        "ShortType()",
     ]
     FLOAT_TYPE_NAMES = [
         "FLOAT",
@@ -41,7 +45,9 @@ class ProfilerTypeMapping:
         "DOUBLE_PRECISION",
         "NUMERIC",
         "FloatType",
+        "FloatType()",
         "DoubleType",
+        "DoubleType()",
         "float",
         "float_",
         "float16",
@@ -49,6 +55,7 @@ class ProfilerTypeMapping:
         "float64",
         "number",
         "DECIMAL",
+        "DecimalType()",
         "REAL",
     ]
     STRING_TYPE_NAMES = [
@@ -60,6 +67,7 @@ class ProfilerTypeMapping:
         "NTEXT",
         "STRING",
         "StringType",
+        "StringType()",
         "string",
         "str",
         "object",
@@ -73,6 +81,7 @@ class ProfilerTypeMapping:
         "BIT",
         "bool",
         "BooleanType",
+        "BooleanType()",
     ]
     DATETIME_TYPE_NAMES = [
         "DATE",
@@ -85,7 +94,9 @@ class ProfilerTypeMapping:
         "TIMESTAMP",
         "Timestamp",
         "TimestampType",
+        "TimestampType()",
         "DateType",
+        "DateType()",
         "datetime64",
         "datetime64[ns]",
         "timedelta[ns]",
@@ -98,6 +109,7 @@ class ProfilerTypeMapping:
         "varbinary",
         "IMAGE",
         "image",
+        "BinaryType()",
     ]
     CURRENCY_TYPE_NAMES = [
         "MONEY",
