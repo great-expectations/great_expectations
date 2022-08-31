@@ -15,10 +15,10 @@ import sys
 from dataclasses import dataclass
 from typing import List, Optional
 
+from marshmallow import Schema, fields
 from packaging import version
 
 from great_expectations.core.usage_statistics.package_dependencies import GEDependencies
-from great_expectations.marshmallow__shade import Schema, fields
 
 if sys.version_info < (3, 8):
     # Note: importlib_metadata is included in the python standard library as importlib

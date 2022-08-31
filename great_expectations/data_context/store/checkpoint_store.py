@@ -5,6 +5,8 @@ import random
 import uuid
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+from marshmallow import ValidationError
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store import ConfigurationStore
@@ -23,7 +25,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
-from great_expectations.marshmallow__shade import ValidationError
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
