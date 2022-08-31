@@ -53,11 +53,15 @@ action_list:
      renderer:
        module_name: great_expectations.render.renderer.opsgenie_renderer
        class_name: OpsgenieRenderer
+     tags:
+      - Production
+      - Non-Critical
  ```
 
  - Set notify_on to one of, "all", "failure", or "success"
  - Optionally set a priority (from P1 - P5, defaults to P3)
  - Set region: eu if you are using the European Opsgenie endpoint
+ - Optionally include 'tags' in your settings which will be included in your API call to OpsGenie. e.g.: 'Production'
 
 ### 4. Validate a Batch of data to test your alerts
 
