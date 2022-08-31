@@ -979,8 +979,10 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         _debug = lambda x: x
+        _error = lambda x: x
         if debug_logger:
             _debug = lambda x: debug_logger.debug(f"(run_diagnostics) {x}")
+            _error = lambda x: debug_logger.error(f"(run_diagnostics) {x}")
 
         errors: List[ExpectationErrorDiagnostics] = []
 
@@ -1007,6 +1009,11 @@ class Expectation(metaclass=MetaExpectation):
         _expectation_config: ExpectationConfiguration = (
             self._get_expectation_configuration_from_examples(examples)
         )
+        if not _expectation_config:
+            _error(
+                f"Was NOT able to get Expectation configuration for {self.expectation_type}. "
+                "Is there at least one sample test where 'success' is True?"
+            )
         metric_diagnostics_list: List[
             ExpectationMetricDiagnostics
         ] = self._get_metric_diagnostics_list(
