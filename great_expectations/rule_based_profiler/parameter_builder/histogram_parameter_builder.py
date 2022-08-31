@@ -157,7 +157,7 @@ class HistogramParameterBuilder(MetricSingleBatchParameterBuilder):
         self._bucketize_data = bucketize_data
 
     @property
-    def bucketize_data(self) -> Union[str, bool]:
+    def bucketize_data(self) -> bool:
         return self._bucketize_data
 
     def _build_parameters(
