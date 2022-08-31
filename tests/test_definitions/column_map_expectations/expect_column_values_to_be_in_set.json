@@ -182,6 +182,9 @@
         "bigquery": {
           "empty_column": "STRING"
         },
+        "redshift": {
+          "empty_column": "VARCHAR"
+        },
         "trino": {
           "empty_column": "VARCHAR"
         }
@@ -218,6 +221,9 @@
       },
       "mssql": {
         "dates": "DATETIME"
+      },
+      "redshift": {
+        "dates": "TIMESTAMP"
       },
       "trino": {
         "dates": "TIMESTAMP"

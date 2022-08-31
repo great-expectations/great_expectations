@@ -92,7 +92,13 @@ def pytest_generate_tests(metafunc):
                             data_asset = datasets[0]
                         else:
                             schemas = d["schemas"] if "schemas" in d else None
-                            data_asset = get_dataset(c, d["data"], schemas=schemas)
+                            try:
+                                data_asset = get_dataset(c, d["data"], schemas=schemas)
+                            except Exception as e:
+                                print(
+                                    f"\n\nFor {repr(filename)} there was the following Exception\n\n{repr(e)}"
+                                )
+                                continue
 
                     for test in d["tests"]:
                         generate_test = True

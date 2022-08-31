@@ -170,7 +170,7 @@ def pytest_generate_tests(metafunc):
                                     generate_test = True
                                 elif (
                                     "trino" in test["only_for"]
-                                    and BigQueryDialect is not None
+                                    and trinoDialect is not None
                                     and hasattr(
                                         validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
                                         "name",
