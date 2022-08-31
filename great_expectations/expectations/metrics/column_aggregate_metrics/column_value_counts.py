@@ -120,10 +120,10 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         results: List[sqlalchemy_engine_Row] = execution_engine.engine.execute(
             query.select_from(selectable)
         ).fetchall()
-        results_array: np.ndarray = np.asarray(results)
+        # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.
         series = pd.Series(
-            results_array[:, 1],
-            index=pd.Index(data=results_array[:, 0], name="value"),
+            [row[1] for row in results],
+            index=pd.Index(data=[row[0] for row in results], name="value"),
             name="count",
         )
         return series
