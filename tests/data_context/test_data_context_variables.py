@@ -277,6 +277,7 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         ),
     ],
 )
+@pytest.mark.slow  # 1.20s
 def test_data_context_variables_get(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
@@ -396,6 +397,7 @@ def test_data_context_variables_get_with_substitutions(
         ),
     ],
 )
+@pytest.mark.slow  # 1.20s
 def test_data_context_variables_set(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,

@@ -106,6 +106,7 @@ def test_docs_help_output(caplog):
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 14.75s
 def test_docs_build_happy_paths_build_site_on_single_site_context(
     mock_webbrowser,
     mock_emit,
@@ -330,6 +331,7 @@ def context_with_two_sites(titanic_data_context_stats_enabled_config_version_3):
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 22.72s
 def test_docs_build_happy_paths_build_site_on_multiple_site_context(
     mock_webbrowser,
     mock_emit,
@@ -547,6 +549,7 @@ def context_with_site_built(titanic_data_context_stats_enabled_config_version_3)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 2.74s
 def test_docs_clean_and_build_raises_helpful_errors(
     mock_emit,
     mock_webbrowser,
@@ -616,6 +619,7 @@ def test_docs_clean_and_build_raises_helpful_errors(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 2.77s
 def test_docs_clean_happy_paths_clean_expected_sites(
     mock_emit, invocation, caplog, monkeypatch, context_with_site_built
 ):

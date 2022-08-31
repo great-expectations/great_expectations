@@ -1799,6 +1799,7 @@ def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
 @pytest.mark.integration
 @pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
+@pytest.mark.slow  # 79.77s
 def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments):
     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
     _execute_integration_test(test_configuration, tmp_path)
