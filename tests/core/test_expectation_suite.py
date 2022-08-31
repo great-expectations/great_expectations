@@ -9,6 +9,7 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.util import filter_properties_dict
 
 
@@ -603,3 +604,51 @@ def test_get_expectations_by_domain_type(
         exp4,
         column_pair_expectation,
     ]
+
+
+class DataContextSendUsageMessageSpy:
+    def __init__(self):
+        self.messages = []
+
+    def send_usage_message(
+        self,
+        event,
+        event_payload,
+        success,
+    ):
+        self.messages.append(
+            {
+                "event": event,
+                "event_payload": event_payload,
+                "success": success,
+            }
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "success",
+    [
+        pytest.param(True, id="success=True"),
+        pytest.param(False, id="success=False"),
+    ],
+)
+def test_expectation_suite_send_usage_message(success: bool):
+    """Ensure usage stats event is sent on expectation suite."""
+
+    dc_message_spy = DataContextSendUsageMessageSpy()
+
+    suite = ExpectationSuite(
+        expectation_suite_name="suite_name",
+        data_context=dc_message_spy,
+    )
+
+    suite.send_usage_event(success=success)
+
+    assert dc_message_spy.messages
+    assert len(dc_message_spy.messages) == 1
+    assert dc_message_spy.messages[0] == {
+        "event": UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION.value,
+        "event_payload": {},
+        "success": success,
+    }

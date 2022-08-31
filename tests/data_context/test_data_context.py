@@ -626,6 +626,7 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
+@pytest.mark.slow  # 1.02s
 def test_render_full_static_site_from_empty_project(tmp_path, filesystem_csv_3):
 
     # TODO : Use a standard test fixture
@@ -1882,6 +1883,7 @@ data_connectors:
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 
 
+@pytest.mark.slow  # 8.13s
 def test_get_validator_without_expectation_suite(in_memory_runtime_context):
     context = in_memory_runtime_context
 
@@ -1903,6 +1905,7 @@ def test_get_validator_without_expectation_suite(in_memory_runtime_context):
     assert my_validator.expectation_suite_name == "default"
 
 
+@pytest.mark.slow  # 1.35s
 def test_get_validator_with_batch(in_memory_runtime_context):
     context = in_memory_runtime_context
 

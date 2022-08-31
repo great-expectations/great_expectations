@@ -35,6 +35,7 @@ def clean_up_test_files(base_dir: str, paths: List[str]) -> None:
             os.remove(full_path)
 
 
+@pytest.mark.slow  # 19.49s
 def test_run_rbp_notebook(tmp_path):
     """
     What does this test and why?
@@ -79,6 +80,7 @@ def test_run_rbp_notebook(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
+@pytest.mark.slow  # 8.92s
 def test_run_data_assistants_notebook(tmp_path):
     """
     What does this test and why?
@@ -122,6 +124,7 @@ def test_run_data_assistants_notebook(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
+@pytest.mark.slow  # 5.72s
 def test_run_self_initializing_expectations_notebook(tmp_path):
     """
     What does this test and why?
@@ -258,6 +261,7 @@ def test_run_multibatch_configured_asset_example_spark(tmp_path, spark_session):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
+@pytest.mark.slow  # 7.41s
 def test_run_multibatch_inferred_asset_example_pandas(tmp_path):
     """
     What does this test and why?
@@ -303,6 +307,7 @@ def test_run_multibatch_inferred_asset_example_pandas(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
+@pytest.mark.slow  # 7.53s
 def test_run_multibatch_configured_asset_example_pandas(tmp_path):
     """
     What does this test and why?

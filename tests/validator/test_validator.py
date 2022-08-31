@@ -997,6 +997,7 @@ def test_adding_expectation_to_validator_not_send_usage_message(
     assert mock_emit.call_args_list == []
 
 
+@pytest.mark.slow  # 2.53s
 def test_validator_set_active_batch(
     multi_batch_taxi_validator,
 ):

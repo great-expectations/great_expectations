@@ -1084,6 +1084,7 @@ def test_TupleGCSStoreBackend_base_public_path():
     not is_library_loadable(library_name="google"),
     reason="google is not installed",
 )
+@pytest.mark.slow  # 1.35s
 def test_TupleGCSStoreBackend():
     # pytest.importorskip("google-cloud-storage")
     """
@@ -1276,6 +1277,7 @@ def test_TupleAzureBlobStoreBackend_account_url():
 
 
 @mock_s3
+@pytest.mark.slow  # 14.36s
 def test_TupleS3StoreBackend_list_over_1000_keys():
     """
     What does this test test and why?
