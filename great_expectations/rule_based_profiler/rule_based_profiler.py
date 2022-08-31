@@ -3,7 +3,8 @@ import datetime
 import json
 import logging
 import sys
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from contextlib import contextmanager
+from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -288,73 +289,73 @@ class BaseRuleBasedProfiler(ConfigPeer):
             reconciliation_directives=reconciliation_directives,
         )
 
-        self._apply_runtime_environment(
+        with self._apply_runtime_environment(
             variables=effective_variables,
             rules=effective_rules,
             variables_directives_list=variables_directives_list,
             domain_type_directives_list=domain_type_directives_list,
-        )
-
-        rule: Rule
-        effective_rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
-            rule.name: rule.to_json_dict() for rule in effective_rules
-        }
-
-        sys.stdout.write("\n")
-        sys.stdout.flush()
-
-        pbar_method: Callable = determine_progress_bar_method_by_environment()
-
-        rule_state: RuleState
-        rule: Rule
-        for rule in pbar_method(
-            effective_rules,
-            desc="Generating Expectations:",
-            disable=disable,
-            position=0,
-            leave=True,
-            bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
         ):
-            rule_state = rule.run(
-                variables=effective_variables,
-                batch_list=batch_list,
-                batch_request=batch_request,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
-                reconciliation_directives=reconciliation_directives,
-                rule_state=RuleState(),
-            )
-            self.rule_states.append(rule_state)
 
-        return RuleBasedProfilerResult(
-            fully_qualified_parameter_names_by_domain=self.get_fully_qualified_parameter_names_by_domain(),
-            parameter_values_for_fully_qualified_parameter_names_by_domain=self.get_parameter_values_for_fully_qualified_parameter_names_by_domain(),
-            expectation_configurations=list(
-                filter(None, self.get_expectation_configurations())
-            ),
-            citation={
-                "citation_date": convert_to_json_serializable(
-                    data=datetime.datetime.now(datetime.timezone.utc)
+            rule: Rule
+            effective_rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
+                rule.name: rule.to_json_dict() for rule in effective_rules
+            }
+
+            sys.stdout.write("\n")
+            sys.stdout.flush()
+
+            pbar_method: Callable = determine_progress_bar_method_by_environment()
+
+            rule_state: RuleState
+            rule: Rule
+            for rule in pbar_method(
+                effective_rules,
+                desc="Generating Expectations:",
+                disable=disable,
+                position=0,
+                leave=True,
+                bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
+            ):
+                rule_state = rule.run(
+                    variables=effective_variables,
+                    batch_list=batch_list,
+                    batch_request=batch_request,
+                    recompute_existing_parameter_values=recompute_existing_parameter_values,
+                    reconciliation_directives=reconciliation_directives,
+                    rule_state=RuleState(),
+                )
+                self.rule_states.append(rule_state)
+
+            return RuleBasedProfilerResult(
+                fully_qualified_parameter_names_by_domain=self.get_fully_qualified_parameter_names_by_domain(),
+                parameter_values_for_fully_qualified_parameter_names_by_domain=self.get_parameter_values_for_fully_qualified_parameter_names_by_domain(),
+                expectation_configurations=list(
+                    filter(None, self.get_expectation_configurations())
                 ),
-                "comment": comment
-                if comment
-                else "Created by Rule-Based Profiler with the configuration included.",
-                "profiler_config": {
-                    "name": self.name,
-                    "config_version": self.config_version,
-                    "variables": convert_variables_to_dict(variables=self.variables),
-                    "rules": effective_rules_configs,
+                citation={
+                    "citation_date": convert_to_json_serializable(
+                        data=datetime.datetime.now(datetime.timezone.utc)
+                    ),
+                    "comment": comment
+                    if comment
+                    else "Created by Rule-Based Profiler with the configuration included.",
+                    "profiler_config": {
+                        "name": self.name,
+                        "config_version": self.config_version,
+                        "variables": convert_variables_to_dict(variables=self.variables),
+                        "rules": effective_rules_configs,
+                    },
                 },
-            },
-            rule_domain_builder_execution_time={
-                rule_state.rule.name: rule_state.rule_domain_builder_execution_time
-                for rule_state in self.rule_states
-            },
-            rule_execution_time={
-                rule_state.rule.name: rule_state.rule_execution_time
-                for rule_state in self.rule_states
-            },
-            _usage_statistics_handler=self._usage_statistics_handler,
-        )
+                rule_domain_builder_execution_time={
+                    rule_state.rule.name: rule_state.rule_domain_builder_execution_time
+                    for rule_state in self.rule_states
+                },
+                rule_execution_time={
+                    rule_state.rule.name: rule_state.rule_execution_time
+                    for rule_state in self.rule_states
+                },
+                _usage_statistics_handler=self._usage_statistics_handler,
+            )
 
     def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
         """
@@ -881,6 +882,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return {rule.name: rule for rule in self.rules}
 
     # noinspection PyUnusedLocal
+    @contextmanager
     def _apply_runtime_environment(
         self,
         variables: Optional[ParameterContainer] = None,
@@ -891,7 +893,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         domain_type_directives_list: Optional[
             List[RuntimeEnvironmentDomainTypeDirectives]
         ] = None,
-    ) -> None:
+    ) -> Iterator[None]:
         """
         variables: attribute name/value pairs, commonly-used in Builder objects, to modify using "runtime_environment"
         rules: name/(configuration-dictionary) to modify using "runtime_environment"
@@ -907,8 +909,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
             domain_type_directives_list=domain_type_directives_list,
         )
 
-        rule: Rule
-        self._profiler_config.rules = {rule.name: rule.to_json_dict() for rule in rules}
+        try:
+            original_config_rules = self._profiler_config.rules
+            rule: Rule
+            self._profiler_config.rules = {rule.name: rule.to_json_dict() for rule in rules}
+            yield
+        finally:
+            self._profiler_config.rules = original_config_rules
 
     @staticmethod
     def _apply_variables_directives_runtime_environment(
