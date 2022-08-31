@@ -1,3 +1,5 @@
+import pytest
+
 """
 This module specifically tests for combinations of paths for datasource new.
 
@@ -90,6 +92,7 @@ def _run_cli_datasource_new_path_test(
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 5.17s
 def test_cli_datasource_new_run_from_ge_dir_absolute_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
@@ -104,6 +107,7 @@ def test_cli_datasource_new_run_from_ge_dir_absolute_data_path(
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 5.13s
 def test_cli_datasource_new_run_from_ge_dir_relative_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
@@ -118,6 +122,7 @@ def test_cli_datasource_new_run_from_ge_dir_relative_data_path(
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 5.32s
 def test_cli_datasource_new_run_from_adjacent_dir_absolute_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
@@ -133,6 +138,7 @@ def test_cli_datasource_new_run_from_adjacent_dir_absolute_data_path(
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 5.28s
 def test_cli_datasource_new_run_from_adjacent_dir_relative_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
@@ -148,6 +154,7 @@ def test_cli_datasource_new_run_from_adjacent_dir_relative_data_path(
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 5.22s
 def test_cli_datasource_new_run_from_misc_dir_using_config_flag_absolute_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2, misc_directory
 ):
@@ -162,6 +169,7 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_absolute_data_pa
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 5.36s
 def test_cli_datasource_new_run_from_misc_dir_using_config_flag_relative_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2, misc_directory
 ):

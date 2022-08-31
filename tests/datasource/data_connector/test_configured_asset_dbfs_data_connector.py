@@ -21,6 +21,7 @@ yaml = YAML()
 
 
 @pytest.mark.unit
+@pytest.mark.slow  # 1.05s
 def test__get_full_file_path_for_asset_pandas(fs):
     """
     What does this test and why?

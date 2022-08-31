@@ -3,6 +3,7 @@ from collections import OrderedDict
 from unittest import mock
 
 import nbformat
+import pytest
 from click.testing import CliRunner
 from nbconvert.preprocessors import ExecutePreprocessor
 
@@ -218,6 +219,7 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.81s
 def test_cli_datasource_new_connection_string(
     mock_subprocess,
     mock_emit,

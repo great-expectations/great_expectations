@@ -2,8 +2,9 @@
 from abc import ABC
 from typing import Optional
 
-from great_expectations.marshmallow__shade.decorators import post_dump
-from great_expectations.marshmallow__shade.schema import Schema
+from marshmallow.decorators import post_dump
+from marshmallow.schema import Schema
+
 from great_expectations.types import SerializableDictDot
 
 
