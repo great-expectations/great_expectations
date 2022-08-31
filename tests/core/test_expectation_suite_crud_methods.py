@@ -144,7 +144,9 @@ def column_pair_expectation() -> ExpectationConfiguration:
 
 
 @pytest.fixture
-def single_expectation_suite(exp1, empty_data_context_stats_enabled) -> ExpectationSuite:
+def single_expectation_suite(
+    exp1, empty_data_context_stats_enabled
+) -> ExpectationSuite:
     context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -268,7 +270,9 @@ def suite_with_column_pair_and_table_expectations(
 
 
 @pytest.fixture
-def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3, empty_data_context_stats_enabled) -> ExpectationSuite:
+def ge_cloud_suite(
+    ge_cloud_id, exp1, exp2, exp3, empty_data_context_stats_enabled
+) -> ExpectationSuite:
     context: DataContext = empty_data_context_stats_enabled
 
     for exp in (exp1, exp2, exp3):

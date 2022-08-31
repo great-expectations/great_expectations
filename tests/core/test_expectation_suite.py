@@ -8,7 +8,10 @@ from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_suite import ExpectationSuite, expectationSuiteSchema
+from great_expectations.core.expectation_suite import (
+    ExpectationSuite,
+    expectationSuiteSchema,
+)
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.util import filter_properties_dict
 
