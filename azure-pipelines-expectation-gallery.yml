@@ -188,7 +188,7 @@ stages:
 
           - bash: grep -o "Implemented engines.*" output--build_gallery.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Show implemented engines''
+            displayName: 'Show implemented engines'
 
           - bash: cat checklists.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
