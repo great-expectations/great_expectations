@@ -368,7 +368,8 @@ def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided
 @pytest.mark.unit
 def test_suite_does_not_overwrite_existing_version_metadata():
     suite = ExpectationSuite(
-        "foo", meta={"great_expectations_version": "0.0.0"},
+        "foo",
+        meta={"great_expectations_version": "0.0.0"},
     )
     assert "great_expectations_version" in suite.meta.keys()
     assert suite.meta["great_expectations_version"] == "0.0.0"
