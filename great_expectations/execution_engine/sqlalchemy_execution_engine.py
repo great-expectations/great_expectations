@@ -87,7 +87,7 @@ try:
         TextClause,
         quoted_name,
     )
-    from sqlalchemy.sql.selectable import Select
+    from sqlalchemy.sql.selectable import Select, TextualSelect
 except ImportError:
     BooleanClauseList = None
     DefaultDialect = None
@@ -99,6 +99,7 @@ except ImportError:
     Select = None
     Selectable = None
     TextClause = None
+    TextualSelect = None
     quoted_name = None
 
 
@@ -965,7 +966,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                             selectable.columns().subquery()
                         )
                     ).fetchall()
-                elif Select and isinstance(selectable, Select):
+                elif (Select and isinstance(selectable, Select)) or (
+                    TextualSelect and isinstance(selectable, TextualSelect)
+                ):
                     res = self.engine.execute(
                         sa.select(query["select"]).select_from(selectable.subquery())
                     ).fetchall()
