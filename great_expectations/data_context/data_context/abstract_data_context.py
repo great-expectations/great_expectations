@@ -601,11 +601,10 @@ class AbstractDataContext(ABC):
         )
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(config)
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = self._instantiate_datasource_from_config(
-            name=datasource_name, config=config
-        )
+        ] = self._instantiate_datasource_from_config(config=datasource_config)
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
@@ -1618,8 +1617,10 @@ class AbstractDataContext(ABC):
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
                 config_dict = dict(datasourceConfigSchema.dump(config))
+                datasource_config: DatasourceConfig = datasourceConfigSchema.load(config_dict)
+                datasource_config.name = datasource_name
                 datasource = self._instantiate_datasource_from_config(
-                    name=datasource_name, config=config_dict
+                    config=datasource_config
                 )
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
