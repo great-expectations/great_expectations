@@ -181,7 +181,7 @@ stages:
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
         variables:
           - group: 'common_secrets'
-          - GE_pytest_opts: '--no-sqlalchemy'
+          # GE_pytest_opts: '--no-sqlalchemy'  # TODO: resolve using this with `- group`
         strategy:
           matrix:
             Python37-Pandas023:
