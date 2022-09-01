@@ -1527,9 +1527,9 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     """
     Convert all elements of N-D "np.ndarray" argument from "decimal.Decimal" type to "float" type objects.
     """
-    convert_decimal_to_float_vectorized: Callable = np.vectorize(
-        pyfunc=convert_decimal_to_float
-    )
+    convert_decimal_to_float_vectorized: Callable[
+        [np.ndarray], np.ndarray
+    ] = np.vectorize(pyfunc=convert_decimal_to_float)
     return convert_decimal_to_float_vectorized(data)
 
 
