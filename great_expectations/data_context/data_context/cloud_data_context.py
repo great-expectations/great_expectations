@@ -363,10 +363,7 @@ class CloudDataContext(AbstractDataContext):
             resource_ref: GeCloudResourceRef = self._datasource_store.create(config)  # type: ignore[assignment]
             config.id = resource_ref.ge_cloud_id
 
-        config_property_serializer = YAMLReadyDictDatasourceConfigSerializer(
-            schema=datasourceConfigSchema
-        )
-        self.config.datasources[config.name] = config_property_serializer.serialize(config)  # type: ignore[index,assignment]
+        self.config.datasources[config.name] = config
 
         substituted_config = self._perform_substitutions_on_datasource_config(config)
 

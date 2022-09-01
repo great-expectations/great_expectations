@@ -1745,10 +1745,7 @@ class AbstractDataContext(ABC):
                 datasource_name=config.name, datasource_config=config
             )
 
-        config_property_serializer = YAMLReadyDictDatasourceConfigSerializer(
-            schema=datasourceConfigSchema
-        )
-        self.config.datasources[config.name] = config_property_serializer.serialize(config)  # type: ignore[assignment,index]
+        self.config.datasources[config.name] = config
 
         substituted_config = self._perform_substitutions_on_datasource_config(config)
 
