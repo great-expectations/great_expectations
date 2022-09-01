@@ -17,7 +17,6 @@ try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.validator.validator import Validator
 
 yaml = YAML(typ="safe")
