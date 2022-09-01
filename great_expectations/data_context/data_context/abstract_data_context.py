@@ -26,7 +26,6 @@ from great_expectations.core.serializer import (
 )
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
-    YAMLReadyDictDatasourceConfigSerializer,
 )
 
 if TYPE_CHECKING:
@@ -1745,7 +1744,7 @@ class AbstractDataContext(ABC):
                 datasource_name=config.name, datasource_config=config
             )
 
-        self.config.datasources[config.name] = config
+        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
 
         substituted_config = self._perform_substitutions_on_datasource_config(config)
 

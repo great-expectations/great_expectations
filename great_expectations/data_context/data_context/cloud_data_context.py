@@ -25,9 +25,6 @@ from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.datasource import Datasource
-from great_expectations.datasource.datasource_serializer import (
-    YAMLReadyDictDatasourceConfigSerializer,
-)
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -363,7 +360,7 @@ class CloudDataContext(AbstractDataContext):
             resource_ref: GeCloudResourceRef = self._datasource_store.create(config)  # type: ignore[assignment]
             config.id = resource_ref.ge_cloud_id
 
-        self.config.datasources[config.name] = config
+        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
 
         substituted_config = self._perform_substitutions_on_datasource_config(config)
 
