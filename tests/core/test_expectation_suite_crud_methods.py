@@ -14,7 +14,7 @@ from great_expectations.exceptions import (
 
 
 @pytest.fixture
-def empty_suite(empty_data_context_stats_enabled):
+def empty_suite(empty_data_context_stats_enabled) -> ExpectationSuite:
     context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -25,7 +25,7 @@ def empty_suite(empty_data_context_stats_enabled):
 
 
 @pytest.fixture
-def baseline_suite(exp1, exp2, empty_data_context_stats_enabled):
+def baseline_suite(exp1, exp2, empty_data_context_stats_enabled) -> ExpectationSuite:
     context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -36,7 +36,7 @@ def baseline_suite(exp1, exp2, empty_data_context_stats_enabled):
 
 
 @pytest.fixture
-def exp1():
+def exp1() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
@@ -45,7 +45,7 @@ def exp1():
 
 
 @pytest.fixture
-def exp2():
+def exp2() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "BASIC"},
@@ -54,7 +54,7 @@ def exp2():
 
 
 @pytest.fixture
-def exp3():
+def exp3() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "BASIC"},
@@ -63,7 +63,7 @@ def exp3():
 
 
 @pytest.fixture
-def exp4():
+def exp4() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [1, 2, 3], "result_format": "BASIC"},
@@ -72,7 +72,7 @@ def exp4():
 
 
 @pytest.fixture
-def exp5():
+def exp5() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [1, 2, 3], "result_format": "COMPLETE"},
@@ -81,7 +81,7 @@ def exp5():
 
 
 @pytest.fixture
-def exp6():
+def exp6() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [1, 2]},
@@ -90,7 +90,7 @@ def exp6():
 
 
 @pytest.fixture
-def exp7():
+def exp7() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [1, 2, 3, 4]},
@@ -99,7 +99,7 @@ def exp7():
 
 
 @pytest.fixture
-def exp8():
+def exp8() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [1, 2, 3]},
@@ -108,7 +108,7 @@ def exp8():
 
 
 @pytest.fixture
-def table_exp1():
+def table_exp1() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_table_columns_to_match_ordered_list",
         kwargs={"value": ["a", "b", "c"]},
@@ -116,7 +116,7 @@ def table_exp1():
 
 
 @pytest.fixture
-def table_exp2():
+def table_exp2() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_table_row_count_to_be_between",
         kwargs={"min_value": 0, "max_value": 1},
@@ -124,14 +124,14 @@ def table_exp2():
 
 
 @pytest.fixture
-def table_exp3():
+def table_exp3() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_table_row_count_to_equal", kwargs={"value": 1}
     )
 
 
 @pytest.fixture
-def column_pair_expectation():
+def column_pair_expectation() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_pair_values_to_be_in_set",
         kwargs={
@@ -144,7 +144,9 @@ def column_pair_expectation():
 
 
 @pytest.fixture
-def single_expectation_suite(exp1, empty_data_context_stats_enabled):
+def single_expectation_suite(
+    exp1, empty_data_context_stats_enabled
+) -> ExpectationSuite:
     context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -157,7 +159,7 @@ def single_expectation_suite(exp1, empty_data_context_stats_enabled):
 @pytest.fixture
 def single_expectation_suite_with_expectation_ge_cloud_id(
     exp1, empty_data_context_stats_enabled
-):
+) -> ExpectationSuite:
     exp1_with_ge_cloud_id = deepcopy(exp1)
     exp1_with_ge_cloud_id.ge_cloud_id = UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774")
     context: DataContext = empty_data_context_stats_enabled
@@ -171,7 +173,7 @@ def single_expectation_suite_with_expectation_ge_cloud_id(
 
 
 @pytest.fixture
-def different_suite(exp1, exp4, empty_data_context_stats_enabled):
+def different_suite(exp1, exp4, empty_data_context_stats_enabled) -> ExpectationSuite:
     context: DataContext = empty_data_context_stats_enabled
 
     return ExpectationSuite(
@@ -185,7 +187,7 @@ def different_suite(exp1, exp4, empty_data_context_stats_enabled):
 @pytest.fixture
 def domain_success_runtime_suite(
     exp1, exp2, exp3, exp4, exp5, empty_data_context_stats_enabled
-):
+) -> ExpectationSuite:
     context: DataContext = empty_data_context_stats_enabled
 
     return ExpectationSuite(
@@ -207,7 +209,7 @@ def suite_with_table_and_column_expectations(
     table_exp2,
     table_exp3,
     empty_data_context_stats_enabled,
-):
+) -> ExpectationSuite:
     context: DataContext = empty_data_context_stats_enabled
     suite = ExpectationSuite(
         expectation_suite_name="warning",
@@ -244,7 +246,7 @@ def suite_with_column_pair_and_table_expectations(
     table_exp3,
     column_pair_expectation,
     empty_data_context_stats_enabled,
-):
+) -> ExpectationSuite:
     context: DataContext = empty_data_context_stats_enabled
 
     suite = ExpectationSuite(
@@ -268,7 +270,9 @@ def suite_with_column_pair_and_table_expectations(
 
 
 @pytest.fixture
-def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3, empty_data_context_stats_enabled):
+def ge_cloud_suite(
+    ge_cloud_id, exp1, exp2, exp3, empty_data_context_stats_enabled
+) -> ExpectationSuite:
     context: DataContext = empty_data_context_stats_enabled
 
     for exp in (exp1, exp2, exp3):
