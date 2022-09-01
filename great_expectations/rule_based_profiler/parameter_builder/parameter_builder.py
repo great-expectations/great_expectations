@@ -577,7 +577,7 @@ specified (empty "metric_name" value detected)."""
                         if not is_parseable_date(value=metric_value):
                             raise ge_exceptions.ProfilerExecutionError(
                                 message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
-metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
+and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
 """
                             )
                     elif not (
@@ -587,7 +587,7 @@ metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
                     ):
                         raise ge_exceptions.ProfilerExecutionError(
                             message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
-metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
+and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
 """
                         )
 
