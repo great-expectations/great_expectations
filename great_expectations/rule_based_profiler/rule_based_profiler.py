@@ -342,7 +342,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     "profiler_config": {
                         "name": self.name,
                         "config_version": self.config_version,
-                        "variables": convert_variables_to_dict(variables=self.variables),
+                        "variables": convert_variables_to_dict(
+                            variables=self.variables
+                        ),
                         "rules": effective_rules_configs,
                     },
                 },
@@ -912,7 +914,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         try:
             original_config_rules = self._profiler_config.rules
             rule: Rule
-            self._profiler_config.rules = {rule.name: rule.to_json_dict() for rule in rules}
+            self._profiler_config.rules = {
+                rule.name: rule.to_json_dict() for rule in rules
+            }
             yield
         finally:
             self._profiler_config.rules = original_config_rules

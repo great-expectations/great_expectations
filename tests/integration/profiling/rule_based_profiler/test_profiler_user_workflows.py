@@ -1311,8 +1311,10 @@ def test_default_profiler_config_unchanged_after_custom_profiler_config_used(
 
     assert "profiler_config" not in default_profiler_result.expectation_config.kwargs
     assert "profiler_config" in default_profiler_result.expectation_config.meta
-    assert default_profiler_result.expectation_config.meta["profiler_config"] != custom_profiler_result.expectation_config.meta["profiler_config"]
-
+    assert (
+        default_profiler_result.expectation_config.meta["profiler_config"]
+        != custom_profiler_result.expectation_config.meta["profiler_config"]
+    )
 
 
 @pytest.mark.skipif(
