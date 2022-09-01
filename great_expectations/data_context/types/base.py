@@ -286,7 +286,7 @@ class AssetConfigSchema(Schema):
         """
         # check whether spark exists
         if StructType is None:
-            return
+            return data
 
         batch_spec_passthrough_config = data.get("batch_spec_passthrough")
         if batch_spec_passthrough_config:
@@ -769,7 +769,7 @@ continue.
         """
         # check whether spark exists
         if StructType is None:
-            return
+            return data
 
         batch_spec_passthrough_config = data.get("batch_spec_passthrough")
         if batch_spec_passthrough_config:
