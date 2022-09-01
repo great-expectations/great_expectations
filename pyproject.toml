@@ -98,13 +98,14 @@ filterwarnings = [
 ]
 junit_family="xunit2"
 markers = [
+    "base_data_context: mark test as being relevant to BaseDataContext, which will be removed during refactor",
+    "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs: mark a test as a docs test.",
-    "unit: mark a test as a unit test.",
-    "integration: mark test as an integration test.",
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
-    "cloud: mark test as being relevant to Great Expectations Cloud.",
-    "base_data_context: mark test as being relevant to BaseDataContext, which will be removed during refactor",
+    "integration: mark test as an integration test.",
+    "slow: mark tests taking longer than 1 second.",
+    "unit: mark a test as a unit test.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors)",
 ]
 testpaths = "tests"
