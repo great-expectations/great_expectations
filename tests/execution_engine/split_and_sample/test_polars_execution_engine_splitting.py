@@ -31,17 +31,17 @@ from tests.execution_engine.split_and_sample.split_and_sample_test_cases import 
     SINGLE_DATE_PART_DATE_PARTS,
 )
 
-# Here we add PandasDataSplitter specific test cases to the generic test cases:
+# Here we add PolarsDataSplitter specific test cases to the generic test cases:
 SINGLE_DATE_PART_DATE_PARTS += [
     pytest.param(
         [PolarsDataSplitter.date_part.MONTH],
-        id="month getting date parts from PandasDataSplitter.date_part",
+        id="month getting date parts from PolarsDataSplitter.date_part",
     )
 ]
 MULTIPLE_DATE_PART_DATE_PARTS += [
     pytest.param(
         [PolarsDataSplitter.date_part.YEAR, PolarsDataSplitter.date_part.MONTH],
-        id="year_month getting date parts from PandasDataSplitter.date_part",
+        id="year_month getting date parts from PolarsDataSplitter.date_part",
     )
 ]
 

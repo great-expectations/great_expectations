@@ -70,24 +70,24 @@ HASH_THRESHOLD = 1e9
 
 class PolarsExecutionEngine(ExecutionEngine):
     """
-PandasExecutionEngine instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
+PolarsExecutionEngine instantiates the great_expectations Expectations API as a subclass of a polars.DataFrame.
 
 For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
 
 Notes:
-    1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
+    1. Samples and Subsets of PolarsDataSet have ALL the expectations of the original \
        data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
        property on the original data frame.
-    2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
+    2. Concatenations, joins, and merges of PolarsDataSets contain NO expectations (since no autoinspection
        is performed by default).
 
 --ge-feature-maturity-info--
 
-    id: validation_engine_pandas
-    title: Validation Engine - Pandas
+    id: validation_engine_polars
+    title: Validation Engine - Polars
     icon:
-    short_description: Use Pandas DataFrame to validate data
-    description: Use Pandas DataFrame to validate data
+    short_description: Use Polars DataFrame to validate data
+    description: Use Polars DataFrame to validate data
     how_to_guide_url:
     maturity: Production
     maturity_details:
@@ -191,7 +191,7 @@ Notes:
             pass
         else:
             raise ge_exceptions.GreatExpectationsError(
-                "PandasExecutionEngine requires batch data that is either a DataFrame or a PandasBatchData object"
+                "PolarsExecutionEngine requires batch data that is either a DataFrame or a PolarsBatchData object"
             )
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
@@ -213,7 +213,7 @@ Notes:
             batch_data = batch_spec.batch_data
             if isinstance(batch_data, str):
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
+                    f"""PolarsExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
 Please check your config."""
                 )
             if isinstance(batch_spec.batch_data, pl.DataFrame):
@@ -222,7 +222,7 @@ Please check your config."""
                 df = batch_spec.batch_data.dataframe
             else:
                 raise ValueError(
-                    "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object."
+                    "RuntimeDataBatchSpec must provide a Polars DataFrame or PolarsBatchData object."
                 )
             batch_spec.batch_data = "PolarsDataFrame"
 
@@ -232,7 +232,7 @@ Please check your config."""
             # if we were not able to instantiate S3 client, then raise error
             if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
-                    """PandasExecutionEngine has been passed a S3BatchSpec,
+                    """PolarsExecutionEngine has been passed a S3BatchSpec,
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
                 )
             s3_engine = self._s3
@@ -248,7 +248,7 @@ Please check your config."""
                 s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             except (ParamValidationError, ClientError) as error:
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
+                    f"""PolarsExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
                 )
             logger.debug(
                 f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}"
@@ -290,7 +290,7 @@ Please check your config."""
             # if we were not able to instantiate GCS client, then raise error
             if self._gcs is None:
                 raise ge_exceptions.ExecutionEngineError(
-                    """PandasExecutionEngine has been passed a GCSBatchSpec,
+                    """PolarsExecutionEngine has been passed a GCSBatchSpec,
                         but the ExecutionEngine does not have an GCS client configured. Please check your config."""
                 )
             gcs_engine = self._gcs
@@ -305,7 +305,7 @@ Please check your config."""
                 )
             except GoogleAPIError as error:
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine encountered the following error while trying to read data from GCS Bucket: {error}"""
+                    f"""PolarsExecutionEngine encountered the following error while trying to read data from GCS Bucket: {error}"""
                 )
             reader_fn = self._get_reader_fn(reader_method, gcs_url.blob)
             buf = BytesIO(gcs_blob.download_as_bytes())
@@ -327,7 +327,7 @@ Please check your config."""
         df = self._apply_splitting_and_sampling_methods(batch_spec, df)
 
         # if df.memory_usage().sum() < HASH_THRESHOLD: ||| Polars doesn't support estimates of memory usage
-        batch_markers["pandas_data_fingerprint"] = hash_polars_dataframe(df)
+        batch_markers["polars_data_fingerprint"] = hash_polars_dataframe(df)
 
         typed_batch_data = PolarsBatchData(execution_engine=self, dataframe=df)
 
@@ -413,7 +413,7 @@ Please check your config."""
         """
         if reader_method is None and path is None:
             raise ge_exceptions.ExecutionEngineError(
-                "Unable to determine pandas reader function without reader_method or path."
+                "Unable to determine polars reader function without reader_method or path."
             )
 
         reader_options = {}
@@ -431,7 +431,7 @@ Please check your config."""
             return reader_fn
         except AttributeError:
             raise ge_exceptions.ExecutionEngineError(
-                f'Unable to find reader_method "{reader_method}" in pandas.'
+                f'Unable to find reader_method "{reader_method}" in polars.'
             )
 
     def get_domain_records(
@@ -440,7 +440,7 @@ Please check your config."""
     ) -> pl.DataFrame:
         """
         Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
-        obtain and/or query a batch. Returns in the format of a Pandas DataFrame.
+        obtain and/or query a batch. Returns in the format of a Polars DataFrame.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
@@ -451,7 +451,7 @@ Please check your config."""
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
-                "PandasExecutionEngine does not currently support multiple named tables."
+                "PolarsExecutionEngine does not currently support multiple named tables."
             )
 
         batch_id = domain_kwargs.get("batch_id")
@@ -562,7 +562,7 @@ Please check your config."""
     ) -> Tuple[pl.DataFrame, dict, dict]:
         """
         Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
-        obtain and/or query a batch.  Returns in the format of a Pandas DataFrame. If the domain is a single column,
+        obtain and/or query a batch.  Returns in the format of a Polars DataFrame. If the domain is a single column,
         this is added to 'accessor domain kwargs' and used for later access
 
         Args:
@@ -586,7 +586,7 @@ Please check your config."""
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
-                "PandasExecutionEngine does not currently support multiple named tables."
+                "PolarsExecutionEngine does not currently support multiple named tables."
             )
 
         split_domain_kwargs = self._split_domain_kwargs(

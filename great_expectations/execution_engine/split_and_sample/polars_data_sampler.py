@@ -11,7 +11,7 @@ from great_expectations.execution_engine.split_and_sample.data_sampler import (
 
 
 class PolarsDataSampler(DataSampler):
-    """Methods for sampling a pandas dataframe."""
+    """Methods for sampling a polars dataframe."""
 
     def sample_using_limit(
         self, df: pl.DataFrame, batch_spec: BatchSpec
@@ -19,7 +19,7 @@ class PolarsDataSampler(DataSampler):
         """Sample the first n rows of data.
 
         Args:
-            df: pandas dataframe.
+            df: polars dataframe.
             batch_spec: Should contain key `n` in sampling_kwargs, the number of
                 values in the sample e.g. sampling_kwargs={"n": 100}.
 
@@ -160,7 +160,7 @@ class PolarsDataSampler(DataSampler):
         except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
-                    f"""The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.
+                    f"""The sampling method used with PolarsExecutionEngine has a reference to an invalid hash_function_name.
                        Reference to {hash_function_name} cannot be found."""
                 )
             )

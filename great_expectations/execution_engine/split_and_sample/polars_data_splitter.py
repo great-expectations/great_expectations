@@ -11,7 +11,7 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import (
 
 
 class PolarsDataSplitter(DataSplitter):
-    """Methods for splitting data accessible via PandasExecutionEngine.
+    """Methods for splitting data accessible via PolarsExecutionEngine.
 
     Note, for convenience, you can also access DatePart via the instance variable
     date_part e.g. SparkDataSplitter.date_part.MONTH
@@ -218,7 +218,7 @@ class PolarsDataSplitter(DataSplitter):
             value = batch_identifiers.get(column_name)
             if not value:
                 raise ValueError(
-                    f"In order for PandasExecution to `_split_on_multi_column_values`, "
+                    f"In order for PolarsExecutionEngine to `_split_on_multi_column_values`, "
                     f"all values in column_names must also exist in batch_identifiers. "
                     f"{column_name} was not found in batch_identifiers."
                 )

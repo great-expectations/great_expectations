@@ -367,7 +367,7 @@ def test_get_compute_domain_with_unmeetable_row_condition():
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
 
-# Just checking that the Pandas Execution Engine can perform these in sequence
+# Just checking that the Polars Execution Engine can perform these in sequence
 def test_resolve_metric_bundle():
     df = pl.DataFrame({"a": [1, 2, 3, None]})
 
@@ -528,7 +528,7 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
+    "great_expectations.execution_engine.polars_execution_engine.BlobServiceClient",
 )
 def test_constructor_with_azure_options(mock_azure_conn):
     # default instantiation
@@ -579,7 +579,7 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
 
 @pytest.mark.skipif(
     storage is None,
-    reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
+    reason="Could not import 'storage' from google.cloud in polars_execution_engine.py",
 )
 @mock.patch(
     "great_expectations.execution_engine.polars_execution_engine.service_account",
@@ -603,7 +603,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
 
 @pytest.mark.skipif(
     storage is None,
-    reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
+    reason="Could not import 'storage' from google.cloud in polars_execution_engine.py",
 )
 @mock.patch(
     "great_expectations.execution_engine.polars_execution_engine.storage.Client",
@@ -632,7 +632,7 @@ def test_get_batch_data_with_gcs_batch_spec(
 def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monkeypatch):
     # If PolarsExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,
     # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.
-    # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.
+    # TODO : Determine how we can test the scenario where we are running PolarsExecutionEngine from within Google Cloud env.
 
     monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
     with pytest.raises(Exception):
@@ -641,7 +641,7 @@ def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monke
 
 @pytest.mark.skipif(
     storage is None,
-    reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
+    reason="Could not import 'storage' from google.cloud in polars_execution_engine.py",
 )
 def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):
     # gcs_batchspec point to data that the ExecutionEngine does not have access to
