@@ -194,9 +194,15 @@ class Store:
 
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
         id: Optional[str] = None
+        # Chetan - 20220831 - Explicit fork in logic to cover legacy behavior (particularly around Checkpoints).
+        # Will be removed as part of the effort to rename `ge_cloud_id` to `id` across the codebase.
+        if hasattr(config, "ge_cloud_id"):
+            id = config.ge_cloud_id  # type: ignore[attr-defined]
         if hasattr(config, "id"):
             id = config.id
+
         name: Optional[str] = None
         if hasattr(config, "name"):
             name = config.name
+
         return self.store_backend.build_key(name=name, id=id)
