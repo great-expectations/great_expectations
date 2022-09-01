@@ -26,7 +26,7 @@ from great_expectations.data_context.types.resource_identifiers import GeCloudId
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.datasource_serializer import (
-    NamedDatasourceSerializer,
+    YAMLReadyDictDatasourceConfigSerializer,
 )
 
 if TYPE_CHECKING:
@@ -363,7 +363,7 @@ class CloudDataContext(AbstractDataContext):
             resource_ref: GeCloudResourceRef = self._datasource_store.create(config)  # type: ignore[assignment]
             config.id = resource_ref.ge_cloud_id
 
-        config_property_serializer = NamedDatasourceSerializer(
+        config_property_serializer = YAMLReadyDictDatasourceConfigSerializer(
             schema=datasourceConfigSchema
         )
         self.config.datasources[config.name] = config_property_serializer.serialize(config)  # type: ignore[index,assignment]
