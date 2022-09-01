@@ -49,9 +49,6 @@ Changelog
 * [MAINTENANCE] Adding serialization tests for Spark (#5897)
 * [MAINTENANCE] Improve existing expectation suite unit tests (phase 1) (#5898)
 * [MAINTENANCE] `SqlAlchemyExecutionEngine` case for SQL Alchemy `Select` and `TextualSelect` due to `SADeprecationWarning` (#5902)
-* [MAINTENANCE] xfail Cloud E2E tests due to schema issue with `DataContextVariables` (#5828)
-* [MAINTENANCE] Clean up xfails in preparation for 0.15.20 release (#5835)
-* [MAINTENANCE] Add back xfails for E2E Cloud tests that fail on env var retrieval in Docker (#5837)
 
 0.15.20
 -----------------
@@ -82,6 +79,9 @@ Changelog
 * [MAINTENANCE] Clean up build_parameter_container_for_variables (#5823)
 * [MAINTENANCE] Bugfix/snowflake temp table schema name (#5814)
 * [MAINTENANCE] Update `list_` methods on `DataContext` to emit names along with object ids (#5826)
+* [MAINTENANCE] xfail Cloud E2E tests due to schema issue with `DataContextVariables` (#5828)
+* [MAINTENANCE] Clean up xfails in preparation for 0.15.20 release (#5835)
+* [MAINTENANCE] Add back xfails for E2E Cloud tests that fail on env var retrieval in Docker (#5837)
 
 0.15.19
 -----------------
