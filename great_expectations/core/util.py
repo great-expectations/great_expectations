@@ -285,7 +285,6 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
 
     # PySpark schema serialization
     if StructType is not None:
-        print("hello this is working!")
         if isinstance(data, StructType):
             return dict(data.jsonValue())
 

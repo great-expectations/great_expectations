@@ -2583,7 +2583,6 @@ class CheckpointConfig(BaseYamlConfig):
         super().__init__(commented_map=commented_map)
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
-
     @classmethod
     def get_config_class(cls):  # type: ignore[no-untyped-def]
         return cls  # CheckpointConfig
