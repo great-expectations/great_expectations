@@ -1623,9 +1623,7 @@ class AbstractDataContext(ABC):
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
                 config_dict = dict(datasourceConfigSchema.dump(config))
-                datasource_config = datasourceConfigSchema.load(
-                    config_dict
-                )
+                datasource_config = datasourceConfigSchema.load(config_dict)
                 datasource_config.name = datasource_name
                 datasource = self._instantiate_datasource_from_config(
                     config=datasource_config
