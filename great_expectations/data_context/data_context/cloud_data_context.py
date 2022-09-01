@@ -25,6 +25,7 @@ from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.datasource import Datasource
+from great_expectations.datasource.datasource_serializer import NamedDatasourceSerializer
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -340,8 +341,7 @@ class CloudDataContext(AbstractDataContext):
 
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
-        name: str,
-        config: dict,
+        config: DatasourceConfig,
         initialize: bool = True,
         save_changes: bool = False,
     ) -> Optional[Datasource]:
@@ -357,49 +357,26 @@ class CloudDataContext(AbstractDataContext):
             If initialize=True return an instantiated Datasource object, else None.
         """
 
-        datasource_config: DatasourceConfig = datasourceConfigSchema.load(config)
-
         if save_changes:
+            resource_ref: GeCloudResourceRef = self._datasource_store.create(config)  # type: ignore[assignment]
+            config.id = resource_ref.ge_cloud_id
 
-            datasource_config["name"] = name
-            resource_ref: GeCloudResourceRef = self._datasource_store.create(  # type: ignore[assignment]
-                datasource_config
-            )
-            datasource_config.id = resource_ref.ge_cloud_id
+        config_property_serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
+        self.config.datasources[config.name] = config_property_serializer.serialize(config)  # type: ignore[index,assignment]
 
-        self.config.datasources[name] = datasource_config  # type: ignore[index,assignment]
-
-        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
-        substitutions: dict = self._determine_substitutions()
-        config = dict(datasourceConfigSchema.dump(datasource_config))
-
-        substituted_config_dict = substitute_all_config_variables(
-            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
-
-        # Round trip through schema validation and config creation to ensure "id" is present
-        #
-        # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
-        # be refactored to into the config/schema. Also, downstream methods should be refactored
-        # to accept the config object (as opposed to a dict).
-        substituted_config = DatasourceConfig(
-            **datasourceConfigSchema.load(substituted_config_dict)
-        )
-        schema_validated_substituted_config_dict = substituted_config.to_json_dict()
+        substituted_config = self._perform_substitutions_on_datasource_config(config)
 
         datasource: Optional[Datasource] = None
         if initialize:
             try:
-                datasource = self._instantiate_datasource_from_config(
-                    name=name, config=schema_validated_substituted_config_dict
-                )
-                self._cached_datasources[name] = datasource
+                datasource = self._instantiate_datasource_from_config(config=substituted_config)
+                self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
                 if save_changes:
-                    self._datasource_store.delete(datasource_config)
+                    self._datasource_store.delete(config)
                 # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(name, None)  # type: ignore[union-attr]
+                self.config.datasources.pop(config.name, None)  # type: ignore[union-attr,arg-type]
                 raise e
 
         return datasource

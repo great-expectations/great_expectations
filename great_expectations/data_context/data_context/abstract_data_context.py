@@ -1688,6 +1688,31 @@ class AbstractDataContext(ABC):
             )
         return datasource
 
+    def _perform_substitutions_on_datasource_config(self, config: DatasourceConfig) -> DatasourceConfig:
+        """Substitute variables in a datasource config e.g. from env vars, config_vars.yml
+
+        Config must be persisted with ${VARIABLES} syntax but hydrated at time of use.
+
+        Args:
+            config: Datasource Config
+
+        Returns:
+            Datasource Config with substitutions performed.
+        """
+        substitutions: dict = self._determine_substitutions()
+
+        substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+        raw_config: dict = substitution_serializer.serialize(config)
+
+        substituted_config_dict: dict = substitute_all_config_variables(
+            raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        )
+
+        substituted_config: DatasourceConfig = datasourceConfigSchema.load(substituted_config_dict)
+
+        return substituted_config
+
+
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
         config: DatasourceConfig,
@@ -1715,17 +1740,7 @@ class AbstractDataContext(ABC):
         config_property_serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
         self.config.datasources[config.name] = config_property_serializer.serialize(config)  # type: ignore[assignment,index]
 
-        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
-        substitutions: dict = self._determine_substitutions()
-
-        substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        raw_config: dict = substitution_serializer.serialize(config)
-
-        substituted_config_dict: dict = substitute_all_config_variables(
-            raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
-
-        substituted_config: DatasourceConfig = datasourceConfigSchema.load(substituted_config_dict)
+        substituted_config = self._perform_substitutions_on_datasource_config(config)
 
         datasource: Optional[Datasource] = None
         if initialize:

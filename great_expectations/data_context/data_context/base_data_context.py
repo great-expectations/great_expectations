@@ -2898,17 +2898,15 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         return instantiated_class, usage_stats_event_payload
 
-    def _instantiate_datasource_from_config_and_update_project_config(
-        self,
-        name: str,
-        config: dict,
+    def _instantiate_datasource_from_config_and_update_project_config(  # type: ignore
+            self,
+        config: DatasourceConfig,
         initialize: bool = True,
         save_changes: bool = False,
     ) -> Optional[Datasource]:
         """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
 
         Args:
-            name: Desired name for the datasource.
             config: Config for the datasource.
             initialize: Whether to initialize the datasource or return None.
             save_changes: Whether to save the datasource config to the configured Datasource store.
@@ -2916,9 +2914,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             If initialize=True return an instantiated Datasource object, else None.
         """
-
-        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr]
-            name=name,
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr,arg-type]
             config=config,
             initialize=initialize,
             save_changes=save_changes,
