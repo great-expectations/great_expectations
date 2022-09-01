@@ -12,10 +12,16 @@ from ruamel.yaml import YAML
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
-from great_expectations.data_context.types.base import DataContextConfigSchema, datasourceConfigSchema, DatasourceConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfigSchema,
+    DatasourceConfig,
+    datasourceConfigSchema,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
-from great_expectations.datasource.datasource_serializer import YAMLReadyDictDatasourceConfigSerializer
+from great_expectations.datasource.datasource_serializer import (
+    YAMLReadyDictDatasourceConfigSerializer,
+)
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.util import is_library_loadable
@@ -98,8 +104,12 @@ def test_create_pandas_datasource(
 
     # To match what we expect out of the yaml file, we need to deserialize our config using the same mechanism
     serializer = YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema)
-    datasource_config: DatasourceConfig = DataContextConfigSchema().dump(data_context_config)["datasources"][name]
-    expected_serialized_datasource_config: dict = serializer.serialize(datasource_config)
+    datasource_config: DatasourceConfig = DataContextConfigSchema().dump(
+        data_context_config
+    )["datasources"][name]
+    expected_serialized_datasource_config: dict = serializer.serialize(
+        datasource_config
+    )
     assert (
         data_context_file_config["datasources"][name]
         == expected_serialized_datasource_config
