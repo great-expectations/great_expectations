@@ -1,7 +1,6 @@
 from copy import deepcopy
 from typing import Dict, List, Optional, Tuple, cast
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -329,16 +328,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         include_schema_name: bool = data_asset_config.get(
             "include_schema_name", self.include_schema_name
         )
-        if schema_name is not None and not include_schema_name:
-            raise ge_exceptions.DataConnectorError(
-                message=f"""{self.__class__.__name__} ran into an error while initializing Asset names.  Schema \
-{schema_name} was specified, but "include_schema_name" flag was set to False."""
-            )
 
-        if schema_name is None:
-            schema_name = ""
-        else:
+        if schema_name is not None and include_schema_name:
             schema_name = f"{schema_name}."
+        else:
+            schema_name = ""
 
         data_asset_name: str = f"{schema_name}{data_asset_name}"
 

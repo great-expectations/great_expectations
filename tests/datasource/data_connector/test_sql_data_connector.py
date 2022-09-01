@@ -1457,26 +1457,20 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     )
     assert "main.table_partitioned_by_date_column__A" in my_data_connector.assets
 
-    # schema_name given but include_schema_name is set to False
-    with pytest.raises(ge_exceptions.DataConnectorError) as e:
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine=mock_sql_alchemy_execution_engine,
-            assets={
-                "table_partitioned_by_date_column__A": {
-                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                    "splitter_kwargs": {"column_name": "date"},
-                    "include_schema_name": False,
-                    "schema_name": "main",
-                },
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=mock_sql_alchemy_execution_engine,
+        assets={
+            "table_partitioned_by_date_column__A": {
+                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+                "splitter_kwargs": {"column_name": "date"},
+                "include_schema_name": False,
+                "schema_name": "main",
             },
-        )
-
-    assert (
-        e.value.message
-        == 'ConfiguredAssetSqlDataConnector ran into an error while initializing Asset names.  Schema main was specified, but "include_schema_name" flag was set to False.'
+        },
     )
+    assert "table_partitioned_by_date_column__A" in my_data_connector.assets
 
 
 @mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
