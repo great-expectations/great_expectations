@@ -1366,6 +1366,11 @@ def test_GeCloudStoreBackend(
 
     Since GeCloudStoreBackend relies on GE Cloud, we mock requests.post, requests.get, and
     requests.patch and assert that the right calls are made for set, get, list, and remove_key.
+
+    Note that although ge_cloud_access_token is provided (and is a valid UUID), no external
+    requests are actually made as part of this test. The actual value of the token does not
+    matter here but we leverage an existing fixture to mimic the contents of requests made
+    in production. The same logic applies to all UUIDs in this test.
     """
     ge_cloud_base_url = "https://app.greatexpectations.io/"
     ge_cloud_credentials = {
