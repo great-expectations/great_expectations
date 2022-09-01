@@ -25,7 +25,9 @@ from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.datasource import Datasource
-from great_expectations.datasource.datasource_serializer import NamedDatasourceSerializer
+from great_expectations.datasource.datasource_serializer import (
+    NamedDatasourceSerializer,
+)
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -361,7 +363,9 @@ class CloudDataContext(AbstractDataContext):
             resource_ref: GeCloudResourceRef = self._datasource_store.create(config)  # type: ignore[assignment]
             config.id = resource_ref.ge_cloud_id
 
-        config_property_serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
+        config_property_serializer = NamedDatasourceSerializer(
+            schema=datasourceConfigSchema
+        )
         self.config.datasources[config.name] = config_property_serializer.serialize(config)  # type: ignore[index,assignment]
 
         substituted_config = self._perform_substitutions_on_datasource_config(config)
@@ -369,7 +373,9 @@ class CloudDataContext(AbstractDataContext):
         datasource: Optional[Datasource] = None
         if initialize:
             try:
-                datasource = self._instantiate_datasource_from_config(config=substituted_config)
+                datasource = self._instantiate_datasource_from_config(
+                    config=substituted_config
+                )
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.

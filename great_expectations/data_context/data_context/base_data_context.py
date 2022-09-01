@@ -2900,7 +2900,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return instantiated_class, usage_stats_event_payload
 
     def _instantiate_datasource_from_config_and_update_project_config(  # type: ignore
-            self,
+        self,
         config: DatasourceConfig,
         initialize: bool = True,
         save_changes: bool = False,

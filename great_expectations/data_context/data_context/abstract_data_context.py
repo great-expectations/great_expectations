@@ -20,9 +20,13 @@ from typing import (
     cast,
 )
 
-from great_expectations.core.serializer import AbstractConfigSerializer, DictConfigSerializer
+from great_expectations.core.serializer import (
+    AbstractConfigSerializer,
+    DictConfigSerializer,
+)
 from great_expectations.datasource.datasource_serializer import (
-    NamedDatasourceSerializer, YAMLReadyDictDatasourceConfigSerializer,
+    NamedDatasourceSerializer,
+    YAMLReadyDictDatasourceConfigSerializer,
 )
 
 if TYPE_CHECKING:
@@ -491,7 +495,9 @@ class AbstractDataContext(ABC):
         else:
             config = kwargs
 
-        datasource_config: DatasourceConfig = datasourceConfigSchema.load(CommentedMap(**config))
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+            CommentedMap(**config)
+        )
         datasource_config.name = name
 
         datasource: Optional[
@@ -1617,7 +1623,9 @@ class AbstractDataContext(ABC):
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
                 config_dict = dict(datasourceConfigSchema.dump(config))
-                datasource_config: DatasourceConfig = datasourceConfigSchema.load(config_dict)
+                datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+                    config_dict
+                )
                 datasource_config.name = datasource_name
                 datasource = self._instantiate_datasource_from_config(
                     config=datasource_config
@@ -1651,9 +1659,7 @@ class AbstractDataContext(ABC):
             )
         return datasource
 
-    def _build_datasource_from_config(
-        self, config: DatasourceConfig
-    ) -> Datasource:
+    def _build_datasource_from_config(self, config: DatasourceConfig) -> Datasource:
         """Instantiate a Datasource from a config.
 
         Args:
@@ -1689,7 +1695,9 @@ class AbstractDataContext(ABC):
             )
         return datasource
 
-    def _perform_substitutions_on_datasource_config(self, config: DatasourceConfig) -> DatasourceConfig:
+    def _perform_substitutions_on_datasource_config(
+        self, config: DatasourceConfig
+    ) -> DatasourceConfig:
         """Substitute variables in a datasource config e.g. from env vars, config_vars.yml
 
         Config must be persisted with ${VARIABLES} syntax but hydrated at time of use.
@@ -1709,10 +1717,11 @@ class AbstractDataContext(ABC):
             raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
-        substituted_config: DatasourceConfig = datasourceConfigSchema.load(substituted_config_dict)
+        substituted_config: DatasourceConfig = datasourceConfigSchema.load(
+            substituted_config_dict
+        )
 
         return substituted_config
-
 
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
@@ -1738,7 +1747,9 @@ class AbstractDataContext(ABC):
                 datasource_name=config.name, datasource_config=config
             )
 
-        config_property_serializer = YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema)
+        config_property_serializer = YAMLReadyDictDatasourceConfigSerializer(
+            schema=datasourceConfigSchema
+        )
         self.config.datasources[config.name] = config_property_serializer.serialize(config)  # type: ignore[assignment,index]
 
         substituted_config = self._perform_substitutions_on_datasource_config(config)
