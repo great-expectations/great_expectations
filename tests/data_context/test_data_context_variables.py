@@ -590,6 +590,11 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     assert success is True
 
 
+@pytest.mark.xfail(
+    reason="GX Cloud E2E tests are currently failing intermittently due to env vars not being recognized by Docker; xfailing with strict=False for purposes of the 0.15.21 release",
+    run=True,
+    strict=False,
+)
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
