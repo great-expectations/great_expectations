@@ -87,17 +87,19 @@ try:
         TextClause,
         quoted_name,
     )
+    from sqlalchemy.sql.selectable import Select
 except ImportError:
-    Row = None
-    Dialect = None
-    reflection = None
-    DefaultDialect = None
-    Selectable = None
     BooleanClauseList = None
+    DefaultDialect = None
+    Dialect = None
+    Label = None
+    OperationalError = None
+    reflection = None
+    Row = None
+    Select = None
+    Selectable = None
     TextClause = None
     quoted_name = None
-    OperationalError = None
-    Label = None
 
 
 try:
@@ -962,6 +964,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.select(query["select"]).select_from(
                             selectable.columns().subquery()
                         )
+                    ).fetchall()
+                elif Select and isinstance(selectable, Select):
+                    res = self.engine.execute(
+                        sa.select(query["select"]).select_from(selectable.subquery())
                     ).fetchall()
                 else:
                     res = self.engine.execute(
