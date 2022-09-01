@@ -180,7 +180,8 @@ stages:
       - job: compatibility_matrix
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
         variables:
-          GE_pytest_opts: '--no-sqlalchemy'
+          - group: 'common_secrets'
+          - GE_pytest_opts: '--no-sqlalchemy'
         strategy:
           matrix:
             Python37-Pandas023:
@@ -260,7 +261,7 @@ stages:
             env:
               CIRCLECI: 1
               CIRCLE_BUILD_NUM: $(Build.BuildNumber)
-              COVERALLS_REPO_TOKEN: $(common_secrets.coveralls)
+              COVERALLS_REPO_TOKEN: $(coveralls)
 
           - script: |
               # Install dependencies
