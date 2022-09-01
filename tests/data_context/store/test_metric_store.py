@@ -82,6 +82,7 @@ def in_memory_param_store(request, test_backends):
     )
 
 
+@pytest.mark.unit
 def test_metric_store_store_backend_id(in_memory_param_store):
     """
     What does this test and why?
