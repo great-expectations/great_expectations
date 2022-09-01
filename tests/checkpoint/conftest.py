@@ -8,8 +8,6 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
 
-yaml = YAMLHandler()
-
 
 @pytest.fixture
 def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation(
@@ -145,6 +143,8 @@ def context_with_single_taxi_csv_spark(
     empty_data_context, tmp_path_factory, spark_session
 ):
     context = empty_data_context
+
+    yaml = YAMLHandler()
 
     base_directory = str(tmp_path_factory.mktemp("test_checkpoint_spark"))
     taxi_asset_base_directory_path: str = os.path.join(base_directory, "data")

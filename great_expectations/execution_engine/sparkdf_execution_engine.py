@@ -297,10 +297,9 @@ Please check your config."""
             # schema can be a dict if it has been through serialization step,
             # either as part of the datasource configuration, or checkpoint config
             if isinstance(schema, dict):
-                schema_converted: pyspark.sql.types.StructType = (
-                    sparktypes.StructType.fromJson(schema)
+                schema: pyspark.sql.types.StructType = sparktypes.StructType.fromJson(
+                    schema
                 )
-                schema = schema_converted
 
             # this can happen if we have not converted schema into json at Datasource-config level
             elif isinstance(schema, str):
