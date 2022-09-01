@@ -197,7 +197,7 @@ class Store:
         # Chetan - 20220831 - Explicit fork in logic to cover legacy behavior (particularly around Checkpoints).
         # Will be removed as part of the effort to rename `ge_cloud_id` to `id` across the codebase.
         if hasattr(config, "ge_cloud_id"):
-            id = config.ge_cloud_id
+            id = config.ge_cloud_id  # type: ignore[attr-defined]
         if hasattr(config, "id"):
             id = config.id
 
