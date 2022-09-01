@@ -225,9 +225,14 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             and isinstance(self.assets[data_asset_name].batch_spec_passthrough, dict)
         ):
             # batch_spec_passthrough from data_asset
-            batch_spec_passthrough = deepcopy(
-                self.assets[data_asset_name]["batch_spec_passthrough"]
-            )
+            if isinstance(self.assets[data_asset_name], Asset):
+                batch_spec_passthrough = deepcopy(
+                    self.assets[data_asset_name].batch_spec_passthrough
+                )
+            else:
+                batch_spec_passthrough = deepcopy(
+                    self.assets[data_asset_name]["batch_spec_passthrough"]
+                )
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}
             )
