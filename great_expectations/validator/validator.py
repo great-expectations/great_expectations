@@ -11,6 +11,7 @@ from collections.abc import Hashable
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse
+from marshmallow import ValidationError
 from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
@@ -48,7 +49,6 @@ from great_expectations.expectations.registry import (
     get_metric_provider,
     list_registered_expectation_implementations,
 )
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -150,7 +150,7 @@ class Validator:
             Any
         ] = None,  # Cannot type DataContext due to circular import
         batches: Optional[List[Batch]] = None,
-        include_rendered_content: bool = False,
+        include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
         """
@@ -284,7 +284,7 @@ class Validator:
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
             )
 
-    def validate_expectation(self, name: str) -> Callable:
+    def validate_expectation(self, name: str) -> Callable:  # noqa: C901 - complexity 16
         """
         Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the
                 expectation's validate method to obtain a validation result. Also adds in the runtime configuration
@@ -297,7 +297,7 @@ class Validator:
         """
         expectation_impl = get_expectation_impl(name)
 
-        def inst_expectation(*args, **kwargs):
+        def inst_expectation(*args, force_no_progress_bar: bool = False, **kwargs):
             # this is used so that exceptions are caught appropriately when they occur in expectation config
 
             # TODO: JPC - THIS LOGIC DOES NOT RESPECT DEFAULTS SET BY USERS IN THE VALIDATOR VS IN THE EXPECTATION
@@ -374,6 +374,7 @@ class Validator:
                         evaluation_parameters=self._expectation_suite.evaluation_parameters,
                         data_context=self._data_context,
                         runtime_configuration=basic_runtime_configuration,
+                        force_no_progress_bar=force_no_progress_bar,
                     )
 
                 # If validate has set active_validation to true, then we do not save the config to avoid
@@ -414,6 +415,11 @@ class Validator:
                     )
                 else:
                     raise err
+
+            if self._include_rendered_content:
+                validation_result.render()
+                validation_result.expectation_config.render()
+
             return validation_result
 
         inst_expectation.__name__ = name
@@ -636,7 +642,7 @@ class Validator:
             profiler_config.name == expectation_type
         ), "The name of profiler used to build an ExpectationConfiguration must equal to expectation_type of the expectation being invoked."
 
-        profiler: BaseRuleBasedProfiler = BaseRuleBasedProfiler(
+        profiler = BaseRuleBasedProfiler(
             profiler_config=profiler_config,
             data_context=self.data_context,
         )
@@ -806,13 +812,19 @@ class Validator:
         ]
 
     def compute_metrics(
-        self, metric_configurations: List[MetricConfiguration]
+        self,
+        metric_configurations: List[MetricConfiguration],
+        force_no_progress_bar: bool = False,
     ) -> Dict[Tuple[str, str, str], Any]:
         """
-        metrics: List of desired MetricConfiguration objects to be resolved.
-        Return Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+        Args:
+            metric_configurations: List of desired MetricConfiguration objects to be resolved.
+            force_no_progress_bar: (bool) if True, prevent all "Calculating Metrics" output; (False by default).
+
+        Returns:
+            Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
-        graph: ValidationGraph = ValidationGraph()
+        graph = ValidationGraph()
 
         metric_configuration: MetricConfiguration
         for metric_configuration in metric_configurations:
@@ -844,6 +856,7 @@ class Validator:
         ] = self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
+            force_no_progress_bar=force_no_progress_bar,
         )
 
         if aborted_metrics_info:
@@ -853,13 +866,22 @@ class Validator:
 
         return resolved_metrics
 
-    def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
+    def get_metrics(
+        self,
+        metrics: Dict[str, MetricConfiguration],
+        force_no_progress_bar: bool = False,
+    ) -> Dict[str, Any]:
         """
-        metrics: Dictionary of desired metrics to be resolved, with metric_name as key and MetricConfiguration as value.
-        Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
+        Args:
+            metrics: Dictionary of desired metrics to be resolved, with metric_name as key and MetricConfiguration as value.
+            force_no_progress_bar: (bool) if True, prevent all "Calculating Metrics" output; (False by default).
+
+        Returns:
+            Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
         """
         resolved_metrics: Dict[Tuple[str, str, str], Any] = self.compute_metrics(
-            metric_configurations=list(metrics.values())
+            metric_configurations=list(metrics.values()),
+            force_no_progress_bar=force_no_progress_bar,
         )
 
         return {
@@ -895,31 +917,38 @@ class Validator:
                     key
                 ] = metric_provider_cls.default_kwarg_values[key]
 
-    def get_metric(self, metric: MetricConfiguration) -> Any:
+    def get_metric(
+        self,
+        metric: MetricConfiguration,
+        force_no_progress_bar: bool = False,
+    ) -> Any:
         """return the value of the requested metric."""
-        return self.get_metrics(metrics={metric.metric_name: metric})[
-            metric.metric_name
-        ]
+        return self.get_metrics(
+            metrics={metric.metric_name: metric},
+            force_no_progress_bar=force_no_progress_bar,
+        )[metric.metric_name]
 
     def graph_validate(
         self,
         configurations: List[ExpectationConfiguration],
         metrics: Optional[Dict[Tuple[str, str, str], Any]] = None,
         runtime_configuration: Optional[dict] = None,
+        force_no_progress_bar: bool = False,
     ) -> List[ExpectationValidationResult]:
         """Obtains validation dependencies for each metric using the implementation of their associated expectation,
         then proceeds to add these dependencies to the validation graph, supply readily available metric implementations
         to fulfill current metric requirements, and validate these metrics.
 
-                Args:
-                    configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that
-                    will be used to supply domain and values for metrics.
-                    metrics (dict): A list of currently registered metrics in the registry
-                    runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics
-                    such as the result_format.
+        Args:
+            configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will be
+            used to supply domain and values for metrics.
+            metrics (dict): A list of currently registered metrics in the registry
+            runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics, such as the
+            result_format.
+            force_no_progress_bar: (bool) if True, prevent all "Calculating Metrics" output; (False by default).
 
-                Returns:
-                    A list of Validations, validating that all necessary metrics are available.
+        Returns:
+            A list of Validations, validating that all necessary metrics are available.
         """
         if runtime_configuration is None:
             runtime_configuration = {}
@@ -965,6 +994,7 @@ class Validator:
                 expectation_validation_graphs=expectation_validation_graphs,
                 evrs=evrs,
                 processed_configurations=processed_configurations,
+                force_no_progress_bar=force_no_progress_bar,
             )
         except Exception as err:
             # If a general Exception occurs during the execution of "Validator.resolve_validation_graph()", then all
@@ -1059,11 +1089,11 @@ class Validator:
                 if catch_exceptions:
                     exception_traceback: str = traceback.format_exc()
                     exception_message: str = str(err)
-                    exception_info: ExceptionInfo = ExceptionInfo(
+                    exception_info = ExceptionInfo(
                         exception_traceback=exception_traceback,
                         exception_message=exception_message,
                     )
-                    result: ExpectationValidationResult = ExpectationValidationResult(
+                    result = ExpectationValidationResult(
                         success=False,
                         exception_info=exception_info,
                         expectation_config=evaluated_config,
@@ -1088,7 +1118,7 @@ class Validator:
                 ]
             )
         )
-        validation_graph: ValidationGraph = ValidationGraph(edges=edges)
+        validation_graph = ValidationGraph(edges=edges)
         return validation_graph
 
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
@@ -1099,6 +1129,7 @@ class Validator:
         expectation_validation_graphs: List[ExpectationValidationGraph],
         evrs: List[ExpectationValidationResult],
         processed_configurations: List[ExpectationConfiguration],
+        force_no_progress_bar: bool = False,
     ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
         aborted_metrics_info: Dict[
@@ -1108,6 +1139,7 @@ class Validator:
             graph=validation_graph,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
+            force_no_progress_bar=force_no_progress_bar,
         )
 
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
@@ -1157,7 +1189,7 @@ class Validator:
             List of ExpectationValidationResult objects with unsuccessful ExpectationValidationResult objects appended
         """
         exception_message: str = str(exception)
-        exception_info: ExceptionInfo = ExceptionInfo(
+        exception_info = ExceptionInfo(
             exception_traceback=exception_traceback,
             exception_message=exception_message,
         )
@@ -1230,6 +1262,7 @@ class Validator:
         metrics: Dict[Tuple[str, str, str], Any],
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
+        force_no_progress_bar: bool = False,
     ) -> Dict[
         Tuple[str, str, str],
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
@@ -1269,7 +1302,7 @@ class Validator:
             if len(graph.edges) < min_graph_edges_pbar_enable:
                 disable = True
 
-            if progress_bar is None:
+            if progress_bar is None and not force_no_progress_bar:
                 # noinspection PyProtectedMember,SpellCheckingInspection
                 progress_bar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
@@ -1300,8 +1333,9 @@ class Validator:
                         runtime_configuration=runtime_configuration,
                     )
                 )
-                progress_bar.update(len(computable_metrics))
-                progress_bar.refresh()
+                if progress_bar:
+                    progress_bar.update(len(computable_metrics))
+                    progress_bar.refresh()
             except MetricResolutionError as err:
                 if catch_exceptions:
                     exception_traceback = traceback.format_exc()
@@ -1343,7 +1377,8 @@ aborting graph resolution.
             ):
                 done = True
 
-        progress_bar.close()
+        if progress_bar:
+            progress_bar.close()
 
         return aborted_metrics_info
 
@@ -1965,9 +2000,11 @@ set as active.
                 configurations=expectations_to_evaluate,
                 runtime_configuration=runtime_configuration,
             )
+
             if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
+                    validation_result.expectation_config.render()
             statistics = _calc_validation_statistics(results)
 
             if only_return_failures:

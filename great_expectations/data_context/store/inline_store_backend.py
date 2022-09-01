@@ -1,5 +1,6 @@
 import logging
-from typing import Any, List, Optional, Tuple
+import pathlib
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -10,6 +11,9 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions.exceptions import StoreBackendError
 from great_expectations.util import filter_properties_dict
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +38,7 @@ class InlineStoreBackend(StoreBackend):
 
     def __init__(
         self,
-        data_context: "DataContext",  # noqa: F821
+        data_context: "DataContext",
         resource_type: DataContextVariableSchema,
         runtime_environment: Optional[dict] = None,
         fixed_length_key: bool = False,
@@ -164,10 +168,10 @@ class InlineStoreBackend(StoreBackend):
 
     def build_key(
         self,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         name: Optional[str] = None,
     ) -> DataContextVariableKey:
-        """Get the store backend specific implementation of the key. id_ included for super class compatibility."""
+        """Get the store backend specific implementation of the key. id included for super class compatibility."""
         return DataContextVariableKey(
             resource_name=name,
         )
@@ -183,8 +187,16 @@ class InlineStoreBackend(StoreBackend):
         return resource_type in self._data_context.config
 
     def _save_changes(self) -> None:
-        # NOTE: <DataContextRefactor> This responsibility will be moved into DataContext Variables object
-        self._data_context._save_project_config()
+        context = self._data_context
+        config_filepath = pathlib.Path(context.root_directory) / context.GE_YML  # type: ignore[arg-type]
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                context.config.to_yaml(outfile)
+        # In environments where wrting to disk is not allowed, it is impossible to
+        # save changes. As such, we log a warning but do not raise.
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
 
     @staticmethod
     def _determine_resource_name(key: Tuple[str, ...]) -> Optional[str]:

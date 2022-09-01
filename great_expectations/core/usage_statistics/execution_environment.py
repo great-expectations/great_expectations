@@ -5,7 +5,7 @@ to help enable the core team to safely upgrade package dependencies to gain
 access to features of new package versions.
 
     Typical usage example:
-        ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
+        ge_execution_environment = GEExecutionEnvironment()
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
 """
@@ -15,10 +15,10 @@ import sys
 from dataclasses import dataclass
 from typing import List, Optional
 
+from marshmallow import Schema, fields
 from packaging import version
 
 from great_expectations.core.usage_statistics.package_dependencies import GEDependencies
-from great_expectations.marshmallow__shade import Schema, fields
 
 if sys.version_info < (3, 8):
     # Note: importlib_metadata is included in the python standard library as importlib
@@ -59,7 +59,7 @@ class GEExecutionEnvironment:
     """
 
     def __init__(self) -> None:
-        self._ge_dependencies: GEDependencies = GEDependencies()
+        self._ge_dependencies = GEDependencies()
         self._all_installed_packages = None
         self._get_all_installed_packages()
 

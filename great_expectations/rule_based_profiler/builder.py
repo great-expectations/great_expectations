@@ -63,11 +63,15 @@ class Builder(SerializableDictDot):
     def data_context(self) -> Optional["BaseDataContext"]:  # noqa: F821
         return self._data_context
 
-    def set_batch_list_or_batch_request(
+    def set_batch_list_if_null_batch_request(
         self,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> None:
+        """
+        If "batch_request" is already set on "Builder" object, then it is not overwritten.  However, if "batch_request"
+        is absent, then "batch_list" is accepted to support scenarios, where "Validator" already loaded "Batch" objects.
+        """
         if self.batch_request is None:
             self.set_batch_data(
                 batch_list=batch_list,

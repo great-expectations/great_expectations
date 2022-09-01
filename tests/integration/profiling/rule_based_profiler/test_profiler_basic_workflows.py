@@ -172,7 +172,7 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
         expectation_type="expect_column_values_to_not_be_null",
         column="$domain.domain_kwargs.column",
     )
-    simple_rule: Rule = Rule(
+    simple_rule = Rule(
         name="rule_with_no_variables_no_parameters",
         variables=None,
         domain_builder=domain_builder,
@@ -226,7 +226,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
             column="$domain.domain_kwargs.column",
         )
     )
-    simple_rule: Rule = Rule(
+    simple_rule = Rule(
         name="rule_with_variables_and_parameters",
         variables=None,
         domain_builder=domain_builder,
@@ -276,7 +276,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
             column="$domain.domain_kwargs.column",
         )
     )
-    simple_variables_rule: Rule = Rule(
+    simple_variables_rule = Rule(
         name="rule_with_no_variables_no_parameters",
         variables=None,
         domain_builder=domain_builder,
@@ -288,26 +288,33 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         config_version=1.0,
         data_context=context,
     )
+
+    # Config would normally go through schema validation to remove optional values (such as id)
+    # but for purposes of testing, we deem `to_json_dict` appropriate.
     res: dict = my_rbp.config.to_json_dict()
     assert res == {
         "class_name": "RuleBasedProfiler",
         "module_name": "great_expectations.rule_based_profiler",
         "name": "my_rbp",
+        "id": None,
         "config_version": 1.0,
         "rules": None,
         "variables": {},
     }
     my_rbp.add_rule(rule=simple_variables_rule)
-    context.save_profiler(name="my_rbp", profiler=my_rbp)
+    context.save_profiler(profiler=my_rbp)
 
     # load profiler from store
     my_loaded_profiler: RuleBasedProfiler = context.get_profiler(name="my_rbp")
 
+    # Config would normally go through schema validation to remove optional values (such as id)
+    # but for purposes of testing, we deem `to_json_dict` appropriate.
     res = my_loaded_profiler.config.to_json_dict()
     assert res == {
         "module_name": "great_expectations.rule_based_profiler",
         "class_name": "RuleBasedProfiler",
         "name": "my_rbp",
+        "id": None,
         "config_version": 1.0,
         "variables": {},
         "rules": {
@@ -327,6 +334,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "name": "my_column_min",
                         "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "single_batch_mode": False,
                         "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,

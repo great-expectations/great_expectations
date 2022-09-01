@@ -1,5 +1,6 @@
 import logging
-from typing import Callable, List, Optional, Tuple, Union
+from collections import namedtuple
+from typing import Callable, List, Optional, Union
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -9,22 +10,40 @@ from great_expectations.expectations.registry import (
     get_renderer_impl,
     get_renderer_names_with_renderer_prefix,
 )
+from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import RenderedAtomicContent
 
+try:
+    from typing import TypedDict  # type: ignore[attr-defined]
+except ImportError:
+    from typing_extensions import TypedDict
+
 logger = logging.getLogger(__name__)
+
+
+class InlineRendererConfig(TypedDict):
+    class_name: str
+    render_object: Union[ExpectationConfiguration, ExpectationValidationResult]
 
 
 class InlineRenderer(Renderer):
     def __init__(
         self,
-        render_object: ExpectationValidationResult,
+        render_object: Union[ExpectationConfiguration, ExpectationValidationResult],
     ) -> None:
         super().__init__()
 
-        self._render_object = render_object
+        if isinstance(
+            render_object, (ExpectationConfiguration, ExpectationValidationResult)
+        ):
+            self._render_object = render_object
+        else:
+            raise InvalidRenderedContentError(
+                f"InlineRenderer can only be used with an ExpectationConfiguration or ExpectationValidationResult, but {type(render_object)} was used."
+            )
 
-    def get_atomic_rendered_content_for_object(
+    def _get_atomic_rendered_content_for_object(
         self,
         render_object: Union[ExpectationConfiguration, ExpectationValidationResult],
     ) -> List[RenderedAtomicContent]:
@@ -46,9 +65,8 @@ class InlineRenderer(Renderer):
             expectation_type = render_object.expectation_config.expectation_type
             renderer_prefix = "atomic.diagnostic"
         else:
-            raise ValueError(
-                f"""object must be of type ExpectationConfiguration or ExpectationValidationResult,
-but an object of type "{type(render_object)}" was passed."""
+            raise InvalidRenderedContentError(
+                f"InlineRenderer._get_atomic_rendered_content_for_object can only be used with an ExpectationConfiguration or ExpectationValidationResult, but {type(render_object)} was used."
             )
 
         renderer_names: List[str] = get_renderer_names_with_renderer_prefix(
@@ -134,15 +152,16 @@ Default renderer "{default_prescriptive_renderer_name}" will be used to render p
 
         return renderer_rendered_content
 
-    def render(self) -> Tuple[List[RenderedAtomicContent], List[RenderedAtomicContent]]:
-        """Gets RenderedAtomicContent for a given ExpectationConfiguration or ExpectationValidationResult.
+    def get_rendered_content(
+        self,
+    ) -> List[RenderedAtomicContent]:
+        """Gets RenderedAtomicContent for a given object.
 
         Returns:
-            A tuple containing RenderedAtomicContent objects for a given ExpectationConfiguration (index 0) and
-            ExpectationValidationResult (index 1).
+            RenderedAtomicContent for a given object.
         """
-        render_object: ExpectationValidationResult = self._render_object
+        render_object: Union[
+            ExpectationConfiguration, ExpectationValidationResult
+        ] = self._render_object
 
-        return self.get_atomic_rendered_content_for_object(
-            render_object=render_object.expectation_config
-        ), self.get_atomic_rendered_content_for_object(render_object=render_object)
+        return self._get_atomic_rendered_content_for_object(render_object=render_object)

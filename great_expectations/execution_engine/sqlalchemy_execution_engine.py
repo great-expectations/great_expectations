@@ -87,17 +87,20 @@ try:
         TextClause,
         quoted_name,
     )
+    from sqlalchemy.sql.selectable import Select, TextualSelect
 except ImportError:
-    Row = None
-    Dialect = None
-    reflection = None
-    DefaultDialect = None
-    Selectable = None
     BooleanClauseList = None
-    TextClause = None
-    quoted_name = None
-    OperationalError = None
+    DefaultDialect = None
+    Dialect = None
     Label = None
+    OperationalError = None
+    reflection = None
+    Row = None
+    Select = None
+    Selectable = None
+    TextClause = None
+    TextualSelect = None
+    quoted_name = None
 
 
 try:
@@ -918,7 +921,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
 
-            domain_id = compute_domain_kwargs.to_id()
+            domain_id = IDDict.convert_dictionary_to_id_dict(
+                data=convert_to_json_serializable(data=compute_domain_kwargs)
+            ).to_id()
             if domain_id not in queries:
                 queries[domain_id] = {
                     "select": [],
@@ -961,13 +966,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                             selectable.columns().subquery()
                         )
                     ).fetchall()
+                elif (Select and isinstance(selectable, Select)) or (
+                    TextualSelect and isinstance(selectable, TextualSelect)
+                ):
+                    res = self.engine.execute(
+                        sa.select(query["select"]).select_from(selectable.subquery())
+                    ).fetchall()
                 else:
                     res = self.engine.execute(
                         sa.select(query["select"]).select_from(selectable)
                     ).fetchall()
 
                 logger.debug(
-                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
+                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"
                 )
             except OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
@@ -1142,7 +1153,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         batch_data: Optional[SqlAlchemyBatchData] = None
-        batch_markers: BatchMarkers = BatchMarkers(
+        batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"

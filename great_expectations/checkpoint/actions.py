@@ -496,6 +496,7 @@ class OpsgenieAlertAction(ValidationAction):
         region=None,
         priority="P3",
         notify_on="failure",
+        tags: Optional[list] = None,
     ) -> None:
         """Construct a OpsgenieAlertAction
 
@@ -525,6 +526,7 @@ class OpsgenieAlertAction(ValidationAction):
         self.region = region
         self.priority = priority
         self.notify_on = notify_on
+        self.tags = tags
 
     def _run(
         self,
@@ -571,6 +573,7 @@ class OpsgenieAlertAction(ValidationAction):
                 "api_key": self.api_key,
                 "region": self.region,
                 "priority": self.priority,
+                "tags": self.tags,
             }
 
             description = self.renderer.render(validation_result_suite, None, None)
@@ -813,9 +816,9 @@ class StoreValidationResultAction(ValidationAction):
                 )
             )
 
-        contract_ge_cloud_id = None
+        checkpoint_ge_cloud_id = None
         if self.data_context.ge_cloud_mode and checkpoint_identifier:
-            contract_ge_cloud_id = checkpoint_identifier.ge_cloud_id
+            checkpoint_ge_cloud_id = checkpoint_identifier.ge_cloud_id
 
         expectation_suite_ge_cloud_id = None
         if self.data_context.ge_cloud_mode and expectation_suite_identifier:
@@ -826,7 +829,7 @@ class StoreValidationResultAction(ValidationAction):
         return_val = self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
-            contract_id=contract_ge_cloud_id,
+            checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
         if self.data_context.ge_cloud_mode:
@@ -1131,7 +1134,7 @@ class CloudNotificationAction(ValidationAction):
 
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
-            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/contracts/"
+            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/checkpoints/"
             f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
         )
         auth_headers = {

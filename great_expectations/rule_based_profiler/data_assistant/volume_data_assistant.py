@@ -73,11 +73,11 @@ class VolumeDataAssistant(DataAssistant):
             _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,
+            rule_domain_builder_execution_time=data_assistant_result.rule_domain_builder_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
-            execution_time=data_assistant_result.execution_time,
             _usage_statistics_handler=data_assistant_result._usage_statistics_handler,
         )
 
@@ -88,7 +88,7 @@ class VolumeDataAssistant(DataAssistant):
         """
         # Step-1: Instantiate "TableDomainBuilder" object.
 
-        table_domain_builder: TableDomainBuilder = TableDomainBuilder(
+        table_domain_builder = TableDomainBuilder(
             data_context=None,
         )
 
@@ -118,7 +118,7 @@ class VolumeDataAssistant(DataAssistant):
                 **table_row_count_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_table_row_count_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_table_row_count_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_table_row_count_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             min_value=f"{table_row_count_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
@@ -151,7 +151,7 @@ class VolumeDataAssistant(DataAssistant):
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
             expect_table_row_count_to_be_between_expectation_configuration_builder,
         ]
-        rule: Rule = Rule(
+        rule = Rule(
             name="table_rule",
             variables=variables,
             domain_builder=table_domain_builder,
@@ -212,7 +212,7 @@ class VolumeDataAssistant(DataAssistant):
                 **column_distinct_values_count_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_column_unique_value_count_to_be_between_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+        expect_column_unique_value_count_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_unique_value_count_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -252,7 +252,7 @@ class VolumeDataAssistant(DataAssistant):
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
             expect_column_unique_value_count_to_be_between_expectation_configuration_builder,
         ]
-        rule: Rule = Rule(
+        rule = Rule(
             name="categorical_columns_rule",
             variables=variables,
             domain_builder=categorical_column_type_domain_builder,

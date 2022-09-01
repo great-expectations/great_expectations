@@ -9,6 +9,7 @@ To show all available tasks `invoke --list`
 To show task help page `invoke <NAME> --help`
 """
 import json
+import os
 import pathlib
 import shutil
 
@@ -116,43 +117,16 @@ def type_coverage(ctx):
     try:
         check_type_hint_coverage.main()
     except AssertionError as err:
-        raise invoke.Exit(message=str(err), code=1)
-
-
-# numbers next to each package represent the last known number of typing errors.
-# when errors reach 0 please uncomment the module so it becomes type-checked by default.
-DEFAULT_PACKAGES_TO_TYPE_CHECK = [
-    # "checkpoint",  # 78
-    # "cli",  # 237
-    # "core",  # 242
-    "data_asset",  # 0
-    # "data_context",  # 242
-    # "data_context/data_context",  # 195
-    # "data_context/store", # 83
-    "data_context/types",  # 0
-    # "datasource",  # 98
-    "exceptions",  # 0
-    # "execution_engine",  # 109
-    # "expectations",  # 462
-    "jupyter_ux",  # 0
-    # "marshmallow__shade",  # 14
-    "profile",  # 0
-    # "render",  # 87
-    # "rule_based_profiler",  # 469
-    "self_check",  # 0
-    "types",  # 0
-    # "validation_operators", # 47
-    # "validator",  # 46
-    # util.py # 28
-]
+        raise invoke.Exit(
+            message=f"{err}\n\n  See {check_type_hint_coverage.__file__}", code=1
+        )
 
 
 @invoke.task(
     aliases=["types"],
     iterable=["packages"],
     help={
-        "packages": f"One or more packages to type-check with mypy. (Default: {DEFAULT_PACKAGES_TO_TYPE_CHECK})",
-        "show-default-packages": "Print the default packages to type-check and then exit.",
+        "packages": "One or more `great_expectatations` sub-packages to type-check with mypy.",
         "install-types": "Automatically install any needed types from `typeshed`.",
         "daemon": "Run mypy in daemon mode with faster analysis."
         " The daemon will be started and re-used for subsequent calls."
@@ -164,9 +138,9 @@ def type_check(
     ctx,
     packages,
     install_types=False,
-    show_default_packages=False,
     daemon=False,
     clear_cache=False,
+    report=False,
 ):
     """Run mypy static type-checking on select packages."""
     if clear_cache:
@@ -178,21 +152,11 @@ def type_check(
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 
-    if show_default_packages:
-        # Use this to keep the Type-checking section of the docs up to date.
-        # https://docs.greatexpectations.io/docs/contributing/style_guides/code_style#type-checking
-        print("\n".join(DEFAULT_PACKAGES_TO_TYPE_CHECK))
-        raise invoke.Exit(code=0)
-
     if daemon:
         bin = "dmypy run --"
     else:
         bin = "mypy"
 
-    packages = packages or DEFAULT_PACKAGES_TO_TYPE_CHECK
-    # once we have sunsetted `type-coverage` and our typing has matured we should define
-    # our packages to exclude (if any) in the mypy config file.
-    # https://mypy.readthedocs.io/en/stable/config_file.html#confval-exclude
     ge_pkgs = [f"great_expectations/{p}" for p in packages]
     cmds = [
         bin,
@@ -203,6 +167,8 @@ def type_check(
     if daemon:
         # see related issue https://github.com/python/mypy/issues/9475
         cmds.extend(["--follow-imports=normal"])
+    if report:
+        cmds.extend(["--txt-report", "type_cov", "--html-report", "type_cov"])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
@@ -239,3 +205,149 @@ def mv_usage_stats_json(ctx):
     cmd = cmd.format(outfile)
     ctx.run(cmd)
     print(f"'{outfile}' copied to dbfs.")
+
+
+UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
+
+
+@invoke.task(
+    aliases=["test"],
+    help={
+        "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
+        "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
+        "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
+        "slowest": "Report on the slowest n number of tests",
+        "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
+        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",
+        "html": "Create html coverage report",
+        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
+        "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
+    },
+)
+def tests(
+    ctx,
+    unit=True,
+    integration=False,
+    ignore_markers=False,
+    ci=False,
+    html=False,
+    cloud=True,
+    slowest=5,
+    timeout=UNIT_TEST_DEFAULT_TIMEOUT,
+    package=None,
+    full_cov=False,
+):
+    """
+    Run tests. Runs unit tests by default.
+
+    Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage (or lack thereof).
+    """
+    markers = []
+    if integration:
+        markers += ["integration"]
+        unit = False
+    markers += ["unit" if unit else "not unit"]
+
+    marker_text = " and ".join(markers)
+
+    cov_param = "--cov=great_expectations"
+    if package and not full_cov:
+        cov_param += f"/{package.replace('.', '/')}"
+
+    cmds = [
+        "pytest",
+        f"--durations={slowest}",
+        cov_param,
+        "--cov-report term",
+        "-vv",
+    ]
+    if not ignore_markers:
+        cmds += ["-m", f"'{marker_text}'"]
+    if unit and not ignore_markers:
+        try:
+            import pytest_timeout  # noqa: F401
+
+            cmds += [f"--timeout={timeout}"]
+        except ImportError:
+            print("`pytest-timeout` is not installed, cannot use --timeout")
+
+    if cloud:
+        cmds += ["--cloud"]
+    if ci:
+        cmds += ["--cov-report", "xml"]
+    if html:
+        cmds += ["--cov-report", "html"]
+    if package:
+        cmds += [f"tests/{package.replace('.', '/')}"]  # allow `foo.bar`` format
+    ctx.run(" ".join(cmds), echo=True, pty=True)
+
+
+PYTHON_VERSION_DEFAULT: float = 3.8
+
+
+@invoke.task(
+    help={
+        "name": "Docker image name.",
+        "tag": "Docker image tag.",
+        "build": "If True build the image, otherwise run it. Defaults to False.",
+        "detach": "Run container in background and print container ID. Defaults to False.",
+        "py": f"version of python to use. Default is {PYTHON_VERSION_DEFAULT}",
+        "cmd": "Command for docker image. Default is bash.",
+    }
+)
+def docker(
+    ctx,
+    name="gx38local",
+    tag="latest",
+    build=False,
+    detach=False,
+    cmd="bash",
+    py=PYTHON_VERSION_DEFAULT,
+):
+    """
+    Build or run gx docker image.
+    """
+    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    curdir = os.path.realpath(os.getcwd())
+    if filedir != curdir:
+        raise invoke.Exit(
+            "The docker task must be invoked from the same directory as the task.py file at the top of the repo.",
+            code=1,
+        )
+
+    cmds = ["docker"]
+
+    if build:
+        cmds.extend(
+            [
+                "buildx",
+                "build",
+                "-f",
+                "docker/Dockerfile.tests",
+                f"--tag {name}:{tag}",
+                *[
+                    f"--build-arg {arg}"
+                    for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]
+                ],
+                ".",
+            ]
+        )
+
+    else:
+        cmds.append("run")
+        if detach:
+            cmds.append("--detach")
+        cmds.extend(
+            [
+                "-it",
+                "--rm",
+                "--mount",
+                f"type=bind,source={filedir},target=/great_expectations",
+                "-w",
+                "/great_expectations",
+                f"{name}:{tag}",
+                f"{cmd}",
+            ]
+        )
+
+    ctx.run(" ".join(cmds), echo=True, pty=True)

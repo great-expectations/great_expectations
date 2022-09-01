@@ -152,9 +152,27 @@ def profile(func: Callable = None) -> Callable:
 def measure_execution_time(
     execution_time_holder_object_reference_name: str = "execution_time_holder",
     execution_time_property_name: str = "execution_time",
+    method: str = "process_time",
     pretty_print: bool = True,
     include_arguments: bool = True,
 ) -> Callable:
+    """
+    Parameterizes template "execution_time_decorator" function with options, supplied as arguments.
+
+    Args:
+        execution_time_holder_object_reference_name: Handle, provided in "kwargs", holds execution time property setter.
+        execution_time_property_name: Property attribute nane, provided in "kwargs", sets execution time value.
+        method: Name of method in "time" module (default: "process_time") to be used for recording timestamps.
+        pretty_print: If True (default), prints execution time summary to standard output; if False, "silent" mode.
+        include_arguments: If True (default), prints arguments of function, whose execution time is measured.
+
+    Note: Method "time.perf_counter()" keeps going during sleep, while method "time.process_time()" does not.
+    Using "time.process_time()" is the better suited method for measuring code computational efficiency.
+
+    Returns:
+        Callable -- configured "execution_time_decorator" function.
+    """
+
     def execution_time_decorator(func: Callable) -> Callable:
         @wraps(func)
         def compute_delta_t(*args, **kwargs) -> Any:
@@ -170,11 +188,11 @@ def measure_execution_time(
             Returns:
                 Any (output value of original function being decorated).
             """
-            time_begin: float = time.perf_counter()
+            time_begin: float = (getattr(time, method))()
             try:
                 return func(*args, **kwargs)
             finally:
-                time_end: float = time.perf_counter()
+                time_end: float = (getattr(time, method))()
                 delta_t: float = time_end - time_begin
                 if kwargs is None:
                     kwargs = {}
@@ -894,7 +912,7 @@ def validate(
             expectation_suite_dict: dict = expectationSuiteSchema.load(
                 expectation_suite
             )
-            expectation_suite: ExpectationSuite = ExpectationSuite(
+            expectation_suite = ExpectationSuite(
                 **expectation_suite_dict, data_context=data_context
             )
 
@@ -1173,7 +1191,7 @@ def filter_properties_dict(
 
 
 def deep_filter_properties_iterable(
-    properties: Optional[Union[dict, list, set, tuple]] = None,
+    properties: Optional[Any] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
@@ -1240,7 +1258,8 @@ def deep_filter_properties_iterable(
             )
 
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
-        properties = list(
+        properties_type: type = type(properties)
+        properties = properties_type(
             filter(
                 lambda v: not _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=v,
@@ -1338,8 +1357,8 @@ def requires_lossy_conversion(d: decimal.Decimal) -> bool:
 
 
 def isclose(
-    operand_a: Union[datetime.datetime, Number],
-    operand_b: Union[datetime.datetime, Number],
+    operand_a: Union[datetime.datetime, datetime.timedelta, Number],
+    operand_b: Union[datetime.datetime, datetime.timedelta, Number],
     rtol: float = 1.0e-5,  # controls relative weight of "operand_b" (when its magnitude is large)
     atol: float = 1.0e-8,  # controls absolute accuracy (based on floating point machine precision)
     equal_nan: bool = False,
@@ -1362,11 +1381,19 @@ def isclose(
     relative tolerance ("rtol") parameter carries a greater weight in the comparison assessment, because the acceptable
     deviation between the two quantities can be relatively larger for them to be deemed as "close enough" in this case.
     """
-    if (isinstance(operand_a, str) and isinstance(operand_b, str)) or (
-        isinstance(operand_a, datetime.datetime)
-        and isinstance(operand_b, datetime.datetime)
-    ):
+    if isinstance(operand_a, str) and isinstance(operand_b, str):
         return operand_a == operand_b
+
+    if isinstance(operand_a, datetime.datetime) and isinstance(
+        operand_b, datetime.datetime
+    ):
+        operand_a = operand_a.timestamp()
+        operand_b = operand_b.timestamp()
+    elif isinstance(operand_a, datetime.timedelta) and isinstance(
+        operand_b, datetime.timedelta
+    ):
+        operand_a = operand_a.total_seconds()
+        operand_b = operand_b.total_seconds()
 
     return np.isclose(
         a=np.float64(operand_a),
@@ -1406,10 +1433,85 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
-        parse(value, fuzzy=fuzzy)
+        _ = parse(value, fuzzy=fuzzy)
+        return True
     except (TypeError, ValueError):
-        return False
-    return True
+        try:
+            _ = datetime.datetime.fromisoformat(value)
+            return True
+        except (TypeError, ValueError):
+            return False
+
+
+def is_ndarray_datetime_dtype(
+    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+) -> bool:
+    """
+    Determine whether or not all elements of 1-D "np.ndarray" argument are "datetime.datetime" type objects.
+    """
+    value: Any
+    result: bool = all(isinstance(value, datetime.datetime) for value in data)
+    return result or (
+        parse_strings_as_datetimes
+        and all(is_parseable_date(value=value, fuzzy=fuzzy) for value in data)
+    )
+
+
+def convert_ndarray_to_datetime_dtype_best_effort(
+    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+) -> Tuple[bool, bool, np.ndarray]:
+    """
+    Attempt to parse all elements of 1-D "np.ndarray" argument into "datetime.datetime" type objects.
+
+    Returns:
+        Boolean flag -- True if all elements of original "data" were "datetime.datetime" type objects; False, otherwise.
+        Boolean flag -- True, if conversion was performed; False, otherwise.
+        Output "np.ndarray" (converted, if necessary).
+    """
+    if is_ndarray_datetime_dtype(
+        data=data, parse_strings_as_datetimes=False, fuzzy=fuzzy
+    ):
+        return True, False, data
+
+    value: Any
+    if is_ndarray_datetime_dtype(
+        data=data, parse_strings_as_datetimes=parse_strings_as_datetimes, fuzzy=fuzzy
+    ):
+        try:
+            return (
+                False,
+                True,
+                np.asarray([parse(value, fuzzy=fuzzy) for value in data]),
+            )
+        except (TypeError, ValueError):
+            pass
+
+    return False, False, data
+
+
+def convert_ndarray_datetime_to_float_dtype(data: np.ndarray) -> np.ndarray:
+    """
+    Convert all elements of 1-D "np.ndarray" argument from "datetime.datetime" type to "timestamp" "float" type objects.
+    """
+    value: Any
+    return np.asarray([value.timestamp() for value in data])
+
+
+def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
+    """
+    Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type objects.
+    """
+    value: Any
+    return np.asarray([datetime.datetime.fromtimestamp(value) for value in data])
+
+
+def convert_ndarray_float_to_datetime_tuple(
+    data: np.ndarray,
+) -> Tuple[datetime.datetime, ...]:
+    """
+    Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type tuple elements.
+    """
+    return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
 def get_context():
@@ -1488,6 +1590,19 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
         else:
             selectable = selectable.alias()
     return selectable
+
+
+def get_sqlalchemy_subquery_type():
+    """
+    Beginning from SQLAlchemy 1.4, `sqlalchemy.sql.Alias` has been deprecated in favor of `sqlalchemy.sql.Subquery`.
+    This helper method ensures that the appropriate type is returned.
+
+    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
+    """
+    try:
+        return sa.sql.Subquery
+    except AttributeError:
+        return sa.sql.Alias
 
 
 def get_sqlalchemy_domain_data(domain_data):

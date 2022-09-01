@@ -4,7 +4,7 @@ This module contains static lists of GE dependencies, along with a utility for
 checking and updating these static lists.
 
     Typical usage example:
-        ge_dependencies: GEDependencies = GEDependencies()
+        ge_dependencies = GEDependencies()
         print(ge_dependencies.get_required_dependency_names())
         print(ge_dependencies.get_dev_dependency_names())
 
@@ -42,6 +42,8 @@ class GEDependencies:
             "jinja2",
             "jsonpatch",
             "jsonschema",
+            "makefun",
+            "marshmallow",
             "mistune",
             "nbformat",
             "notebook",
@@ -98,8 +100,11 @@ class GEDependencies:
             "pytest-benchmark",
             "pytest-azurepipelines",
             "pytest-cov",
+            "pytest-mock",
+            "pytest-icdiff",
             "pytest-order",
             "pytest-random-order",
+            "pytest-timeout",
             "pyupgrade",
             "requirements-parser",
             "s3fs",
@@ -136,6 +141,9 @@ class GEDependencies:
         "pyfakefs",
         "pytest",
         "pytest-benchmark",
+        "pytest-mock",
+        "pytest-icdiff",
+        "pytest-timeout",
         "requirements-parser",
         "s3fs",
         "snapshottest",
@@ -147,6 +155,53 @@ class GEDependencies:
         # requirements-dev-test-pipeline.txt:
         "pytest-azurepipelines",
         "pytest-random-order",
+        # requirements-dev-all-contrib-expectations.txt
+        "arxiv",
+        "barcodenumber",
+        "blockcypher",
+        "coinaddrvalidator",
+        "cryptoaddress",
+        "cryptocompare",
+        "dataprofiler",
+        "disposable_email_domains",
+        "dnspython",
+        "edtf_validate",
+        "ephem",
+        "geonamescache",
+        "geopandas",
+        "geopy",
+        "global-land-mask",
+        "gtin",
+        "holidays",
+        "ipwhois",
+        "isbnlib",
+        "langid",
+        "pgeocode",
+        "phonenumbers",
+        "price_parser",
+        "primefac",
+        "pwnedpasswords",
+        "py-moneyed",
+        "pydnsbl",
+        "pygeos",
+        "pyogrio",
+        "python-geohash",
+        "python-stdnum",
+        "pyvat",
+        "rtree",
+        "schwifty",
+        "scikit-learn",
+        "shapely",
+        "simple_icd_10",
+        "sklearn",
+        "sympy",
+        "tensorflow",
+        "timezonefinder",
+        "us",
+        "user_agents",
+        "uszipcode",
+        "yahoo_fin",
+        "zipcodes",
     ]
 
     GE_DEV_DEPENDENCIES: List[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(
@@ -256,7 +311,7 @@ class GEDependencies:
 
 def main() -> None:
     """Run this module to generate a list of packages from requirements files to update our static lists"""
-    ge_dependencies: GEDependencies = GEDependencies()
+    ge_dependencies = GEDependencies()
     print("\n\nRequired Dependencies:\n\n")
     print(ge_dependencies.get_required_dependency_names_from_requirements_file())
     print("\n\nDev Dependencies:\n\n")

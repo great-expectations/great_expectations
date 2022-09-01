@@ -52,6 +52,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         assets: Optional[Dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        id: Optional[str] = None,
     ) -> None:
         self._assets: dict = {}
         if assets:
@@ -65,6 +66,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         super().__init__(
             name=name,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
@@ -207,7 +209,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         for batch_identifiers in sub_cache:
-            batch_definition: BatchDefinition = BatchDefinition(
+            batch_definition = BatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,
@@ -324,10 +326,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self, batch_definition: BatchDefinition
     ) -> str:
         """
-            Helper method called by _get_batch_identifiers_list_from_data_asset_config() to parse table_name from data_asset_name in cases
-            where schema is included.
+        Helper method called by _get_batch_identifiers_list_from_data_asset_config() to parse table_name from
+        data_asset_name in cases where schema is included.
 
-            data_asset_name in those cases are [schema].[table_name].
+        data_asset_name in those cases are [schema].[table_name].
 
         function will split data_asset_name on [schema]. and return the resulting table_name.
         """

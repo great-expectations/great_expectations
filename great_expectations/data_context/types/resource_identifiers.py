@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING, Optional, Union
 from uuid import UUID
 
 from dateutil.parser import parse
+from marshmallow import Schema, fields, post_load
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
-from great_expectations.marshmallow__shade import Schema, fields, post_load
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store.ge_cloud_store_backend import (
@@ -253,7 +253,10 @@ class GeCloudIdentifier(DataContextKey):
         return cls.from_tuple(tuple_)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        if self.resource_name:
+            repr += f"::{self.resource_name}"
+        return repr
 
 
 class ValidationResultIdentifierSchema(Schema):

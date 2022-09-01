@@ -44,9 +44,9 @@ def test_expectation_self_check():
             "docstring": "",
         },
         "execution_engines": {
-            "PandasExecutionEngine": True,
-            "SqlAlchemyExecutionEngine": True,
-            "SparkDFExecutionEngine": True,
+            "PandasExecutionEngine": False,
+            "SqlAlchemyExecutionEngine": False,
+            "SparkDFExecutionEngine": False,
         },
         "gallery_examples": [],
         "renderers": [
@@ -121,6 +121,7 @@ def test_expectation_self_check():
         "tests": [],
         "backend_test_result_counts": [],
         "errors": [],
+        "coverage_score": 0.0,
         "maturity_checklist": {
             "beta": [
                 {

@@ -92,7 +92,13 @@ def pytest_generate_tests(metafunc):
                             data_asset = datasets[0]
                         else:
                             schemas = d["schemas"] if "schemas" in d else None
-                            data_asset = get_dataset(c, d["data"], schemas=schemas)
+                            try:
+                                data_asset = get_dataset(c, d["data"], schemas=schemas)
+                            except Exception as e:
+                                print(
+                                    f"\n\nFor {repr(filename)} there was the following Exception\n\n{repr(e)}"
+                                )
+                                continue
 
                     for test in d["tests"]:
                         generate_test = True
@@ -150,6 +156,20 @@ def pytest_generate_tests(metafunc):
                                     == "bigquery"
                                 ):
                                     generate_test = True
+                                elif (
+                                    "bigquery_v2" in only_for
+                                    and BigQueryDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and hasattr(data_asset.engine.dialect, "name")
+                                    and data_asset.engine.dialect.name.lower()
+                                    == "bigquery"
+                                ):
+                                    # <WILL> : Marker to get the test to only run for the V2 API
+                                    # expect_column_values_to_be_unique:positive_case_all_null_values_bigquery_nones
+                                    # works in different ways between CFE (V3) and V2 Expectations. This flag allows for
+                                    # the test to only be run in the V2 case
+                                    generate_test = True
+
                             elif isinstance(data_asset, PandasDataset):
                                 major, minor, *_ = pd.__version__.split(".")
                                 if "pandas" in only_for:
@@ -266,6 +286,7 @@ def pytest_generate_tests(metafunc):
 
 @pytest.mark.order(index=1)
 @pytest.mark.integration
+@pytest.mark.slow  # 14.90s
 def test_case_runner(test_case):
     if test_case["skip"]:
         pytest.skip()

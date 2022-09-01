@@ -2,19 +2,19 @@ from typing import Dict, Union
 
 import numpy as np
 import pandas as pd
+import pytest
 
+from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
+    DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+)
+from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+    NumericRangeEstimationResult,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     compute_bootstrap_quantiles_point_estimate,
 )
 
 # Allowable tolerance for how closely a bootstrap method approximates the sample
-from great_expectations.rule_based_profiler.numeric_range_estimation_result import (
-    NumericRangeEstimationResult,
-)
-from great_expectations.rule_based_profiler.parameter_builder import (
-    NumericMetricRangeMultiBatchParameterBuilder,
-)
-
 EFFICACY_TOLERANCE: float = 1.0e-2
 
 # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
@@ -23,6 +23,7 @@ RTOL: float = 1.0e-7
 ATOL: float = 1.0e-2
 
 
+@pytest.mark.slow  # 6.20s
 def test_bootstrap_point_estimate_efficacy(
     bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
 ):
@@ -50,7 +51,7 @@ def test_bootstrap_point_estimate_efficacy(
         numeric_range_estimation_result = compute_bootstrap_quantiles_point_estimate(
             metric_values=distribution_samples[distribution],
             false_positive_rate=false_positive_rate,
-            n_resamples=NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+            n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
             quantile_statistic_interpolation_method="linear",
             quantile_bias_correction=True,
             quantile_bias_std_error_ratio_threshold=2.5e-1,

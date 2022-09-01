@@ -22,6 +22,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 
+@pytest.mark.slow  # 1.11s
 def test_simple_date_format_parameter_builder_instantiation(
     alice_columnar_table_single_batch_context,
 ):
@@ -38,6 +39,7 @@ def test_simple_date_format_parameter_builder_instantiation(
     assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
 
 
+@pytest.mark.slow  # 1.08s
 def test_simple_date_format_parameter_builder_zero_batch_id_error(
     alice_columnar_table_single_batch_context,
 ):
@@ -50,11 +52,11 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
         )
     )
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -71,6 +73,7 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
     )
 
 
+@pytest.mark.slow  # 1.44s
 def test_simple_date_format_parameter_builder_alice(
     alice_columnar_table_single_batch_context,
 ):
@@ -95,12 +98,12 @@ def test_simple_date_format_parameter_builder_alice(
     assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
     assert date_format_string_parameter._threshold == 1.0
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -195,6 +198,7 @@ def test_simple_date_format_parameter_builder_alice(
     assert parameter_node == expected_value
 
 
+@pytest.mark.slow  # 1.76s
 def test_simple_date_format_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -227,12 +231,12 @@ def test_simple_date_format_parameter_builder_bobby(
     assert date_format_string_parameter._candidate_strings == set(candidate_strings)
     assert date_format_string_parameter._threshold == 0.9
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }

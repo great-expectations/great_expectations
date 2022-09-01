@@ -71,6 +71,7 @@ def send_opsgenie_alert(query, suite_name, settings):
         "message": f"Great Expectations suite {suite_name} failed",
         "description": query,
         "priority": settings["priority"],  # allow this to be modified in settings
+        "tags": settings["tags"],
     }
 
     session = requests.Session()
@@ -208,10 +209,13 @@ def get_substituted_validation_dict(
         ),
         "include_rendered_content": validation_dict.get("include_rendered_content")
         or substituted_runtime_config.get("include_rendered_content")
-        or False,
+        or None,
     }
-    if validation_dict.get("name") is not None:
-        substituted_validation_dict["name"] = validation_dict["name"]
+
+    for attr in ("name", "id"):
+        if validation_dict.get(attr) is not None:
+            substituted_validation_dict[attr] = validation_dict[attr]
+
     validate_validation_dict(substituted_validation_dict)
     return substituted_validation_dict
 

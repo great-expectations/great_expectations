@@ -13,6 +13,7 @@ from functools import wraps
 from typing import Dict, List, Optional, Union
 
 from dateutil.parser import parse
+from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.evaluation_parameters import build_evaluation_parameters
@@ -33,7 +34,6 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.marshmallow__shade import ValidationError
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -850,7 +850,7 @@ class DataAsset:
                         expectation_suite_dict: dict = expectationSuiteSchema.loads(
                             infile.read()
                         )
-                        expectation_suite: ExpectationSuite = ExpectationSuite(
+                        expectation_suite = ExpectationSuite(
                             **expectation_suite_dict, data_context=self._data_context
                         )
                 except ValidationError:
@@ -861,7 +861,7 @@ class DataAsset:
                     )
             elif isinstance(expectation_suite, dict):
                 expectation_suite_dict: dict = expectation_suite
-                expectation_suite: ExpectationSuite = ExpectationSuite(
+                expectation_suite = ExpectationSuite(
                     **expectation_suite_dict, data_context=None
                 )
             elif not isinstance(expectation_suite, ExpectationSuite):

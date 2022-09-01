@@ -414,7 +414,8 @@ class ExecutionEngine(ABC):
                 resolved_metrics.update(new_resolved)
             except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
-                    message=str(e), failed_metrics=[x[0] for x in metric_fn_bundle]
+                    message=str(e),
+                    failed_metrics=[x.metric_configuration for x in metric_fn_bundle],
                 )
 
         if self._caching:
@@ -496,7 +497,8 @@ class ExecutionEngine(ABC):
             column = column_name
         else:
             column = domain_kwargs["column"]
-        row_condition: RowCondition = RowCondition(
+
+        row_condition = RowCondition(
             condition=f'col("{column}").notnull()',
             condition_type=RowConditionParserType.GE,
         )

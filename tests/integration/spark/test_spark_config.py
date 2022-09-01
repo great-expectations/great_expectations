@@ -67,9 +67,7 @@ def test_spark_config_execution_engine(spark_session, databricks_runtime):
         "spark.executor.memory": "512m",
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
-    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
-        spark_config=spark_config
-    )
+    execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
     spark_session: SparkSession = execution_engine.spark
     # noinspection PyProtectedMember
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()

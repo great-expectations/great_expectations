@@ -43,7 +43,8 @@ class RuleState:
 
         self._parameters = parameters
 
-        self._execution_time = 0.0
+        self._rule_domain_builder_execution_time = 0.0
+        self._rule_execution_time = 0.0
 
     @property
     def rule(self) -> "Rule":  # noqa: F821:
@@ -78,12 +79,20 @@ class RuleState:
         self._parameters = value
 
     @property
-    def execution_time(self) -> float:
-        return self._execution_time
+    def rule_domain_builder_execution_time(self) -> float:
+        return self._rule_domain_builder_execution_time
 
-    @execution_time.setter
-    def execution_time(self, value: float) -> None:
-        self._execution_time = value
+    @rule_domain_builder_execution_time.setter
+    def rule_domain_builder_execution_time(self, value: float) -> None:
+        self._rule_domain_builder_execution_time = value
+
+    @property
+    def rule_execution_time(self) -> float:
+        return self._rule_execution_time
+
+    @rule_execution_time.setter
+    def rule_execution_time(self, value: float) -> None:
+        self._rule_execution_time = value
 
     def reset(self) -> None:
         self.reset_domains()
@@ -134,9 +143,7 @@ pass "overwrite=True" or call "RuleState.remove_parameter_container_from_domain(
 """
             )
 
-        parameter_container: ParameterContainer = ParameterContainer(
-            parameter_nodes=None
-        )
+        parameter_container = ParameterContainer(parameter_nodes=None)
         self._parameters[domain.id] = parameter_container
 
     def remove_parameter_container_from_domain_if_exists(self, domain: Domain) -> None:

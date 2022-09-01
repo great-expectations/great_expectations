@@ -1,6 +1,7 @@
 import json
 
 import jsonschema
+import pytest
 
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.schemas import (
@@ -306,6 +307,7 @@ def test_cli_suite_edit_message():
             )
 
 
+@pytest.mark.slow  # 2.42s
 def test_test_yaml_config_messages():
     usage_stats_records_messages = [
         "data_context.test_yaml_config",
@@ -359,6 +361,7 @@ def test_usage_stats_expectation_suite_messages():
             )
 
 
+@pytest.mark.slow  # 5.20s
 def test_usage_stats_cli_payload_messages():
     usage_stats_records_messages = [
         "cli.checkpoint.delete",

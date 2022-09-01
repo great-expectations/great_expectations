@@ -229,6 +229,7 @@ def test_get_config(empty_data_context):
         "checkpoint_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",
+        "include_rendered_content",
     }
 
 
@@ -502,6 +503,7 @@ data_connectors:
     )
 
 
+@pytest.mark.slow  # 1.06s
 def test_in_memory_data_context_configuration(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
