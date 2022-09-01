@@ -1514,6 +1514,25 @@ def convert_ndarray_float_to_datetime_tuple(
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
+def is_ndarray_decimal_dtype(data: np.ndarray) -> bool:
+    """
+    Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
+    """
+    value: Any
+    result: bool = all(isinstance(value, decimal.Decimal) for value in data)
+    return result
+
+
+def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
+    """
+    Convert all elements of N-D "np.ndarray" argument from "decimal.Decimal" type to "float" type objects.
+    """
+    convert_decimal_to_float_vectorized: Callable[
+        [np.ndarray], np.ndarray
+    ] = np.vectorize(pyfunc=convert_decimal_to_float)
+    return convert_decimal_to_float_vectorized(data)
+
+
 def get_context():
     from great_expectations.data_context.data_context import DataContext
 
