@@ -49,7 +49,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import is_ndarray_datetime_dtype, is_numeric
+from great_expectations.util import (
+    convert_ndarray_decimal_to_float_dtype,
+    is_ndarray_datetime_dtype,
+    is_ndarray_decimal_dtype,
+    is_numeric,
+)
 
 MAX_DECIMALS: int = 9
 
@@ -544,6 +549,14 @@ detected.
                 shape=estimation_histogram_shape, fill_value=datetime.datetime.min
             )
         else:
+            if self._is_metric_values_ndarray_decimal_dtype(
+                metric_values=metric_values,
+                metric_value_vector_indices=metric_value_vector_indices,
+            ):
+                metric_values = convert_ndarray_decimal_to_float_dtype(
+                    data=metric_values
+                )
+
             metric_value_range = np.zeros(shape=metric_value_range_shape)
             estimation_histogram = np.empty(shape=estimation_histogram_shape)
 
@@ -640,6 +653,19 @@ detected.
             if not is_ndarray_datetime_dtype(
                 data=metric_value_vector, parse_strings_as_datetimes=True
             ):
+                return False
+
+        return True
+
+    @staticmethod
+    def _is_metric_values_ndarray_decimal_dtype(
+        metric_values: np.ndarray,
+        metric_value_vector_indices: List[tuple],
+    ) -> bool:
+        metric_value_vector: np.ndarray
+        for metric_value_idx in metric_value_vector_indices:
+            metric_value_vector = metric_values[metric_value_idx]
+            if not is_ndarray_decimal_dtype(data=metric_value_vector):
                 return False
 
         return True
