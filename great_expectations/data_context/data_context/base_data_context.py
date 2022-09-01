@@ -2661,7 +2661,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         print(f"\tInstantiating as a Datasource, since class_name is {class_name}")
         datasource_name: str = name or config.get("name") or "my_temp_datasource"
         datasource_config = datasourceConfigSchema.load(config)
-        datasource_config.name = name
+        datasource_config.name = datasource_name
         instantiated_class = cast(
             Datasource,
             self._instantiate_datasource_from_config_and_update_project_config(
