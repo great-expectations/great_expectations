@@ -145,17 +145,9 @@ class DatasourceStore(Store):
     def _build_key_from_config(  # type: ignore[override]
         self, datasource_config: DatasourceConfig
     ) -> Union[GeCloudIdentifier, DataContextVariableKey]:
-        if hasattr(datasource_config, "id"):
-            id = datasource_config.id
-        else:
-            id = None
-        if hasattr(datasource_config, "name"):
-            name = datasource_config.name
-        else:
-            name = None
         return self.store_backend.build_key(
-            name=name,
-            id=id,
+            name=datasource_config.name,
+            id=datasource_config.id,
         )
 
     def set_by_name(
