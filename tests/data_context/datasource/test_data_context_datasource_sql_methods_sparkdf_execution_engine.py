@@ -8,7 +8,7 @@ import pytest
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import InvalidBatchRequestError
+from great_expectations.exceptions import ExecutionEngineError, InvalidBatchRequestError
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.validator.validator import Validator
 from tests.test_utils import create_files_in_directory
@@ -126,7 +126,7 @@ def test_get_validator_bad_batch_request(context_with_single_titanic_csv_spark):
 
 
 @pytest.mark.integration
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_inferred_assets(
+def test_get_batch_list_spark_engine_inferred_assets(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
     context = empty_data_context
@@ -205,7 +205,7 @@ data_connectors:
 
 
 @pytest.mark.integration
-def test_get_batch_list_from_new_style_datasource_with_runtime_data_connector(
+def test_get_batch_list_from_datasource_with_runtime_data_connector(
     empty_data_context, tmp_path_factory, spark_session
 ):
     context = empty_data_context
@@ -362,13 +362,13 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
 
 
 @pytest.mark.integration
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter(
+def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limit_and_filter(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
     context = empty_data_context
     base_directory = str(
         tmp_path_factory.mktemp(
-            "test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter"
+            "test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limit_and_filter"
         )
     )
     create_files_in_directory(
@@ -458,17 +458,19 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
 
 
 @pytest.mark.integration
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter_limit_param_ignored(
+def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limit_and_custom_filter_limit_param_ignored(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
     """
     What does this test and why?
-    This test mirrors other tests in this file but the key difference is that it tests whether a limit parameter passed in as a part of the data_connector_query overrides a limit passed in as a parameter to the BatchRequest.
+
+    This test mirrors other tests in this file but the key difference is that it tests whether a limit parameter
+    passed in as a part of the data_connector_query overrides a limit passed in as a parameter to the BatchRequest.
     """
     context = empty_data_context
     base_directory = str(
         tmp_path_factory.mktemp(
-            "test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter"
+            "test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limit_and_custom_filter_limit_param_ignored"
         )
     )
     create_files_in_directory(
@@ -572,13 +574,13 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
 
 
 @pytest.mark.integration
-def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_in_get_batch_list_with_batch_request(
+def test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_batch_list_with_batch_request(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
     context = empty_data_context
     base_directory = str(
         tmp_path_factory.mktemp(
-            "test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_in_get_batch_list_with_batch_request"
+            "test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_batch_list_with_batch_request"
         )
     )
     create_files_in_directory(
@@ -586,9 +588,6 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         file_name_list=[
             "Test_1998.csv",
             "Test_1999.csv",
-            "Test_2000.csv",
-            "Test_2010.csv",
-            "Test_2021.csv",
         ],
         file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
     )
@@ -668,3 +667,181 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "year": "2010",
     }
     assert batch.data.dataframe.schema == schema_for_spark_testset
+
+
+@pytest.mark.integration
+def test_get_batch_list_from_datasource_schema_in_datasource_config_serialized(
+    empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
+):
+    """
+    What does this test and why? When passing in Spark schema as part of a Datasource configuration
+    we must call the .jsonValue() function in order to convert it into a json. This is because
+    add_datasource() takes in the kwargs directly, which means the schema is converted into a string
+    like "StructType(List(StructField(x,IntegerType,true)". Therefore we ask that users call the jsonValue()
+    method to serialize the schema before loading into Datasource config
+    """
+
+    context = empty_data_context
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_batch_list_with_batch_request"
+        )
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "Test_1998.csv",
+            "Test_1999.csv",
+        ],
+        file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
+    )
+
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SparkDFExecutionEngine
+    data_connectors:
+        my_data_connector:
+            class_name: ConfiguredAssetFilesystemDataConnector
+            base_directory: {base_directory}
+            glob_directive: "*.csv"
+            batch_spec_passthrough:
+                reader_method: csv
+                reader_options:
+                    header: True
+                    schema: {schema_for_spark_testset.jsonValue()}
+            default_regex:
+                pattern: (.+)_(\\d.*)\\.csv
+                group_names:
+                    - name
+                    - year
+            sorters:
+                - orderby: desc
+                  class_name: NumericSorter
+                  name: year
+            assets:
+                YearTest:
+                    base_directory: {base_directory}
+                    pattern: (.+)_(\\d.*)\\.csv
+                    group_names:
+                        - name
+                        - year
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+
+    # Use an instantiated BatchRequest object with custom filter
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_data_connector",
+        data_asset_name="YearTest",
+    )
+
+    # Add the limit here in the call to get_batch_list instead of in the BatchRequest.
+    # The limit is ignored since we passed a BatchRequest via batch_request
+    batch_list: List[Batch] = context.get_batch_list(
+        batch_request=batch_request, limit=2
+    )
+    # first batch
+    batch: Batch = batch_list[0]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["batch_identifiers"] == {
+        "name": "Test",
+        "year": "1999",
+    }
+    assert batch.data.dataframe.schema == schema_for_spark_testset
+
+    # second batch
+    batch: Batch = batch_list[1]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["batch_identifiers"] == {
+        "name": "Test",
+        "year": "1998",
+    }
+    assert batch.data.dataframe.schema == schema_for_spark_testset
+
+
+@pytest.mark.integration
+def test_get_batch_list_from_datasource_schema_in_datasource_config_non_serialized(
+    empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
+):
+    """
+    What does this test and why?
+
+    When passing in Spark schema as part of a Datasource configuration
+    we must call the .jsonValue() function in order to convert it into a json. This is because
+    add_datasource() takes in the kwargs directly, which means the schema is converted into a string
+    like "StructType(List(StructField(x,IntegerType,true)". Therefore we ask that users call the jsonValue()
+    method to serialize the schema before loading into Datasource config
+
+    This test tests that not serializing the schema will return the expected error message
+    """
+
+    context = empty_data_context
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_batch_list_with_batch_request"
+        )
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "Test_1998.csv",
+            "Test_1999.csv",
+        ],
+        file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
+    )
+
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SparkDFExecutionEngine
+    data_connectors:
+        my_data_connector:
+            class_name: ConfiguredAssetFilesystemDataConnector
+            base_directory: {base_directory}
+            glob_directive: "*.csv"
+            batch_spec_passthrough:
+                reader_method: csv
+                reader_options:
+                    header: True
+                    schema: {schema_for_spark_testset} # this schema is not going to be properly converted into dict
+            default_regex:
+                pattern: (.+)_(\\d.*)\\.csv
+                group_names:
+                    - name
+                    - year
+            sorters:
+                - orderby: desc
+                  class_name: NumericSorter
+                  name: year
+            assets:
+                YearTest:
+                    base_directory: {base_directory}
+                    pattern: (.+)_(\\d.*)\\.csv
+                    group_names:
+                        - name
+                        - year
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+
+    # Use an instantiated BatchRequest object with custom filter
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_data_connector",
+        data_asset_name="YearTest",
+    )
+    with pytest.raises(ExecutionEngineError):
+        # this
+        context.get_batch_list(batch_request=batch_request, limit=2)
