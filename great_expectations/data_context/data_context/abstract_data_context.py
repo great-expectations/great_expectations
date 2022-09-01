@@ -22,7 +22,7 @@ from typing import (
 
 from great_expectations.core.serializer import AbstractConfigSerializer, DictConfigSerializer
 from great_expectations.datasource.datasource_serializer import (
-    NamedDatasourceSerializer,
+    NamedDatasourceSerializer, YAMLReadyDictDatasourceConfigSerializer,
 )
 
 if TYPE_CHECKING:
@@ -1738,7 +1738,7 @@ class AbstractDataContext(ABC):
                 datasource_name=config.name, datasource_config=config
             )
 
-        config_property_serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
+        config_property_serializer = YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema)
         self.config.datasources[config.name] = config_property_serializer.serialize(config)  # type: ignore[assignment,index]
 
         substituted_config = self._perform_substitutions_on_datasource_config(config)
