@@ -2442,7 +2442,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
         "mostly": 1,
-        "ignore_row_if": "all_value_are_missing",
+        "ignore_row_if": "all_values_are_missing",
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,

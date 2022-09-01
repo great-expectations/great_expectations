@@ -8,7 +8,10 @@ from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_suite import (
+    ExpectationSuite,
+    expectationSuiteSchema,
+)
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.util import filter_properties_dict
 
@@ -241,7 +244,6 @@ def profiler_config():
 def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_suite):
     """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
     are the same."""
-    assert baseline_suite is baseline_suite  # no difference
     assert (
         baseline_suite is not identical_suite
     )  # different instances, but same content
@@ -270,66 +272,18 @@ def test_expectation_suite_equivalence(
 
 
 @pytest.mark.unit
-def test_expectation_suite_dictionary_equivalence(baseline_suite):
-    assert (
-        baseline_suite.isEquivalentTo(
-            {
-                "expectation_suite_name": "warning",
-                "expectations": [
-                    {
-                        "expectation_type": "expect_column_values_to_be_in_set",
-                        "kwargs": {
-                            "column": "a",
-                            "value_set": [1, 2, 3],
-                            "result_format": "BASIC",
-                        },
-                        "meta": {"notes": "This is an expectation."},
-                    },
-                    {
-                        "expectation_type": "expect_column_values_to_be_in_set",
-                        "kwargs": {
-                            "column": "b",
-                            "value_set": [-1, -2, -3],
-                            "result_format": "BASIC",
-                        },
-                        "meta": {"notes": "This is an expectation."},
-                    },
-                ],
-                "meta": {"notes": "This is an expectation suite."},
-            }
-        )
-        is True
-    )
+def test_expectation_suite_dictionary_equivalence(baseline_suite: ExpectationSuite):
 
-    assert (
-        baseline_suite.isEquivalentTo(
-            {
-                "expectation_suite_name": "warning",
-                "expectations": [
-                    {
-                        "expectation_type": "expect_column_values_to_be_in_set",
-                        "kwargs": {
-                            "column": "a",
-                            "value_set": [-1, 2, 3],  # One value changed here
-                            "result_format": "BASIC",
-                        },
-                        "meta": {"notes": "This is an expectation."},
-                    },
-                    {
-                        "expectation_type": "expect_column_values_to_be_in_set",
-                        "kwargs": {
-                            "column": "b",
-                            "value_set": [-1, -2, -3],
-                            "result_format": "BASIC",
-                        },
-                        "meta": {"notes": "This is an expectation."},
-                    },
-                ],
-                "meta": {"notes": "This is an expectation suite."},
-            }
-        )
-        is False
-    )
+    baseline_suite_dict: dict = expectationSuiteSchema.dump(baseline_suite)
+
+    assert baseline_suite.isEquivalentTo(baseline_suite_dict)
+
+    modified_suite = deepcopy(baseline_suite_dict)
+    modified_suite["expectations"][0]["kwargs"]["value_set"][0] = -1
+
+    modified_suite_dict: dict = expectationSuiteSchema.dump(modified_suite)
+
+    assert not baseline_suite.isEquivalentTo(modified_suite_dict)
 
 
 @pytest.mark.unit
@@ -359,20 +313,17 @@ def test_expectation_suite_deepcopy(baseline_suite):
     assert baseline_suite.expectations[0].meta["notes"] == "This is an expectation."
 
 
-@pytest.mark.integration
-def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided(
-    empty_data_context,
-):
-    context: DataContext = empty_data_context
-    suite = ExpectationSuite("foo", data_context=context)
+@pytest.mark.unit
+def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided():
+    suite = ExpectationSuite("foo")
     assert "great_expectations_version" in suite.meta.keys()
 
 
-@pytest.mark.integration
-def test_suite_does_not_overwrite_existing_version_metadata(empty_data_context):
-    context: DataContext = empty_data_context
+@pytest.mark.unit
+def test_suite_does_not_overwrite_existing_version_metadata():
     suite = ExpectationSuite(
-        "foo", meta={"great_expectations_version": "0.0.0"}, data_context=context
+        "foo",
+        meta={"great_expectations_version": "0.0.0"},
     )
     assert "great_expectations_version" in suite.meta.keys()
     assert suite.meta["great_expectations_version"] == "0.0.0"
