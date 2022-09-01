@@ -1199,6 +1199,12 @@ def deep_filter_properties_iterable(
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
 ) -> Optional[Union[dict, list, set]]:
+    if keep_fields is None:
+        keep_fields = set()
+
+    if delete_fields is None:
+        delete_fields = set()
+
     if isinstance(properties, dict):
         if not inplace:
             properties = copy.deepcopy(properties)
@@ -1226,10 +1232,11 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         keys_to_delete: List[str] = list(
             filter(
-                lambda k: _is_to_be_removed_from_deep_filter_properties_iterable(
+                lambda k: k not in keep_fields
+                and _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=properties[k],
                     clean_nulls=clean_nulls,
                     clean_falsy=clean_falsy,
@@ -1257,7 +1264,7 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         properties_type: type = type(properties)
         properties = properties_type(
             filter(
@@ -1283,7 +1290,7 @@ def _is_to_be_removed_from_deep_filter_properties_iterable(
     conditions: Tuple[bool, ...] = (
         clean_nulls and value is None,
         not keep_falsy_numerics and is_numeric(value) and value == 0,
-        clean_falsy and not is_numeric(value) and not value,
+        clean_falsy and not (is_numeric(value) or value),
     )
     return any(condition for condition in conditions)
 

@@ -292,8 +292,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             data_asset_config: dict
             for data_asset_name, data_asset_config in assets.items():
                 aux_config: dict = {
-                    "type": data_asset_config.get("type"),
-                    "table_name": data_asset_config.get("table_name", data_asset_name),
                     "splitter_method": data_asset_config.get(
                         "splitter_method", self.splitter_method
                     ),
@@ -308,10 +306,18 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                     ),
                 }
 
-                data_asset_config.update(aux_config)
-
                 deep_filter_properties_iterable(
-                    properties=data_asset_config, inplace=True
+                    properties=aux_config,
+                    inplace=True,
+                )
+                data_asset_config.update(aux_config)
+                data_asset_config.update(
+                    {
+                        "type": data_asset_config.get("type"),
+                        "table_name": data_asset_config.get(
+                            "table_name", data_asset_name
+                        ),
+                    }
                 )
 
                 self.add_data_asset(name=data_asset_name, config=data_asset_config)
