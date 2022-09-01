@@ -98,7 +98,6 @@ class GEDependencies:
             "pyspark",
             "pytest",
             "pytest-benchmark",
-            "pytest-azurepipelines",
             "pytest-cov",
             "pytest-mock",
             "pytest-icdiff",
