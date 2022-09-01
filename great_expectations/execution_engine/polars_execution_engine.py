@@ -268,9 +268,9 @@ Please check your config."""
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
             azure_engine = self._azure
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
+            path = batch_spec.path
             azure_url = AzureUrl(path)
             blob_client = azure_engine.get_blob_client(
                 container=azure_url.container, blob=azure_url.blob
@@ -295,8 +295,8 @@ Please check your config."""
                 )
             gcs_engine = self._gcs
             gcs_url = GCSUrl(batch_spec.path)
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
             try:
                 gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
                 gcs_blob = gcs_bucket.blob(gcs_url.blob)
@@ -313,10 +313,10 @@ Please check your config."""
             df = reader_fn(buf, **reader_options)
 
         elif isinstance(batch_spec, PathBatchSpec):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options
-            path: str = batch_spec.path
-            reader_fn: Callable = self._get_reader_fn(reader_method, path)
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options
+            path = batch_spec.path
+            reader_fn = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
 
         else:
