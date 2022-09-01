@@ -607,7 +607,7 @@ class AbstractDataContext(ABC):
         )
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-        datasource_config: DatasourceConfig = datasourceConfigSchema.load(config)
+        datasource_config = datasourceConfigSchema.load(config)
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = self._instantiate_datasource_from_config(config=datasource_config)
@@ -1623,7 +1623,7 @@ class AbstractDataContext(ABC):
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
                 config_dict = dict(datasourceConfigSchema.dump(config))
-                datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+                datasource_config = datasourceConfigSchema.load(
                     config_dict
                 )
                 datasource_config.name = datasource_name
