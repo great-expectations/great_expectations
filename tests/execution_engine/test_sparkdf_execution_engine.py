@@ -140,6 +140,18 @@ def test_reader_fn_parameters(
     assert test_sparkdf_with_header_param_and_schema.head() == Row(x=1, y=2)
     assert test_sparkdf_with_header_param_and_schema.schema == schema_dict
 
+    test_sparkdf_with_header_param_and_schema = (
+        basic_spark_df_execution_engine.get_batch_data(
+            PathBatchSpec(
+                path=test_df_small_csv_path,
+                data_asset_name="DATA_ASSET",
+                reader_options={"header": True, "schema": schema_dict},
+            )
+        ).dataframe
+    )
+    assert test_sparkdf_with_header_param_and_schema.head() == Row(x=1, y=2)
+    assert test_sparkdf_with_header_param_and_schema.schema == schema_dict
+
 
 @pytest.mark.integration
 def test_get_domain_records_with_column_domain(

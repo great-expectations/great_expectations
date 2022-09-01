@@ -291,7 +291,7 @@ Please check your config."""
             reader_options: dict = batch_spec.reader_options or {}
             path: str = batch_spec.path
             schema: Optional[
-                Union[pyspark.sql.types.StructType, dict]
+                Union[pyspark.sql.types.StructType, dict, str]
             ] = reader_options.get("schema")
 
             # schema can be a dict if it has been through serialization step,
@@ -301,6 +301,16 @@ Please check your config."""
                     sparktypes.StructType.fromJson(schema)
                 )
                 schema = schema_converted
+
+            # this can happen if we have not converted schema into json at Datasource-config level
+            elif isinstance(schema, str):
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""
+                                Spark schema was not properly serialized.
+                                Please run the .jsonValue() method on the schema object before loading into GE.
+                                schema: your_schema.jsonValue()
+                                """
+                )
             try:
                 if schema:
                     reader: DataFrameReader = self.spark.read.schema(schema).options(

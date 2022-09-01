@@ -100,6 +100,19 @@ def mocked_post_response(
 
 
 @pytest.fixture
+def mocked_put_response(
+    mock_response_factory: Callable, checkpoint_id: str, validation_ids: Tuple[str, str]
+) -> Callable[[], MockResponse]:
+    def _mocked_put_response(*args, **kwargs):
+        return mock_response_factory(
+            {},
+            204,
+        )
+
+    return _mocked_put_response
+
+
+@pytest.fixture
 def mocked_get_response(
     mock_response_factory: Callable,
     checkpoint_config_with_ids: dict,
@@ -221,6 +234,106 @@ def test_cloud_backed_data_context_add_checkpoint(
 
     assert checkpoint.config.validations[1]["id"] == validation_id_2
     assert checkpoint.validations[1]["id"] == validation_id_2
+
+
+@pytest.mark.cloud
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "data_context_fixture_name,data_context_type",
+    [
+        # In order to leverage existing fixtures in parametrization, we provide
+        # their string names and dynamically retrieve them using pytest's built-in
+        # `request` fixture.
+        # Source: https://stackoverflow.com/a/64348247
+        pytest.param(
+            "empty_base_data_context_in_cloud_mode",
+            BaseDataContext,
+            id="BaseDataContext",
+        ),
+        pytest.param("empty_data_context_in_cloud_mode", DataContext, id="DataContext"),
+        pytest.param(
+            "empty_cloud_data_context", CloudDataContext, id="CloudDataContext"
+        ),
+    ],
+)
+def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
+    data_context_fixture_name: str,
+    data_context_type: Type[AbstractDataContext],
+    checkpoint_config: dict,
+    checkpoint_id: str,
+    mocked_post_response: Callable[[], MockResponse],
+    mocked_put_response: Callable[[], MockResponse],
+    mocked_get_response: Callable[[], MockResponse],
+    shared_called_with_request_kwargs: dict,
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+    request,
+) -> None:
+    context = request.getfixturevalue(data_context_fixture_name)
+
+    # Make sure the fixture has the right configuration
+    assert isinstance(context, data_context_type)
+    assert context.ge_cloud_mode
+
+    with mock.patch(
+        "requests.post", autospec=True, side_effect=mocked_post_response
+    ) as mock_post, mock.patch(
+        "requests.put", autospec=True, side_effect=mocked_put_response
+    ) as mock_put, mock.patch(
+        "requests.get", autospec=True, side_effect=mocked_get_response
+    ) as mock_get:
+        checkpoint_1 = context.add_checkpoint(**checkpoint_config)
+        checkpoint_2 = context.add_checkpoint(
+            ge_cloud_id=checkpoint_1.ge_cloud_id, **checkpoint_config
+        )
+
+        # Round trip through schema to mimic updates made during store serialization process
+        expected_checkpoint_config = checkpointConfigSchema.dump(
+            CheckpointConfig(**checkpoint_config)
+        )
+
+        # Called during creation of `checkpoint_1`
+        mock_post.assert_called_once_with(
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
+            json={
+                "data": {
+                    "type": "checkpoint",
+                    "attributes": {
+                        "checkpoint_config": expected_checkpoint_config,
+                        "organization_id": ge_cloud_organization_id,
+                    },
+                },
+            },
+            **shared_called_with_request_kwargs,
+        )
+
+        # Always called by store after POST and PATCH calls
+        assert mock_get.call_count == 2
+        mock_get.assert_called_with(
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
+            params={"name": checkpoint_config["name"]},
+            **shared_called_with_request_kwargs,
+        )
+
+        expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
+
+        # Called during creation of `checkpoint_2` (which is `checkpoint_1` but updated)
+        mock_put.assert_called_once_with(
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
+            json={
+                "data": {
+                    "type": "checkpoint",
+                    "attributes": {
+                        "checkpoint_config": expected_checkpoint_config,
+                        "organization_id": ge_cloud_organization_id,
+                    },
+                    "id": checkpoint_id,
+                },
+            },
+            **shared_called_with_request_kwargs,
+        )
+
+    assert checkpoint_1.ge_cloud_id == checkpoint_2.ge_cloud_id
 
 
 @pytest.mark.xfail(
