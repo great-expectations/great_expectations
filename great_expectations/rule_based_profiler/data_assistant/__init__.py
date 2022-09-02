@@ -1,3 +1,4 @@
 from .data_assistant import DataAssistant
 from .onboarding_data_assistant import OnboardingDataAssistant
+from .statistics_data_assistant import StatisticsDataAssistant
 from .volume_data_assistant import VolumeDataAssistant
