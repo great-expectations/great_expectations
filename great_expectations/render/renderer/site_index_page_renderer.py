@@ -248,7 +248,7 @@ class SiteIndexPageRenderer(Renderer):
                     "_batch_identifier_sort": dict_.get("batch_identifier"),
                     "expectation_suite_name": cls._render_expectation_suite_cell(
                         dict_.get("expectation_suite_name"),
-                        dict_.get("expectation_suite_filepath"),
+                        dict_.get("filepath"),
                     ),
                     "_expectation_suite_name_sort": dict_.get("expectation_suite_name"),
                     "_table_row_link_path": dict_.get("filepath"),
