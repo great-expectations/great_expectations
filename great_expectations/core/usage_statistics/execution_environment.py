@@ -13,7 +13,7 @@ access to features of new package versions.
 import enum
 import sys
 from dataclasses import dataclass
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Iterable
 
 from marshmallow import Schema, fields
 from packaging import version
@@ -109,7 +109,7 @@ class GEExecutionEnvironment:
 
     def _build_dependencies_info(
         self,
-        dependency_names: Union[List[str], Set[str]],
+        dependency_names: Iterable[str],
         install_environment: InstallEnvironment,
     ) -> List[PackageInfo]:
         """Build list of info about dependencies including version and install status.
