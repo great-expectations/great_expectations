@@ -105,7 +105,16 @@ exclude = [
     'rule_based_profiler/domain_builder', # 62
     'rule_based_profiler/estimators',  # 23
     'rule_based_profiler/expectation_configuration_builder',  # 13
-    'rule_based_profiler/parameter_builder',  # 161
+    'rule_based_profiler/parameter_builder/mean_table_columns_set_match_multi_batch_parameter_builder\.py',  # 2
+    'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
+    'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15
+    'rule_based_profiler/parameter_builder/metric_single_batch_parameter_builder\.py',  # 3
+    'rule_based_profiler/parameter_builder/numeric_metric_range_multi_batch_parameter_builder\.py',  # 27
+    'rule_based_profiler/parameter_builder/parameter_builder\.py',  # 40
+    'rule_based_profiler/parameter_builder/partition_parameter_builder\.py',  # 9
+    'rule_based_profiler/parameter_builder/regex_pattern_string_parameter_builder\.py',  # 21
+    'rule_based_profiler/parameter_builder/simple_date_format_string_parameter_builder\.py',  # 20
+    'rule_based_profiler/parameter_builder/value_set_multi_batch_parameter_builder\.py',  # 2
     'rule_based_profiler/rule',  # 51
     'rule_based_profiler/attributed_resolved_metrics\.py',  # 4
     'rule_based_profiler/parameter_container\.py',  # 7
