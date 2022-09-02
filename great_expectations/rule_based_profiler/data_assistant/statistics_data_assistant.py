@@ -29,12 +29,12 @@ from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.validator.validator import Validator
 
 
-class OnboardingDataAssistant(DataAssistant):
+class StatisticsDataAssistant(DataAssistant):
     """
     OnboardingDataAssistant provides dataset exploration and validation to help with Great Expectations "Onboarding".
     """
 
-    __alias__: str = "onboarding"
+    __alias__: str = "statistics"
 
     def __init__(
         self,
