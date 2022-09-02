@@ -265,3 +265,44 @@ store_backend:
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_ge_cloud_response_json_to_object_dict() -> None:
+    store = CheckpointStore(store_name="checkpoint_store")
+
+    checkpoint_id = "7b5e962c-3c67-4a6d-b311-b48061d52103"
+    checkpoint_config = {
+        "name": "oss_test_checkpoint",
+        "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "expectation_suite_name": "oss_test_expectation_suite",
+        "validations": [
+            {
+                "expectation_suite_name": "taxi.demo_pass",
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "oss_test_datasource",
+                    "data_connector_name": "oss_test_data_connector",
+                    "data_asset_name": "users",
+                },
+            },
+        ],
+    }
+    response_json = {
+        "data": {
+            "id": checkpoint_id,
+            "attributes": {
+                "checkpoint_config": checkpoint_config,
+            },
+        }
+    }
+
+    expected = checkpoint_config
+    expected["ge_cloud_id"] = checkpoint_id
+
+    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+
+    assert actual == expected
