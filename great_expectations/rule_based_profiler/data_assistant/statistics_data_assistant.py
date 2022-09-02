@@ -159,7 +159,9 @@ class StatisticsDataAssistant(DataAssistant):
         parameter_builders: List[ParameterBuilder] = [
             table_row_count_metric_multi_batch_parameter_builder_for_metrics,
             table_columns_metric_multi_batch_parameter_builder_for_metrics,
-            table_row_count_range_parameter_builder_for_validations,
+            # TODO: <Alex>ALEX</Alex>
+            # table_row_count_range_parameter_builder_for_validations,
+            # TODO: <Alex>ALEX</Alex>
             mean_table_columns_set_match_multi_batch_parameter_builder_for_validations,
         ]
         rule = Rule(
@@ -440,12 +442,14 @@ class StatisticsDataAssistant(DataAssistant):
             column_median_metric_multi_batch_parameter_builder_for_metrics,
             column_mean_metric_multi_batch_parameter_builder_for_metrics,
             column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics,
-            column_min_values_range_parameter_builder_for_validations,
-            column_max_values_range_parameter_builder_for_validations,
-            column_quantile_values_range_parameter_builder_for_validations,
-            column_median_values_range_parameter_builder_for_validations,
-            column_mean_values_range_parameter_builder_for_validations,
-            column_standard_deviation_values_range_parameter_builder_for_validations,
+            # TODO: <Alex>ALEX</Alex>
+            # column_min_values_range_parameter_builder_for_validations,
+            # column_max_values_range_parameter_builder_for_validations,
+            # column_quantile_values_range_parameter_builder_for_validations,
+            # column_median_values_range_parameter_builder_for_validations,
+            # column_mean_values_range_parameter_builder_for_validations,
+            # column_standard_deviation_values_range_parameter_builder_for_validations,
+            # TODO: <Alex>ALEX</Alex>
         ]
         rule = Rule(
             name="numeric_columns_rule",
@@ -539,8 +543,10 @@ class StatisticsDataAssistant(DataAssistant):
         parameter_builders: List[ParameterBuilder] = [
             column_min_metric_multi_batch_parameter_builder_for_metrics,
             column_max_metric_multi_batch_parameter_builder_for_metrics,
-            column_min_values_range_parameter_builder_for_validations,
-            column_max_values_range_parameter_builder_for_validations,
+            # TODO: <Alex>ALEX</Alex>
+            # column_min_values_range_parameter_builder_for_validations,
+            # column_max_values_range_parameter_builder_for_validations,
+            # TODO: <Alex>ALEX</Alex>
         ]
         rule = Rule(
             name="datetime_columns_rule",
@@ -637,8 +643,10 @@ class StatisticsDataAssistant(DataAssistant):
         parameter_builders: List[ParameterBuilder] = [
             column_min_length_metric_multi_batch_parameter_builder_for_metrics,
             column_max_length_metric_multi_batch_parameter_builder_for_metrics,
-            column_min_length_range_parameter_builder_for_validations,
-            column_max_length_range_parameter_builder_for_validations,
+            # TODO: <Alex>ALEX</Alex>
+            # column_min_length_range_parameter_builder_for_validations,
+            # column_max_length_range_parameter_builder_for_validations,
+            # TODO: <Alex>ALEX</Alex>
             column_values_to_match_regex_parameter_builder_for_validations,
         ]
         rule = Rule(
@@ -761,8 +769,10 @@ class StatisticsDataAssistant(DataAssistant):
             column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,
             column_value_counts_metric_multi_batch_parameter_builder_for_metrics,
             value_set_multi_batch_parameter_builder_for_validations,
-            column_distinct_values_count_range_parameter_builder_for_validations,
-            column_unique_proportion_range_parameter_builder_for_validations,
+            # TODO: <Alex>ALEX</Alex>
+            # column_distinct_values_count_range_parameter_builder_for_validations,
+            # column_unique_proportion_range_parameter_builder_for_validations,
+            # TODO: <Alex>ALEX</Alex>
         ]
         rule = Rule(
             name="categorical_columns_rule",
