@@ -375,6 +375,48 @@ def basic_spark_df_execution_engine(spark_session):
     return execution_engine
 
 
+@pytest.fixture
+def spark_df_taxi_data_schema(spark_session):
+    """
+    Fixture used by tests for providing schema to SparkDFExecutionEngine.
+    The schema returned by this fixture corresponds to taxi_tripdata
+    """
+
+    # will not import unless we have a spark_session already passed in as fixture
+    from pyspark.sql.types import (
+        DoubleType,
+        IntegerType,
+        StringType,
+        StructField,
+        StructType,
+        TimestampType,
+    )
+
+    schema = StructType(
+        [
+            StructField("vendor_id", IntegerType(), True, None),
+            StructField("pickup_datetime", TimestampType(), True, None),
+            StructField("dropoff_datetime", TimestampType(), True, None),
+            StructField("passenger_count", IntegerType(), True, None),
+            StructField("trip_distance", DoubleType(), True, None),
+            StructField("rate_code_id", IntegerType(), True, None),
+            StructField("store_and_fwd_flag", StringType(), True, None),
+            StructField("pickup_location_id", IntegerType(), True, None),
+            StructField("dropoff_location_id", IntegerType(), True, None),
+            StructField("payment_type", IntegerType(), True, None),
+            StructField("fare_amount", DoubleType(), True, None),
+            StructField("extra", DoubleType(), True, None),
+            StructField("mta_tax", DoubleType(), True, None),
+            StructField("tip_amount", DoubleType(), True, None),
+            StructField("tolls_amount", DoubleType(), True, None),
+            StructField("improvement_surcharge", DoubleType(), True, None),
+            StructField("total_amount", DoubleType(), True, None),
+            StructField("congestion_surcharge", DoubleType(), True, None),
+        ]
+    )
+    return schema
+
+
 @pytest.mark.order(index=3)
 @pytest.fixture
 def spark_session_v012(test_backends):
