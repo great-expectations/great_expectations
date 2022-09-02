@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 from unittest import mock
 
 import pytest
@@ -11,6 +11,7 @@ from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import filter_properties_dict, gen_directory_tree_str
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
@@ -306,3 +307,46 @@ def test_ge_cloud_response_json_to_object_dict() -> None:
     actual = store.ge_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected
+
+
+@pytest.mark.unit
+def test_serialization_self_check(capsys) -> None:
+    store = CheckpointStore(store_name="checkpoint_store")
+
+    with mock.patch("random.choice", lambda _: "0"):
+        store.serialization_self_check(pretty_print=True)
+
+    stdout = capsys.readouterr().out
+
+    test_key = "ConfigurationIdentifier::test-name-00000000000000000000"
+    messages = [
+        f"Attempting to add a new test key {test_key} to Checkpoint store...",
+        f"Test key {test_key} successfully added to Checkpoint store.",
+        f"Attempting to retrieve the test value associated with key {test_key} from Checkpoint store...",
+        "Test value successfully retrieved from Checkpoint store",
+        f"Cleaning up test key {test_key} and value from Checkpoint store...",
+        "Test key and value successfully removed from Checkpoint store",
+    ]
+
+    for message in messages:
+        assert message in stdout
+
+
+@pytest.mark.parametrize(
+    "path,exists",
+    [
+        ("", False),
+        ("my_fake_dir", False),
+        (
+            file_relative_path(
+                __file__,
+                "../../integration/fixtures/gcp_deployment/great_expectations",
+            ),
+            True,
+        ),
+    ],
+)
+@pytest.mark.unit
+def test_default_checkpoints_exist(path: str, exists: bool) -> None:
+    store = CheckpointStore(store_name="checkpoint_store")
+    assert store.default_checkpoints_exist(path) is exists
