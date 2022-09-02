@@ -232,7 +232,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
-        if len(self.sorters) > 0:
+        if len(self.sorters) > 0 and len(batch_definition_list) > 1:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list
             )
