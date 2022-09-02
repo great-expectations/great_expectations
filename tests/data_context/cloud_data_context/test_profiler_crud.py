@@ -12,6 +12,7 @@ from great_expectations.data_context.store.ge_cloud_store_backend import (
 )
 from great_expectations.data_context.types.base import DataContextConfig, GeCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.exceptions.exceptions import GeCloudError
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
@@ -203,11 +204,6 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     assert return_profiler.ge_cloud_id == profiler_id
 
 
-@pytest.mark.xfail(
-    reason="GX Cloud E2E tests are currently failing intermittently due to env vars not being recognized by Docker; xfailing with strict=False for purposes of the 0.15.21 release",
-    run=True,
-    strict=False,
-)
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
@@ -215,7 +211,15 @@ def test_cloud_backed_data_context_add_profiler_e2e(
     mock_save_project_config: mock.MagicMock,
     profiler_rules: dict,
 ) -> None:
-    context = DataContext(ge_cloud_mode=True)
+    cloud_internal_server_error_retries = 3
+    for retry in range(cloud_internal_server_error_retries):
+        try:
+            context = DataContext(ge_cloud_mode=True)
+        except GeCloudError as e:
+            internal_server_error = "<title>500 Internal Server Error</title>"
+            if internal_server_error in e.message:
+                continue
+        break
 
     name = "oss_test_profiler"
     config_version = 1.0
