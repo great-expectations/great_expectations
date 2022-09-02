@@ -21,6 +21,7 @@ from tests.test_utils import build_checkpoint_store_using_filesystem
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 def test_checkpoint_store(empty_data_context):
     store_name: str = "checkpoint_store"
     base_directory: str = str(Path(empty_data_context.root_directory) / "checkpoints")
@@ -227,6 +228,7 @@ def test_checkpoint_store(empty_data_context):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
