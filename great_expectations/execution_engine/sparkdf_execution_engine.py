@@ -260,6 +260,7 @@ Please check your config."""
             reader_options: dict = batch_spec.reader_options or {}
             path: str = batch_spec.path
             azure_url = AzureUrl(path)
+            # TODO <WILL> 202209 - Add `schema` definition to Azure like PathBatchSpec below (GREAT-1224)
             try:
                 credential = self._azure_options.get("credential")
                 storage_account_url = azure_url.account_url
@@ -289,8 +290,33 @@ Please check your config."""
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
             path: str = batch_spec.path
+            schema: Optional[
+                Union[pyspark.sql.types.StructType, dict, str]
+            ] = reader_options.get("schema")
+
+            # schema can be a dict if it has been through serialization step,
+            # either as part of the datasource configuration, or checkpoint config
+            if isinstance(schema, dict):
+                schema: pyspark.sql.types.StructType = sparktypes.StructType.fromJson(
+                    schema
+                )
+
+            # this can happen if we have not converted schema into json at Datasource-config level
+            elif isinstance(schema, str):
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""
+                                Spark schema was not properly serialized.
+                                Please run the .jsonValue() method on the schema object before loading into GE.
+                                schema: your_schema.jsonValue()
+                                """
+                )
             try:
-                reader: DataFrameReader = self.spark.read.options(**reader_options)
+                if schema:
+                    reader: DataFrameReader = self.spark.read.schema(schema).options(
+                        **reader_options
+                    )
+                else:
+                    reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
