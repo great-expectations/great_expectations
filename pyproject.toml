@@ -126,7 +126,13 @@ exclude = [
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
     'rule_based_profiler/data_assistant_result/onboarding_data_assistant_result\.py', # 1
     'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 71
-    'rule_based_profiler/domain_builder', # 62
+    'rule_based_profiler/domain_builder/categorical_column_domain_builder\.py',  # 18
+    'rule_based_profiler/domain_builder/column_domain_builder\.py',
+    'rule_based_profiler/domain_builder/column_pair_domain_builder\.py',  # 4
+    'rule_based_profiler/domain_builder/domain_builder\.py',  # 5
+    'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
+    'rule_based_profiler/domain_builder/multi_column_domain_builder\.py',  # 4
+    'rule_based_profiler/domain_builder/table_domain_builder\.py',  # 1
     'rule_based_profiler/estimators',  # 23
     'rule_based_profiler/expectation_configuration_builder',  # 13
     'rule_based_profiler/parameter_builder/mean_table_columns_set_match_multi_batch_parameter_builder\.py',  # 2
