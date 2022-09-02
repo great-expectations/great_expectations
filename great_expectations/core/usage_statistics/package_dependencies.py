@@ -98,7 +98,6 @@ class GEDependencies:
             "pyspark",
             "pytest",
             "pytest-benchmark",
-            "pytest-azurepipelines",
             "pytest-cov",
             "pytest-mock",
             "pytest-icdiff",
@@ -130,6 +129,7 @@ class GEDependencies:
         "pre-commit",
         "pytest-cov",
         "pytest-order",
+        "pytest-random-order",
         "pyupgrade",
         # requirements-dev-lite.txt:
         "flask",
@@ -152,9 +152,6 @@ class GEDependencies:
         "PyHive",
         "thrift",
         "thrift-sasl",
-        # requirements-dev-test-pipeline.txt:
-        "pytest-azurepipelines",
-        "pytest-random-order",
         # requirements-dev-all-contrib-expectations.txt
         "arxiv",
         "barcodenumber",
