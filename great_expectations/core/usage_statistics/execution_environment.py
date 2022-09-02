@@ -13,7 +13,7 @@ access to features of new package versions.
 import enum
 import sys
 from dataclasses import dataclass
-from typing import List, Optional, Iterable
+from typing import Iterable, List, Optional
 
 from marshmallow import Schema, fields
 from packaging import version

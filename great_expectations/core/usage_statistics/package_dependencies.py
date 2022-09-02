@@ -216,7 +216,7 @@ class GEDependencies:
         return self.GE_REQUIRED_DEPENDENCIES
 
     def get_dev_dependency_names(self) -> Set[str]:
-        """Sorted list of dev GE dependencies"""
+        """Set of dev GE dependencies"""
         return self.GE_DEV_DEPENDENCIES
 
     def get_required_dependency_names_from_requirements_file(self) -> List[str]:
