@@ -75,6 +75,7 @@ class StatisticsDataAssistant(DataAssistant):
 
         return [
             table_rule,
+            column_integrity_rule,
             numeric_columns_rule,
             datetime_columns_rule,
             text_columns_rule,
