@@ -75,7 +75,22 @@ exclude = [
     'execution_engine/sqlalchemy_execution_engine\.py',  # 8
     'execution_engine/sqlalchemy_batch_data\.py',  # 1
     'execution_engine/execution_engine\.py',  # 7
-    'render/renderer', # 78
+    'render/renderer/checkpoint_new_notebook_renderer\.py',  # 9
+    'render/renderer/column_section_renderer\.py',  # 1
+    'render/renderer/content_block/bullet_list_content_block\.py',  # 1
+    'render/renderer/content_block/content_block\.py',  # 5
+    'render/renderer/content_block/exception_list_content_block\.py',  # 4
+    'render/renderer/content_block/validation_results_table_content_block\.py',  # 2
+    'render/renderer/datasource_new_notebook_renderer\.py',  #  4
+    'render/renderer/inline_renderer\.py',  # 3
+    'render/renderer/notebook_renderer\.py',  # 2
+    'render/renderer/page_renderer\.py',  # 10
+    'render/renderer/profiling_results_overview_section_renderer\.py',  # 2
+    'render/renderer/site_builder\.py',  # 3
+    'render/renderer/suite_edit_notebook_renderer\.py',  # 7
+    'render/renderer/suite_scaffold_notebook_renderer\.py',  # 7
+    'render/renderer/v3/suite_edit_notebook_renderer\.py',  # 11
+    'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/view',  # 11
     'render/types',  # 4
     'expectations/expectation', # 188
