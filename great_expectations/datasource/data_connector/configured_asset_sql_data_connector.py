@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, List, Optional, cast
+from typing import Dict, Iterator, List, Optional, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -249,6 +249,26 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
             batch_definition_list = batch_filter_obj.select_from_data_connector_query(
                 batch_definition_list=batch_definition_list
+            )
+        return batch_definition_list
+
+    def _sort_batch_definition_list(
+        self, batch_definition_list: List[BatchDefinition]
+    ) -> List[BatchDefinition]:
+        """
+        Use configured sorters to sort batch_definition
+
+        Args:
+            batch_definition_list (list): list of batch_definitions to sort
+
+        Returns:
+            sorted list of batch_definitions
+
+        """
+        sorters: Iterator[SplitterSorter] = reversed(list(self.sorters.values()))
+        for sorter in sorters:
+            batch_definition_list = sorter.get_sorted_batch_definitions(
+                batch_definitions=batch_definition_list
             )
         return batch_definition_list
 
