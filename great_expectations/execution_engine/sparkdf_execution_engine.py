@@ -260,7 +260,7 @@ Please check your config."""
             reader_options: dict = batch_spec.reader_options or {}
             path: str = batch_spec.path
             azure_url = AzureUrl(path)
-            # TODO <WILL> 202209 - Add `schema` definition to Azure like PathBatchSpec below
+            # TODO <WILL> 202209 - Add `schema` definition to Azure like PathBatchSpec below (GREAT-1224)
             try:
                 credential = self._azure_options.get("credential")
                 storage_account_url = azure_url.account_url
