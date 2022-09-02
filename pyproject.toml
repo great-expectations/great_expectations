@@ -93,7 +93,14 @@ exclude = [
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/view',  # 11
     'render/types',  # 4
-    'expectations/expectation', # 188
+    'expectations/core',  # 257
+    'expectations/expectation\.py',  # 59
+    'expectations/metrics',  # 130
+    'expectations/regex_based_column_map_expectation\.py',  # 3
+    'expectations/registry\.py',  # 19
+    'expectations/row_conditions\.py',  # 4
+    'expectations/set_based_column_map_expectation\.py',  # 3
+    'expectations/validation_handlers\.py', # 1
     'rule_based_profiler/helpers', # 16
     'rule_based_profiler/config',  # 13
     'rule_based_profiler/data_assistant/data_assistant\.py',  # 15
