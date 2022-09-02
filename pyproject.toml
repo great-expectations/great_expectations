@@ -45,7 +45,8 @@ exclude = [
     'cli/store\.py',  # 2
     'cli/suite\.py',  # 24
     'cli/python_subprocess\.py', # 6
-    'core/usage_statistics', # 108
+    'core/usage_statistics/anonymizers', # 100
+    'core/usage_statistics/usage_statistics\.py',  # 19
     'core/expectation_diagnostics', # 20
     'core/batch\.py', # 29
     'core/expectation_configuration\.py', # 21
