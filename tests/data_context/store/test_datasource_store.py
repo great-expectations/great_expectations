@@ -53,6 +53,7 @@ def datasource_store_with_single_datasource(
     return empty_datasource_store
 
 
+@pytest.mark.unit
 def test_datasource_store_with_bad_key_raises_error(
     empty_datasource_store: DatasourceStore, datasource_config: DatasourceConfig
 ) -> None:
@@ -105,6 +106,7 @@ def _assert_serialized_datasource_configs_are_equal(
         )
 
 
+@pytest.mark.unit
 def test__assert_serialized_datasource_configs_are_equal(
     datasource_config: DatasourceConfig, datasource_config_with_names: DatasourceConfig
 ) -> None:
@@ -147,6 +149,7 @@ def test__assert_serialized_datasource_configs_are_equal(
         )
 
 
+@pytest.mark.integration
 def test_datasource_store_retrieval(
     empty_datasource_store: DatasourceStore, datasource_config: DatasourceConfig
 ) -> None:
@@ -168,6 +171,7 @@ def test_datasource_store_retrieval(
     )
 
 
+@pytest.mark.integration
 def test_datasource_store_retrieval_cloud_mode(
     datasource_config: DatasourceConfig,
     ge_cloud_base_url: str,
@@ -219,6 +223,7 @@ def test_datasource_store_retrieval_cloud_mode(
         )
 
 
+@pytest.mark.integration
 def test_datasource_store_with_inline_store_backend(
     datasource_config: DatasourceConfig, empty_data_context: DataContext
 ) -> None:
@@ -254,6 +259,7 @@ def test_datasource_store_with_inline_store_backend(
     )
 
 
+@pytest.mark.unit
 def test_datasource_store_set_by_name(
     empty_datasource_store: DatasourceStore,
     datasource_config: DatasourceConfig,
@@ -268,6 +274,7 @@ def test_datasource_store_set_by_name(
     assert len(empty_datasource_store.list_keys()) == 1
 
 
+@pytest.mark.integration
 def test_datasource_store_retrieve_by_name(
     datasource_name: str,
     datasource_config: DatasourceConfig,
@@ -288,6 +295,7 @@ def test_datasource_store_retrieve_by_name(
     )
 
 
+@pytest.mark.unit
 def test_datasource_store_delete_by_name(
     datasource_name: str,
     datasource_store_with_single_datasource: DatasourceStore,
@@ -301,6 +309,7 @@ def test_datasource_store_delete_by_name(
     assert len(datasource_store_with_single_datasource.list_keys()) == 0
 
 
+@pytest.mark.integration
 def test_datasource_store_update_by_name(
     datasource_name: str,
     datasource_config: DatasourceConfig,
@@ -334,6 +343,7 @@ def test_datasource_store_update_by_name(
     )
 
 
+@pytest.mark.unit
 def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
     datasource_name: str,
     empty_datasource_store: DatasourceStore,

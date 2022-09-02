@@ -13,6 +13,7 @@ from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import build_profiler_store_using_filesystem
 
 
+@pytest.mark.unit
 def test_profiler_store_raises_error_with_invalid_value(
     empty_profiler_store: ProfilerStore,
 ):
@@ -22,6 +23,7 @@ def test_profiler_store_raises_error_with_invalid_value(
         )
 
 
+@pytest.mark.unit
 def test_profiler_store_set_adds_valid_key(
     empty_profiler_store: ProfilerStore,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
@@ -34,6 +36,7 @@ def test_profiler_store_set_adds_valid_key(
     assert len(empty_profiler_store.list_keys()) == 1
 
 
+@pytest.mark.integration
 def test_profiler_store_integration(
     empty_data_context: DataContext,
     profiler_store_name: str,
