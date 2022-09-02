@@ -14,6 +14,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
     build_batch_filter,
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector
+from great_expectations.datasource.data_connector.sorter import SplitterSorter
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
@@ -55,9 +56,19 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         id: Optional[str] = None,
     ) -> None:
         self._assets: dict = {}
+        self._sorters: dict = {}
         if assets:
             for asset_name, config in assets.items():
                 self.add_data_asset(asset_name, config)
+                if "splitter_method" in config:
+                    splitter_method: str = config.get("splitter_method")
+                    splitter_kwargs: dict = config.get("splitter_kwargs")
+                    splitter_sorter = SplitterSorter(
+                        name=asset_name,
+                        splitter_method=splitter_method,
+                        splitter_kwargs=splitter_kwargs,
+                    )
+                    self._sorters[asset_name] = splitter_sorter
 
         if execution_engine:
             execution_engine: SqlAlchemyExecutionEngine = cast(
@@ -79,6 +90,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     @property
     def execution_engine(self) -> SqlAlchemyExecutionEngine:
         return cast(SqlAlchemyExecutionEngine, self._execution_engine)
+
+    @property
+    def sorters(self) -> Optional[dict]:
+        return self._sorters
 
     def add_data_asset(
         self,
@@ -155,8 +170,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 )
             )
 
-            # TODO Abe 20201029 : Apply sorters to batch_identifiers_list here
-            # TODO Will 20201102 : add sorting code here
             self._data_references_cache[data_asset_name] = batch_identifiers_list
 
     def get_available_data_asset_names(self) -> List[str]:
@@ -219,12 +232,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
-        # <WILL> 20220725 - In the case of file_data_connectors, this step is enabled, but sql_data_connectors
-        # currently do not support sorters. This step can be enabled once sorting is implemented for sql_data_connectors
-        # if len(self.sorters) > 0:
-        #     batch_definition_list = self._sort_batch_definition_list(
-        #         batch_definition_list=batch_definition_list
-        #     )
+        if len(self.sorters) > 0:
+            batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list
+            )
         if batch_request.data_connector_query is not None:
             data_connector_query_dict = batch_request.data_connector_query.copy()
             if (
