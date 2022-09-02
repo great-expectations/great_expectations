@@ -79,10 +79,16 @@ exclude = [
     'datasource/data_connector/sorter/sorter\.py',  # 1
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
-    'execution_engine/split_and_sample',  # 65
+    'execution_engine/split_and_sample/data_sampler\.py',  # 1
+    'execution_engine/split_and_sample/pandas_data_sampler\.py',  # 16
+    'execution_engine/split_and_sample/pandas_data_splitter\.py',  # 2
+    'execution_engine/split_and_sample/sparkdf_data_sampler\.py',  # 11
+    'execution_engine/split_and_sample/sparkdf_data_splitter\.py',  # 4
+    'execution_engine/split_and_sample/sqlalchemy_data_sampler\.py',  # 10
+    'execution_engine/split_and_sample/sqlalchemy_data_splitter\.py',  # 22
     'execution_engine/pandas_execution_engine\.py',  # 9
     'execution_engine/sparkdf_execution_engine\.py',  # 8
-    'execution_engine/sqlalchemy_dialect.py', # 1
+    'execution_engine/sqlalchemy_dialect.py',  # 1
     'execution_engine/sqlalchemy_execution_engine\.py',  # 8
     'execution_engine/sqlalchemy_batch_data\.py',  # 1
     'execution_engine/execution_engine\.py',  # 7
