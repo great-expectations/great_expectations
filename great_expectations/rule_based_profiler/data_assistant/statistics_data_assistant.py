@@ -17,6 +17,7 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
 from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
     MeanTableColumnsSetMatchMultiBatchParameterBuilder,
+    MeanUnexpectedMapMetricMultiBatchParameterBuilder,
     MetricMultiBatchParameterBuilder,
     ParameterBuilder,
     ValueSetMultiBatchParameterBuilder,
