@@ -175,4 +175,5 @@ class BatchRequestAnonymizer(BaseAnonymizer):
         for kwarg in kwargs:
             if kwarg in attrs or kwarg == "batch_request":
                 return True
+
         return False

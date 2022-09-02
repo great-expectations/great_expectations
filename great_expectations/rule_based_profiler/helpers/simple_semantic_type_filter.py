@@ -2,9 +2,11 @@ from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.domain import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -125,9 +127,12 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         column_type: str = str(column_types_dict_list[0]["type"]).upper()
 
         semantic_column_type: SemanticDomainTypes
-        if column_type in (
-            {type_name.upper() for type_name in ProfilerTypeMapping.INT_TYPE_NAMES}
-            | {type_name.upper() for type_name in ProfilerTypeMapping.FLOAT_TYPE_NAMES}
+        if any(
+            map(
+                lambda type_name: column_type.startswith(type_name.upper()),
+                ProfilerTypeMapping.INT_TYPE_NAMES
+                + ProfilerTypeMapping.FLOAT_TYPE_NAMES,
+            )
         ):
             semantic_column_type = SemanticDomainTypes.NUMERIC
         elif column_type in {

@@ -68,7 +68,7 @@ def context_with_multiple_built_sites(empty_data_context):
         },
     }
     config.data_docs_sites = multi_sites
-    context._project_config = config
+    context.variables.config = config
     context.build_data_docs()
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 2
@@ -381,7 +381,6 @@ def test_build_data_docs_skipping_index_does_not_build_index(
         },
     }
     context._project_config = config
-
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
     context._save_project_config()

@@ -12,9 +12,10 @@ from great_expectations.core.batch import (
     BatchRequest,
 )
 from great_expectations.core.id_dict import BatchSpec, IDDict
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -22,8 +23,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     RegexPatternStringParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
@@ -44,15 +44,15 @@ def batch_fixture() -> Batch:
         data_connector_name="my_data_connector",
         data_asset_name="my_data_asset_name",
     )
-    batch_definition: BatchDefinition = BatchDefinition(
+    batch_definition = BatchDefinition(
         datasource_name="my_datasource",
         data_connector_name="my_data_connector",
         data_asset_name="my_data_asset_name",
         batch_identifiers=IDDict({"id": "A"}),
     )
-    batch_spec: BatchSpec = BatchSpec(path="/some/path/some.file")
-    batch_markers: BatchMarkers = BatchMarkers(ge_load_time="FAKE_LOAD_TIME")
-    batch: Batch = Batch(
+    batch_spec = BatchSpec(path="/some/path/some.file")
+    batch_markers = BatchMarkers(ge_load_time="FAKE_LOAD_TIME")
+    batch = Batch(
         data=df,
         batch_request=batch_request,
         batch_definition=batch_definition,
@@ -75,7 +75,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
         r"[A-Za-z0-9\.,;:!?()\"'%\-]+",  # general text
         r"^\s+",  # leading space
         r"\s+$",  # trailing space
-        r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  #  Matching URL (including http(s) protocol)
+        r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,255}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  #  Matching URL (including http(s) protocol)
         r"<\/?(?:p|a|b|img)(?: \/)?>",  # HTML tags
         r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}",  # IPv4 IP address
         r"(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",  # IPv6 IP address,
@@ -117,6 +117,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
     assert regex_pattern_string_parameter.CANDIDATE_REGEX != candidate_regexes
 
 
+@pytest.mark.slow  # 1.34s
 def test_regex_pattern_string_parameter_builder_alice(
     alice_columnar_table_single_batch_context,
 ):
@@ -144,12 +145,12 @@ def test_regex_pattern_string_parameter_builder_alice(
         )
     )
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -223,12 +224,12 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     assert regex_parameter.candidate_regexes == candidate_regexes
     assert regex_parameter.threshold == 0.9
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -294,12 +295,12 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         threshold=threshold,
         data_context=data_context,
     )
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -325,7 +326,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
                 r"[A-Za-z0-9\.,;:!?()\"'%\-]+": 1.0,
                 r"^\s+": 0.0,
                 r"\s+$": 0.0,
-                r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)": 0.0,
+                r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,255}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)": 0.0,
                 r"<\/?(?:p|a|b|img)(?: \/)?>": 0.0,
                 r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}": 0.0,
                 r"(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}": 1.0,
@@ -368,12 +369,12 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
         )
     )
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -393,13 +394,10 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_regex_single_candidate(
-    mock_data_context: mock.MagicMock, batch_fixture: Batch
+    mock_data_context: mock.MagicMock,
+    batch_fixture: Batch,
 ):
     batch: Batch = batch_fixture
-    mock_data_context.get_batch_list.return_value = [batch]
-    mock_data_context.get_validator_using_batch_list.return_value = Validator(
-        execution_engine=PandasExecutionEngine(), batches=[batch]
-    )
 
     data_context: DataContext = mock_data_context
 
@@ -415,15 +413,21 @@ def test_regex_single_candidate(
         )
     )
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    validator = Validator(
+        execution_engine=PandasExecutionEngine(),
+        batches=[batch],
+    )
+    mock_data_context.get_validator.return_value = validator
 
     assert parameter_container.parameter_nodes is None
 
@@ -464,10 +468,6 @@ def test_regex_single_candidate(
 def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: Batch):
     batch: Batch = batch_fixture
 
-    mock_data_context.get_batch_list.return_value = [batch]
-    mock_data_context.get_validator_using_batch_list.return_value = Validator(
-        execution_engine=PandasExecutionEngine(), batches=[batch]
-    )
     data_context: DataContext = mock_data_context
 
     metric_domain_kwargs: dict = {"column": "b"}
@@ -482,15 +482,21 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
         )
     )
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    validator = Validator(
+        execution_engine=PandasExecutionEngine(),
+        batches=[batch],
+    )
+    mock_data_context.get_validator.return_value = validator
 
     assert parameter_container.parameter_nodes is None
 

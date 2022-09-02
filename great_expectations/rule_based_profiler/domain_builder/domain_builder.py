@@ -2,7 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.builder import Builder
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
 )
@@ -12,9 +14,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
 )
-from great_expectations.rule_based_profiler.types import (
-    Builder,
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -55,7 +55,7 @@ class DomainBuilder(ABC, Builder):
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
         """
-        self.set_batch_list_or_batch_request(
+        self.set_batch_list_if_null_batch_request(
             batch_list=batch_list,
             batch_request=batch_request,
         )

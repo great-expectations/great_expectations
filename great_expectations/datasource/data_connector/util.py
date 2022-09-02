@@ -8,7 +8,7 @@ import sre_constants
 import sre_parse
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
@@ -17,6 +17,9 @@ from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.sorter import Sorter
+
+if TYPE_CHECKING:
+    from great_expectations.datasource import DataConnector
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +83,7 @@ def batch_definition_matches_batch_request(
         if batch_filter_parameters:
             if not isinstance(batch_filter_parameters, dict):
                 return False
+
             for key in batch_filter_parameters.keys():
                 if not (
                     key in batch_definition.batch_identifiers
@@ -91,6 +95,7 @@ def batch_definition_matches_batch_request(
     if batch_request.batch_identifiers:
         if not isinstance(batch_request.batch_identifiers, dict):
             return False
+
         for key in batch_request.batch_identifiers.keys():
             if not (
                 key in batch_definition.batch_identifiers
@@ -153,7 +158,7 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
         )
     else:
         groups: list = list(matches.groups())
-        batch_identifiers: IDDict = IDDict(dict(zip(group_names, groups)))
+        batch_identifiers = IDDict(dict(zip(group_names, groups)))
 
     # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
     # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>

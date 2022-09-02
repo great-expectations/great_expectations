@@ -525,6 +525,7 @@ def test_suite_demo_one_datasource_without_generator_without_suite_name_argument
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 3.08s
 def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argument(
     mock_webbrowser,
     mock_subprocess,
@@ -618,6 +619,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 3.09s
 def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument(
     mock_webbrowser,
     mock_subprocess,
@@ -847,6 +849,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 3.25s
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations(
     mock_webbrowser,
     mock_subprocess,
@@ -939,6 +942,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 3.26s
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations(
     mock_webbrowser,
     mock_subprocess,
@@ -1016,6 +1020,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 3.14s
 def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     mock_webbrowser,
     mock_subprocess,
@@ -1115,7 +1120,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error(
+def test_suite_edit_on_existing_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error(
     mock_webbrowser,
     mock_subprocess,
     caplog,
@@ -1156,7 +1161,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     stdout = result.output
     assert result.exit_code == 1
     assert "Please check that your batch_kwargs are able to load a batch." in stdout
-    assert "Unable to load datasource `None`" in stdout
+    assert "Must provide a datasource_name to retrieve an existing Datasource" in stdout
 
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0

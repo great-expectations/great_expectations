@@ -884,7 +884,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name\n        }\n    ]\n}\ncheckpoint = SimpleCheckpoint(\n    f"_tmp_checkpoint_{expectation_suite_name}",\n    context,\n    **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
+                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name\n        }\n    ]\n}\ncheckpoint = SimpleCheckpoint(\n    f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}",\n    context,\n    **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -899,6 +899,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
     assert obs == expected
 
 
+@pytest.mark.slow  # 9.72s
 def test_notebook_execution_with_pandas_backend(
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1182,7 +1183,7 @@ def test_notebook_execution_with_custom_notebooks(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name\n        }\n    ]\n}\ncheckpoint = SimpleCheckpoint(\n    f"_tmp_checkpoint_{expectation_suite_name}",\n    context,\n    **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
+                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name\n        }\n    ]\n}\ncheckpoint = SimpleCheckpoint(\n    f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}",\n    context,\n    **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -1206,6 +1207,7 @@ def test_notebook_execution_with_custom_notebooks(
         """,
     ],
 )
+@pytest.mark.slow  # 1.36s
 def test_raise_exception_quotes_or_space_with_row_condition(
     row_condition,
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,

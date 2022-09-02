@@ -4,13 +4,13 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
@@ -55,6 +55,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None
+
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)
@@ -85,7 +86,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     def _spark(
         cls,
-        execution_engine: SqlAlchemyExecutionEngine,
+        execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],

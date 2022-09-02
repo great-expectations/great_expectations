@@ -26,6 +26,7 @@ title: "Connect to Data: Index"
 - [How to connect to a Redshift database](../../guides/connecting_to_your_data/database/redshift.md)
 - [How to connect to a Snowflake database](../../guides/connecting_to_your_data/database/snowflake.md)
 - [How to connect to a SQLite database](../../guides/connecting_to_your_data/database/sqlite.md)
+- [How to connect to a Trino database](../../guides/connecting_to_your_data/database/trino.md) (formerly Presto SQL)
 
 ## Filesystem
 - [How to connect to data on a filesystem using Pandas](../../guides/connecting_to_your_data/filesystem/pandas.md)

@@ -34,8 +34,10 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
 from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.util import deep_filter_properties_iterable
 
 
@@ -120,7 +122,6 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -129,7 +130,6 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
                     "include_estimator_samples_histogram_in_details": False,
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -177,10 +177,10 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -193,9 +193,9 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_correction": False,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -240,10 +240,10 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -311,10 +311,10 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -361,10 +361,10 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_special_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -377,7 +377,6 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "false_positive_rate": 0.025,
                     "quantile_statistic_interpolation_method": "auto",
                     "include_estimator_samples_histogram_in_details": False,
-                    "json_serialize": True,
                 },
             ],
         },
@@ -396,10 +395,10 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_special_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -412,9 +411,9 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
                     "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_correction": False,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -500,10 +499,10 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -567,7 +566,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -576,7 +574,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
                     "include_estimator_samples_histogram_in_details": False,
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -624,10 +621,10 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -640,9 +637,9 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_correction": False,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -717,7 +714,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
                     "include_estimator_samples_histogram_in_details": False,
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -757,9 +753,9 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_correction": False,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -816,7 +812,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -825,7 +820,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "metric_name": "my_other_metric",
                     "quantile_statistic_interpolation_method": "auto",
                     "include_estimator_samples_histogram_in_details": False,
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -873,10 +867,10 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
-                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -889,9 +883,9 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "quantile_statistic_interpolation_method": "auto",
+                    "quantile_bias_correction": False,
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {},
-                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -966,6 +960,9 @@ def test_run_profiler_without_dynamic_args(
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
+        variables_directives_list=None,
+        domain_type_directives_list=None,
+        comment=None,
     )
 
 
@@ -1005,6 +1002,9 @@ def test_run_profiler_with_dynamic_args(
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
+        variables_directives_list=None,
+        domain_type_directives_list=None,
+        comment=None,
     )
 
 
@@ -1088,7 +1088,7 @@ def test_serialize_profiler_config(
     mock_data_context: mock.MagicMock,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    profiler: BaseRuleBasedProfiler = BaseRuleBasedProfiler(
+    profiler = BaseRuleBasedProfiler(
         profiler_config=profiler_config_with_placeholder_args,
         data_context=mock_data_context,
     )
@@ -1113,11 +1113,11 @@ def test_serialize_profiler_config(
         "metric_name": "my_metric",
         "metric_domain_kwargs": None,
         "metric_value_kwargs": None,
+        "single_batch_mode": False,
         "enforce_numeric_metric": False,
         "replace_nan_with_zero": False,
         "reduce_scalar_metric": True,
         "evaluation_parameter_builder_configs": None,
-        "json_serialize": True,
     }
     assert isinstance(
         profiler.rules[0].expectation_configuration_builders[0],
@@ -1150,7 +1150,7 @@ def test_add_profiler(
     profiler_key: ConfigurationIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    mock_data_context.ge_cloud_mode.return_value = False
+    mock_data_context.ge_cloud_mode = False
     profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
         profiler_config_with_placeholder_args,
         data_context=mock_data_context,
@@ -1177,7 +1177,6 @@ def test_add_profiler_ge_cloud_mode(
         profiler_config_with_placeholder_args,
         data_context=mock_data_context,
         profiler_store=mock_data_context.profiler_store,
-        ge_cloud_id=ge_cloud_profiler_id,
     )
 
     assert isinstance(profiler, RuleBasedProfiler)
@@ -1209,7 +1208,6 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
                         "class_name": "MetricMultiBatchParameterBuilder",
                         "name": "my_parameter",
                         "metric_name": "my_metric",
-                        "json_serialize": True,
                     },
                 ],
                 "expectation_configuration_builders": [
@@ -1350,7 +1348,7 @@ def test_add_single_rule(
         config_version=1.0,
         data_context=mock_data_context,
     )
-    first_rule: Rule = Rule(
+    first_rule = Rule(
         name="first_rule",
         variables=None,
         domain_builder=mock_domain_builder,
@@ -1360,7 +1358,7 @@ def test_add_single_rule(
     profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
-    duplicate_of_first_rule: Rule = Rule(
+    duplicate_of_first_rule = Rule(
         name="first_rule",
         variables=None,
         domain_builder=mock_domain_builder,
@@ -1388,7 +1386,7 @@ def test_add_rule_overwrite_first_rule(
         config_version=1.0,
         data_context=mock_data_context,
     )
-    first_rule: Rule = Rule(
+    first_rule = Rule(
         name="first_rule",
         variables=None,
         domain_builder=mock_domain_builder,
@@ -1415,7 +1413,7 @@ def test_add_rule_add_second_rule(
         config_version=1.0,
         data_context=mock_data_context,
     )
-    first_rule: Rule = Rule(
+    first_rule = Rule(
         name="first_rule",
         variables=None,
         domain_builder=mock_domain_builder,
@@ -1425,7 +1423,7 @@ def test_add_rule_add_second_rule(
     profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
-    second_rule: Rule = Rule(
+    second_rule = Rule(
         name="second_rule",
         variables=None,
         domain_builder=mock_domain_builder,

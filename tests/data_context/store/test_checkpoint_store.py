@@ -21,6 +21,7 @@ from tests.test_utils import build_checkpoint_store_using_filesystem
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 def test_checkpoint_store(empty_data_context):
     store_name: str = "checkpoint_store"
     base_directory: str = str(Path(empty_data_context.root_directory) / "checkpoints")
@@ -84,7 +85,7 @@ def test_checkpoint_store(empty_data_context):
             "partial_unexpected_count": 20,
         },
     }
-    my_checkpoint_config_0: CheckpointConfig = CheckpointConfig(
+    my_checkpoint_config_0 = CheckpointConfig(
         name=checkpoint_name_0,
         run_name_template=run_name_template_0,
         expectation_suite_name=expectation_suite_name_0,
@@ -93,7 +94,7 @@ def test_checkpoint_store(empty_data_context):
         validations=validations_0,
     )
 
-    key_0: ConfigurationIdentifier = ConfigurationIdentifier(
+    key_0 = ConfigurationIdentifier(
         configuration_key=checkpoint_name_0,
     )
     checkpoint_store.set(key=key_0, value=my_checkpoint_config_0)
@@ -161,7 +162,7 @@ def test_checkpoint_store(empty_data_context):
             "partial_unexpected_count": 20,
         },
     }
-    my_checkpoint_config_1: CheckpointConfig = CheckpointConfig(
+    my_checkpoint_config_1 = CheckpointConfig(
         name=checkpoint_name_1,
         run_name_template=run_name_template_1,
         expectation_suite_name=expectation_suite_name_1,
@@ -171,7 +172,7 @@ def test_checkpoint_store(empty_data_context):
         validations=validations_1,
     )
 
-    key_1: ConfigurationIdentifier = ConfigurationIdentifier(
+    key_1 = ConfigurationIdentifier(
         configuration_key=checkpoint_name_1,
     )
     checkpoint_store.set(key=key_1, value=my_checkpoint_config_1)
@@ -227,6 +228,7 @@ def test_checkpoint_store(empty_data_context):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):

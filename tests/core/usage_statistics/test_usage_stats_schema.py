@@ -1,6 +1,7 @@
 import json
 
 import jsonschema
+import pytest
 
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.schemas import (
@@ -11,6 +12,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_cli_suite_expectation_suite_payload_schema,
     anonymized_datasource_schema,
     anonymized_datasource_sqlalchemy_connect_payload_schema,
+    anonymized_get_or_edit_or_save_expectation_suite_payload_schema,
     anonymized_init_payload_schema,
     anonymized_legacy_profiler_build_suite_payload_schema,
     anonymized_rule_based_profiler_run_schema,
@@ -77,6 +79,8 @@ def test_comprehensive_list_of_messages():
         "profiler.run",
         "data_context.run_profiler_on_data",
         "data_context.run_profiler_with_dynamic_arguments",
+        "profiler.result.get_expectation_suite",
+        "data_assistant.result.get_expectation_suite",
     }
     # Note: "cli.project.upgrade" has no base event, only .begin and .end events
     assert set(valid_message_list) == set(
@@ -208,6 +212,8 @@ def test_legacy_profiler_build_suite_message():
 def test_data_context_save_expectation_suite_message():
     usage_stats_records_messages = [
         "data_context.save_expectation_suite",
+        "profiler.result.get_expectation_suite",
+        "data_assistant.result.get_expectation_suite",
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
@@ -218,7 +224,7 @@ def test_data_context_save_expectation_suite_message():
             )
             jsonschema.validate(
                 message["event_payload"],
-                anonymized_cli_suite_expectation_suite_payload_schema,
+                anonymized_get_or_edit_or_save_expectation_suite_payload_schema,
             )
 
 
@@ -301,6 +307,7 @@ def test_cli_suite_edit_message():
             )
 
 
+@pytest.mark.slow  # 2.42s
 def test_test_yaml_config_messages():
     usage_stats_records_messages = [
         "data_context.test_yaml_config",
@@ -354,6 +361,7 @@ def test_usage_stats_expectation_suite_messages():
             )
 
 
+@pytest.mark.slow  # 5.20s
 def test_usage_stats_cli_payload_messages():
     usage_stats_records_messages = [
         "cli.checkpoint.delete",

@@ -1,5 +1,7 @@
 from unittest import mock
 
+import pytest
+
 from great_expectations import DataContext
 from great_expectations.cli.datasource import (
     BigqueryCredentialYamlHelper,
@@ -600,8 +602,10 @@ data_connectors:
       pattern: (.*)
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset_name:
+        batch_identifiers:
+          - runtime_batch_identifier_name
 """'''
     )
 
@@ -651,12 +655,15 @@ data_connectors:
       pattern: (.*)
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset_name:
+        batch_identifiers:
+          - runtime_batch_identifier_name
 """'''
     )
 
 
+@pytest.mark.slow  # 1.45s
 def test_check_if_datasource_name_exists(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):

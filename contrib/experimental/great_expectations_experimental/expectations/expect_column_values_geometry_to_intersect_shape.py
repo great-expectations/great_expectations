@@ -80,7 +80,7 @@ class ColumnValuesGeometryIntersectsShape(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesGeometryToInstersectShape(ColumnMapExpectation):
+class ExpectColumnValuesGeometryToIntersectShape(ColumnMapExpectation):
     """
     Expect that column values as geometries intersect a given reference shape.
 
@@ -277,4 +277,4 @@ class ExpectColumnValuesGeometryToInstersectShape(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesGeometryToInstersectShape().print_diagnostic_checklist()
+    ExpectColumnValuesGeometryToIntersectShape().print_diagnostic_checklist()

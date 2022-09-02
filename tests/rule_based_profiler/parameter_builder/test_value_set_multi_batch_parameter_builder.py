@@ -3,7 +3,8 @@ from typing import Any, Collection, Dict, List, Optional, Set, cast
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -11,13 +12,13 @@ from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_ba
     ValueSetMultiBatchParameterBuilder,
     _get_unique_values_from_nested_collection_of_sets,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
 
 
+@pytest.mark.slow  # 1.08s
 def test_instantiation_value_set_multi_batch_parameter_builder(
     alice_columnar_table_single_batch_context,
 ):
@@ -32,6 +33,7 @@ def test_instantiation_value_set_multi_batch_parameter_builder(
     )
 
 
+@pytest.mark.slow  # 1.07s
 def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
     alice_columnar_table_single_batch_context,
 ):
@@ -49,6 +51,7 @@ def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
     )
 
 
+@pytest.mark.slow  # 1.19s
 def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     alice_columnar_table_single_batch_context,
 ):
@@ -61,12 +64,12 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     }
 
     metric_domain_kwargs: dict = {"column": "event_type"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -121,6 +124,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     assert parameter_node.details == expected_parameter_value["details"]
 
 
+@pytest.mark.slow  # 1.20s
 def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     alice_columnar_table_single_batch_context,
 ):
@@ -137,12 +141,12 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     }
 
     metric_domain_kwargs: dict = {"column": "user_agent"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -222,12 +226,12 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     )
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -299,12 +303,12 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
     )
 
     metric_domain_kwargs: dict = {"column": "store_and_fwd_flag"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }

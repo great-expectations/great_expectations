@@ -5,14 +5,14 @@ from typing import Dict, List, Optional, Set, Union
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     init_rule_parameter_builders,
 )
-from great_expectations.rule_based_profiler.types import (
-    Builder,
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 
@@ -32,7 +32,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             List[ParameterBuilderConfig]
         ] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         The ExpectationConfigurationBuilder will build ExpectationConfiguration objects for a Domain from the Rule.
@@ -63,10 +63,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 
     def build_expectation_configuration(
@@ -120,7 +117,6 @@ class ExpectationConfigurationBuilder(ABC, Builder):
                 variables=variables,
                 parameters=parameters,
                 parameter_computation_impl=None,
-                json_serialize=None,
                 batch_list=batch_list,
                 batch_request=batch_request,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
