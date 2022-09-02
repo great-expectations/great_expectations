@@ -35,6 +35,11 @@ from great_expectations.types import DictDot, SerializableDictDot, safe_deep_cop
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
 
+try:
+    from pyspark.sql.types import StructType
+except ImportError:
+    StructType = None  # type: ignore
+
 if TYPE_CHECKING:
     from io import TextIOWrapper
 
@@ -272,6 +277,27 @@ class AssetConfigSchema(Schema):
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:  # type: ignore[no-untyped-def]
         pass
+
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        """
+        Schemas in Spark Dataframes are defined as StructType, which is not serializable
+        This method calls the schema's jsonValue() method, which translates the object into a json
+        """
+        # check whether spark exists
+        if StructType is None:
+            return data
+
+        batch_spec_passthrough_config = data.get("batch_spec_passthrough")
+        if batch_spec_passthrough_config:
+            reader_options: dict = batch_spec_passthrough_config.get("reader_options")
+            if reader_options:
+                schema = reader_options.get("schema")
+                if schema and isinstance(schema, StructType):
+                    data["batch_spec_passthrough"]["reader_options"][
+                        "schema"
+                    ] = schema.jsonValue()
+        return data
 
     # noinspection PyUnusedLocal
     @post_load
@@ -734,6 +760,27 @@ continue.
     @post_load
     def make_data_connector_config(self, data, **kwargs):
         return DataConnectorConfig(**data)
+
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        """
+        Schemas in Spark Dataframes are defined as StructType, which is not serializable
+        This method calls the schema's jsonValue() method, which translates the object into a json
+        """
+        # check whether spark exists
+        if StructType is None:
+            return data
+
+        batch_spec_passthrough_config = data.get("batch_spec_passthrough")
+        if batch_spec_passthrough_config:
+            reader_options: dict = batch_spec_passthrough_config.get("reader_options")
+            if reader_options:
+                schema = reader_options.get("schema")
+                if schema and isinstance(schema, StructType):
+                    data["batch_spec_passthrough"]["reader_options"][
+                        "schema"
+                    ] = schema.jsonValue()
+        return data
 
 
 class ExecutionEngineConfig(DictDot):
@@ -2325,6 +2372,13 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
 
         sorted_data = dict(sorted(data.items()))
         return sorted_data
+
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        data = copy.deepcopy(data)
+        for key, value in data.items():
+            data[key] = convert_to_json_serializable(data=value)
+        return data
 
 
 class CheckpointConfigSchema(Schema):
