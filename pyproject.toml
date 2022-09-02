@@ -96,7 +96,12 @@ exclude = [
     'expectations/expectation', # 188
     'rule_based_profiler/helpers', # 16
     'rule_based_profiler/config',  # 13
-    'rule_based_profiler/data_assistant',  # 124
+    'rule_based_profiler/data_assistant/data_assistant\.py',  # 15
+    'rule_based_profiler/data_assistant/data_assistant_runner\.py',  # 10
+    'rule_based_profiler/data_assistant/data_assistant_dispatcher\.py',  # 3
+    'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
+    'rule_based_profiler/data_assistant_result/onboarding_data_assistant_result\.py', # 1
+    'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 71
     'rule_based_profiler/domain_builder', # 62
     'rule_based_profiler/estimators',  # 23
     'rule_based_profiler/expectation_configuration_builder',  # 13
