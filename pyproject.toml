@@ -79,6 +79,7 @@ exclude = [
     'datasource/data_connector/sorter/sorter\.py',  # 1
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
+    'execution_engine/split_and_sample/data_splitter\.py',  # 6
     'execution_engine/split_and_sample/data_sampler\.py',  # 1
     'execution_engine/split_and_sample/pandas_data_sampler\.py',  # 16
     'execution_engine/split_and_sample/pandas_data_splitter\.py',  # 2
