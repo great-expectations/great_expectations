@@ -30,37 +30,30 @@ exclude = [
     # #################################################################################
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
-    'checkpoint/types',  # 34
     'checkpoint/actions\.py',  # 18
     'checkpoint/checkpoint\.py',  # 26
     'checkpoint/configurator\.py', # 2
-    'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
-    'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
+    'checkpoint/types',  # 34
+    'checkpoint/util\.py',  # 5
     'cli/batch_request\.py',  # 11
     'cli/checkpoint\.py',  # 9
     'cli/cli\.py',  # 10
     'cli/datasource\.py',  # 12
     'cli/docs\.py',  # 1
     'cli/project\.py',  # 5
-    'cli/toolkit\.py',  # 27
+    'cli/python_subprocess\.py', # 6
     'cli/store\.py',  # 2
     'cli/suite\.py',  # 24
-    'cli/python_subprocess\.py', # 6
-    # 'core/usage_statistics/anonymizers/checkpoint_anonymizer\.py',  # 16
-    # 'core/usage_statistics/anonymizers/store_anonymizer\.py',  # 6
-    # 'core/usage_statistics/anonymizers/datasource_anonymizer\.py',  # 9
-    # 'core/usage_statistics/anonymizers/store_backend_anonymizer\.py',  # 5
-    # 'core/usage_statistics/anonymizers/anonymizer\.py',  # 9
-    # 'core/usage_statistics/anonymizers/batch_anonymizer\.py',  # 10
-    # 'core/usage_statistics/anonymizers/batch_request_anonymizer\.py',  # 16
-    # 'core/usage_statistics/anonymizers/data_docs_anonymizer\.py',  # 5
-    # 'core/usage_statistics/anonymizers/expectation_anonymizer\.py',  # 6
-    # 'core/usage_statistics/anonymizers/base\.py',  # 8
-    'core/usage_statistics/usage_statistics\.py',  # 19
-    'core/expectation_diagnostics', # 20
+    'cli/toolkit\.py',  # 27
+    'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
+    'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
+    'cli/util\.py',  # 1
     'core/batch\.py', # 29
     'core/expectation_configuration\.py', # 21
+    'core/expectation_diagnostics', # 20
     'core/expectation_validation_result\.py', # 9
+    'dataset/sparkdf_dataset\.py', # 3
+    'dataset/sqlalchemy_dataset\.py', # 16
     'datasource/batch_kwargs_generator', # 16
     'datasource/data_connector/batch_filter\.py',  # 10
     'datasource/data_connector/configured_asset_azure_data_connector\.py',  # 2
@@ -73,22 +66,29 @@ exclude = [
     'datasource/data_connector/inferred_asset_sql_data_connector\.py',  # 4
     'datasource/data_connector/runtime_data_connector\.py',  # 15
     'datasource/data_connector/sorter/sorter\.py',  # 1
-    'dataset/sparkdf_dataset\.py', # 3
-    'dataset/sqlalchemy_dataset\.py', # 16
-    'execution_engine/split_and_sample/data_splitter\.py',  # 6
+    'datasource/data_connector/util\.py',  # 4
+    'execution_engine/execution_engine\.py',  # 7
+    'execution_engine/pandas_execution_engine\.py',  # 9
+    'execution_engine/sparkdf_execution_engine\.py',  # 8
     'execution_engine/split_and_sample/data_sampler\.py',  # 1
+    'execution_engine/split_and_sample/data_splitter\.py',  # 6
     'execution_engine/split_and_sample/pandas_data_sampler\.py',  # 16
     'execution_engine/split_and_sample/pandas_data_splitter\.py',  # 2
     'execution_engine/split_and_sample/sparkdf_data_sampler\.py',  # 11
     'execution_engine/split_and_sample/sparkdf_data_splitter\.py',  # 4
     'execution_engine/split_and_sample/sqlalchemy_data_sampler\.py',  # 10
     'execution_engine/split_and_sample/sqlalchemy_data_splitter\.py',  # 22
-    'execution_engine/pandas_execution_engine\.py',  # 9
-    'execution_engine/sparkdf_execution_engine\.py',  # 8
+    'execution_engine/sqlalchemy_batch_data\.py',  # 1
     'execution_engine/sqlalchemy_dialect.py',  # 1
     'execution_engine/sqlalchemy_execution_engine\.py',  # 8
-    'execution_engine/sqlalchemy_batch_data\.py',  # 1
-    'execution_engine/execution_engine\.py',  # 7
+    'expectations/core',  # 257
+    'expectations/expectation\.py',  # 59
+    'expectations/metrics',  # 130
+    'expectations/regex_based_column_map_expectation\.py',  # 3
+    'expectations/registry\.py',  # 19
+    'expectations/row_conditions\.py',  # 4
+    'expectations/set_based_column_map_expectation\.py',  # 3
+    'expectations/validation_handlers\.py', # 1
     'render/renderer/checkpoint_new_notebook_renderer\.py',  # 9
     'render/renderer/column_section_renderer\.py',  # 1
     'render/renderer/content_block/bullet_list_content_block\.py',  # 1
@@ -105,24 +105,18 @@ exclude = [
     'render/renderer/suite_scaffold_notebook_renderer\.py',  # 7
     'render/renderer/v3/suite_edit_notebook_renderer\.py',  # 11
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
-    'render/view',  # 11
     'render/types',  # 4
-    'expectations/core',  # 257
-    'expectations/expectation\.py',  # 59
-    'expectations/metrics',  # 130
-    'expectations/regex_based_column_map_expectation\.py',  # 3
-    'expectations/registry\.py',  # 19
-    'expectations/row_conditions\.py',  # 4
-    'expectations/set_based_column_map_expectation\.py',  # 3
-    'expectations/validation_handlers\.py', # 1
-    'rule_based_profiler/helpers', # 16
+    'render/util\.py',  # 2
+    'render/view',  # 11
+    'rule_based_profiler/attributed_resolved_metrics\.py',  # 4
+    'rule_based_profiler/builder\.py',  # 4
     'rule_based_profiler/config',  # 13
-    'rule_based_profiler/data_assistant/data_assistant\.py',  # 15
-    'rule_based_profiler/data_assistant/data_assistant_runner\.py',  # 10
-    'rule_based_profiler/data_assistant/data_assistant_dispatcher\.py',  # 3
-    'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
-    'rule_based_profiler/data_assistant_result/onboarding_data_assistant_result\.py', # 1
     'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 71
+    'rule_based_profiler/data_assistant_result/onboarding_data_assistant_result\.py', # 1
+    'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
+    'rule_based_profiler/data_assistant/data_assistant_dispatcher\.py',  # 3
+    'rule_based_profiler/data_assistant/data_assistant_runner\.py',  # 10
+    'rule_based_profiler/data_assistant/data_assistant\.py',  # 15
     'rule_based_profiler/domain_builder/categorical_column_domain_builder\.py',  # 18
     'rule_based_profiler/domain_builder/column_domain_builder\.py',
     'rule_based_profiler/domain_builder/column_pair_domain_builder\.py',  # 4
@@ -130,8 +124,10 @@ exclude = [
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
     'rule_based_profiler/domain_builder/multi_column_domain_builder\.py',  # 4
     'rule_based_profiler/domain_builder/table_domain_builder\.py',  # 1
+    'rule_based_profiler/domain\.py', # 4
     'rule_based_profiler/estimators',  # 23
     'rule_based_profiler/expectation_configuration_builder',  # 13
+    'rule_based_profiler/helpers', # 16
     'rule_based_profiler/parameter_builder/mean_table_columns_set_match_multi_batch_parameter_builder\.py',  # 2
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
     'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15
@@ -142,17 +138,14 @@ exclude = [
     'rule_based_profiler/parameter_builder/regex_pattern_string_parameter_builder\.py',  # 21
     'rule_based_profiler/parameter_builder/simple_date_format_string_parameter_builder\.py',  # 20
     'rule_based_profiler/parameter_builder/value_set_multi_batch_parameter_builder\.py',  # 2
-    'rule_based_profiler/rule',  # 51
-    'rule_based_profiler/attributed_resolved_metrics\.py',  # 4
     'rule_based_profiler/parameter_container\.py',  # 7
-    'rule_based_profiler/builder\.py',  # 4
-    'rule_based_profiler/domain\.py', # 4
+    'rule_based_profiler/rule',  # 51
+    'self_check/util\.py',  # 6
     'validation_operators/types',  # 34
     'validation_operators/validation_operators\.py',  # 16
     'validator/exception_info\.py', # 1
     'validator/validation_graph\.py',  # 2
     'validator/validator\.py', # 54
-    'util\.py', # 19
 ]
 
 [tool.pytest.ini_options]
