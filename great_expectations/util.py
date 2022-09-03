@@ -132,7 +132,7 @@ def hyphen(txt: str):
     return txt.replace("_", "-")
 
 
-def profile(func: Callable = None) -> Callable:
+def profile(func: Callable) -> Callable:
     @wraps(func)
     def profile_function_call(*args, **kwargs) -> Any:
         pr: cProfile.Profile = cProfile.Profile()
