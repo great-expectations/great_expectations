@@ -1006,6 +1006,11 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 
 class HasStaticDefaultProfiler(Protocol):
     default_profiler_config: RuleBasedProfilerConfig
+    # I'd like to force the key "profiler_config" to be present in the following dict.
+    # While its absence doesn't break functionality, I do expect it to exist. TypeDicts
+    # unfortunately don't help us here since one needs to list all potential keys in a
+    # TypeDict since they don't allow extras keys to be present. See the discussion here:
+    # https://github.com/python/mypy/issues/4617#issuecomment-367647383
     default_kwarg_values: Dict[str, Any]
 
 
