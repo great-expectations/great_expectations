@@ -559,7 +559,13 @@ specified (empty "metric_name" value detected)."""
         ) in attributed_resolved_metrics.conditioned_attributed_metric_values.items():
             batch_metric_values: MetricValues = []
 
-            metric_value_shape: tuple = metric_values.shape
+            metric_value_shape: tuple
+            if isinstance(metric_values, list):
+                metric_value_shape = (len(metric_values),)
+            elif metric_values is not None:
+                metric_value_shape = metric_values.shape
+            else:
+                metric_value_shape = tuple()
 
             # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
             metric_value_shape_idx: int
@@ -571,7 +577,14 @@ specified (empty "metric_name" value detected)."""
 
             metric_value_idx: tuple
             for metric_value_idx in metric_value_indices:
-                metric_value: MetricValue = metric_values[metric_value_idx]
+                metric_value: Optional[MetricValue]
+                if isinstance(metric_values, list):
+                    metric_value = metric_values[metric_value_idx[0]]
+                elif metric_values is not None:
+                    metric_value = metric_values[metric_value_idx]
+                else:
+                    metric_value = None
+
                 if enforce_numeric_metric:
                     if isinstance(metric_value, (str, np.str_)):
                         if not is_parseable_date(value=metric_value):
@@ -581,7 +594,8 @@ and datetime-valued metrics (value {metric_value} of type "{str(type(metric_valu
 """
                             )
                     elif not (
-                        isinstance(metric_value, datetime.datetime)
+                        metric_value is None
+                        or isinstance(metric_value, datetime.datetime)
                         or isinstance(metric_value, decimal.Decimal)
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
