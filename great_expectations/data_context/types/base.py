@@ -267,6 +267,9 @@ class AssetConfigSchema(Schema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
 
+    data_asset_name_prefix = fields.String(required=False, allow_none=True)
+    data_asset_name_suffix = fields.String(required=False, allow_none=True)
+    include_schema_name = fields.Boolean(required=False, allow_none=True)
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
@@ -411,7 +414,6 @@ class DataConnectorConfig(AbstractConfig):
         default_regex=None,
         batch_identifiers=None,
         sorters=None,
-        batch_spec_passthrough=None,
         # S3
         boto3_options=None,
         bucket=None,
@@ -427,6 +429,18 @@ class DataConnectorConfig(AbstractConfig):
         prefix=None,
         # Both S3/Azure
         delimiter=None,
+        data_asset_name_prefix=None,
+        data_asset_name_suffix=None,
+        include_schema_name=None,
+        splitter_method=None,
+        splitter_kwargs=None,
+        sampling_method=None,
+        sampling_kwargs=None,
+        excluded_tables=None,
+        included_tables=None,
+        skip_inapplicable_tables=None,
+        introspection_directives=None,
+        batch_spec_passthrough=None,
         **kwargs,
     ) -> None:
         self._class_name = class_name
@@ -445,6 +459,28 @@ class DataConnectorConfig(AbstractConfig):
             self.batch_identifiers = batch_identifiers
         if sorters is not None:
             self.sorters = sorters
+        if data_asset_name_prefix is not None:
+            self.data_asset_name_prefix = data_asset_name_prefix
+        if data_asset_name_suffix is not None:
+            self.data_asset_name_suffix = data_asset_name_suffix
+        if include_schema_name is not None:
+            self.include_schema_name = include_schema_name
+        if splitter_method is not None:
+            self.splitter_method = splitter_method
+        if splitter_kwargs is not None:
+            self.splitter_kwargs = splitter_kwargs
+        if sampling_method is not None:
+            self.sampling_method = sampling_method
+        if sampling_kwargs is not None:
+            self.sampling_kwargs = sampling_kwargs
+        if excluded_tables is not None:
+            self.excluded_tables = excluded_tables
+        if included_tables is not None:
+            self.included_tables = included_tables
+        if skip_inapplicable_tables is not None:
+            self.skip_inapplicable_tables = skip_inapplicable_tables
+        if introspection_directives is not None:
+            self.introspection_directives = introspection_directives
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
 
@@ -583,6 +619,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
+
     excluded_tables = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
@@ -590,6 +627,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
+    introspection_directives = fields.Dict(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
@@ -1079,6 +1117,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
+
         if (
             "connection_string" in data
             or "credentials" in data
