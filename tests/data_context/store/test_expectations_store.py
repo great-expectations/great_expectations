@@ -237,3 +237,29 @@ store_backend:
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_ge_cloud_response_json_to_object_dict() -> None:
+    store = ExpectationsStore(store_name="expectations_store")
+
+    suite_id = "03d61d4e-003f-48e7-a3b2-f9f842384da3"
+    suite_config = {
+        "expectation_suite_name": "my_suite",
+    }
+    response_json = {
+        "data": {
+            "id": suite_id,
+            "attributes": {
+                "suite": suite_config,
+            },
+        }
+    }
+
+    expected = suite_config
+    expected["ge_cloud_id"] = suite_id
+
+    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+
+    assert actual == expected
