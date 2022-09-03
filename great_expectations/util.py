@@ -44,6 +44,11 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import _registered_expectations
 
 try:
+    from typing import TypeGuard  # type: ignore[attr-defined]
+except ImportError:
+    from typing_extensions import TypeGuard
+
+try:
     import black
 except ImportError:
     black = None  # type: ignore[assignment]
@@ -1555,7 +1560,7 @@ def is_sane_slack_webhook(url: str) -> bool:
     return url.strip().startswith("https://hooks.slack.com/")
 
 
-def is_list_of_strings(_list) -> bool:
+def is_list_of_strings(_list) -> TypeGuard[List[str]]:
     return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
 
 
