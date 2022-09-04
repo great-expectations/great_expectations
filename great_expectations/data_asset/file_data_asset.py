@@ -554,9 +554,9 @@ class FileDataAsset(MetaFileDataAsset):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
 
-        if filepath is not None and os.path.isfile(filepath):
+        if filepath is not None and os.path.isfile(filepath):  # noqa: PL113
             success = True
-        elif self._path is not None and os.path.isfile(self._path):
+        elif self._path is not None and os.path.isfile(self._path):  # noqa: PL113
             success = True
         else:
             success = False
