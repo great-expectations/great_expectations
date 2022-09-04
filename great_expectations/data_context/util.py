@@ -3,7 +3,7 @@ import copy
 import inspect
 import json
 import logging
-import os
+import pathlib
 import re
 import warnings
 from collections import OrderedDict
@@ -476,7 +476,7 @@ def substitute_all_config_variables(
     )
 
 
-def file_relative_path(dunderfile, relative_path):
+def file_relative_path(dunderfile, relative_path) -> str:
     """
     This function is useful when one needs to load a file that is
     relative to the position of the current file. (Such as when
@@ -488,7 +488,7 @@ def file_relative_path(dunderfile, relative_path):
 
     H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
     """
-    return os.path.join(os.path.dirname(dunderfile), relative_path)
+    return str(pathlib.Path(dunderfile).relative_to(relative_path))
 
 
 def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
