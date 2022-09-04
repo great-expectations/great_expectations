@@ -9,6 +9,7 @@ pytest>=5.3.5
 pytest-benchmark>=3.4.1
 pytest-icdiff>=0.6
 pytest-mock>=3.8.2
+pytest-timeout>=2.1.0
 requirements-parser>=0.2.0
 s3fs>=0.5.1
 snapshottest==0.6.0 # GE Cloud atomic renderer tests

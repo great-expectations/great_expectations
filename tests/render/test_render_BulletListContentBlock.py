@@ -61,6 +61,7 @@ def test_parse_row_condition_string_pandas_engine():
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
+@pytest.mark.slow  # 1.52s
 def test_all_expectations_using_test_definitions():
     # Chetan - 20220129 - During v0.14.4, it was revealed that this test was broken.
     # The `glob` statement did not pick up any relevant tests, resulting in `test_files` being empty.

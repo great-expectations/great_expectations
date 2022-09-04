@@ -207,7 +207,7 @@ class CloudDataContext(AbstractDataContext):
         self,
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ):
+    ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
 
         Args:
@@ -225,21 +225,23 @@ class CloudDataContext(AbstractDataContext):
                 f"expectation_suite with id {ge_cloud_id} does not exist."
             )
 
-        self.expectations_store.remove_key(key)
-        return True
+        return self.expectations_store.remove_key(key)
 
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
+        include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GE Cloud ID
         Args:
-            expectation_suite_name (str): the name for the Expectation Suite
-            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
+            expectation_suite_name (str): The name of the Expectation Suite
+            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+                ExpectationConfiguration.
+            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
 
         Returns:
-            expectation_suite
+            An existing ExpectationSuite
         """
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
@@ -251,8 +253,19 @@ class CloudDataContext(AbstractDataContext):
             )
 
         expectations_schema_dict: dict = cast(dict, self.expectations_store.get(key))
+
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_suite_include_rendered_content()
+            )
+
         # create the ExpectationSuite from constructor
-        return ExpectationSuite(**expectations_schema_dict, data_context=self)
+        expectation_suite = ExpectationSuite(
+            **expectations_schema_dict, data_context=self
+        )
+        if include_rendered_content:
+            expectation_suite.render()
+        return expectation_suite
 
     def save_expectation_suite(
         self,
@@ -327,8 +340,7 @@ class CloudDataContext(AbstractDataContext):
 
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
-        name: str,
-        config: dict,
+        config: DatasourceConfig,
         initialize: bool = True,
         save_changes: bool = False,
     ) -> Optional[Datasource]:
@@ -344,49 +356,27 @@ class CloudDataContext(AbstractDataContext):
             If initialize=True return an instantiated Datasource object, else None.
         """
 
-        datasource_config: DatasourceConfig = datasourceConfigSchema.load(config)
-
         if save_changes:
+            resource_ref: GeCloudResourceRef = self._datasource_store.create(config)  # type: ignore[assignment]
+            config.id = resource_ref.ge_cloud_id
 
-            datasource_config["name"] = name
-            resource_ref: GeCloudResourceRef = self._datasource_store.create(  # type: ignore[assignment]
-                datasource_config
-            )
-            datasource_config.id = resource_ref.ge_cloud_id
+        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
 
-        self.config.datasources[name] = datasource_config  # type: ignore[index,assignment]
-
-        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
-        substitutions: dict = self._determine_substitutions()
-        config = dict(datasourceConfigSchema.dump(datasource_config))
-
-        substituted_config_dict = substitute_all_config_variables(
-            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
-
-        # Round trip through schema validation and config creation to ensure "id" is present
-        #
-        # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
-        # be refactored to into the config/schema. Also, downstream methods should be refactored
-        # to accept the config object (as opposed to a dict).
-        substituted_config = DatasourceConfig(
-            **datasourceConfigSchema.load(substituted_config_dict)
-        )
-        schema_validated_substituted_config_dict = substituted_config.to_json_dict()
+        substituted_config = self._perform_substitutions_on_datasource_config(config)
 
         datasource: Optional[Datasource] = None
         if initialize:
             try:
                 datasource = self._instantiate_datasource_from_config(
-                    name=name, config=schema_validated_substituted_config_dict
+                    config=substituted_config
                 )
-                self._cached_datasources[name] = datasource
+                self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
                 if save_changes:
-                    self._datasource_store.delete(datasource_config)
+                    self._datasource_store.delete(config)
                 # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(name, None)  # type: ignore[union-attr]
+                self.config.datasources.pop(config.name, None)  # type: ignore[union-attr,arg-type]
                 raise e
 
         return datasource

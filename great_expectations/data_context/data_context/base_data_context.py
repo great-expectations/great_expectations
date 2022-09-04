@@ -43,6 +43,8 @@ except ImportError:
     # Fallback for python < 3.8
     from typing_extensions import Literal  # type: ignore[misc]
 
+from marshmallow import ValidationError
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -102,7 +104,6 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import (
@@ -1404,13 +1405,28 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
+        include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
         """
-        See `AbstractDataContext.get_expectation_suite` for more information.
+        Args:
+            expectation_suite_name (str): The name of the Expectation Suite
+            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+                ExpectationConfiguration.
+            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
+
+        Returns:
+            An existing ExpectationSuite
         """
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_suite_include_rendered_content()
+            )
+
         res = self._data_context.get_expectation_suite(  # type: ignore[union-attr]
-            expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
+            expectation_suite_name=expectation_suite_name,
+            include_rendered_content=include_rendered_content,
+            ge_cloud_id=ge_cloud_id,
         )
         return res
 
@@ -1418,7 +1434,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self,
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ) -> ExpectationSuite:
+    ) -> bool:
         """
         See `AbstractDataContext.delete_expectation_suite` for more information.
         """
@@ -1485,6 +1501,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         batch_identifier=None,
         validations_store_name=None,
         failed_only=False,
+        include_rendered_content=None,
     ):
         """Get validation results from a configured store.
 
@@ -1493,6 +1510,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
             validations_store_name: the name of the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
+            include_rendered_content: whether to re-populate the validation_result rendered_content
 
         Returns:
             validation_result
@@ -1531,6 +1549,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             if batch_identifier is None:
                 batch_identifier = filtered_key_list[-1].batch_identifier
 
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_validation_result_include_rendered_content()
+            )
+
         key = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
@@ -1540,11 +1563,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         results_dict = selected_store.get(key)
 
-        return (
+        validation_result = (
             results_dict.get_failed_validation_results()
             if failed_only
             else results_dict
         )
+
+        if include_rendered_content:
+            for expectation_validation_result in validation_result.results:
+                expectation_validation_result.render()
+                expectation_validation_result.expectation_config.render()
+
+        return validation_result
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,
@@ -2678,11 +2708,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         print(f"\tInstantiating as a Datasource, since class_name is {class_name}")
         datasource_name: str = name or config.get("name") or "my_temp_datasource"
+        datasource_config = datasourceConfigSchema.load(config)
+        datasource_config.name = datasource_name
         instantiated_class = cast(
             Datasource,
             self._instantiate_datasource_from_config_and_update_project_config(
-                name=datasource_name,
-                config=config,
+                config=datasource_config,
                 initialize=True,
                 save_changes=False,
             ),
@@ -2918,15 +2949,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
-        name: str,
-        config: dict,
+        config: DatasourceConfig,
         initialize: bool = True,
         save_changes: bool = False,
     ) -> Optional[Datasource]:
         """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
 
         Args:
-            name: Desired name for the datasource.
             config: Config for the datasource.
             initialize: Whether to initialize the datasource or return None.
             save_changes: Whether to save the datasource config to the configured Datasource store.
@@ -2934,9 +2963,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             If initialize=True return an instantiated Datasource object, else None.
         """
-
-        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr]
-            name=name,
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr,arg-type]
             config=config,
             initialize=initialize,
             save_changes=save_changes,

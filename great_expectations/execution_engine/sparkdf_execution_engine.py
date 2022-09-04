@@ -18,7 +18,11 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import AzureUrl, get_or_create_spark_application
+from great_expectations.core.util import (
+    AzureUrl,
+    convert_to_json_serializable,
+    get_or_create_spark_application,
+)
 from great_expectations.exceptions import (
     BatchSpecError,
     ExecutionEngineError,
@@ -257,6 +261,7 @@ Please check your config."""
             reader_options: dict = batch_spec.reader_options or {}
             path: str = batch_spec.path
             azure_url = AzureUrl(path)
+            # TODO <WILL> 202209 - Add `schema` definition to Azure like PathBatchSpec below (GREAT-1224)
             try:
                 credential = self._azure_options.get("credential")
                 storage_account_url = azure_url.account_url
@@ -286,8 +291,33 @@ Please check your config."""
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
             reader_arg: str = batch_spec.path
+            schema: Optional[
+                Union[pyspark.sql.types.StructType, dict, str]
+            ] = reader_options.get("schema")
+
+            # schema can be a dict if it has been through serialization step,
+            # either as part of the datasource configuration, or checkpoint config
+            if isinstance(schema, dict):
+                schema: pyspark.sql.types.StructType = sparktypes.StructType.fromJson(
+                    schema
+                )
+
+            # this can happen if we have not converted schema into json at Datasource-config level
+            elif isinstance(schema, str):
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""
+                                Spark schema was not properly serialized.
+                                Please run the .jsonValue() method on the schema object before loading into GE.
+                                schema: your_schema.jsonValue()
+                                """
+                )
             try:
-                reader: DataFrameReader = self.spark.read.options(**reader_options)
+                if schema:
+                    reader: DataFrameReader = self.spark.read.schema(schema).options(
+                        **reader_options
+                    )
+                else:
+                    reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
@@ -666,7 +696,9 @@ Please check your config."""
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
 
-            domain_id = compute_domain_kwargs.to_id()
+            domain_id = IDDict.convert_dictionary_to_id_dict(
+                data=convert_to_json_serializable(data=compute_domain_kwargs)
+            ).to_id()
             if domain_id not in aggregates:
                 aggregates[domain_id] = {
                     "column_aggregates": [],
@@ -697,6 +729,10 @@ Please check your config."""
 
             res = df.agg(*aggregate_cols).collect()
 
+            logger.debug(
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"
+            )
+
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
@@ -704,14 +740,14 @@ Please check your config."""
                 res[0]
             ), "unexpected number of metrics returned"
 
-            logger.debug(
-                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
-            )
-
             idx: int
             metric_id: Tuple[str, str, str]
             for idx, metric_id in enumerate(aggregate["ids"]):
-                resolved_metrics[metric_id] = res[0][idx]
+                # Converting DataFrame.collect() results into JSON-serializable format produces simple data types,
+                # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
+                resolved_metrics[metric_id] = convert_to_json_serializable(
+                    data=res[0][idx]
+                )
 
         return resolved_metrics
 
