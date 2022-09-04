@@ -95,6 +95,30 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.order(index=2)
+@pytest.fixture(scope="module")
+def spark_warehouse_session(tmp_path_factory):
+    # Note this fixture will configure spark to use in-memory metastore
+    try:
+        pyspark = pytest.importorskip("pyspark")
+        # noinspection PyPep8Naming
+        from pyspark.sql import SparkSession
+    except ImportError:
+        pyspark = None
+        SparkSession = None
+
+    spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
+    spark: SparkSession = get_or_create_spark_application(
+        spark_config={
+            "spark.sql.catalogImplementation": "in-memory",
+            "spark.executor.memory": "450m",
+            "spark.sql.warehouse.dir": spark_warehouse_path,
+        }
+    )
+    yield spark
+    spark.stop()
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers",
@@ -361,30 +385,6 @@ def spark_session(test_backends):
         )
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
-
-
-@pytest.mark.order(index=2)
-@pytest.fixture(scope="module")
-def spark_warehouse_session(tmp_path_factory):
-    # Note this fixture will configure spark to use in-memory metastore
-    try:
-        pyspark = pytest.importorskip("pyspark")
-        # noinspection PyPep8Naming
-        from pyspark.sql import SparkSession
-    except ImportError:
-        pyspark = None
-        SparkSession = None
-
-    spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
-    spark: SparkSession = get_or_create_spark_application(
-        spark_config={
-            "spark.sql.catalogImplementation": "in-memory",
-            "spark.executor.memory": "450m",
-            "spark.sql.warehouse.dir": spark_warehouse_path,
-        }
-    )
-    yield spark
-    spark.stop()
 
 
 @pytest.fixture

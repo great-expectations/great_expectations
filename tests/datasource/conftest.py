@@ -21,48 +21,22 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.self_check.util import get_sqlite_connection_url
 
 
-@pytest.fixture(scope="module")
-def basic_pandas_datasource():
-    return PandasDatasource("basic_pandas_datasource")
+def create_partitions_for_table(
+    glue_client, database_name: str, table_name: str, partitions: dict
+):
+    partition_values = list(product(*partitions.values()))
+    partition_path = "={}/".join(partitions.keys()) + "={}/"
 
-
-@pytest.fixture
-def postgresql_sqlalchemy_datasource(postgresql_engine):
-    return SqlAlchemyDatasource(
-        "postgresql_sqlalchemy_datasource", engine=postgresql_engine
-    )
-
-
-@pytest.fixture(scope="module")
-def basic_sparkdf_datasource(test_backends):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("Spark has not been enabled, so this test must be skipped.")
-    return SparkDFDatasource("basic_sparkdf_datasource")
-
-
-@pytest.fixture
-def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
-    if sa is None:
-        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
-
-    db_file_path: str = file_relative_path(
-        __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
-    )
-
-    engine: sa.engine.Engine = sa.create_engine(get_sqlite_connection_url(db_file_path))
-    conn: sa.engine.Connection = engine.connect()
-    raw_connection = engine.raw_connection()
-    raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
-    raw_connection.create_function(
-        "md5", 2, lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[-1 * d :]
-    )
-
-    # Build a SqlAlchemyDataset using that database
-    return SqlAlchemyExecutionEngine(
-        name="test_sql_execution_engine",
-        engine=conn,
-    )
+    for value in partition_values:
+        path = partition_path.format(*value)
+        glue_client.create_partition(
+            DatabaseName=database_name,
+            TableName=table_name,
+            PartitionInput={
+                "Values": list(value),
+                "StorageDescriptor": {"Location": path},
+            },
+        )
 
 
 @pytest.fixture(scope="module")
@@ -122,19 +96,45 @@ def glue_titanic_catalog():
         yield client
 
 
-def create_partitions_for_table(
-    glue_client, database_name: str, table_name: str, partitions: dict
-):
-    partition_values = list(product(*partitions.values()))
-    partition_path = "={}/".join(partitions.keys()) + "={}/"
+@pytest.fixture(scope="module")
+def basic_pandas_datasource():
+    return PandasDatasource("basic_pandas_datasource")
 
-    for value in partition_values:
-        path = partition_path.format(*value)
-        glue_client.create_partition(
-            DatabaseName=database_name,
-            TableName=table_name,
-            PartitionInput={
-                "Values": list(value),
-                "StorageDescriptor": {"Location": path},
-            },
-        )
+
+@pytest.fixture
+def postgresql_sqlalchemy_datasource(postgresql_engine):
+    return SqlAlchemyDatasource(
+        "postgresql_sqlalchemy_datasource", engine=postgresql_engine
+    )
+
+
+@pytest.fixture(scope="module")
+def basic_sparkdf_datasource(test_backends):
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("Spark has not been enabled, so this test must be skipped.")
+    return SparkDFDatasource("basic_sparkdf_datasource")
+
+
+@pytest.fixture
+def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
+    if sa is None:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+
+    db_file_path: str = file_relative_path(
+        __file__,
+        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    engine: sa.engine.Engine = sa.create_engine(get_sqlite_connection_url(db_file_path))
+    conn: sa.engine.Connection = engine.connect()
+    raw_connection = engine.raw_connection()
+    raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
+    raw_connection.create_function(
+        "md5", 2, lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[-1 * d :]
+    )
+
+    # Build a SqlAlchemyDataset using that database
+    return SqlAlchemyExecutionEngine(
+        name="test_sql_execution_engine",
+        engine=conn,
+    )
