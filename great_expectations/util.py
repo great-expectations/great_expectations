@@ -1311,11 +1311,11 @@ def is_truthy(value: Any) -> bool:
         return False
 
 
-def is_numeric(value: Any) -> TypeGuard[Union[int, float]]:
+def is_numeric(value: Any) -> bool:
     return value is not None and (is_int(value=value) or is_float(value=value))
 
 
-def is_int(value: Any) -> TypeGuard[int]:
+def is_int(value: Any) -> bool:
     try:
         int(value)
     except (TypeError, ValueError):
@@ -1323,7 +1323,7 @@ def is_int(value: Any) -> TypeGuard[int]:
     return True
 
 
-def is_float(value: Any) -> TypeGuard[float]:
+def is_float(value: Any) -> bool:
     try:
         float(value)
     except (TypeError, ValueError):
