@@ -2,7 +2,7 @@ black==22.3.0
 flake8==5.0.4
 flake8-use-pathlib>=0.3.0
 invoke>=1.7.1
-isort==5.10.1
+isort[requirements]==5.10.1
 mypy>=0.971
 pre-commit>=2.6.0
 pytest-cov>=2.8.1
