@@ -242,8 +242,8 @@ def get_project_distribution() -> Optional[Distribution]:
         except ValueError:
             pass
         else:
-            if relative_path in distr.files:
-                return distr
+            if relative_path in distr.files:  # type: ignore[operator]
+                return distr  # type: ignore[return-value]
     return None
 
 
@@ -339,7 +339,7 @@ def verify_dynamic_loading_support(
     """
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[assignment]
+        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[assignment,attr-defined]
             module_name, package=package_name
         )
     except ModuleNotFoundError:
