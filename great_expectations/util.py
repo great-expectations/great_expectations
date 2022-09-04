@@ -1002,7 +1002,7 @@ def gen_directory_tree_str(startpath):
     for root, dirs, files in tuples:
         level = root.replace(startpath, "").count(os.sep)
         indent = " " * 4 * level
-        output_str += f"{indent}{os.path.basename(root)}/\n"
+        output_str += f"{indent}{os.path.basename(root)}/\n"  # noqa: PL119
         subindent = " " * 4 * (level + 1)
 
         files.sort()
