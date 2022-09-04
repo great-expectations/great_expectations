@@ -259,7 +259,14 @@ class AssetConfigSchema(Schema):
     schema_name = fields.String(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
-    # Necessary addition for AWS Glue Data Catalog assets
+    """
+    Necessary addition for AWS Glue Data Catalog assets. By using AWS Glue Data Catalog,
+    we need to have both database and table names. The partitions are optional, it
+    must match the partitions defined in the table and it is used to create batch
+    identifiers that would allow the validation of a single partition. Example: if we have two
+    partitions (year, month), specifying these would create one batch id per combination of year
+    and month. The connector gets the partitions values from the catalog.
+    """
     database_name = fields.String(required=False, allow_none=True)
     partitions = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
