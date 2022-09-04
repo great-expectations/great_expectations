@@ -1,6 +1,6 @@
 import logging
 from abc import ABCMeta
-from typing import List
+from typing import List, Optional
 
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
@@ -123,15 +123,15 @@ class GlueDataCatalogBatchSpec(BatchSpec):
             )
 
     @property
-    def reader_method(self) -> dict:
+    def reader_method(self) -> str:
         return "table"
 
     @property
-    def database_name(self) -> str:
+    def database_name(self) -> Optional[str]:
         return self.get("database_name")
 
     @property
-    def table_name(self) -> str:
+    def table_name(self) -> Optional[str]:
         return self.get("table_name")
 
     @property

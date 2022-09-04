@@ -306,11 +306,11 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             "data_asset_name_suffix", ""
         )
 
-        if not "database_name" in data_asset_config:
+        if "database_name" not in data_asset_config:
             raise DataConnectorError(
                 message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'database_name' was not specified"
             )
-        if not "table_name" in data_asset_config:
+        if "table_name" not in data_asset_config:
             raise DataConnectorError(
                 message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'table_name' was not specified"
             )
