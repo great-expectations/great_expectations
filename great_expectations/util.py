@@ -32,6 +32,7 @@ from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
@@ -1527,7 +1528,9 @@ def convert_ndarray_float_to_datetime_tuple(
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
-def is_ndarray_decimal_dtype(data: np.ndarray) -> bool:
+def is_ndarray_decimal_dtype(
+    data: npt.NDArray,
+) -> TypeGuard[npt.NDArray[decimal.Decimal]]:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
     """
