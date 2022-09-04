@@ -75,6 +75,7 @@ class GEDependencies:
             "boto3",
             "feather-format",
             "flake8",
+            "flake8-use-pathlib",
             "flask",
             "freezegun",
             "gcsfs",
@@ -123,6 +124,7 @@ class GEDependencies:
         # requirements-dev-contrib.txt:
         "black",
         "flake8",
+        "flake8-use-pathlib",
         "invoke",
         "isort",
         "mypy",
