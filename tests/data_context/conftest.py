@@ -734,7 +734,7 @@ def datasource_id() -> str:
 
 
 @pytest.fixture
-def mocked_post_response(
+def mocked_datasource_post_response(
     mock_response_factory: Callable, datasource_id: str
 ) -> Callable[[], MockResponse]:
 
@@ -759,10 +759,11 @@ def datasource_config_with_names_and_ids(datasource_config_with_names: Datasourc
 
 
 @pytest.fixture
-def mocked_get_response(
+def mocked_datasource_get_response(
     mock_response_factory: Callable,
     datasource_config_with_names_and_ids: DatasourceConfig,
     datasource_id: str,
+    datasource_name: str,
 ) -> Callable[[], MockResponse]:
     def _mocked_get_response(*args, **kwargs):
         created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
@@ -778,7 +779,7 @@ def mocked_get_response(
                         "deleted": False,
                         "deleted_at": None,
                         "desc": None,
-                        "name": "my_datasource",
+                        "name": datasource_config_with_names_and_ids.name,
                         "organization_id": f"{organization_id}",
                         "updated_at": "2022-08-02T17:55:45.107550",
                     },
