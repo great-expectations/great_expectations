@@ -1,6 +1,6 @@
 import copy
 import pathlib
-from typing import List, Optional, cast, Callable
+from typing import Callable, List, Optional, cast
 from unittest.mock import PropertyMock, patch
 
 import pytest
@@ -27,7 +27,8 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.datasource.datasource_serializer import (
     JsonDatasourceConfigSerializer,
-    YAMLReadyDictDatasourceConfigSerializer, NamedDatasourceSerializer,
+    NamedDatasourceSerializer,
+    YAMLReadyDictDatasourceConfigSerializer,
 )
 from tests.data_context.conftest import MockResponse
 
@@ -228,7 +229,9 @@ def test_datasource_store_set_cloud_mode(
 
         json_serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
 
-        assert json_serializer.serialize(retrieved_datasource_config) == json_serializer.serialize(datasource_config_with_names_and_ids)
+        assert json_serializer.serialize(
+            retrieved_datasource_config
+        ) == json_serializer.serialize(datasource_config_with_names_and_ids)
 
 
 @pytest.mark.integration

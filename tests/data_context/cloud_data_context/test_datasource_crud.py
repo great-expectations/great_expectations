@@ -69,7 +69,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     datasource_config_with_name.name = datasource_name
 
     with patch(
-            "requests.post", autospec=True, side_effect=mocked_datasource_post_response
+        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
     ) as mock_post, patch(
         "requests.get", autospec=True, side_effect=mocked_datasource_get_response
     ):
@@ -175,7 +175,7 @@ def test_data_context_in_cloud_mode_add_datasource(
     datasource_config_with_name.name = datasource_name
 
     with patch(
-            "requests.post", autospec=True, side_effect=mocked_datasource_post_response
+        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
     ) as mock_post, patch(
         "requests.get", autospec=True, side_effect=mocked_datasource_get_response
     ):
@@ -273,7 +273,7 @@ def test_cloud_data_context_add_datasource(
     datasource_config_with_name.name = datasource_name
 
     with patch(
-            "requests.post", autospec=True, side_effect=mocked_datasource_post_response
+        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
     ) as mock_post, patch(
         "requests.get", autospec=True, side_effect=mocked_datasource_get_response
     ):

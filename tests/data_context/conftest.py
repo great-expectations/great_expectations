@@ -737,7 +737,6 @@ def datasource_id() -> str:
 def mocked_datasource_post_response(
     mock_response_factory: Callable, datasource_id: str
 ) -> Callable[[], MockResponse]:
-
     def _mocked_post_response(*args, **kwargs):
         return mock_response_factory(
             {
@@ -752,7 +751,9 @@ def mocked_datasource_post_response(
 
 
 @pytest.fixture
-def datasource_config_with_names_and_ids(datasource_config_with_names: DatasourceConfig, datasource_id: str) -> DatasourceConfig:
+def datasource_config_with_names_and_ids(
+    datasource_config_with_names: DatasourceConfig, datasource_id: str
+) -> DatasourceConfig:
     updated_config = copy.deepcopy(datasource_config_with_names)
     updated_config["id"] = datasource_id
     return updated_config
