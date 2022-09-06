@@ -3,8 +3,8 @@ import os
 import pathlib
 import re
 import tempfile
-from typing import List
 from mimetypes import guess_type
+from typing import List
 from zipfile import ZipFile, is_zipfile
 
 from great_expectations.core.data_context_key import DataContextKey
