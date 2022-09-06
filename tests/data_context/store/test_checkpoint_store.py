@@ -350,3 +350,23 @@ def test_serialization_self_check(capsys) -> None:
 def test_default_checkpoints_exist(path: str, exists: bool) -> None:
     store = CheckpointStore(store_name="checkpoint_store")
     assert store.default_checkpoints_exist(path) is exists
+
+
+@pytest.mark.unit
+def test_list_checkpoints() -> None:
+    pass
+
+
+@pytest.mark.unit
+def test_get_checkpoint() -> None:
+    pass
+
+
+@pytest.mark.unit
+def test_add_checkpoint() -> None:
+    pass
+
+
+@pytest.mark.unit
+def test_create() -> None:
+    pass
