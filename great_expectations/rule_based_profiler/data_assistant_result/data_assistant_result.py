@@ -3722,64 +3722,41 @@ class DataAssistantResult(SerializableDictDot):
         metric_df: pd.DataFrame
         join_keys: List[str]
         df: pd.DataFrame
-        column_df: Optional[ColumnDataFrame] = None
+        column_df: ColumnDataFrame
         column_dfs: List[ColumnDataFrame] = []
         for metric_domain in metric_domains:
             attributed_values_by_metric_name: Dict[
                 str, List[ParameterNode]
             ] = attributed_metrics_by_domain[metric_domain]
-            column_name: str = metric_domain.domain_kwargs.column
+            column_name = metric_domain.domain_kwargs.column
 
-            if metric_expectation_map.get(metric_names):
-                df = pd.DataFrame()
-                for metric_name in metric_names:
-                    if len(expectation_configurations) > 0:
-                        for expectation_configuration in expectation_configurations:
-                            metric_df = self._create_df_for_charting(
-                                metric_name=metric_name,
-                                attributed_values=attributed_values_by_metric_name[
-                                    metric_name
-                                ],
-                                expectation_configuration=expectation_configuration,
-                                plot_mode=plot_mode,
-                            )
-                            if len(df.index) == 0:
-                                df = metric_df.copy()
-                            else:
-                                join_keys = [
-                                    column
-                                    for column in metric_df.columns
-                                    if column not in sanitized_metric_names
-                                ]
-                                df = df.merge(metric_df, on=join_keys).reset_index(
-                                    drop=True
-                                )
-                            column_df = ColumnDataFrame(column_name, df)
-                    else:
-                        metric_df = self._create_df_for_charting(
-                            metric_name=metric_name,
-                            attributed_values=attributed_values_by_metric_name[
-                                metric_name
-                            ],
-                            expectation_configuration=None,
-                            plot_mode=plot_mode,
-                        )
-                        if metric_df is not None:
-                            if len(df.index) == 0:
-                                df = metric_df.copy()
-                            else:
-                                join_keys = [
-                                    column
-                                    for column in metric_df.columns
-                                    if column not in sanitized_metric_names
-                                ]
-                                df = df.merge(metric_df, on=join_keys).reset_index(
-                                    drop=True
-                                )
-                            column_df = ColumnDataFrame(column_name, df)
-                if column_df is not None:
-                    column_dfs.append(column_df)
-                    column_df = None
+            metric_domain_expectation_configuration: Optional[
+                ExpectationConfiguration
+            ] = None
+            for expectation_configuration in expectation_configurations:
+                if expectation_configuration.kwargs["column"] == column_name:
+                    metric_domain_expectation_configuration = expectation_configuration
+
+            df = pd.DataFrame()
+            for metric_name in metric_names:
+                metric_df = self._create_df_for_charting(
+                    metric_name=metric_name,
+                    attributed_values=attributed_values_by_metric_name[metric_name],
+                    expectation_configuration=metric_domain_expectation_configuration,
+                    plot_mode=plot_mode,
+                )
+                if len(df.index) == 0:
+                    df = metric_df.copy()
+                else:
+                    join_keys = [
+                        column
+                        for column in metric_df.columns
+                        if column not in sanitized_metric_names
+                    ]
+                    df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
+            column_df = ColumnDataFrame(column_name, df)
+
+            column_dfs.append(column_df)
 
         return column_dfs
 
