@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, Iterator, List, Optional, cast
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -77,6 +77,21 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             sampling_kwargs (dict): Keyword arguments to pass to sampling_method
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
+        self._assets: dict = {}
+        self._sorters: dict = {}
+        if assets:
+            for asset_name, config in assets.items():
+                self.add_data_asset(asset_name, config)
+                if "splitter_method" in config:
+                    splitter_method: str = config.get("splitter_method")
+                    splitter_kwargs: dict = config.get("splitter_kwargs")
+                    splitter_sorter = SplitterSorter(
+                        name=asset_name,
+                        splitter_method=splitter_method,
+                        splitter_kwargs=splitter_kwargs,
+                    )
+                    self._sorters[asset_name] = splitter_sorter
+
         if execution_engine:
             execution_engine = cast(SqlAlchemyExecutionEngine, execution_engine)
 
@@ -96,11 +111,56 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self._sampling_method = sampling_method
         self._sampling_kwargs = sampling_kwargs
 
+    @property
+    def assets(self) -> Dict[str, dict]:
+        return self._assets
+
+    @property
+    def execution_engine(self) -> SqlAlchemyExecutionEngine:
+        return cast(SqlAlchemyExecutionEngine, self._execution_engine)
+
+    @property
+    def sorters(self) -> Optional[dict]:
+        return self._sorters
+
+    def add_data_asset(
+        self,
+        name: str,
+        config: dict,
+    ) -> None:
+        """
+        Add data_asset to DataConnector using data_asset name as key, and data_asset config as value.
+        """
+        name = self._update_data_asset_name_from_config(name, config)
+        self._assets[name] = config
+
+    def _update_data_asset_name_from_config(
+        self, data_asset_name: str, data_asset_config: dict
+    ) -> str:
+
+        data_asset_name_prefix: str = data_asset_config.get(
+            "data_asset_name_prefix", ""
+        )
+        data_asset_name_suffix: str = data_asset_config.get(
+            "data_asset_name_suffix", ""
+        )
+        schema_name: str = data_asset_config.get("schema_name", "")
+        include_schema_name: bool = data_asset_config.get("include_schema_name", True)
+        if schema_name and include_schema_name is False:
+            raise ge_exceptions.DataConnectorError(
+                message=f"{self.__class__.__name__} ran into an error while initializing Asset names. Schema {schema_name} was specified, but 'include_schema_name' flag was set to False."
+            )
+
+        if schema_name:
+            data_asset_name: str = f"{schema_name}.{data_asset_name}"
+
         self._assets = {}
 
         self._refresh_data_assets_cache(assets=assets)
 
         self._data_references_cache = {}
+
+        self._data_references_cache[data_asset_name] = batch_identifiers_list
 
     @property
     def execution_engine(self) -> SqlAlchemyExecutionEngine:
@@ -213,6 +273,31 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         return batch_definition_list
+
+    def _sort_batch_definition_list(
+        self, batch_definition_list: List[BatchDefinition]
+    ) -> List[BatchDefinition]:
+        """
+        Use configured sorters to sort batch_definition
+
+        Args:
+            batch_definition_list (list): list of batch_definitions to sort
+
+        Returns:
+            sorted list of batch_definitions
+
+        """
+        sorters: Iterator[SplitterSorter] = reversed(list(self.sorters.values()))
+        for sorter in sorters:
+            batch_definition_list = sorter.get_sorted_batch_definitions(
+                batch_definitions=batch_definition_list
+            )
+        return batch_definition_list
+
+    def _get_data_reference_list_from_cache_by_data_asset_name(
+        self, data_asset_name: str
+    ) -> List[str]:
+        return self._data_references_cache[data_asset_name]
 
     def get_available_data_asset_names(self) -> List[str]:
         """
@@ -391,11 +476,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             batch_identifiers_list = [{}]
 
         return batch_identifiers_list
-
-    def _get_data_reference_list_from_cache_by_data_asset_name(
-        self, data_asset_name: str
-    ) -> List[dict]:
-        return self._data_references_cache[data_asset_name]
 
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
