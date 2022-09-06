@@ -263,13 +263,3 @@ def test_ge_cloud_response_json_to_object_dict() -> None:
     actual = store.ge_cloud_response_json_to_object_dict(response_json)
 
     assert actual == expected
-
-
-@pytest.mark.unit
-def test_serialize() -> None:
-    pass
-
-
-@pytest.mark.unit
-def test_self_check() -> None:
-    pass

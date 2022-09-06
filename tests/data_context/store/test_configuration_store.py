@@ -230,18 +230,3 @@ def test_v3_configuration_store(tmp_path_factory):
         )
         == 0
     )
-
-
-@pytest.mark.unit
-def test_init_with_invalid_configuration_class_raises_error() -> None:
-    pass
-
-
-@pytest.mark.unit
-def test_self_check() -> None:
-    pass
-
-
-@pytest.mark.unit
-def test_determine_key() -> None:
-    pass
