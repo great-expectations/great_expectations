@@ -736,13 +736,3 @@ def resolve_evaluation_dependencies(
                 parameters=parameters,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
-
-            # Step-4: Any "ParameterBuilder" object, including members of "evaluation_parameter_builders" list may be
-            # configured with its own "evaluation_parameter_builders" list.  Recursive call handles such situations.
-            resolve_evaluation_dependencies(
-                parameter_builder=evaluation_parameter_builder,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
-            )

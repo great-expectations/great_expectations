@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -101,3 +102,53 @@ def test_profiler_store_integration(
         "keys": [],
         "len_keys": 0,
     }
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_ge_cloud_response_json_to_object_dict(
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+) -> None:
+    store = ProfilerStore(store_name="profiler_store")
+
+    profiler_id = "b1445fa5-d034-45d7-a4ae-d6dca19b207b"
+
+    profiler_config = profiler_config_with_placeholder_args.to_dict()
+    response_json = {
+        "data": {
+            "id": profiler_id,
+            "attributes": {
+                "profiler": profiler_config,
+            },
+        }
+    }
+
+    expected = profiler_config
+    expected["id"] = profiler_id
+
+    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+
+    assert actual == expected
+
+
+@pytest.mark.unit
+def test_serialization_self_check(capsys) -> None:
+    store = ProfilerStore(store_name="profiler_store")
+
+    with mock.patch("random.choice", lambda _: "0"):
+        store.serialization_self_check(pretty_print=True)
+
+    stdout = capsys.readouterr().out
+
+    test_key = "ConfigurationIdentifier::profiler_00000000000000000000"
+    messages = [
+        f"Attempting to add a new test key {test_key} to Profiler store...",
+        f"Test key {test_key} successfully added to Profiler store.",
+        f"Attempting to retrieve the test value associated with key {test_key} from Profiler store...",
+        "Test value successfully retrieved from Profiler store",
+        f"Cleaning up test key {test_key} and value from Profiler store...",
+        "Test key and value successfully removed from Profiler store",
+    ]
+
+    for message in messages:
+        assert message in stdout

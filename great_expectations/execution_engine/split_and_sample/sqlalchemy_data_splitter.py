@@ -646,6 +646,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 splitter_method_name
             )
         )
+
         split_query: Selectable = getattr(self, get_split_query_method_name)(
             table_name=table_name, **splitter_kwargs
         )
