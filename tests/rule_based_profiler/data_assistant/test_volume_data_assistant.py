@@ -1666,10 +1666,10 @@ def test_volume_data_assistant_result_serialization(
     assert len(bobby_volume_data_assistant_result.profiler_config.rules) == 2
 
 
-@pytest.mark.integration
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
 @pytest.mark.slow  # 1.06s
 def test_volume_data_assistant_result_get_expectation_suite(
     mock_emit,
@@ -1783,8 +1783,8 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
     assert actual_expectation_suite == expected_expectation_suite
 
 
-@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.integration
 @pytest.mark.slow  # 3.53s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
@@ -1862,8 +1862,8 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
-@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.integration
 @pytest.mark.slow  # 3.03s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
     quentin_columnar_table_multi_batch_data_context,
@@ -2007,8 +2007,8 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
-@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.integration
 @pytest.mark.slow  # 3.30s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
     quentin_columnar_table_multi_batch_data_context,
@@ -2036,6 +2036,7 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     )
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 3.31s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     quentin_columnar_table_multi_batch_data_context,
