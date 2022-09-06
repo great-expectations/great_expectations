@@ -1,5 +1,7 @@
 from typing import Dict, List
 
+import pytest
+
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -12,6 +14,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 
+@pytest.mark.unit
 def test_build_parameter_container(
     parameters_with_different_depth_level_values,
     multi_part_name_parameter_container,
@@ -24,6 +27,7 @@ def test_build_parameter_container(
     assert parameter_container == multi_part_name_parameter_container
 
 
+@pytest.mark.unit
 def test_get_fully_qualified_parameter_names(
     parameters_with_different_depth_level_values,
 ):
@@ -80,6 +84,7 @@ def test_get_fully_qualified_parameter_names(
     )
 
 
+@pytest.mark.unit
 def test_get_parameter_values_for_fully_qualified_parameter_names(
     parameters_with_different_depth_level_values,
 ):
