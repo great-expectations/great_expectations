@@ -78,21 +78,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             sampling_kwargs (dict): Keyword arguments to pass to sampling_method
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
-        self._assets: dict = {}
-        self._sorters: dict = {}
-        if assets:
-            for asset_name, config in assets.items():
-                self.add_data_asset(asset_name, config)
-                if "splitter_method" in config:
-                    splitter_method: str = config.get("splitter_method")
-                    splitter_kwargs: dict = config.get("splitter_kwargs")
-                    splitter_sorter = SplitterSorter(
-                        name=asset_name,
-                        splitter_method=splitter_method,
-                        splitter_kwargs=splitter_kwargs,
-                    )
-                    self._sorters[asset_name] = splitter_sorter
-
         if execution_engine:
             execution_engine = cast(SqlAlchemyExecutionEngine, execution_engine)
 
@@ -111,6 +96,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self._splitter_kwargs = splitter_kwargs
         self._sampling_method = sampling_method
         self._sampling_kwargs = sampling_kwargs
+
+        self._assets = {}
+
+        self._refresh_data_assets_cache(assets=assets)
+
+        self._data_references_cache = {}
 
     @property
     def execution_engine(self) -> SqlAlchemyExecutionEngine:
