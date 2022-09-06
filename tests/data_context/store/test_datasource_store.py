@@ -1,6 +1,6 @@
 import copy
 import pathlib
-from typing import List, Optional, cast
+from typing import List, Optional, cast, Callable
 from unittest.mock import PropertyMock, patch
 
 import pytest
@@ -27,8 +27,9 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.datasource.datasource_serializer import (
     JsonDatasourceConfigSerializer,
-    YAMLReadyDictDatasourceConfigSerializer,
+    YAMLReadyDictDatasourceConfigSerializer, NamedDatasourceSerializer,
 )
+from tests.data_context.conftest import MockResponse
 
 yaml = YAMLHandler()
 
@@ -172,9 +173,77 @@ def test_datasource_store_retrieval(
     )
 
 
+@pytest.fixture
+def datasource_id() -> str:
+    return "aaa7cfdd-4aa4-4f3d-a979-fe2ea5203cbf"
+
+@pytest.fixture
+def mocked_post_response(
+    mock_response_factory: Callable, datasource_id: str
+) -> Callable[[], MockResponse]:
+
+    def _mocked_post_response(*args, **kwargs):
+        return mock_response_factory(
+            {
+                "data": {
+                    "id": datasource_id,
+                }
+            },
+            201,
+        )
+
+    return _mocked_post_response
+
+@pytest.fixture
+def datasource_config_with_names_and_ids(datasource_config_with_names: DatasourceConfig, datasource_id: str) -> DatasourceConfig:
+    updated_config = copy.deepcopy(datasource_config_with_names)
+    updated_config["id"] = datasource_id
+    return updated_config
+
+
+
+@pytest.fixture
+def mocked_get_response(
+    mock_response_factory: Callable,
+    datasource_config_with_names_and_ids: DatasourceConfig,
+    datasource_id: str,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_response(*args, **kwargs):
+        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
+        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
+
+        return mock_response_factory(
+            {
+                "data": {
+                    "attributes": {
+                        "datasource_config": datasource_config_with_names_and_ids,
+                        "created_at": "2022-08-02T17:55:45.107550",
+                        "created_by_id": created_by_id,
+                        "deleted": False,
+                        "deleted_at": None,
+                        "desc": None,
+                        "name": "my_datasource",
+                        "organization_id": f"{organization_id}",
+                        "updated_at": "2022-08-02T17:55:45.107550",
+                    },
+                    "id": datasource_id,
+                    "links": {
+                        "self": f"/organizations/{organization_id}/datasources/{datasource_id}"
+                    },
+                    "type": "datasource",
+                },
+            },
+            200,
+        )
+
+    return _mocked_get_response
+
 @pytest.mark.integration
-def test_datasource_store_retrieval_cloud_mode(
+def test_datasource_store_set_cloud_mode(
     datasource_config: DatasourceConfig,
+    datasource_config_with_names_and_ids: DatasourceConfig,
+    mocked_post_response: Callable[[], MockResponse],
+    mocked_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_access_token: str,
     ge_cloud_organization_id: str,
@@ -197,23 +266,22 @@ def test_datasource_store_retrieval_cloud_mode(
         serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
     )
 
-    key = GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id="foobarbaz"
-    )
+    with patch(
+        "requests.post", autospec=True, side_effect=mocked_post_response
+    ) as mock_post, patch(
+        "requests.get", autospec=True, side_effect=mocked_get_response
+    ):
 
-    with patch("requests.put", autospec=True) as mock_put:
-        type(mock_put.return_value).status_code = PropertyMock(return_value=200)
+        retrieved_datasource_config = store.set(key=None, value=datasource_config)
 
-        store.set(key=key, value=datasource_config)
+        serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
+        expected_datasource_config = serializer.serialize(datasource_config)
 
-        expected_datasource_config = datasourceConfigSchema.dump(datasource_config)
-
-        mock_put.assert_called_with(
-            "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/datasources/foobarbaz",
+        mock_post.assert_called_with(
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {
                     "type": "datasource",
-                    "id": "foobarbaz",
                     "attributes": {
                         "datasource_config": expected_datasource_config,
                         "organization_id": ge_cloud_organization_id,
@@ -222,6 +290,10 @@ def test_datasource_store_retrieval_cloud_mode(
             },
             **shared_called_with_request_kwargs,
         )
+
+        json_serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
+
+        assert json_serializer.serialize(retrieved_datasource_config) == json_serializer.serialize(datasource_config_with_names_and_ids)
 
 
 @pytest.mark.integration
