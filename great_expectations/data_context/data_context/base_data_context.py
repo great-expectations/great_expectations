@@ -2660,11 +2660,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         print(f"\tInstantiating as a Datasource, since class_name is {class_name}")
         datasource_name: str = name or config.get("name") or "my_temp_datasource"
+        datasource_config = datasourceConfigSchema.load(config)
+        datasource_config.name = datasource_name
         instantiated_class = cast(
             Datasource,
             self._instantiate_datasource_from_config_and_update_project_config(
-                name=datasource_name,
-                config=config,
+                config=datasource_config,
                 initialize=True,
                 save_changes=False,
             ),
@@ -2900,15 +2901,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
-        name: str,
-        config: dict,
+        config: DatasourceConfig,
         initialize: bool = True,
         save_changes: bool = False,
     ) -> Optional[Datasource]:
         """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
 
         Args:
-            name: Desired name for the datasource.
             config: Config for the datasource.
             initialize: Whether to initialize the datasource or return None.
             save_changes: Whether to save the datasource config to the configured Datasource store.
@@ -2916,9 +2915,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             If initialize=True return an instantiated Datasource object, else None.
         """
-
-        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr]
-            name=name,
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr,arg-type]
             config=config,
             initialize=initialize,
             save_changes=save_changes,

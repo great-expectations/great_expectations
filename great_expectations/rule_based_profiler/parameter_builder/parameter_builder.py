@@ -1,5 +1,6 @@
 import copy
 import datetime
+import decimal
 import itertools
 import logging
 from abc import ABC, abstractmethod
@@ -576,17 +577,17 @@ specified (empty "metric_name" value detected)."""
                         if not is_parseable_date(value=metric_value):
                             raise ge_exceptions.ProfilerExecutionError(
                                 message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
-metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
+and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
 """
                             )
                     elif not (
                         isinstance(metric_value, datetime.datetime)
+                        or isinstance(metric_value, decimal.Decimal)
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
                         raise ge_exceptions.ProfilerExecutionError(
                             message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
-metrics (value {metric_value} having numpy.dtype "{str(metric_value.dtype)}" and Python type \
-"{str(type(metric_value))}" was computed).
+and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
 """
                         )
 
@@ -730,16 +731,6 @@ def resolve_evaluation_dependencies(
             )
 
             evaluation_parameter_builder.build_parameters(
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
-            )
-
-            # Step-4: Any "ParameterBuilder" object, including members of "evaluation_parameter_builders" list may be
-            # configured with its own "evaluation_parameter_builders" list.  Recursive call handles such situations.
-            resolve_evaluation_dependencies(
-                parameter_builder=evaluation_parameter_builder,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,

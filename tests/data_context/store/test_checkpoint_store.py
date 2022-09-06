@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 from unittest import mock
 
 import pytest
@@ -11,6 +11,7 @@ from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import filter_properties_dict, gen_directory_tree_str
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
@@ -21,6 +22,7 @@ from tests.test_utils import build_checkpoint_store_using_filesystem
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.integration
 def test_checkpoint_store(empty_data_context):
     store_name: str = "checkpoint_store"
     base_directory: str = str(Path(empty_data_context.root_directory) / "checkpoints")
@@ -227,6 +229,7 @@ def test_checkpoint_store(empty_data_context):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -263,3 +266,87 @@ store_backend:
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_ge_cloud_response_json_to_object_dict() -> None:
+    store = CheckpointStore(store_name="checkpoint_store")
+
+    checkpoint_id = "7b5e962c-3c67-4a6d-b311-b48061d52103"
+    checkpoint_config = {
+        "name": "oss_test_checkpoint",
+        "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "expectation_suite_name": "oss_test_expectation_suite",
+        "validations": [
+            {
+                "expectation_suite_name": "taxi.demo_pass",
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "oss_test_datasource",
+                    "data_connector_name": "oss_test_data_connector",
+                    "data_asset_name": "users",
+                },
+            },
+        ],
+    }
+    response_json = {
+        "data": {
+            "id": checkpoint_id,
+            "attributes": {
+                "checkpoint_config": checkpoint_config,
+            },
+        }
+    }
+
+    expected = checkpoint_config
+    expected["ge_cloud_id"] = checkpoint_id
+
+    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+
+    assert actual == expected
+
+
+@pytest.mark.unit
+def test_serialization_self_check(capsys) -> None:
+    store = CheckpointStore(store_name="checkpoint_store")
+
+    with mock.patch("random.choice", lambda _: "0"):
+        store.serialization_self_check(pretty_print=True)
+
+    stdout = capsys.readouterr().out
+
+    test_key = "ConfigurationIdentifier::test-name-00000000000000000000"
+    messages = [
+        f"Attempting to add a new test key {test_key} to Checkpoint store...",
+        f"Test key {test_key} successfully added to Checkpoint store.",
+        f"Attempting to retrieve the test value associated with key {test_key} from Checkpoint store...",
+        "Test value successfully retrieved from Checkpoint store",
+        f"Cleaning up test key {test_key} and value from Checkpoint store...",
+        "Test key and value successfully removed from Checkpoint store",
+    ]
+
+    for message in messages:
+        assert message in stdout
+
+
+@pytest.mark.parametrize(
+    "path,exists",
+    [
+        ("", False),
+        ("my_fake_dir", False),
+        (
+            file_relative_path(
+                __file__,
+                "../../integration/fixtures/gcp_deployment/great_expectations",
+            ),
+            True,
+        ),
+    ],
+)
+@pytest.mark.unit
+def test_default_checkpoints_exist(path: str, exists: bool) -> None:
+    store = CheckpointStore(store_name="checkpoint_store")
+    assert store.default_checkpoints_exist(path) is exists
