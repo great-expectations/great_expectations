@@ -1693,7 +1693,7 @@ class AbstractDataContext(ABC):
         Raises:
             ClassInstantiationError
         """
-        # serialize to dict for compatibility with the following code
+        # We convert from the type back to a dictionary for purposes of instantiation
         serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         config_dict: dict = serializer.serialize(config)
 
