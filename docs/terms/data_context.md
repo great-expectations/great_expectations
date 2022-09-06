@@ -90,7 +90,7 @@ Alternatively, you might call:
 
 ```python title="Python code"
 import great_expectations as ge
-context = ge.get_context(filepath=”something”)
+context = ge.data_context.DataContext(context_root_dir=”path/to/my/context/root/directory/great_expectations”)
 ```
 
 If you’re using Great Expectations Cloud, you’d call:
