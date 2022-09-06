@@ -156,6 +156,7 @@ class FilePathDataConnector(DataConnector):
 
         """
         self._validate_batch_request(batch_request=batch_request)
+
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
