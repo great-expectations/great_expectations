@@ -1161,6 +1161,7 @@ def test_serialize_profiler_config(
 
 
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@pytest.mark.unit
 def test_add_profiler(
     mock_data_context: mock.MagicMock,
     profiler_key: ConfigurationIdentifier,
@@ -1180,8 +1181,9 @@ def test_add_profiler(
     )
 
 
-@pytest.mark.cloud
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@pytest.mark.cloud
+@pytest.mark.unit
 def test_add_profiler_ge_cloud_mode(
     mock_data_context: mock.MagicMock,
     ge_cloud_profiler_id: str,
@@ -1203,6 +1205,7 @@ def test_add_profiler_ge_cloud_mode(
 
 
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@pytest.mark.unit
 def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
     mock_data_context: mock.MagicMock,
 ):
@@ -1247,6 +1250,7 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
 
 
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@pytest.mark.unit
 def test_get_profiler(
     mock_data_context: mock.MagicMock,
     populated_profiler_store: ProfilerStore,
@@ -1267,6 +1271,7 @@ def test_get_profiler(
 
 
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@pytest.mark.unit
 def test_get_profiler_non_existent_profiler_raises_error(
     mock_data_context: mock.MagicMock, empty_profiler_store: ProfilerStore
 ):
@@ -1281,6 +1286,7 @@ def test_get_profiler_non_existent_profiler_raises_error(
     assert "Non-existent Profiler" in str(e.value)
 
 
+@pytest.mark.unit
 def test_delete_profiler(
     populated_profiler_store: ProfilerStore,
 ):
@@ -1299,6 +1305,7 @@ def test_delete_profiler(
     )
 
 
+@pytest.mark.unit
 def test_delete_profiler_with_too_many_args_raises_error(
     populated_profiler_store: ProfilerStore,
 ):
@@ -1312,6 +1319,7 @@ def test_delete_profiler_with_too_many_args_raises_error(
     assert "either name or ge_cloud_id" in str(e.value)
 
 
+@pytest.mark.unit
 def test_delete_profiler_non_existent_profiler_raises_error(
     populated_profiler_store: ProfilerStore,
 ):
@@ -1326,6 +1334,7 @@ def test_delete_profiler_non_existent_profiler_raises_error(
 
 
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
+@pytest.mark.unit
 def test_list_profilers(mock_profiler_store: mock.MagicMock):
     store = mock_profiler_store()
     keys = ["a", "b", "c"]
@@ -1336,8 +1345,9 @@ def test_list_profilers(mock_profiler_store: mock.MagicMock):
     assert store.list_keys.called
 
 
-@pytest.mark.cloud
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
+@pytest.mark.cloud
+@pytest.mark.unit
 def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
     store = mock_profiler_store()
     keys = ["a", "b", "c"]
@@ -1353,6 +1363,7 @@ def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
 @mock.patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
+@pytest.mark.unit
 def test_add_single_rule(
     mock_expectation_configuration_builder: mock.MagicMock,
     mock_domain_builder: mock.MagicMock,
@@ -1390,6 +1401,7 @@ def test_add_single_rule(
 @mock.patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
+@pytest.mark.unit
 def test_add_rule_overwrite_first_rule(
     mock_expectation_configuration_builder: mock.MagicMock,
     mock_domain_builder: mock.MagicMock,
@@ -1418,6 +1430,7 @@ def test_add_rule_overwrite_first_rule(
 @mock.patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
+@pytest.mark.unit
 def test_add_rule_add_second_rule(
     mock_expectation_configuration_builder: mock.MagicMock,
     mock_domain_builder: mock.MagicMock,
@@ -1451,6 +1464,7 @@ def test_add_rule_add_second_rule(
 
 
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@pytest.mark.unit
 def test_add_rule_bad_rule(
     mock_data_context: mock.MagicMock,
 ):
