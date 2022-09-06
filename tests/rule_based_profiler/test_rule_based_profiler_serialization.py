@@ -46,6 +46,7 @@ from great_expectations.rule_based_profiler.config.base import (
         ),
     ],
 )
+@pytest.mark.unit
 def test_rule_based_profiler_config_is_serialized(
     rbp_config: RuleBasedProfilerConfig, expected_serialized_rbp_config: dict
 ):
