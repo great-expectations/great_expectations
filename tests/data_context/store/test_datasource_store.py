@@ -26,7 +26,8 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.datasource.datasource_serializer import (
-    YAMLReadyDictDatasourceConfigSerializer, JsonDatasourceConfigSerializer,
+    JsonDatasourceConfigSerializer,
+    YAMLReadyDictDatasourceConfigSerializer,
 )
 
 yaml = YAMLHandler()
@@ -273,6 +274,7 @@ def test_datasource_store_set_by_name(
 
     assert len(empty_datasource_store.list_keys()) == 1
 
+
 @pytest.mark.unit
 def test_datasource_store_set(
     empty_datasource_store: DatasourceStore,
@@ -290,7 +292,9 @@ def test_datasource_store_set(
 
     # Use a consistent serializer to check equality
     serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
-    assert serializer.serialize(retrieved_datasource_config) == serializer.serialize(datasource_config)
+    assert serializer.serialize(retrieved_datasource_config) == serializer.serialize(
+        datasource_config
+    )
 
 
 @pytest.mark.integration

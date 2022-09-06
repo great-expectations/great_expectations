@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import copy
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Tuple, Union
 
-from great_expectations.data_context.types.refs import GeCloudResourceRef
-
-from great_expectations.core.data_context_key import DataContextVariableKey, DataContextKey
+from great_expectations.core.data_context_key import (
+    DataContextKey,
+    DataContextVariableKey,
+)
 from great_expectations.core.serializer import AbstractConfigSerializer
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -13,6 +14,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
+from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.util import filter_properties_dict
 
@@ -166,7 +168,7 @@ class DatasourceStore(Store):
         self.set(datasource_key, datasource_config)
 
     def set(  # type: ignore[override]
-            self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
+        self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
     ) -> DatasourceConfig:
         """Create a datasource config in the store using a store_backend-specific key.
         Args:
