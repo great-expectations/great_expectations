@@ -626,88 +626,92 @@ class DataAssistantResult(SerializableDictDot):
             charts=themed_charts
         )
 
-        display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {" ": None}
-        for idx in range(len(chart_titles)):
-            display_chart_dict[chart_titles[idx]] = themed_charts[idx]
+        if len(chart_titles) > 0:
+            display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {
+                " ": None
+            }
+            for idx in range(len(chart_titles)):
+                display_chart_dict[chart_titles[idx]] = themed_charts[idx]
 
-        dropdown_title_color: str = altair_theme["legend"]["titleColor"]
-        dropdown_font: str = altair_theme["font"]
-        dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
-        dropdown_text_color: str = altair_theme["axis"]["labelColor"]
+            dropdown_title_color: str = altair_theme["legend"]["titleColor"]
+            dropdown_font: str = altair_theme["font"]
+            dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
+            dropdown_text_color: str = altair_theme["axis"]["labelColor"]
 
-        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
-        altair_dropdown_css: str = f"""
-            <style>
-            span.vega-bind-name {{
-                color: {dropdown_title_color};
-                font-family: {dropdown_font};
-                font-size: {dropdown_font_size}px;
-                font-weight: bold;
-            }}
-            form.vega-bindings {{
-                color: {dropdown_text_color};
-                font-family: {dropdown_font};
-                font-size: {dropdown_font_size}px;
-                position: absolute;
-                left: 75px;
-                top: 28px;
-            }}
-            </style>
-        """
-        display(HTML(altair_dropdown_css))
+            # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+            altair_dropdown_css: str = f"""
+                <style>
+                span.vega-bind-name {{
+                    color: {dropdown_title_color};
+                    font-family: {dropdown_font};
+                    font-size: {dropdown_font_size}px;
+                    font-weight: bold;
+                }}
+                form.vega-bindings {{
+                    color: {dropdown_text_color};
+                    font-family: {dropdown_font};
+                    font-size: {dropdown_font_size}px;
+                    position: absolute;
+                    left: 75px;
+                    top: 28px;
+                }}
+                </style>
+            """
+            display(HTML(altair_dropdown_css))
 
-        # max rows for Altair charts is set to 5,000 without this
-        alt.data_transformers.disable_max_rows()
+            # max rows for Altair charts is set to 5,000 without this
+            alt.data_transformers.disable_max_rows()
 
-        ipywidgets_dropdown_css: str = f"""
-            <style>
-            .widget-inline-hbox .widget-label {{
-                color: {dropdown_title_color};
-                font-family: {dropdown_font};
-                font-size: {dropdown_font_size}px;
-                font-weight: bold;
-            }}
-            .widget-dropdown > select {{
-                padding-right: 21px;
-                padding-left: 3px;
-                color: {dropdown_text_color};
-                font-family: {dropdown_font};
-                font-size: {dropdown_font_size}px;
-                height: 20px;
-                line-height: {dropdown_font_size}px;
-                background-size: 20px;
-                border-radius: 2px;
-            }}
-            </style>
-        """
-        display(HTML(ipywidgets_dropdown_css))
+            ipywidgets_dropdown_css: str = f"""
+                <style>
+                .widget-inline-hbox .widget-label {{
+                    color: {dropdown_title_color};
+                    font-family: {dropdown_font};
+                    font-size: {dropdown_font_size}px;
+                    font-weight: bold;
+                }}
+                .widget-dropdown > select {{
+                    padding-right: 21px;
+                    padding-left: 3px;
+                    color: {dropdown_text_color};
+                    font-family: {dropdown_font};
+                    font-size: {dropdown_font_size}px;
+                    height: 20px;
+                    line-height: {dropdown_font_size}px;
+                    background-size: 20px;
+                    border-radius: 2px;
+                }}
+                </style>
+            """
+            display(HTML(ipywidgets_dropdown_css))
 
-        dropdown_selection: widgets.Dropdown = widgets.Dropdown(
-            options=chart_titles,
-            description="Select Plot Type: ",
-            style={"description_width": "initial"},
-            layout={"width": "max-content", "margin": "0px"},
-        )
+            dropdown_selection: widgets.Dropdown = widgets.Dropdown(
+                options=chart_titles,
+                description="Select Plot Type: ",
+                style={"description_width": "initial"},
+                layout={"width": "max-content", "margin": "0px"},
+            )
 
-        # As of 19 July, 2022 there is a Deprecation Warning due to the latest ipywidgets' interaction with
-        # ipykernel (Kernel._parent_header deprecated in v6.0.0). Rather than add a version constraint to ipykernel,
-        # we suppress Deprecation Warnings produced by module ipywidgets.widgets.widget_output.
-        warnings.filterwarnings(
-            action="ignore",
-            module="ipywidgets.widgets.widget_output",
-        )
-        widgets.interact(
-            DataAssistantResult._display_chart_from_dict,
-            display_chart_dict=widgets.fixed(display_chart_dict),
-            chart_title=dropdown_selection,
-        )
+            # As of 19 July, 2022 there is a Deprecation Warning due to the latest ipywidgets' interaction with
+            # ipykernel (Kernel._parent_header deprecated in v6.0.0). Rather than add a version constraint to ipykernel,
+            # we suppress Deprecation Warnings produced by module ipywidgets.widgets.widget_output.
+            warnings.filterwarnings(
+                action="ignore",
+                module="ipywidgets.widgets.widget_output",
+            )
+            widgets.interact(
+                DataAssistantResult._display_chart_from_dict,
+                display_chart_dict=widgets.fixed(display_chart_dict),
+                chart_title=dropdown_selection,
+            )
 
     @staticmethod
     def _display_chart_from_dict(
         display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]],
         chart_title: str,
     ) -> None:
-        display_chart_dict[chart_title].display()
+        if chart_title is not None:
+            display_chart_dict[chart_title].display()
 
     @staticmethod
     def _get_chart_layer_title(
@@ -3076,11 +3080,16 @@ class DataAssistantResult(SerializableDictDot):
             ):
                 first_chart_idx = idx
 
-        sorted_charts: List[alt.Chart] = [charts[first_chart_idx]] + [
-            chart
-            for idx, chart in enumerate(charts)
-            if chart is not None and idx != first_chart_idx
-        ]
+        # return the sorted charts
+        sorted_charts: List[alt.Chart]
+        if len(charts) > 1:
+            sorted_charts = [charts[first_chart_idx]] + [
+                chart
+                for idx, chart in enumerate(charts)
+                if chart is not None and idx != first_chart_idx
+            ]
+        else:
+            sorted_charts = charts
 
         return sorted_charts
 
@@ -3383,7 +3392,7 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
-        column_dfs: List[ColumnDataFrame] = self._create_column_dfs_for_charting(
+        column_dfs: List[ColumnDataFrame] = self._create_dfs_for_charting(
             metric_names=metric_names,
             attributed_metrics_by_domain=attributed_metrics_by_domain,
             expectation_configurations=expectation_configurations,
@@ -3594,9 +3603,9 @@ class DataAssistantResult(SerializableDictDot):
         self,
         metric_name: str,
         attributed_values: List[ParameterNode],
-        expectation_configuration: ExpectationConfiguration,
+        expectation_configuration: Optional[ExpectationConfiguration],
         plot_mode: PlotMode,
-    ) -> pd.DataFrame:
+    ) -> Optional[pd.DataFrame]:
         batch_ids: KeysView[str] = attributed_values[0].keys()
         metric_values: MetricValues = [
             value[0] if len(value) == 1 else value
@@ -3659,23 +3668,26 @@ class DataAssistantResult(SerializableDictDot):
         df = pd.concat([df, batch_identifier_df], axis=1)
 
         if plot_mode == PlotMode.DIAGNOSTIC:
-            for kwarg_name in expectation_configuration.kwargs:
-                # column name was already retrieved from the domain
-                if isinstance(expectation_configuration.kwargs[kwarg_name], dict):
-                    for key, value in expectation_configuration.kwargs[
-                        kwarg_name
-                    ].items():
-                        if isinstance(value, list):
-                            df[key] = [value for _ in df.index]
-                        else:
-                            df[key] = value
+            if expectation_configuration is not None:
+                for kwarg_name in expectation_configuration.kwargs:
+                    if isinstance(expectation_configuration.kwargs[kwarg_name], dict):
+                        for key, value in expectation_configuration.kwargs[
+                            kwarg_name
+                        ].items():
+                            if isinstance(value, list):
+                                df[key] = [value for _ in df.index]
+                            else:
+                                df[key] = value
 
-                elif isinstance(expectation_configuration.kwargs[kwarg_name], list):
-                    df[kwarg_name] = [
-                        expectation_configuration.kwargs[kwarg_name] for _ in df.index
-                    ]
-                else:
-                    df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
+                    elif isinstance(expectation_configuration.kwargs[kwarg_name], list):
+                        df[kwarg_name] = [
+                            expectation_configuration.kwargs[kwarg_name]
+                            for _ in df.index
+                        ]
+                    else:
+                        df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
+            else:
+                return None
 
         # if there are any lists in the dataframe
         if (df.applymap(type) == list).any().any():
@@ -3687,7 +3699,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return df
 
-    def _create_column_dfs_for_charting(
+    def _create_dfs_for_charting(
         self,
         metric_names: Tuple[str],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
@@ -3711,43 +3723,64 @@ class DataAssistantResult(SerializableDictDot):
         metric_df: pd.DataFrame
         join_keys: List[str]
         df: pd.DataFrame
-        column_df: ColumnDataFrame
+        column_df: Optional[ColumnDataFrame] = None
         column_dfs: List[ColumnDataFrame] = []
-        for expectation_configuration in expectation_configurations:
-            column_name = expectation_configuration.kwargs["column"]
-
-            column_domain = [
-                d for d in metric_domains if d.domain_kwargs.column == column_name
-            ][0]
-
+        for metric_domain in metric_domains:
             attributed_values_by_metric_name: Dict[
                 str, List[ParameterNode]
-            ] = attributed_metrics_by_domain[column_domain]
+            ] = attributed_metrics_by_domain[metric_domain]
+            column_name: str = metric_domain.domain_kwargs.column
 
-            if (
-                metric_expectation_map.get(metric_names)
-                == expectation_configuration.expectation_type
-            ):
+            if metric_expectation_map.get(metric_names):
                 df = pd.DataFrame()
                 for metric_name in metric_names:
-                    metric_df = self._create_df_for_charting(
-                        metric_name=metric_name,
-                        attributed_values=attributed_values_by_metric_name[metric_name],
-                        expectation_configuration=expectation_configuration,
-                        plot_mode=plot_mode,
-                    )
-                    if len(df.index) == 0:
-                        df = metric_df.copy()
+                    if len(expectation_configurations) > 0:
+                        for expectation_configuration in expectation_configurations:
+                            metric_df = self._create_df_for_charting(
+                                metric_name=metric_name,
+                                attributed_values=attributed_values_by_metric_name[
+                                    metric_name
+                                ],
+                                expectation_configuration=expectation_configuration,
+                                plot_mode=plot_mode,
+                            )
+                            if len(df.index) == 0:
+                                df = metric_df.copy()
+                            else:
+                                join_keys = [
+                                    column
+                                    for column in metric_df.columns
+                                    if column not in sanitized_metric_names
+                                ]
+                                df = df.merge(metric_df, on=join_keys).reset_index(
+                                    drop=True
+                                )
+                            column_df = ColumnDataFrame(column_name, df)
                     else:
-                        join_keys = [
-                            column
-                            for column in metric_df.columns
-                            if column not in sanitized_metric_names
-                        ]
-                        df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
-
-                column_df = ColumnDataFrame(column_name, df)
-                column_dfs.append(column_df)
+                        metric_df = self._create_df_for_charting(
+                            metric_name=metric_name,
+                            attributed_values=attributed_values_by_metric_name[
+                                metric_name
+                            ],
+                            expectation_configuration=None,
+                            plot_mode=plot_mode,
+                        )
+                        if metric_df is not None:
+                            if len(df.index) == 0:
+                                df = metric_df.copy()
+                            else:
+                                join_keys = [
+                                    column
+                                    for column in metric_df.columns
+                                    if column not in sanitized_metric_names
+                                ]
+                                df = df.merge(metric_df, on=join_keys).reset_index(
+                                    drop=True
+                                )
+                            column_df = ColumnDataFrame(column_name, df)
+                if column_df is not None:
+                    column_dfs.append(column_df)
+                    column_df = None
 
         return column_dfs
 
