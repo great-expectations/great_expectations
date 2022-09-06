@@ -1,17 +1,16 @@
 from __future__ import annotations
 
 import copy
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple
 
-from great_expectations.core.data_context_key import DataContextVariableKey
+from great_expectations.core.data_context_key import DataContextVariableKey, DataContextKey
 from great_expectations.core.serializer import AbstractConfigSerializer
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
-    DatasourceConfigSchema,
+    datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.util import filter_properties_dict
 
@@ -30,7 +29,7 @@ class DatasourceStore(Store):
         store_backend: Optional[dict] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
-        self._schema = DatasourceConfigSchema()
+        self._schema = datasourceConfigSchema
         self._serializer = serializer
         super().__init__(
             store_backend=store_backend,
@@ -164,22 +163,23 @@ class DatasourceStore(Store):
         )
         self.set(datasource_key, datasource_config)
 
-    def create(
-        self, datasource_config: DatasourceConfig
-    ) -> Optional[GeCloudResourceRef]:
+    def set(
+        self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
+    ) -> DatasourceConfig:
         """Create a datasource config in the store using a store_backend-specific key.
-
         Args:
-            datasource_config: Config containing the datasource name.
-
+            key: Optional key to use when setting value.
+            value: DatasourceConfig set in the store at the key provided or created from the DatasourceConfig attributes.
+            **_: kwargs will be ignored but accepted to align with the parent class.
         Returns:
-            None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
-            which was used to create the config in the backend.
+            DatasourceConfig retrieved from the DatasourceStore.
         """
-        key: Union[
-            GeCloudIdentifier, DataContextVariableKey
-        ] = self._build_key_from_config(datasource_config)
-        return self.set(key, datasource_config)  # type: ignore[func-returns-value]
+        if not key:
+            key = self._build_key_from_config(value)
+
+        super().set(key, value)
+
+        return self.get(key)
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
@@ -210,3 +210,12 @@ class DatasourceStore(Store):
             resource_name=datasource_name,
         )
         return datasource_key
+
+    def _validate_key(self, key: Union[GeCloudIdentifier, Tuple[str, ...]]) -> None:
+        # Continue to support tuple as a key for get method until we can refactor
+        if not isinstance(key, GeCloudIdentifier):
+            super()._validate_key(key)
+        else:
+            assert isinstance(
+                key, GeCloudIdentifier
+            ), f"Only {GeCloudIdentifier.__name__} is supported in {self.__class__.__name__}"
