@@ -2,7 +2,7 @@ import contextlib
 import copy
 import datetime
 from numbers import Number
-from typing import Any, Dict, Iterator, List, Optional, Protocol, Tuple, Type, cast
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, cast
 from unittest import mock
 
 import numpy as np
@@ -12,6 +12,9 @@ from freezegun import freeze_time
 from packaging import version
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
+
+# To support python 3.7 we must import Protocol from typing_extensions instead of typing
+from typing_extensions import Protocol
 
 from great_expectations import DataContext
 from great_expectations.core import (
