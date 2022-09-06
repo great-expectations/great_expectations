@@ -187,7 +187,11 @@ class DatasourceStore(Store):
         if ref and isinstance(ref, GeCloudResourceRef):
             key.ge_cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
 
-        return self.get(key)  # type: ignore[return-value]
+        return_value: DatasourceConfig = self.get(key)
+        if not return_value.name and isinstance(key, DataContextVariableKey):
+            return_value.name = key.resource_name
+
+        return return_value  # type: ignore[return-value]
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
