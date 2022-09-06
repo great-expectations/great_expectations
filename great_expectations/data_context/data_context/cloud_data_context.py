@@ -17,14 +17,12 @@ from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     DataContextConfig,
     DataContextConfigDefaults,
-    DatasourceConfig,
     GeCloudConfig,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
-from great_expectations.datasource import Datasource
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
