@@ -1099,7 +1099,7 @@ def test_get_profiler_with_too_many_args_raises_error(
 
 
 @mock.patch("great_expectations.data_context.data_context.BaseDataContext")
-@pytest.mark.integration
+@pytest.mark.unit
 def test_serialize_profiler_config(
     mock_data_context: mock.MagicMock,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
