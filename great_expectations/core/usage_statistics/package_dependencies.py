@@ -13,9 +13,9 @@ checking and updating these static lists.
     files against the static lists returned via the methods above in the
     usage example and raise exceptions if there are discrepancies.
 """
-import os
+import pathlib
 import re
-from typing import List, Set
+from typing import List, Set, Union
 
 from great_expectations.data_context.util import file_relative_path
 
@@ -208,8 +208,8 @@ class GEDependencies:
     )
 
     def __init__(self, requirements_relative_base_dir: str = "../../../") -> None:
-        self._requirements_relative_base_dir = file_relative_path(
-            __file__, requirements_relative_base_dir
+        self._requirements_relative_base_dir = pathlib.Path(
+            file_relative_path(__file__, requirements_relative_base_dir)
         )
         self._dev_requirements_prefix: str = "requirements-dev"
 
@@ -241,40 +241,41 @@ class GEDependencies:
             List of string names of dev dependencies.
         """
         dev_dependency_names: Set[str] = set()
-        dev_dependency_filename: str
+        dev_dependency_filename: pathlib.Path
         for dev_dependency_filename in self.dev_requirements_paths:
             dependency_names: List[
                 str
             ] = self._get_dependency_names_from_requirements_file(
-                os.path.join(
-                    self._requirements_relative_base_dir, dev_dependency_filename
-                )
+                self._requirements_relative_base_dir / dev_dependency_filename
             )
             dev_dependency_names.update(dependency_names)
         return sorted(dev_dependency_names)
 
     @property
-    def required_requirements_path(self) -> str:
+    def required_requirements_path(self) -> pathlib.Path:
         """Get path for requirements.txt
 
         Returns:
-            String path of requirements.txt
+            pathlib.Path of requirements.txt
         """
-        return os.path.join(self._requirements_relative_base_dir, "requirements.txt")
+        return self._requirements_relative_base_dir / "requirements.txt"
 
     @property
-    def dev_requirements_paths(self) -> List[str]:
+    def dev_requirements_paths(self) -> List[pathlib.Path]:
         """Get all paths for requirements-dev files with dependencies in them.
         Returns:
-            List of string filenames for dev requirements files
+            List of `pathlib.Path`s for dev requirements files
         """
         return [
             filename
-            for filename in os.listdir(self._requirements_relative_base_dir)
-            if filename.startswith(self._dev_requirements_prefix)
+            for filename in self._requirements_relative_base_dir.glob(
+                f"{self._dev_requirements_prefix}*.txt"
+            )
         ]
 
-    def _get_dependency_names_from_requirements_file(self, filepath: str) -> List[str]:
+    def _get_dependency_names_from_requirements_file(
+        self, filepath: Union[str, pathlib.Path]
+    ) -> List[str]:
         """Load requirements file and parse to retrieve dependency names.
 
         Args:
