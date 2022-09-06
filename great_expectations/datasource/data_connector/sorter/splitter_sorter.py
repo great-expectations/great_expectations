@@ -12,18 +12,18 @@ from great_expectations.datasource.data_connector.sorter import (
 
 
 class SplitterSorter(Sorter):
-    SPLITTER_METHOD_TO_SORTER_MAPPING: Dict[str, Optional[Sorter]] = {
-        "split_on_year": DateTimeSorter,
-        "split_on_year_and_month": DateTimeSorter,
-        "split_on_year_and_month_and_day": DateTimeSorter,
-        "split_on_date_parts": DateTimeSorter,
-        "split_on_whole_table": LexicographicSorter,
-        "split_on_column_value": CustomListSorter,
-        "split_on_converted_datetime": LexicographicSorter,
-        "split_on_divided_integer": NumericSorter,
-        "split_on_mod_integer": NumericSorter,
-        "split_on_multi_column_values": LexicographicSorter,
-        "split_on_hashed_column": LexicographicSorter,
+    SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[str, Optional[Sorter]] = {
+        "_split_on_year": DateTimeSorter,
+        "_split_on_year_and_month": DateTimeSorter,
+        "_split_on_year_and_month_and_day": DateTimeSorter,
+        "_split_on_date_parts": DateTimeSorter,
+        "_split_on_whole_table": LexicographicSorter,
+        "_split_on_column_value": LexicographicSorter,
+        "_split_on_converted_datetime": LexicographicSorter,
+        "_split_on_divided_integer": NumericSorter,
+        "_split_on_mod_integer": NumericSorter,
+        "_split_on_multi_column_values": LexicographicSorter,
+        "_split_on_hashed_column": LexicographicSorter,
     }
 
     def __init__(
@@ -36,6 +36,7 @@ class SplitterSorter(Sorter):
         super().__init__(name=name, orderby=orderby)
         self._splitter_method = splitter_method
         self._splitter_kwargs = splitter_kwargs
+        self._sorter_method = self.get_sorter_method_from_splitter_method()
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {"name": self.name, "reverse": self.reverse}
@@ -50,22 +51,25 @@ class SplitterSorter(Sorter):
         return self._splitter_kwargs
 
     @property
-    def sorter(self) -> dict:
-        return self._sorter
+    def sorter_method(self) -> Sorter:
+        return self._sorter_method
 
-    def get_sorter_from_splitter_method(self) -> Sorter:
-        splitter_method_to_sorter_mapping: Dict[
+    def get_sorter_method_from_splitter_method(self) -> Sorter:
+        splitter_method_to_sorter_method_mapping: Dict[
             str, Optional[Sorter]
-        ] = self.SPLITTER_METHOD_TO_SORTER_MAPPING
+        ] = self.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING
         try:
-            sorter = splitter_method_to_sorter_mapping[self._splitter_method]
+            sorter_method = splitter_method_to_sorter_method_mapping[
+                self._splitter_method
+            ]
         except KeyError:
             raise ge_exceptions.SorterError(
                 f"No Sorter is defined for splitter_method: {self._splitter_method}"
             )
-        return sorter
+        return sorter_method
 
     def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
-        sorter: Sorter = self.get_sorter_from_splitter_method()
+        sorter_method: Sorter = self._sorter_method
+        sorter = sorter_method(name=self.name, orderby=self.orderby)
         key: Any = sorter.get_batch_key(batch_definition=batch_definition)
         return key
