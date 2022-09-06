@@ -587,11 +587,12 @@ specified (empty "metric_name" value detected)."""
                             )
 
                         batch_metric_values.append(0.0)
-                    elif (
-                        isinstance(metric_value, (str, np.str_))
-                        and not is_parseable_date(value=metric_value)
-                    ) or not (
-                        isinstance(metric_value, datetime.datetime)
+                    elif not (
+                        (
+                            isinstance(metric_value, (str, np.str_))
+                            and is_parseable_date(value=metric_value)
+                        )
+                        or isinstance(metric_value, datetime.datetime)
                         or isinstance(metric_value, decimal.Decimal)
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
