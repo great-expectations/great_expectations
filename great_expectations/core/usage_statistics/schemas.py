@@ -2,7 +2,7 @@
 # These schemas are used to ensure that we *never* take unexpected usage stats message and provide full transparency
 # about usage statistics. Please reach out to the Great Expectations with any questions!
 ###
-
+import pathlib
 
 # An anonymized string *must* be an md5 hash, so must have exactly 32 characters
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
@@ -1205,10 +1205,9 @@ def write_schema_to_file(target_dir: str) -> None:
         target_dir (str): The dir you wish to write the schema to.
     """
     import json
-    import os
 
     file: str = "usage_statistics_record_schema.json"
-    out: str = os.path.join(target_dir, file)
+    out = pathlib.Path(target_dir) / file
 
     with open(out, "w") as outfile:
         json.dump(anonymized_usage_statistics_record_schema, outfile, indent=2)
