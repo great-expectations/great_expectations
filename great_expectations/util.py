@@ -56,6 +56,7 @@ except ModuleNotFoundError:
     import importlib_metadata
 
 logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.ERROR)
 
 try:
     import sqlalchemy as sa

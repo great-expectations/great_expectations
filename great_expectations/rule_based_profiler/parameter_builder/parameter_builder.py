@@ -485,6 +485,7 @@ specified (empty "metric_name" value detected)."""
             attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
             self._sanitize_metric_computation(
+                parameter_builder=self,
                 metric_name=metric_name,
                 attributed_resolved_metrics=attributed_resolved_metrics,
                 enforce_numeric_metric=enforce_numeric_metric,
@@ -510,8 +511,9 @@ specified (empty "metric_name" value detected)."""
             },
         )
 
+    @staticmethod
     def _sanitize_metric_computation(
-        self,
+        parameter_builder: "ParameterBuilder",  # noqa: F821
         metric_name: str,
         attributed_resolved_metrics: AttributedResolvedMetrics,
         enforce_numeric_metric: Union[str, bool] = False,
@@ -597,8 +599,8 @@ specified (empty "metric_name" value detected)."""
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
                         raise ge_exceptions.ProfilerExecutionError(
-                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued and \
-datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
+                            message=f"""Applicability of {parameter_builder.__class__.__name__} is restricted to \
+numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
 """
                         )
                     else:
