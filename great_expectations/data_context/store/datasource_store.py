@@ -187,7 +187,7 @@ class DatasourceStore(Store):
         if ref and isinstance(ref, GeCloudResourceRef):
             key.ge_cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
 
-        return_value: DatasourceConfig = self.get(key)
+        return_value: DatasourceConfig = self.get(key)  # type: ignore[assignment]
         if not return_value.name and isinstance(key, DataContextVariableKey):
             return_value.name = key.resource_name
 
