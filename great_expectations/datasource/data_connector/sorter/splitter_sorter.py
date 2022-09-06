@@ -1,9 +1,7 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector.sorter import (
-    CustomListSorter,
     DateTimeSorter,
     LexicographicSorter,
     NumericSorter,
@@ -67,9 +65,3 @@ class SplitterSorter(Sorter):
                 f"No Sorter is defined for splitter_method: {self._splitter_method}"
             )
         return sorter_method
-
-    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
-        sorter_method: Sorter = self._sorter_method
-        sorter = sorter_method(name=self.name, orderby=self.orderby)
-        key: Any = sorter.get_batch_key(batch_definition=batch_definition)
-        return key
