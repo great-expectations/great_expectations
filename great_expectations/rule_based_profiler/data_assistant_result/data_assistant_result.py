@@ -3705,10 +3705,6 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> List[ColumnDataFrame]:
-        metric_expectation_map: Dict[
-            Tuple[str], str
-        ] = self._get_metric_expectation_map()
-
         sanitized_metric_names: Set[
             str
         ] = self._get_sanitized_metric_names_from_metric_names(
