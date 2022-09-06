@@ -10,6 +10,7 @@ from typing import Any, Generator, List, Optional, Set, Tuple, Union, cast
 import numpy as np
 import pandas as pd
 import pytest
+from great_expectations.data_context.types.resource_identifiers import ConfigurationIdentifier
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.yaml_handler import YAMLHandler
