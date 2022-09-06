@@ -244,11 +244,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
         return batch_definition_list
 
-    def _get_data_reference_list_from_cache_by_data_asset_name(
-        self, data_asset_name: str
-    ) -> List[str]:
-        return self._data_references_cache[data_asset_name]
-
     def get_available_data_asset_names(self) -> List[str]:
         """
         Return the list of asset names known by this DataConnector.
@@ -426,6 +421,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             batch_identifiers_list = [{}]
 
         return batch_identifiers_list
+
+    def _get_data_reference_list_from_cache_by_data_asset_name(
+        self, data_asset_name: str
+    ) -> List[str]:
+        return self._data_references_cache[data_asset_name]
 
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
