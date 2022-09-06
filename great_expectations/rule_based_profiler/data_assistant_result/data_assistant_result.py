@@ -710,8 +710,7 @@ class DataAssistantResult(SerializableDictDot):
         display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]],
         chart_title: str,
     ) -> None:
-        if chart_title is not None:
-            display_chart_dict[chart_title].display()
+        display_chart_dict[chart_title].display()
 
     @staticmethod
     def _get_chart_layer_title(
