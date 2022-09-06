@@ -425,6 +425,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
     )
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 25.61s
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
