@@ -5,6 +5,7 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.data_context.types.resource_identifiers import DataContextKey
 from great_expectations.exceptions import InvalidKeyError
 from great_expectations.util import filter_properties_dict
 
@@ -65,6 +66,8 @@ class InMemoryStoreBackend(StoreBackend):
         return key in self._store
 
     def remove_key(self, key) -> None:
+        if isinstance(key, DataContextKey):
+            key = key.to_tuple()
         del self._store[key]
 
     @property
