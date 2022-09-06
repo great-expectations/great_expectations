@@ -338,49 +338,6 @@ class CloudDataContext(AbstractDataContext):
         """
         return self._context_root_directory
 
-    def _instantiate_datasource_from_config_and_update_project_config(
-        self,
-        config: DatasourceConfig,
-        initialize: bool = True,
-        save_changes: bool = False,
-    ) -> Optional[Datasource]:
-        """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
-
-        Args:
-            name: Desired name for the datasource.
-            config: Config for the datasource.
-            initialize: Whether to initialize the datasource or return None.
-            save_changes: Whether to save the datasource config to the configured Datasource store.
-
-        Returns:
-            If initialize=True return an instantiated Datasource object, else None.
-        """
-
-        if save_changes:
-            resource_ref: GeCloudResourceRef = self._datasource_store.create(config)  # type: ignore[assignment]
-            config.id = resource_ref.ge_cloud_id
-
-        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
-
-        substituted_config = self._perform_substitutions_on_datasource_config(config)
-
-        datasource: Optional[Datasource] = None
-        if initialize:
-            try:
-                datasource = self._instantiate_datasource_from_config(
-                    config=substituted_config
-                )
-                self._cached_datasources[config.name] = datasource
-            except ge_exceptions.DatasourceInitializationError as e:
-                # Do not keep configuration that could not be instantiated.
-                if save_changes:
-                    self._datasource_store.delete(config)
-                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(config.name, None)  # type: ignore[union-attr,arg-type]
-                raise e
-
-        return datasource
-
     def add_checkpoint(
         self,
         name: str,
