@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, Iterator, List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -13,7 +13,6 @@ from great_expectations.datasource.data_connector.batch_filter import (
     build_batch_filter,
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector
-from great_expectations.datasource.data_connector.sorter import SplitterSorter
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
@@ -63,7 +62,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         id: Optional[str] = None,
     ) -> None:
         """
-        ConfiguredAssetDataConnector for connecting to data on a SQL database
+        InferredAssetDataConnector for connecting to data on a SQL database
 
         Args:
             name (str): The name of this DataConnector
@@ -192,10 +191,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
-        if len(self.sorters) > 0 and len(batch_definition_list) > 1:
-            batch_definition_list = self._sort_batch_definition_list(
-                batch_definition_list=batch_definition_list
-            )
+        # <WILL> 20220725 - In the case of file_data_connectors, this step is enabled, but sql_data_connectors
+        # currently do not support sorters. This step can be enabled once sorting is implemented for sql_data_connectors
+        # if len(self.sorters) > 0:
+        #     batch_definition_list = self._sort_batch_definition_list(
+        #         batch_definition_list=batch_definition_list
+        #     )
         if batch_request.data_connector_query is not None:
             data_connector_query_dict = batch_request.data_connector_query.copy()
             if (
@@ -212,31 +213,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         return batch_definition_list
-
-    def _sort_batch_definition_list(
-        self, batch_definition_list: List[BatchDefinition]
-    ) -> List[BatchDefinition]:
-        """
-        Use configured sorters to sort batch_definition
-
-        Args:
-            batch_definition_list (list): list of batch_definitions to sort
-
-        Returns:
-            sorted list of batch_definitions
-
-        """
-        sorters: Iterator[SplitterSorter] = reversed(list(self.sorters.values()))
-        for sorter in sorters:
-            batch_definition_list = sorter.get_sorted_batch_definitions(
-                batch_definitions=batch_definition_list
-            )
-        return batch_definition_list
-
-    def _get_data_reference_list_from_cache_by_data_asset_name(
-        self, data_asset_name: str
-    ) -> List[str]:
-        return self._data_references_cache[data_asset_name]
 
     def get_available_data_asset_names(self) -> List[str]:
         """
