@@ -1,5 +1,6 @@
 import json
 import random
+from unittest import mock
 
 import pytest
 from ruamel.yaml import YAML
@@ -7,19 +8,21 @@ from ruamel.yaml import YAML
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.datasource.data_connector import (
+    ConfiguredAssetSqlDataConnector,
+    InferredAssetSqlDataConnector,
+)
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.validator.validator import Validator
 
 yaml = YAML(typ="safe")
 
 
-# TODO: <Alex>ALEX -- Some methods in this module are misplaced and/or provide no action; this must be repaired.</Alex>
+# TODO: <Alex>Some methods in this module are misplaced and/or provide no action; this must be repaired.</Alex>
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
@@ -80,7 +83,7 @@ def test_get_batch_definition_list_from_batch_request(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     random.seed(0)
-    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
         f"""
@@ -95,10 +98,9 @@ def test_get_batch_definition_list_from_batch_request(
 
     """,
     )
-    config["execution_engine"] = db
+    config["execution_engine"] = execution_engine
 
     my_data_connector = ConfiguredAssetSqlDataConnector(**config)
-    my_data_connector._refresh_data_references_cache()
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -179,7 +181,7 @@ def test_get_batch_definition_list_from_batch_request(
 
 def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
-    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
         """
@@ -194,7 +196,7 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
     """,
     )
-    config["execution_engine"] = db
+    config["execution_engine"] = execution_engine
 
     my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
@@ -237,7 +239,7 @@ def test_example_B(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     random.seed(0)
-    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
         f"""
@@ -251,7 +253,7 @@ def test_example_B(
                 column_name: timestamp
     """
     )
-    config["execution_engine"] = db
+    config["execution_engine"] = execution_engine
 
     my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
@@ -294,7 +296,7 @@ def test_example_C(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     random.seed(0)
-    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
         f"""
@@ -309,7 +311,7 @@ def test_example_C(
                 divisor: 10
     """,
     )
-    config["execution_engine"] = db
+    config["execution_engine"] = execution_engine
 
     my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
@@ -350,7 +352,7 @@ def test_example_C(
 
 def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
-    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
         """
@@ -364,7 +366,7 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
                 column_name: batch_id
     """,
     )
-    config["execution_engine"] = db
+    config["execution_engine"] = execution_engine
 
     my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
@@ -403,7 +405,7 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
 def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
-    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
         """
@@ -417,7 +419,7 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
                 column_name: session_id
     """,
     )
-    config["execution_engine"] = db
+    config["execution_engine"] = execution_engine
 
     my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
@@ -461,7 +463,7 @@ def test_example_G(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     random.seed(0)
-    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
         f"""
@@ -478,7 +480,7 @@ def test_example_G(
                     - d
     """,
     )
-    config["execution_engine"] = db
+    config["execution_engine"] = execution_engine
 
     my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
@@ -526,7 +528,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
     # Leaving this test commented for now, since sqlite doesn't support MD5.
     # Later, we'll want to add a more thorough test harness, including other databases.
 
-    # db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    # execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     # config = yaml.load("""
     # name: my_sql_data_connector
@@ -539,7 +541,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
     #             column_name: id
     #             hash_digits: 1
     # """)
-    # config["execution_engine"] = db
+    # config["execution_engine"] = execution_engine
 
     # my_data_connector = ConfiguredAssetSqlDataConnector(**config)
 
@@ -574,7 +576,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
 
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
-def test_sampling_method__limit(
+def test_get_batch_data_and_markers_sampling_method__limit(
     sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -604,7 +606,7 @@ def test_sampling_method__limit(
 
 
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
-def test_sampling_method__random(
+def test_get_batch_data_and_markers_sampling_method__random(
     sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -630,7 +632,7 @@ def test_sampling_method__random(
 
 
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
-def test_sampling_method__mod(
+def test_get_batch_data_and_markers_sampling_method__mod(
     sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -658,7 +660,7 @@ def test_sampling_method__mod(
 
 
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
-def test_sampling_method__a_list(
+def test_get_batch_data_and_markers_sampling_method__a_list(
     sampler_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -684,7 +686,7 @@ def test_sampling_method__a_list(
     assert len(validator.head(fetch_all=True)) == 4
 
 
-def test_sampling_method__md5(
+def test_get_batch_data_and_markers_sampling_method__md5(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     # noinspection PyUnusedLocal
@@ -705,7 +707,7 @@ def test_sampling_method__md5(
     # )
 
 
-def test_to_make_sure_splitter_and_sampler_methods_are_optional(
+def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_are_optional(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
@@ -756,10 +758,316 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
     assert len(validator.head(fetch_all=True)) == 120
 
 
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
+def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
+    sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        assets={
+            "my_asset": {
+                "splitter_method": "_split_on_whole_table",
+                "splitter_kwargs": {},
+                "sampling_method": f"{sampler_method_name_prefix}sample_using_limit",
+                "sampling_kwargs": {"n": 20},
+                "include_schema_name": True,
+                "schema_name": "main",
+                "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    assert len(validator.head(fetch_all=True)) == 20
+    assert not validator.expect_column_values_to_be_in_set(
+        "date", value_set=["2020-01-02"]
+    ).success
+
+
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
+def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__random(
+    sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        assets={
+            "my_asset": {
+                "splitter_method": "_split_on_whole_table",
+                "splitter_kwargs": {},
+                "sampling_method": f"{sampler_method_name_prefix}sample_using_random",
+                "sampling_kwargs": {"p": 1.0},
+                "include_schema_name": True,
+                "schema_name": "main",
+                "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    assert len(validator.head(fetch_all=True)) == 120
+
+
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
+def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__mod(
+    sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "my_asset": {
+                    "splitter_method": "_split_on_whole_table",
+                    "splitter_kwargs": {},
+                    "sampling_method": f"{sampler_method_name_prefix}sample_using_mod",
+                    "sampling_kwargs": {
+                        "column_name": "id",
+                        "mod": 10,
+                        "value": 8,
+                    },
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
+                },
+            },
+        )
+    )
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    assert len(validator.head(fetch_all=True)) == 12
+
+
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
+def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__a_list(
+    sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        assets={
+            "my_asset": {
+                "splitter_method": "_split_on_whole_table",
+                "splitter_kwargs": {},
+                "sampling_method": f"{sampler_method_name_prefix}sample_using_a_list",
+                "sampling_kwargs": {
+                    "column_name": "id",
+                    "value_list": [10, 20, 30, 40],
+                },
+                "include_schema_name": True,
+                "schema_name": "main",
+                "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    assert len(validator.head(fetch_all=True)) == 4
+
+
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
+def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__a_list(
+    sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            sampling_method=f"{sampler_method_name_prefix}sample_using_a_list",
+            sampling_kwargs={
+                "column_name": "id",
+                "value_list": [10, 20, 30, 40],
+            },
+            assets={
+                "my_asset": {
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
+                },
+            },
+        )
+    )
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    assert len(validator.head(fetch_all=True)) == 4
+
+
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
+def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__random_asset_override__a_list(
+    sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        sampling_method=f"{sampler_method_name_prefix}sample_using_random",
+        sampling_kwargs={"p": 1.0},
+        assets={
+            "my_asset": {
+                "sampling_method": f"{sampler_method_name_prefix}sample_using_a_list",
+                "sampling_kwargs": {
+                    "column_name": "id",
+                    "value_list": [10, 20, 30, 40],
+                },
+                "include_schema_name": True,
+                "schema_name": "main",
+                "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    assert len(validator.head(fetch_all=True)) == 4
+
+
 def test_default_behavior_with_no_splitter(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
         """
@@ -770,7 +1078,7 @@ def test_default_behavior_with_no_splitter(
         table_partitioned_by_date_column__A: {}
     """,
     )
-    config["execution_engine"] = db
+    config["execution_engine"] = execution_engine
 
     my_data_connector = ConfiguredAssetSqlDataConnector(**config)
     report_object = my_data_connector.self_check()
@@ -818,7 +1126,7 @@ def test_default_behavior_with_no_splitter(
 def test_behavior_with_whole_table_splitter(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
         """
@@ -831,7 +1139,7 @@ def test_behavior_with_whole_table_splitter(
             splitter_kwargs : {}
     """,
     )
-    config["execution_engine"] = db
+    config["execution_engine"] = execution_engine
 
     my_data_connector = ConfiguredAssetSqlDataConnector(**config)
     report_object = my_data_connector.self_check()
@@ -983,7 +1291,6 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
     )
 
     report_object = my_data_connector.self_check()
-
     assert report_object == {
         "class_name": "InferredAssetSqlDataConnector",
         "data_asset_count": 21,
@@ -1070,7 +1377,6 @@ def test_basic_instantiation_of_ConfiguredAssetSqlDataConnector(
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     report_object = my_data_connector.self_check()
-
     assert report_object == {
         "class_name": "ConfiguredAssetSqlDataConnector",
         "data_asset_count": 1,
@@ -1128,15 +1434,17 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector(
     }
 
 
+@mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name(
+    mock_sql_alchemy_execution_engine: mock.MagicMock,
     splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
         name="my_sql_data_connector",
         datasource_name="my_test_datasource",
-        execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+        execution_engine=mock_sql_alchemy_execution_engine,
         assets={
             "table_partitioned_by_date_column__A": {
                 "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
@@ -1148,37 +1456,33 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     )
     assert "main.table_partitioned_by_date_column__A" in my_data_connector.assets
 
-    # schema_name given but include_schema_name is set to False
-    with pytest.raises(ge_exceptions.DataConnectorError) as e:
-        ConfiguredAssetSqlDataConnector(
-            name="my_sql_data_connector",
-            datasource_name="my_test_datasource",
-            execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
-            assets={
-                "table_partitioned_by_date_column__A": {
-                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                    "splitter_kwargs": {"column_name": "date"},
-                    "include_schema_name": False,
-                    "schema_name": "main",
-                },
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=mock_sql_alchemy_execution_engine,
+        assets={
+            "table_partitioned_by_date_column__A": {
+                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+                "splitter_kwargs": {"column_name": "date"},
+                "include_schema_name": False,
+                "schema_name": "main",
             },
-        )
-
-    assert (
-        e.value.message
-        == "ConfiguredAssetSqlDataConnector ran into an error while initializing Asset names. Schema main was specified, but 'include_schema_name' flag was set to False."
+        },
     )
+    assert "table_partitioned_by_date_column__A" in my_data_connector.assets
 
 
+@mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix(
+    mock_sql_alchemy_execution_engine: mock.MagicMock,
     splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
         name="my_sql_data_connector",
         datasource_name="my_test_datasource",
-        execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+        execution_engine=mock_sql_alchemy_execution_engine,
         assets={
             "table_partitioned_by_date_column__A": {
                 "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
@@ -1195,27 +1499,314 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
         in my_data_connector.assets
     )
 
-    # schema_name provided, but include_schema_name is set to False
-    with pytest.raises(ge_exceptions.DataConnectorError) as e:
+
+@mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name(
+    mock_sql_alchemy_execution_engine: mock.MagicMock,
+    splitter_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=mock_sql_alchemy_execution_engine,
+        assets={
+            "my_asset": {
+                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+                "splitter_kwargs": {"column_name": "date"},
+                "include_schema_name": True,
+                "schema_name": "main",
+                "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    assert "taxi__main.my_asset__asset" in my_data_connector.assets
+
+
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name_asset_splitter(
+    splitter_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        assets={
+            "my_asset": {
+                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+                "splitter_kwargs": {"column_name": "date"},
+                "include_schema_name": True,
+                "schema_name": "main",
+                "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    assert "taxi__main.my_asset__asset" in my_data_connector.assets
+
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 30
+
+
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name_default_splitter(
+    splitter_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
         ConfiguredAssetSqlDataConnector(
             name="my_sql_data_connector",
             datasource_name="my_test_datasource",
-            execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+            execution_engine=execution_engine,
+            splitter_method=f"{splitter_method_name_prefix}split_on_column_value",
+            splitter_kwargs={"column_name": "date"},
             assets={
-                "table_partitioned_by_date_column__A": {
-                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                    "splitter_kwargs": {"column_name": "date"},
-                    "include_schema_name": False,
+                "my_asset": {
+                    "include_schema_name": True,
                     "schema_name": "main",
+                    "table_name": "table_partitioned_by_date_column__A",
                     "data_asset_name_prefix": "taxi__",
                     "data_asset_name_suffix": "__asset",
                 },
             },
         )
-    assert (
-        e.value.message
-        == "ConfiguredAssetSqlDataConnector ran into an error while initializing Asset names. Schema main was specified, but 'include_schema_name' flag was set to False."
     )
+    assert "taxi__main.my_asset__asset" in my_data_connector.assets
+
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 30
+
+
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name_default_splitter_asset_override(
+    splitter_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        splitter_method=f"{splitter_method_name_prefix}split_on_column_value",
+        splitter_kwargs={"column_name": "date"},
+        assets={
+            "my_asset": {
+                "splitter_method": f"{splitter_method_name_prefix}split_on_whole_table",
+                "splitter_kwargs": {},
+                "include_schema_name": True,
+                "schema_name": "main",
+                "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    assert "taxi__main.my_asset__asset" in my_data_connector.assets
+
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
+def test_simple_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_with_no_splitter_no_sampler(
+    splitter_method_name_prefix,
+    sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = (
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine=execution_engine,
+            assets={
+                "table_partitioned_by_date_column__A": {},
+            },
+        )
+    )
+    assert "table_partitioned_by_date_column__A" in my_data_connector.assets
+
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    assert len(validator.head(fetch_all=True)) == 120
+
+
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
+def test_full_config_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_with_default_splitter_sampler_asset_override(
+    splitter_method_name_prefix,
+    sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        splitter_method=f"{splitter_method_name_prefix}split_on_column_value",
+        splitter_kwargs={"column_name": "date"},
+        sampling_method=f"{sampler_method_name_prefix}sample_using_random",
+        sampling_kwargs={"p": 1.0},
+        assets={
+            "my_asset": {
+                "splitter_method": f"{splitter_method_name_prefix}split_on_whole_table",
+                "splitter_kwargs": {},
+                "sampling_method": f"{sampler_method_name_prefix}sample_using_a_list",
+                "sampling_kwargs": {
+                    "column_name": "id",
+                    "value_list": [10, 20, 30, 40],
+                },
+                "include_schema_name": True,
+                "schema_name": "main",
+                "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    assert "taxi__main.my_asset__asset" in my_data_connector.assets
+
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[0]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    assert len(validator.head(fetch_all=True)) == 4
+
+
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+@pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
+def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnector_with_default_splitter_sampler_asset_override(
+    splitter_method_name_prefix,
+    sampler_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: InferredAssetSqlDataConnector = InferredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        data_asset_name_prefix="taxi__",
+        data_asset_name_suffix="__asset",
+        include_schema_name=True,
+        splitter_method=f"{splitter_method_name_prefix}split_on_column_value",
+        splitter_kwargs={"column_name": "date"},
+        sampling_method=f"{sampler_method_name_prefix}sample_using_limit",
+        sampling_kwargs={
+            "n": 5,
+        },
+        excluded_tables=None,
+        included_tables=None,
+        skip_inapplicable_tables=True,
+        introspection_directives={
+            "schema_name": "main",
+            "ignore_information_schemas_and_system_tables": True,
+            "information_schemas": None,
+            "system_tables": None,
+            "include_views": True,
+        },
+        batch_spec_passthrough=None,
+    )
+    assert (
+        "taxi__main.table_partitioned_by_date_column__A__asset"
+        in my_data_connector.assets
+    )
+
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.table_partitioned_by_date_column__A__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 30
+
+    batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
+        batch_definition=batch_definition_list[1]
+    )
+    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine, batches=[batch])
+    assert len(validator.head(fetch_all=True)) == 5
 
 
 # TODO
