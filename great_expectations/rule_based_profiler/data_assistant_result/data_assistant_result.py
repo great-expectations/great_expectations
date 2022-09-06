@@ -3392,7 +3392,7 @@ class DataAssistantResult(SerializableDictDot):
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
-        column_dfs: List[ColumnDataFrame] = self._create_dfs_for_charting(
+        column_dfs: List[ColumnDataFrame] = self._create_column_dfs_for_charting(
             metric_names=metric_names,
             attributed_metrics_by_domain=attributed_metrics_by_domain,
             expectation_configurations=expectation_configurations,
@@ -3699,7 +3699,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return df
 
-    def _create_dfs_for_charting(
+    def _create_column_dfs_for_charting(
         self,
         metric_names: Tuple[str],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
