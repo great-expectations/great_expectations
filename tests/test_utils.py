@@ -7,16 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Generator, List, Optional, Set, Tuple, Union, cast
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.store import ConfigurationStore, StoreBackend
-from great_expectations.data_context.types.base import BaseYamlConfig
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-)
-from great_expectations.data_context.util import build_store_from_config
-
-logger = logging.getLogger(__name__)
-
 import numpy as np
 import pandas as pd
 import pytest
@@ -29,11 +19,7 @@ from great_expectations.data_context.store import (
     ProfilerStore,
     StoreBackend,
 )
-from great_expectations.data_context.store.configuration_store import ConfigurationStore
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-)
 from great_expectations.data_context.util import (
     build_store_from_config,
     instantiate_class_from_config,
@@ -41,6 +27,7 @@ from great_expectations.data_context.util import (
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
+
 
 try:
     import sqlalchemy as sa
