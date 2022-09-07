@@ -1808,8 +1808,26 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "splitter_method,splitter_kwargs,table_name",
+    [
+        (
+            "split_on_column_value",
+            {"column_name": "date"},
+            "table_partitioned_by_date_column__A",
+        ),
+        (
+            "split_on_multi_column_values",
+            {"column_names": ["y", "m", "d"]},
+            "table_partitioned_by_multiple_columns__G",
+        ),
+    ],
+)
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_sorting(
+    splitter_method,
+    splitter_kwargs,
+    table_name,
     splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -1822,40 +1840,11 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
         execution_engine=execution_engine,
         assets={
             "my_asset": {
-                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
-                "splitter_kwargs": {"column_name": "date"},
+                "splitter_method": f"{splitter_method_name_prefix}{splitter_method}",
+                "splitter_kwargs": splitter_kwargs,
                 "include_schema_name": True,
                 "schema_name": "main",
-                "table_name": "table_partitioned_by_date_column__A",
-                "data_asset_name_prefix": "taxi__",
-                "data_asset_name_suffix": "__asset",
-            },
-        },
-    )
-    assert "taxi__main.my_asset__asset" in my_data_connector.assets
-
-    batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="my_test_datasource",
-                data_connector_name="my_sql_data_connector",
-                data_asset_name="taxi__main.my_asset__asset",
-            )
-        )
-    )
-    assert len(batch_definition_list) == 30
-
-    my_data_connector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=execution_engine,
-        assets={
-            "my_asset": {
-                "splitter_method": f"{splitter_method_name_prefix}split_on_multi_column_values",
-                "splitter_kwargs": {"column_names": ["y", "m", "d"]},
-                "include_schema_name": True,
-                "schema_name": "main",
-                "table_name": "table_partitioned_by_multiple_columns__G",
+                "table_name": table_name,
                 "data_asset_name_prefix": "taxi__",
                 "data_asset_name_suffix": "__asset",
             },
