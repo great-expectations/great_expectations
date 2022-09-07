@@ -1,17 +1,13 @@
-import copy
-import json
 import os
 import shutil
 import unittest.mock
-from typing import Any, Callable, Dict, Optional, Union, cast
+from typing import Callable, Dict, cast
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
-import requests
 
 import great_expectations as ge
 from great_expectations.data_context.store import GeCloudStoreBackend
-from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
