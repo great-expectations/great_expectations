@@ -58,10 +58,10 @@ class SplitterSorter(Sorter):
         ] = self.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING
         try:
             sorter_method = splitter_method_to_sorter_method_mapping[
-                self._splitter_method
+                self.splitter_method
             ]
         except KeyError:
             raise ge_exceptions.SorterError(
-                f"No Sorter is defined for splitter_method: {self._splitter_method}"
+                f"No Sorter is defined for splitter_method: {self.splitter_method}"
             )
         return sorter_method
