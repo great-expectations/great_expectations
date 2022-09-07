@@ -4,7 +4,17 @@ import logging
 import pprint
 import uuid
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union, Type
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 from marshmallow import Schema, ValidationError, fields, pre_dump
 
@@ -37,9 +47,9 @@ from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
 
