@@ -320,8 +320,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         data_asset_name: str = f"{schema_name}{data_asset_name}"
 
-        data_asset_name_prefix: str = data_asset_config.get("data_asset_name_prefix")
-        data_asset_name_suffix: str = data_asset_config.get("data_asset_name_suffix")
+        data_asset_name_prefix: str = data_asset_config.get(
+            "data_asset_name_prefix", ""
+        )
+        data_asset_name_suffix: str = data_asset_config.get(
+            "data_asset_name_suffix", ""
+        )
 
         data_asset_name: str = (
             f"{data_asset_name_prefix}{data_asset_name}{data_asset_name_suffix}"
