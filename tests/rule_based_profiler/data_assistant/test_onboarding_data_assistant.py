@@ -849,3 +849,20 @@ def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non
         new_cell=new_cell,
         implicit=True,
     )
+
+
+@pytest.mark.integration
+def test_onboarding_data_assistant_result_empty_suite_plot_metrics_and_expectations(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+):
+    data_assistant_result: OnboardingDataAssistantResult = (
+        bobby_onboarding_data_assistant_result
+    )
+    data_assistant_result.expectation_configurations = []
+
+    try:
+        data_assistant_result.plot_expectations_and_metrics()
+    except Exception as exc:
+        assert (
+            False
+        ), f"DataAssistantResult.plot_expectations_and_metrics raised an exception '{exc}'"
