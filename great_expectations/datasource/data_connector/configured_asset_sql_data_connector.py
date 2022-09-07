@@ -315,6 +315,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         data_asset_name: str = f"{schema_name}{data_asset_name}"
 
+        """
+        In order to support "SimpleSqlalchemyDatasource", which supports "data_asset_name_prefix" and
+        "data_asset_name_suffix" as part of "tables" (reserved key for configuring "ConfiguredAssetSqlDataConnector" for
+        a table), these configuration attributes can exist in "data_asset_config" and must be handled appropriately.
+        """
         data_asset_name_prefix: str = data_asset_config.get(
             "data_asset_name_prefix", ""
         )
