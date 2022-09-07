@@ -425,6 +425,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
     )
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 25.61s
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -849,3 +850,20 @@ def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non
         new_cell=new_cell,
         implicit=True,
     )
+
+
+@pytest.mark.integration
+def test_onboarding_data_assistant_result_empty_suite_plot_metrics_and_expectations(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+):
+    data_assistant_result: OnboardingDataAssistantResult = (
+        bobby_onboarding_data_assistant_result
+    )
+    data_assistant_result.expectation_configurations = []
+
+    try:
+        data_assistant_result.plot_expectations_and_metrics()
+    except Exception as exc:
+        assert (
+            False
+        ), f"DataAssistantResult.plot_expectations_and_metrics raised an exception '{exc}'"

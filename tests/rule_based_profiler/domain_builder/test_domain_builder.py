@@ -28,6 +28,7 @@ yaml = YAML(typ="safe")
 
 
 # noinspection PyPep8Naming
+@pytest.mark.integration
 @pytest.mark.slow  # 1.15s
 def test_table_domain_builder(
     alice_columnar_table_single_batch_context,
@@ -55,6 +56,7 @@ def test_table_domain_builder(
     assert domain.kwargs is None
 
 
+@pytest.mark.integration
 def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
     data_context_with_datasource_pandas_engine,
     alice_columnar_table_single_batch,
@@ -125,6 +127,7 @@ def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
     ]
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.21s
 def test_column_domain_builder(
     alice_columnar_table_single_batch_context,
@@ -244,6 +247,7 @@ def test_column_domain_builder(
     ]
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.20s
 def test_column_domain_builder_with_simple_semantic_type_included(
     alice_columnar_table_single_batch_context,
@@ -309,6 +313,7 @@ def test_column_domain_builder_with_simple_semantic_type_included(
     ]
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.19s
 def test_column_pair_domain_builder_wrong_column_names(
     alice_columnar_table_single_batch_context,
@@ -355,6 +360,7 @@ def test_column_pair_domain_builder_wrong_column_names(
     )
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.19s
 def test_column_pair_domain_builder_correct_sorted_column_names(
     alice_columnar_table_single_batch_context,
@@ -418,6 +424,7 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
     assert domain.domain_kwargs.column_B == "user_id"
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.30s
 def test_multi_column_domain_builder_wrong_column_list(
     alice_columnar_table_single_batch_context,
@@ -469,6 +476,7 @@ def test_multi_column_domain_builder_wrong_column_list(
     )
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.18s
 def test_multi_column_domain_builder_correct_column_list(
     alice_columnar_table_single_batch_context,
