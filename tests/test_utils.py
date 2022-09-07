@@ -20,6 +20,9 @@ from great_expectations.data_context.store import (
     StoreBackend,
 )
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+)
 from great_expectations.data_context.util import (
     build_store_from_config,
     instantiate_class_from_config,
