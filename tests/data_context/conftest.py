@@ -3,7 +3,7 @@ import json
 import os
 import shutil
 import unittest.mock
-from typing import Callable, Dict, cast, Union, Any, Optional
+from typing import Any, Callable, Dict, Optional, Union, cast
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
