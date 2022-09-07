@@ -189,6 +189,8 @@ class DatasourceStore(Store):
 
         return_value: DatasourceConfig = self.get(key)  # type: ignore[assignment]
         if not return_value.name and isinstance(key, DataContextVariableKey):
+            # Setting the name in the config is currently needed to handle adding the name to v2 datasource
+            # configs and can be refactored (e.g. into `get()`)
             return_value.name = key.resource_name
 
         return return_value  # type: ignore[return-value]

@@ -196,6 +196,9 @@ def test_DataContext_add_datasource_updates_cache_and_store(
 
     For persistence-enabled contexts, we should update both the cache and the underlying
     store upon adding a datasource.
+
+    Note: the actual datasource config is not important for this test, it just needs to be a valid config since
+        initialize=True must be set in add_datasource() to add the datasource to the cache.
     """
     context = cloud_data_context_in_cloud_mode_with_datasource_pandas_engine
 
