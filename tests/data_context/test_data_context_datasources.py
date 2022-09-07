@@ -13,7 +13,11 @@ from great_expectations.data_context.store.ge_cloud_store_backend import (
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
-from great_expectations.data_context.types.base import DataContextConfig, GeCloudConfig, DatasourceConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    DatasourceConfig,
+    GeCloudConfig,
+)
 from great_expectations.datasource import Datasource
 
 
@@ -185,7 +189,7 @@ def test_get_datasource_cache_miss(
 @pytest.mark.unit
 def test_DataContext_add_datasource_updates_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
-    datasource_config_with_names: DatasourceConfig
+    datasource_config_with_names: DatasourceConfig,
 ) -> None:
     """
     What does this test and why?
@@ -202,7 +206,8 @@ def test_DataContext_add_datasource_updates_cache_and_store(
 
     with mock.patch(
         "great_expectations.data_context.store.DatasourceStore.set",
-        autospec=True, return_value=datasource_config_with_names
+        autospec=True,
+        return_value=datasource_config_with_names,
     ) as mock_set:
         context.add_datasource(**datasource_config_with_names.to_json_dict())
 

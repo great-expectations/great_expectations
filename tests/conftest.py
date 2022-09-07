@@ -9,7 +9,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Callable, Union, Any
+from typing import Any, Callable, Dict, List, Optional, Union
 from unittest import mock
 
 import numpy as np
@@ -33,7 +33,8 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource, AnyPayload,
+    AnyPayload,
+    GeCloudRESTResource,
 )
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
@@ -2705,7 +2706,6 @@ class MockResponse:
         return f"<Response [{self.status_code}]>"
 
 
-
 @pytest.fixture
 def mock_response_factory() -> Callable[
     [JSONData, int, Optional[RequestError]], MockResponse
@@ -2721,13 +2721,16 @@ def mock_response_factory() -> Callable[
 
     return _make_mock_response
 
+
 @pytest.fixture
 def datasource_name() -> str:
     return "my_first_datasource"
 
+
 @pytest.fixture
 def datasource_id() -> str:
     return "aaa7cfdd-4aa4-4f3d-a979-fe2ea5203cbf"
+
 
 @pytest.fixture
 def datasource_config_with_names_and_ids(
@@ -2736,6 +2739,7 @@ def datasource_config_with_names_and_ids(
     updated_config = copy.deepcopy(datasource_config_with_names)
     updated_config["id"] = datasource_id
     return updated_config
+
 
 @pytest.fixture
 def mocked_datasource_get_response(
@@ -2774,9 +2778,12 @@ def mocked_datasource_get_response(
 
     return _mocked_get_response
 
+
 @pytest.fixture
 def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_data_context_in_cloud_mode: DataContext, db_file, mocked_datasource_get_response
+    empty_data_context_in_cloud_mode: DataContext,
+    db_file,
+    mocked_datasource_get_response,
 ):
     context: DataContext = empty_data_context_in_cloud_mode
     config = yaml.load(
@@ -2796,8 +2803,7 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
     ), mock.patch(
         "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
     ), mock.patch(
-        "requests.get",
-        autospec=True, side_effect=mocked_datasource_get_response
+        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
     ):
         context.add_datasource(
             "my_datasource",
