@@ -1,5 +1,6 @@
 import copy
 import datetime
+import json
 import locale
 import logging
 import os
@@ -8,12 +9,13 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Callable, Union, Any
 from unittest import mock
 
 import numpy as np
 import pandas as pd
 import pytest
+import requests
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
@@ -31,7 +33,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
+    GeCloudRESTResource, AnyPayload,
 )
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
@@ -2665,9 +2667,116 @@ def cloud_data_context_with_datasource_pandas_engine(
     return context
 
 
+JSONData = Union[AnyPayload, Dict[str, Any]]
+RequestError = Union[requests.exceptions.HTTPError, requests.exceptions.Timeout]
+
+
+class MockResponse:
+    # TODO: GG 08232022 update signature to accept arbitrary content types
+    def __init__(
+        self,
+        json_data: JSONData,
+        status_code: int,
+        headers: Optional[Dict[str, str]] = None,
+        exc_to_raise: Optional[RequestError] = None,
+    ) -> None:
+        self._json_data = json_data
+        self.status_code = status_code
+        self.headers = headers or {
+            "content-type": "application/json" if json_data else "text/html"
+        }
+        self._exc_to_raise = exc_to_raise
+
+    def json(self):
+        if self.headers.get("content-type") == "application/json":
+            return self._json_data
+        raise json.JSONDecodeError("Uh oh - check content-type", "foobar", 1)
+
+    def raise_for_status(self):
+        if self._exc_to_raise:
+            raise self._exc_to_raise
+        if self.status_code >= 400:
+            raise requests.exceptions.HTTPError(
+                f"Mock {self.status_code} HTTPError", response=self
+            )
+        return None
+
+    def __repr__(self):
+        return f"<Response [{self.status_code}]>"
+
+
+
+@pytest.fixture
+def mock_response_factory() -> Callable[
+    [JSONData, int, Optional[RequestError]], MockResponse
+]:
+    def _make_mock_response(
+        json_data: JSONData,
+        status_code: int,
+        exc_to_raise: Optional[RequestError] = None,
+    ) -> MockResponse:
+        return MockResponse(
+            json_data=json_data, status_code=status_code, exc_to_raise=exc_to_raise
+        )
+
+    return _make_mock_response
+
+@pytest.fixture
+def datasource_name() -> str:
+    return "my_first_datasource"
+
+@pytest.fixture
+def datasource_id() -> str:
+    return "aaa7cfdd-4aa4-4f3d-a979-fe2ea5203cbf"
+
+@pytest.fixture
+def datasource_config_with_names_and_ids(
+    datasource_config_with_names: DatasourceConfig, datasource_id: str
+) -> DatasourceConfig:
+    updated_config = copy.deepcopy(datasource_config_with_names)
+    updated_config["id"] = datasource_id
+    return updated_config
+
+@pytest.fixture
+def mocked_datasource_get_response(
+    mock_response_factory: Callable,
+    datasource_config_with_names_and_ids: DatasourceConfig,
+    datasource_id: str,
+    datasource_name: str,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_response(*args, **kwargs):
+        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
+        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
+
+        return mock_response_factory(
+            {
+                "data": {
+                    "attributes": {
+                        "datasource_config": datasource_config_with_names_and_ids,
+                        "created_at": "2022-08-02T17:55:45.107550",
+                        "created_by_id": created_by_id,
+                        "deleted": False,
+                        "deleted_at": None,
+                        "desc": None,
+                        "name": datasource_config_with_names_and_ids.name,
+                        "organization_id": f"{organization_id}",
+                        "updated_at": "2022-08-02T17:55:45.107550",
+                    },
+                    "id": datasource_id,
+                    "links": {
+                        "self": f"/organizations/{organization_id}/datasources/{datasource_id}"
+                    },
+                    "type": "datasource",
+                },
+            },
+            200,
+        )
+
+    return _mocked_get_response
+
 @pytest.fixture
 def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_data_context_in_cloud_mode: DataContext, db_file
+    empty_data_context_in_cloud_mode: DataContext, db_file, mocked_datasource_get_response
 ):
     context: DataContext = empty_data_context_in_cloud_mode
     config = yaml.load(
@@ -2686,6 +2795,9 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
         "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
     ), mock.patch(
         "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ), mock.patch(
+        "requests.get",
+        autospec=True, side_effect=mocked_datasource_get_response
     ):
         context.add_datasource(
             "my_datasource",
