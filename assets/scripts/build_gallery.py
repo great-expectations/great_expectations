@@ -14,6 +14,8 @@ from typing import Dict, List
 import click
 import pkg_resources
 
+import great_expectations as ge
+
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
 chandler.setLevel(logging.DEBUG)
@@ -133,7 +135,7 @@ def get_expectation_file_info_dict(
         logger.debug(
             f"{name} was created {result[name]['created_at']} and updated {result[name]['updated_at']}"
         )
-        with open(file_path, "r") as fp:
+        with open(file_path) as fp:
             text = fp.read()
 
         exp_type_set = set()
@@ -437,13 +439,11 @@ def build_gallery(
             "expectations",
             "core",
         )
-        core_expectations_filename_set = set(
-            [
-                fname.rsplit(".", 1)[0]
-                for fname in os.listdir(core_dir)
-                if fname.startswith("expect_")
-            ]
-        )
+        core_expectations_filename_set = {
+            fname.rsplit(".", 1)[0]
+            for fname in os.listdir(core_dir)
+            if fname.startswith("expect_")
+        }
         core_expectations_not_in_gallery = core_expectations_filename_set - set(
             core_expectations
         )
@@ -529,6 +529,12 @@ def format_docstring_to_markdown(docstr: str) -> str:
     return clean_docstr
 
 
+def _disable_progress_bars() -> None:
+    context = ge.get_context()
+    context.variables.progress_bars.globally = False
+    context.variables.save_config()
+
+
 @click.command()
 @click.option(
     "--no-core",
@@ -584,6 +590,9 @@ def main(**kwargs):
     backends = []
     if kwargs["backends"]:
         backends = [name.strip() for name in kwargs["backends"].split(",")]
+
+    _disable_progress_bars()
+
     gallery_info = build_gallery(
         include_core=not kwargs["no_core"],
         include_contrib=not kwargs["no_contrib"],

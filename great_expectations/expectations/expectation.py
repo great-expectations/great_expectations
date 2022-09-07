@@ -951,7 +951,7 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
-        force_no_progress_bar: bool = True,
+        force_no_progress_bar: bool = False,
         ignore_suppress: bool = False,
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
