@@ -50,8 +50,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        data_asset_name_prefix: str = "",
-        data_asset_name_suffix: str = "",
         include_schema_name: bool = False,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
@@ -62,14 +60,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         id: Optional[str] = None,
     ) -> None:
         """
-        InferredAssetDataConnector for connecting to data on a SQL database
-
         Args:
             name (str): The name of this DataConnector
             datasource_name (str): The name of the Datasource that contains it
             execution_engine (ExecutionEngine): An ExecutionEngine
-            data_asset_name_prefix (str): An optional prefix to prepend to inferred data_asset_names
-            data_asset_name_suffix (str): An optional suffix to append to inferred data_asset_names
             include_schema_name (bool): Should the data_asset_name include the schema as a prefix?
             splitter_method (str): A method to split the target table into multiple Batches
             splitter_kwargs (dict): Keyword arguments to pass to splitter_method
@@ -88,8 +82,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
-        self._data_asset_name_prefix = data_asset_name_prefix
-        self._data_asset_name_suffix = data_asset_name_suffix
         self._include_schema_name = include_schema_name
         self._splitter_method = splitter_method
         self._splitter_kwargs = splitter_kwargs
@@ -105,14 +97,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     @property
     def execution_engine(self) -> SqlAlchemyExecutionEngine:
         return cast(SqlAlchemyExecutionEngine, self._execution_engine)
-
-    @property
-    def data_asset_name_prefix(self) -> str:
-        return self._data_asset_name_prefix
-
-    @property
-    def data_asset_name_suffix(self) -> str:
-        return self._data_asset_name_suffix
 
     @property
     def include_schema_name(self) -> bool:
@@ -336,12 +320,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         data_asset_name: str = f"{schema_name}{data_asset_name}"
 
-        data_asset_name_prefix: str = data_asset_config.get(
-            "data_asset_name_prefix", self.data_asset_name_prefix
-        )
-        data_asset_name_suffix: str = data_asset_config.get(
-            "data_asset_name_suffix", self.data_asset_name_suffix
-        )
+        data_asset_name_prefix: str = data_asset_config.get("data_asset_name_prefix")
+        data_asset_name_suffix: str = data_asset_config.get("data_asset_name_suffix")
 
         data_asset_name: str = (
             f"{data_asset_name_prefix}{data_asset_name}{data_asset_name_suffix}"
