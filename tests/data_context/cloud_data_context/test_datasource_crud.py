@@ -45,7 +45,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
     datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
-    datasource_id: str,
+    test_datasource_id: str,
     mocked_datasource_post_response: Callable[[], MockResponse],
     mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
@@ -124,7 +124,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 
         if save_changes:
             # Make sure the id was populated correctly into the created datasource object and config
-            assert stored_datasource.id == datasource_id
+            assert stored_datasource.id == test_datasource_id
         else:
             assert stored_datasource.id is None
 
@@ -152,7 +152,7 @@ def test_data_context_in_cloud_mode_add_datasource(
     empty_data_context_in_cloud_mode: DataContext,
     datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
-    datasource_id: str,
+    test_datasource_id: str,
     mocked_datasource_post_response: Callable[[], MockResponse],
     mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
@@ -224,7 +224,7 @@ def test_data_context_in_cloud_mode_add_datasource(
         )
 
         # Make sure the id was populated correctly into the created datasource object and config
-        assert stored_datasource.id == datasource_id
+        assert stored_datasource.id == test_datasource_id
 
         # Make sure the name is populated correctly into the created datasource
         assert stored_datasource.name == datasource_name
@@ -250,7 +250,7 @@ def test_cloud_data_context_add_datasource(
     empty_cloud_data_context: CloudDataContext,
     datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
-    datasource_id: str,
+    test_datasource_id: str,
     mocked_datasource_post_response: Callable[[], MockResponse],
     mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
@@ -325,7 +325,7 @@ def test_cloud_data_context_add_datasource(
         )
 
         # Make sure the id was populated correctly into the created datasource object and config
-        assert stored_datasource.id == datasource_id
+        assert stored_datasource.id == test_datasource_id
 
         # Make sure the name is populated correctly into the created datasource
         assert stored_datasource.name == datasource_name
