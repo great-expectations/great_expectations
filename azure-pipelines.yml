@@ -131,7 +131,7 @@ stages:
               echo "##vso[task.setvariable variable=IMAGE_SUFFIX;isOutput=true]${SUFFIX}"
             name: suffix
 
-      - job: build_push_
+      - job: build_push
         dependsOn: make_suffix
         condition: succeeded()
         strategy:
@@ -169,7 +169,7 @@ stages:
               DOCKER_USER: $(DOCKER_USER)
               DOCKER_TOKEN: $(DOCKER_TOKEN)
 
-      - job: test_comprehensive_
+      - job: test_comprehensive
         dependsOn: [make_suffix, build_push_]
         condition: succeeded()
         timeoutInMinutes: 120
@@ -197,7 +197,7 @@ stages:
               # path and then mv it.
               PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
               PYTEST+="--ignore=tests/cli --ignore=tests/integration/usage_statistics "
-              # The onboarding data assistant tests do not succeed in random order and are run on there own below.
+              # The onboarding data assistant tests do not succeed in random order and are run on their own below.
               PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py "
               # The last \" closes the quote from bash -c \"
               PYTEST+="&& mv coverage.xml /coverage/coverage.xml\""
@@ -217,7 +217,7 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/coverage/htmlcov'
 
-      - job: test_onboarding_data_assistant_
+      - job: test_onboarding_data_assistant
         dependsOn: [ make_suffix, build_push_ ]
         condition: succeeded()
         strategy:
@@ -240,7 +240,7 @@ stages:
               eval ${PYTEST}
             displayName: 'Pytest Onboarding Data Assistant'
 
-      - job: test_spark_
+      - job: test_spark
         dependsOn: [ make_suffix, build_push_ ]
         condition: succeeded()
         timeoutInMinutes: 120
@@ -266,7 +266,7 @@ stages:
               eval ${PYTEST}
             displayName: 'Pytest Spark'
 
-      - job: test_cloud_
+      - job: test_cloud
         dependsOn: [ make_suffix, build_push_ ]
         condition: succeeded()
         strategy:
@@ -296,7 +296,7 @@ stages:
               GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'Pytest cloud integration'
 
-      - job: test_mysql_
+      - job: test_mysql
         dependsOn: [ make_suffix, build_push_ ]
         condition: succeeded()
         timeoutInMinutes: 120
