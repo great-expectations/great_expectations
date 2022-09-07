@@ -350,16 +350,3 @@ def test_serialization_self_check(capsys) -> None:
 def test_default_checkpoints_exist(path: str, exists: bool) -> None:
     store = CheckpointStore(store_name="checkpoint_store")
     assert store.default_checkpoints_exist(path) is exists
-
-
-# Toy around with this class vs mock.MagicMock - what is easiest vs maintainable?
-class MockStoreBackend:
-    pass
-
-
-# Chetan - look into this pattern (we're okay with setting the mock after the default init)
-@pytest.fixture
-def checkpoint_store_with_mock_store_backend() -> CheckpointStore:
-    store = CheckpointStore(store_name="checkpoint_store")
-    store._store_backend = mock.MagicMock()
-    return store
