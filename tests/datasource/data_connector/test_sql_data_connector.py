@@ -433,7 +433,6 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "data_assets": {
             "table_partitioned_by_foreign_key__F": {
                 "batch_definition_count": 49,
-                # TODO Abe 20201029 : These values should be sorted
                 "example_data_references": [
                     {"session_id": 2},
                     {"session_id": 3},
@@ -494,7 +493,6 @@ def test_example_G(
         "data_assets": {
             "table_partitioned_by_multiple_columns__G": {
                 "batch_definition_count": 30,
-                # TODO Abe 20201029 : These values should be sorted
                 "example_data_references": [
                     {"y": 2020, "m": 1, "d": 1},
                     {"y": 2020, "m": 1, "d": 2},
