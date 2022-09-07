@@ -63,7 +63,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         id: Optional[str] = None,
     ) -> None:
         """
-        InferredAssetDataConnector for connecting to data on a SQL database
+        ConfiguredAssetDataConnector for connecting to data on a SQL database
 
         Args:
             name (str): The name of this DataConnector
