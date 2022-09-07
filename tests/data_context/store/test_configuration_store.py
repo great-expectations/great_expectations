@@ -262,7 +262,7 @@ def test_overwrite_existing_property_and_setter() -> None:
 
 
 @pytest.mark.unit
-def test_config_property() -> None:
+def test_config_property_and_defaults() -> None:
     store = SampleConfigurationStore(store_name="my_configuration_store")
 
     assert store.config == {
