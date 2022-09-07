@@ -3963,8 +3963,16 @@ def test_value_counts_metric_sa(sa):
     metrics = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric, desired_metric_b)
     )
-    assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
-    assert pd.Series(index=[4], data=[6]).equals(metrics[desired_metric_b.id])
+    assert pd.Series(
+        index=pd.Index(data=[1, 2, 3], name="value"),
+        data=[2, 2, 2],
+        dtype=np.object,
+    ).equals(metrics[desired_metric.id])
+    assert pd.Series(
+        index=pd.Index(data=[4], name="value"),
+        data=[6],
+        dtype=np.object,
+    ).equals(metrics[desired_metric_b.id])
 
 
 @pytest.mark.integration
