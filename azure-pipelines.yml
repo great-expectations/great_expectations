@@ -197,6 +197,8 @@ stages:
               # path and then mv it.
               PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
               PYTEST+="--ignore=tests/cli --ignore=tests/integration/usage_statistics "
+              # The onboarding data assistant tests do not succeed in random order and are run on there own below.
+              PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py "
               # The last \" closes the quote from bash -c \"
               PYTEST+="&& mv coverage.xml /coverage/coverage.xml\""
               echo ${PYTEST}
@@ -214,6 +216,29 @@ stages:
               codeCoverageTool: Cobertura
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/coverage/htmlcov'
+
+      - job: test_onboarding_data_assistant_
+        dependsOn: [ make_suffix, build_push_ ]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              PYTEST="docker run greatexpectations/test:${DOCKER_TAG} "
+              # These tests currently do no succeed in random order.
+              PYTEST+="pytest tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py"
+              echo ${PYTEST}
+              eval ${PYTEST}
+            displayName: 'Pytest Onboarding Data Assistant'
 
       - job: test_spark_
         dependsOn: [ make_suffix, build_push_ ]
