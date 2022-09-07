@@ -3,6 +3,7 @@ from typing import Optional
 import pytest
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
@@ -180,13 +181,34 @@ def test_ExpectationValidationGraph_update(
     assert len(expectation_validation_graph.graph.edges) == 1
 
 
-# @pytest.mark.unit
-# def test_ExpectationValidationGraph_get_exception_info(
-#     expectation_validation_graph: ExpectationValidationGraph,
-# ) -> None:
-#     metric_info =
-#     exception_info = expectation_validation_graph.get_exception_info(
-#         metric_info=metric_info
-#     )
+@pytest.mark.unit
+def test_ExpectationValidationGraph_get_exception_info(
+    expectation_validation_graph: ExpectationValidationGraph,
+    validation_graph_with_single_edge: ValidationGraph,
+    metric_edge: MetricEdge,
+) -> None:
+    left = metric_edge.left
+    right = metric_edge.right
 
-#     assert exception_info == {}
+    left_exception = ExceptionInfo(
+        exception_traceback="my first traceback",
+        exception_message="my first message",
+    )
+    right_exception = ExceptionInfo(
+        exception_traceback="my second traceback",
+        exception_message="my second message",
+        raised_exception=False,
+    )
+
+    metric_info = {
+        left.id: {"exception_info": {left_exception}},
+        right.id: {"exception_info": {right_exception}},
+    }
+
+    expectation_validation_graph.update(validation_graph_with_single_edge)
+    exception_info = expectation_validation_graph.get_exception_info(
+        metric_info=metric_info
+    )
+
+    assert left_exception in exception_info
+    assert right_exception in exception_info
