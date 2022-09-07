@@ -4,6 +4,7 @@ from copy import copy, deepcopy
 from typing import Any, Dict, List
 
 import pytest
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -14,15 +15,134 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.util import filter_properties_dict
-
+from great_expectations import __version__ as ge_version
 
 @pytest.fixture
-def exp1():
+def test_expectation_suite_name():
+    return "test_expectation_suite_name"
+
+@pytest.fixture
+def expect_column_values_to_be_in_set_col_a_with_meta() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
         meta={"notes": "This is an expectation."},
     )
+
+@pytest.fixture
+def expect_column_values_to_be_in_set_col_a_with_meta_dict() -> dict:
+    # Note, value_set is distinct to ensure this is treated as a different expectation
+    return {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": {"column": "a", "value_set": [1, 2, 3, 4, 5], "result_format": "BASIC"},
+        "meta": {"notes": "This is an expectation."},
+    }
+
+@pytest.mark.unit
+def test_expectation_suite_init_defaults(test_expectation_suite_name: str):
+    suite = ExpectationSuite(expectation_suite_name=test_expectation_suite_name)
+
+    default_meta = {"great_expectations_version": ge_version}
+
+    assert suite.expectation_suite_name == test_expectation_suite_name
+    assert suite._data_context is None
+    assert suite.expectations == []
+    assert suite.evaluation_parameters == {}
+    assert suite.data_asset_type is None
+    assert suite.execution_engine_type is None
+    assert suite.meta == default_meta
+    assert suite.ge_cloud_id is None
+
+
+@pytest.mark.unit
+def test_expectation_suite_init_overrides(
+    test_expectation_suite_name: str,
+    expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration
+):
+    class MockDataContext:
+        pass
+
+    class MockExecutionEngine:
+        pass
+
+    mock_data_context = MockDataContext()
+    test_evaluation_parameters = {"$PARAMETER": "test_evaluation_parameters"}
+    test_data_asset_type = "test_data_asset_type"
+    test_execution_engine_type = type(MockExecutionEngine())
+    default_meta = {"great_expectations_version": ge_version}
+    test_meta_base = {"test_key": "test_value"}
+    test_meta = {**default_meta, **test_meta_base}
+    test_id = "test_id"
+
+    suite = ExpectationSuite(
+        expectation_suite_name=test_expectation_suite_name,
+        data_context=mock_data_context,  # ignore[arg-type]
+        expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
+        evaluation_parameters=test_evaluation_parameters,
+        data_asset_type=test_data_asset_type,
+        execution_engine_type=test_execution_engine_type,  # ignore[arg-type]
+        meta=test_meta,
+        ge_cloud_id=test_id,
+    )
+    assert suite.expectation_suite_name == test_expectation_suite_name
+    assert suite._data_context == mock_data_context
+    assert suite.expectations == [expect_column_values_to_be_in_set_col_a_with_meta]
+    assert suite.evaluation_parameters == test_evaluation_parameters
+    assert suite.data_asset_type == test_data_asset_type
+    assert suite.execution_engine_type == test_execution_engine_type
+    assert suite.meta == test_meta
+    assert suite.ge_cloud_id == test_id
+
+
+@pytest.mark.unit
+def test_expectation_suite_init_overrides_expectations_dict_and_obj(
+    test_expectation_suite_name: str,
+    expect_column_values_to_be_in_set_col_a_with_meta_dict: dict,
+    expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration
+):
+    """What does this test and why?
+
+    The expectations param of ExpectationSuite takes a list of ExpectationConfiguration or dicts and both can be provided at the same time. We need to make sure they both show up as expectation configurations in the instantiated ExpectationSuite.
+    """
+
+    test_expectations_input = [
+        expect_column_values_to_be_in_set_col_a_with_meta_dict,
+        expect_column_values_to_be_in_set_col_a_with_meta,
+    ]
+
+    suite = ExpectationSuite(
+        expectation_suite_name=test_expectation_suite_name,
+        expectations=test_expectations_input,
+    )
+    assert suite.expectation_suite_name == test_expectation_suite_name
+
+    test_expected_expectations = [
+        ExpectationConfiguration(**expect_column_values_to_be_in_set_col_a_with_meta_dict),
+        expect_column_values_to_be_in_set_col_a_with_meta
+    ]
+    assert len(suite.expectations) == 2
+    assert suite.expectations == test_expected_expectations
+
+
+@pytest.mark.unit
+def test_expectation_suite_init_overrides_non_json_serializable_meta(
+    test_expectation_suite_name: str,
+):
+    """What does this test and why?
+
+    meta field overrides need to be json serializable, if not we raise an exception.
+    """
+    class NotSerializable:
+        def __dict__(self):
+            raise NotImplementedError
+
+    test_meta = {"this_is_not_json_serializable": NotSerializable()}
+
+    with pytest.raises(InvalidExpectationConfigurationError):
+        ExpectationSuite(
+            expectation_suite_name=test_expectation_suite_name,
+            meta=test_meta,
+        )
 
 
 @pytest.fixture
