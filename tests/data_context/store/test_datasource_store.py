@@ -356,7 +356,8 @@ def test_datasource_store_update_by_name(
     ] = updated_base_directory
 
     datasource_store_with_single_datasource.update_by_name(
-        datasource_name=test_datasource_name, datasource_config=updated_datasource_config
+        datasource_name=test_datasource_name,
+        datasource_config=updated_datasource_config,
     )
 
     key = DataContextVariableKey(
@@ -384,7 +385,8 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
     updated_datasource_config = DatasourceConfig()
     with pytest.raises(ValueError) as e:
         empty_datasource_store.update_by_name(
-            datasource_name=test_datasource_name, datasource_config=updated_datasource_config
+            datasource_name=test_datasource_name,
+            datasource_config=updated_datasource_config,
         )
 
     assert f"Unable to load datasource `{test_datasource_name}`" in str(e.value)

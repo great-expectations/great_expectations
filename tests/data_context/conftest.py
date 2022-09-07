@@ -596,13 +596,16 @@ def data_context_with_incomplete_global_config_in_dot_dir_only(
 def datasource_store_name() -> str:
     return "datasource_store"
 
+
 @pytest.fixture
 def test_datasource_name() -> str:
     return "my_first_datasource"
 
+
 @pytest.fixture
 def test_datasource_id() -> str:
     return "aaa7cfdd-4aa4-4f3d-a979-fe2ea5203cbf"
+
 
 @pytest.fixture
 def request_headers(ge_cloud_access_token) -> Dict[str, str]:
@@ -611,6 +614,7 @@ def request_headers(ge_cloud_access_token) -> Dict[str, str]:
         "Authorization": f"Bearer {ge_cloud_access_token}",
         "Gx-Version": ge.__version__,
     }
+
 
 JSONData = Union[AnyPayload, Dict[str, Any]]
 RequestError = Union[requests.exceptions.HTTPError, requests.exceptions.Timeout]
@@ -665,6 +669,7 @@ def mock_response_factory() -> Callable[
 
     return _make_mock_response
 
+
 @pytest.fixture
 def datasource_config() -> DatasourceConfig:
     return DatasourceConfig(
@@ -698,6 +703,7 @@ def datasource_config_with_names_and_ids(
     updated_config = copy.deepcopy(datasource_config_with_names)
     updated_config["id"] = test_datasource_id
     return updated_config
+
 
 @pytest.fixture
 def shared_called_with_request_kwargs(request_headers) -> dict:
@@ -734,6 +740,7 @@ def mock_http_unavailable(mock_response_factory: Callable):
             print(f"Mocking `requests.{name}` with `{mocked_response.__name__}()`")
 
         yield mock_requests
+
 
 @pytest.fixture
 def mocked_datasource_get_response(

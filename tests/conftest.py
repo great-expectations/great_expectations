@@ -2665,21 +2665,6 @@ def cloud_data_context_with_datasource_pandas_engine(
     return context
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @pytest.fixture
 def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
     empty_data_context_in_cloud_mode: DataContext,
