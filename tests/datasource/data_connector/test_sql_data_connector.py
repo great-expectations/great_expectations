@@ -433,7 +433,6 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "data_assets": {
             "table_partitioned_by_foreign_key__F": {
                 "batch_definition_count": 49,
-                # TODO Abe 20201029 : These values should be sorted
                 "example_data_references": [
                     {"session_id": 2},
                     {"session_id": 3},
@@ -494,7 +493,6 @@ def test_example_G(
         "data_assets": {
             "table_partitioned_by_multiple_columns__G": {
                 "batch_definition_count": 30,
-                # TODO Abe 20201029 : These values should be sorted
                 "example_data_references": [
                     {"y": 2020, "m": 1, "d": 1},
                     {"y": 2020, "m": 1, "d": 2},
@@ -1809,8 +1807,39 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
     assert len(validator.head(fetch_all=True)) == 5
 
 
-# TODO
-def test_ConfiguredAssetSqlDataConnector_with_sorting(
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+def test_ConfiguredAssetSqlDataConnector_sorting(
+    splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    pass
+    random.seed(0)
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        assets={
+            "my_asset": {
+                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
+                "splitter_kwargs": {"column_name": "date"},
+                "include_schema_name": True,
+                "schema_name": "main",
+                "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    assert "taxi__main.my_asset__asset" in my_data_connector.assets
+
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 30
