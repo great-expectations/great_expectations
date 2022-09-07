@@ -169,7 +169,7 @@ stages:
               DOCKER_USER: $(DOCKER_USER)
               DOCKER_TOKEN: $(DOCKER_TOKEN)
 
-      - job: test_comprehensive
+      - job: test_comprehensive_
         dependsOn: [make_suffix, build_push_]
         condition: succeeded()
         timeoutInMinutes: 120
