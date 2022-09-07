@@ -1816,7 +1816,7 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+    my_data_connector = ConfiguredAssetSqlDataConnector(
         name="my_sql_data_connector",
         datasource_name="my_test_datasource",
         execution_engine=execution_engine,
@@ -1827,6 +1827,35 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
                 "include_schema_name": True,
                 "schema_name": "main",
                 "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    assert "taxi__main.my_asset__asset" in my_data_connector.assets
+
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="taxi__main.my_asset__asset",
+            )
+        )
+    )
+    assert len(batch_definition_list) == 30
+
+    my_data_connector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine=execution_engine,
+        assets={
+            "my_asset": {
+                "splitter_method": f"{splitter_method_name_prefix}split_on_multi_column_values",
+                "splitter_kwargs": {"column_names": ["y", "m", "d"]},
+                "include_schema_name": True,
+                "schema_name": "main",
+                "table_name": "table_partitioned_by_multiple_columns__G",
                 "data_asset_name_prefix": "taxi__",
                 "data_asset_name_suffix": "__asset",
             },
