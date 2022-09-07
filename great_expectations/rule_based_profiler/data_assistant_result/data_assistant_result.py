@@ -3715,7 +3715,7 @@ class DataAssistantResult(SerializableDictDot):
 
         column_name: str
         column_domain: Domain
-        metric_df: pd.DataFrame
+        metric_df: Optional[pd.DataFrame]
         join_keys: List[str]
         df: pd.DataFrame
         column_df: ColumnDataFrame
@@ -3741,15 +3741,16 @@ class DataAssistantResult(SerializableDictDot):
                     expectation_configuration=metric_domain_expectation_configuration,
                     plot_mode=plot_mode,
                 )
-                if len(df.index) == 0:
-                    df = metric_df.copy()
-                else:
-                    join_keys = [
-                        column
-                        for column in metric_df.columns
-                        if column not in sanitized_metric_names
-                    ]
-                    df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
+                if metric_df is not None:
+                    if len(df.index) == 0:
+                        df = metric_df.copy()
+                    else:
+                        join_keys = [
+                            column
+                            for column in metric_df.columns
+                            if column not in sanitized_metric_names
+                        ]
+                        df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
             column_df = ColumnDataFrame(column_name, df)
 
             column_dfs.append(column_df)
