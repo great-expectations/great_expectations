@@ -25,6 +25,7 @@ from inspect import (
     getclosurevars,
     getmodule,
     signature,
+    stack,
 )
 from numbers import Number
 from pathlib import Path
@@ -1347,7 +1348,20 @@ def convert_decimal_to_float(d: decimal.Decimal) -> float:
     """
     This method convers "decimal.Decimal" to standard "float" type.
     """
-    if requires_lossy_conversion(d=d):
+    rule_based_profiler_call: bool = (
+        len(
+            list(
+                filter(
+                    lambda frame_info: Path(frame_info.filename).name
+                    == "parameter_builder.py"
+                    and frame_info.function == "get_metrics",
+                    stack(),
+                )
+            )
+        )
+        > 0
+    )
+    if not rule_based_profiler_call and requires_lossy_conversion(d=d):
         logger.warning(
             f"Using lossy conversion for decimal {d} to float object to support serialization."
         )
