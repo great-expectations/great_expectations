@@ -169,8 +169,8 @@ stages:
               DOCKER_USER: $(DOCKER_USER)
               DOCKER_TOKEN: $(DOCKER_TOKEN)
 
-      - job: test_comprehensive_
-        dependsOn: [make_suffix, build_push_]
+      - job: test_comprehensive
+        dependsOn: [make_suffix, build_push]
         condition: succeeded()
         timeoutInMinutes: 120
         strategy:
@@ -218,7 +218,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/coverage/htmlcov'
 
       - job: test_onboarding_data_assistant
-        dependsOn: [ make_suffix, build_push_ ]
+        dependsOn: [ make_suffix, build_push ]
         condition: succeeded()
         strategy:
           matrix:
@@ -241,7 +241,7 @@ stages:
             displayName: 'Pytest Onboarding Data Assistant'
 
       - job: test_spark
-        dependsOn: [ make_suffix, build_push_ ]
+        dependsOn: [ make_suffix, build_push ]
         condition: succeeded()
         timeoutInMinutes: 120
         strategy:
@@ -267,7 +267,7 @@ stages:
             displayName: 'Pytest Spark'
 
       - job: test_cloud
-        dependsOn: [ make_suffix, build_push_ ]
+        dependsOn: [ make_suffix, build_push ]
         condition: succeeded()
         strategy:
           matrix:
@@ -297,7 +297,7 @@ stages:
             displayName: 'Pytest cloud integration'
 
       - job: test_mysql
-        dependsOn: [ make_suffix, build_push_ ]
+        dependsOn: [ make_suffix, build_push ]
         condition: succeeded()
         timeoutInMinutes: 120
         strategy:
@@ -335,7 +335,7 @@ stages:
             displayName: 'Pytest MySQL'
 
       - job: test_trino
-        dependsOn: [make_suffix, build_push_]
+        dependsOn: [make_suffix, build_push]
         condition: succeeded()
         timeoutInMinutes: 120
         strategy:
@@ -364,7 +364,7 @@ stages:
             displayName: 'Pytest Trino'
 
       - job: test_cli
-        dependsOn: [make_suffix, build_push_]
+        dependsOn: [make_suffix, build_push]
         condition: succeeded()
         strategy:
           matrix:
@@ -388,7 +388,7 @@ stages:
             displayName: 'Pytest cli'
 
       - job: test_min_versions
-        dependsOn: [make_suffix, build_push_]
+        dependsOn: [make_suffix, build_push]
         condition: succeeded()
         strategy:
           matrix:
@@ -418,7 +418,7 @@ stages:
             displayName: 'Pytest min versions'
 
       - job: test_usage_stats
-        dependsOn: [make_suffix, build_push_]
+        dependsOn: [make_suffix, build_push]
         condition: succeeded()
         strategy:
           matrix:
