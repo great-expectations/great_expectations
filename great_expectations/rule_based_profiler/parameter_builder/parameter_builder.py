@@ -603,8 +603,8 @@ specified (empty "metric_name" value detected)."""
 
                         batch_metric_values.append(0.0)
                     elif not (
-                        metric_value is None
-                        (
+                        metric_value
+                        is None(
                             isinstance(metric_value, (str, np.str_))
                             and is_parseable_date(value=metric_value)
                         )
