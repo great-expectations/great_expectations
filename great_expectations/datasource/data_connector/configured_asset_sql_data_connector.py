@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, Iterator, List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -192,9 +192,14 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
-        if self.splitter_method is not None:
+        batch_request_data_asset: Dict[Union[str, dict, None]] = self.assets[
+            batch_request.data_asset_name
+        ]
+        if batch_request_data_asset["splitter_method"] is not None:
             batch_definition_list = self._sort_batch_definition_list(
-                batch_definition_list=batch_definition_list
+                batch_definition_list=batch_definition_list,
+                splitter_method_name=batch_request_data_asset["splitter_method"],
+                splitter_kwargs=batch_request_data_asset["splitter_kwargs"],
             )
         if batch_request.data_connector_query is not None:
             data_connector_query_dict = batch_request.data_connector_query.copy()
@@ -280,12 +285,16 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return SqlAlchemyDatasourceBatchSpec(batch_spec)
 
     def _sort_batch_definition_list(
-        self, batch_definition_list: List[BatchDefinition]
+        self,
+        batch_definition_list: List[BatchDefinition],
+        splitter_method_name: str,
+        splitter_kwargs: dict[str, str],
     ) -> List[BatchDefinition]:
+        name: str = splitter_kwargs["column_name"]
         sorter = SplitterSorter(
-            name=self.name,
-            splitter_method=self.splitter_method,
-            splitter_kwargs=self.splitter_kwargs,
+            name=name,
+            splitter_method_name=splitter_method_name,
+            splitter_kwargs=splitter_kwargs,
         )
         return sorter.get_sorted_batch_definitions(
             batch_definitions=batch_definition_list
