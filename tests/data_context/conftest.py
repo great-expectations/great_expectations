@@ -670,7 +670,6 @@ def mocked_datasource_get_response(
     mock_response_factory: Callable,
     datasource_config_with_names_and_ids: DatasourceConfig,
     datasource_id: str,
-    datasource_name: str,
 ) -> Callable[[], MockResponse]:
     def _mocked_get_response(*args, **kwargs):
         created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"

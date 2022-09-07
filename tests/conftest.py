@@ -2723,7 +2723,7 @@ def mock_response_factory() -> Callable[
 
 
 @pytest.fixture
-def datasource_name() -> str:
+def test_datasource_name() -> str:
     return "my_first_datasource"
 
 
