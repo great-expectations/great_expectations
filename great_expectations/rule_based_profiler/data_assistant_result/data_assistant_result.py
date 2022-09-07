@@ -3751,9 +3751,9 @@ class DataAssistantResult(SerializableDictDot):
                             if column not in sanitized_metric_names
                         ]
                         df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
-            column_df = ColumnDataFrame(column_name, df)
-
-            column_dfs.append(column_df)
+            if len(df.index) > 0:
+                column_df = ColumnDataFrame(column_name, df)
+                column_dfs.append(column_df)
 
         return column_dfs
 
