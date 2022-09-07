@@ -8,10 +8,10 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 import requests
-from great_expectations.core.yaml_handler import YAMLHandler
 
 import great_expectations as ge
 from great_expectations import DataContext
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
 from great_expectations.data_context.types.base import (
@@ -798,6 +798,7 @@ def mocked_datasource_post_response(
         )
 
     return _mocked_post_response
+
 
 @pytest.fixture
 def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
