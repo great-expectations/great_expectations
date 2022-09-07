@@ -36,13 +36,6 @@ except ImportError:
 class ConfiguredAssetSqlDataConnector(DataConnector):
     """
     A DataConnector that requires explicit listing of SQL tables you want to connect to.
-
-    Args:
-        name (str): The name of this DataConnector
-        datasource_name (str): The name of the Datasource that contains it
-        execution_engine (ExecutionEngine): An ExecutionEngine
-        assets (str): assets
-        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
     def __init__(
