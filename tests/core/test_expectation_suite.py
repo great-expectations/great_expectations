@@ -220,11 +220,11 @@ def empty_suite(empty_data_context):
 
 
 @pytest.fixture
-def single_expectation_suite(exp1, empty_data_context):
+def single_expectation_suite(expect_column_values_to_be_in_set_col_a_with_meta, empty_data_context):
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
-        expectations=[exp1],
+        expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
@@ -232,7 +232,7 @@ def single_expectation_suite(exp1, empty_data_context):
 
 @pytest.fixture
 def suite_with_table_and_column_expectations(
-    exp1,
+    expect_column_values_to_be_in_set_col_a_with_meta,
     exp2,
     exp3,
     exp4,
@@ -246,7 +246,7 @@ def suite_with_table_and_column_expectations(
     suite = ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[
-            exp1,
+            expect_column_values_to_be_in_set_col_a_with_meta,
             exp2,
             exp3,
             exp4,
@@ -259,7 +259,7 @@ def suite_with_table_and_column_expectations(
         data_context=context,
     )
     assert suite.expectations == [
-        exp1,
+        expect_column_values_to_be_in_set_col_a_with_meta,
         exp2,
         exp3,
         exp4,
@@ -272,33 +272,33 @@ def suite_with_table_and_column_expectations(
 
 
 @pytest.fixture
-def baseline_suite(exp1, exp2, empty_data_context):
+def baseline_suite(expect_column_values_to_be_in_set_col_a_with_meta, exp2, empty_data_context):
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
-        expectations=[exp1, exp2],
+        expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp2],
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
 
 
 @pytest.fixture
-def identical_suite(exp1, exp3, empty_data_context):
+def identical_suite(expect_column_values_to_be_in_set_col_a_with_meta, exp3, empty_data_context):
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
-        expectations=[exp1, exp3],
+        expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp3],
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
 
 
 @pytest.fixture
-def equivalent_suite(exp1, exp3, empty_data_context):
+def equivalent_suite(expect_column_values_to_be_in_set_col_a_with_meta, exp3, empty_data_context):
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="danger",
-        expectations=[exp1, exp3],
+        expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp3],
         meta={
             "notes": "This is another expectation suite, with a different name and meta"
         },
@@ -307,11 +307,11 @@ def equivalent_suite(exp1, exp3, empty_data_context):
 
 
 @pytest.fixture
-def different_suite(exp1, exp4, empty_data_context):
+def different_suite(expect_column_values_to_be_in_set_col_a_with_meta, exp4, empty_data_context):
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
-        expectations=[exp1, exp4],
+        expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp4],
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
@@ -639,16 +639,16 @@ def test_get_column_expectations_returns_empty_list_on_empty_suite(empty_suite):
 
 @pytest.mark.unit
 def test_get_column_expectations(
-    suite_with_table_and_column_expectations, exp1, exp2, exp3, exp4
+    suite_with_table_and_column_expectations, expect_column_values_to_be_in_set_col_a_with_meta, exp2, exp3, exp4
 ):
     obs = suite_with_table_and_column_expectations.get_column_expectations()
-    assert obs == [exp1, exp2, exp3, exp4]
+    assert obs == [expect_column_values_to_be_in_set_col_a_with_meta, exp2, exp3, exp4]
 
 
 @pytest.mark.unit
 def test_get_expectations_by_expectation_type(
     suite_with_table_and_column_expectations,
-    exp1,
+    expect_column_values_to_be_in_set_col_a_with_meta,
     exp2,
     exp3,
     exp4,
@@ -664,7 +664,7 @@ def test_get_expectations_by_expectation_type(
         table_exp1,
         table_exp2,
         table_exp3,
-        exp1,
+        expect_column_values_to_be_in_set_col_a_with_meta,
         exp2,
         exp3,
         exp4,
@@ -675,7 +675,7 @@ def test_get_expectations_by_expectation_type(
 @pytest.mark.unit
 def test_get_expectations_by_domain_type(
     suite_with_table_and_column_expectations,
-    exp1,
+    expect_column_values_to_be_in_set_col_a_with_meta,
     exp2,
     exp3,
     exp4,
@@ -691,7 +691,7 @@ def test_get_expectations_by_domain_type(
         table_exp1,
         table_exp2,
         table_exp3,
-        exp1,
+        expect_column_values_to_be_in_set_col_a_with_meta,
         exp2,
         exp3,
         exp4,
