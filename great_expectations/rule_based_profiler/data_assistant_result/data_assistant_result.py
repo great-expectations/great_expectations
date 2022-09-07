@@ -3604,7 +3604,7 @@ class DataAssistantResult(SerializableDictDot):
         attributed_values: List[ParameterNode],
         expectation_configuration: Optional[ExpectationConfiguration],
         plot_mode: PlotMode,
-    ) -> Optional[pd.DataFrame]:
+    ) -> pd.DataFrame:
         batch_ids: KeysView[str] = attributed_values[0].keys()
         metric_values: MetricValues = [
             value[0] if len(value) == 1 else value
@@ -3686,7 +3686,7 @@ class DataAssistantResult(SerializableDictDot):
                     else:
                         df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
             else:
-                return None
+                return pd.DataFrame()
 
         # if there are any lists in the dataframe
         if (df.applymap(type) == list).any().any():
@@ -3715,7 +3715,7 @@ class DataAssistantResult(SerializableDictDot):
 
         column_name: str
         column_domain: Domain
-        metric_df: Optional[pd.DataFrame]
+        metric_df: pd.DataFrame
         join_keys: List[str]
         df: pd.DataFrame
         column_df: ColumnDataFrame
@@ -3741,7 +3741,7 @@ class DataAssistantResult(SerializableDictDot):
                     expectation_configuration=metric_domain_expectation_configuration,
                     plot_mode=plot_mode,
                 )
-                if metric_df is not None:
+                if len(metric_df) > 0:
                     if len(df.index) == 0:
                         df = metric_df.copy()
                     else:
