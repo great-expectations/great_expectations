@@ -2668,77 +2668,16 @@ def cloud_data_context_with_datasource_pandas_engine(
     return context
 
 
-JSONData = Union[AnyPayload, Dict[str, Any]]
-RequestError = Union[requests.exceptions.HTTPError, requests.exceptions.Timeout]
 
 
-class MockResponse:
-    # TODO: GG 08232022 update signature to accept arbitrary content types
-    def __init__(
-        self,
-        json_data: JSONData,
-        status_code: int,
-        headers: Optional[Dict[str, str]] = None,
-        exc_to_raise: Optional[RequestError] = None,
-    ) -> None:
-        self._json_data = json_data
-        self.status_code = status_code
-        self.headers = headers or {
-            "content-type": "application/json" if json_data else "text/html"
-        }
-        self._exc_to_raise = exc_to_raise
-
-    def json(self):
-        if self.headers.get("content-type") == "application/json":
-            return self._json_data
-        raise json.JSONDecodeError("Uh oh - check content-type", "foobar", 1)
-
-    def raise_for_status(self):
-        if self._exc_to_raise:
-            raise self._exc_to_raise
-        if self.status_code >= 400:
-            raise requests.exceptions.HTTPError(
-                f"Mock {self.status_code} HTTPError", response=self
-            )
-        return None
-
-    def __repr__(self):
-        return f"<Response [{self.status_code}]>"
 
 
-@pytest.fixture
-def mock_response_factory() -> Callable[
-    [JSONData, int, Optional[RequestError]], MockResponse
-]:
-    def _make_mock_response(
-        json_data: JSONData,
-        status_code: int,
-        exc_to_raise: Optional[RequestError] = None,
-    ) -> MockResponse:
-        return MockResponse(
-            json_data=json_data, status_code=status_code, exc_to_raise=exc_to_raise
-        )
-
-    return _make_mock_response
 
 
-@pytest.fixture
-def test_datasource_name() -> str:
-    return "my_first_datasource"
 
 
-@pytest.fixture
-def datasource_id() -> str:
-    return "aaa7cfdd-4aa4-4f3d-a979-fe2ea5203cbf"
 
 
-@pytest.fixture
-def datasource_config_with_names_and_ids(
-    datasource_config_with_names: DatasourceConfig, datasource_id: str
-) -> DatasourceConfig:
-    updated_config = copy.deepcopy(datasource_config_with_names)
-    updated_config["id"] = datasource_id
-    return updated_config
 
 
 

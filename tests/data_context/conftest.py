@@ -1,19 +1,22 @@
+import copy
+import json
 import os
 import shutil
 import unittest.mock
-from typing import Callable, Dict, cast
+from typing import Callable, Dict, cast, Union, Any, Optional
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
+import requests
 
 import great_expectations as ge
 from great_expectations.data_context.store import GeCloudStoreBackend
+from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
 )
 from great_expectations.data_context.util import file_relative_path
-from tests.conftest import MockResponse
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -593,6 +596,13 @@ def data_context_with_incomplete_global_config_in_dot_dir_only(
 def datasource_store_name() -> str:
     return "datasource_store"
 
+@pytest.fixture
+def test_datasource_name() -> str:
+    return "my_first_datasource"
+
+@pytest.fixture
+def datasource_id() -> str:
+    return "aaa7cfdd-4aa4-4f3d-a979-fe2ea5203cbf"
 
 @pytest.fixture
 def request_headers(ge_cloud_access_token) -> Dict[str, str]:
@@ -602,6 +612,58 @@ def request_headers(ge_cloud_access_token) -> Dict[str, str]:
         "Gx-Version": ge.__version__,
     }
 
+JSONData = Union[AnyPayload, Dict[str, Any]]
+RequestError = Union[requests.exceptions.HTTPError, requests.exceptions.Timeout]
+
+
+class MockResponse:
+    # TODO: GG 08232022 update signature to accept arbitrary content types
+    def __init__(
+        self,
+        json_data: JSONData,
+        status_code: int,
+        headers: Optional[Dict[str, str]] = None,
+        exc_to_raise: Optional[RequestError] = None,
+    ) -> None:
+        self._json_data = json_data
+        self.status_code = status_code
+        self.headers = headers or {
+            "content-type": "application/json" if json_data else "text/html"
+        }
+        self._exc_to_raise = exc_to_raise
+
+    def json(self):
+        if self.headers.get("content-type") == "application/json":
+            return self._json_data
+        raise json.JSONDecodeError("Uh oh - check content-type", "foobar", 1)
+
+    def raise_for_status(self):
+        if self._exc_to_raise:
+            raise self._exc_to_raise
+        if self.status_code >= 400:
+            raise requests.exceptions.HTTPError(
+                f"Mock {self.status_code} HTTPError", response=self
+            )
+        return None
+
+    def __repr__(self):
+        return f"<Response [{self.status_code}]>"
+
+
+@pytest.fixture
+def mock_response_factory() -> Callable[
+    [JSONData, int, Optional[RequestError]], MockResponse
+]:
+    def _make_mock_response(
+        json_data: JSONData,
+        status_code: int,
+        exc_to_raise: Optional[RequestError] = None,
+    ) -> MockResponse:
+        return MockResponse(
+            json_data=json_data, status_code=status_code, exc_to_raise=exc_to_raise
+        )
+
+    return _make_mock_response
 
 @pytest.fixture
 def datasource_config() -> DatasourceConfig:
@@ -628,6 +690,14 @@ def datasource_config() -> DatasourceConfig:
         },
     )
 
+
+@pytest.fixture
+def datasource_config_with_names_and_ids(
+    datasource_config_with_names: DatasourceConfig, datasource_id: str
+) -> DatasourceConfig:
+    updated_config = copy.deepcopy(datasource_config_with_names)
+    updated_config["id"] = datasource_id
+    return updated_config
 
 @pytest.fixture
 def shared_called_with_request_kwargs(request_headers) -> dict:
