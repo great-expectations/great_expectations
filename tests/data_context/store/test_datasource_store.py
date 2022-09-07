@@ -178,8 +178,8 @@ def test_datasource_store_retrieval(
 def test_datasource_store_set_cloud_mode(
     datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
-    mocked_post_response: Callable[[], MockResponse],
-    mocked_get_response: Callable[[], MockResponse],
+    mocked_datasource_post_response: Callable[[], MockResponse],
+    mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_access_token: str,
     ge_cloud_organization_id: str,
@@ -203,9 +203,9 @@ def test_datasource_store_set_cloud_mode(
     )
 
     with patch(
-        "requests.post", autospec=True, side_effect=mocked_post_response
+        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
     ) as mock_post, patch(
-        "requests.get", autospec=True, side_effect=mocked_get_response
+        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
     ):
 
         retrieved_datasource_config = store.set(key=None, value=datasource_config)
