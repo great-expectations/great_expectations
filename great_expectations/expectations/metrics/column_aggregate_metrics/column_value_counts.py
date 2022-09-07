@@ -122,10 +122,10 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         ).fetchall()
         # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.
         series = pd.Series(
-            [row[1] for row in results],
+            data=[row[1] for row in results],
             index=pd.Index(data=[row[0] for row in results], name="value"),
             name="count",
-            dtype="object",
+            dtype=np.object,
         )
         return series
 
