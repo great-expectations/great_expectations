@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -182,7 +182,8 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        if bins is None:
+        element: Any
+        if bins is None or all(element is None for element in bins):
             is_categorical = True
         elif not is_categorical:
             ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
