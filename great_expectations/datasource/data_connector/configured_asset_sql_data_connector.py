@@ -53,6 +53,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         id: Optional[str] = None,
     ) -> None:
         """
+        ConfiguredAssetDataConnector for connecting to data on a SQL database
+
         Args:
             name (str): The name of this DataConnector
             datasource_name (str): The name of the Datasource that contains it
