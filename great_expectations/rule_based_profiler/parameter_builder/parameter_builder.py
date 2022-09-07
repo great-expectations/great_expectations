@@ -568,13 +568,7 @@ specified (empty "metric_name" value detected)."""
         ) in conditioned_attributed_metric_values.items():
             batch_metric_values: MetricValues = []
 
-            metric_value_shape: tuple
-            if isinstance(metric_values, list):
-                metric_value_shape = (len(metric_values),)
-            elif metric_values is not None:
-                metric_value_shape = metric_values.shape
-            else:
-                metric_value_shape = tuple()
+            metric_value_shape: tuple = metric_values.shape
 
             # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
             metric_value_shape_idx: int
@@ -586,13 +580,7 @@ specified (empty "metric_name" value detected)."""
 
             metric_value_idx: tuple
             for metric_value_idx in metric_value_indices:
-                metric_value: Optional[MetricValue]
-                if isinstance(metric_values, list):
-                    metric_value = metric_values[metric_value_idx[0]]
-                elif metric_values is not None:
-                    metric_value = metric_values[metric_value_idx]
-                else:
-                    metric_value = None
+                metric_value: MetricValue = metric_values[metric_value_idx]
 
                 if enforce_numeric_metric:
                     if pd.isnull(metric_value):
@@ -603,8 +591,7 @@ specified (empty "metric_name" value detected)."""
 
                         batch_metric_values.append(0.0)
                     elif not (
-                        metric_value
-                        is None(
+                        (
                             isinstance(metric_value, (str, np.str_))
                             and is_parseable_date(value=metric_value)
                         )
