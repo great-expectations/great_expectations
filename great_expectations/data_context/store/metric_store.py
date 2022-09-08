@@ -55,11 +55,6 @@ class MetricStore(Store):
 
         super().__init__(store_backend=store_backend, store_name=store_name)
 
-    # noinspection PyMethodMayBeStatic
-    def _validate_value(self, value) -> None:
-        # Values must be json serializable since they must be inputs to expectation configurations
-        ensure_json_serializable(value)
-
     def serialize(self, value):
         return json.dumps({"value": value})
 
