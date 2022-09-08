@@ -19,7 +19,7 @@ from great_expectations.util import filter_properties_dict
 
 
 @pytest.fixture
-def test_expectation_suite_name():
+def fake_expectation_suite_name() -> str:
     return "test_expectation_suite_name"
 
 
@@ -47,12 +47,12 @@ def expect_column_values_to_be_in_set_col_a_with_meta_dict() -> dict:
 
 
 @pytest.mark.unit
-def test_expectation_suite_init_defaults(test_expectation_suite_name: str):
-    suite = ExpectationSuite(expectation_suite_name=test_expectation_suite_name)
+def test_expectation_suite_init_defaults(fake_expectation_suite_name):
+    suite = ExpectationSuite(expectation_suite_name=fake_expectation_suite_name)
 
     default_meta = {"great_expectations_version": ge_version}
 
-    assert suite.expectation_suite_name == test_expectation_suite_name
+    assert suite.expectation_suite_name == fake_expectation_suite_name
     assert suite._data_context is None
     assert suite.expectations == []
     assert suite.evaluation_parameters == {}
@@ -64,47 +64,47 @@ def test_expectation_suite_init_defaults(test_expectation_suite_name: str):
 
 @pytest.mark.unit
 def test_expectation_suite_init_overrides(
-    test_expectation_suite_name: str,
+        fake_expectation_suite_name,
     expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
 ):
-    class MockDataContext:
+    class DummyDataContext:
         pass
 
-    class MockExecutionEngine:
+    class DummyExecutionEngine:
         pass
 
-    mock_data_context = MockDataContext()
+    dummy_data_context = DummyDataContext()
     test_evaluation_parameters = {"$PARAMETER": "test_evaluation_parameters"}
     test_data_asset_type = "test_data_asset_type"
-    test_execution_engine_type = type(MockExecutionEngine())
+    dummy_execution_engine_type = type(DummyExecutionEngine())
     default_meta = {"great_expectations_version": ge_version}
     test_meta_base = {"test_key": "test_value"}
     test_meta = {**default_meta, **test_meta_base}
     test_id = "test_id"
 
     suite = ExpectationSuite(
-        expectation_suite_name=test_expectation_suite_name,
-        data_context=mock_data_context,  # ignore[arg-type]
+        expectation_suite_name=fake_expectation_suite_name,
+        data_context=dummy_data_context,  # type: ignore[arg-type]
         expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
         evaluation_parameters=test_evaluation_parameters,
         data_asset_type=test_data_asset_type,
-        execution_engine_type=test_execution_engine_type,  # ignore[arg-type]
+        execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
         meta=test_meta,
         ge_cloud_id=test_id,
     )
-    assert suite.expectation_suite_name == test_expectation_suite_name
-    assert suite._data_context == mock_data_context
+    assert suite.expectation_suite_name == fake_expectation_suite_name
+    assert suite._data_context == dummy_data_context
     assert suite.expectations == [expect_column_values_to_be_in_set_col_a_with_meta]
     assert suite.evaluation_parameters == test_evaluation_parameters
     assert suite.data_asset_type == test_data_asset_type
-    assert suite.execution_engine_type == test_execution_engine_type
+    assert suite.execution_engine_type == dummy_execution_engine_type
     assert suite.meta == test_meta
     assert suite.ge_cloud_id == test_id
 
 
 @pytest.mark.unit
 def test_expectation_suite_init_overrides_expectations_dict_and_obj(
-    test_expectation_suite_name: str,
+        fake_expectation_suite_name,
     expect_column_values_to_be_in_set_col_a_with_meta_dict: dict,
     expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
 ):
@@ -119,10 +119,10 @@ def test_expectation_suite_init_overrides_expectations_dict_and_obj(
     ]
 
     suite = ExpectationSuite(
-        expectation_suite_name=test_expectation_suite_name,
-        expectations=test_expectations_input,
+        expectation_suite_name=fake_expectation_suite_name,
+        expectations=test_expectations_input,  # type: ignore[arg-type]
     )
-    assert suite.expectation_suite_name == test_expectation_suite_name
+    assert suite.expectation_suite_name == fake_expectation_suite_name
 
     test_expected_expectations = [
         ExpectationConfiguration(
@@ -136,7 +136,7 @@ def test_expectation_suite_init_overrides_expectations_dict_and_obj(
 
 @pytest.mark.unit
 def test_expectation_suite_init_overrides_non_json_serializable_meta(
-    test_expectation_suite_name: str,
+        fake_expectation_suite_name,
 ):
     """What does this test and why?
 
@@ -151,13 +151,13 @@ def test_expectation_suite_init_overrides_non_json_serializable_meta(
 
     with pytest.raises(InvalidExpectationConfigurationError):
         ExpectationSuite(
-            expectation_suite_name=test_expectation_suite_name,
-            meta=test_meta,
+            expectation_suite_name=fake_expectation_suite_name,
+            meta=test_meta,  # type: ignore[arg-type]
         )
 
 
 @pytest.fixture
-def exp2():
+def exp2() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "BASIC"},
@@ -166,7 +166,7 @@ def exp2():
 
 
 @pytest.fixture
-def exp3():
+def exp3() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [-1, -2, -3], "result_format": "BASIC"},
@@ -175,7 +175,7 @@ def exp3():
 
 
 @pytest.fixture
-def exp4():
+def exp4() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [1, 2, 3], "result_format": "BASIC"},
@@ -184,7 +184,7 @@ def exp4():
 
 
 @pytest.fixture
-def column_pair_expectation():
+def column_pair_expectation() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_pair_values_to_be_in_set",
         kwargs={
@@ -197,7 +197,7 @@ def column_pair_expectation():
 
 
 @pytest.fixture
-def table_exp1():
+def table_exp1() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_table_columns_to_match_ordered_list",
         kwargs={"value": ["a", "b", "c"]},
@@ -205,7 +205,7 @@ def table_exp1():
 
 
 @pytest.fixture
-def table_exp2():
+def table_exp2() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_table_row_count_to_be_between",
         kwargs={"min_value": 0, "max_value": 1},
@@ -213,14 +213,14 @@ def table_exp2():
 
 
 @pytest.fixture
-def table_exp3():
+def table_exp3() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_table_row_count_to_equal", kwargs={"value": 1}
     )
 
 
 @pytest.fixture
-def empty_suite(empty_data_context):
+def empty_suite(empty_data_context) -> ExpectationSuite:
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -233,7 +233,7 @@ def empty_suite(empty_data_context):
 @pytest.fixture
 def single_expectation_suite(
     expect_column_values_to_be_in_set_col_a_with_meta, empty_data_context
-):
+) -> ExpectationSuite:
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -254,7 +254,7 @@ def suite_with_table_and_column_expectations(
     table_exp2,
     table_exp3,
     empty_data_context,
-):
+) -> ExpectationSuite:
     context: DataContext = empty_data_context
     suite = ExpectationSuite(
         expectation_suite_name="warning",
@@ -287,7 +287,7 @@ def suite_with_table_and_column_expectations(
 @pytest.fixture
 def baseline_suite(
     expect_column_values_to_be_in_set_col_a_with_meta, exp2, empty_data_context
-):
+) -> ExpectationSuite:
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -300,7 +300,7 @@ def baseline_suite(
 @pytest.fixture
 def identical_suite(
     expect_column_values_to_be_in_set_col_a_with_meta, exp3, empty_data_context
-):
+) -> ExpectationSuite:
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -313,7 +313,7 @@ def identical_suite(
 @pytest.fixture
 def equivalent_suite(
     expect_column_values_to_be_in_set_col_a_with_meta, exp3, empty_data_context
-):
+) -> ExpectationSuite:
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="danger",
@@ -328,7 +328,7 @@ def equivalent_suite(
 @pytest.fixture
 def different_suite(
     expect_column_values_to_be_in_set_col_a_with_meta, exp4, empty_data_context
-):
+) -> ExpectationSuite:
     context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
@@ -758,7 +758,7 @@ def test_expectation_suite_send_usage_message(success: bool):
 
     suite = ExpectationSuite(
         expectation_suite_name="suite_name",
-        data_context=dc_message_spy,
+        data_context=dc_message_spy,  # type: ignore[arg-type]
     )
 
     suite.send_usage_event(success=success)
