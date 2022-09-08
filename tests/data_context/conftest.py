@@ -602,12 +602,7 @@ def datasource_store_name() -> str:
 
 
 @pytest.fixture
-def test_datasource_name() -> str:
-    return "my_first_datasource"
-
-
-@pytest.fixture
-def test_datasource_id() -> str:
+def fake_datasource_id() -> str:
     return "aaa7cfdd-4aa4-4f3d-a979-fe2ea5203cbf"
 
 
@@ -702,10 +697,10 @@ def datasource_config() -> DatasourceConfig:
 
 @pytest.fixture
 def datasource_config_with_names_and_ids(
-    datasource_config_with_names: DatasourceConfig, test_datasource_id: str
+    datasource_config_with_names: DatasourceConfig, fake_datasource_id
 ) -> DatasourceConfig:
     updated_config = copy.deepcopy(datasource_config_with_names)
-    updated_config["id"] = test_datasource_id
+    updated_config["id"] = fake_datasource_id
     return updated_config
 
 
@@ -750,7 +745,7 @@ def mock_http_unavailable(mock_response_factory: Callable):
 def mocked_datasource_get_response(
     mock_response_factory: Callable,
     datasource_config_with_names_and_ids: DatasourceConfig,
-    test_datasource_id: str,
+        fake_datasource_id,
 ) -> Callable[[], MockResponse]:
     def _mocked_get_response(*args, **kwargs):
         created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
@@ -770,9 +765,9 @@ def mocked_datasource_get_response(
                         "organization_id": f"{organization_id}",
                         "updated_at": "2022-08-02T17:55:45.107550",
                     },
-                    "id": test_datasource_id,
+                    "id": fake_datasource_id,
                     "links": {
-                        "self": f"/organizations/{organization_id}/datasources/{test_datasource_id}"
+                        "self": f"/organizations/{organization_id}/datasources/{fake_datasource_id}"
                     },
                     "type": "datasource",
                 },
@@ -785,13 +780,13 @@ def mocked_datasource_get_response(
 
 @pytest.fixture
 def mocked_datasource_post_response(
-    mock_response_factory: Callable, test_datasource_id: str
+    mock_response_factory: Callable, fake_datasource_id
 ) -> Callable[[], MockResponse]:
     def _mocked_post_response(*args, **kwargs):
         return mock_response_factory(
             {
                 "data": {
-                    "id": test_datasource_id,
+                    "id": fake_datasource_id,
                 }
             },
             201,

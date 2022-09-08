@@ -1,7 +1,7 @@
 import copy
 import pathlib
 from typing import Callable, List, Optional, cast
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -24,7 +24,6 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.datasource.datasource_serializer import (
     JsonDatasourceConfigSerializer,
     NamedDatasourceSerializer,
@@ -36,6 +35,10 @@ yaml = YAMLHandler()
 
 
 @pytest.fixture
+def fake_datasource_name() -> str:
+    return "my_first_datasource"
+
+@pytest.fixture
 def empty_datasource_store(datasource_store_name: str) -> DatasourceStore:
     return DatasourceStore(
         store_name=datasource_store_name,
@@ -45,12 +48,12 @@ def empty_datasource_store(datasource_store_name: str) -> DatasourceStore:
 
 @pytest.fixture
 def datasource_store_with_single_datasource(
-    test_datasource_name: str,
+        fake_datasource_name,
     datasource_config: DatasourceConfig,
     empty_datasource_store: DatasourceStore,
 ) -> DatasourceStore:
     key = DataContextVariableKey(
-        resource_name=test_datasource_name,
+        resource_name=fake_datasource_name,
     )
     empty_datasource_store.set(key=key, value=datasource_config)
     return empty_datasource_store
@@ -65,11 +68,11 @@ def test_datasource_store_with_bad_key_raises_error(
     error_msg: str = "key must be an instance of DataContextVariableKey"
 
     with pytest.raises(TypeError) as e:
-        store.set(key="my_bad_key", value=datasource_config)
+        store.set(key="my_bad_key", value=datasource_config)  # type: ignore[arg-type]
     assert error_msg in str(e.value)
 
     with pytest.raises(TypeError) as e:
-        store.get(key="my_bad_key")
+        store.get(key="my_bad_key")  # type: ignore[arg-type]
     assert error_msg in str(e.value)
 
 
@@ -274,12 +277,12 @@ def test_datasource_store_with_inline_store_backend(
 def test_datasource_store_set_by_name(
     empty_datasource_store: DatasourceStore,
     datasource_config: DatasourceConfig,
-    test_datasource_name: str,
+        fake_datasource_name,
 ) -> None:
     assert len(empty_datasource_store.list_keys()) == 0
 
     empty_datasource_store.set_by_name(
-        datasource_name=test_datasource_name, datasource_config=datasource_config
+        datasource_name=fake_datasource_name, datasource_config=datasource_config
     )
 
     assert len(empty_datasource_store.list_keys()) == 1
@@ -289,11 +292,11 @@ def test_datasource_store_set_by_name(
 def test_datasource_store_set(
     empty_datasource_store: DatasourceStore,
     datasource_config: DatasourceConfig,
-    test_datasource_name: str,
+        fake_datasource_name,
 ) -> None:
     assert len(empty_datasource_store.list_keys()) == 0
 
-    datasource_config.name = test_datasource_name
+    datasource_config.name = fake_datasource_name
     retrieved_datasource_config: DatasourceConfig = empty_datasource_store.set(
         key=None, value=datasource_config
     )
@@ -309,13 +312,13 @@ def test_datasource_store_set(
 
 @pytest.mark.integration
 def test_datasource_store_retrieve_by_name(
-    test_datasource_name: str,
+        fake_datasource_name,
     datasource_config: DatasourceConfig,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
     actual_config: DatasourceConfig = (
         datasource_store_with_single_datasource.retrieve_by_name(
-            datasource_name=test_datasource_name
+            datasource_name=fake_datasource_name
         )
     )
     set_config_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
@@ -330,13 +333,13 @@ def test_datasource_store_retrieve_by_name(
 
 @pytest.mark.unit
 def test_datasource_store_delete_by_name(
-    test_datasource_name: str,
+        fake_datasource_name,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
     assert len(datasource_store_with_single_datasource.list_keys()) == 1
 
     datasource_store_with_single_datasource.delete_by_name(
-        datasource_name=test_datasource_name
+        datasource_name=fake_datasource_name
     )
 
     assert len(datasource_store_with_single_datasource.list_keys()) == 0
@@ -344,7 +347,7 @@ def test_datasource_store_delete_by_name(
 
 @pytest.mark.integration
 def test_datasource_store_update_by_name(
-    test_datasource_name: str,
+        fake_datasource_name,
     datasource_config: DatasourceConfig,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
@@ -356,12 +359,12 @@ def test_datasource_store_update_by_name(
     ] = updated_base_directory
 
     datasource_store_with_single_datasource.update_by_name(
-        datasource_name=test_datasource_name,
+        datasource_name=fake_datasource_name,
         datasource_config=updated_datasource_config,
     )
 
     key = DataContextVariableKey(
-        resource_name=test_datasource_name,
+        resource_name=fake_datasource_name,
     )
     actual_config = cast(
         DatasourceConfig, datasource_store_with_single_datasource.get(key=key)
@@ -379,17 +382,17 @@ def test_datasource_store_update_by_name(
 
 @pytest.mark.unit
 def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
-    test_datasource_name: str,
+        fake_datasource_name,
     empty_datasource_store: DatasourceStore,
 ) -> None:
     updated_datasource_config = DatasourceConfig()
     with pytest.raises(ValueError) as e:
         empty_datasource_store.update_by_name(
-            datasource_name=test_datasource_name,
+            datasource_name=fake_datasource_name,
             datasource_config=updated_datasource_config,
         )
 
-    assert f"Unable to load datasource `{test_datasource_name}`" in str(e.value)
+    assert f"Unable to load datasource `{fake_datasource_name}`" in str(e.value)
 
 
 @pytest.mark.integration
