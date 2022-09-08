@@ -5,6 +5,7 @@ import numpy as np
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
+    NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
@@ -175,7 +176,9 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
             ]
 
-        nonnull_count_values: np.ndarray = total_count_values - null_count_values
+        nonnull_count_values: np.ndarray = (
+            total_count_values - null_count_values + NP_EPSILON
+        )
 
         # Compute "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").
         super().build_parameters(

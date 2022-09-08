@@ -8,6 +8,7 @@ from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
+    NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
@@ -159,7 +160,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
 
-        nonnull_count: int = sum(metric_values)
+        nonnull_count: int = sum(metric_values) + NP_EPSILON
 
         # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
         candidate_regexes: Union[
