@@ -1208,7 +1208,7 @@ def get_test_validator_with_data(
     sqlite_db_path=None,
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional[Any] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ):
     """Utility to create datasets for json-formatted tests."""
 
@@ -1388,7 +1388,7 @@ def get_test_validator_with_data(
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional[Any] = None,  # Cannot type DataContext due to circular import
+    context: Optional["DataContext"] = None,  # noqa: F821
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
@@ -1410,7 +1410,7 @@ def build_sa_validator_with_data(
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional[Any] = None,  # Cannot type DataContext due to circular import
+    context: Optional["DataContext"] = None,  # noqa: F821
 ):
     _debug = lambda x: x
     if debug_logger:
@@ -1602,7 +1602,7 @@ def build_spark_validator_with_data(
     df: Union[pd.DataFrame, SparkDataFrame],
     spark: SparkSession,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional[Any] = None,  # Cannot type DataContext due to circular import
+    context: Optional["DataContext"] = None,  # noqa: F821
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -2203,7 +2203,7 @@ def generate_expectation_tests(
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional[Any] = None,  # Cannot type DataContext due to circular import
+    context: Optional["DataContext"] = None,  # noqa: F821
 ):
     """Determine tests to run
 

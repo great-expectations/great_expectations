@@ -953,7 +953,7 @@ class Expectation(metaclass=MetaExpectation):
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
-        context: Optional[Any] = None,  # Cannot type DataContext due to circular import
+        context: Optional["DataContext"] = None,  # noqa: F821
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -1340,7 +1340,7 @@ class Expectation(metaclass=MetaExpectation):
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
-        context: Optional[Any] = None,  # Cannot type DataContext due to circular import
+        context: Optional["DataContext"] = None,  # noqa: F821
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
 
