@@ -2678,9 +2678,7 @@ def evaluate_json_test(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_cfe(
-    validator, expectation_type, test, raise_exception=True, force_no_progress_bar=False
-):
+def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=True):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -2701,7 +2699,6 @@ def evaluate_json_test_cfe(
               - details
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :param raise_exception: (bool) If False, capture any failed AssertionError from the call to check_json_test_result and return with validation_result
-    :param force_no_progress_bar: (bool) if True, prevent all "Calculating Metrics" output
     :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
     expectation_suite = ExpectationSuite(
@@ -2742,14 +2739,12 @@ def evaluate_json_test_cfe(
 
     try:
         if isinstance(test["input"], list):
-            kwargs["force_no_progress_bar"] = force_no_progress_bar
             result = getattr(validator, expectation_type)(*kwargs)
         # As well as keyword arguments
         else:
             runtime_kwargs = {
                 "result_format": "COMPLETE",
                 "include_config": False,
-                "force_no_progress_bar": force_no_progress_bar,
             }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)
