@@ -2,6 +2,7 @@ import datetime
 import logging
 import uuid
 import warnings
+from typing import Any, Optional
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import get_or_create_spark_application
@@ -16,8 +17,8 @@ logger = logging.getLogger(__name__)
 try:
     from pyspark.sql import DataFrame, SparkSession
 except ImportError:
-    DataFrame = None
-    SparkSession = None
+    DataFrame = None  # type: ignore
+    SparkSession = None  # type: ignore
     # TODO: review logging more detail here
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
