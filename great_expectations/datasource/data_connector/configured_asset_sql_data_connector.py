@@ -45,12 +45,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     A DataConnector that requires explicit listing of SQL tables you want to connect to.
     """
 
-    SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[str, Sorter] = {
+    SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[str, Optional[Sorter]] = {
         "split_on_year": DateTimeSorter,
         "split_on_year_and_month": DateTimeSorter,
         "split_on_year_and_month_and_day": DateTimeSorter,
         "split_on_date_parts": DateTimeSorter,
-        "split_on_whole_table": LexicographicSorter,
+        "split_on_whole_table": None,
         "split_on_column_value": LexicographicSorter,
         "split_on_converted_datetime": LexicographicSorter,
         "split_on_divided_integer": NumericSorter,
@@ -303,7 +303,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self, splitter_method_name: str, splitter_kwargs: Dict[str, Union[str, list]]
     ) -> List[Sorter]:
         splitter_method_to_sorter_method_mapping: Dict[
-            str, Sorter
+            str, Optional[Sorter]
         ] = self.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING
         splitter_method_name: str = self._get_splitter_method_name(
             splitter_method_name=splitter_method_name,
@@ -327,8 +327,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 ]
             else:
                 return [LexicographicSorter(name=splitter_kwargs["column_name"])]
-        else:
+        elif sorter_method == NumericSorter:
             return [NumericSorter(name=splitter_kwargs["column_name"])]
+        else:
+            return []
 
     @staticmethod
     def _get_splitter_method_name(splitter_method_name: str) -> str:
