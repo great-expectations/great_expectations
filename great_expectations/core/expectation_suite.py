@@ -406,7 +406,7 @@ class ExpectationSuite(SerializableDictDot):
                     match_indexes.append(idx)
             else:
                 if expectation.isEquivalentTo(
-                    other=expectation_configuration, match_type=match_type
+                    other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
                 ):
                     match_indexes.append(idx)
 
@@ -493,7 +493,7 @@ class ExpectationSuite(SerializableDictDot):
         elif len(found_expectation_indexes) == 0:
             raise ValueError("No matching Expectation was found.")
 
-        self.expectations[found_expectation_indexes[0]] = new_expectation_configuration
+        self.expectations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
 
     def patch_expectation(
         self,
