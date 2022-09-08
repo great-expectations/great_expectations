@@ -14,6 +14,7 @@ from functools import wraps
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
+    Any,
     Dict,
     Iterable,
     List,
@@ -47,6 +48,8 @@ from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
 )
+
+# from great_expectations.data_context.data_context import DataContext
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -1205,6 +1208,7 @@ def get_test_validator_with_data(
     sqlite_db_path=None,
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ):
     """Utility to create datasets for json-formatted tests."""
 
@@ -1241,7 +1245,7 @@ def get_test_validator_with_data(
             # noinspection PyUnusedLocal
             table_name = generate_test_table_name()
 
-        return build_pandas_validator_with_data(df=df)
+        return build_pandas_validator_with_data(df=df, context=context)
 
     elif execution_engine in SQL_DIALECT_NAMES:
         if not create_engine:
@@ -1259,6 +1263,7 @@ def get_test_validator_with_data(
             sqlite_db_path=sqlite_db_path,
             extra_debug_info=extra_debug_info,
             debug_logger=debug_logger,
+            context=context,
         )
         return result
 
@@ -1372,7 +1377,9 @@ def get_test_validator_with_data(
             # noinspection PyUnusedLocal
             table_name = generate_test_table_name()
 
-        return build_spark_validator_with_data(df=spark_df, spark=spark)
+        return build_spark_validator_with_data(
+            df=spark_df, spark=spark, context=context
+        )
 
     else:
         raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
@@ -1381,6 +1388,7 @@ def get_test_validator_with_data(
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
@@ -1388,6 +1396,7 @@ def build_pandas_validator_with_data(
         batches=[
             batch,
         ],
+        data_context=context,
     )
 
 
@@ -1401,6 +1410,7 @@ def build_sa_validator_with_data(
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ):
     _debug = lambda x: x
     if debug_logger:
@@ -1566,6 +1576,7 @@ def build_sa_validator_with_data(
         batches=[
             batch,
         ],
+        data_context=context,
     )
 
 
@@ -1591,6 +1602,7 @@ def build_spark_validator_with_data(
     df: Union[pd.DataFrame, SparkDataFrame],
     spark: SparkSession,
     batch_definition: Optional[BatchDefinition] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -1614,6 +1626,7 @@ def build_spark_validator_with_data(
         batches=[
             batch,
         ],
+        data_context=context,
     )
 
 
@@ -2190,6 +2203,7 @@ def generate_expectation_tests(
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ):
     """Determine tests to run
 
@@ -2372,6 +2386,7 @@ def generate_expectation_tests(
                                 sqlite_db_path=sqlite_db_path,
                                 extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
+                                context=context,
                             )
                         )
                     validator_with_data = datasets[0]
@@ -2382,6 +2397,7 @@ def generate_expectation_tests(
                         d["schemas"],
                         extra_debug_info=expectation_type,
                         debug_logger=debug_logger,
+                        context=context,
                     )
             except Exception as e:
                 _error(
@@ -2412,6 +2428,7 @@ def generate_expectation_tests(
                                         sqlite_db_path=sqlite_db_path,
                                         extra_debug_info=expectation_type,
                                         debug_logger=debug_logger,
+                                        context=context,
                                     )
                                 )
                             validator_with_data = datasets[0]
@@ -2422,6 +2439,7 @@ def generate_expectation_tests(
                                 d["schemas"],
                                 extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
+                                context=context,
                             )
                     except Exception as e2:
                         # print(
@@ -2660,9 +2678,7 @@ def evaluate_json_test(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_cfe(
-    validator, expectation_type, test, raise_exception=True, force_no_progress_bar=False
-):
+def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=True):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -2683,7 +2699,6 @@ def evaluate_json_test_cfe(
               - details
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :param raise_exception: (bool) If False, capture any failed AssertionError from the call to check_json_test_result and return with validation_result
-    :param force_no_progress_bar: (bool) if True, prevent all "Calculating Metrics" output
     :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
     expectation_suite = ExpectationSuite(
@@ -2724,14 +2739,12 @@ def evaluate_json_test_cfe(
 
     try:
         if isinstance(test["input"], list):
-            kwargs["force_no_progress_bar"] = force_no_progress_bar
             result = getattr(validator, expectation_type)(*kwargs)
         # As well as keyword arguments
         else:
             runtime_kwargs = {
                 "result_format": "COMPLETE",
                 "include_config": False,
-                "force_no_progress_bar": force_no_progress_bar,
             }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)
