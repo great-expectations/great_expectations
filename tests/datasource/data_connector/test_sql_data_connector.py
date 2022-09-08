@@ -1811,6 +1811,11 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
 @pytest.mark.parametrize(
     "splitter_method,splitter_kwargs,table_name,first_3_batch_identifiers_expected,last_3_batch_identifiers_expected",
     [
+        ("split_on_year", {}, "", [], []),
+        ("split_on_year_and_month", {}, "", [], []),
+        ("split_on_year_and_month_and_day", {}, "", [], []),
+        ("split_on_date_parts", {}, "", [], []),
+        ("split_on_whole_table", {}, "", [], []),
         (
             "split_on_column_value",
             {"column_name": "date"},
@@ -1818,6 +1823,15 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
             [{"date": "2020-01-01"}, {"date": "2020-01-02"}, {"date": "2020-01-03"}],
             [{"date": "2020-01-28"}, {"date": "2020-01-29"}, {"date": "2020-01-30"}],
         ),
+        ("split_on_converted_datetime", {}, "", [], []),
+        (
+            "split_on_divided_integer",
+            {"column_name": "id", "divisor": 10},
+            "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+            [{"id": 0}, {"id": 1}, {"id": 2}],
+            [{"id": 9}, {"id": 10}, {"id": 11}],
+        ),
+        ("split_on_mod_integer", {}, "", [], []),
         (
             "split_on_multi_column_values",
             {"column_names": ["y", "m", "d"]},
@@ -1833,13 +1847,7 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
                 {"d": 30, "m": 1, "y": 2020},
             ],
         ),
-        (
-            "split_on_divided_integer",
-            {"column_name": "id", "divisor": 10},
-            "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
-            [{"id": 0}, {"id": 1}, {"id": 2}],
-            [{"id": 9}, {"id": 10}, {"id": 11}],
-        ),
+        ("split_on_hashed_column", {}, "", [], []),
     ],
 )
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
