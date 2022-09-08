@@ -157,7 +157,9 @@ class TestInitMethod:
                 expectation_suite_name=fake_expectation_suite_name,
                 meta=test_meta,  # type: ignore[arg-type]
             )
-        assert "is of type NotSerializable which cannot be serialized to json" in str(e.value)
+        assert "is of type NotSerializable which cannot be serialized to json" in str(
+            e.value
+        )
 
 
 class TestAddCitation:
@@ -274,14 +276,15 @@ class TestAddCitation:
     )
     @pytest.mark.unit
     def test_add_citation_citation_date_override(
-        self, citation_date: Union[str, datetime.datetime], empty_suite_with_meta: ExpectationSuite
+        self,
+        citation_date: Union[str, datetime.datetime],
+        empty_suite_with_meta: ExpectationSuite,
     ):
         empty_suite_with_meta.add_citation("fake_comment", citation_date=citation_date)
         assert (
             empty_suite_with_meta.meta["citations"][0]["citation_date"]
             == "2022-09-08T00:00:00.000000Z"
         )
-
 
     @pytest.mark.unit
     def test_add_citation_with_existing_citations(
