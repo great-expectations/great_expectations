@@ -414,8 +414,8 @@ stages:
               PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} bash -c \""
               PYTEST+="printf 'Y\nY\n' | pip uninstall numpy pandas && "
               PYTEST+="printf 'Y\nY\n' | pip install numpy==$(min_numpy) pandas==$(min_pandas) && "
-              PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistic\""
-              PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py"
+              PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistic "
+              PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py\""
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest min versions'
