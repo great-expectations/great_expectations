@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 from great_expectations.core.data_context_key import (
     DataContextKey,
