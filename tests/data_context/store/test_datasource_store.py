@@ -38,6 +38,7 @@ yaml = YAMLHandler()
 def fake_datasource_name() -> str:
     return "my_first_datasource"
 
+
 @pytest.fixture
 def empty_datasource_store(datasource_store_name: str) -> DatasourceStore:
     return DatasourceStore(
@@ -48,7 +49,7 @@ def empty_datasource_store(datasource_store_name: str) -> DatasourceStore:
 
 @pytest.fixture
 def datasource_store_with_single_datasource(
-        fake_datasource_name,
+    fake_datasource_name,
     datasource_config: DatasourceConfig,
     empty_datasource_store: DatasourceStore,
 ) -> DatasourceStore:
@@ -277,7 +278,7 @@ def test_datasource_store_with_inline_store_backend(
 def test_datasource_store_set_by_name(
     empty_datasource_store: DatasourceStore,
     datasource_config: DatasourceConfig,
-        fake_datasource_name,
+    fake_datasource_name,
 ) -> None:
     assert len(empty_datasource_store.list_keys()) == 0
 
@@ -292,7 +293,7 @@ def test_datasource_store_set_by_name(
 def test_datasource_store_set(
     empty_datasource_store: DatasourceStore,
     datasource_config: DatasourceConfig,
-        fake_datasource_name,
+    fake_datasource_name,
 ) -> None:
     assert len(empty_datasource_store.list_keys()) == 0
 
@@ -312,7 +313,7 @@ def test_datasource_store_set(
 
 @pytest.mark.integration
 def test_datasource_store_retrieve_by_name(
-        fake_datasource_name,
+    fake_datasource_name,
     datasource_config: DatasourceConfig,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
@@ -333,7 +334,7 @@ def test_datasource_store_retrieve_by_name(
 
 @pytest.mark.unit
 def test_datasource_store_delete_by_name(
-        fake_datasource_name,
+    fake_datasource_name,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
     assert len(datasource_store_with_single_datasource.list_keys()) == 1
@@ -347,7 +348,7 @@ def test_datasource_store_delete_by_name(
 
 @pytest.mark.integration
 def test_datasource_store_update_by_name(
-        fake_datasource_name,
+    fake_datasource_name,
     datasource_config: DatasourceConfig,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
@@ -382,7 +383,7 @@ def test_datasource_store_update_by_name(
 
 @pytest.mark.unit
 def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
-        fake_datasource_name,
+    fake_datasource_name,
     empty_datasource_store: DatasourceStore,
 ) -> None:
     updated_datasource_config = DatasourceConfig()

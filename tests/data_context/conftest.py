@@ -745,7 +745,7 @@ def mock_http_unavailable(mock_response_factory: Callable):
 def mocked_datasource_get_response(
     mock_response_factory: Callable,
     datasource_config_with_names_and_ids: DatasourceConfig,
-        fake_datasource_id,
+    fake_datasource_id,
 ) -> Callable[[], MockResponse]:
     def _mocked_get_response(*args, **kwargs):
         created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
