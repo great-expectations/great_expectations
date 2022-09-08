@@ -54,7 +54,7 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
         "example_data_asset_names": ["table_partitioned_by_date_column__A"],
         "data_assets": {
             "table_partitioned_by_date_column__A": {
-                "batch_definition_count": 30,
+                "batch_definition_count": 34,
                 "example_data_references": [
                     {"date": "2020-01-01"},
                     {"date": "2020-01-02"},
@@ -127,7 +127,7 @@ def test_get_batch_definition_list_from_batch_request(
             )
         )
     )
-    assert len(batch_definition_list) == 30
+    assert len(batch_definition_list) == 34
 
     # Note: Abe 20201109: It would be nice to put in safeguards for mistakes like this.
     # In this case, "date" should go inside "batch_identifiers".
@@ -156,7 +156,7 @@ def test_get_batch_definition_list_from_batch_request(
             )
         )
     )
-    assert len(batch_definition_list) == 30
+    assert len(batch_definition_list) == 34
 
     with pytest.raises(TypeError):
         # noinspection PyArgumentList
@@ -210,7 +210,7 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "example_data_asset_names": ["table_partitioned_by_date_column__A"],
         "data_assets": {
             "table_partitioned_by_date_column__A": {
-                "batch_definition_count": 30,
+                "batch_definition_count": 34,
                 "example_data_references": [
                     {"date": "2020-01-01"},
                     {"date": "2020-01-02"},
@@ -739,7 +739,7 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
     )
     execution_engine.load_batch_data("__", batch_data)
     validator = Validator(execution_engine)
-    assert len(validator.head(fetch_all=True)) == 120
+    assert len(validator.head(fetch_all=True)) == 123
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
@@ -754,7 +754,7 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
 
     execution_engine.load_batch_data("__", batch_data)
     validator = Validator(execution_engine)
-    assert len(validator.head(fetch_all=True)) == 120
+    assert len(validator.head(fetch_all=True)) == 123
 
 
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
@@ -853,7 +853,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__random(
     )
     batch = Batch(data=batch_data)
     validator = Validator(execution_engine, batches=[batch])
-    assert len(validator.head(fetch_all=True)) == 120
+    assert len(validator.head(fetch_all=True)) == 123
 
 
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
@@ -1420,7 +1420,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector(
         "example_data_asset_names": ["main.table_partitioned_by_date_column__A"],
         "data_assets": {
             "main.table_partitioned_by_date_column__A": {
-                "batch_definition_count": 30,
+                "batch_definition_count": 34,
                 "example_data_references": [
                     {"date": "2020-01-01"},
                     {"date": "2020-01-02"},
@@ -1560,7 +1560,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
             )
         )
     )
-    assert len(batch_definition_list) == 30
+    assert len(batch_definition_list) == 34
 
 
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
@@ -1600,7 +1600,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
             )
         )
     )
-    assert len(batch_definition_list) == 30
+    assert len(batch_definition_list) == 34
 
 
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
@@ -1684,7 +1684,7 @@ def test_simple_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_w
     )
     batch = Batch(data=batch_data)
     validator = Validator(execution_engine, batches=[batch])
-    assert len(validator.head(fetch_all=True)) == 120
+    assert len(validator.head(fetch_all=True)) == 123
 
 
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
@@ -1795,7 +1795,7 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
             )
         )
     )
-    assert len(batch_definition_list) == 30
+    assert len(batch_definition_list) == 34
 
     batch_spec: SqlAlchemyDatasourceBatchSpec = my_data_connector.build_batch_spec(
         batch_definition=batch_definition_list[1]
