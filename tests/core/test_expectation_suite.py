@@ -159,6 +159,82 @@ class TestInitMethod:
             )
 
 
+class TestAddCitation:
+
+    @pytest.fixture
+    def empty_suite_with_meta(self, fake_expectation_suite_name: str) -> ExpectationSuite:
+        return ExpectationSuite(
+            expectation_suite_name=fake_expectation_suite_name,
+            meta={"notes": "This is an expectation suite."},
+        )
+
+    @pytest.mark.unit
+    def test_empty_suite_with_meta_fixture(self, empty_suite_with_meta: ExpectationSuite):
+        assert "citations" not in empty_suite_with_meta.meta
+
+    @pytest.mark.unit
+    def test_add_citation_comment(self, empty_suite_with_meta: ExpectationSuite):
+        empty_suite_with_meta.add_citation("hello!")
+        assert empty_suite_with_meta.meta["citations"][0].get("comment") == "hello!"
+
+
+    @pytest.mark.unit
+    def test_add_citation_comment_required(self, empty_suite_with_meta: ExpectationSuite):
+        with pytest.raises(TypeError) as e:
+            empty_suite_with_meta.add_citation()  # type: ignore[call-arg]
+        assert "add_citation() missing 1 required positional argument: 'comment'" in str(e.value)
+
+
+    @pytest.mark.unit
+    def test_add_citation_not_specified_params_filtered(self, empty_suite_with_meta: ExpectationSuite):
+        empty_suite_with_meta.add_citation("fake_comment", batch_spec={"fake": "batch_spec"}, batch_markers={"fake": "batch_markers"})
+        assert "citations" in empty_suite_with_meta.meta
+
+        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
+        # Note: citation_date is always added if not provided
+        assert citation_keys == {"comment", 'citation_date', 'batch_spec', 'batch_markers',}
+        # batch_definition (along with other keys that are not provided) should be filtered out
+        assert "batch_definition" not in citation_keys
+
+
+    @pytest.mark.unit
+    @pytest.mark.v2_api
+    def test_add_citation_accepts_v2_api_params(self, empty_suite_with_meta: ExpectationSuite):
+        """This test ensures backward compatibility with the v2 api and can be removed when deprecated."""
+        empty_suite_with_meta.add_citation("fake_comment", batch_kwargs={"fake": "batch_kwargs"})
+
+        assert empty_suite_with_meta.meta["citations"][0]["batch_kwargs"] == {'fake': 'batch_kwargs'}
+        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
+        assert citation_keys == {'comment', 'citation_date', 'batch_kwargs'}
+
+    @pytest.mark.unit
+    def test_add_citation_all_params(self):
+        raise NotImplementedError
+
+    @pytest.mark.unit
+    def test_add_citation_citation_date_str_override(self):
+        raise NotImplementedError
+
+    @pytest.mark.unit
+    def test_add_citation_citation_date_datetime_override(self):
+        raise NotImplementedError
+
+    @pytest.mark.unit
+    def test_add_citation_with_existing_citations(self):
+        raise NotImplementedError
+
+    @pytest.mark.unit
+    def test_add_citation_with_profiler_config(self, baseline_suite, profiler_config):
+        assert (
+                "citations" not in baseline_suite.meta
+                or len(baseline_suite.meta["citations"]) == 0
+        )
+        baseline_suite.add_citation(
+            "adding profiler config citation",
+            profiler_config=profiler_config,
+        )
+        assert baseline_suite.meta["citations"][0].get("profiler_config") == profiler_config
+
 #### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
 
 
@@ -481,27 +557,7 @@ def test_suite_with_metadata_includes_ge_version_metadata(baseline_suite):
     assert "great_expectations_version" in baseline_suite.meta.keys()
 
 
-@pytest.mark.unit
-def test_add_citation(baseline_suite):
-    assert (
-        "citations" not in baseline_suite.meta
-        or len(baseline_suite.meta["citations"]) == 0
-    )
-    baseline_suite.add_citation("hello!")
-    assert baseline_suite.meta["citations"][0].get("comment") == "hello!"
 
-
-@pytest.mark.unit
-def test_add_citation_with_profiler_config(baseline_suite, profiler_config):
-    assert (
-        "citations" not in baseline_suite.meta
-        or len(baseline_suite.meta["citations"]) == 0
-    )
-    baseline_suite.add_citation(
-        "adding profiler config citation",
-        profiler_config=profiler_config,
-    )
-    assert baseline_suite.meta["citations"][0].get("profiler_config") == profiler_config
 
 
 @pytest.mark.unit
