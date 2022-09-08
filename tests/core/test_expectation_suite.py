@@ -64,7 +64,7 @@ def test_expectation_suite_init_defaults(fake_expectation_suite_name):
 
 @pytest.mark.unit
 def test_expectation_suite_init_overrides(
-        fake_expectation_suite_name,
+    fake_expectation_suite_name,
     expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
 ):
     class DummyDataContext:
@@ -104,7 +104,7 @@ def test_expectation_suite_init_overrides(
 
 @pytest.mark.unit
 def test_expectation_suite_init_overrides_expectations_dict_and_obj(
-        fake_expectation_suite_name,
+    fake_expectation_suite_name,
     expect_column_values_to_be_in_set_col_a_with_meta_dict: dict,
     expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
 ):
@@ -136,7 +136,7 @@ def test_expectation_suite_init_overrides_expectations_dict_and_obj(
 
 @pytest.mark.unit
 def test_expectation_suite_init_overrides_non_json_serializable_meta(
-        fake_expectation_suite_name,
+    fake_expectation_suite_name,
 ):
     """What does this test and why?
 
