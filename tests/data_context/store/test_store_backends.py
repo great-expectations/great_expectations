@@ -1774,3 +1774,47 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
     datasources: dict = config_commented_map_from_yaml["datasources"]
     assert len(datasources) == 1
     assert datasources["my_datasource"] == datasource_config
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_move_overwrites_key() -> None:
+    store_backend = InMemoryStoreBackend()
+
+    key_1 = ("my_key_1",)
+    key_2 = ("my_key_2",)
+
+    store_backend.set(key_1, 123)
+    assert store_backend.has_key(key_1)
+    assert not store_backend.has_key(key_2)
+
+    store_backend.move(key_1, key_2)
+    assert not store_backend.has_key(key_1)
+    assert store_backend.has_key(key_2)
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_move_nonexistent_key_raises_error() -> None:
+    store_backend = InMemoryStoreBackend()
+
+    with pytest.raises(KeyError):
+        store_backend.move(("my_fake_key_1",), ("my_fake_key_2",))
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_config_and_defaults() -> None:
+    store_backend = InMemoryStoreBackend()
+    assert store_backend.config == {
+        "class_name": "InMemoryStoreBackend",
+        "fixed_length_key": False,
+        "module_name": "great_expectations.data_context.store.in_memory_store_backend",
+        "suppress_store_backend_id": False,
+    }
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_build_Key() -> None:
+    store_backend = InMemoryStoreBackend()
+    name = "my_backend_key"
+    assert store_backend.build_key(name=name) == DataContextVariableKey(
+        resource_name=name
+    )
