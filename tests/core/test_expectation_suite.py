@@ -201,39 +201,65 @@ class TestAddCitation:
     @pytest.mark.v2_api
     def test_add_citation_accepts_v2_api_params(self, empty_suite_with_meta: ExpectationSuite):
         """This test ensures backward compatibility with the v2 api and can be removed when deprecated."""
-        empty_suite_with_meta.add_citation("fake_comment", batch_kwargs={"fake": "batch_kwargs"})
+        empty_suite_with_meta.add_citation(
+            "fake_comment",
+            batch_kwargs={"fake": "batch_kwargs"},
+            batch_parameters={"fake": "batch_parameters"},
+        )
 
         assert empty_suite_with_meta.meta["citations"][0]["batch_kwargs"] == {'fake': 'batch_kwargs'}
+        assert empty_suite_with_meta.meta["citations"][0]["batch_parameters"] == {'fake': 'batch_parameters'}
         citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
-        assert citation_keys == {'comment', 'citation_date', 'batch_kwargs'}
+        assert citation_keys == {'comment', 'citation_date', 'batch_kwargs', "batch_parameters"}
 
     @pytest.mark.unit
-    def test_add_citation_all_params(self):
-        raise NotImplementedError
-
-    @pytest.mark.unit
-    def test_add_citation_citation_date_str_override(self):
-        raise NotImplementedError
-
-    @pytest.mark.unit
-    def test_add_citation_citation_date_datetime_override(self):
-        raise NotImplementedError
-
-    @pytest.mark.unit
-    def test_add_citation_with_existing_citations(self):
-        raise NotImplementedError
-
-    @pytest.mark.unit
-    def test_add_citation_with_profiler_config(self, baseline_suite, profiler_config):
-        assert (
-                "citations" not in baseline_suite.meta
-                or len(baseline_suite.meta["citations"]) == 0
+    def test_add_citation_all_params(self, empty_suite_with_meta: ExpectationSuite):
+        """Note, this does not include v2 api params e.g. batch_kwargs"""
+        empty_suite_with_meta.add_citation(
+            "fake_comment",
+            batch_request={"fake": "batch_request"},
+            batch_definition={"fake": "batch_definition"},
+            batch_spec={"fake": "batch_spec"},
+            batch_markers={"fake": "batch_markers"},
+            profiler_config={"fake": "profiler_config"},
+            citation_date="2022-09-08"
         )
-        baseline_suite.add_citation(
-            "adding profiler config citation",
-            profiler_config=profiler_config,
+        assert "citations" in empty_suite_with_meta.meta
+
+        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
+        assert citation_keys == {"comment", 'citation_date', "batch_request", "batch_definition", 'batch_spec', 'batch_markers', "profiler_config",}
+
+
+    @pytest.mark.unit
+    def test_add_citation_citation_date_str_override(self, empty_suite_with_meta: ExpectationSuite):
+        empty_suite_with_meta.add_citation("fake_comment", citation_date="2022-09-08")
+        assert empty_suite_with_meta.meta["citations"][0]["citation_date"] == '2022-09-08T00:00:00.000000Z'
+
+    @pytest.mark.unit
+    def test_add_citation_citation_date_datetime_override(self, empty_suite_with_meta: ExpectationSuite):
+        empty_suite_with_meta.add_citation("fake_comment", citation_date=datetime.datetime(2022, 9, 8))
+        assert empty_suite_with_meta.meta["citations"][0]["citation_date"] == '2022-09-08T00:00:00.000000Z'
+
+    @pytest.mark.unit
+    def test_add_citation_with_existing_citations(self, empty_suite_with_meta: ExpectationSuite):
+        empty_suite_with_meta.add_citation("fake_comment1")
+        assert "citations" in empty_suite_with_meta.meta
+        assert len(empty_suite_with_meta.meta["citations"]) == 1
+        empty_suite_with_meta.add_citation("fake_comment2")
+        assert len(empty_suite_with_meta.meta["citations"]) == 2
+
+    @pytest.mark.unit
+    def test_add_citation_with_profiler_config(self, empty_suite_with_meta: ExpectationSuite):
+        empty_suite_with_meta.add_citation(
+            "fake_comment",
+            profiler_config={"fake": "profiler_config"},
         )
-        assert baseline_suite.meta["citations"][0].get("profiler_config") == profiler_config
+
+        assert empty_suite_with_meta.meta["citations"][0]["profiler_config"] == {'fake': 'profiler_config'}
+        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
+        assert citation_keys == {'comment', 'citation_date', 'profiler_config'}
+
+
 
 #### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
 
