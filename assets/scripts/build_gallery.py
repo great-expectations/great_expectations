@@ -4,17 +4,18 @@ import json
 import logging
 import os
 import re
+import shutil
 import sys
 import traceback
 from glob import glob
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, check_output, run
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 import click
 import pkg_resources
 
-import great_expectations as ge
+from great_expectations.data_context.data_context import DataContext
 
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
@@ -207,6 +208,7 @@ def build_gallery(
     ignore_only_for: bool = False,
     only_these_expectations: List[str] = [],
     only_consider_these_backends: List[str] = [],
+    context: Optional[DataContext] = None,
 ) -> Dict:
     """
     Build the gallery object by running diagnostics for each Expectation and returning the resulting reports.
@@ -342,6 +344,7 @@ def build_gallery(
                 ignore_only_for=ignore_only_for,
                 debug_logger=logger,
                 only_consider_these_backends=only_consider_these_backends,
+                context=context,
             )
             checklist_string = diagnostics.generate_checklist()
             expectation_checklists.write(
@@ -529,10 +532,18 @@ def format_docstring_to_markdown(docstr: str) -> str:
     return clean_docstr
 
 
-def _disable_progress_bars() -> None:
-    context = ge.get_context()
-    context.variables.progress_bars.globally = False
+def _disable_progress_bars() -> Tuple[str, DataContext]:
+    """Return context_dir and context that was created"""
+    context_dir = os.path.join(os.path.sep, "tmp", f"gx-context-{os.getpid()}")
+    os.makedirs(context_dir)
+    context = DataContext.create(context_dir, usage_statistics_enabled=False)
+    context.variables.progress_bars = {
+        "globally": False,
+        "metric_calculations": False,
+        "profilers": False,
+    }
     context.variables.save_config()
+    return (context_dir, context)
 
 
 @click.command()
@@ -591,7 +602,7 @@ def main(**kwargs):
     if kwargs["backends"]:
         backends = [name.strip() for name in kwargs["backends"].split(",")]
 
-    _disable_progress_bars()
+    context_dir, context = _disable_progress_bars()
 
     gallery_info = build_gallery(
         include_core=not kwargs["no_core"],
@@ -600,6 +611,7 @@ def main(**kwargs):
         ignore_only_for=kwargs["ignore_only_for"],
         only_these_expectations=kwargs["args"],
         only_consider_these_backends=backends,
+        context=context,
     )
     tracebacks = expectation_tracebacks.getvalue()
     checklists = expectation_checklists.getvalue()
@@ -611,6 +623,9 @@ def main(**kwargs):
             outfile.write(checklists)
     with open(f"./{kwargs['outfile_name']}", "w") as outfile:
         json.dump(gallery_info, outfile, indent=4)
+
+    print(f"Deleting {context_dir}")
+    shutil.rmtree(context_dir)
 
 
 if __name__ == "__main__":

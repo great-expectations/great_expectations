@@ -956,6 +956,7 @@ class Expectation(metaclass=MetaExpectation):
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
+        context: Optional[Any] = None,  # Cannot type DataContext due to circular import
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -1038,6 +1039,7 @@ class Expectation(metaclass=MetaExpectation):
             ignore_only_for=ignore_only_for,
             debug_logger=debug_logger,
             only_consider_these_backends=only_consider_these_backends,
+            context=context,
         )
 
         backend_test_result_counts: List[
@@ -1343,6 +1345,7 @@ class Expectation(metaclass=MetaExpectation):
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
+        context: Optional[Any] = None,  # Cannot type DataContext due to circular import
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
 
@@ -1364,6 +1367,7 @@ class Expectation(metaclass=MetaExpectation):
             ignore_only_for=ignore_only_for,
             debug_logger=debug_logger,
             only_consider_these_backends=only_consider_these_backends,
+            context=context,
         )
 
         backend_test_times = defaultdict(list)
