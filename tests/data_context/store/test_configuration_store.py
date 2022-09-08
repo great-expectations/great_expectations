@@ -14,11 +14,19 @@ from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
+from great_expectations.data_context.store.in_memory_store_backend import (
+    InMemoryStoreBackend,
+)
+from great_expectations.data_context.store.tuple_store_backend import (
+    TupleFilesystemStoreBackend,
+    TupleStoreBackend,
+)
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import (
     delete_config_from_filesystem,
@@ -349,3 +357,20 @@ def test_determine_key_raises_error_with_conflicting_args(
         ConfigurationStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)
 
     assert "Must provide either name or ge_cloud_id" in str(e.value)
+
+
+@pytest.mark.unit
+def test_init_with_invalid_configuration_class_raises_error() -> None:
+    class InvalidConfigClass:
+        pass
+
+    class InvalidConfigurationStore(ConfigurationStore):
+        _configuration_class = InvalidConfigClass
+
+    with pytest.raises(DataContextError) as e:
+        InvalidConfigurationStore(store_name="my_configuration_store")
+
+    assert (
+        "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
+        in str(e.value)
+    )
