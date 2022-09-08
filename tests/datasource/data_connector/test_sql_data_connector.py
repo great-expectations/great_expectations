@@ -1809,13 +1809,14 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "splitter_method,splitter_kwargs,table_name,first_3_batch_identifiers_expected",
+    "splitter_method,splitter_kwargs,table_name,first_3_batch_identifiers_expected,last_3_batch_identifiers_expected",
     [
         (
             "split_on_column_value",
             {"column_name": "date"},
             "table_partitioned_by_date_column__A",
             [{"date": "2020-01-01"}, {"date": "2020-01-02"}, {"date": "2020-01-03"}],
+            [{"date": "2020-01-28"}, {"date": "2020-01-29"}, {"date": "2020-01-30"}],
         ),
         (
             "split_on_multi_column_values",
@@ -1826,12 +1827,18 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
                 {"d": 2, "m": 1, "y": 2020},
                 {"d": 3, "m": 1, "y": 2020},
             ],
+            [
+                {"d": 28, "m": 1, "y": 2020},
+                {"d": 29, "m": 1, "y": 2020},
+                {"d": 30, "m": 1, "y": 2020},
+            ],
         ),
         (
             "split_on_divided_integer",
             {"column_name": "id", "divisor": 10},
             "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
             [{"id": 0}, {"id": 1}, {"id": 2}],
+            [{"id": 9}, {"id": 10}, {"id": 11}],
         ),
     ],
 )
@@ -1841,6 +1848,7 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
     splitter_kwargs,
     table_name,
     first_3_batch_identifiers_expected,
+    last_3_batch_identifiers_expected,
     splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -1879,3 +1887,8 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
         for batch_definition in batch_definition_list[:3]
     ]
     assert first_3_batch_identifiers_actual == first_3_batch_identifiers_expected
+    last_3_batch_identifiers_actual = [
+        batch_definition.batch_identifiers
+        for batch_definition in batch_definition_list[-3:]
+    ]
+    assert last_3_batch_identifiers_actual == last_3_batch_identifiers_expected
