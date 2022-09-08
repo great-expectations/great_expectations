@@ -7,15 +7,15 @@ import pytest
 from marshmallow.exceptions import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    checkpointConfigSchema,
-)
+from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -500,4 +500,22 @@ def test_get_checkpoint_with_invalid_legacy_checkpoint_raises_error() -> None:
     assert (
         "Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments"
         in str(e.value)
+    )
+
+
+@pytest.mark.unit
+def test_add_checkpoint() -> None:
+    store = CheckpointStore(store_name="checkpoint_store")
+    mock_backend = mock.MagicMock()
+    store._store_backend = mock_backend
+
+    context = mock.MagicMock(spec=DataContext)
+    context._usage_statistics_handler = mock.MagicMock()
+    checkpoint = Checkpoint(name="my_checkpoint", data_context=context)
+
+    store.add_checkpoint(checkpoint=checkpoint, name="my_checkpoint", ge_cloud_id=None)
+
+    mock_backend.set.assert_called_once_with(
+        ("my_checkpoint",),
+        "name: my_checkpoint\nconfig_version:\nmodule_name: great_expectations.checkpoint\nclass_name: LegacyCheckpoint\n",
     )
