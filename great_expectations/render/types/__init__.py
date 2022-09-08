@@ -610,7 +610,7 @@ class RenderedAtomicValueSchema(Schema):
         their values are None."""
         data = deepcopy(data)
         for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
-            if key == "graph" and key in data and data[key].graph is None:
+            if key == "graph" and key in data and data[key]["graph"] is None:
                 data.pop(key)
             elif key in data and data[key] is None:
                 data.pop(key)
