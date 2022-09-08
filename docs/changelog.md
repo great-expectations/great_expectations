@@ -36,7 +36,7 @@ title: Changelog
 * [MAINTENANCE] Update to OnboardingDataAssistant Notebook - Sql (#5939)
 * [MAINTENANCE] Use DataContext to ignore progress bars (#5959)
 * [MAINTENANCE] Use datasource config in add_datasource support methods (#5901)
-* [Maintenance] Cleanup to allow docker test target to run tests in random order (#5915)
+* [MAINTENANCE] Cleanup to allow docker test target to run tests in random order (#5915)
 
 ### 0.15.21
 * [FEATURE] Add `include_rendered_content` to `get_expectation_suite` and `get_validation_result` (#5853)

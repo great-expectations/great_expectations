@@ -39,7 +39,7 @@ Changelog
 * [MAINTENANCE] Update to OnboardingDataAssistant Notebook - Sql (#5939)
 * [MAINTENANCE] Use DataContext to ignore progress bars (#5959)
 * [MAINTENANCE] Use datasource config in add_datasource support methods (#5901)
-* [Maintenance] Cleanup to allow docker test target to run tests in random order (#5915)
+* [MAINTENANCE] Cleanup to allow docker test target to run tests in random order (#5915)
 
 0.15.21
 -----------------
@@ -1808,7 +1808,7 @@ Changelog
 * [DOCS] Update rule-based profiler docs (#2987)
 * [DOCS] add image zoom plugin (#2979)
 * [MAINTENANCE] fix lint issues for docusaurus (#3004)
-* [Maintenance] update header to match GE.io (#2811)
+* [MAINTENANCE] update header to match GE.io (#2811)
 * [MAINTENANCE] Instrument test_yaml_config() (#2981)
 * [MAINTENANCE] Remove "mostly" from "bobster" test config (#2996)
 * [MAINTENANCE] Update v-0.12 CLI test to reflect Pandas upgrade to version 1.3.0 (#2995)
