@@ -248,7 +248,7 @@ stages:
               pip install pytest-cov pytest-icdiff pytest-mock pytest-azurepipelines invoke
 
               # Run unit-tests
-              invoke tests --ci --cloud
+              invoke tests --ci --cloud  --timeout=3.0
 
             displayName: 'Unit Tests'
 
