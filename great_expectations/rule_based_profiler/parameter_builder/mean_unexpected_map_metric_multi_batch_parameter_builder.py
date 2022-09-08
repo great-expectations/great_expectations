@@ -5,6 +5,7 @@ import numpy as np
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
+    NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
@@ -198,8 +199,8 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        unexpected_count_ratio_values: np.ndarray = (
-            unexpected_count_values / nonnull_count_values
+        unexpected_count_ratio_values: np.ndarray = unexpected_count_values / (
+            nonnull_count_values + NP_EPSILON
         )
         mean_unexpected_count_ratio: np.float64 = np.mean(unexpected_count_ratio_values)
 
