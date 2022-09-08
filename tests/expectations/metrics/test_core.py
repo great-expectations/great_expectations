@@ -4010,7 +4010,7 @@ def test_distinct_metric_spark(
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
-            {"a": [1, 2, 1, 2, 3, 3, None]},
+            {"a": [1, 2, 1, 2, 3, 3, None], "b": [1, 3, 5, 6, 1, 2, None]},
         ),
         batch_id="my_id",
     )

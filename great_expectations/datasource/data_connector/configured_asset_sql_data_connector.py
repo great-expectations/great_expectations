@@ -15,7 +15,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.sorter import (
-    DateTimeSorter,
+    DictionarySorter,
     LexicographicSorter,
     NumericSorter,
     Sorter,
@@ -46,10 +46,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     """
 
     SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[str, Optional[Sorter]] = {
-        "split_on_year": DateTimeSorter,
-        "split_on_year_and_month": DateTimeSorter,
-        "split_on_year_and_month_and_day": DateTimeSorter,
-        "split_on_date_parts": DateTimeSorter,
+        "split_on_year": DictionarySorter,
+        "split_on_year_and_month": DictionarySorter,
+        "split_on_year_and_month_and_day": DictionarySorter,
+        "split_on_date_parts": DictionarySorter,
         "split_on_whole_table": None,
         "split_on_column_value": LexicographicSorter,
         "split_on_converted_datetime": LexicographicSorter,
@@ -317,8 +317,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 f"No Sorter is defined for splitter_method: {splitter_method_name}"
             )
 
-        if sorter_method == DateTimeSorter:
-            return [DateTimeSorter(name=splitter_kwargs["column_name"])]
+        if sorter_method == DictionarySorter:
+            return [DictionarySorter(name=splitter_kwargs["column_name"])]
         elif sorter_method == LexicographicSorter:
             if splitter_method_name == "split_on_multi_column_values":
                 return [

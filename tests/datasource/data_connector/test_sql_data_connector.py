@@ -1812,20 +1812,28 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
 @pytest.mark.parametrize(
     "splitter_method,splitter_kwargs,table_name,first_3_batch_identifiers_expected,last_3_batch_identifiers_expected",
     [
-        # (
-        #     "split_on_year",
-        #     {"column_name": "date"},
-        #     "table_partitioned_by_date_column__A",
-        #     [],
-        #     [],
-        # ),
-        # (
-        #     "split_on_year_and_month",
-        #     {"column_name": "date"},
-        #     "table_partitioned_by_date_column__A",
-        #     [],
-        #     [],
-        # ),
+        (
+            "split_on_year",
+            {"column_name": "date"},
+            "table_partitioned_by_date_column__A",
+            [
+                {"date": {"year": 2020}},
+                {"date": {"year": 2021}},
+                {"date": {"year": 2022}},
+            ],
+            [
+                {"date": {"year": 2021}},
+                {"date": {"year": 2022}},
+                {"date": {"year": 2023}},
+            ],
+        ),
+        (
+            "split_on_year_and_month",
+            {"column_name": "date"},
+            "table_partitioned_by_date_column__A",
+            [],
+            [],
+        ),
         # (
         #     "split_on_year_and_month_and_day",
         #     {"column_name": "date"},

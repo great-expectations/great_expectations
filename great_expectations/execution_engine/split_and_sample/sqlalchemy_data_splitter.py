@@ -346,9 +346,12 @@ class SqlAlchemyDataSplitter(DataSplitter):
         Returns:
             List of dicts of the form [{column_name: {"key": value}}]
         """
-        if self._is_datetime_splitter(splitter_method_name):
+        processed_splitter_method_name: str = self._get_splitter_method_name(
+            splitter_method_name
+        )
+        if self._is_datetime_splitter(processed_splitter_method_name):
             splitter_fn_name: str = self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
-                splitter_method_name
+                processed_splitter_method_name
             ]
             batch_identifiers_list: List[dict] = getattr(self, splitter_fn_name)(
                 execution_engine, table_name, **splitter_kwargs
@@ -357,7 +360,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
             batch_identifiers_list: List[
                 dict
             ] = self.get_data_for_batch_identifiers_for_non_date_part_splitters(
-                execution_engine, table_name, splitter_method_name, splitter_kwargs
+                execution_engine,
+                table_name,
+                processed_splitter_method_name,
+                splitter_kwargs,
             )
 
         return batch_identifiers_list
