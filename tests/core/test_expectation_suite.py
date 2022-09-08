@@ -1,7 +1,7 @@
 import datetime
 import itertools
 from copy import copy, deepcopy
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import pytest
 from ruamel.yaml import YAML
@@ -265,27 +265,23 @@ class TestAddCitation:
             "profiler_config",
         }
 
+    @pytest.mark.parametrize(
+        "citation_date",
+        [
+            pytest.param("2022-09-08", id="str override"),
+            pytest.param(datetime.datetime(2022, 9, 8), id="datetime override"),
+        ],
+    )
     @pytest.mark.unit
-    def test_add_citation_citation_date_str_override(
-        self, empty_suite_with_meta: ExpectationSuite
+    def test_add_citation_citation_date_override(
+        self, citation_date: Union[str, datetime.datetime], empty_suite_with_meta: ExpectationSuite
     ):
-        empty_suite_with_meta.add_citation("fake_comment", citation_date="2022-09-08")
+        empty_suite_with_meta.add_citation("fake_comment", citation_date=citation_date)
         assert (
             empty_suite_with_meta.meta["citations"][0]["citation_date"]
             == "2022-09-08T00:00:00.000000Z"
         )
 
-    @pytest.mark.unit
-    def test_add_citation_citation_date_datetime_override(
-        self, empty_suite_with_meta: ExpectationSuite
-    ):
-        empty_suite_with_meta.add_citation(
-            "fake_comment", citation_date=datetime.datetime(2022, 9, 8)
-        )
-        assert (
-            empty_suite_with_meta.meta["citations"][0]["citation_date"]
-            == "2022-09-08T00:00:00.000000Z"
-        )
 
     @pytest.mark.unit
     def test_add_citation_with_existing_citations(
