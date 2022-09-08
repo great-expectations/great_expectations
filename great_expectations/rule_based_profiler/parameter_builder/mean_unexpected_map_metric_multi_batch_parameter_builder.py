@@ -176,9 +176,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
             ]
 
-        nonnull_count_values: np.ndarray = (
-            total_count_values - null_count_values + NP_EPSILON
-        )
+        nonnull_count_values: np.ndarray = total_count_values - null_count_values
 
         # Compute "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").
         super().build_parameters(
@@ -201,8 +199,8 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        unexpected_count_ratio_values: np.ndarray = (
-            unexpected_count_values / nonnull_count_values
+        unexpected_count_ratio_values: np.ndarray = unexpected_count_values / (
+            nonnull_count_values + NP_EPSILON
         )
         mean_unexpected_count_ratio: np.float64 = np.mean(unexpected_count_ratio_values)
 

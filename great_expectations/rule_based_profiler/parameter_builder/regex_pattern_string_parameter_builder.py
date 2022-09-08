@@ -160,7 +160,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
 
-        nonnull_count: int = sum(metric_values) + NP_EPSILON
+        nonnull_count: int = sum(metric_values)
 
         # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
         candidate_regexes: Union[
@@ -214,9 +214,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
             match_regex_unexpected_count: int = sum(metric_values)
-            success_ratio: float = (
-                nonnull_count - match_regex_unexpected_count
-            ) / nonnull_count
+            success_ratio: float = (nonnull_count - match_regex_unexpected_count) / (
+                nonnull_count + NP_EPSILON
+            )
             regex_string_success_ratios[
                 attributed_resolved_metrics.metric_attributes["regex"]
             ] = success_ratio
