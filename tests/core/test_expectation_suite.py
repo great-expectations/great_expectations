@@ -152,11 +152,12 @@ class TestInitMethod:
 
         test_meta = {"this_is_not_json_serializable": NotSerializable()}
 
-        with pytest.raises(InvalidExpectationConfigurationError):
+        with pytest.raises(InvalidExpectationConfigurationError) as e:
             ExpectationSuite(
                 expectation_suite_name=fake_expectation_suite_name,
                 meta=test_meta,  # type: ignore[arg-type]
             )
+        assert "is of type NotSerializable which cannot be serialized to json" in str(e.value)
 
 
 class TestAddCitation:
