@@ -316,12 +316,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         batch_identifiers: dict,
     ) -> bool:
         """Split on the hashed value of the named column"""
-        if self._dialect == "sqlite":
-            return (
-                sa.func.md5(sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits)
-                == batch_identifiers[column_name]
-            )
-
         raise NotImplementedError(
             f'Splitter method "split_on_hashed_column" is not supported for "{self._dialect}" SQL dialect.'
         )

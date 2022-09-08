@@ -59,6 +59,7 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
 @mock.patch(
     "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
 )
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "splitter_method_name,called_with_date_parts",
     [

@@ -12,6 +12,7 @@ from great_expectations.datasource.data_connector import (
     ConfiguredAssetSqlDataConnector,
     InferredAssetSqlDataConnector,
 )
+from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -1811,19 +1812,57 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
 @pytest.mark.parametrize(
     "splitter_method,splitter_kwargs,table_name,first_3_batch_identifiers_expected,last_3_batch_identifiers_expected",
     [
-        ("split_on_year", {}, "", [], []),
-        ("split_on_year_and_month", {}, "", [], []),
-        ("split_on_year_and_month_and_day", {}, "", [], []),
-        ("split_on_date_parts", {}, "", [], []),
-        ("split_on_whole_table", {}, "", [], []),
+        # (
+        #     "split_on_year",
+        #     {"column_name": "date"},
+        #     "table_partitioned_by_date_column__A",
+        #     [],
+        #     [],
+        # ),
+        (
+            "split_on_year_and_month",
+            {"column_name": "date"},
+            "table_partitioned_by_date_column__A",
+            [],
+            [],
+        ),
+        (
+            "split_on_year_and_month_and_day",
+            {"column_name": "date"},
+            "table_partitioned_by_date_column__A",
+            [],
+            [],
+        ),
+        (
+            "split_on_date_parts",
+            {"column_name": "date", "date_parts": [DatePart.MONTH]},
+            "table_partitioned_by_date_column__A",
+            [],
+            [],
+        ),
+        # ("split_on_whole_table", {}, "", [], []),
         (
             "split_on_column_value",
             {"column_name": "date"},
             "table_partitioned_by_date_column__A",
             [{"date": "2020-01-01"}, {"date": "2020-01-02"}, {"date": "2020-01-03"}],
-            [{"date": "2020-01-28"}, {"date": "2020-01-29"}, {"date": "2020-01-30"}],
+            [{"date": "2021-01-01"}, {"date": "2022-01-01"}, {"date": "2023-01-01"}],
         ),
-        ("split_on_converted_datetime", {}, "", [], []),
+        (
+            "split_on_converted_datetime",
+            {"column_name": "date"},
+            "table_partitioned_by_date_column__A",
+            [
+                {"date": "2020-01-01"},
+                {"date": "2020-01-02"},
+                {"date": "2020-01-03"},
+            ],
+            [
+                {"date": "2021-01-01"},
+                {"date": "2022-01-01"},
+                {"date": "2023-01-01"},
+            ],
+        ),
         (
             "split_on_divided_integer",
             {"column_name": "id", "divisor": 10},
@@ -1831,7 +1870,13 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
             [{"id": 0}, {"id": 1}, {"id": 2}],
             [{"id": 9}, {"id": 10}, {"id": 11}],
         ),
-        ("split_on_mod_integer", {}, "", [], []),
+        (
+            "split_on_mod_integer",
+            {"column_name": "id", "mod": 10},
+            "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+            [{"id": 0}, {"id": 1}, {"id": 2}],
+            [{"id": 7}, {"id": 8}, {"id": 9}],
+        ),
         (
             "split_on_multi_column_values",
             {"column_names": ["y", "m", "d"]},
@@ -1847,7 +1892,7 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
                 {"d": 30, "m": 1, "y": 2020},
             ],
         ),
-        ("split_on_hashed_column", {}, "", [], []),
+        # ("split_on_hashed_column", {"column_name": "id", "hash_digits": 7}, "table_that_should_be_partitioned_by_random_hash__H", [], []),
     ],
 )
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
