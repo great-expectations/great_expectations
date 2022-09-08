@@ -224,12 +224,3 @@ class DatasourceStore(Store):
             resource_name=datasource_name,
         )
         return datasource_key
-
-    def _validate_key(self, key: Union[GeCloudIdentifier, Tuple[str, ...]]) -> None:  # type: ignore[override]
-        # Continue to support tuple as a key for get method until we can refactor
-        if not isinstance(key, GeCloudIdentifier):
-            super()._validate_key(key)  # type: ignore[arg-type]
-        else:
-            assert isinstance(
-                key, GeCloudIdentifier
-            ), f"Only {GeCloudIdentifier.__name__} is supported in {self.__class__.__name__}"
