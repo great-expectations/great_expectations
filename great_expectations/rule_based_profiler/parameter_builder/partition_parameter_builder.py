@@ -1,10 +1,11 @@
-from typing import Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 import numpy as np
 
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
+    NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import MetricValue
@@ -182,7 +183,8 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        if bins is None:
+        element: Any
+        if bins is None or all(element is None for element in bins):
             is_categorical = True
         elif not is_categorical:
             ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
@@ -238,9 +240,12 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
                         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
                     ]
                 )
-                / column_values_nonnull_count_parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-                ]
+                / (
+                    column_values_nonnull_count_parameter_node[
+                        FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+                    ]
+                    + NP_EPSILON
+                )
             )
 
             partition_object = {
@@ -280,9 +285,12 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             bins = list(bins)
             weights = list(
                 np.asarray(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY])
-                / column_values_nonnull_count_parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-                ]
+                / (
+                    column_values_nonnull_count_parameter_node[
+                        FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+                    ]
+                    + NP_EPSILON
+                )
             )
             tail_weights: float = (1.0 - sum(weights)) / 2.0
 

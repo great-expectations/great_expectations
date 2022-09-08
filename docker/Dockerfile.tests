@@ -26,5 +26,5 @@ CMD [ "python", "--version"]
 FROM dev as test
 RUN pip install --no-cache-dir --requirement requirements-dev-test.txt --constraint constraints-dev.txt
 
-FROM test as azure
-RUN pip install --no-cache-dir --requirement requirements-dev-test-pipeline.txt --constraint constraints-dev.txt
+FROM dev as dev-tools
+RUN pip install --no-cache-dir --requirement requirements-dev-tools.txt --constraint constraints-dev.txt

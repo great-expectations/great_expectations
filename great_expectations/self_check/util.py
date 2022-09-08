@@ -1630,6 +1630,7 @@ def build_sa_engine(
     df: pd.DataFrame,
     sa: ModuleType,
     schema: Optional[str] = None,
+    batch_id: Optional[str] = None,
     if_exists: str = "fail",
     index: bool = False,
     dtype: Optional[dict] = None,
@@ -1655,8 +1656,11 @@ def build_sa_engine(
     )
     batch = Batch(data=batch_data)
 
+    if batch_id is None:
+        batch_id = batch.id
+
     execution_engine = SqlAlchemyExecutionEngine(
-        engine=sqlalchemy_engine, batch_data_dict={batch.id: batch_data}
+        engine=sqlalchemy_engine, batch_data_dict={batch_id: batch_data}
     )
 
     return execution_engine
@@ -2917,13 +2921,16 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                         + str(result["result"]["unexpected_list"])
                     )
                 except AssertionError as e:
-                    if type(result["result"]["unexpected_list"][0]) == list:
-                        unexpected_list_tup = [
-                            tuple(x) for x in result["result"]["unexpected_list"]
-                        ]
-                        assert (
-                            unexpected_list_tup == value
-                        ), f"{unexpected_list_tup} != {value}"
+                    if result["result"]["unexpected_list"]:
+                        if type(result["result"]["unexpected_list"][0]) == list:
+                            unexpected_list_tup = [
+                                tuple(x) for x in result["result"]["unexpected_list"]
+                            ]
+                            assert (
+                                unexpected_list_tup == value
+                            ), f"{unexpected_list_tup} != {value}"
+                        else:
+                            raise
                     else:
                         raise
 

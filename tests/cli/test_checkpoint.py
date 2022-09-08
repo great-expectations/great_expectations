@@ -731,6 +731,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.69s
 def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     mock_webbroser,
     mock_subprocess,
@@ -1486,6 +1487,7 @@ def test_checkpoint_run_on_non_existent_validations(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.48s
 def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     mock_emit,
     caplog,
@@ -1703,6 +1705,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.44s
 def test_checkpoint_run_happy_path_with_successful_validation_sql(
     mock_emit,
     caplog,
@@ -2131,6 +2134,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.52s
 def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     mock_emit,
     caplog,
@@ -2348,6 +2352,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.44s
 def test_checkpoint_run_happy_path_with_failed_validation_sql(
     mock_emit,
     caplog,
@@ -2763,6 +2768,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.11s
 def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas(
     mock_emit,
     caplog,
@@ -2973,6 +2979,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.05s
 def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     mock_emit,
     caplog,
@@ -3504,6 +3511,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.34s
 def test_checkpoint_script_happy_path_generates_script_pandas(
     mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
@@ -3565,6 +3573,7 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
     )
 
 
+@pytest.mark.slow  # 7.49s
 def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     caplog,
     monkeypatch,
@@ -3679,6 +3688,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     assert "Validation succeeded!" in output
 
 
+@pytest.mark.slow  # 7.51s
 def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     caplog,
     monkeypatch,
@@ -3802,6 +3812,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     assert "Validation failed!" in output
 
 
+@pytest.mark.slow  # 7.69s
 def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data_pandas(
     caplog,
     monkeypatch,

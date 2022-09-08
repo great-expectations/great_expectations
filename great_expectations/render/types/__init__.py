@@ -3,13 +3,8 @@ from copy import deepcopy
 from string import Template as pTemplate
 from typing import List, Optional
 
-from great_expectations.marshmallow__shade import (
-    INCLUDE,
-    Schema,
-    fields,
-    post_dump,
-    post_load,
-)
+from marshmallow import INCLUDE, Schema, fields, post_dump, post_load
+
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
@@ -615,7 +610,7 @@ class RenderedAtomicValueSchema(Schema):
         their values are None."""
         data = deepcopy(data)
         for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
-            if key == "graph" and key in data and data[key].graph is None:
+            if key == "graph" and key in data and data[key]["graph"] is None:
                 data.pop(key)
             elif key in data and data[key] is None:
                 data.pop(key)

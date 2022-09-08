@@ -16,6 +16,7 @@ from tests.core.usage_statistics.util import (
 )
 
 
+@pytest.mark.integration
 def test_expectations_store(empty_data_context):
     context: DataContext = empty_data_context
     my_store = ExpectationsStore()
@@ -52,6 +53,7 @@ def test_expectations_store(empty_data_context):
     }
 
 
+@pytest.mark.integration
 def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     context: DataContext = empty_data_context
     # Use sqlite so we don't require postgres for this test.
@@ -122,6 +124,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     }
 
 
+@pytest.mark.unit
 def test_expectations_store_report_store_backend_id_in_memory_store_backend():
     """
     What does this test and why?
@@ -197,6 +200,7 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -233,3 +237,29 @@ store_backend:
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_ge_cloud_response_json_to_object_dict() -> None:
+    store = ExpectationsStore(store_name="expectations_store")
+
+    suite_id = "03d61d4e-003f-48e7-a3b2-f9f842384da3"
+    suite_config = {
+        "expectation_suite_name": "my_suite",
+    }
+    response_json = {
+        "data": {
+            "id": suite_id,
+            "attributes": {
+                "suite": suite_config,
+            },
+        }
+    }
+
+    expected = suite_config
+    expected["ge_cloud_id"] = suite_id
+
+    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+
+    assert actual == expected

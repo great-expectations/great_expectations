@@ -61,7 +61,6 @@ exclude = [
     'execution_engine/sqlalchemy_execution_engine\.py',  # 8
     'execution_engine/sqlalchemy_batch_data\.py',  # 1
     'execution_engine/execution_engine\.py',  # 7
-    'marshmallow__shade', # 19
     'render/renderer', # 78
     'render/view',  # 11
     'render/types',  # 4
@@ -99,16 +98,17 @@ filterwarnings = [
 ]
 junit_family="xunit2"
 markers = [
+    "base_data_context: mark test as being relevant to BaseDataContext, which will be removed during refactor",
+    "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs: mark a test as a docs test.",
-    "unit: mark a test as a unit test.",
-    "integration: mark test as an integration test.",
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
-    "cloud: mark test as being relevant to Great Expectations Cloud.",
-    "base_data_context: mark test as being relevant to BaseDataContext, which will be removed during refactor",
+    "integration: mark test as an integration test.",
+    "slow: mark tests taking longer than 1 second.",
+    "unit: mark a test as a unit test.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors)",
 ]
 testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`
 # https://pytest-mock.readthedocs.io/en/latest/configuration.html#use-standalone-mock-package
-mock_use_standalone_module = true
+mock_use_standalone_module = false
