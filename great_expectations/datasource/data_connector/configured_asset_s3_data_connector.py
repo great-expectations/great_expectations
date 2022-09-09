@@ -48,7 +48,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         ConfiguredAssetDataConnector for connecting to S3.
@@ -71,7 +71,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             assets=assets,

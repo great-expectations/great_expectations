@@ -38,7 +38,7 @@ def profiler_with_id(profiler_id: str, profiler_rules: dict) -> RuleBasedProfile
     return RuleBasedProfiler(
         "my_profiler",
         config_version=1.0,
-        id_=profiler_id,
+        id=profiler_id,
         rules=profiler_rules,
     )
 
@@ -203,14 +203,13 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     assert return_profiler.ge_cloud_id == profiler_id
 
 
-@pytest.mark.xfail(
-    reason="GX Cloud E2E tests are currently failing due to env vars not being recognized by Docker; xfailing for purposes of the 0.15.20 release",
-    run=True,
-    strict=True,
-)
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
+@pytest.mark.xfail(
+    strict=False,
+    reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",
+)
 def test_cloud_backed_data_context_add_profiler_e2e(
     mock_save_project_config: mock.MagicMock,
     profiler_rules: dict,

@@ -497,6 +497,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     run=True,
     strict=True,
 )
+@pytest.mark.slow  # 1.02s
 def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     caplog, monkeypatch, tmp_path_factory
 ):

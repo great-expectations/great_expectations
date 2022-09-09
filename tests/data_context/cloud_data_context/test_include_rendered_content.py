@@ -9,6 +9,10 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
+from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
@@ -40,10 +44,18 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
     """
     context = request.getfixturevalue(data_context_fixture_name)
 
+    ge_cloud_id = "d581305a-cdce-483b-84ba-5c673d2ce009"
+    cloud_ref = GeCloudResourceRef(
+        resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+        ge_cloud_id=ge_cloud_id,
+        url="foo/bar/baz",
+    )
+
     with mock.patch(
         "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
     ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set",
+        return_value=cloud_ref,
     ):
         expectation_suite: ExpectationSuite = context.create_expectation_suite(
             "test_suite"
@@ -68,7 +80,7 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         mock_update.call_args[1]["value"].pop("meta")
 
         mock_update.assert_called_with(
-            ge_cloud_id="None",
+            ge_cloud_id=ge_cloud_id,
             value={
                 "expectations": [
                     {
@@ -96,7 +108,7 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
                         ],
                     }
                 ],
-                "ge_cloud_id": None,
+                "ge_cloud_id": ge_cloud_id,
                 "data_asset_type": None,
                 "expectation_suite_name": "test_suite",
             },

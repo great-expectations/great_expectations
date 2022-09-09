@@ -22,15 +22,6 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-ExpectationValidationResultRenderedContent = namedtuple(
-    "ExpectationValidationResultRenderedContent",
-    [
-        "ExpectationConfigurationRenderedContent",
-        "ExpectationValidationResultRenderedContent",
-    ],
-)
-
-
 class InlineRendererConfig(TypedDict):
     class_name: str
     render_object: Union[ExpectationConfiguration, ExpectationValidationResult]
@@ -161,32 +152,16 @@ Default renderer "{default_prescriptive_renderer_name}" will be used to render p
 
         return renderer_rendered_content
 
-    def get_expectation_validation_result_rendered_content(
-        self,
-    ) -> ExpectationValidationResultRenderedContent:
-        """Gets RenderedAtomicContent for a given ExpectationValidationResult.
-
-        Returns:
-            A tuple containing RenderedAtomicContent objects for a given ExpectationConfiguration (index 0) and
-            ExpectationValidationResult (index 1).
-        """
-        render_object: ExpectationValidationResult = self._render_object
-
-        return ExpectationValidationResultRenderedContent(
-            self._get_atomic_rendered_content_for_object(
-                render_object=render_object.expectation_config
-            ),
-            self._get_atomic_rendered_content_for_object(render_object=render_object),
-        )
-
-    def get_expectation_configuration_rendered_content(
+    def get_rendered_content(
         self,
     ) -> List[RenderedAtomicContent]:
-        """Gets RenderedAtomicContent for a given ExpectationConfiguration.
+        """Gets RenderedAtomicContent for a given object.
 
         Returns:
-            RenderedAtomicContent objects for a given ExpectationConfiguration.
+            RenderedAtomicContent for a given object.
         """
-        render_object: ExpectationConfiguration = self._render_object
+        render_object: Union[
+            ExpectationConfiguration, ExpectationValidationResult
+        ] = self._render_object
 
         return self._get_atomic_rendered_content_for_object(render_object=render_object)

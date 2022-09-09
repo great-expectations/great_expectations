@@ -10,6 +10,7 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 )
 
 
+@pytest.mark.unit
 def test_get_chart_titles():
     title_text: str = "This is the title"
 

@@ -43,12 +43,16 @@ def send_slack_notification(
 
     try:
         response = session.post(url=url, headers=headers, json=query)
+        if slack_webhook:
+            ok_status = response.text == "ok"
+        else:
+            ok_status = response.json()["ok"]
     except requests.ConnectionError:
         logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200 or not ok_status:
             logger.warning(
                 "Request to Slack webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -71,6 +75,7 @@ def send_opsgenie_alert(query, suite_name, settings):
         "message": f"Great Expectations suite {suite_name} failed",
         "description": query,
         "priority": settings["priority"],  # allow this to be modified in settings
+        "tags": settings["tags"],
     }
 
     session = requests.Session()
@@ -208,10 +213,10 @@ def get_substituted_validation_dict(
         ),
         "include_rendered_content": validation_dict.get("include_rendered_content")
         or substituted_runtime_config.get("include_rendered_content")
-        or False,
+        or None,
     }
 
-    for attr in ("name", "id_"):
+    for attr in ("name", "id"):
         if validation_dict.get(attr) is not None:
             substituted_validation_dict[attr] = validation_dict[attr]
 

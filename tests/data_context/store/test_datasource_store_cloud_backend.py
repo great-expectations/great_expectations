@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Callable, Dict
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -24,6 +24,8 @@ def test_datasource_store_create(
     shared_called_with_request_kwargs: dict,
     datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
+    mocked_datasource_post_response: Callable[[], MockResponse],
+    mocked_datasource_get_response: Callable[[], MockResponse],
 ) -> None:
     """What does this test and why?
 
@@ -35,8 +37,11 @@ def test_datasource_store_create(
         resource_type=GeCloudRESTResource.DATASOURCE,
     )
 
-    with patch("requests.post", autospec=True) as mock_post:
-        type(mock_post.return_value).status_code = PropertyMock(return_value=200)
+    with patch(
+        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
+    ) as mock_post, patch(
+        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    ):
 
         datasource_store_ge_cloud_backend.set(key=key, value=datasource_config)
 
@@ -71,10 +76,10 @@ def test_datasource_store_get_by_id(
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource.
     """
 
-    id_: str = "example_id_normally_uuid"
+    id: str = "example_id_normally_uuid"
 
     key = GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
+        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id
     )
 
     def mocked_response(*args, **kwargs):
@@ -82,7 +87,7 @@ def test_datasource_store_get_by_id(
         return MockResponse(
             {
                 "data": {
-                    "id_": id_,
+                    "id": id,
                     "attributes": {"datasource_config": datasource_config},
                 }
             },
@@ -94,7 +99,7 @@ def test_datasource_store_get_by_id(
         datasource_store_ge_cloud_backend.get(key=key)
 
         mock_get.assert_called_once_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id_}",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id}",
             params=None,
             **shared_called_with_request_kwargs,
         )
@@ -114,7 +119,7 @@ def test_datasource_store_get_by_name(
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource with a name.
     """
 
-    id_: str = "example_id_normally_uuid"
+    id: str = "example_id_normally_uuid"
     datasource_name: str = "example_datasource_config_name"
 
     def mocked_response(*args, **kwargs):
@@ -122,7 +127,7 @@ def test_datasource_store_get_by_name(
         return MockResponse(
             {
                 "data": {
-                    "id_": id_,
+                    "id": id,
                     "attributes": {"datasource_config": datasource_config},
                 }
             },
@@ -161,10 +166,10 @@ def test_datasource_store_delete_by_id(
 
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource.
     """
-    id_: str = "example_id_normally_uuid"
+    id: str = "example_id_normally_uuid"
 
     key = GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
+        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id
     )
 
     with patch("requests.delete", autospec=True) as mock_delete:
@@ -173,11 +178,11 @@ def test_datasource_store_delete_by_id(
         datasource_store_ge_cloud_backend.remove_key(key=key)
 
         mock_delete.assert_called_once_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id_}",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id}",
             json={
                 "data": {
                     "type": "datasource",
-                    "id_": id_,
+                    "id": id,
                     "attributes": {"deleted": True},
                 }
             },
@@ -208,10 +213,10 @@ def test_datasource_http_error_handling(
     method: str,
     args: list,
 ):
-    id_: str = "example_id_normally_uuid"
+    id: str = "example_id_normally_uuid"
 
     key = GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id_
+        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id
     )
     with pytest.raises(
         StoreBackendError, match=r"Unable to \w+ object in GE Cloud Store Backend: .*"

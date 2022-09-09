@@ -1,9 +1,14 @@
 import copy
+import inspect
 import logging
 from decimal import Decimal
+from typing import Union
+from unittest import mock
 
 import pandas as pd
 import pytest
+from _pytest.fixtures import FixtureRequest
+from marshmallow import Schema
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
@@ -11,16 +16,16 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
     AbstractConfig,
+    AssetConfig,
     CheckpointConfig,
     CheckpointValidationConfig,
+    DataConnectorConfig,
     DatasourceConfig,
+    ExecutionEngineConfig,
+    assetConfigSchema,
     checkpointConfigSchema,
+    dataConnectorConfigSchema,
     datasourceConfigSchema,
-)
-from great_expectations.marshmallow__shade import Schema
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -28,7 +33,213 @@ from great_expectations.util import (
     requires_lossy_conversion,
 )
 
+try:
+    from pyspark.sql.types import IntegerType, StructField, StructType
+except ImportError:
+    IntegerType = None
+    StructField = None
+    StructType = None
 
+
+@pytest.fixture
+def spark_schema(spark_session) -> "StructType":
+    return StructType(
+        [
+            StructField("a", IntegerType(), True, None),
+            StructField("b", IntegerType(), True, None),
+        ]
+    )
+
+
+# The following fixtures are used by parameterized tests for serializing
+# Spark schemas. They follow the pattern described in:
+# https://miguendes.me/how-to-use-fixtures-as-arguments-in-pytestmarkparametrize
+@pytest.fixture
+def checkpoint_config_spark(spark_session) -> CheckpointConfig:
+    return CheckpointConfig(
+        name="my_nested_checkpoint",
+        config_version=1,
+        template_name="my_nested_checkpoint_template",
+        expectation_suite_name="users.delivery",
+        validations=[
+            CheckpointValidationConfig(
+                batch_request={
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_data_connector",
+                    "data_asset_name": "users",
+                    "data_connector_query": {"partition_index": -1},
+                    "batch_spec_passthrough": {"reader_options": {"header": True}},
+                },
+                id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+            ),
+        ],
+    )
+
+
+@pytest.fixture
+def checkpoint_config_with_schema_spark(
+    spark_session, spark_schema
+) -> CheckpointConfig:
+    return CheckpointConfig(
+        name="my_nested_checkpoint",
+        config_version=1,
+        template_name="my_nested_checkpoint_template",
+        expectation_suite_name="users.delivery",
+        validations=[
+            CheckpointValidationConfig(
+                batch_request={
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_data_connector",
+                    "data_asset_name": "users",
+                    "data_connector_query": {"partition_index": -1},
+                    "batch_spec_passthrough": {
+                        "reader_options": {"schema": spark_schema}
+                    },
+                },
+                id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+            ),
+        ],
+    )
+
+
+@pytest.fixture
+def datasource_config_spark(spark_session) -> DatasourceConfig:
+    return DatasourceConfig(
+        name="taxi_data",
+        class_name="Datasource",
+        module_name="great_expectations.datasource",
+        execution_engine=ExecutionEngineConfig(
+            class_name="SparkDFExecutionEngine",
+            module_name="great_expectations.execution_engine.sparkdf_execution_engine",
+        ),
+        data_connectors={
+            "configured_asset_connector": DataConnectorConfig(
+                class_name="ConfiguredAssetFilesystemDataConnector",
+                module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                assets={
+                    "my_asset": AssetConfig(
+                        class_name="Asset",
+                        module_name="great_expectations.datasource.data_connector.asset",
+                        batch_spec_passthrough={
+                            "reader_options": {"header": True},
+                        },
+                    )
+                },
+            )
+        },
+    )
+
+
+@pytest.fixture
+def datasource_config_with_schema_at_asset_level_spark(
+    spark_session, spark_schema
+) -> DatasourceConfig:
+    return DatasourceConfig(
+        name="taxi_data",
+        class_name="Datasource",
+        module_name="great_expectations.datasource",
+        execution_engine=ExecutionEngineConfig(
+            class_name="SparkDFExecutionEngine",
+            module_name="great_expectations.execution_engine.sparkdf_execution_engine",
+        ),
+        data_connectors={
+            "configured_asset_connector": DataConnectorConfig(
+                class_name="ConfiguredAssetFilesystemDataConnector",
+                module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                assets={
+                    "my_asset": AssetConfig(
+                        class_name="Asset",
+                        module_name="great_expectations.datasource.data_connector.asset",
+                        batch_spec_passthrough={
+                            "reader_options": {
+                                "header": True,
+                                "schema": spark_schema,
+                            },
+                        },
+                    )
+                },
+            )
+        },
+    )
+
+
+@pytest.fixture
+def datasource_config_with_schema_at_data_connector_level_spark(
+    spark_session, spark_schema
+) -> DatasourceConfig:
+    return DatasourceConfig(
+        name="taxi_data",
+        class_name="Datasource",
+        module_name="great_expectations.datasource",
+        execution_engine=ExecutionEngineConfig(
+            class_name="SparkDFExecutionEngine",
+            module_name="great_expectations.execution_engine.sparkdf_execution_engine",
+        ),
+        data_connectors={
+            "configured_asset_connector": DataConnectorConfig(
+                class_name="ConfiguredAssetFilesystemDataConnector",
+                module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                batch_spec_passthrough={
+                    "reader_options": {"header": True, "schema": spark_schema},
+                },
+                assets={
+                    "my_asset": AssetConfig(
+                        class_name="Asset",
+                        module_name="great_expectations.datasource.data_connector.asset",
+                    )
+                },
+            )
+        },
+    )
+
+
+@pytest.fixture
+def data_connector_config_spark(spark_session) -> DataConnectorConfig:
+    return DataConnectorConfig(
+        class_name="ConfiguredAssetFilesystemDataConnector",
+        module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+        batch_spec_passthrough={
+            "reader_options": {"header": True},
+        },
+    )
+
+
+@pytest.fixture
+def datas_connector_config_with_schema_spark(
+    spark_session, spark_schema
+) -> DataConnectorConfig:
+    return DataConnectorConfig(
+        class_name="ConfiguredAssetFilesystemDataConnector",
+        module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+        batch_spec_passthrough={
+            "reader_options": {"header": True, "schema": spark_schema},
+        },
+    )
+
+
+@pytest.fixture
+def asset_config_spark(spark_session) -> AssetConfig:
+    return AssetConfig(
+        class_name="Asset",
+        module_name="great_expectations.datasource.data_connector.asset",
+        batch_spec_passthrough={
+            "reader_options": {"header": True},
+        },
+    )
+
+
+@pytest.fixture
+def asset_config_with_schema_spark(spark_session, spark_schema) -> AssetConfig:
+    return AssetConfig(
+        class_name="Asset",
+        module_name="great_expectations.datasource.data_connector.asset",
+        batch_spec_passthrough={
+            "reader_options": {"header": True, "schema": spark_schema},
+        },
+    )
+
+
+@pytest.mark.unit
 def test_lossy_serialization_warning(caplog):
     caplog.set_level(logging.WARNING, logger="great_expectations.core")
 
@@ -47,6 +258,31 @@ def test_lossy_serialization_warning(caplog):
     assert len(caplog.messages) == 0
 
 
+@pytest.mark.unit
+def test_lossy_serialization_rule_based_profiler_no_warning(caplog):
+    caplog.set_level(logging.WARNING, logger="great_expectations.core")
+
+    with mock.patch.multiple(
+        inspect.FrameInfo,
+        filename="great_expectations/rule_based_profiler/parameter_builder/parameter_builder.py",
+        function="get_metrics",
+        frame=inspect.FrameInfo.frame,
+        lineno=260,
+        code_context=None,
+        index=None,
+    ):
+        d = Decimal("12345.678901234567890123456789")
+        convert_to_json_serializable(d)
+        assert len(caplog.messages) == 0
+
+    caplog.clear()
+    d = Decimal("0.1")
+    convert_to_json_serializable(d)
+    print(caplog.messages)
+    assert len(caplog.messages) == 0
+
+
+@pytest.mark.unit
 def test_lossy_conversion():
     d = Decimal("12345.678901234567890123456789")
     assert requires_lossy_conversion(d)
@@ -81,6 +317,7 @@ def test_serialization_of_spark_df(spark_session):
     assert convert_to_json_serializable(sdf) == {"a": [1, 2, 3], "b": [4, 5, 6]}
 
 
+@pytest.mark.unit
 def test_batch_request_deepcopy():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -106,6 +343,7 @@ def test_batch_request_deepcopy():
     )
 
 
+@pytest.mark.integration
 def test_checkpoint_config_deepcopy(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
@@ -239,6 +477,7 @@ def test_checkpoint_config_deepcopy(
     )
 
 
+@pytest.mark.integration
 def test_checkpoint_config_print(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
@@ -595,7 +834,7 @@ def test_checkpoint_config_print(
                             "data_asset_name": "users",
                             "data_connector_query": {"partition_index": -1},
                         },
-                        id_="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                        id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     ),
                 ],
             ),
@@ -645,7 +884,7 @@ def test_checkpoint_config_print(
                             "data_asset_name": "users",
                             "data_connector_query": {"partition_index": -1},
                         },
-                        id_="06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                        id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     ),
                 ],
             ),
@@ -682,6 +921,7 @@ def test_checkpoint_config_print(
         ),
     ],
 )
+@pytest.mark.unit
 def test_checkpoint_config_and_nested_objects_are_serialized(
     checkpoint_config: CheckpointConfig, expected_serialized_checkpoint_config: dict
 ) -> None:
@@ -696,79 +936,427 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
     )
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
-    "config,schema,expected_serialized_config",
+    "checkpoint_config,expected_serialized_checkpoint_config",
     [
         pytest.param(
-            DatasourceConfig(
-                class_name="Datasource",
-            ),
-            datasourceConfigSchema,
+            "checkpoint_config_spark",
             {
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-            },
-            id="DatasourceConfig-minimal",
-        ),
-        pytest.param(
-            DatasourceConfig(
-                name="my_datasource",
-                id_="d3a14abd-d4cb-4343-806e-55b555b15c28",
-                class_name="Datasource",
-            ),
-            datasourceConfigSchema,
-            {
-                "name": "my_datasource",
-                "id": "d3a14abd-d4cb-4343-806e-55b555b15c28",
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-            },
-            id="DatasourceConfig-minimal_with_name_and_id",
-        ),
-        pytest.param(
-            DatasourceConfig(
-                name="my_datasource",
-                class_name="Datasource",
-                data_connectors={
-                    "my_data_connector": DatasourceConfig(
-                        class_name="RuntimeDataConnector",
-                        batch_identifiers=["default_identifier_name"],
-                        id_="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
-                    )
-                },
-            ),
-            datasourceConfigSchema,
-            {
-                "name": "my_datasource",
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "my_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "module_name": "great_expectations.datasource",
-                        "id": "dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
-                        "batch_identifiers": ["default_identifier_name"],
+                "action_list": [],
+                "batch_request": {},
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "evaluation_parameters": {},
+                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_name": "users.delivery",
+                "ge_cloud_id": None,
+                "module_name": "great_expectations.checkpoint",
+                "name": "my_nested_checkpoint",
+                "profilers": [],
+                "run_name_template": None,
+                "runtime_configuration": {},
+                "template_name": "my_nested_checkpoint_template",
+                "validations": [
+                    {
+                        "batch_request": {
+                            "data_asset_name": "users",
+                            "data_connector_name": "my_data_connector",
+                            "data_connector_query": {
+                                "partition_index": -1,
+                            },
+                            "batch_spec_passthrough": {
+                                "reader_options": {"header": True}
+                            },
+                            "datasource_name": "my_datasource",
+                        },
+                        "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
                     },
-                },
+                ],
             },
-            id="DatasourceConfig-nested_data_connector_id",
+            id="config_no_schema",
+        ),
+        pytest.param(
+            "checkpoint_config_with_schema_spark",
+            {
+                "action_list": [],
+                "batch_request": {},
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "evaluation_parameters": {},
+                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_name": "users.delivery",
+                "ge_cloud_id": None,
+                "module_name": "great_expectations.checkpoint",
+                "name": "my_nested_checkpoint",
+                "profilers": [],
+                "run_name_template": None,
+                "runtime_configuration": {},
+                "template_name": "my_nested_checkpoint_template",
+                "validations": [
+                    {
+                        "batch_request": {
+                            "data_asset_name": "users",
+                            "data_connector_name": "my_data_connector",
+                            "data_connector_query": {
+                                "partition_index": -1,
+                            },
+                            "batch_spec_passthrough": {
+                                "reader_options": {
+                                    "schema": {
+                                        "fields": [
+                                            {
+                                                "metadata": {},
+                                                "name": "a",
+                                                "nullable": True,
+                                                "type": "integer",
+                                            },
+                                            {
+                                                "metadata": {},
+                                                "name": "b",
+                                                "nullable": True,
+                                                "type": "integer",
+                                            },
+                                        ],
+                                        "type": "struct",
+                                    }
+                                }
+                            },
+                            "datasource_name": "my_datasource",
+                        },
+                        "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
+                    },
+                ],
+            },
+            id="config_with_schema",
         ),
     ],
 )
-def test_dict_round_trip_serialization(
+@pytest.mark.integration
+def test_checkpoint_config_and_nested_objects_are_serialized_spark(
+    checkpoint_config: Union[CheckpointConfig, str],
+    expected_serialized_checkpoint_config: dict,
+    spark_session: "SparkSession",
+    request: FixtureRequest,
+):
+    # when using a fixture value in a parmeterized test, we need to call
+    # request.getfixturevalue()
+    if isinstance(checkpoint_config, str):
+        checkpoint_config = request.getfixturevalue(checkpoint_config)
+
+    observed_dump = checkpointConfigSchema.dump(checkpoint_config)
+    assert observed_dump == expected_serialized_checkpoint_config
+    loaded_data = checkpointConfigSchema.load(observed_dump)
+    observed_load = CheckpointConfig(**loaded_data)
+    assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
+        checkpoint_config
+    )
+
+
+@pytest.mark.parametrize(
+    "datasource_config,expected_serialized_datasource_config",
+    [
+        pytest.param(
+            "datasource_config_spark",
+            {
+                "class_name": "Datasource",
+                "data_connectors": {
+                    "configured_asset_connector": {
+                        "assets": {
+                            "my_asset": {
+                                "batch_spec_passthrough": {
+                                    "reader_options": {
+                                        "header": True,
+                                    }
+                                },
+                                "class_name": "Asset",
+                                "module_name": "great_expectations.datasource.data_connector.asset",
+                            }
+                        },
+                        "class_name": "ConfiguredAssetFilesystemDataConnector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                    }
+                },
+                "execution_engine": {
+                    "class_name": "SparkDFExecutionEngine",
+                    "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
+                },
+                "module_name": "great_expectations.datasource",
+                "name": "taxi_data",
+            },
+            id="datasource_with_header_no_schema",
+        ),
+        pytest.param(
+            "datasource_config_with_schema_at_asset_level_spark",
+            {
+                "class_name": "Datasource",
+                "data_connectors": {
+                    "configured_asset_connector": {
+                        "assets": {
+                            "my_asset": {
+                                "batch_spec_passthrough": {
+                                    "reader_options": {
+                                        "header": True,
+                                        "schema": {
+                                            "fields": [
+                                                {
+                                                    "metadata": {},
+                                                    "name": "a",
+                                                    "nullable": True,
+                                                    "type": "integer",
+                                                },
+                                                {
+                                                    "metadata": {},
+                                                    "name": "b",
+                                                    "nullable": True,
+                                                    "type": "integer",
+                                                },
+                                            ],
+                                            "type": "struct",
+                                        },
+                                    }
+                                },
+                                "class_name": "Asset",
+                                "module_name": "great_expectations.datasource.data_connector.asset",
+                            }
+                        },
+                        "class_name": "ConfiguredAssetFilesystemDataConnector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                    }
+                },
+                "execution_engine": {
+                    "class_name": "SparkDFExecutionEngine",
+                    "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
+                },
+                "module_name": "great_expectations.datasource",
+                "name": "taxi_data",
+            },
+            id="datasource_with_header_schema_at_asset_level",
+        ),
+        pytest.param(
+            "datasource_config_with_schema_at_data_connector_level_spark",
+            {
+                "class_name": "Datasource",
+                "data_connectors": {
+                    "configured_asset_connector": {
+                        "assets": {
+                            "my_asset": {
+                                "class_name": "Asset",
+                                "module_name": "great_expectations.datasource.data_connector.asset",
+                            }
+                        },
+                        "batch_spec_passthrough": {
+                            "reader_options": {
+                                "header": True,
+                                "schema": {
+                                    "fields": [
+                                        {
+                                            "metadata": {},
+                                            "name": "a",
+                                            "nullable": True,
+                                            "type": "integer",
+                                        },
+                                        {
+                                            "metadata": {},
+                                            "name": "b",
+                                            "nullable": True,
+                                            "type": "integer",
+                                        },
+                                    ],
+                                    "type": "struct",
+                                },
+                            }
+                        },
+                        "class_name": "ConfiguredAssetFilesystemDataConnector",
+                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+                    }
+                },
+                "execution_engine": {
+                    "class_name": "SparkDFExecutionEngine",
+                    "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
+                },
+                "module_name": "great_expectations.datasource",
+                "name": "taxi_data",
+            },
+            id="datasource_with_header_schema_at_data_connector_level",
+        ),
+    ],
+)
+@pytest.mark.integration
+def test_datasource_config_and_nested_objects_are_serialized_spark(
+    datasource_config: Union[DatasourceConfig, str],
+    expected_serialized_datasource_config: dict,
+    spark_session: "SparkSession",
+    request: FixtureRequest,
+):
+    # when using a fixture value in a parmeterized test, we need to call
+    # request.getfixturevalue()
+    if isinstance(datasource_config, str):
+        datasource_config = request.getfixturevalue(datasource_config)
+
+    observed_dump = datasourceConfigSchema.dump(obj=datasource_config)
+    assert observed_dump == expected_serialized_datasource_config
+    loaded_data = datasourceConfigSchema.load(observed_dump)
+    observed_load = DatasourceConfig(**loaded_data)
+    assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
+        datasource_config
+    )
+
+
+@pytest.mark.parametrize(
+    "data_connector_config,expected_serialized_data_connector_config",
+    [
+        pytest.param(
+            "data_connector_config_spark",
+            {
+                "batch_spec_passthrough": {
+                    "reader_options": {
+                        "header": True,
+                    }
+                },
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+            },
+            id="data_connector_with_schema",
+        ),
+        pytest.param(
+            "datas_connector_config_with_schema_spark",
+            {
+                "batch_spec_passthrough": {
+                    "reader_options": {
+                        "header": True,
+                        "schema": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "a",
+                                    "nullable": True,
+                                    "type": "integer",
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "b",
+                                    "nullable": True,
+                                    "type": "integer",
+                                },
+                            ],
+                            "type": "struct",
+                        },
+                    }
+                },
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+            },
+            id="data_connector_without_schema",
+        ),
+    ],
+)
+@pytest.mark.integration
+def test_data_connector_and_nested_objects_are_serialized_spark(
+    data_connector_config: DataConnectorConfig,
+    expected_serialized_data_connector_config: dict,
+    spark_session: "SparkSession",
+    request: FixtureRequest,
+):
+    # when using a fixture value in a parmeterized test, we need to call
+    # request.getfixturevalue()
+    if isinstance(data_connector_config, str):
+        data_connector_config = request.getfixturevalue(data_connector_config)
+
+    observed_dump = dataConnectorConfigSchema.dump(obj=data_connector_config)
+    assert observed_dump == expected_serialized_data_connector_config
+    observed_load = dataConnectorConfigSchema.load(observed_dump)
+    assert dataConnectorConfigSchema.dump(
+        observed_load
+    ) == dataConnectorConfigSchema.dump(data_connector_config)
+
+
+@pytest.mark.parametrize(
+    "asset_config,expected_serialized_asset_config",
+    [
+        pytest.param(
+            "asset_config_with_schema_spark",
+            {
+                "batch_spec_passthrough": {
+                    "reader_options": {
+                        "header": True,
+                        "schema": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "a",
+                                    "nullable": True,
+                                    "type": "integer",
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "b",
+                                    "nullable": True,
+                                    "type": "integer",
+                                },
+                            ],
+                            "type": "struct",
+                        },
+                    }
+                },
+                "class_name": "Asset",
+                "module_name": "great_expectations.datasource.data_connector.asset",
+            },
+            id="asset_serialized_with_schema",
+        ),
+        pytest.param(
+            "asset_config_spark",
+            {
+                "batch_spec_passthrough": {
+                    "reader_options": {"header": True},
+                },
+                "class_name": "Asset",
+                "module_name": "great_expectations.datasource.data_connector.asset",
+            },
+            id="asset_serialized_without_schema",
+        ),
+    ],
+)
+@pytest.mark.integration
+def test_asset_and_nested_objects_are_serialized_spark(
+    asset_config: AssetConfig,
+    expected_serialized_asset_config: dict,
+    spark_session: "SparkSession",
+    request: FixtureRequest,
+):
+    # when using a fixture value in a parmeterized test, we need to call
+    # request.getfixturevalue()
+    if isinstance(asset_config, str):
+        asset_config = request.getfixturevalue(asset_config)
+
+    observed_dump = assetConfigSchema.dump(obj=asset_config)
+    assert observed_dump == expected_serialized_asset_config
+    observed_load = assetConfigSchema.load(observed_dump)
+    assert assetConfigSchema.dump(observed_load) == assetConfigSchema.dump(asset_config)
+
+
+def generic_config_serialization_assertions(
     config: AbstractConfig,
     schema: Schema,
     expected_serialized_config: dict,
-):
-    observed_dump = datasourceConfigSchema.dump(config)
+    expected_roundtrip_config: dict,
+) -> None:
+    """Generic assertions for testing configuration serialization.
 
-    round_tripped = config._dict_round_trip(schema, observed_dump)
+    Args:
+        config: config object to check serialization.
+        schema: Marshmallow schema used for serializing / deserializing config object.
+        expected_serialized_config: expected when serializing a config via dump
+        expected_roundtrip_config: expected config after loading the dump
 
-    assert round_tripped == config.to_json_dict()
+    Returns:
+        None
 
-    assert (
-        round_tripped.get("id_")
-        == observed_dump.get("id")
-        == expected_serialized_config.get("id")
-    )
+    Raises:
+        AssertionError
+    """
+
+    observed_dump = schema.dump(config)
+    assert observed_dump == expected_serialized_config
+
+    loaded_data = schema.load(observed_dump)
+    assert loaded_data.to_json_dict() == expected_roundtrip_config

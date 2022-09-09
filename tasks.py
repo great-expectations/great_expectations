@@ -117,7 +117,9 @@ def type_coverage(ctx):
     try:
         check_type_hint_coverage.main()
     except AssertionError as err:
-        raise invoke.Exit(message=str(err), code=1)
+        raise invoke.Exit(
+            message=f"{err}\n\n  See {check_type_hint_coverage.__file__}", code=1
+        )
 
 
 @invoke.task(
@@ -138,6 +140,7 @@ def type_check(
     install_types=False,
     daemon=False,
     clear_cache=False,
+    report=False,
 ):
     """Run mypy static type-checking on select packages."""
     if clear_cache:
@@ -160,10 +163,12 @@ def type_check(
         *ge_pkgs,
     ]
     if install_types:
-        cmds.extend(["--install-types", "--non-interactive", "--no-strict-optional"])
+        cmds.extend(["--install-types", "--non-interactive"])
     if daemon:
         # see related issue https://github.com/python/mypy/issues/9475
         cmds.extend(["--follow-imports=normal"])
+    if report:
+        cmds.extend(["--txt-report", "type_cov", "--html-report", "type_cov"])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
@@ -202,34 +207,78 @@ def mv_usage_stats_json(ctx):
     print(f"'{outfile}' copied to dbfs.")
 
 
+UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
+
+
 @invoke.task(
     aliases=["test"],
     help={
+        "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
+        "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
+        "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
+        "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",
+        "html": "Create html coverage report",
+        "package": "Run tests on a specific package. Assumes there is a `tests/<PACKAGE>` directory of the same name.",
+        "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
     },
 )
-def tests(ctx, unit=True, ci=False, html=False, cloud=True, slowest=5):
-    """Run tests. Runs unit tests by default."""
-    # TODO: update this to also run the full e2e/integration tests (but unit-tests should always be the default mode)
+def tests(
+    ctx,
+    unit=True,
+    integration=False,
+    ignore_markers=False,
+    ci=False,
+    html=False,
+    cloud=True,
+    slowest=5,
+    timeout=UNIT_TEST_DEFAULT_TIMEOUT,
+    package=None,
+    full_cov=False,
+):
+    """
+    Run tests. Runs unit tests by default.
+
+    Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage (or lack thereof).
+    """
+    markers = []
+    if integration:
+        markers += ["integration"]
+        unit = False
+    markers += ["unit" if unit else "not unit"]
+
+    marker_text = " and ".join(markers)
+
+    cov_param = "--cov=great_expectations"
+    if package and not full_cov:
+        cov_param += f"/{package.replace('.', '/')}"
+
     cmds = [
         "pytest",
         f"--durations={slowest}",
-        "--cov=great_expectations",
-        "--cov-report term:skip-covered",  # modules with 100% will not be shown
+        cov_param,
+        "--cov-report term",
         "-vv",
     ]
-    if unit:
-        cmds += [
-            "-m",
-            "unit",
-        ]
+    if not ignore_markers:
+        cmds += ["-m", f"'{marker_text}'"]
+    if unit and not ignore_markers:
+        try:
+            import pytest_timeout  # noqa: F401
+
+            cmds += [f"--timeout={timeout}"]
+        except ImportError:
+            print("`pytest-timeout` is not installed, cannot use --timeout")
+
     if cloud:
         cmds += ["--cloud"]
     if ci:
         cmds += ["--cov-report", "xml"]
     if html:
         cmds += ["--cov-report", "html"]
+    if package:
+        cmds += [f"tests/{package.replace('.', '/')}"]  # allow `foo.bar`` format
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
