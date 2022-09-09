@@ -84,19 +84,6 @@ def context_with_data_source_and_empty_suite(
 
 
 @pytest.fixture
-def context_with_data_source_and_empty_suite_with_templates(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-    datasources = context.list_datasources()
-    assert datasources[0]["class_name"] == "Datasource"
-    assert "my_special_data_connector" in datasources[0]["data_connectors"].keys()
-    context.create_expectation_suite("one", overwrite_existing=True)
-    assert context.list_expectation_suite_names() == ["one"]
-    return context
-
-
-@pytest.fixture
 def simple_checkpoint_defaults(context_with_data_source_and_empty_suite):
     return SimpleCheckpoint(
         name="foo", data_context=context_with_data_source_and_empty_suite

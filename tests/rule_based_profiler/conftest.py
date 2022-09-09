@@ -31,46 +31,6 @@ RTOL: float = 1.0e-7
 ATOL: float = 5.0e-2
 
 
-@pytest.fixture
-def pandas_test_df():
-    df: pd.DataFrame = pd.DataFrame(
-        {
-            "Age": pd.Series(
-                [
-                    7,
-                    15,
-                    21,
-                    39,
-                    None,
-                ],
-                dtype="float64",
-            ),
-            "Date": pd.Series(
-                [
-                    datetime.date(2020, 12, 31),
-                    datetime.date(2021, 1, 1),
-                    datetime.date(2021, 2, 21),
-                    datetime.date(2021, 3, 20),
-                    None,
-                ],
-                dtype="object",
-            ),
-            "Description": pd.Series(
-                [
-                    "child",
-                    "teenager",
-                    "young adult",
-                    "adult",
-                    None,
-                ],
-                dtype="object",
-            ),
-        }
-    )
-    df["Date"] = pd.to_datetime(df["Date"])
-    return df
-
-
 # noinspection PyPep8Naming
 @pytest.fixture
 def table_Users_domain():
@@ -102,50 +62,6 @@ def column_Date_domain():
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Date",
-        },
-        details=None,
-        rule_name="my_rule",
-    )
-
-
-# noinspection PyPep8Naming
-@pytest.fixture
-def column_Description_domain():
-    return Domain(
-        domain_type=MetricDomainTypes.COLUMN,
-        domain_kwargs={
-            "column": "Description",
-        },
-        details=None,
-        rule_name="my_rule",
-    )
-
-
-# noinspection PyPep8Naming
-@pytest.fixture
-def column_pair_Age_Date_domain():
-    return Domain(
-        domain_type=MetricDomainTypes.COLUMN_PAIR,
-        domain_kwargs={
-            "column_A": "Age",
-            "column_B": "Date",
-        },
-        details=None,
-        rule_name="my_rule",
-    )
-
-
-# noinspection PyPep8Naming
-@pytest.fixture
-def multi_column_Age_Date_Description_domain():
-    return Domain(
-        domain_type=MetricDomainTypes.MULTICOLUMN,
-        domain_kwargs={
-            "column_list": [
-                "Age",
-                "Date",
-                "Description",
-            ],
         },
         details=None,
         rule_name="my_rule",
