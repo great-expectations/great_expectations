@@ -59,7 +59,6 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
 @mock.patch(
     "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
 )
-@pytest.mark.unit
 @pytest.mark.parametrize(
     "splitter_method_name,called_with_date_parts",
     [
@@ -326,8 +325,8 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     [
         pytest.param(dialect, expected_query_str, id=dialect)
         for dialect, expected_query_str in {
-            "sqlite": "SELECT DISTINCT(CAST(extract(year FROM column_name) AS varchar) || CAST (extract(month FROM column_name) AS varchar)) AS CONCAT_DISTINCT_values, CAST(extract(year FROM column_name) AS integer) AS year, CAST(extract(month FROM column_name) AS integer) AS month FROM table_name",
-            "postgres": "SELECT DISTINCT(CONCAT(CONCAT('', CAST(EXTRACT(year FROM column_name) AS VARCHAR)), CAST(EXTRACT(month FROM column_name) AS VARCHAR))) AS CONCAT_DISTINCT_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
+            "sqlite": "SELECT DISTINCT(CAST(EXTRACT(year FROM column_name) AS VARCHAR) || CAST (EXTRACT(month FROM column_name) AS VARCHAR)) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
+            "postgres": "SELECT DISTINCT(CONCAT(CONCAT('', CAST(EXTRACT(year FROM column_name) AS VARCHAR)), CAST(EXTRACT(month FROM column_name) AS VARCHAR))) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
         }.items()
     ],
 )
