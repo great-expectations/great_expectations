@@ -130,7 +130,11 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         ]
 
         element: Any
-        if bins is None or all(element is None for element in bins):
+        if (
+            bins is None
+            or (isinstance(bins, np.ndarray) and np.isnan(bins).all())
+            or all(element is None for element in bins)
+        ):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} into bins encountered empty or non-existent \
