@@ -20,6 +20,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
+    SplitterMethod,
 )
 
 try:
@@ -52,20 +53,20 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self._dialect = dialect
 
     DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
-        "split_on_year": "get_data_for_batch_identifiers_year",
-        "split_on_year_and_month": "get_data_for_batch_identifiers_year_and_month",
-        "split_on_year_and_month_and_day": "get_data_for_batch_identifiers_year_and_month_and_day",
-        "split_on_date_parts": "get_data_for_batch_identifiers_for_split_on_date_parts",
+        SplitterMethod.SPLIT_ON_YEAR.value: "get_data_for_batch_identifiers_year",
+        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH.value: "get_data_for_batch_identifiers_year_and_month",
+        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH_AND_DAY.value: "get_data_for_batch_identifiers_year_and_month_and_day",
+        SplitterMethod.SPLIT_ON_DATE_PARTS.value: "get_data_for_batch_identifiers_for_split_on_date_parts",
     }
 
     SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
-        "split_on_whole_table": "get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table",
-        "split_on_column_value": "get_split_query_for_data_for_batch_identifiers_for_split_on_column_value",
-        "split_on_converted_datetime": "get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime",
-        "split_on_divided_integer": "get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer",
-        "split_on_mod_integer": "get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer",
-        "split_on_multi_column_values": "get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values",
-        "split_on_hashed_column": "get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column",
+        SplitterMethod.SPLIT_ON_WHOLE_TABLE.value: "get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table",
+        SplitterMethod.SPLIT_ON_COLUMN_VALUE.value: "get_split_query_for_data_for_batch_identifiers_for_split_on_column_value",
+        SplitterMethod.SPLIT_ON_CONVERTED_DATETIME.value: "get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime",
+        SplitterMethod.SPLIT_ON_DIVIDED_INTEGER.value: "get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer",
+        SplitterMethod.SPLIT_ON_MOD_INTEGER.value: "get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer",
+        SplitterMethod.SPLIT_ON_MULTI_COLUMN_VALUES.value: "get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values",
+        SplitterMethod.SPLIT_ON_HASHED_COLUMN.value: "get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column",
     }
 
     def split_on_year(
