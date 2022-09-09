@@ -332,6 +332,7 @@ class TestIsEquivalentTo:
         suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
         suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
         assert suite1.isEquivalentTo(suite2)
+        assert suite2.isEquivalentTo(suite1)
 
     @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes_unit_test(
@@ -344,6 +345,7 @@ class TestIsEquivalentTo:
         suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
         suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()], data_asset_type="different", meta={"notes": "different"}, ge_cloud_id="different")  # type: ignore[arg-type]
         assert suite1.isEquivalentTo(suite2)
+        assert suite2.isEquivalentTo(suite1)
 
     @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_false_unit_test(self):
@@ -354,6 +356,7 @@ class TestIsEquivalentTo:
         suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
         suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
         assert not suite1.isEquivalentTo(suite2)
+        assert not suite2.isEquivalentTo(suite1)
 
     @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_and_dict_true(
@@ -414,6 +417,9 @@ class TestIsEquivalentTo:
         assert suite_with_single_expectation.isEquivalentTo(
             different_but_equivalent_suite
         )
+        assert different_but_equivalent_suite.isEquivalentTo(
+            suite_with_single_expectation
+        )
 
     @pytest.mark.integration
     def test_is_equivalent_to_expectation_suite_classes_false(
@@ -431,6 +437,9 @@ class TestIsEquivalentTo:
         assert not suite_with_single_expectation.isEquivalentTo(
             different_and_not_equivalent_suite
         )
+        assert not different_and_not_equivalent_suite.isEquivalentTo(
+            suite_with_single_expectation
+        )
 
     @pytest.mark.integration
     def test_is_equivalent_to_expectation_suite_classes_false_multiple_equivalent_expectations(
@@ -447,6 +456,9 @@ class TestIsEquivalentTo:
 
         assert not suite_with_single_expectation.isEquivalentTo(
             different_and_not_equivalent_suite
+        )
+        assert not different_and_not_equivalent_suite.isEquivalentTo(
+            suite_with_single_expectation
         )
 
 
