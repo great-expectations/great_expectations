@@ -4,7 +4,6 @@ import shutil
 import warnings
 from typing import Dict, Optional, Union
 
-import requests
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
@@ -360,36 +359,6 @@ class DataContext(BaseDataContext):
 
         return False
 
-    def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
-        """
-        Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
-        Given proper authorization, the request retrieves a data context config that is pre-populated with
-        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
-
-        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
-        over the wire.
-
-        :return: the configuration object retrieved from the Cloud API
-        """
-        base_url = self.ge_cloud_config.base_url  # type: ignore[union-attr]
-        organization_id = self.ge_cloud_config.organization_id  # type: ignore[union-attr]
-        ge_cloud_url = (
-            f"{base_url}/organizations/{organization_id}/data-context-configuration"
-        )
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {self.ge_cloud_config.access_token}",  # type: ignore[union-attr]
-            "Gx-Version": __version__,
-        }
-
-        response = requests.get(ge_cloud_url, headers=headers)
-        if response.status_code != 200:
-            raise ge_exceptions.GeCloudError(
-                f"Bad request made to GE Cloud; {response.text}"
-            )
-        config = response.json()
-        return DataContextConfig(**config)
-
     def _load_project_config(self):
         """
         Reads the project configuration from the project configuration file.
@@ -397,12 +366,16 @@ class DataContext(BaseDataContext):
         for how these are substituted.
 
         For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
-        - see self._retrieve_data_context_config_from_ge_cloud for more details.
+        - see CloudDataContext.retrieve_data_context_config_from_ge_cloud for more details.
 
         :return: the configuration object read from the file or template
         """
         if self.ge_cloud_mode:
-            config = self._retrieve_data_context_config_from_ge_cloud()
+            ge_cloud_config = self.ge_cloud_config
+            assert ge_cloud_config is not None
+            config = CloudDataContext.retrieve_data_context_config_from_ge_cloud(
+                ge_cloud_config=ge_cloud_config
+            )
             return config
 
         path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
