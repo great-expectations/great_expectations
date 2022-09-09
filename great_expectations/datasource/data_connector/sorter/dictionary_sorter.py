@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, List
 
@@ -19,4 +20,4 @@ class DictionarySorter(Sorter):
             "reverse": self.reverse,
             "type": "DictionarySorter",
         }
-        return str(doc_fields_dict)
+        return json.dumps(doc_fields_dict, indent=2)
