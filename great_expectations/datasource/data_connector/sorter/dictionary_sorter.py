@@ -14,7 +14,7 @@ class DictionarySorter(Sorter):
         return batch_values
 
     def __repr__(self) -> str:
-        doc_fields_dict: dict = {
+        doc_fields_dict = {
             "name": self.name,
             "reverse": self.reverse,
             "type": "DictionarySorter",

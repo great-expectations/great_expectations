@@ -302,6 +302,15 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _get_sorters_from_splitter_method_name(
         self, splitter_method_name: str, splitter_kwargs: Dict[str, Union[str, list]]
     ) -> List[Sorter]:
+        """Given a splitter method and its kwargs, return an appropriately instantiated Sorter.
+
+        Args:
+            splitter_method_name: splitter name starting with or without preceding '_'.
+            splitter_kwargs: splitter kwargs dictionary for splitter directives.
+
+        Returns:
+            an ordered list of sorters required to sort splitter batches.
+        """
         splitter_method_to_sorter_method_mapping: Dict[
             str, Optional[Sorter]
         ] = self.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING
@@ -309,12 +318,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             splitter_method_name=splitter_method_name,
         )
         try:
-            sorter_method = splitter_method_to_sorter_method_mapping[
+            sorter_method: Optional[Sorter] = splitter_method_to_sorter_method_mapping[
                 splitter_method_name
             ]
         except KeyError:
             raise ge_exceptions.SorterError(
-                f"No Sorter is defined for splitter_method: {splitter_method_name}"
+                f"No Sorter is defined in ConfiguredAssetSqlDataConnector.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING for splitter_method: {splitter_method_name}"
             )
 
         if sorter_method == DictionarySorter:
@@ -353,7 +362,17 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         splitter_method_name: str,
         splitter_kwargs: Dict[str, Union[str, dict, None]],
     ) -> List[BatchDefinition]:
-        sorters = self._get_sorters_from_splitter_method_name(
+        """Sort a list of batch definitions given the splitter method used to define them.
+
+        Args:
+            batch_definition_list: an unsorted list of batch definitions.
+            splitter_method_name: splitter name used to define the batches, starting with or without preceding `_`.
+            splitter_kwargs: splitter kwargs dictionary for splitter directives.
+
+        Returns:
+            a list of batch definitions sorted depending on splitter method used to define them.
+        """
+        sorters: List[Sorter] = self._get_sorters_from_splitter_method_name(
             splitter_method_name=splitter_method_name, splitter_kwargs=splitter_kwargs
         )
         for sorter in sorters:
