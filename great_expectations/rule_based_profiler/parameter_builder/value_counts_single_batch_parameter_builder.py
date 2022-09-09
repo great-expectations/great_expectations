@@ -24,7 +24,7 @@ from great_expectations.types.attributes import Attributes
 
 class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     """
-    Compute partition using specified metric for one Batch of data.
+    Compute value counts using specified metric for one Batch of data.
     """
 
     exclude_field_names: Set[
