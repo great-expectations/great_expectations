@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import shutil
@@ -9,6 +10,8 @@ import pytest
 import requests
 
 import great_expectations as ge
+from great_expectations import DataContext
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
 from great_expectations.data_context.types.base import (
@@ -19,6 +22,8 @@ from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
+
+yaml = YAMLHandler()
 
 
 @pytest.fixture()
@@ -592,13 +597,13 @@ def data_context_with_incomplete_global_config_in_dot_dir_only(
 
 
 @pytest.fixture
-def datasource_name() -> str:
-    return "my_first_datasource"
+def datasource_store_name() -> str:
+    return "datasource_store"
 
 
 @pytest.fixture
-def datasource_store_name() -> str:
-    return "datasource_store"
+def fake_datasource_id() -> str:
+    return "aaa7cfdd-4aa4-4f3d-a979-fe2ea5203cbf"
 
 
 @pytest.fixture
@@ -608,41 +613,6 @@ def request_headers(ge_cloud_access_token) -> Dict[str, str]:
         "Authorization": f"Bearer {ge_cloud_access_token}",
         "Gx-Version": ge.__version__,
     }
-
-
-@pytest.fixture
-def datasource_config() -> DatasourceConfig:
-    return DatasourceConfig(
-        class_name="Datasource",
-        execution_engine={
-            "class_name": "PandasExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        data_connectors={
-            "tripdata_monthly_configured": {
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector",
-                "base_directory": "/path/to/trip_data",
-                "assets": {
-                    "yellow": {
-                        "class_name": "Asset",
-                        "module_name": "great_expectations.datasource.data_connector.asset",
-                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
-                        "group_names": ["year", "month"],
-                    }
-                },
-            }
-        },
-    )
-
-
-@pytest.fixture
-def shared_called_with_request_kwargs(request_headers) -> dict:
-    """
-    Standard request kwargs that all GeCloudStoreBackend http calls are made with.
-    Use in combination with `assert_called_with()`
-    """
-    return dict(timeout=GeCloudStoreBackend.TIMEOUT, headers=request_headers)
 
 
 JSONData = Union[AnyPayload, Dict[str, Any]]
@@ -700,6 +670,50 @@ def mock_response_factory() -> Callable[
 
 
 @pytest.fixture
+def datasource_config() -> DatasourceConfig:
+    return DatasourceConfig(
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        data_connectors={
+            "tripdata_monthly_configured": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "base_directory": "/path/to/trip_data",
+                "assets": {
+                    "yellow": {
+                        "class_name": "Asset",
+                        "module_name": "great_expectations.datasource.data_connector.asset",
+                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                        "group_names": ["year", "month"],
+                    }
+                },
+            }
+        },
+    )
+
+
+@pytest.fixture
+def datasource_config_with_names_and_ids(
+    datasource_config_with_names: DatasourceConfig, fake_datasource_id
+) -> DatasourceConfig:
+    updated_config = copy.deepcopy(datasource_config_with_names)
+    updated_config["id"] = fake_datasource_id
+    return updated_config
+
+
+@pytest.fixture
+def shared_called_with_request_kwargs(request_headers) -> dict:
+    """
+    Standard request kwargs that all GeCloudStoreBackend http calls are made with.
+    Use in combination with `assert_called_with()`
+    """
+    return dict(timeout=GeCloudStoreBackend.TIMEOUT, headers=request_headers)
+
+
+@pytest.fixture
 def mock_http_unavailable(mock_response_factory: Callable):
     """Mock all request http calls to return a 503 Unavailable response."""
 
@@ -725,3 +739,90 @@ def mock_http_unavailable(mock_response_factory: Callable):
             print(f"Mocking `requests.{name}` with `{mocked_response.__name__}()`")
 
         yield mock_requests
+
+
+@pytest.fixture
+def mocked_datasource_get_response(
+    mock_response_factory: Callable,
+    datasource_config_with_names_and_ids: DatasourceConfig,
+    fake_datasource_id,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_response(*args, **kwargs):
+        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
+        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
+
+        return mock_response_factory(
+            {
+                "data": {
+                    "attributes": {
+                        "datasource_config": datasource_config_with_names_and_ids,
+                        "created_at": "2022-08-02T17:55:45.107550",
+                        "created_by_id": created_by_id,
+                        "deleted": False,
+                        "deleted_at": None,
+                        "desc": None,
+                        "name": datasource_config_with_names_and_ids.name,
+                        "organization_id": f"{organization_id}",
+                        "updated_at": "2022-08-02T17:55:45.107550",
+                    },
+                    "id": fake_datasource_id,
+                    "links": {
+                        "self": f"/organizations/{organization_id}/datasources/{fake_datasource_id}"
+                    },
+                    "type": "datasource",
+                },
+            },
+            200,
+        )
+
+    return _mocked_get_response
+
+
+@pytest.fixture
+def mocked_datasource_post_response(
+    mock_response_factory: Callable, fake_datasource_id
+) -> Callable[[], MockResponse]:
+    def _mocked_post_response(*args, **kwargs):
+        return mock_response_factory(
+            {
+                "data": {
+                    "id": fake_datasource_id,
+                }
+            },
+            201,
+        )
+
+    return _mocked_post_response
+
+
+@pytest.fixture
+def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
+    empty_data_context_in_cloud_mode: DataContext,
+    db_file,
+    mocked_datasource_get_response,
+):
+    context: DataContext = empty_data_context_in_cloud_mode
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    with patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ), patch(
+        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
+    return context
