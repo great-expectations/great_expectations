@@ -1,5 +1,6 @@
 import logging
-from typing import TYPE_CHECKING, List, Mapping, Optional, Union, cast
+from enum import Enum
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -23,11 +24,19 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
+from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
+
+
+class GECloudEnvironmentVariable(str, Enum):
+    BASE_URL = "GE_CLOUD_BASE_URL"
+    ACCOUNT_ID = "GE_CLOUD_ACCOUNT_ID"  # Deprecated
+    ORGANIZATION_ID = "GE_CLOUD_ORGANIZATION_ID"
+    ACCESS_TOKEN = "GE_CLOUD_ACCESS_TOKEN"
 
 
 class CloudDataContext(AbstractDataContext):
@@ -406,3 +415,93 @@ class CloudDataContext(AbstractDataContext):
             checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
         return checkpoint
+
+    # TODO: deprecate ge_cloud_account_id
+    @classmethod
+    def _get_ge_cloud_config_dict(
+        cls,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_account_id: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
+    ) -> Dict[GECloudEnvironmentVariable, Optional[str]]:
+        ge_cloud_base_url = (
+            ge_cloud_base_url
+            or CloudDataContext._get_global_config_value(
+                environment_variable=GECloudEnvironmentVariable.BASE_URL,
+                conf_file_section="ge_cloud_config",
+                conf_file_option="base_url",
+            )
+            or "https://app.greatexpectations.io/"
+        )
+
+        # TODO: remove if/else block when ge_cloud_account_id is deprecated.
+        if ge_cloud_account_id is not None:
+            logger.warning(
+                'The "ge_cloud_account_id" argument has been renamed "ge_cloud_organization_id" and will be '
+                "deprecated in the next major release."
+            )
+        else:
+            ge_cloud_account_id = CloudDataContext._get_global_config_value(
+                environment_variable=GECloudEnvironmentVariable.ACCOUNT_ID,
+                conf_file_section="ge_cloud_config",
+                conf_file_option="account_id",
+            )
+
+        if ge_cloud_organization_id is None:
+            ge_cloud_organization_id = CloudDataContext._get_global_config_value(
+                environment_variable=GECloudEnvironmentVariable.ORGANIZATION_ID,
+                conf_file_section="ge_cloud_config",
+                conf_file_option="organization_id",
+            )
+
+        ge_cloud_organization_id = ge_cloud_organization_id or ge_cloud_account_id
+        ge_cloud_access_token = (
+            ge_cloud_access_token
+            or CloudDataContext._get_global_config_value(
+                environment_variable=GECloudEnvironmentVariable.ACCESS_TOKEN,
+                conf_file_section="ge_cloud_config",
+                conf_file_option="access_token",
+            )
+        )
+        return {
+            GECloudEnvironmentVariable.BASE_URL: ge_cloud_base_url,
+            GECloudEnvironmentVariable.ORGANIZATION_ID: ge_cloud_organization_id,
+            GECloudEnvironmentVariable.ACCESS_TOKEN: ge_cloud_access_token,
+        }
+
+    # TODO: deprecate ge_cloud_account_id
+    @classmethod
+    def get_ge_cloud_config(
+        cls,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_account_id: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
+    ) -> GeCloudConfig:
+        """
+        Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
+        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
+        """
+        ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_account_id=ge_cloud_account_id,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+
+        missing_keys = []
+        for key, val in ge_cloud_config_dict.items():
+            if not val:
+                missing_keys.append(key)
+        if len(missing_keys) > 0:
+            missing_keys_str = [f'"{key}"' for key in missing_keys]
+            global_config_path_str = [
+                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
+            ]
+            raise DataContextError(
+                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
+                f"environment or in global configs ({(', ').join(global_config_path_str)})."
+            )
+
+        return GeCloudConfig(**ge_cloud_config_dict)  # type: ignore[arg-type]
