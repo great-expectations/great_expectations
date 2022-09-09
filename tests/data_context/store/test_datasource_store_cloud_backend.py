@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Callable, Dict
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -24,6 +24,8 @@ def test_datasource_store_create(
     shared_called_with_request_kwargs: dict,
     datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
+    mocked_datasource_post_response: Callable[[], MockResponse],
+    mocked_datasource_get_response: Callable[[], MockResponse],
 ) -> None:
     """What does this test and why?
 
@@ -35,8 +37,11 @@ def test_datasource_store_create(
         resource_type=GeCloudRESTResource.DATASOURCE,
     )
 
-    with patch("requests.post", autospec=True) as mock_post:
-        type(mock_post.return_value).status_code = PropertyMock(return_value=200)
+    with patch(
+        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
+    ) as mock_post, patch(
+        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    ):
 
         datasource_store_ge_cloud_backend.set(key=key, value=datasource_config)
 
