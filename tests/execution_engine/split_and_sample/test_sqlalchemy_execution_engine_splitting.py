@@ -323,11 +323,16 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
 @pytest.mark.parametrize(
     "dialect,expected_query_str",
     [
-        pytest.param(dialect, expected_query_str, id=dialect)
-        for dialect, expected_query_str in {
-            "sqlite": "SELECT DISTINCT(CAST(EXTRACT(year FROM column_name) AS VARCHAR) || CAST (EXTRACT(month FROM column_name) AS VARCHAR)) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
-            "postgres": "SELECT DISTINCT(CONCAT(CONCAT('', CAST(EXTRACT(year FROM column_name) AS VARCHAR)), CAST(EXTRACT(month FROM column_name) AS VARCHAR))) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
-        }.items()
+        pytest.param(
+            "sqlite",
+            "SELECT DISTINCT(CAST(EXTRACT(year FROM column_name) AS VARCHAR) || CAST (EXTRACT(month FROM column_name) AS VARCHAR)) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
+            id="sqlite",
+        ),
+        pytest.param(
+            "postgres",
+            "SELECT DISTINCT(CONCAT(CONCAT('', CAST(EXTRACT(year FROM column_name) AS VARCHAR)), CAST(EXTRACT(month FROM column_name) AS VARCHAR))) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
+            id="postgres",
+        ),
     ],
 )
 def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_multiple_date_parts(
