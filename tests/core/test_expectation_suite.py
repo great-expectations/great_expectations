@@ -465,25 +465,19 @@ class TestIsEquivalentTo:
 
 
 class TestEqDunder:
-    @pytest.mark.xfail(
-        strict=True,
-        reason="This test should be modified to pass when returning NotImplemented",
-    )
+
     @pytest.mark.unit
-    def test_equality_to_unsupported_class_returns_notimplemented(
+    def test_equality_to_unsupported_class_is_false(
         self, suite_with_single_expectation: ExpectationSuite
     ):
-        """If we are not comparing to an ExpectationSuite or dict then we should return NotImplemented."""
+        """If we are not comparing to an ExpectationSuite or dict then we should return False."""
 
         class UnsupportedClass:
-            def __eq__(self, other):
-                return NotImplemented
+            pass
 
         return_value = suite_with_single_expectation == UnsupportedClass()
-        assert (
-            not return_value
-        )  # This assertion should be removed, return_value should be NotImplemented
-        assert return_value == NotImplemented
+        assert not return_value
+
 
     @pytest.mark.unit
     def test_expectation_suite_equality_single_expectation_true(
