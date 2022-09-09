@@ -2,7 +2,6 @@ import datetime
 import itertools
 from copy import copy, deepcopy
 from typing import Any, Dict, List, Union
-from unittest import mock
 
 import pytest
 from ruamel.yaml import YAML
@@ -46,10 +45,9 @@ def expect_column_values_to_be_in_set_col_a_with_meta_dict() -> dict:
         "meta": {"notes": "This is an expectation."},
     }
 
+
 @pytest.fixture
-def empty_suite_with_meta(
-    fake_expectation_suite_name: str
-) -> ExpectationSuite:
+def empty_suite_with_meta(fake_expectation_suite_name: str) -> ExpectationSuite:
     return ExpectationSuite(
         expectation_suite_name=fake_expectation_suite_name,
         meta={"notes": "This is an expectation suite."},
@@ -173,8 +171,6 @@ class TestInit:
 
 
 class TestAddCitation:
-
-
     @pytest.mark.unit
     def test_empty_suite_with_meta_fixture(
         self, empty_suite_with_meta: ExpectationSuite
@@ -315,15 +311,17 @@ class TestAddCitation:
         assert citation_keys == {"comment", "citation_date", "profiler_config"}
 
 
-
 class TestIsEquivalentTo:
-
     @pytest.fixture
-    def suite_with_single_expectation(self, expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration, empty_suite_with_meta: ExpectationSuite) -> ExpectationSuite:
-        empty_suite_with_meta.add_expectation(expect_column_values_to_be_in_set_col_a_with_meta)
+    def suite_with_single_expectation(
+        self,
+        expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
+        empty_suite_with_meta: ExpectationSuite,
+    ) -> ExpectationSuite:
+        empty_suite_with_meta.add_expectation(
+            expect_column_values_to_be_in_set_col_a_with_meta
+        )
         return empty_suite_with_meta
-
-
 
     @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_true_unit_test(self):
@@ -335,9 +333,10 @@ class TestIsEquivalentTo:
         suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
         assert suite1.isEquivalentTo(suite2)
 
-
     @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes_unit_test(self):
+    def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes_unit_test(
+        self,
+    ):
         class StubExpectationConfiguration:
             def isEquivalentTo(self, *args, **kwargs):
                 return True
@@ -357,15 +356,22 @@ class TestIsEquivalentTo:
         assert not suite1.isEquivalentTo(suite2)
 
     @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_and_dict_true(self, suite_with_single_expectation: ExpectationSuite):
+    def test_is_equivalent_to_expectation_suite_and_dict_true(
+        self, suite_with_single_expectation: ExpectationSuite
+    ):
         """Suite should be equivalent to its dict representation."""
-        suite_with_single_expectation_dict: dict = expectationSuiteSchema.dump(suite_with_single_expectation)
+        suite_with_single_expectation_dict: dict = expectationSuiteSchema.dump(
+            suite_with_single_expectation
+        )
 
-        assert suite_with_single_expectation.isEquivalentTo(suite_with_single_expectation_dict)
-
+        assert suite_with_single_expectation.isEquivalentTo(
+            suite_with_single_expectation_dict
+        )
 
     @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_and_dict_false(self, suite_with_single_expectation: ExpectationSuite):
+    def test_is_equivalent_to_expectation_suite_and_dict_false(
+        self, suite_with_single_expectation: ExpectationSuite
+    ):
         modified_suite = deepcopy(suite_with_single_expectation)
         modified_suite.expectations[0]["kwargs"]["value_set"][0] = -1
 
@@ -373,25 +379,31 @@ class TestIsEquivalentTo:
 
         assert not suite_with_single_expectation.isEquivalentTo(modified_suite_dict)
 
-
     @pytest.mark.unit
-    def test_is_equivalent_to_invalid_expectation_config_dict_returns_notimplemented(self, suite_with_single_expectation: ExpectationSuite):
-        return_value = suite_with_single_expectation.isEquivalentTo({"not_valid": "expectation_suite_config_dict"})
+    def test_is_equivalent_to_invalid_expectation_config_dict_returns_notimplemented(
+        self, suite_with_single_expectation: ExpectationSuite
+    ):
+        return_value = suite_with_single_expectation.isEquivalentTo(
+            {"not_valid": "expectation_suite_config_dict"}
+        )
         assert return_value == NotImplemented
 
-
     @pytest.mark.unit
-    def test_is_equivalent_to_unsupported_class_returns_notimplemented(self, suite_with_single_expectation: ExpectationSuite):
+    def test_is_equivalent_to_unsupported_class_returns_notimplemented(
+        self, suite_with_single_expectation: ExpectationSuite
+    ):
         """If we are not comparing to an ExpectationConfiguration or dict then we should return NotImplemented."""
+
         class UnsupportedClass:
             pass
 
         return_value = suite_with_single_expectation.isEquivalentTo(UnsupportedClass())
         assert return_value == NotImplemented
 
-
     @pytest.mark.integration
-    def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes(self, suite_with_single_expectation: ExpectationSuite):
+    def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes(
+        self, suite_with_single_expectation: ExpectationSuite
+    ):
         """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
         different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
         different_but_equivalent_suite.expectation_suite_name = "different_name"
@@ -399,30 +411,43 @@ class TestIsEquivalentTo:
         different_but_equivalent_suite.data_asset_type = "different_data_asset_type"
         different_but_equivalent_suite.ge_cloud_id = "different_id"
 
-        assert suite_with_single_expectation.isEquivalentTo(different_but_equivalent_suite)
-
+        assert suite_with_single_expectation.isEquivalentTo(
+            different_but_equivalent_suite
+        )
 
     @pytest.mark.integration
-    def test_is_equivalent_to_expectation_suite_classes_false(self, suite_with_single_expectation: ExpectationSuite):
+    def test_is_equivalent_to_expectation_suite_classes_false(
+        self, suite_with_single_expectation: ExpectationSuite
+    ):
         """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
         different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
         # Set different column in expectation kwargs
-        different_and_not_equivalent_suite.expectations[0].kwargs = {'column': 'b', 'value_set': [1, 2, 3], 'result_format': 'BASIC'}
+        different_and_not_equivalent_suite.expectations[0].kwargs = {
+            "column": "b",
+            "value_set": [1, 2, 3],
+            "result_format": "BASIC",
+        }
 
-        assert not suite_with_single_expectation.isEquivalentTo(different_and_not_equivalent_suite)
-
+        assert not suite_with_single_expectation.isEquivalentTo(
+            different_and_not_equivalent_suite
+        )
 
     @pytest.mark.integration
-    def test_is_equivalent_to_expectation_suite_classes_false_multiple_equivalent_expectations(self, suite_with_single_expectation: ExpectationSuite):
+    def test_is_equivalent_to_expectation_suite_classes_false_multiple_equivalent_expectations(
+        self, suite_with_single_expectation: ExpectationSuite
+    ):
         """Only expectation equivalence is considered for suite equivalence, and the same number of expectations in the suite is required for equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""
         different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
         # Add a copy of the existing expectation, using list .append() to bypass add_expectation logic to handle overwrite
-        different_and_not_equivalent_suite.expectations.append(different_and_not_equivalent_suite.expectations[0])
+        different_and_not_equivalent_suite.expectations.append(
+            different_and_not_equivalent_suite.expectations[0]
+        )
         assert len(suite_with_single_expectation.expectations) == 1
         assert len(different_and_not_equivalent_suite.expectations) == 2
 
-        assert not suite_with_single_expectation.isEquivalentTo(different_and_not_equivalent_suite)
-
+        assert not suite_with_single_expectation.isEquivalentTo(
+            different_and_not_equivalent_suite
+        )
 
 
 #### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
