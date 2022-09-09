@@ -42,7 +42,6 @@ class DatePart(enum.Enum):
         return representer.represent_str(data=node.value)
 
 
-@yaml_object(yaml)
 class SplitterMethod(enum.Enum):
     """The names of available splitter_methods."""
 
@@ -63,15 +62,6 @@ class SplitterMethod(enum.Enum):
 
     def __hash__(self: SplitterMethod):
         return hash(self.value)
-
-    @classmethod
-    def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
-        """
-        Method allows for yaml-encodable representation of ENUM, using internal methods of ruamel.
-        pattern was found in the following stackoverflow thread:
-        https://stackoverflow.com/questions/48017317/can-ruamel-yaml-encode-an-enum
-        """
-        return representer.represent_str(data=node.value)
 
 
 class DataSplitter(abc.ABC):
