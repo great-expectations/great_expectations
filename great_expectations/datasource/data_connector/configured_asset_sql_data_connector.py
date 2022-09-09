@@ -302,7 +302,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _get_sorters_from_splitter_method_name(
         self, splitter_method_name: str, splitter_kwargs: Dict[str, Union[str, list]]
     ) -> List[Sorter]:
-        """Given a splitter method and its kwargs, return an appropriately instantiated Sorter.
+        """Given a splitter method and its kwargs, return an appropriately instantiated list of Sorters.
 
         Args:
             splitter_method_name: splitter name starting with or without preceding '_'.
