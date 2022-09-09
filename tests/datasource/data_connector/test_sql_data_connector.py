@@ -1936,7 +1936,6 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
     splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     my_data_connector = ConfiguredAssetSqlDataConnector(
