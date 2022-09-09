@@ -742,6 +742,29 @@ def mock_http_unavailable(mock_response_factory: Callable):
 
 
 @pytest.fixture
+def checkpoint_config() -> dict:
+    checkpoint_config = {
+        "name": "oss_test_checkpoint",
+        "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "expectation_suite_name": "oss_test_expectation_suite",
+        "validations": [
+            {
+                "expectation_suite_name": "taxi.demo_pass",
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "oss_test_datasource",
+                    "data_connector_name": "oss_test_data_connector",
+                    "data_asset_name": "users",
+                },
+            },
+        ],
+    }
+    return checkpoint_config
+
+
+@pytest.fixture
 def mocked_datasource_get_response(
     mock_response_factory: Callable,
     datasource_config_with_names_and_ids: DatasourceConfig,

@@ -28,29 +28,6 @@ from tests.data_context.conftest import MockResponse
 
 
 @pytest.fixture
-def checkpoint_config() -> dict:
-    checkpoint_config = {
-        "name": "oss_test_checkpoint",
-        "config_version": 1.0,
-        "class_name": "Checkpoint",
-        "expectation_suite_name": "oss_test_expectation_suite",
-        "validations": [
-            {
-                "expectation_suite_name": "taxi.demo_pass",
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "oss_test_datasource",
-                    "data_connector_name": "oss_test_data_connector",
-                    "data_asset_name": "users",
-                },
-            },
-        ],
-    }
-    return checkpoint_config
-
-
-@pytest.fixture
 def checkpoint_id() -> str:
     return "c83e4299-6188-48c6-83b7-f6dce8ad4ab5"
 
