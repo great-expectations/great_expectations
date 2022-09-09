@@ -1,15 +1,23 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Tuple, Union
 from unittest import mock
 
 import pytest
+from marshmallow.exceptions import ValidationError
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.store import CheckpointStore
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
+    GeCloudIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import filter_properties_dict, gen_directory_tree_str
@@ -20,6 +28,15 @@ from tests.core.usage_statistics.util import (
 from tests.test_utils import build_checkpoint_store_using_filesystem
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture
+def checkpoint_store_with_mock_backend() -> Tuple[CheckpointStore, mock.MagicMock]:
+    store = CheckpointStore(store_name="checkpoint_store")
+    mock_backend = mock.MagicMock()
+    store._store_backend = mock_backend
+
+    return store, mock_backend
 
 
 @pytest.mark.integration
@@ -350,3 +367,164 @@ def test_serialization_self_check(capsys) -> None:
 def test_default_checkpoints_exist(path: str, exists: bool) -> None:
     store = CheckpointStore(store_name="checkpoint_store")
     assert store.default_checkpoints_exist(path) is exists
+
+
+@pytest.mark.unit
+def test_list_checkpoints(
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+) -> None:
+    store, mock_backend = checkpoint_store_with_mock_backend
+    mock_backend.list_keys.return_value = [("a", "b", "c"), ("d", "e", "f")]
+
+    checkpoints = store.list_checkpoints(ge_cloud_mode=False)
+    assert checkpoints == ["a.b.c", "d.e.f"]
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_list_checkpoints_cloud_mode(
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+) -> None:
+    store, mock_backend = checkpoint_store_with_mock_backend
+    mock_backend.list_keys.return_value = [("a", "b", "c"), ("d", "e", "f")]
+
+    checkpoints = store.list_checkpoints(ge_cloud_mode=True)
+    assert checkpoints == [
+        ConfigurationIdentifier("a.b.c"),
+        ConfigurationIdentifier("d.e.f"),
+    ]
+
+
+@pytest.mark.unit
+def test_delete_checkpoint(
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+) -> None:
+    store, mock_backend = checkpoint_store_with_mock_backend
+
+    store.delete_checkpoint(name="my_checkpoint")
+
+    mock_backend.remove_key.assert_called_once_with(
+        ConfigurationIdentifier("my_checkpoint")
+    )
+
+
+@pytest.mark.cloud
+@pytest.mark.unit
+def test_delete_checkpoint_with_cloud_id(
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+) -> None:
+    store, mock_backend = checkpoint_store_with_mock_backend
+
+    store.delete_checkpoint(ge_cloud_id="abc123")
+
+    mock_backend.remove_key.assert_called_once_with(
+        GeCloudIdentifier(
+            resource_type=GeCloudRESTResource.CHECKPOINT, ge_cloud_id="abc123"
+        )
+    )
+
+
+@pytest.mark.unit
+def test_delete_checkpoint_with_invalid_key_raises_error(
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+) -> None:
+    def _raise_key_error(_: Any) -> None:
+        raise ge_exceptions.InvalidKeyError(message="invalid key")
+
+    store, mock_backend = checkpoint_store_with_mock_backend
+    mock_backend.remove_key.side_effect = _raise_key_error
+
+    with pytest.raises(ge_exceptions.CheckpointNotFoundError) as e:
+        store.delete_checkpoint(name="my_fake_checkpoint")
+
+    assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(
+        e.value
+    )
+
+
+@pytest.mark.unit
+def test_get_checkpoint(
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
+    checkpoint_config: dict,
+) -> None:
+    store, mock_backend = checkpoint_store_with_mock_backend
+    mock_backend.get.return_value = checkpoint_config
+
+    checkpoint = store.get_checkpoint(name=checkpoint_config["name"], ge_cloud_id=None)
+
+    actual_checkpoint_config = checkpoint.to_json_dict()
+    for key, val in checkpoint_config.items():
+        assert val == actual_checkpoint_config.get(key)
+
+
+@pytest.mark.unit
+def test_get_checkpoint_with_nonexistent_checkpoint_raises_error(
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+) -> None:
+    def _raise_key_error(_: Any) -> None:
+        raise ge_exceptions.InvalidKeyError(message="invalid key")
+
+    store, mock_backend = checkpoint_store_with_mock_backend
+    mock_backend.get.side_effect = _raise_key_error
+
+    with pytest.raises(ge_exceptions.CheckpointNotFoundError) as e:
+        store.get_checkpoint(name="my_fake_checkpoint", ge_cloud_id=None)
+
+    assert 'Non-existent Checkpoint configuration named "my_fake_checkpoint".' in str(
+        e.value
+    )
+
+
+@pytest.mark.unit
+def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+) -> None:
+    def _raise_validation_error(_: Any) -> None:
+        raise ValidationError(message="invalid config")
+
+    store, mock_backend = checkpoint_store_with_mock_backend
+    mock_backend.get.return_value = {"class_name": "Checkpoint"}
+
+    with mock.patch(
+        "great_expectations.data_context.store.CheckpointStore.deserialize",
+        side_effect=_raise_validation_error,
+    ), pytest.raises(ge_exceptions.InvalidCheckpointConfigError) as e:
+        store.get_checkpoint(name="my_fake_checkpoint", ge_cloud_id=None)
+
+    assert "Invalid Checkpoint configuration" in str(e.value)
+
+
+@pytest.mark.unit
+def test_get_checkpoint_with_invalid_legacy_checkpoint_raises_error(
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+) -> None:
+    store, mock_backend = checkpoint_store_with_mock_backend
+    mock_backend.get.return_value = (
+        CheckpointConfig().to_json_dict()
+    )  # Defaults to empty LegacyCheckpoint
+
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
+        store.get_checkpoint(name="my_checkpoint", ge_cloud_id=None)
+
+    assert (
+        "Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments"
+        in str(e.value)
+    )
+
+
+@pytest.mark.unit
+def test_add_checkpoint(
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+) -> None:
+    store, mock_backend = checkpoint_store_with_mock_backend
+
+    context = mock.MagicMock(spec=DataContext)
+    context._usage_statistics_handler = mock.MagicMock()
+    checkpoint = Checkpoint(name="my_checkpoint", data_context=context)
+
+    store.add_checkpoint(checkpoint=checkpoint, name="my_checkpoint", ge_cloud_id=None)
+
+    mock_backend.set.assert_called_once_with(
+        ("my_checkpoint",),
+        "name: my_checkpoint\nconfig_version:\nmodule_name: great_expectations.checkpoint\nclass_name: LegacyCheckpoint\n",
+    )
