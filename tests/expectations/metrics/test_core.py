@@ -4004,14 +4004,20 @@ def test_value_counts_metric_pd():
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "dataframe",
+    [
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3, None]}),
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3, None], "b": [1, 3, 5, 3, 4, 2, None]}),
+    ],
+)
 def test_distinct_metric_spark(
     spark_session,
+    dataframe,
 ):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
-        df=pd.DataFrame(
-            {"a": [1, 2, 1, 2, 3, 3, None], "b": [1, 3, 5, 6, 1, 2, None]},
-        ),
+        df=dataframe,
         batch_id="my_id",
     )
 
