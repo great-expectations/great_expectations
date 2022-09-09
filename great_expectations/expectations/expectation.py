@@ -882,7 +882,6 @@ class Expectation(metaclass=MetaExpectation):
         interactive_evaluation=True,
         data_context=None,
         runtime_configuration=None,
-        force_no_progress_bar: bool = False,
     ):
         include_rendered_content: bool = validator._include_rendered_content
 
@@ -895,7 +894,6 @@ class Expectation(metaclass=MetaExpectation):
         evr = validator.graph_validate(
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
-            force_no_progress_bar=force_no_progress_bar,
         )[0]
         if include_rendered_content:
             evr.render()
@@ -951,11 +949,11 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
-        force_no_progress_bar: bool = True,
         ignore_suppress: bool = False,
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
+        context: Optional["DataContext"] = None,  # noqa: F821
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -1033,11 +1031,11 @@ class Expectation(metaclass=MetaExpectation):
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
-            force_no_progress_bar=force_no_progress_bar,
             ignore_suppress=ignore_suppress,
             ignore_only_for=ignore_only_for,
             debug_logger=debug_logger,
             only_consider_these_backends=only_consider_these_backends,
+            context=context,
         )
 
         backend_test_result_counts: List[
@@ -1338,11 +1336,11 @@ class Expectation(metaclass=MetaExpectation):
         test_data_cases: List[ExpectationTestDataCases],
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
         raise_exceptions_for_backends: bool = False,
-        force_no_progress_bar: bool = True,
         ignore_suppress: bool = False,
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
+        context: Optional["DataContext"] = None,  # noqa: F821
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
 
@@ -1364,6 +1362,7 @@ class Expectation(metaclass=MetaExpectation):
             ignore_only_for=ignore_only_for,
             debug_logger=debug_logger,
             only_consider_these_backends=only_consider_these_backends,
+            context=context,
         )
 
         backend_test_times = defaultdict(list)
@@ -1400,7 +1399,6 @@ class Expectation(metaclass=MetaExpectation):
                 expectation_type=exp_test["expectation_type"],
                 test=exp_test["test"],
                 raise_exception=False,
-                force_no_progress_bar=force_no_progress_bar,
             )
             _end = time.time()
             _duration = _end - _start
