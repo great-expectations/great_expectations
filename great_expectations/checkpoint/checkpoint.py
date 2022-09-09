@@ -73,8 +73,11 @@ class BaseCheckpoint(ConfigPeer):
         checkpoint_config: CheckpointConfig,
         data_context: "DataContext",  # noqa: F821
     ) -> None:
-        # Note the gross typechecking to avoid a circular import
-        if "DataContext" not in str(type(data_context)):
+        from great_expectations.data_context.data_context.abstract_data_context import (
+            AbstractDataContext,
+        )
+
+        if not isinstance(data_context, AbstractDataContext):
             raise TypeError("A Checkpoint requires a valid DataContext")
 
         self._usage_statistics_handler = data_context._usage_statistics_handler
