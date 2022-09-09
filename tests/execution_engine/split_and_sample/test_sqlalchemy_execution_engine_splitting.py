@@ -316,18 +316,29 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     )
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "date_parts",
     MULTIPLE_DATE_PART_DATE_PARTS,
 )
+@pytest.mark.parametrize(
+    "dialect,expected_query_str",
+    [
+        pytest.param(dialect, expected_query_str, id=dialect)
+        for dialect, expected_query_str in {
+            "sqlite": "SELECT DISTINCT(CAST(extract(year FROM column_name) AS varchar) || CAST (extract(month FROM column_name) AS varchar)) AS CONCAT_DISTINCT_values, CAST(extract(year FROM column_name) AS integer) AS year, CAST(extract(month FROM column_name) AS integer) AS month FROM table_name",
+            "postgres": "SELECT DISTINCT(CONCAT(CONCAT('', CAST(EXTRACT(year FROM column_name) AS VARCHAR)), CAST(EXTRACT(month FROM column_name) AS VARCHAR))) AS CONCAT_DISTINCT_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name",
+        }.items()
+    ],
+)
 def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_multiple_date_parts(
-    date_parts, sa
+    date_parts, dialect, expected_query_str, sa
 ):
     """What does this test and why?
     get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts should
     return the correct query when passed any valid set of parameters including multiple date parts.
     """
-    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
+    data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect=dialect)
     table_name: str = "table_name"
     column_name: str = "column_name"
 
@@ -339,7 +350,6 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
 
     assert isinstance(result, sa.sql.Select)
 
-    expected_query_str: str = "SELECT distinct(concat(concat('', CAST(EXTRACT(year FROM column_name) AS VARCHAR)), CAST(EXTRACT(month FROM column_name) AS VARCHAR))) AS concat_distinct_values, CAST(EXTRACT(year FROM column_name) AS INTEGER) AS year, CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name"
     actual_query_str: str = (
         str(result.compile(compile_kwargs={"literal_binds": True}))
         .replace("\n", "")
