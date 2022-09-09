@@ -65,7 +65,9 @@ class BaseDatasource:
                 "name": name,
             }
         except Exception as e:
-            raise ge_exceptions.ExecutionEngineError("Failed to initialize BaseDatasource") from e
+            raise ge_exceptions.ExecutionEngineError(
+                "Failed to initialize BaseDatasource"
+            ) from e
 
         self._data_connectors: dict = {}
 

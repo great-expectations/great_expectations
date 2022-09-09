@@ -66,9 +66,9 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
     # noinspection PyMethodOverriding
     # Note: This method is meant to overwrite Datasource._init_data_connectors (despite signature mismatch).
     def _init_data_connectors(
-            self,
-            introspection_configs: dict,
-            table_configs: dict,
+        self,
+        introspection_configs: dict,
+        table_configs: dict,
     ) -> None:
         # Step-1: Build "DataConnector" objects for introspected tables/views (using "InferredAssetSqlDataConnector").
         for name, config in introspection_configs.items():
