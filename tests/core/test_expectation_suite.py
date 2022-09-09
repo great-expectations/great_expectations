@@ -1,7 +1,7 @@
 import datetime
 import itertools
 from copy import copy, deepcopy
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import pytest
 from ruamel.yaml import YAML
@@ -46,114 +46,273 @@ def expect_column_values_to_be_in_set_col_a_with_meta_dict() -> dict:
     }
 
 
-@pytest.mark.unit
-def test_expectation_suite_init_defaults(fake_expectation_suite_name):
-    suite = ExpectationSuite(expectation_suite_name=fake_expectation_suite_name)
+class TestInitMethod:
+    """Tests related to ExpectationSuite.__init__()"""
 
-    default_meta = {"great_expectations_version": ge_version}
+    @pytest.mark.unit
+    def test_expectation_suite_init_defaults(self, fake_expectation_suite_name: str):
+        suite = ExpectationSuite(expectation_suite_name=fake_expectation_suite_name)
 
-    assert suite.expectation_suite_name == fake_expectation_suite_name
-    assert suite._data_context is None
-    assert suite.expectations == []
-    assert suite.evaluation_parameters == {}
-    assert suite.data_asset_type is None
-    assert suite.execution_engine_type is None
-    assert suite.meta == default_meta
-    assert suite.ge_cloud_id is None
+        default_meta = {"great_expectations_version": ge_version}
 
+        assert suite.expectation_suite_name == fake_expectation_suite_name
+        assert suite._data_context is None
+        assert suite.expectations == []
+        assert suite.evaluation_parameters == {}
+        assert suite.data_asset_type is None
+        assert suite.execution_engine_type is None
+        assert suite.meta == default_meta
+        assert suite.ge_cloud_id is None
 
-@pytest.mark.unit
-def test_expectation_suite_init_overrides(
-    fake_expectation_suite_name,
-    expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
-):
-    class DummyDataContext:
-        pass
+    @pytest.mark.unit
+    def test_expectation_suite_init_overrides(
+        self,
+        fake_expectation_suite_name: str,
+        expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
+    ):
+        class DummyDataContext:
+            pass
 
-    class DummyExecutionEngine:
-        pass
+        class DummyExecutionEngine:
+            pass
 
-    dummy_data_context = DummyDataContext()
-    test_evaluation_parameters = {"$PARAMETER": "test_evaluation_parameters"}
-    test_data_asset_type = "test_data_asset_type"
-    dummy_execution_engine_type = type(DummyExecutionEngine())
-    default_meta = {"great_expectations_version": ge_version}
-    test_meta_base = {"test_key": "test_value"}
-    test_meta = {**default_meta, **test_meta_base}
-    test_id = "test_id"
+        dummy_data_context = DummyDataContext()
+        test_evaluation_parameters = {"$PARAMETER": "test_evaluation_parameters"}
+        test_data_asset_type = "test_data_asset_type"
+        dummy_execution_engine_type = type(DummyExecutionEngine())
+        default_meta = {"great_expectations_version": ge_version}
+        test_meta_base = {"test_key": "test_value"}
+        test_meta = {**default_meta, **test_meta_base}
+        test_id = "test_id"
 
-    suite = ExpectationSuite(
-        expectation_suite_name=fake_expectation_suite_name,
-        data_context=dummy_data_context,  # type: ignore[arg-type]
-        expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
-        evaluation_parameters=test_evaluation_parameters,
-        data_asset_type=test_data_asset_type,
-        execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
-        meta=test_meta,
-        ge_cloud_id=test_id,
-    )
-    assert suite.expectation_suite_name == fake_expectation_suite_name
-    assert suite._data_context == dummy_data_context
-    assert suite.expectations == [expect_column_values_to_be_in_set_col_a_with_meta]
-    assert suite.evaluation_parameters == test_evaluation_parameters
-    assert suite.data_asset_type == test_data_asset_type
-    assert suite.execution_engine_type == dummy_execution_engine_type
-    assert suite.meta == test_meta
-    assert suite.ge_cloud_id == test_id
-
-
-@pytest.mark.unit
-def test_expectation_suite_init_overrides_expectations_dict_and_obj(
-    fake_expectation_suite_name,
-    expect_column_values_to_be_in_set_col_a_with_meta_dict: dict,
-    expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
-):
-    """What does this test and why?
-
-    The expectations param of ExpectationSuite takes a list of ExpectationConfiguration or dicts and both can be provided at the same time. We need to make sure they both show up as expectation configurations in the instantiated ExpectationSuite.
-    """
-
-    test_expectations_input = [
-        expect_column_values_to_be_in_set_col_a_with_meta_dict,
-        expect_column_values_to_be_in_set_col_a_with_meta,
-    ]
-
-    suite = ExpectationSuite(
-        expectation_suite_name=fake_expectation_suite_name,
-        expectations=test_expectations_input,  # type: ignore[arg-type]
-    )
-    assert suite.expectation_suite_name == fake_expectation_suite_name
-
-    test_expected_expectations = [
-        ExpectationConfiguration(
-            **expect_column_values_to_be_in_set_col_a_with_meta_dict
-        ),
-        expect_column_values_to_be_in_set_col_a_with_meta,
-    ]
-    assert len(suite.expectations) == 2
-    assert suite.expectations == test_expected_expectations
-
-
-@pytest.mark.unit
-def test_expectation_suite_init_overrides_non_json_serializable_meta(
-    fake_expectation_suite_name,
-):
-    """What does this test and why?
-
-    meta field overrides need to be json serializable, if not we raise an exception.
-    """
-
-    class NotSerializable:
-        def __dict__(self):
-            raise NotImplementedError
-
-    test_meta = {"this_is_not_json_serializable": NotSerializable()}
-
-    with pytest.raises(InvalidExpectationConfigurationError):
-        ExpectationSuite(
+        suite = ExpectationSuite(
             expectation_suite_name=fake_expectation_suite_name,
-            meta=test_meta,  # type: ignore[arg-type]
+            data_context=dummy_data_context,  # type: ignore[arg-type]
+            expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
+            evaluation_parameters=test_evaluation_parameters,
+            data_asset_type=test_data_asset_type,
+            execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
+            meta=test_meta,
+            ge_cloud_id=test_id,
         )
+        assert suite.expectation_suite_name == fake_expectation_suite_name
+        assert suite._data_context == dummy_data_context
+        assert suite.expectations == [expect_column_values_to_be_in_set_col_a_with_meta]
+        assert suite.evaluation_parameters == test_evaluation_parameters
+        assert suite.data_asset_type == test_data_asset_type
+        assert suite.execution_engine_type == dummy_execution_engine_type
+        assert suite.meta == test_meta
+        assert suite.ge_cloud_id == test_id
+
+    @pytest.mark.unit
+    def test_expectation_suite_init_overrides_expectations_dict_and_obj(
+        self,
+        fake_expectation_suite_name: str,
+        expect_column_values_to_be_in_set_col_a_with_meta_dict: dict,
+        expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
+    ):
+        """What does this test and why?
+
+        The expectations param of ExpectationSuite takes a list of ExpectationConfiguration or dicts and both can be provided at the same time. We need to make sure they both show up as expectation configurations in the instantiated ExpectationSuite.
+        """
+
+        test_expectations_input = [
+            expect_column_values_to_be_in_set_col_a_with_meta_dict,
+            expect_column_values_to_be_in_set_col_a_with_meta,
+        ]
+
+        suite = ExpectationSuite(
+            expectation_suite_name=fake_expectation_suite_name,
+            expectations=test_expectations_input,  # type: ignore[arg-type]
+        )
+        assert suite.expectation_suite_name == fake_expectation_suite_name
+
+        test_expected_expectations = [
+            ExpectationConfiguration(
+                **expect_column_values_to_be_in_set_col_a_with_meta_dict
+            ),
+            expect_column_values_to_be_in_set_col_a_with_meta,
+        ]
+        assert len(suite.expectations) == 2
+        assert suite.expectations == test_expected_expectations
+
+    @pytest.mark.unit
+    def test_expectation_suite_init_overrides_non_json_serializable_meta(
+        self,
+        fake_expectation_suite_name: str,
+    ):
+        """What does this test and why?
+
+        meta field overrides need to be json serializable, if not we raise an exception.
+        """
+
+        class NotSerializable:
+            def __dict__(self):
+                raise NotImplementedError
+
+        test_meta = {"this_is_not_json_serializable": NotSerializable()}
+
+        with pytest.raises(InvalidExpectationConfigurationError) as e:
+            ExpectationSuite(
+                expectation_suite_name=fake_expectation_suite_name,
+                meta=test_meta,  # type: ignore[arg-type]
+            )
+        assert "is of type NotSerializable which cannot be serialized to json" in str(
+            e.value
+        )
+
+
+class TestAddCitation:
+    @pytest.fixture
+    def empty_suite_with_meta(
+        self, fake_expectation_suite_name: str
+    ) -> ExpectationSuite:
+        return ExpectationSuite(
+            expectation_suite_name=fake_expectation_suite_name,
+            meta={"notes": "This is an expectation suite."},
+        )
+
+    @pytest.mark.unit
+    def test_empty_suite_with_meta_fixture(
+        self, empty_suite_with_meta: ExpectationSuite
+    ):
+        assert "citations" not in empty_suite_with_meta.meta
+
+    @pytest.mark.unit
+    def test_add_citation_comment(self, empty_suite_with_meta: ExpectationSuite):
+        empty_suite_with_meta.add_citation("hello!")
+        assert empty_suite_with_meta.meta["citations"][0].get("comment") == "hello!"
+
+    @pytest.mark.unit
+    def test_add_citation_comment_required(
+        self, empty_suite_with_meta: ExpectationSuite
+    ):
+        with pytest.raises(TypeError) as e:
+            empty_suite_with_meta.add_citation()  # type: ignore[call-arg]
+        assert (
+            "add_citation() missing 1 required positional argument: 'comment'"
+            in str(e.value)
+        )
+
+    @pytest.mark.unit
+    def test_add_citation_not_specified_params_filtered(
+        self, empty_suite_with_meta: ExpectationSuite
+    ):
+        empty_suite_with_meta.add_citation(
+            "fake_comment",
+            batch_spec={"fake": "batch_spec"},
+            batch_markers={"fake": "batch_markers"},
+        )
+        assert "citations" in empty_suite_with_meta.meta
+
+        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
+        # Note: citation_date is always added if not provided
+        assert citation_keys == {
+            "comment",
+            "citation_date",
+            "batch_spec",
+            "batch_markers",
+        }
+        # batch_definition (along with other keys that are not provided) should be filtered out
+        assert "batch_definition" not in citation_keys
+
+    @pytest.mark.unit
+    @pytest.mark.v2_api
+    def test_add_citation_accepts_v2_api_params(
+        self, empty_suite_with_meta: ExpectationSuite
+    ):
+        """This test ensures backward compatibility with the v2 api and can be removed when deprecated."""
+        empty_suite_with_meta.add_citation(
+            "fake_comment",
+            batch_kwargs={"fake": "batch_kwargs"},
+            batch_parameters={"fake": "batch_parameters"},
+        )
+
+        assert empty_suite_with_meta.meta["citations"][0]["batch_kwargs"] == {
+            "fake": "batch_kwargs"
+        }
+        assert empty_suite_with_meta.meta["citations"][0]["batch_parameters"] == {
+            "fake": "batch_parameters"
+        }
+        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
+        assert citation_keys == {
+            "comment",
+            "citation_date",
+            "batch_kwargs",
+            "batch_parameters",
+        }
+
+    @pytest.mark.unit
+    def test_add_citation_all_params(self, empty_suite_with_meta: ExpectationSuite):
+        """Note, this does not include v2 api params e.g. batch_kwargs"""
+        empty_suite_with_meta.add_citation(
+            "fake_comment",
+            batch_request={"fake": "batch_request"},
+            batch_definition={"fake": "batch_definition"},
+            batch_spec={"fake": "batch_spec"},
+            batch_markers={"fake": "batch_markers"},
+            profiler_config={"fake": "profiler_config"},
+            citation_date="2022-09-08",
+        )
+        assert "citations" in empty_suite_with_meta.meta
+
+        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
+        assert citation_keys == {
+            "comment",
+            "citation_date",
+            "batch_request",
+            "batch_definition",
+            "batch_spec",
+            "batch_markers",
+            "profiler_config",
+        }
+
+    @pytest.mark.parametrize(
+        "citation_date",
+        [
+            pytest.param("2022-09-08", id="str override"),
+            pytest.param(datetime.datetime(2022, 9, 8), id="datetime override"),
+        ],
+    )
+    @pytest.mark.unit
+    def test_add_citation_citation_date_override(
+        self,
+        citation_date: Union[str, datetime.datetime],
+        empty_suite_with_meta: ExpectationSuite,
+    ):
+        empty_suite_with_meta.add_citation("fake_comment", citation_date=citation_date)
+        assert (
+            empty_suite_with_meta.meta["citations"][0]["citation_date"]
+            == "2022-09-08T00:00:00.000000Z"
+        )
+
+    @pytest.mark.unit
+    def test_add_citation_with_existing_citations(
+        self, empty_suite_with_meta: ExpectationSuite
+    ):
+        empty_suite_with_meta.add_citation("fake_comment1")
+        assert "citations" in empty_suite_with_meta.meta
+        assert len(empty_suite_with_meta.meta["citations"]) == 1
+        empty_suite_with_meta.add_citation("fake_comment2")
+        assert len(empty_suite_with_meta.meta["citations"]) == 2
+
+    @pytest.mark.unit
+    def test_add_citation_with_profiler_config(
+        self, empty_suite_with_meta: ExpectationSuite
+    ):
+        empty_suite_with_meta.add_citation(
+            "fake_comment",
+            profiler_config={"fake": "profiler_config"},
+        )
+
+        assert empty_suite_with_meta.meta["citations"][0]["profiler_config"] == {
+            "fake": "profiler_config"
+        }
+        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
+        assert citation_keys == {"comment", "citation_date", "profiler_config"}
+
+
+#### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
 
 
 @pytest.fixture
@@ -473,29 +632,6 @@ def test_suite_does_not_overwrite_existing_version_metadata():
 @pytest.mark.unit
 def test_suite_with_metadata_includes_ge_version_metadata(baseline_suite):
     assert "great_expectations_version" in baseline_suite.meta.keys()
-
-
-@pytest.mark.unit
-def test_add_citation(baseline_suite):
-    assert (
-        "citations" not in baseline_suite.meta
-        or len(baseline_suite.meta["citations"]) == 0
-    )
-    baseline_suite.add_citation("hello!")
-    assert baseline_suite.meta["citations"][0].get("comment") == "hello!"
-
-
-@pytest.mark.unit
-def test_add_citation_with_profiler_config(baseline_suite, profiler_config):
-    assert (
-        "citations" not in baseline_suite.meta
-        or len(baseline_suite.meta["citations"]) == 0
-    )
-    baseline_suite.add_citation(
-        "adding profiler config citation",
-        profiler_config=profiler_config,
-    )
-    assert baseline_suite.meta["citations"][0].get("profiler_config") == profiler_config
 
 
 @pytest.mark.unit
