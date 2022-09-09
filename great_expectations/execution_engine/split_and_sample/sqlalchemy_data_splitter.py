@@ -500,29 +500,48 @@ class SqlAlchemyDataSplitter(DataSplitter):
         else:
             """
             # NOTE: <Alex>6/29/2022</Alex>
-            Certain SQLAlchemy-compliant backends (e.g., Amazon Redshift) allow only binary operators for "CONCAT".
+            Certain SQLAlchemy-compliant backends (e.g., Amazon Redshift, SQLite) allow only binary operators for "CONCAT".
             """
-            concat_date_parts: concat = sa.func.concat(
-                "",
-                sa.cast(
+            if self._dialect == "sqlite":
+                concat_date_parts = sa.cast(
                     sa.func.extract(date_parts[0].value, sa.column(column_name)),
                     sa.String,
-                ),
-            )
+                )
 
-            date_part: DatePart
-            for date_part in date_parts[1:]:
-                concat_date_parts = sa.func.concat(
-                    concat_date_parts,
+                date_part: DatePart
+                for date_part in date_parts[1:]:
+                    concat_date_parts = concat_date_parts.concat(
+                        sa.cast(
+                            sa.func.extract(date_part.value, sa.column(column_name)),
+                            sa.String,
+                        )
+                    )
+
+                concat_clause: List[Label] = [
+                    sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
+                ]
+            else:
+                concat_date_parts: concat = sa.func.concat(
+                    "",
                     sa.cast(
-                        sa.func.extract(date_part.value, sa.column(column_name)),
+                        sa.func.extract(date_parts[0].value, sa.column(column_name)),
                         sa.String,
                     ),
                 )
 
-            concat_clause: List[Label] = [
-                sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
-            ]
+                date_part: DatePart
+                for date_part in date_parts[1:]:
+                    concat_date_parts = sa.func.concat(
+                        concat_date_parts,
+                        sa.cast(
+                            sa.func.extract(date_part.value, sa.column(column_name)),
+                            sa.String,
+                        ),
+                    )
+
+                concat_clause: List[Label] = [
+                    sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
+                ]
 
         split_query: Selectable = sa.select(
             concat_clause
