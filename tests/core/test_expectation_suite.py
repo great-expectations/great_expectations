@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Union
 from unittest.mock import MagicMock
 
 import pytest
-from great_expectations.execution_engine import ExecutionEngine
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -17,6 +16,7 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.util import filter_properties_dict
 
 
@@ -54,6 +54,7 @@ def empty_suite_with_meta(fake_expectation_suite_name: str) -> ExpectationSuite:
         expectation_suite_name=fake_expectation_suite_name,
         meta={"notes": "This is an expectation suite."},
     )
+
 
 @pytest.fixture
 def suite_with_single_expectation(
@@ -324,8 +325,6 @@ class TestAddCitation:
 
 
 class TestIsEquivalentTo:
-
-
     @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_true_unit_test(self):
         class StubExpectationConfiguration:
@@ -466,8 +465,10 @@ class TestIsEquivalentTo:
 
 
 class TestEqDunder:
-
-    @pytest.mark.xfail(strict=True, reason="This test should be modified to pass when returning NotImplemented")
+    @pytest.mark.xfail(
+        strict=True,
+        reason="This test should be modified to pass when returning NotImplemented",
+    )
     @pytest.mark.unit
     def test_equality_to_unsupported_class_returns_notimplemented(
         self, suite_with_single_expectation: ExpectationSuite
@@ -479,12 +480,15 @@ class TestEqDunder:
                 return NotImplemented
 
         return_value = suite_with_single_expectation == UnsupportedClass()
-        assert not return_value  # This assertion should be removed, return_value should be NotImplemented
+        assert (
+            not return_value
+        )  # This assertion should be removed, return_value should be NotImplemented
         assert return_value == NotImplemented
 
-
     @pytest.mark.unit
-    def test_expectation_suite_equality_single_expectation_true(self, suite_with_single_expectation: ExpectationSuite):
+    def test_expectation_suite_equality_single_expectation_true(
+        self, suite_with_single_expectation: ExpectationSuite
+    ):
         different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
         assert suite_with_single_expectation == different_but_equivalent_suite
         assert different_but_equivalent_suite == suite_with_single_expectation
@@ -492,27 +496,52 @@ class TestEqDunder:
         assert not suite_with_single_expectation != different_but_equivalent_suite
         assert not different_but_equivalent_suite != suite_with_single_expectation
 
-
-
-
     @pytest.mark.parametrize(
         "attribute,new_value",
         [
             pytest.param("expectation_suite_name", "different_name"),
-            pytest.param("data_context", MagicMock(), marks=pytest.mark.xfail(strict=True, raises=AssertionError,
-                                                                                reason="Currently data_context is not considered in ExpectationSuite equality")),
+            pytest.param(
+                "data_context",
+                MagicMock(),
+                marks=pytest.mark.xfail(
+                    strict=True,
+                    raises=AssertionError,
+                    reason="Currently data_context is not considered in ExpectationSuite equality",
+                ),
+            ),
             pytest.param("expectations", []),
-            pytest.param("evaluation_parameters", {"different": "evaluation_parameters"}),
+            pytest.param(
+                "evaluation_parameters", {"different": "evaluation_parameters"}
+            ),
             pytest.param("data_asset_type", "different_data_asset_type"),
-            pytest.param("execution_engine_type", type(ExecutionEngine), marks=pytest.mark.xfail(strict=True, raises=AssertionError,
-                                                                                reason="Currently execution_engine_type is not considered in ExpectationSuite equality")),
+            pytest.param(
+                "execution_engine_type",
+                type(ExecutionEngine),
+                marks=pytest.mark.xfail(
+                    strict=True,
+                    raises=AssertionError,
+                    reason="Currently execution_engine_type is not considered in ExpectationSuite equality",
+                ),
+            ),
             pytest.param("meta", {"notes": "Different meta."}),
-            pytest.param("ge_cloud_id", "different_id", marks=pytest.mark.xfail(strict=True, raises=AssertionError, reason="Currently ge_cloud_id is not considered in ExpectationSuite equality")),
-
-        ]
+            pytest.param(
+                "ge_cloud_id",
+                "different_id",
+                marks=pytest.mark.xfail(
+                    strict=True,
+                    raises=AssertionError,
+                    reason="Currently ge_cloud_id is not considered in ExpectationSuite equality",
+                ),
+            ),
+        ],
     )
     @pytest.mark.unit
-    def test_expectation_suite_equality_false(self, attribute: str, new_value: Union[str, Dict[str, str]], suite_with_single_expectation: ExpectationSuite):
+    def test_expectation_suite_equality_false(
+        self,
+        attribute: str,
+        new_value: Union[str, Dict[str, str]],
+        suite_with_single_expectation: ExpectationSuite,
+    ):
 
         different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
 
@@ -750,9 +779,6 @@ def profiler_config():
     """
     yaml = YAML()
     return yaml.load(yaml_config)
-
-
-
 
 
 @pytest.mark.unit
