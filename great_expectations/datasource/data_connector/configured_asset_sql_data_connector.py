@@ -203,6 +203,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             Dict[str, Union[str, list]]
         ] = data_asset.get("splitter_kwargs")
 
+        # if splitter_method and splitter_kwargs are configured at the asset level use that, otherwise look for
+        # splitter_method and splitter_kwargs at the data connector level.
         if data_asset_splitter_method is not None:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list,
