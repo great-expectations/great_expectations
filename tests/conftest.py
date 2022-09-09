@@ -2580,35 +2580,6 @@ def cloud_data_context_with_datasource_pandas_engine(
 
 
 @pytest.fixture
-def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_data_context_in_cloud_mode: DataContext, db_file
-):
-    context: DataContext = empty_data_context_in_cloud_mode
-    config = yaml.load(
-        f"""
-    class_name: Datasource
-    execution_engine:
-        class_name: PandasExecutionEngine
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
-    with mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
-    ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
-    ):
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
-    return context
-
-
-@pytest.fixture
 def profiler_name() -> str:
     return "my_first_profiler"
 
