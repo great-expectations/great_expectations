@@ -2,7 +2,11 @@ import logging
 from typing import Any, Dict, List, Tuple, Type, Union
 
 import pytest
-import sqlalchemy.engine
+
+try:
+    import sqlalchemy
+except ImportError:
+    sqlalchemy = None
 
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetSqlDataConnector,
@@ -167,6 +171,7 @@ def _datasource_asserts(
 # The configured data sources, "whole_table", "hourly", and "daily", all have unique names
 # because if any of them share a name they will clobber each other.
 @pytest.mark.unit
+@pytest.mark.skipif(sqlalchemy is None, reason="sqlalchemy is not installed")
 @pytest.mark.parametrize("connection", [None, "lets-connect"])
 @pytest.mark.parametrize("url", [None, "https://url.com"])
 @pytest.mark.parametrize("credentials", [None, {"username": "foo", "password": "bar"}])
@@ -239,20 +244,6 @@ def test_simple_sqlalchemy_datasource_init(
     )
 
 
-@pytest.mark.unit
-def test_simple_sqlalchemy_datasource_init_fails_with_no_engine():
-    with pytest.raises(ExecutionEngineError):
-        SimpleSqlalchemyDatasource(
-            name="simple_sqlalchemy_datasource",
-            connection_string="connect",
-            url="http://url.com",
-            credentials={"user": "name"},
-            engine=None,
-            introspection={},
-            tables={},
-        )
-
-
 SqlDataConnectorType = Union[
     Type[InferredAssetSqlDataConnector], Type[ConfiguredAssetSqlDataConnector]
 ]
@@ -282,3 +273,18 @@ def _expected_data_assets_with_types(
                 expected_data_assets_with_types[key] = []
             expected_data_assets_with_types[key].append((table_name, "table"))
     return expected_data_assets_with_types
+
+
+@pytest.mark.unit
+@pytest.mark.skipif(sqlalchemy is None, reason="sqlalchemy is not installed")
+def test_simple_sqlalchemy_datasource_init_fails_with_no_engine():
+    with pytest.raises(ExecutionEngineError):
+        SimpleSqlalchemyDatasource(
+            name="simple_sqlalchemy_datasource",
+            connection_string="connect",
+            url="http://url.com",
+            credentials={"user": "name"},
+            engine=None,
+            introspection={},
+            tables={},
+        )
