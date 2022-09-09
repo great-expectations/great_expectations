@@ -74,6 +74,75 @@ class CloudDataContext(AbstractDataContext):
             runtime_environment=runtime_environment,
         )
 
+    @classmethod
+    def retrieve_data_context_config_from_ge_cloud(
+        cls, ge_cloud_config: GeCloudConfig
+    ) -> DataContextConfig:
+        """
+        Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
+        Given proper authorization, the request retrieves a data context config that is pre-populated with
+        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
+
+        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
+        over the wire.
+
+        :return: the configuration object retrieved from the Cloud API
+        """
+        base_url = ge_cloud_config.base_url  # type: ignore[union-attr]
+        organization_id = ge_cloud_config.organization_id  # type: ignore[union-attr]
+        ge_cloud_url = (
+            f"{base_url}/organizations/{organization_id}/data-context-configuration"
+        )
+        headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {ge_cloud_config.access_token}",  # type: ignore[union-attr]
+            "Gx-Version": __version__,
+        }
+
+        response = requests.get(ge_cloud_url, headers=headers)
+        if response.status_code != 200:
+            raise ge_exceptions.GeCloudError(
+                f"Bad request made to GE Cloud; {response.text}"
+            )
+        config = response.json()
+        return DataContextConfig(**config)
+
+    # TODO: deprecate ge_cloud_account_id
+    @classmethod
+    def get_ge_cloud_config(
+        cls,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_account_id: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
+    ) -> GeCloudConfig:
+        """
+        Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
+        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
+        """
+        ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_account_id=ge_cloud_account_id,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+
+        missing_keys = []
+        for key, val in ge_cloud_config_dict.items():
+            if not val:
+                missing_keys.append(key)
+        if len(missing_keys) > 0:
+            missing_keys_str = [f'"{key}"' for key in missing_keys]
+            global_config_path_str = [
+                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
+            ]
+            raise DataContextError(
+                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
+                f"environment or in global configs ({(', ').join(global_config_path_str)})."
+            )
+
+        return GeCloudConfig(**ge_cloud_config_dict)  # type: ignore[arg-type,misc]
+
     # TODO: deprecate ge_cloud_account_id
     @classmethod
     def _get_ge_cloud_config_dict(
@@ -127,75 +196,6 @@ class CloudDataContext(AbstractDataContext):
             GECloudEnvironmentVariable.ORGANIZATION_ID: ge_cloud_organization_id,
             GECloudEnvironmentVariable.ACCESS_TOKEN: ge_cloud_access_token,
         }
-
-    # TODO: deprecate ge_cloud_account_id
-    @classmethod
-    def get_ge_cloud_config(
-        cls,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> GeCloudConfig:
-        """
-        Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
-        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
-        """
-        ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_account_id=ge_cloud_account_id,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-        )
-
-        missing_keys = []
-        for key, val in ge_cloud_config_dict.items():
-            if not val:
-                missing_keys.append(key)
-        if len(missing_keys) > 0:
-            missing_keys_str = [f'"{key}"' for key in missing_keys]
-            global_config_path_str = [
-                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
-            ]
-            raise DataContextError(
-                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
-                f"environment or in global configs ({(', ').join(global_config_path_str)})."
-            )
-
-        return GeCloudConfig(**ge_cloud_config_dict)  # type: ignore[arg-type,misc]
-
-    @classmethod
-    def retrieve_data_context_config_from_ge_cloud(
-        cls, ge_cloud_config: GeCloudConfig
-    ) -> DataContextConfig:
-        """
-        Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
-        Given proper authorization, the request retrieves a data context config that is pre-populated with
-        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
-
-        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
-        over the wire.
-
-        :return: the configuration object retrieved from the Cloud API
-        """
-        base_url = ge_cloud_config.base_url  # type: ignore[union-attr]
-        organization_id = ge_cloud_config.organization_id  # type: ignore[union-attr]
-        ge_cloud_url = (
-            f"{base_url}/organizations/{organization_id}/data-context-configuration"
-        )
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {ge_cloud_config.access_token}",  # type: ignore[union-attr]
-            "Gx-Version": __version__,
-        }
-
-        response = requests.get(ge_cloud_url, headers=headers)
-        if response.status_code != 200:
-            raise ge_exceptions.GeCloudError(
-                f"Bad request made to GE Cloud; {response.text}"
-            )
-        config = response.json()
-        return DataContextConfig(**config)
 
     def _init_datasource_store(self) -> None:
         from great_expectations.data_context.store.datasource_store import (
