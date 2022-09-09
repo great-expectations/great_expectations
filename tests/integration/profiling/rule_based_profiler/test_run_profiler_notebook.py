@@ -421,7 +421,7 @@ def test_run_multibatch_sql_inferred_asset_example(tmp_path, sa, test_backends):
     in code. This test ensures the codepaths and examples described in the Notebook actually run and pass, nbconvert's
     `preprocess` function.
 
-    This test is for ConfiguredAssetSqlDataConnector
+    This test is for InferredAssetSqlDataConnector
     """
     if "postgresql" not in test_backends:
         pytest.skip("testing multibatch in sql requires postgres backend")
