@@ -42,6 +42,38 @@ class DatePart(enum.Enum):
         return representer.represent_str(data=node.value)
 
 
+@yaml_object(yaml)
+class SplitterMethod(enum.Enum):
+    """The names of available splitter_methods."""
+
+    SPLIT_ON_YEAR = "split_on_year"
+    SPLIT_ON_YEAR_AND_MONTH = "split_on_year_and_month"
+    SPLIT_ON_YEAR_AND_MONTH_AND_DAY = "split_on_year_and_month_and_day"
+    SPLIT_ON_DATE_PARTS = "split_on_date_parts"
+    SPLIT_ON_WHOLE_TABLE = "split_on_whole_table"
+    SPLIT_ON_COLUMN_VALUE = "split_on_column_value"
+    SPLIT_ON_CONVERTED_DATETIME = "split_on_converted_datetime"
+    SPLIT_ON_DIVIDED_INTEGER = "split_on_divided_integer"
+    SPLIT_ON_MOD_INTEGER = "split_on_mod_integer"
+    SPLIT_ON_MULTI_COLUMN_VALUES = "split_on_multi_column_values"
+    SPLIT_ON_HASHED_COLUMN = "split_on_hashed_column"
+
+    def __eq__(self, other: SplitterMethod):
+        return self.value == other.value
+
+    def __hash__(self: SplitterMethod):
+        return hash(self.value)
+
+    @classmethod
+    def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
+        """
+        Method allows for yaml-encodable representation of ENUM, using internal methods of ruamel.
+        pattern was found in the following stackoverflow thread:
+        https://stackoverflow.com/questions/48017317/can-ruamel-yaml-encode-an-enum
+        """
+        return representer.represent_str(data=node.value)
+
+
 class DataSplitter(abc.ABC):
     """Abstract base class containing methods for splitting data accessible via Execution Engines.
 
