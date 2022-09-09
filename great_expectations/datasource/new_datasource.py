@@ -29,7 +29,7 @@ class BaseDatasource:
     def __init__(
         self,
         name: str,
-        execution_engine=None,
+        execution_engine: dict,  # execution_engine is really a configuration dictionary.
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
@@ -39,7 +39,7 @@ class BaseDatasource:
 
         Args:
             name: the name for the datasource
-            execution_engine (ClassConfig): the type of compute engine to produce
+            execution_engine: compute engine configuration with keys 'module_name' and 'class_name'.
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
             id: Identifier specific to this datasource.
@@ -65,7 +65,7 @@ class BaseDatasource:
                 "name": name,
             }
         except Exception as e:
-            raise ge_exceptions.ExecutionEngineError(message=str(e))
+            raise ge_exceptions.ExecutionEngineError("Failed to initialize BaseDatasource") from e
 
         self._data_connectors: dict = {}
 

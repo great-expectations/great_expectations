@@ -124,8 +124,7 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
             "Couldn't instantiate class: {} with config: \n\t{}\n \n".format(
                 class_name, format_dict_for_error_message(config_with_defaults)
             )
-            + str(e)
-        )
+        ) from e
 
     return class_instance
 
