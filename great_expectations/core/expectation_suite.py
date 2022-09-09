@@ -4,7 +4,17 @@ import logging
 import pprint
 import uuid
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 from marshmallow import Schema, ValidationError, fields, pre_dump
 
@@ -37,6 +47,8 @@ from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
@@ -53,14 +65,14 @@ class ExpectationSuite(SerializableDictDot):
 
     def __init__(
         self,
-        expectation_suite_name,
-        data_context=None,
-        expectations=None,
-        evaluation_parameters=None,
-        data_asset_type=None,
-        execution_engine_type=None,
-        meta=None,
-        ge_cloud_id=None,
+        expectation_suite_name: str,
+        data_context: "AbstractDataContext" = None,
+        expectations: List[Union[dict, ExpectationConfiguration]] = None,
+        evaluation_parameters: dict = None,
+        data_asset_type: str = None,
+        execution_engine_type: Type["ExecutionEngine"] = None,
+        meta: dict = None,
+        ge_cloud_id: str = None,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
@@ -394,7 +406,7 @@ class ExpectationSuite(SerializableDictDot):
                     match_indexes.append(idx)
             else:
                 if expectation.isEquivalentTo(
-                    other=expectation_configuration, match_type=match_type
+                    other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
                 ):
                     match_indexes.append(idx)
 
@@ -481,7 +493,7 @@ class ExpectationSuite(SerializableDictDot):
         elif len(found_expectation_indexes) == 0:
             raise ValueError("No matching Expectation was found.")
 
-        self.expectations[found_expectation_indexes[0]] = new_expectation_configuration
+        self.expectations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
 
     def patch_expectation(
         self,
