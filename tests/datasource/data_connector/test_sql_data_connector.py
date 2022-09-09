@@ -1916,7 +1916,14 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
                 {"d": 30, "m": 1, "y": 2020},
             ],
         ),
-        # ("split_on_hashed_column", {"column_name": "id", "hash_digits": 2}, "table_that_should_be_partitioned_by_random_hash__H", [], []),
+        # SQLite does not support MD5 hashing
+        # (
+        #     "split_on_hashed_column",
+        #     {"column_name": "id", "hash_digits": 2},
+        #     "table_that_should_be_partitioned_by_random_hash__H",
+        #     [],
+        #     [],
+        # ),
     ],
 )
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
