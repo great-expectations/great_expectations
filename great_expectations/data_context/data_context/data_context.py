@@ -26,6 +26,7 @@ from great_expectations.data_context.types.base import (
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
+    GeCloudConfig,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
@@ -236,26 +237,16 @@ class DataContext(BaseDataContext):
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         self._ge_cloud_mode = ge_cloud_mode
-        self._ge_cloud_config = None
+        self._ge_cloud_config = self._init_ge_cloud_config(
+            ge_cloud_mode=ge_cloud_mode,
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_account_id=ge_cloud_account_id,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
 
-        if ge_cloud_mode:
-            context_root_dir = self._determine_context_root_dir_from_cloud(
-                context_root_dir=context_root_dir,
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_account_id=ge_cloud_account_id,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
-            )
-        else:
-            # Determine the "context root directory" - this is the parent of "great_expectations" dir
-            context_root_dir = (
-                self.find_context_root_dir()
-                if context_root_dir is None
-                else context_root_dir
-            )
-
-        self._context_root_directory = os.path.abspath(
-            os.path.expanduser(context_root_dir)
+        self._context_root_directory = self._init_context_root_directory(
+            context_root_dir=context_root_dir
         )
 
         project_config = self._load_project_config()
@@ -272,30 +263,41 @@ class DataContext(BaseDataContext):
         if self._check_for_usage_stats_sync(project_config):
             self._save_project_config()
 
-    def _determine_context_root_dir_from_cloud(
+    def _init_ge_cloud_config(
         self,
-        context_root_dir: Optional[str] = None,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> str:
+        ge_cloud_mode: bool,
+        ge_cloud_base_url: Optional[str],
+        ge_cloud_account_id: Optional[str],
+        ge_cloud_access_token: Optional[str],
+        ge_cloud_organization_id: Optional[str],
+    ) -> Optional[GeCloudConfig]:
+        if not ge_cloud_mode:
+            return None
+
         ge_cloud_config = CloudDataContext.get_ge_cloud_config(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_account_id=ge_cloud_account_id,
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
-        self._ge_cloud_config = ge_cloud_config
-        # in ge_cloud_mode, if not provided, set context_root_dir to cwd
+        return ge_cloud_config
+
+    def _init_context_root_directory(self, context_root_dir: Optional[str]) -> str:
         if context_root_dir is None:
             context_root_dir = os.getcwd()
             logger.info(
                 f'context_root_dir was not provided - defaulting to current working directory "'
                 f'{context_root_dir}".'
             )
+        else:
+            # Determine the "context root directory" - this is the parent of "great_expectations" dir
+            context_root_dir = (
+                self.find_context_root_dir()
+                if context_root_dir is None
+                else context_root_dir
+            )
 
-        return context_root_dir
+        return os.path.abspath(os.path.expanduser(context_root_dir))
 
     def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
         """
