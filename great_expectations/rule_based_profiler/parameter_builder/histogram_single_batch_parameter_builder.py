@@ -146,7 +146,7 @@ elements.
             )
 
         # Only unique "bins" are necessary (hence, "n_bins" is potentially lowered to fit data distribution).
-        bins = sorted(list(set(bins)))
+        bins = sorted(set(bins))
 
         column_values_nonnull_count_metric_single_batch_parameter_builder = MetricSingleBatchParameterBuilder(
             name="column_values_nonnull_count_metric_single_batch_parameter_builder",
