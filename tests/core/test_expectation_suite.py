@@ -465,7 +465,6 @@ class TestIsEquivalentTo:
 
 
 class TestEqDunder:
-
     @pytest.mark.unit
     def test_equality_to_unsupported_class_is_false(
         self, suite_with_single_expectation: ExpectationSuite
@@ -477,7 +476,6 @@ class TestEqDunder:
 
         return_value = suite_with_single_expectation == UnsupportedClass()
         assert not return_value
-
 
     @pytest.mark.unit
     def test_expectation_suite_equality_single_expectation_true(
