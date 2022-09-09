@@ -33,10 +33,10 @@ logger = logging.getLogger(__name__)
 
 
 class GECloudEnvironmentVariable(str, Enum):
-    BASE_URL = "GE_CLOUD_BASE_URL"
-    ACCOUNT_ID = "GE_CLOUD_ACCOUNT_ID"  # Deprecated
-    ORGANIZATION_ID = "GE_CLOUD_ORGANIZATION_ID"
-    ACCESS_TOKEN = "GE_CLOUD_ACCESS_TOKEN"
+    BASE_URL = "base_url"
+    ACCOUNT_ID = "account_id"  # Deprecated
+    ORGANIZATION_ID = "organization_id"
+    ACCESS_TOKEN = "access_token"
 
 
 class CloudDataContext(AbstractDataContext):
