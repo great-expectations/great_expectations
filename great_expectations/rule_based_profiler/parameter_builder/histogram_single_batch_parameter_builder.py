@@ -22,10 +22,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import (
-    convert_ndarray_datetime_to_float_dtype,
-    is_ndarray_datetime_dtype,
-)
+from great_expectations.util import is_ndarray_datetime_dtype
 
 
 class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
@@ -146,22 +143,15 @@ elements.
             data=bins,
             parse_strings_as_datetimes=True,
         )
-        bins_ndarray_as_float: MetricValue
         if ndarray_is_datetime_type:
-            bins_ndarray_as_float = convert_ndarray_datetime_to_float_dtype(data=bins)
-        else:
-            bins_ndarray_as_float = bins
-
-        histogram_unsupported: bool = ndarray_is_datetime_type or not np.all(
-            np.diff(bins_ndarray_as_float) > 0.0
-        )
-        if histogram_unsupported:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
-{self._column_partition_metric_single_batch_parameter_builder_config.name} did not yield monotonically-increasing bins \
-of supported data type.
+{self._column_partition_metric_single_batch_parameter_builder_config.name} did not yield bins of supported data type.
 """
             )
+
+        # Only unique "bins" are necessary (hence, "n_bins" is potentially lowered to fit data distribution).
+        bins = sorted(list(set(bins)))
 
         column_values_nonnull_count_metric_single_batch_parameter_builder = MetricSingleBatchParameterBuilder(
             name="column_values_nonnull_count_metric_single_batch_parameter_builder",
@@ -214,8 +204,6 @@ of supported data type.
             parameters=parameters,
         )
 
-        # in this case, we have requested a partition, histogram using said partition, and nonnull count
-        bins = list(bins)
         weights: np.ndarray = np.asarray(
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
         ) / (

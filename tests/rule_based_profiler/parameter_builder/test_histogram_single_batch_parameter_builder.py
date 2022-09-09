@@ -145,7 +145,7 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
         )
 
     assert (
-        "Partitioning values for HistogramSingleBatchParameterBuilder by column_partition_metric_single_batch_parameter_builder did not yield monotonically-increasing bins of supported data type."
+        "Partitioning values for HistogramSingleBatchParameterBuilder by column_partition_metric_single_batch_parameter_builder did not yield bins of supported data type."
         in str(excinfo.value)
     )
 
