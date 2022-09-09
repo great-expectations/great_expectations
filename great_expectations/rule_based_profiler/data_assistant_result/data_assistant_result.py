@@ -161,7 +161,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def show_expectations_by_domain_type(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> None:
@@ -177,7 +177,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def show_expectations_by_expectation_type(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> None:
@@ -193,7 +193,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def get_expectation_suite(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> ExpectationSuite:
@@ -416,7 +416,7 @@ class DataAssistantResult(SerializableDictDot):
     )
     def _get_expectation_suite_with_usage_statistics(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
     ) -> ExpectationSuite:
         """
@@ -430,7 +430,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_expectation_suite_without_usage_statistics(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
     ) -> ExpectationSuite:
         """
