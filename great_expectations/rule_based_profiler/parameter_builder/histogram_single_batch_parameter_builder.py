@@ -22,7 +22,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import is_ndarray_datetime_dtype
 
 
 class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
@@ -139,11 +138,7 @@ elements.
 """
             )
 
-        ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
-            data=bins,
-            parse_strings_as_datetimes=True,
-        )
-        if ndarray_is_datetime_type:
+        if not np.issubdtype(bins.dtype, np.number):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} did not yield bins of supported data type.
