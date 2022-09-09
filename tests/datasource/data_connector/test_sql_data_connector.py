@@ -433,7 +433,6 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "data_assets": {
             "table_partitioned_by_foreign_key__F": {
                 "batch_definition_count": 49,
-                # TODO Abe 20201029 : These values should be sorted
                 "example_data_references": [
                     {"session_id": 2},
                     {"session_id": 3},
@@ -494,7 +493,6 @@ def test_example_G(
         "data_assets": {
             "table_partitioned_by_multiple_columns__G": {
                 "batch_definition_count": 30,
-                # TODO Abe 20201029 : These values should be sorted
                 "example_data_references": [
                     {"y": 2020, "m": 1, "d": 1},
                     {"y": 2020, "m": 1, "d": 2},
@@ -1807,10 +1805,3 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
     batch = Batch(data=batch_data)
     validator = Validator(execution_engine, batches=[batch])
     assert len(validator.head(fetch_all=True)) == 5
-
-
-# TODO
-def test_ConfiguredAssetSqlDataConnector_with_sorting(
-    test_cases_for_sql_data_connector_sqlite_execution_engine,
-):
-    pass

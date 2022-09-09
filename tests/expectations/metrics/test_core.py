@@ -3963,8 +3963,16 @@ def test_value_counts_metric_sa(sa):
     metrics = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric, desired_metric_b)
     )
-    assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
-    assert pd.Series(index=[4], data=[6]).equals(metrics[desired_metric_b.id])
+    assert pd.Series(
+        index=pd.Index(data=[1, 2, 3], name="value"),
+        data=[2, 2, 2],
+        dtype=np.object,
+    ).equals(metrics[desired_metric.id])
+    assert pd.Series(
+        index=pd.Index(data=[4], name="value"),
+        data=[6],
+        dtype=np.object,
+    ).equals(metrics[desired_metric_b.id])
 
 
 @pytest.mark.integration
@@ -3996,14 +4004,20 @@ def test_value_counts_metric_pd():
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "dataframe",
+    [
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3, None]}),
+        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3, None], "b": [1, 3, 5, 3, 4, 2, None]}),
+    ],
+)
 def test_distinct_metric_spark(
     spark_session,
+    dataframe,
 ):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
-        df=pd.DataFrame(
-            {"a": [1, 2, 1, 2, 3, 3, None]},
-        ),
+        df=dataframe,
         batch_id="my_id",
     )
 

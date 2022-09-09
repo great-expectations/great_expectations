@@ -267,7 +267,6 @@ class ParameterBuilder(ABC, Builder):
         limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
-        force_no_progress_bar: Optional[bool] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -283,7 +282,6 @@ class ParameterBuilder(ABC, Builder):
         :param limit: Optional limit on number of "Batch" objects requested (supports single-Batch scenarios).
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
-        :param force_no_progress_bar (bool) if True, prevent all "Calculating Metrics" output; (False by default).
         :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.
@@ -406,7 +404,6 @@ specified (empty "metric_name" value detected)."""
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
             metric_configurations=metrics_to_resolve,
-            force_no_progress_bar=force_no_progress_bar,
         )
 
         # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.
@@ -485,6 +482,7 @@ specified (empty "metric_name" value detected)."""
             attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
             self._sanitize_metric_computation(
+                parameter_builder=self,
                 metric_name=metric_name,
                 attributed_resolved_metrics=attributed_resolved_metrics,
                 enforce_numeric_metric=enforce_numeric_metric,
@@ -510,8 +508,9 @@ specified (empty "metric_name" value detected)."""
             },
         )
 
+    @staticmethod
     def _sanitize_metric_computation(
-        self,
+        parameter_builder: "ParameterBuilder",  # noqa: F821
         metric_name: str,
         attributed_resolved_metrics: AttributedResolvedMetrics,
         enforce_numeric_metric: Union[str, bool] = False,
@@ -519,7 +518,7 @@ specified (empty "metric_name" value detected)."""
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> AttributedResolvedMetrics:
+    ) -> None:
         """
         This method conditions (or "sanitizes") data samples in the format "N x R^m", where "N" (most significant
         dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the multi-dimensional
@@ -547,16 +546,23 @@ specified (empty "metric_name" value detected)."""
         )
 
         if not (enforce_numeric_metric or replace_nan_with_zero):
-            return attributed_resolved_metrics
+            return
 
         metric_values_by_batch_id: Dict[str, MetricValue] = {}
 
+        # noinspection PyTypeChecker
+        conditioned_attributed_metric_values: Dict[str, MetricValues] = dict(
+            filter(
+                lambda element: element[1] is not None,
+                attributed_resolved_metrics.conditioned_attributed_metric_values.items(),
+            )
+        )
         batch_id: str
         metric_values: MetricValues
         for (
             batch_id,
             metric_values,
-        ) in attributed_resolved_metrics.conditioned_attributed_metric_values.items():
+        ) in conditioned_attributed_metric_values.items():
             batch_metric_values: MetricValues = []
 
             metric_value_shape: tuple = metric_values.shape
@@ -573,42 +579,37 @@ specified (empty "metric_name" value detected)."""
             for metric_value_idx in metric_value_indices:
                 metric_value: MetricValue = metric_values[metric_value_idx]
                 if enforce_numeric_metric:
-                    if isinstance(metric_value, (str, np.str_)):
-                        if not is_parseable_date(value=metric_value):
-                            raise ge_exceptions.ProfilerExecutionError(
-                                message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
-and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
-"""
+                    if pd.isnull(metric_value):
+                        if not replace_nan_with_zero:
+                            raise ValueError(
+                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value."""
                             )
+
+                        batch_metric_values.append(0.0)
                     elif not (
-                        isinstance(metric_value, datetime.datetime)
+                        (
+                            isinstance(metric_value, (str, np.str_))
+                            and is_parseable_date(value=metric_value)
+                        )
+                        or isinstance(metric_value, datetime.datetime)
                         or isinstance(metric_value, decimal.Decimal)
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
                         raise ge_exceptions.ProfilerExecutionError(
-                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued \
-and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
+                            message=f"""Applicability of {parameter_builder.__class__.__name__} is restricted to \
+numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
 """
                         )
-
-                    if pd.isnull(metric_value):
-                        if not replace_nan_with_zero:
-                            raise ValueError(
-                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
-"""
-                            )
-
-                        batch_metric_values.append(0.0)
                     else:
                         batch_metric_values.append(metric_value)
+                else:
+                    batch_metric_values.append(metric_value)
 
             metric_values_by_batch_id[batch_id] = batch_metric_values
 
         attributed_resolved_metrics.metric_values_by_batch_id = (
             metric_values_by_batch_id
         )
-
-        return attributed_resolved_metrics
 
     @staticmethod
     def _get_best_candidate_above_threshold(
