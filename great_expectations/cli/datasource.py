@@ -316,6 +316,7 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
             datasource_name=self.datasource_name,
         )
 
+    # <MARKER>
     def yaml_snippet(self) -> str:
         """
         Note the InferredAssetFilesystemDataConnector was selected to get users
@@ -410,6 +411,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         password: str = "YOUR_PASSWORD",
         database: str = "YOUR_DATABASE",
         schema_name: str = "YOUR_SCHEMA",
+        table_name: str = "YOUR_TABLE_NAME",
     ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.SQL,
@@ -423,6 +425,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         self.password = password
         self.database = database
         self.schema_name = schema_name
+        self.table_name = table_name
 
     def credentials_snippet(self) -> str:
         return f'''\
@@ -431,7 +434,10 @@ port = "{self.port}"
 username = "{self.username}"
 password = "{self.password}"
 database = "{self.database}"
-schema_name = "{self.schema_name}"'''
+schema_name = "{self.schema_name}"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "{self.table_name}"'''
 
     def yaml_snippet(self) -> str:
         yaml_str = '''f"""
@@ -452,7 +458,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
         return yaml_str
 
     def _yaml_innards(self) -> str:
@@ -463,8 +480,7 @@ data_connectors:
     port: '{port}'
     username: {username}
     password: {password}
-    database: {database}
-    schema_name: {schema_name}"""
+    database: {database}"""
 
     def get_notebook_renderer(
         self, context: DataContext

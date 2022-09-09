@@ -19,6 +19,7 @@ from great_expectations.cli.datasource import (
 from great_expectations.datasource.types import DatasourceTypes
 
 
+@pytest.mark.unit
 def test_SQLCredentialYamlHelper_defaults(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"})
     expected_credentials_snippet = '''\
@@ -27,7 +28,10 @@ port = "YOUR_PORT"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"
-schema_name = "YOUR_SCHEMA"'''
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
     assert (
         helper.yaml_snippet()
@@ -42,7 +46,6 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
-    schema_name: {schema_name}
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
@@ -50,13 +53,25 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)
     assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
 
 
+@pytest.mark.unit
 def test_SQLCredentialYamlHelper_driver(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"}, driver="stuff")
     expected_credentials_snippet = '''\
@@ -65,7 +80,10 @@ port = "YOUR_PORT"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"
-schema_name = "YOUR_SCHEMA"'''
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     print(helper.yaml_snippet())
@@ -83,7 +101,6 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
-    schema_name: {schema_name}
     drivername: stuff
 data_connectors:
   default_runtime_data_connector_name:
@@ -92,7 +109,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)
@@ -110,7 +138,10 @@ port = "3306"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"
-schema_name = "YOUR_SCHEMA"'''
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
@@ -126,7 +157,6 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
-    schema_name: {schema_name}
     drivername: mysql+pymysql
 data_connectors:
   default_runtime_data_connector_name:
@@ -135,7 +165,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
     )
 
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -169,7 +210,10 @@ port = "5432"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"
-schema_name = "YOUR_SCHEMA"'''
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
@@ -185,7 +229,6 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
-    schema_name: {schema_name}
     drivername: postgresql
 data_connectors:
   default_runtime_data_connector_name:
@@ -194,7 +237,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -226,7 +280,10 @@ port = "5439"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"
-schema_name = "YOUR_SCHEMA"'''
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
     assert (
         helper.yaml_snippet()
@@ -241,7 +298,6 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
-    schema_name: {schema_name}
     query:
       sslmode: prefer
     drivername: postgresql+psycopg2
@@ -252,7 +308,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
     )
 
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -322,7 +389,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -377,7 +455,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -433,7 +522,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -486,7 +586,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -535,7 +646,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
+    assets:
+      {schema_name}.{table_name}
+        include_schema_name: True
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
     )
 
     assert helper.verify_libraries_installed() is True
