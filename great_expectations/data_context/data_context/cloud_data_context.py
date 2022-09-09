@@ -504,4 +504,4 @@ class CloudDataContext(AbstractDataContext):
                 f"environment or in global configs ({(', ').join(global_config_path_str)})."
             )
 
-        return GeCloudConfig(**ge_cloud_config_dict)  # type: ignore[arg-type]
+        return GeCloudConfig(**ge_cloud_config_dict)  # type: ignore[arg-type,misc]
