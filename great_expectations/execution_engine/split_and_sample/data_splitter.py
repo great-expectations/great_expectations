@@ -57,12 +57,6 @@ class SplitterMethod(enum.Enum):
     SPLIT_ON_MULTI_COLUMN_VALUES = "split_on_multi_column_values"
     SPLIT_ON_HASHED_COLUMN = "split_on_hashed_column"
 
-    def __eq__(self, other: SplitterMethod):
-        return self.value == other.value
-
-    def __hash__(self: SplitterMethod):
-        return hash(self.value)
-
 
 class DataSplitter(abc.ABC):
     """Abstract base class containing methods for splitting data accessible via Execution Engines.

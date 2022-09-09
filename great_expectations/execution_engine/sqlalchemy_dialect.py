@@ -11,6 +11,8 @@ class GESqlDialect(enum.Enum):
 
     AWSATHENA = "awsathena"
     BIGQUERY = "bigquery"
+    CLICKHOUSE = "clickhouse"
+    DATABRICKS = "databricks"
     DREMIO = "dremio"
     HIVE = "hive"
     MSSQL = "mssql"

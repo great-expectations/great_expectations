@@ -51,7 +51,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         # Split clause should be permissive of all values if not supplied.
         if where_clause is None:
-            if execution_engine.dialect_name == "sqlite":
+            if execution_engine.dialect_name == GESqlDialect.SQLITE.value:
                 where_clause = sa.text("1 = 1")
             else:
                 where_clause = sa.true()
