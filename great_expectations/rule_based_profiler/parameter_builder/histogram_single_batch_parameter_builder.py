@@ -147,7 +147,9 @@ elements.
             )
 
         # Only unique "bins" are necessary (hence, "n_bins" is potentially lowered to fit data distribution).
-        bins = sorted(set(bins))
+        bins = list(sorted(set(bins)))
+        if len(bins) == 1:
+            bins.append(bins[0])
 
         column_values_nonnull_count_metric_single_batch_parameter_builder = MetricSingleBatchParameterBuilder(
             name="column_values_nonnull_count_metric_single_batch_parameter_builder",
