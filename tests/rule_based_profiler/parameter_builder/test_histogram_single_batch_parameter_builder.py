@@ -233,7 +233,7 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
                 0,
                 0,
             ],
-            [0.0, 0.0],
+            [0.0],
         ),
         pytest.param(
             [
@@ -242,7 +242,7 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
                 1,
                 1,
             ],
-            [1.0, 1.0],
+            [1.0],
         ),
     ],
 )
@@ -303,7 +303,7 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
         )
 
         expected_parameter_value = {
-            "value": {"bins": bins, "weights": [1.0], "tail_weights": [0.0, 0.0]},
+            "value": {"bins": bins, "weights": [], "tail_weights": [0.5, 0.5]},
             "details": {
                 "metric_configuration": {
                     "metric_name": "column.histogram",
