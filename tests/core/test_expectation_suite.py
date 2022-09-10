@@ -2,6 +2,7 @@ import datetime
 import itertools
 from copy import copy, deepcopy
 from typing import Any, Dict, List, Union
+from unittest.mock import MagicMock
 
 import pytest
 from ruamel.yaml import YAML
@@ -15,6 +16,7 @@ from great_expectations.core.expectation_suite import (
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.util import filter_properties_dict
 
 
@@ -52,6 +54,17 @@ def empty_suite_with_meta(fake_expectation_suite_name: str) -> ExpectationSuite:
         expectation_suite_name=fake_expectation_suite_name,
         meta={"notes": "This is an expectation suite."},
     )
+
+
+@pytest.fixture
+def suite_with_single_expectation(
+    expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
+    empty_suite_with_meta: ExpectationSuite,
+) -> ExpectationSuite:
+    empty_suite_with_meta.add_expectation(
+        expect_column_values_to_be_in_set_col_a_with_meta
+    )
+    return empty_suite_with_meta
 
 
 class TestInit:
@@ -312,17 +325,6 @@ class TestAddCitation:
 
 
 class TestIsEquivalentTo:
-    @pytest.fixture
-    def suite_with_single_expectation(
-        self,
-        expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
-        empty_suite_with_meta: ExpectationSuite,
-    ) -> ExpectationSuite:
-        empty_suite_with_meta.add_expectation(
-            expect_column_values_to_be_in_set_col_a_with_meta
-        )
-        return empty_suite_with_meta
-
     @pytest.mark.unit
     def test_is_equivalent_to_expectation_suite_classes_true_unit_test(self):
         class StubExpectationConfiguration:
@@ -395,7 +397,7 @@ class TestIsEquivalentTo:
     def test_is_equivalent_to_unsupported_class_returns_notimplemented(
         self, suite_with_single_expectation: ExpectationSuite
     ):
-        """If we are not comparing to an ExpectationConfiguration or dict then we should return NotImplemented."""
+        """If we are not comparing to an ExpectationSuite or dict then we should return NotImplemented."""
 
         class UnsupportedClass:
             pass
@@ -460,6 +462,87 @@ class TestIsEquivalentTo:
         assert not different_and_not_equivalent_suite.isEquivalentTo(
             suite_with_single_expectation
         )
+
+
+class TestEqDunder:
+    @pytest.mark.unit
+    def test_equality_to_unsupported_class_is_false(
+        self, suite_with_single_expectation: ExpectationSuite
+    ):
+        """If we are not comparing to an ExpectationSuite or dict then we should return False."""
+
+        class UnsupportedClass:
+            pass
+
+        return_value = suite_with_single_expectation == UnsupportedClass()
+        assert not return_value
+
+    @pytest.mark.unit
+    def test_expectation_suite_equality_single_expectation_true(
+        self, suite_with_single_expectation: ExpectationSuite
+    ):
+        different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
+        assert suite_with_single_expectation == different_but_equivalent_suite
+        assert different_but_equivalent_suite == suite_with_single_expectation
+
+        assert not suite_with_single_expectation != different_but_equivalent_suite
+        assert not different_but_equivalent_suite != suite_with_single_expectation
+
+    @pytest.mark.parametrize(
+        "attribute,new_value",
+        [
+            pytest.param("expectation_suite_name", "different_name"),
+            pytest.param(
+                "data_context",
+                MagicMock(),
+                marks=pytest.mark.xfail(
+                    strict=True,
+                    raises=AssertionError,
+                    reason="Currently data_context is not considered in ExpectationSuite equality",
+                ),
+            ),
+            pytest.param("expectations", []),
+            pytest.param(
+                "evaluation_parameters", {"different": "evaluation_parameters"}
+            ),
+            pytest.param("data_asset_type", "different_data_asset_type"),
+            pytest.param(
+                "execution_engine_type",
+                type(ExecutionEngine),
+                marks=pytest.mark.xfail(
+                    strict=True,
+                    raises=AssertionError,
+                    reason="Currently execution_engine_type is not considered in ExpectationSuite equality",
+                ),
+            ),
+            pytest.param("meta", {"notes": "Different meta."}),
+            pytest.param(
+                "ge_cloud_id",
+                "different_id",
+                marks=pytest.mark.xfail(
+                    strict=True,
+                    raises=AssertionError,
+                    reason="Currently ge_cloud_id is not considered in ExpectationSuite equality",
+                ),
+            ),
+        ],
+    )
+    @pytest.mark.unit
+    def test_expectation_suite_equality_false(
+        self,
+        attribute: str,
+        new_value: Union[str, Dict[str, str]],
+        suite_with_single_expectation: ExpectationSuite,
+    ):
+
+        different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
+
+        setattr(different_but_equivalent_suite, attribute, new_value)
+
+        assert not suite_with_single_expectation == different_but_equivalent_suite
+        assert not different_but_equivalent_suite == suite_with_single_expectation
+        assert suite_with_single_expectation != different_but_equivalent_suite
+        assert different_but_equivalent_suite != suite_with_single_expectation
 
 
 #### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
@@ -688,19 +771,6 @@ def profiler_config():
     """
     yaml = YAML()
     return yaml.load(yaml_config)
-
-
-@pytest.mark.unit
-def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_suite):
-    """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
-    are the same."""
-    assert (
-        baseline_suite is not identical_suite
-    )  # different instances, but same content
-    assert baseline_suite == identical_suite  # different instances, but same content
-    assert not (baseline_suite != identical_suite)  # ne works properly
-    assert not (baseline_suite == equivalent_suite)  # different meta
-    assert baseline_suite != equivalent_suite  # ne works properly
 
 
 @pytest.mark.unit
