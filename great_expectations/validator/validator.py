@@ -104,33 +104,6 @@ ValidationStatistics = namedtuple(
 )
 
 
-def _calc_validation_statistics(
-    validation_results: List[ExpectationValidationResult],
-) -> ValidationStatistics:
-    """
-    Calculate summary statistics for the validation results and
-    return ``ExpectationStatistics``.
-    """
-    # calc stats
-    evaluated_expectations = len(validation_results)
-    successful_expectations = sum(exp.success for exp in validation_results)
-    unsuccessful_expectations = evaluated_expectations - successful_expectations
-    success = successful_expectations == evaluated_expectations
-    try:
-        success_percent = successful_expectations / evaluated_expectations * 100
-    except ZeroDivisionError:
-        # success_percent = float("nan")
-        success_percent = None
-
-    return ValidationStatistics(
-        successful_expectations=successful_expectations,
-        evaluated_expectations=evaluated_expectations,
-        unsuccessful_expectations=unsuccessful_expectations,
-        success=success,
-        success_percent=success_percent,
-    )
-
-
 class Validator:
     DEFAULT_RUNTIME_CONFIGURATION = {
         "include_config": True,
@@ -208,7 +181,7 @@ class Validator:
 
         self._include_rendered_content = include_rendered_content
 
-    def __dir__(self):
+    def __dir__(self) -> List[str]:
         """
         This custom magic method is used to enable expectation tab completion on Validator objects.
         It also allows users to call Pandas.DataFrame methods on Validator objects
@@ -1988,7 +1961,7 @@ set as active.
                 for validation_result in results:
                     validation_result.render()
                     validation_result.expectation_config.render()
-            statistics = _calc_validation_statistics(results)
+            statistics = self._calc_validation_statistics(results)
 
             if only_return_failures:
                 abbrev_results = []
@@ -2335,6 +2308,33 @@ set as active.
                 runtime_configuration.update({"result_format": result_format})
 
         return runtime_configuration
+
+    @staticmethod
+    def _calc_validation_statistics(
+        validation_results: List[ExpectationValidationResult],
+    ) -> ValidationStatistics:
+        """
+        Calculate summary statistics for the validation results and
+        return ``ExpectationStatistics``.
+        """
+        # calc stats
+        evaluated_expectations = len(validation_results)
+        successful_expectations = sum(exp.success for exp in validation_results)
+        unsuccessful_expectations = evaluated_expectations - successful_expectations
+        success = successful_expectations == evaluated_expectations
+        try:
+            success_percent = successful_expectations / evaluated_expectations * 100
+        except ZeroDivisionError:
+            # success_percent = float("nan")
+            success_percent = None
+
+        return ValidationStatistics(
+            successful_expectations=successful_expectations,
+            evaluated_expectations=evaluated_expectations,
+            unsuccessful_expectations=unsuccessful_expectations,
+            success=success,
+            success_percent=success_percent,
+        )
 
 
 class BridgeValidator:
