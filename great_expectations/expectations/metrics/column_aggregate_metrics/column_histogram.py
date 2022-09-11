@@ -70,11 +70,43 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         bins = metric_value_kwargs["bins"]
 
         case_conditions = []
-        idx = 0
         if isinstance(bins, np.ndarray):
             bins = bins.tolist()
         else:
             bins = list(bins)
+
+        if len(bins) == 1:
+            # Single-valued column data are modeled using "impulse" (or "sample") distributions (on open interval).
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (
+                                sa.and_(
+                                    bins[0] - np.finfo(float).eps < sa.column(column),
+                                    sa.column(column) < bins[0] + np.finfo(float).eps,
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
+                ).label(f"bin_0")
+            )
+            query = (
+                sa.select(case_conditions)
+                .where(
+                    sa.column(column) != None,
+                )
+                .select_from(selectable)
+            )
+
+            # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
+            return convert_to_json_serializable(
+                list(execution_engine.engine.execute(query).fetchone())
+            )
+
+        idx = 0
 
         # If we have an infinite lower bound, don't express that in sql
         if (
@@ -163,10 +195,9 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         )
 
         # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
-        hist = convert_to_json_serializable(
+        return convert_to_json_serializable(
             list(execution_engine.engine.execute(query).fetchone())
         )
-        return hist
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(

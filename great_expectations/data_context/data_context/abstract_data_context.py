@@ -1740,9 +1740,7 @@ class AbstractDataContext(ABC):
             DatasourceInitializationError
         """
         if save_changes:
-            self._datasource_store.set_by_name(  # type: ignore[attr-defined]
-                datasource_name=config.name, datasource_config=config
-            )
+            config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
 
         self.config.datasources[config.name] = config  # type: ignore[index,assignment]
 
@@ -1758,7 +1756,7 @@ class AbstractDataContext(ABC):
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
                 if save_changes:
-                    self._datasource_store.delete_by_name(datasource_name=config.name)  # type: ignore[attr-defined]
+                    self._datasource_store.delete(config)  # type: ignore[attr-defined]
                 # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
                 self.config.datasources.pop(config.name, None)  # type: ignore[union-attr,arg-type]
                 raise e
