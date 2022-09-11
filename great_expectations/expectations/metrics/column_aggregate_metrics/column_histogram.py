@@ -76,9 +76,21 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             bins = list(bins)
 
         if len(bins) == 1:
+            # Single-valued column data are modeled using "impulse" (or "sample") distributions (on open interval).
             case_conditions.append(
                 sa.func.sum(
-                    sa.case([(sa.column(column) == bins[0], 1)], else_=0)
+                    sa.case(
+                        [
+                            (
+                                sa.and_(
+                                    bins[0] - np.finfo(float).eps < sa.column(column),
+                                    sa.column(column) < bins[0] + np.finfo(float).eps,
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
                 ).label(f"bin_0")
             )
             query = (
