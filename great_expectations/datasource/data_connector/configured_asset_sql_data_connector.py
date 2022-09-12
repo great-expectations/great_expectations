@@ -1,6 +1,7 @@
 from copy import deepcopy
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -13,6 +14,12 @@ from great_expectations.datasource.data_connector.batch_filter import (
     build_batch_filter,
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector
+from great_expectations.datasource.data_connector.sorter import (
+    DictionarySorter,
+    LexicographicSorter,
+    NumericSorter,
+    Sorter,
+)
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
@@ -37,6 +44,20 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     """
     A DataConnector that requires explicit listing of SQL tables you want to connect to.
     """
+
+    SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[str, Optional[Sorter]] = {
+        "split_on_year": DictionarySorter,
+        "split_on_year_and_month": DictionarySorter,
+        "split_on_year_and_month_and_day": DictionarySorter,
+        "split_on_date_parts": DictionarySorter,
+        "split_on_whole_table": None,
+        "split_on_column_value": LexicographicSorter,
+        "split_on_converted_datetime": LexicographicSorter,
+        "split_on_divided_integer": NumericSorter,
+        "split_on_mod_integer": NumericSorter,
+        "split_on_multi_column_values": LexicographicSorter,
+        "split_on_hashed_column": LexicographicSorter,
+    }
 
     def __init__(
         self,
@@ -170,12 +191,33 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
-        # <WILL> 20220725 - In the case of file_data_connectors, this step is enabled, but sql_data_connectors
-        # currently do not support sorters. This step can be enabled once sorting is implemented for sql_data_connectors
-        # if len(self.sorters) > 0:
-        #     batch_definition_list = self._sort_batch_definition_list(
-        #         batch_definition_list=batch_definition_list
-        #     )
+        data_connector_splitter_method: Optional[str] = self.splitter_method
+        data_connector_splitter_kwargs: Optional[
+            Dict[str, Union[str, list]]
+        ] = self.splitter_kwargs
+        data_asset: Dict[str, Union[str, list, None]] = self.assets[
+            batch_request.data_asset_name
+        ]
+        data_asset_splitter_method: Optional[str] = data_asset.get("splitter_method")
+        data_asset_splitter_kwargs: Optional[
+            Dict[str, Union[str, list]]
+        ] = data_asset.get("splitter_kwargs")
+
+        # if splitter_method and splitter_kwargs are configured at the asset level use that, otherwise look for
+        # splitter_method and splitter_kwargs at the data connector level.
+        if data_asset_splitter_method is not None:
+            batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list,
+                splitter_method_name=data_asset_splitter_method,
+                splitter_kwargs=data_asset_splitter_kwargs,
+            )
+        elif data_connector_splitter_method is not None:
+            batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list,
+                splitter_method_name=data_connector_splitter_method,
+                splitter_kwargs=data_connector_splitter_kwargs,
+            )
+
         if batch_request.data_connector_query is not None:
             data_connector_query_dict = batch_request.data_connector_query.copy()
             if (
@@ -258,6 +300,88 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         )
 
         return SqlAlchemyDatasourceBatchSpec(batch_spec)
+
+    def _get_sorters_from_splitter_method_name(
+        self, splitter_method_name: str, splitter_kwargs: Dict[str, Union[str, list]]
+    ) -> List[Sorter]:
+        """Given a splitter method and its kwargs, return an appropriately instantiated list of Sorters.
+
+        Args:
+            splitter_method_name: splitter name starting with or without preceding '_'.
+            splitter_kwargs: splitter kwargs dictionary for splitter directives.
+
+        Returns:
+            an ordered list of sorters required to sort splitter batches.
+        """
+        splitter_method_to_sorter_method_mapping: Dict[
+            str, Optional[Sorter]
+        ] = self.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING
+        splitter_method_name: str = self._get_splitter_method_name(
+            splitter_method_name=splitter_method_name,
+        )
+        try:
+            sorter_method: Optional[Sorter] = splitter_method_to_sorter_method_mapping[
+                splitter_method_name
+            ]
+        except KeyError:
+            raise ge_exceptions.SorterError(
+                f"No Sorter is defined in ConfiguredAssetSqlDataConnector.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING for splitter_method: {splitter_method_name}"
+            )
+
+        if sorter_method == DictionarySorter:
+            return [DictionarySorter(name=splitter_kwargs["column_name"])]
+        elif sorter_method == LexicographicSorter:
+            if splitter_method_name == "split_on_multi_column_values":
+                return [
+                    LexicographicSorter(name=column_name)
+                    for column_name in splitter_kwargs["column_names"]
+                ]
+            else:
+                return [LexicographicSorter(name=splitter_kwargs["column_name"])]
+        elif sorter_method == NumericSorter:
+            return [NumericSorter(name=splitter_kwargs["column_name"])]
+        else:
+            return []
+
+    @staticmethod
+    def _get_splitter_method_name(splitter_method_name: str) -> str:
+        """Accept splitter methods with or without starting with `_`.
+
+        Args:
+            splitter_method_name: splitter name starting with or without preceding `_`.
+
+        Returns:
+            splitter method name stripped of preceding underscore.
+        """
+        if splitter_method_name.startswith("_"):
+            return splitter_method_name[1:]
+        else:
+            return splitter_method_name
+
+    def _sort_batch_definition_list(
+        self,
+        batch_definition_list: List[BatchDefinition],
+        splitter_method_name: str,
+        splitter_kwargs: Dict[str, Union[str, dict, None]],
+    ) -> List[BatchDefinition]:
+        """Sort a list of batch definitions given the splitter method used to define them.
+
+        Args:
+            batch_definition_list: an unsorted list of batch definitions.
+            splitter_method_name: splitter name used to define the batches, starting with or without preceding `_`.
+            splitter_kwargs: splitter kwargs dictionary for splitter directives.
+
+        Returns:
+            a list of batch definitions sorted depending on splitter method used to define them.
+        """
+        sorters: List[Sorter] = self._get_sorters_from_splitter_method_name(
+            splitter_method_name=splitter_method_name, splitter_kwargs=splitter_kwargs
+        )
+        for sorter in sorters:
+            batch_definition_list = sorter.get_sorted_batch_definitions(
+                batch_definitions=batch_definition_list
+            )
+        return batch_definition_list
 
     def _refresh_data_assets_cache(
         self,
