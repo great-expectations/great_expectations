@@ -19,6 +19,7 @@ stages:
       vmImage: ubuntu-latest
     jobs:
       - job: cloud_integration_tests
+        condition: or(eq(variables.isScheduled, true), eq(variables.isManual, true))
         strategy:
           matrix:
             Python37:
