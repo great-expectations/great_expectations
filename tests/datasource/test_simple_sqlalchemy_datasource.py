@@ -4,9 +4,9 @@ from typing import Any, Dict, List, Tuple, Type, Union
 import pytest
 
 try:
-    import sqlalchemy
+    import sqlalchemy as sa
 except ImportError:
-    sqlalchemy = None
+    sa = None
 
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetSqlDataConnector,
@@ -21,7 +21,7 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 # This is a SQLAlchemy object we are creating a test double for. We need this double because
 # the SimpleSqlalchemyDatasource under test takes it as an input.
-class DummySAEngine(sqlalchemy.engine.Engine):
+class DummySAEngine(sa.engine.Engine):
     # Logger is configured to log nothing
     logger = logging.Logger(name="DummySAEngineLogger", level=55)
 
@@ -48,7 +48,7 @@ class DummySAEngine(sqlalchemy.engine.Engine):
 
 # This is Great Expectations' SQLAlchemy wrapper. We need to mock this out because
 # SimpleSqlalchemyDatasource, the class under test, creates this under the hood, wrapping
-# the passed in `sqlalchemy.engine.Engine` object. However, we don't want to test the
+# the passed in `sa.engine.Engine` object. However, we don't want to test the
 # functionality of SqlAlchemyExecutionEngine in the SimpleSqlalchemyDatasource unit tests.
 class DummySqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
     def __init__(self, *args, **kwargs):
@@ -171,7 +171,7 @@ def _datasource_asserts(
 # The configured data sources, "whole_table", "hourly", and "daily", all have unique names
 # because if any of them share a name they will clobber each other.
 @pytest.mark.unit
-@pytest.mark.skipif(sqlalchemy is None, reason="sqlalchemy is not installed")
+@pytest.mark.skipif(sa is None, reason="sqlalchemy is not installed")
 @pytest.mark.parametrize("connection", [None, "lets-connect"])
 @pytest.mark.parametrize("url", [None, "https://url.com"])
 @pytest.mark.parametrize("credentials", [None, {"username": "foo", "password": "bar"}])
@@ -276,7 +276,7 @@ def _expected_data_assets_with_types(
 
 
 @pytest.mark.unit
-@pytest.mark.skipif(sqlalchemy is None, reason="sqlalchemy is not installed")
+@pytest.mark.skipif(sa is None, reason="sqlalchemy is not installed")
 def test_simple_sqlalchemy_datasource_init_fails_with_no_engine():
     with pytest.raises(ExecutionEngineError):
         SimpleSqlalchemyDatasource(
