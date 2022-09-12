@@ -400,9 +400,9 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
 @pytest.mark.integration
 @pytest.mark.slow  # 38.26s
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
+    quentin_columnar_table_multi_batch_data_context,
 ):
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -422,28 +422,6 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
             else True
             for rule_config in data_assistant_result.profiler_config.rules.values()
         ]
-    )
-
-
-@pytest.mark.integration
-@pytest.mark.slow  # 38.26s
-@pytest.mark.xfail(
-    strict=True,
-    reason="Temporarily mark as xfail due to issue with congestion_surcharge column resolving to NaN for column.min and column.max",
-)
-def test_onboarding_data_assistant_get_metrics_and_expectations_quentin(
-    quentin_columnar_table_multi_batch_data_context,
-):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    context.assistants.onboarding.run(
-        batch_request=batch_request,
     )
 
 
