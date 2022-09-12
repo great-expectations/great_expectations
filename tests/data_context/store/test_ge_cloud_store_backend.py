@@ -1,3 +1,15 @@
+"""
+Test GeCloudStoreBackend behavior and adherence to StoreBackend contract.
+
+Since GeCloudStoreBackend relies on GE Cloud, we mock requests and assert the right calls
+are made from the Store API (set, get, list, and remove_key).
+
+Note that although ge_cloud_access_token is provided (and is a valid UUID), no external
+requests are actually made as part of this test. The actual value of the token does not
+matter here but we leverage an existing fixture to mimic the contents of requests made
+in production. The same logic applies to all UUIDs in this test.
+"""
+
 from collections import OrderedDict
 from typing import Callable, Set, Union
 from unittest import mock
@@ -40,17 +52,6 @@ def test_set(
     ],
     shared_called_with_request_kwargs: dict,
 ) -> None:
-    """
-    What does this test test and why?
-
-    Since GeCloudStoreBackend relies on GE Cloud, we mock requests and assert the right calls
-    are made from the Store API (set, get, list, and remove_key).
-
-    Note that although ge_cloud_access_token is provided (and is a valid UUID), no external
-    requests are actually made as part of this test. The actual value of the token does not
-    matter here but we leverage an existing fixture to mimic the contents of requests made
-    in production. The same logic applies to all UUIDs in this test.
-    """
     store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
 
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
@@ -107,17 +108,6 @@ def test_list_keys(
     ],
     shared_called_with_request_kwargs: dict,
 ) -> None:
-    """
-    What does this test test and why?
-
-    Since GeCloudStoreBackend relies on GE Cloud, we mock requests and assert the right calls
-    are made from the Store API (set, get, list, and remove_key).
-
-    Note that although ge_cloud_access_token is provided (and is a valid UUID), no external
-    requests are actually made as part of this test. The actual value of the token does not
-    matter here but we leverage an existing fixture to mimic the contents of requests made
-    in production. The same logic applies to all UUIDs in this test.
-    """
     store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
 
     with mock.patch("requests.get", autospec=True) as mock_get:
@@ -136,17 +126,6 @@ def test_remove_key(
     ],
     shared_called_with_request_kwargs: dict,
 ) -> None:
-    """
-    What does this test test and why?
-
-    Since GeCloudStoreBackend relies on GE Cloud, we mock requests and assert the right calls
-    are made from the Store API (set, get, list, and remove_key).
-
-    Note that although ge_cloud_access_token is provided (and is a valid UUID), no external
-    requests are actually made as part of this test. The actual value of the token does not
-    matter here but we leverage an existing fixture to mimic the contents of requests made
-    in production. The same logic applies to all UUIDs in this test.
-    """
     store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
 
     with mock.patch("requests.delete", autospec=True) as mock_delete:
@@ -181,12 +160,6 @@ def test_appropriate_casting_of_str_resource_type_to_GeCloudRESTResource(
         [GeCloudRESTResource], GeCloudStoreBackend
     ],
 ) -> None:
-    """
-    What does this test test and why?
-
-    The GeCloudStoreBackend should be able to recognize both GeCloudRESTResource enums
-    and equivalent string values.
-    """
     store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
 
     assert store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
