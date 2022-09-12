@@ -3924,22 +3924,30 @@ def test_median_metric_spark(spark_session):
 
 
 @pytest.mark.integration
-def test_value_counts_metric_spark(spark_session):
-    engine: SparkDFExecutionEngine = build_spark_engine(
-        spark=spark_session,
-        df=pd.DataFrame(
-            {"a": [1, 2, 1, 2, 3, 3, None]},
-        ),
-        batch_id="my_id",
-    )
+def test_value_counts_metric_pd():
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
 
     desired_metric = MetricConfiguration(
         metric_name="column.value_counts",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"sort": "value", "collate": None},
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
 
-    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
     assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
 
 
@@ -3976,31 +3984,45 @@ def test_value_counts_metric_sa(sa):
 
 
 @pytest.mark.integration
-def test_value_counts_metric_pd():
-    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
+def test_value_counts_metric_spark(spark_session):
+    from great_expectations.expectations.metrics.import_manager import sparktypes
 
-    metrics: dict = {}
-
-    table_columns_metric: MetricConfiguration
-    results: dict
-
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
-    metrics.update(results)
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {
+                "a": [1, 2, 1, 2, 3, 3, None],
+                "b": [None, None, None, None, None, None, None],
+            },
+        ),
+        schema=sparktypes.StructType(
+            [
+                sparktypes.StructField("a", sparktypes.FloatType(), True),
+                sparktypes.StructField("b", sparktypes.NullType(), True),
+            ]
+        ),
+        batch_id="my_id",
+    )
 
     desired_metric = MetricConfiguration(
         metric_name="column.value_counts",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"sort": "value", "collate": None},
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
 
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
+    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert pd.Series(index=[1.0, 2.0, 3.0], data=[2, 2, 2]).equals(
+        metrics[desired_metric.id]
     )
-    metrics.update(results)
-    assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.value_counts",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={"sort": "value", "collate": None},
+    )
+
+    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert pd.Series(index=[], data=[]).equals(metrics[desired_metric.id])
 
 
 @pytest.mark.integration
