@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional, Set
 
 import numpy as np
-import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -130,8 +129,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        element: Any
-        if bins is None or all(pd.isnull(element) for element in bins):
+        if bins is None:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} into bins encountered empty or non-existent \
