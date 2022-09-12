@@ -431,7 +431,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
     strict=True,
     reason="Temporarily mark as xfail due to issue with congestion_surcharge column resolving to NaN for column.min and column.max",
 )
-def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
+def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive_quentin(
     quentin_columnar_table_multi_batch_data_context,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
