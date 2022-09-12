@@ -638,16 +638,12 @@ def mocked_datasource_get_response(
 def mocked_datasource_post_response(
     mock_response_factory: Callable,
     fake_datasource_id: str,
-    fake_data_connector_id: str,
 ) -> Callable[[], MockResponse]:
     def _mocked_post_response(*args, **kwargs):
         return mock_response_factory(
             {
                 "data": {
                     "id": fake_datasource_id,
-                    "data_connectors": [
-                        {"id": fake_data_connector_id},
-                    ],
                 }
             },
             201,
