@@ -19,7 +19,6 @@ from great_expectations.datasource.simple_sqlalchemy_datasource import (
 from great_expectations.exceptions import ExecutionEngineError
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
-
 # We only create these test doubles when sqlalchemy is importable
 if sa:
     # This is a SQLAlchemy object we are creating a test double for. We need this double because
@@ -47,7 +46,6 @@ if sa:
 
         class DummyPool:
             connect = None
-
 
     # This is Great Expectations' SQLAlchemy wrapper. We need to mock this out because
     # SimpleSqlalchemyDatasource, the class under test, creates this under the hood, wrapping
