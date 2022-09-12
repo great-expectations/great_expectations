@@ -316,7 +316,6 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
             datasource_name=self.datasource_name,
         )
 
-    # <MARKER>
     def yaml_snippet(self) -> str:
         """
         Note the InferredAssetFilesystemDataConnector was selected to get users
@@ -465,7 +464,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
@@ -626,9 +625,10 @@ class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
 host = "{self.host}"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "{self.username}"
 database = ""  # The database name
-schema = ""  # The schema name
+schema_name = ""  # The schema name
 warehouse = ""  # The warehouse name
-role = ""  # The role name"""
+role = ""  # The role name
+table_name = ""  # A table that you would like to add initially as a Data Asset"""
 
         if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
             snippet += '''
@@ -650,7 +650,7 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
     username: {username}
     database: {database}
     query:
-      schema: {schema}
+      schema: {schema_name}
       warehouse: {warehouse}
       role: {role}
 """

@@ -60,7 +60,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
@@ -116,7 +116,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
@@ -172,7 +172,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
@@ -244,7 +244,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
@@ -315,7 +315,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
@@ -396,7 +396,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
@@ -462,7 +462,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
@@ -529,7 +529,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
@@ -593,7 +593,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
@@ -653,7 +653,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}
+      {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
