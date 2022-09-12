@@ -1284,7 +1284,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
         save_changes: bool = False,
-    ) -> None:
+    ) -> Union[LegacyDatasource, BaseDatasource]:
         """
         Updates a DatasourceConfig that already exists in the store.
 
@@ -1309,9 +1309,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 config=substituted_config
             )
             self._cached_datasources[datasource_name] = updated_datasource
+            return updated_datasource
         else:
             self.config.datasources[datasource_name] = datasource_config  # type: ignore[index,assignment]
             self._cached_datasources[datasource_name] = datasource
+            return datasource
 
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
