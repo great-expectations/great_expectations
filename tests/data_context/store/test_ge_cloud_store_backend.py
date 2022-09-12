@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Callable, Set, Union
 from unittest import mock
 
 import pytest
@@ -11,26 +12,33 @@ from great_expectations.data_context.types.base import CheckpointConfig
 
 
 @pytest.fixture
-def ge_cloud_store_backend(ge_cloud_access_token: str) -> GeCloudStoreBackend:
-    ge_cloud_base_url = "https://app.greatexpectations.io/"
-    ge_cloud_credentials = {
-        "access_token": ge_cloud_access_token,
-        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-    }
-    ge_cloud_resource_type = GeCloudRESTResource.CHECKPOINT
+def construct_ge_cloud_store_backend(
+    ge_cloud_access_token: str,
+) -> Callable[[GeCloudRESTResource], GeCloudStoreBackend]:
+    def _closure(resource_type: GeCloudRESTResource) -> GeCloudStoreBackend:
+        ge_cloud_base_url = "https://app.greatexpectations.io/"
+        ge_cloud_credentials = {
+            "access_token": ge_cloud_access_token,
+            "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+        }
 
-    store_backend = GeCloudStoreBackend(
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_credentials=ge_cloud_credentials,
-        ge_cloud_resource_type=ge_cloud_resource_type,
-    )
-    return store_backend
+        store_backend = GeCloudStoreBackend(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_credentials=ge_cloud_credentials,
+            ge_cloud_resource_type=resource_type,
+        )
+        return store_backend
+
+    return _closure
 
 
 @pytest.mark.cloud
 @pytest.mark.unit
 def test_set(
-    ge_cloud_store_backend: GeCloudStoreBackend, shared_called_with_request_kwargs: dict
+    construct_ge_cloud_store_backend: Callable[
+        [GeCloudRESTResource], GeCloudStoreBackend
+    ],
+    shared_called_with_request_kwargs: dict,
 ) -> None:
     """
     What does this test test and why?
@@ -43,6 +51,8 @@ def test_set(
     matter here but we leverage an existing fixture to mimic the contents of requests made
     in production. The same logic applies to all UUIDs in this test.
     """
+    store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
+
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
@@ -55,9 +65,7 @@ def test_set(
     )
 
     with mock.patch("requests.post", autospec=True) as mock_post:
-        ge_cloud_store_backend.set(
-            ("checkpoint", ""), my_simple_checkpoint_config_serialized
-        )
+        store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             json={
@@ -94,7 +102,10 @@ def test_set(
 @pytest.mark.cloud
 @pytest.mark.unit
 def test_list_keys(
-    ge_cloud_store_backend: GeCloudStoreBackend, shared_called_with_request_kwargs: dict
+    construct_ge_cloud_store_backend: Callable[
+        [GeCloudRESTResource], GeCloudStoreBackend
+    ],
+    shared_called_with_request_kwargs: dict,
 ) -> None:
     """
     What does this test test and why?
@@ -107,8 +118,10 @@ def test_list_keys(
     matter here but we leverage an existing fixture to mimic the contents of requests made
     in production. The same logic applies to all UUIDs in this test.
     """
+    store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
+
     with mock.patch("requests.get", autospec=True) as mock_get:
-        ge_cloud_store_backend.list_keys()
+        store_backend.list_keys()
         mock_get.assert_called_with(
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             **shared_called_with_request_kwargs,
@@ -118,7 +131,10 @@ def test_list_keys(
 @pytest.mark.cloud
 @pytest.mark.unit
 def test_remove_key(
-    ge_cloud_store_backend: GeCloudStoreBackend, shared_called_with_request_kwargs: dict
+    construct_ge_cloud_store_backend: Callable[
+        [GeCloudRESTResource], GeCloudStoreBackend
+    ],
+    shared_called_with_request_kwargs: dict,
 ) -> None:
     """
     What does this test test and why?
@@ -131,11 +147,13 @@ def test_remove_key(
     matter here but we leverage an existing fixture to mimic the contents of requests made
     in production. The same logic applies to all UUIDs in this test.
     """
+    store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
+
     with mock.patch("requests.delete", autospec=True) as mock_delete:
         mock_response = mock_delete.return_value
         mock_response.status_code = 200
 
-        ge_cloud_store_backend.remove_key(
+        store_backend.remove_key(
             (
                 "checkpoint",
                 "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
@@ -159,7 +177,9 @@ def test_remove_key(
 @pytest.mark.cloud
 @pytest.mark.unit
 def test_appropriate_casting_of_str_resource_type_to_GeCloudRESTResource(
-    ge_cloud_store_backend: GeCloudStoreBackend,
+    construct_ge_cloud_store_backend: Callable[
+        [GeCloudRESTResource], GeCloudStoreBackend
+    ],
 ) -> None:
     """
     What does this test test and why?
@@ -167,6 +187,125 @@ def test_appropriate_casting_of_str_resource_type_to_GeCloudRESTResource(
     The GeCloudStoreBackend should be able to recognize both GeCloudRESTResource enums
     and equivalent string values.
     """
-    assert (
-        ge_cloud_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
+    store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
+
+    assert store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
+
+
+@pytest.mark.cloud
+@pytest.mark.unit
+def test___init___with_deprecated_arg(ge_cloud_access_token: str, caplog) -> None:
+    ge_cloud_base_url = "https://app.greatexpectations.io/"
+    ge_cloud_credentials = {
+        "access_token": ge_cloud_access_token,
+        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+    }
+    ge_cloud_resource_type = GeCloudRESTResource.CHECKPOINT
+
+    store_backend = GeCloudStoreBackend(
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_credentials=ge_cloud_credentials,
+        ge_cloud_resource_type=ge_cloud_resource_type,
     )
+
+    log_messages = caplog.messages
+    assert len(log_messages) == 1
+    assert (
+        'The "account_id" ge_cloud_credentials key has been renamed to "organization_id" and will be deprecated'
+        in log_messages[0]
+    )
+
+    assert store_backend.ge_cloud_credentials == {
+        "access_token": ge_cloud_access_token,
+        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+    }
+
+
+@pytest.mark.parametrize(
+    "resource_type,expected_set_kwargs",
+    [
+        pytest.param(
+            GeCloudRESTResource.VALIDATION_RESULT,
+            {"checkpoint_id", "expectation_suite_id"},
+            id="resource_with_allowed_set_kwargs",
+        ),
+        pytest.param(
+            GeCloudRESTResource.CHECKPOINT,
+            set(),
+            id="resource_without_allowed_set_kwargs",
+        ),
+    ],
+)
+@pytest.mark.cloud
+@pytest.mark.unit
+def test_allowed_set_kwargs(
+    resource_type: GeCloudRESTResource,
+    expected_set_kwargs: Set[str],
+    construct_ge_cloud_store_backend: Callable[
+        [GeCloudRESTResource], GeCloudStoreBackend
+    ],
+) -> None:
+    store_backend = construct_ge_cloud_store_backend(resource_type)
+    actual = store_backend.allowed_set_kwargs
+
+    assert actual == expected_set_kwargs
+
+
+@pytest.mark.parametrize(
+    "kwargs,expected",
+    [
+        pytest.param(
+            {},
+            True,
+            id="no kwargs",
+        ),
+        pytest.param(
+            {"checkpoint_id": "123", "expectation_suite_id": "456"},
+            True,
+            id="equivalent kwargs",
+        ),
+        pytest.param(
+            {
+                "checkpoint_id": "123",
+                "expectation_suite_id": "456",
+                "my_other_id": "789",
+            },
+            None,
+            id="additional kwargs",
+            marks=pytest.mark.xfail(strict=True, raises=ValueError),
+        ),
+    ],
+)
+@pytest.mark.cloud
+@pytest.mark.unit
+def test_validate_set_kwargs(
+    kwargs: dict,
+    expected: Union[bool, None],
+    construct_ge_cloud_store_backend: Callable[
+        [GeCloudRESTResource], GeCloudStoreBackend
+    ],
+) -> None:
+    store_backend = construct_ge_cloud_store_backend(
+        GeCloudRESTResource.VALIDATION_RESULT
+    )
+    store_backend.validate_set_kwargs(kwargs) == expected
+
+
+@pytest.mark.cloud
+@pytest.mark.unit
+def test_config_property_and_defaults(
+    construct_ge_cloud_store_backend: Callable[
+        [GeCloudRESTResource], GeCloudStoreBackend
+    ],
+) -> None:
+    store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
+
+    assert store_backend.config == {
+        "class_name": "GeCloudStoreBackend",
+        "fixed_length_key": True,
+        "ge_cloud_base_url": "https://app.greatexpectations.io/",
+        "ge_cloud_resource_type": GeCloudRESTResource.CHECKPOINT,
+        "manually_initialize_store_backend_id": "",
+        "module_name": "great_expectations.data_context.store.ge_cloud_store_backend",
+        "suppress_store_backend_id": True,
+    }
