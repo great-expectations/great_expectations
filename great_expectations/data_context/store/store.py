@@ -160,7 +160,7 @@ class Store:
         else:
             return None
 
-    def set(self, key: DataContextKey, value: Any, **kwargs: dict) -> None:
+    def set(self, key: DataContextKey, value: Any, **kwargs) -> None:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.set(key, value, **kwargs)
 
@@ -193,10 +193,16 @@ class Store:
         )
 
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
-        id_: Optional[str] = None
-        if hasattr(config, "id_"):
-            id_ = config.id_
+        id: Optional[str] = None
+        # Chetan - 20220831 - Explicit fork in logic to cover legacy behavior (particularly around Checkpoints).
+        # Will be removed as part of the effort to rename `ge_cloud_id` to `id` across the codebase.
+        if hasattr(config, "ge_cloud_id"):
+            id = config.ge_cloud_id  # type: ignore[attr-defined]
+        if hasattr(config, "id"):
+            id = config.id
+
         name: Optional[str] = None
         if hasattr(config, "name"):
             name = config.name
-        return self.store_backend.build_key(name=name, id_=id_)
+
+        return self.store_backend.build_key(name=name, id=id)

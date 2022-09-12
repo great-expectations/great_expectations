@@ -112,7 +112,7 @@ Once you have our `SimpleCheckpoint`'s configuration defined, you can instantiat
 ### 6. (Optional) Edit your Expectation Suite, save, and test again.
 
 The Onboarding Data Assistant will create as many applicable Expectations as it can for the permitted columns.  This
- provides a solid base for analizing your data, but may exceed your needs.  It is also possible that you may possess
+ provides a solid base for analyzing your data, but may exceed your needs.  It is also possible that you may possess
  some domain knowledge that is not reflected in the data that was sampled for the Profiling process.  In either of these
  (or any other) cases, you can edit your Expectation Suite to more closely suite your needs.
 

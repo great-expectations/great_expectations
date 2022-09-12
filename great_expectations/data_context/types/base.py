@@ -8,6 +8,17 @@ import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
+from marshmallow import (
+    INCLUDE,
+    Schema,
+    ValidationError,
+    fields,
+    post_dump,
+    post_load,
+    pre_dump,
+    validates_schema,
+)
+from marshmallow.validate import OneOf
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
@@ -20,20 +31,14 @@ from great_expectations.core.util import (
     convert_to_json_serializable,
     get_datetime_string_from_strftime_format,
 )
-from great_expectations.marshmallow__shade import (
-    INCLUDE,
-    Schema,
-    ValidationError,
-    fields,
-    post_dump,
-    post_load,
-    pre_dump,
-    validates_schema,
-)
-from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
+
+try:
+    from pyspark.sql.types import StructType
+except ImportError:
+    StructType = None  # type: ignore
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
@@ -262,6 +267,9 @@ class AssetConfigSchema(Schema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
 
+    data_asset_name_prefix = fields.String(required=False, allow_none=True)
+    data_asset_name_suffix = fields.String(required=False, allow_none=True)
+    include_schema_name = fields.Boolean(required=False, allow_none=True)
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
@@ -272,6 +280,27 @@ class AssetConfigSchema(Schema):
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:  # type: ignore[no-untyped-def]
         pass
+
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        """
+        Schemas in Spark Dataframes are defined as StructType, which is not serializable
+        This method calls the schema's jsonValue() method, which translates the object into a json
+        """
+        # check whether spark exists
+        if StructType is None:
+            return data
+
+        batch_spec_passthrough_config = data.get("batch_spec_passthrough")
+        if batch_spec_passthrough_config:
+            reader_options: dict = batch_spec_passthrough_config.get("reader_options")
+            if reader_options:
+                schema = reader_options.get("schema")
+                if schema and isinstance(schema, StructType):
+                    data["batch_spec_passthrough"]["reader_options"][
+                        "schema"
+                    ] = schema.jsonValue()
+        return data
 
     # noinspection PyUnusedLocal
     @post_load
@@ -375,7 +404,8 @@ class DataConnectorConfig(AbstractConfig):
     def __init__(  # noqa: C901 - 20
         self,
         class_name,
-        id_: Optional[str] = None,
+        name: Optional[str] = None,
+        id: Optional[str] = None,
         module_name=None,
         credentials=None,
         assets=None,
@@ -384,7 +414,6 @@ class DataConnectorConfig(AbstractConfig):
         default_regex=None,
         batch_identifiers=None,
         sorters=None,
-        batch_spec_passthrough=None,
         # S3
         boto3_options=None,
         bucket=None,
@@ -400,6 +429,18 @@ class DataConnectorConfig(AbstractConfig):
         prefix=None,
         # Both S3/Azure
         delimiter=None,
+        data_asset_name_prefix=None,
+        data_asset_name_suffix=None,
+        include_schema_name=None,
+        splitter_method=None,
+        splitter_kwargs=None,
+        sampling_method=None,
+        sampling_kwargs=None,
+        excluded_tables=None,
+        included_tables=None,
+        skip_inapplicable_tables=None,
+        introspection_directives=None,
+        batch_spec_passthrough=None,
         **kwargs,
     ) -> None:
         self._class_name = class_name
@@ -418,6 +459,28 @@ class DataConnectorConfig(AbstractConfig):
             self.batch_identifiers = batch_identifiers
         if sorters is not None:
             self.sorters = sorters
+        if data_asset_name_prefix is not None:
+            self.data_asset_name_prefix = data_asset_name_prefix
+        if data_asset_name_suffix is not None:
+            self.data_asset_name_suffix = data_asset_name_suffix
+        if include_schema_name is not None:
+            self.include_schema_name = include_schema_name
+        if splitter_method is not None:
+            self.splitter_method = splitter_method
+        if splitter_kwargs is not None:
+            self.splitter_kwargs = splitter_kwargs
+        if sampling_method is not None:
+            self.sampling_method = sampling_method
+        if sampling_kwargs is not None:
+            self.sampling_kwargs = sampling_kwargs
+        if excluded_tables is not None:
+            self.excluded_tables = excluded_tables
+        if included_tables is not None:
+            self.included_tables = included_tables
+        if skip_inapplicable_tables is not None:
+            self.skip_inapplicable_tables = skip_inapplicable_tables
+        if introspection_directives is not None:
+            self.introspection_directives = introspection_directives
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
 
@@ -451,7 +514,7 @@ class DataConnectorConfig(AbstractConfig):
         if delimiter is not None:
             self.delimiter = delimiter
 
-        super().__init__(id_=id_)
+        super().__init__(id=id, name=name)
 
         # Note: optional samplers and splitters are handled by setattr
         for k, v in kwargs.items():
@@ -482,10 +545,14 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
-    id_ = fields.String(
+    name = fields.String(
         required=False,
         allow_none=True,
-        data_key="id",
+    )
+
+    id = fields.String(
+        required=False,
+        allow_none=True,
     )
 
     class_name = fields.String(
@@ -552,6 +619,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
+
     excluded_tables = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
@@ -559,6 +627,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
+    introspection_directives = fields.Dict(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
@@ -730,6 +799,27 @@ continue.
     def make_data_connector_config(self, data, **kwargs):
         return DataConnectorConfig(**data)
 
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        """
+        Schemas in Spark Dataframes are defined as StructType, which is not serializable
+        This method calls the schema's jsonValue() method, which translates the object into a json
+        """
+        # check whether spark exists
+        if StructType is None:
+            return data
+
+        batch_spec_passthrough_config = data.get("batch_spec_passthrough")
+        if batch_spec_passthrough_config:
+            reader_options: dict = batch_spec_passthrough_config.get("reader_options")
+            if reader_options:
+                schema = reader_options.get("schema")
+                if schema and isinstance(schema, StructType):
+                    data["batch_spec_passthrough"]["reader_options"][
+                        "schema"
+                    ] = schema.jsonValue()
+        return data
+
 
 class ExecutionEngineConfig(DictDot):
     def __init__(
@@ -853,7 +943,7 @@ class DatasourceConfig(AbstractConfig):
             str
         ] = None,  # Note: name is optional currently to avoid updating all documentation within
         # the scope of this work.
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         class_name: Optional[str] = None,
         module_name: str = "great_expectations.datasource",
         execution_engine=None,
@@ -874,7 +964,7 @@ class DatasourceConfig(AbstractConfig):
         **kwargs,
     ) -> None:
 
-        super().__init__(id_=id_, name=name)
+        super().__init__(id=id, name=name)
         # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
         self._class_name = class_name
         self._module_name = module_name
@@ -960,10 +1050,9 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         required=False,
         allow_none=True,
     )
-    id_ = fields.String(
+    id = fields.String(
         required=False,
         allow_none=True,
-        data_key="id",
     )
 
     class_name = fields.String(
@@ -1028,6 +1117,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
+
         if (
             "connection_string" in data
             or "credentials" in data
@@ -1049,6 +1139,11 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
     # noinspection PyUnusedLocal
     @post_load
     def make_datasource_config(self, data, **kwargs):
+        # Add names to data connectors
+        for data_connector_name, data_connector_config in data.get(
+            "data_connectors", {}
+        ).items():
+            data_connector_config["name"] = data_connector_name
         return DatasourceConfig(**data)
 
 
@@ -2280,8 +2375,8 @@ class DataContextConfig(BaseYamlConfig):
 
 
 class CheckpointValidationConfig(AbstractConfig):
-    def __init__(self, id_: Optional[str] = None, **kwargs: dict) -> None:
-        super().__init__(id_=id_)
+    def __init__(self, id: Optional[str] = None, **kwargs: dict) -> None:
+        super().__init__(id=id)
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -2291,7 +2386,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
-    id_ = fields.String(required=False, allow_none=False, data_key="id")
+    id = fields.String(required=False, allow_none=False)
 
     def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:  # type: ignore[override]
         """
@@ -2316,6 +2411,13 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
 
         sorted_data = dict(sorted(data.items()))
         return sorted_data
+
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        data = copy.deepcopy(data)
+        for key, value in data.items():
+            data[key] = convert_to_json_serializable(data=value)
+        return data
 
 
 class CheckpointConfigSchema(Schema):

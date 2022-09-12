@@ -38,6 +38,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
+    DatasourceConfig,
     GeCloudConfig,
     InMemoryStoreBackendDefaults,
 )
@@ -374,6 +375,48 @@ def basic_spark_df_execution_engine(spark_session):
     return execution_engine
 
 
+@pytest.fixture
+def spark_df_taxi_data_schema(spark_session):
+    """
+    Fixture used by tests for providing schema to SparkDFExecutionEngine.
+    The schema returned by this fixture corresponds to taxi_tripdata
+    """
+
+    # will not import unless we have a spark_session already passed in as fixture
+    from pyspark.sql.types import (
+        DoubleType,
+        IntegerType,
+        StringType,
+        StructField,
+        StructType,
+        TimestampType,
+    )
+
+    schema = StructType(
+        [
+            StructField("vendor_id", IntegerType(), True, None),
+            StructField("pickup_datetime", TimestampType(), True, None),
+            StructField("dropoff_datetime", TimestampType(), True, None),
+            StructField("passenger_count", IntegerType(), True, None),
+            StructField("trip_distance", DoubleType(), True, None),
+            StructField("rate_code_id", IntegerType(), True, None),
+            StructField("store_and_fwd_flag", StringType(), True, None),
+            StructField("pickup_location_id", IntegerType(), True, None),
+            StructField("dropoff_location_id", IntegerType(), True, None),
+            StructField("payment_type", IntegerType(), True, None),
+            StructField("fare_amount", DoubleType(), True, None),
+            StructField("extra", DoubleType(), True, None),
+            StructField("mta_tax", DoubleType(), True, None),
+            StructField("tip_amount", DoubleType(), True, None),
+            StructField("tolls_amount", DoubleType(), True, None),
+            StructField("improvement_surcharge", DoubleType(), True, None),
+            StructField("total_amount", DoubleType(), True, None),
+            StructField("congestion_surcharge", DoubleType(), True, None),
+        ]
+    )
+    return schema
+
+
 @pytest.mark.order(index=3)
 @pytest.fixture
 def spark_session_v012(test_backends):
@@ -643,33 +686,6 @@ def pandas_dataset():
     test_backend = "PandasDataset"
     data, schemas = dataset_sample_data(test_backend)
     return get_dataset(test_backend, data, schemas=schemas)
-
-
-@pytest.fixture
-def sqlalchemy_dataset(test_backends):
-    """Provide dataset fixtures that have special values and/or are otherwise useful outside
-    the standard json testing framework"""
-    if "postgresql" in test_backends:
-        backend = "postgresql"
-    elif "sqlite" in test_backends:
-        backend = "sqlite"
-    else:
-        return
-
-    data = {
-        "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10 / 2.2, np.inf],
-        "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
-        "naturals": [1, 2, 3, 4, 5, 6, 7],
-    }
-    schemas = {
-        "postgresql": {
-            "infinities": "DOUBLE_PRECISION",
-            "nulls": "DOUBLE_PRECISION",
-            "naturals": "DOUBLE_PRECISION",
-        },
-        "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
-    }
-    return get_dataset(backend, data, schemas=schemas, profiler=None)
 
 
 @pytest.fixture
@@ -2535,98 +2551,10 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
 
 
 @pytest.fixture
-def cloud_base_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_base_data_context_in_cloud_mode: BaseDataContext,
-):
-    context: BaseDataContext = empty_base_data_context_in_cloud_mode
-    config = yaml.load(
-        """
-    class_name: Datasource
-    execution_engine:
-        class_name: PandasExecutionEngine
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
-    with mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
-    ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
-    ):
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
-    return context
-
-
-@pytest.fixture
-def cloud_base_data_context_in_cloud_mode_with_datasource_sqlalchemy_engine(
-    empty_base_data_context_in_cloud_mode: BaseDataContext, db_file
-):
-    context: BaseDataContext = empty_base_data_context_in_cloud_mode
-    config = yaml.load(
-        f"""
-    class_name: Datasource
-    execution_engine:
-        class_name: SqlAlchemyExecutionEngine
-        connection_string: sqlite:///{db_file}
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
-    with mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
-    ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
-    ):
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
-    return context
-
-
-@pytest.fixture
 def cloud_data_context_with_datasource_pandas_engine(
     empty_cloud_data_context: CloudDataContext, db_file
 ):
     context: CloudDataContext = empty_cloud_data_context
-    config = yaml.load(
-        f"""
-    class_name: Datasource
-    execution_engine:
-        class_name: PandasExecutionEngine
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
-    with mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
-    ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
-    ):
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
-    return context
-
-
-@pytest.fixture
-def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_data_context_in_cloud_mode: DataContext, db_file
-):
-    context: DataContext = empty_data_context_in_cloud_mode
     config = yaml.load(
         f"""
     class_name: Datasource
@@ -7191,4 +7119,32 @@ def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builde
     )
     logger.info(
         "Set the random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
+    )
+
+
+@pytest.fixture
+def datasource_config_with_names() -> DatasourceConfig:
+    return DatasourceConfig(
+        name="my_datasource",
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        data_connectors={
+            "tripdata_monthly_configured": {
+                "name": "tripdata_monthly_configured",
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "base_directory": "/path/to/trip_data",
+                "assets": {
+                    "yellow": {
+                        "class_name": "Asset",
+                        "module_name": "great_expectations.datasource.data_connector.asset",
+                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                        "group_names": ["year", "month"],
+                    }
+                },
+            }
+        },
     )

@@ -503,6 +503,7 @@ class OpsgenieAlertAction(ValidationAction):
         region=None,
         priority="P3",
         notify_on="failure",
+        tags: Optional[list] = None,
     ) -> None:
         """Construct a OpsgenieAlertAction
 
@@ -532,6 +533,7 @@ class OpsgenieAlertAction(ValidationAction):
         self.region = region
         self.priority = priority
         self.notify_on = notify_on
+        self.tags = tags
 
     def _run(
         self,
@@ -578,6 +580,7 @@ class OpsgenieAlertAction(ValidationAction):
                 "api_key": self.api_key,
                 "region": self.region,
                 "priority": self.priority,
+                "tags": self.tags,
             }
 
             description = self.renderer.render(validation_result_suite, None, None)

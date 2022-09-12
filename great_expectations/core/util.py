@@ -26,14 +26,20 @@ from great_expectations.types.base import SerializableDotDict
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from great_expectations.util import convert_decimal_to_float
 
+try:
+    from pyspark.sql.types import StructType
+except ImportError:
+    StructType = None  # type: ignore
+
 logger = logging.getLogger(__name__)
 
 
 try:
-    from shapely.geometry import Point, Polygon
+    from shapely.geometry import LineString, Point, Polygon
 except ImportError:
     Point = None
     Polygon = None
+    LineString = None
 
 try:
     import sqlalchemy
@@ -213,7 +219,7 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
         return str(data)
 
     # noinspection PyTypeChecker
-    if Polygon and isinstance(data, (Point, Polygon)):
+    if Polygon and isinstance(data, (Point, Polygon, LineString)):
         return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
@@ -276,6 +282,11 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
 
     if isinstance(data, RunIdentifier):
         return data.to_json_dict()
+
+    # PySpark schema serialization
+    if StructType is not None:
+        if isinstance(data, StructType):
+            return dict(data.jsonValue())
 
     else:
         raise TypeError(

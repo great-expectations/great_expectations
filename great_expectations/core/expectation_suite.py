@@ -4,7 +4,19 @@ import logging
 import pprint
 import uuid
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
+
+from marshmallow import Schema, ValidationError, fields, pre_dump
 
 import great_expectations as ge
 from great_expectations import __version__ as ge_version
@@ -31,16 +43,12 @@ from great_expectations.exceptions import (
     DataContextError,
     InvalidExpectationConfigurationError,
 )
-from great_expectations.marshmallow__shade import (
-    Schema,
-    ValidationError,
-    fields,
-    pre_dump,
-)
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
@@ -57,14 +65,14 @@ class ExpectationSuite(SerializableDictDot):
 
     def __init__(
         self,
-        expectation_suite_name,
-        data_context=None,
-        expectations=None,
-        evaluation_parameters=None,
-        data_asset_type=None,
-        execution_engine_type=None,
-        meta=None,
-        ge_cloud_id=None,
+        expectation_suite_name: str,
+        data_context: "AbstractDataContext" = None,
+        expectations: List[Union[dict, ExpectationConfiguration]] = None,
+        evaluation_parameters: dict = None,
+        data_asset_type: str = None,
+        execution_engine_type: Type["ExecutionEngine"] = None,
+        meta: dict = None,
+        ge_cloud_id: str = None,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
@@ -398,7 +406,7 @@ class ExpectationSuite(SerializableDictDot):
                     match_indexes.append(idx)
             else:
                 if expectation.isEquivalentTo(
-                    other=expectation_configuration, match_type=match_type
+                    other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
                 ):
                     match_indexes.append(idx)
 
@@ -485,7 +493,7 @@ class ExpectationSuite(SerializableDictDot):
         elif len(found_expectation_indexes) == 0:
             raise ValueError("No matching Expectation was found.")
 
-        self.expectations[found_expectation_indexes[0]] = new_expectation_configuration
+        self.expectations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
 
     def patch_expectation(
         self,
@@ -715,7 +723,7 @@ class ExpectationSuite(SerializableDictDot):
         for expectation_configuration in expectation_configurations:
             domain_type = expectation_configuration.get_domain_type()
             kwargs = expectation_configuration.kwargs
-            pprint.pprint(
+            pprint.pprint(  # type: ignore[call-arg]
                 object={
                     expectation_configuration.expectation_type: {
                         "domain": domain_type.value,
@@ -949,7 +957,7 @@ class ExpectationSuite(SerializableDictDot):
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """
         for expectation_configuration in self.expectations:
-            inline_renderer_config: "InlineRendererConfig" = {
+            inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
                 "class_name": "InlineRenderer",
                 "render_object": expectation_configuration,
             }
@@ -967,7 +975,7 @@ class ExpectationSuite(SerializableDictDot):
                 )
 
             expectation_configuration.rendered_content = (
-                inline_renderer.get_expectation_configuration_rendered_content()
+                inline_renderer.get_rendered_content()
             )
 
 
@@ -1013,10 +1021,11 @@ class ExpectationSuiteSchema(Schema):
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
-        if isinstance(data, ExpectationSuite):
-            data.meta = convert_to_json_serializable(data.meta)
-        elif isinstance(data, dict):
-            data["meta"] = convert_to_json_serializable(data.get("meta"))
+        for key in data:
+            if key.startswith("_"):
+                continue
+            data[key] = convert_to_json_serializable(data[key])
+
         data = self.clean_empty(data)
         return data
 

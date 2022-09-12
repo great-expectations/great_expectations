@@ -4,15 +4,18 @@ import json
 import logging
 import os
 import re
+import shutil
 import sys
 import traceback
 from glob import glob
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, check_output, run
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 import click
 import pkg_resources
+
+from great_expectations.data_context.data_context import DataContext
 
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
@@ -133,7 +136,7 @@ def get_expectation_file_info_dict(
         logger.debug(
             f"{name} was created {result[name]['created_at']} and updated {result[name]['updated_at']}"
         )
-        with open(file_path, "r") as fp:
+        with open(file_path) as fp:
             text = fp.read()
 
         exp_type_set = set()
@@ -142,9 +145,13 @@ def get_expectation_file_info_dict(
             if match:
                 if not line.strip().startswith("#"):
                     exp_type_set.add(match.group(1))
-        result[name]["exp_type"] = sorted(exp_type_set)[0]
+        if file_path.startswith("great_expectations"):
+            _prefix = "Core "
+        else:
+            _prefix = "Contrib "
+        result[name]["exp_type"] = _prefix + sorted(exp_type_set)[0]
         logger.debug(
-            f"Expectation type {sorted(exp_type_set)[0]} for {name} in {file_path}"
+            f"Expectation type {_prefix}{sorted(exp_type_set)[0]} for {name} in {file_path}"
         )
 
     os.chdir(oldpwd)
@@ -197,8 +204,11 @@ def get_contrib_requirements(filepath: str) -> Dict:
 def build_gallery(
     include_core: bool = True,
     include_contrib: bool = True,
+    ignore_suppress: bool = False,
+    ignore_only_for: bool = False,
     only_these_expectations: List[str] = [],
     only_consider_these_backends: List[str] = [],
+    context: Optional[DataContext] = None,
 ) -> Dict:
     """
     Build the gallery object by running diagnostics for each Expectation and returning the resulting reports.
@@ -282,7 +292,10 @@ def build_gallery(
 
     for expectation in sorted(requirements_dict):
         # Temp
-        if expectation == "expect_column_kl_divergence_to_be_less_than":
+        if expectation in [
+            "expect_column_kl_divergence_to_be_less_than",  # Infinity values break JSON
+            "expect_column_values_to_be_valid_arn",  # Contrib Expectation where pretty much no test passes on any backend
+        ]:
             continue
         group = requirements_dict[expectation]["group"]
         print(f"\n\n\n=== {expectation} ({group}) ===")
@@ -322,13 +335,16 @@ def build_gallery(
                 continue
 
         logger.debug(f"Running diagnostics for expectation: {expectation}")
-        impl = great_expectations.expectations.registry.get_expectation_impl(
-            expectation
-        )
         try:
+            impl = great_expectations.expectations.registry.get_expectation_impl(
+                expectation
+            )
             diagnostics = impl().run_diagnostics(
+                ignore_suppress=ignore_suppress,
+                ignore_only_for=ignore_only_for,
                 debug_logger=logger,
                 only_consider_these_backends=only_consider_these_backends,
+                context=context,
             )
             checklist_string = diagnostics.generate_checklist()
             expectation_checklists.write(
@@ -426,13 +442,11 @@ def build_gallery(
             "expectations",
             "core",
         )
-        core_expectations_filename_set = set(
-            [
-                fname.rsplit(".", 1)[0]
-                for fname in os.listdir(core_dir)
-                if fname.startswith("expect_")
-            ]
-        )
+        core_expectations_filename_set = {
+            fname.rsplit(".", 1)[0]
+            for fname in os.listdir(core_dir)
+            if fname.startswith("expect_")
+        }
         core_expectations_not_in_gallery = core_expectations_filename_set - set(
             core_expectations
         )
@@ -518,6 +532,20 @@ def format_docstring_to_markdown(docstr: str) -> str:
     return clean_docstr
 
 
+def _disable_progress_bars() -> Tuple[str, DataContext]:
+    """Return context_dir and context that was created"""
+    context_dir = os.path.join(os.path.sep, "tmp", f"gx-context-{os.getpid()}")
+    os.makedirs(context_dir)
+    context = DataContext.create(context_dir, usage_statistics_enabled=False)
+    context.variables.progress_bars = {
+        "globally": False,
+        "metric_calculations": False,
+        "profilers": False,
+    }
+    context.variables.save_config()
+    return (context_dir, context)
+
+
 @click.command()
 @click.option(
     "--no-core",
@@ -534,6 +562,22 @@ def format_docstring_to_markdown(docstr: str) -> str:
     is_flag=True,
     default=False,
     help="Do not include contrib/package Expectations",
+)
+@click.option(
+    "--ignore-suppress",
+    "-S",
+    "ignore_suppress",
+    is_flag=True,
+    default=False,
+    help="Ignore the suppress_test_for list on Expectation sample tests",
+)
+@click.option(
+    "--ignore-only-for",
+    "-O",
+    "ignore_only_for",
+    is_flag=True,
+    default=False,
+    help="Ignore the only_for list on Expectation sample tests",
 )
 @click.option(
     "--outfile-name",
@@ -557,11 +601,17 @@ def main(**kwargs):
     backends = []
     if kwargs["backends"]:
         backends = [name.strip() for name in kwargs["backends"].split(",")]
+
+    context_dir, context = _disable_progress_bars()
+
     gallery_info = build_gallery(
         include_core=not kwargs["no_core"],
         include_contrib=not kwargs["no_contrib"],
+        ignore_suppress=kwargs["ignore_suppress"],
+        ignore_only_for=kwargs["ignore_only_for"],
         only_these_expectations=kwargs["args"],
         only_consider_these_backends=backends,
+        context=context,
     )
     tracebacks = expectation_tracebacks.getvalue()
     checklists = expectation_checklists.getvalue()
@@ -573,6 +623,9 @@ def main(**kwargs):
             outfile.write(checklists)
     with open(f"./{kwargs['outfile_name']}", "w") as outfile:
         json.dump(gallery_info, outfile, indent=4)
+
+    print(f"Deleting {context_dir}")
+    shutil.rmtree(context_dir)
 
 
 if __name__ == "__main__":

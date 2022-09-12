@@ -43,13 +43,13 @@ class RuntimeDataConnector(DataConnector):
         batch_identifiers: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
         assets: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
@@ -196,7 +196,7 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_definition: BatchDefinition,
         runtime_parameters: dict,
-    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
+    ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
             batch_definition=batch_definition,
             runtime_parameters=runtime_parameters,
@@ -312,6 +312,9 @@ class RuntimeDataConnector(DataConnector):
             return RuntimeDataBatchSpec(batch_spec)
         elif "query" in runtime_parameters:
             batch_spec["query"] = runtime_parameters.get("query")
+            batch_spec["temp_table_schema_name"] = runtime_parameters.get(
+                "temp_table_schema_name"
+            )
             return RuntimeQueryBatchSpec(batch_spec)
         elif "path" in runtime_parameters:
             path: str = runtime_parameters["path"]

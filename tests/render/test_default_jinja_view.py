@@ -1,6 +1,3 @@
-import json
-from collections import OrderedDict
-
 import pytest
 
 import great_expectations as ge
@@ -19,18 +16,6 @@ from great_expectations.render.types import (
     ValueListContent,
 )
 from great_expectations.render.view import DefaultJinjaPageView
-
-
-@pytest.fixture()
-def validation_results():
-    with open("./tests/test_sets/expected_cli_results_default.json") as infile:
-        return json.load(infile, object_pairs_hook=OrderedDict)
-
-
-@pytest.fixture()
-def expectations():
-    with open("./tests/test_sets/titanic_expectations.json") as infile:
-        return json.load(infile, object_pairs_hook=OrderedDict)
 
 
 # noinspection PyPep8Naming
