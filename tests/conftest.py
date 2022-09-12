@@ -689,33 +689,6 @@ def pandas_dataset():
 
 
 @pytest.fixture
-def sqlalchemy_dataset(test_backends):
-    """Provide dataset fixtures that have special values and/or are otherwise useful outside
-    the standard json testing framework"""
-    if "postgresql" in test_backends:
-        backend = "postgresql"
-    elif "sqlite" in test_backends:
-        backend = "sqlite"
-    else:
-        return
-
-    data = {
-        "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10 / 2.2, np.inf],
-        "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
-        "naturals": [1, 2, 3, 4, 5, 6, 7],
-    }
-    schemas = {
-        "postgresql": {
-            "infinities": "DOUBLE_PRECISION",
-            "nulls": "DOUBLE_PRECISION",
-            "naturals": "DOUBLE_PRECISION",
-        },
-        "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
-    }
-    return get_dataset(backend, data, schemas=schemas, profiler=None)
-
-
-@pytest.fixture
 def sqlitedb_engine(test_backend):
     if test_backend == "sqlite":
         try:
@@ -2513,11 +2486,11 @@ def empty_data_context_in_cloud_mode(
     with mock.patch(
         "great_expectations.data_context.DataContext._save_project_config"
     ), mock.patch(
-        "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_ge_cloud",
         autospec=True,
         side_effect=mocked_config,
     ), mock.patch(
-        "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
+        "great_expectations.data_context.data_context.CloudDataContext.get_ge_cloud_config",
         autospec=True,
         side_effect=mocked_get_ge_cloud_config,
     ):
@@ -2574,65 +2547,6 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     assert context.list_datasources() == []
     assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
     assert context.ge_cloud_config.base_url == custom_base_url
-    return context
-
-
-@pytest.fixture
-def cloud_base_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_base_data_context_in_cloud_mode: BaseDataContext,
-):
-    context: BaseDataContext = empty_base_data_context_in_cloud_mode
-    config = yaml.load(
-        """
-    class_name: Datasource
-    execution_engine:
-        class_name: PandasExecutionEngine
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
-    with mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
-    ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
-    ):
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
-    return context
-
-
-@pytest.fixture
-def cloud_base_data_context_in_cloud_mode_with_datasource_sqlalchemy_engine(
-    empty_base_data_context_in_cloud_mode: BaseDataContext, db_file
-):
-    context: BaseDataContext = empty_base_data_context_in_cloud_mode
-    config = yaml.load(
-        f"""
-    class_name: Datasource
-    execution_engine:
-        class_name: SqlAlchemyExecutionEngine
-        connection_string: sqlite:///{db_file}
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
-    with mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
-    ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
-    ):
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
     return context
 
 
