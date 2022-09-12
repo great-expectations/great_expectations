@@ -178,8 +178,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
         query: Union[BinaryExpression, BooleanClauseList] = sa.and_(
             *[
-                sa.extract(date_part, sa.column(column_name))
-                == date_parts_dict[date_part]
+                sa.extract(date_part.value, sa.column(column_name))
+                == date_parts_dict[date_part.value]
                 for date_part in date_parts
             ]
         )

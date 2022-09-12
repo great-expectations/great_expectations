@@ -386,7 +386,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT,
+                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
                 event_payload={
                     "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
