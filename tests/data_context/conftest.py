@@ -524,6 +524,11 @@ def datasource_config_with_names_and_ids(
     fake_datasource_id: str,
     fake_data_connector_id: str,
 ) -> DatasourceConfig:
+    """
+    An extension of the `datasource_config_with_names` fixture
+    but contains ids for BOTH the top-level Datasource as well
+    as the nested DataConnectors.
+    """
     updated_config = copy.deepcopy(datasource_config_with_names)
 
     # Update top-level Datasource
