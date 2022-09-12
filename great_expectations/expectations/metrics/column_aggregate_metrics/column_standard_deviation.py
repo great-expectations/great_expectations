@@ -41,9 +41,9 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _dialect, _metrics, **kwargs):
         """SqlAlchemy Standard Deviation implementation"""
-        if _dialect.name.lower() == GESqlDialect.MSSQL.value:
+        if _dialect.name.lower() == GESqlDialect.MSSQL:
             standard_deviation = sa.func.stdev(column)
-        elif _dialect.name.lower() == GESqlDialect.SQLITE.value:
+        elif _dialect.name.lower() == GESqlDialect.SQLITE:
             mean = _metrics["column.mean"]
             nonnull_row_count = _metrics["column_values.null.unexpected_count"]
             standard_deviation = sa.func.sqrt(

@@ -289,7 +289,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
             ):
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
-                    event=UsageStatsEvents.DATASOURCE_SQLALCHEMY_CONNECT.value,
+                    event=UsageStatsEvents.DATASOURCE_SQLALCHEMY_CONNECT,
                     event_payload={
                         "anonymized_name": handler.anonymizer.anonymize(obj=self.name),
                         "sqlalchemy_dialect": self.engine.name,
@@ -432,13 +432,13 @@ class SqlAlchemyDatasource(LegacyDatasource):
                 )
 
                 # In BigQuery the table name is already qualified with its schema name
-                if self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY.value:
+                if self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
                     schema = None
 
                 else:
                     schema = batch_kwargs.get("schema")
                 # limit doesn't compile properly for oracle so we will append rownum to query string later
-                if self.engine.dialect.name.lower() == GESqlDialect.ORACLE.value:
+                if self.engine.dialect.name.lower() == GESqlDialect.ORACLE:
                     raw_query = sqlalchemy.select([sqlalchemy.text("*")]).select_from(
                         sqlalchemy.schema.Table(
                             table, sqlalchemy.MetaData(), schema=schema
@@ -461,7 +461,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
                     )
                 )
                 # use rownum instead of limit in oracle
-                if self.engine.dialect.name.lower() == GESqlDialect.ORACLE.value:
+                if self.engine.dialect.name.lower() == GESqlDialect.ORACLE:
                     query += "\nWHERE ROWNUM <= %d" % limit
                 batch_reference = SqlAlchemyBatchReference(
                     engine=self.engine,

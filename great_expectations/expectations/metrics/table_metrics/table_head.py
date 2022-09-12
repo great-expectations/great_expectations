@@ -120,9 +120,7 @@ class TableHead(TableMetricProvider):
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
                 )
-            elif (
-                execution_engine.engine.dialect.name.lower() == GESqlDialect.MSSQL.value
-            ):
+            elif execution_engine.engine.dialect.name.lower() == GESqlDialect.MSSQL:
                 # limit doesn't compile properly for mssql
                 sql = str(
                     stmt.compile(

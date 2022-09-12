@@ -377,7 +377,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 if (
                     expected_type.lower() == "geography"
                     and execution_engine.engine.dialect.name.lower()
-                    == GESqlDialect.BIGQUERY.value
+                    == GESqlDialect.BIGQUERY
                     and not BIGQUERY_GEO_SUPPORT
                 ):
                     logger.warning(

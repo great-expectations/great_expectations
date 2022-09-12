@@ -247,7 +247,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         # The following code fetches the names of external schemas and tables from a special table
         # 'svv_external_tables'.
         try:
-            if engine.dialect.name.lower() == GESqlDialect.REDSHIFT.value:
+            if engine.dialect.name.lower() == GESqlDialect.REDSHIFT:
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
                 result = engine.execute(
                     "select schemaname, tablename from svv_external_tables"

@@ -49,17 +49,17 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     """
 
     SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[str, Optional[Sorter]] = {
-        SplitterMethod.SPLIT_ON_YEAR.value: DictionarySorter,
-        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH.value: DictionarySorter,
-        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH_AND_DAY.value: DictionarySorter,
-        SplitterMethod.SPLIT_ON_DATE_PARTS.value: DictionarySorter,
-        SplitterMethod.SPLIT_ON_WHOLE_TABLE.value: None,
-        SplitterMethod.SPLIT_ON_COLUMN_VALUE.value: LexicographicSorter,
-        SplitterMethod.SPLIT_ON_CONVERTED_DATETIME.value: LexicographicSorter,
-        SplitterMethod.SPLIT_ON_DIVIDED_INTEGER.value: NumericSorter,
-        SplitterMethod.SPLIT_ON_MOD_INTEGER.value: NumericSorter,
-        SplitterMethod.SPLIT_ON_MULTI_COLUMN_VALUES.value: LexicographicSorter,
-        SplitterMethod.SPLIT_ON_HASHED_COLUMN.value: LexicographicSorter,
+        SplitterMethod.SPLIT_ON_YEAR: DictionarySorter,
+        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH: DictionarySorter,
+        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH_AND_DAY: DictionarySorter,
+        SplitterMethod.SPLIT_ON_DATE_PARTS: DictionarySorter,
+        SplitterMethod.SPLIT_ON_WHOLE_TABLE: None,
+        SplitterMethod.SPLIT_ON_COLUMN_VALUE: LexicographicSorter,
+        SplitterMethod.SPLIT_ON_CONVERTED_DATETIME: LexicographicSorter,
+        SplitterMethod.SPLIT_ON_DIVIDED_INTEGER: NumericSorter,
+        SplitterMethod.SPLIT_ON_MOD_INTEGER: NumericSorter,
+        SplitterMethod.SPLIT_ON_MULTI_COLUMN_VALUES: LexicographicSorter,
+        SplitterMethod.SPLIT_ON_HASHED_COLUMN: LexicographicSorter,
     }
 
     def __init__(
@@ -334,10 +334,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         if sorter_method == DictionarySorter:
             return [DictionarySorter(name=splitter_kwargs["column_name"])]
         elif sorter_method == LexicographicSorter:
-            if (
-                splitter_method_name
-                == SplitterMethod.SPLIT_ON_MULTI_COLUMN_VALUES.value
-            ):
+            if splitter_method_name == SplitterMethod.SPLIT_ON_MULTI_COLUMN_VALUES:
                 return [
                     LexicographicSorter(name=column_name)
                     for column_name in splitter_kwargs["column_names"]

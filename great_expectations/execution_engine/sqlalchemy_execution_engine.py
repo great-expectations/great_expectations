@@ -120,7 +120,7 @@ try:
 
     if sa:
         sa.dialects.registry.register(
-            GESqlDialect.DREMIO.value, "sqlalchemy_dremio.pyodbc", "dialect"
+            GESqlDialect.DREMIO, "sqlalchemy_dremio.pyodbc", "dialect"
         )
 except ImportError:
     sqlalchemy_dremio = None
@@ -132,7 +132,7 @@ try:
         # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sa.dialects.registry.register(
-            GESqlDialect.SNOWFLAKE.value, "snowflake.sqlalchemy", "dialect"
+            GESqlDialect.SNOWFLAKE, "snowflake.sqlalchemy", "dialect"
         )
 except (ImportError, KeyError, AttributeError):
     snowflake = None
@@ -142,7 +142,7 @@ try:
     import sqlalchemy_bigquery as sqla_bigquery
 
     sa.dialects.registry.register(
-        GESqlDialect.BIGQUERY.value, _BIGQUERY_MODULE_NAME, "dialect"
+        GESqlDialect.BIGQUERY, _BIGQUERY_MODULE_NAME, "dialect"
     )
     bigquery_types_tuple = None
 except ImportError:
@@ -159,7 +159,7 @@ except ImportError:
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sa.dialects.registry.register(
-            GESqlDialect.BIGQUERY.value, _BIGQUERY_MODULE_NAME, "dialect"
+            GESqlDialect.BIGQUERY, _BIGQUERY_MODULE_NAME, "dialect"
         )
         try:
             getattr(sqla_bigquery, "INTEGER")
@@ -309,42 +309,42 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # these are two backends where temp_table_creation is not supported we set the default value to False.
         if self.dialect_name in [
-            GESqlDialect.TRINO.value,
-            GESqlDialect.AWSATHENA.value,  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
+            GESqlDialect.TRINO,
+            GESqlDialect.AWSATHENA,  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
         ]:
             self._create_temp_table = False
 
         # Get the dialect **for purposes of identifying types**
         if self.dialect_name in [
-            GESqlDialect.POSTGRESQL.value,
-            GESqlDialect.MYSQL.value,
-            GESqlDialect.SQLITE.value,
-            GESqlDialect.ORACLE.value,
-            GESqlDialect.MSSQL.value,
+            GESqlDialect.POSTGRESQL,
+            GESqlDialect.MYSQL,
+            GESqlDialect.SQLITE,
+            GESqlDialect.ORACLE,
+            GESqlDialect.MSSQL,
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect_module = import_library_module(
                 module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
-        elif self.dialect_name == GESqlDialect.SNOWFLAKE.value:
+        elif self.dialect_name == GESqlDialect.SNOWFLAKE:
             self.dialect_module = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
-        elif self.dialect_name == GESqlDialect.DREMIO.value:
+        elif self.dialect_name == GESqlDialect.DREMIO:
             # WARNING: Dremio Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_dremio.pyodbc"
             )
-        elif self.dialect_name == GESqlDialect.REDSHIFT.value:
+        elif self.dialect_name == GESqlDialect.REDSHIFT:
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
             )
-        elif self.dialect_name == GESqlDialect.BIGQUERY.value:
+        elif self.dialect_name == GESqlDialect.BIGQUERY:
             self.dialect_module = import_library_module(
                 module_name=_BIGQUERY_MODULE_NAME
             )
-        elif self.dialect_name == GESqlDialect.TERADATASQL.value:
+        elif self.dialect_name == GESqlDialect.TERADATASQL:
             # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
@@ -358,16 +358,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # Connection can be handled separately.
         self._engine_backup = None
         if self.engine and self.dialect_name in [
-            GESqlDialect.SQLITE.value,
-            GESqlDialect.MSSQL.value,
-            GESqlDialect.SNOWFLAKE.value,
-            GESqlDialect.MYSQL.value,
+            GESqlDialect.SQLITE,
+            GESqlDialect.MSSQL,
+            GESqlDialect.SNOWFLAKE,
+            GESqlDialect.MYSQL,
         ]:
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
             if (
-                self._engine_backup.dialect.name.lower() == GESqlDialect.SQLITE.value
+                self._engine_backup.dialect.name.lower() == GESqlDialect.SQLITE
                 and not isinstance(self._engine_backup, sa.engine.base.Connection)
             ):
                 raw_connection = self._engine_backup.raw_connection()
@@ -386,7 +386,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
+                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT,
                 event_payload={
                     "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
@@ -1107,7 +1107,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         else:
-            if self.dialect_name == GESqlDialect.SQLITE.value:
+            if self.dialect_name == GESqlDialect.SQLITE:
                 split_clause = sa.text("1 = 1")
             else:
                 split_clause = sa.true()

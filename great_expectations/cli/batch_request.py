@@ -384,8 +384,7 @@ Would you like to continue?"""
                 )
 
     if (
-        datasource.execution_engine.engine.dialect.name.lower()
-        == GESqlDialect.BIGQUERY.value
+        datasource.execution_engine.engine.dialect.name.lower() == GESqlDialect.BIGQUERY
         and parse_bigquery_url is not None
     ):
         # bigquery table needs to contain the project id if it differs from the credentials project
