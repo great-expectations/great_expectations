@@ -467,11 +467,21 @@ def test_build_sorters_from_config_good_config():
         }
     ]
     sorters = build_sorters_from_config(sorters_config)
-    assert sorters.__repr__() == str(
-        "{'price': {'name': 'price', 'reverse': True, 'type': 'NumericSorter'}}"
+    assert (
+        sorters.__repr__()
+        == """{'price': {
+  "name": "price",
+  "reverse": true,
+  "type": "NumericSorter"
+}}"""
     )
-    assert sorters["price"].__repr__() == str(
-        {"name": "price", "reverse": True, "type": "NumericSorter"}
+    assert (
+        sorters["price"].__repr__()
+        == """{
+  "name": "price",
+  "reverse": true,
+  "type": "NumericSorter"
+}"""
     )
     # no sorters by name of i_dont_exist
     with pytest.raises(KeyError):
