@@ -36,7 +36,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         # engine is actually a required argument and an exception will be raised if it isn't set.
         # However, it is marked as optional since it has a default value of None and we need to
         # maintain argument order in case anyone is using positional arguments.
-        engine: Optional[sa.engine.Engine] = None,
+        engine: "Optional[sa.engine.Engine]" = None,
         introspection: Optional[dict] = None,
         tables: Optional[dict] = None,
         **kwargs
