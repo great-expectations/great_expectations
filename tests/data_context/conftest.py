@@ -1,12 +1,19 @@
+import copy
+import json
 import os
 import shutil
-from typing import Dict
-from unittest.mock import PropertyMock, patch
+import unittest.mock
+from typing import Any, Callable, Dict, Optional, Union, cast
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
+import requests
 
 import great_expectations as ge
+from great_expectations import DataContext
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import GeCloudStoreBackend
+from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
@@ -15,6 +22,8 @@ from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
+
+yaml = YAMLHandler()
 
 
 @pytest.fixture()
@@ -48,23 +57,6 @@ def data_context_with_variables_in_config(tmp_path_factory, monkeypatch):
         asset_config_path,
         ge_config_fixture_filename="great_expectations_basic_with_variables.yml",
         config_variables_fixture_filename="config_variables.yml",
-    )
-
-    return ge.data_context.DataContext(context_path)
-
-
-@pytest.fixture()
-def data_context_with_variables_in_config_exhaustive(tmp_path_factory):
-    # This data_context is *manually* created to have the config we want, vs created with DataContext.create
-    project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-
-    create_data_context_files(
-        context_path,
-        asset_config_path,
-        ge_config_fixture_filename="great_expectations_basic_with_exhaustive_variables.yml",
-        config_variables_fixture_filename="config_variables_exhaustive.yml",
     )
 
     return ge.data_context.DataContext(context_path)
@@ -418,181 +410,6 @@ def ge_cloud_runtime_organization_id():
 
 
 @pytest.fixture
-def ge_cloud_runtime_access_token():
-    return "b17bc2539062410db0a30e28fb0ee930"
-
-
-@pytest.fixture
-def mocked_global_config_dirs(tmp_path):
-    mock_global_config_dot_dir = tmp_path / ".great_expectations"
-    mock_global_config_dot_dir_file = (
-        mock_global_config_dot_dir / "great_expectations.conf"
-    )
-    mock_global_config_dot_dir.mkdir(parents=True)
-    mock_global_config_etc_dir = tmp_path / "etc"
-    mock_global_config_etc_file = mock_global_config_etc_dir / "great_expectations.conf"
-    mock_global_config_etc_dir.mkdir(parents=True)
-
-    mock_global_config_paths = [
-        str(mock_global_config_dot_dir_file),
-        str(mock_global_config_etc_file),
-    ]
-
-    return (
-        mock_global_config_dot_dir,
-        mock_global_config_etc_dir,
-        mock_global_config_paths,
-    )
-
-
-@pytest.fixture
-def data_context_with_empty_global_config_dirs(
-    mocked_global_config_dirs,
-):
-    with patch(
-        "great_expectations.data_context.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        new_callable=PropertyMock,
-    ) as mock:
-        (
-            mock_global_config_dot_dir,
-            mock_global_config_etc_dir,
-            mock_global_config_paths,
-        ) = mocked_global_config_dirs
-        mock.return_value = mock_global_config_paths
-
-        yield
-
-
-@pytest.fixture
-def data_context_with_complete_global_config_in_dot_and_etc_dirs(
-    mocked_global_config_dirs,
-):
-    with patch(
-        "great_expectations.data_context.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        new_callable=PropertyMock,
-    ) as mock:
-        (
-            mock_global_config_dot_dir,
-            mock_global_config_etc_dir,
-            mock_global_config_paths,
-        ) = mocked_global_config_dirs
-        mock.return_value = mock_global_config_paths
-
-        shutil.copy(
-            file_relative_path(
-                __file__,
-                "fixtures/conf/great_expectations_cloud_config_complete_1.conf",
-            ),
-            str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
-        )
-        shutil.copy(
-            file_relative_path(
-                __file__,
-                "fixtures/conf/great_expectations_cloud_config_complete_2.conf",
-            ),
-            str(os.path.join(mock_global_config_etc_dir, "great_expectations.conf")),
-        )
-        yield
-
-
-@pytest.fixture
-def data_context_with_complete_global_config_in_dot_dir_only(mocked_global_config_dirs):
-    with patch(
-        "great_expectations.data_context.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        new_callable=PropertyMock,
-    ) as mock:
-        (
-            mock_global_config_dot_dir,
-            mock_global_config_etc_dir,
-            mock_global_config_paths,
-        ) = mocked_global_config_dirs
-        mock.return_value = mock_global_config_paths
-
-        shutil.copy(
-            file_relative_path(
-                __file__,
-                "fixtures/conf/great_expectations_cloud_config_complete_1.conf",
-            ),
-            str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
-        )
-        yield
-
-
-@pytest.fixture
-def data_context_with_complete_global_config_with_usage_stats_section_in_dot_dir_only(
-    mocked_global_config_dirs,
-):
-    with patch(
-        "great_expectations.data_context.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        new_callable=PropertyMock,
-    ) as mock:
-        (
-            mock_global_config_dot_dir,
-            mock_global_config_etc_dir,
-            mock_global_config_paths,
-        ) = mocked_global_config_dirs
-        mock.return_value = mock_global_config_paths
-
-        shutil.copy(
-            file_relative_path(
-                __file__,
-                "fixtures/conf/great_expectations_cloud_config_complete_with_usage_stats_section.conf",
-            ),
-            str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
-        )
-        yield
-
-
-@pytest.fixture
-def data_context_with_complete_global_config_in_etc_dir_only(mocked_global_config_dirs):
-    with patch(
-        "great_expectations.data_context.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        new_callable=PropertyMock,
-    ) as mock:
-        (
-            mock_global_config_dot_dir,
-            mock_global_config_etc_dir,
-            mock_global_config_paths,
-        ) = mocked_global_config_dirs
-        mock.return_value = mock_global_config_paths
-
-        shutil.copy(
-            file_relative_path(
-                __file__,
-                "fixtures/conf/great_expectations_cloud_config_complete_2.conf",
-            ),
-            str(os.path.join(mock_global_config_etc_dir, "great_expectations.conf")),
-        )
-        yield
-
-
-@pytest.fixture
-def data_context_with_incomplete_global_config_in_dot_dir_only(
-    mocked_global_config_dirs,
-):
-    # missing access_token
-    with patch(
-        "great_expectations.data_context.data_context.AbstractDataContext.GLOBAL_CONFIG_PATHS",
-        new_callable=PropertyMock,
-    ) as mock:
-        (
-            mock_global_config_dot_dir,
-            mock_global_config_etc_dir,
-            mock_global_config_paths,
-        ) = mocked_global_config_dirs
-        mock.return_value = mock_global_config_paths
-
-        shutil.copy(
-            file_relative_path(
-                __file__,
-                "fixtures/conf/great_expectations_cloud_config_minimal_missing_token_1.conf",
-            ),
-            str(os.path.join(mock_global_config_dot_dir, "great_expectations.conf")),
-        )
-        yield
-
-
-@pytest.fixture
 def datasource_name() -> str:
     return "my_first_datasource"
 
@@ -603,11 +420,71 @@ def datasource_store_name() -> str:
 
 
 @pytest.fixture
+def fake_datasource_id() -> str:
+    return "aaa7cfdd-4aa4-4f3d-a979-fe2ea5203cbf"
+
+
+@pytest.fixture
 def request_headers(ge_cloud_access_token) -> Dict[str, str]:
     return {
         "Content-Type": "application/vnd.api+json",
         "Authorization": f"Bearer {ge_cloud_access_token}",
+        "Gx-Version": ge.__version__,
     }
+
+
+JSONData = Union[AnyPayload, Dict[str, Any]]
+RequestError = Union[requests.exceptions.HTTPError, requests.exceptions.Timeout]
+
+
+class MockResponse:
+    # TODO: GG 08232022 update signature to accept arbitrary content types
+    def __init__(
+        self,
+        json_data: JSONData,
+        status_code: int,
+        headers: Optional[Dict[str, str]] = None,
+        exc_to_raise: Optional[RequestError] = None,
+    ) -> None:
+        self._json_data = json_data
+        self.status_code = status_code
+        self.headers = headers or {
+            "content-type": "application/json" if json_data else "text/html"
+        }
+        self._exc_to_raise = exc_to_raise
+
+    def json(self):
+        if self.headers.get("content-type") == "application/json":
+            return self._json_data
+        raise json.JSONDecodeError("Uh oh - check content-type", "foobar", 1)
+
+    def raise_for_status(self):
+        if self._exc_to_raise:
+            raise self._exc_to_raise
+        if self.status_code >= 400:
+            raise requests.exceptions.HTTPError(
+                f"Mock {self.status_code} HTTPError", response=self
+            )
+        return None
+
+    def __repr__(self):
+        return f"<Response [{self.status_code}]>"
+
+
+@pytest.fixture
+def mock_response_factory() -> Callable[
+    [JSONData, int, Optional[RequestError]], MockResponse
+]:
+    def _make_mock_response(
+        json_data: JSONData,
+        status_code: int,
+        exc_to_raise: Optional[RequestError] = None,
+    ) -> MockResponse:
+        return MockResponse(
+            json_data=json_data, status_code=status_code, exc_to_raise=exc_to_raise
+        )
+
+    return _make_mock_response
 
 
 @pytest.fixture
@@ -637,9 +514,156 @@ def datasource_config() -> DatasourceConfig:
 
 
 @pytest.fixture
+def datasource_config_with_names_and_ids(
+    datasource_config_with_names: DatasourceConfig, fake_datasource_id
+) -> DatasourceConfig:
+    updated_config = copy.deepcopy(datasource_config_with_names)
+    updated_config["id"] = fake_datasource_id
+    return updated_config
+
+
+@pytest.fixture
 def shared_called_with_request_kwargs(request_headers) -> dict:
     """
     Standard request kwargs that all GeCloudStoreBackend http calls are made with.
     Use in combination with `assert_called_with()`
     """
     return dict(timeout=GeCloudStoreBackend.TIMEOUT, headers=request_headers)
+
+
+@pytest.fixture
+def mock_http_unavailable(mock_response_factory: Callable):
+    """Mock all request http calls to return a 503 Unavailable response."""
+
+    def mocked_response(*args, **kwargs):
+
+        return MockResponse(
+            {"code": 503, "detail": "API is unavailable"},
+            503,
+        )
+
+    # should have been able to do this by mocking `requests.request` but this didn't work
+    with unittest.mock.patch.multiple(
+        "requests",
+        autospec=True,
+        get=unittest.mock.DEFAULT,
+        post=unittest.mock.DEFAULT,
+        put=unittest.mock.DEFAULT,
+        patch=unittest.mock.DEFAULT,
+        delete=unittest.mock.DEFAULT,
+    ) as mock_requests:
+        for name, mock in cast(Dict[str, Mock], mock_requests).items():
+            mock.side_effect = mocked_response
+            print(f"Mocking `requests.{name}` with `{mocked_response.__name__}()`")
+
+        yield mock_requests
+
+
+@pytest.fixture
+def checkpoint_config() -> dict:
+    checkpoint_config = {
+        "name": "oss_test_checkpoint",
+        "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "expectation_suite_name": "oss_test_expectation_suite",
+        "validations": [
+            {
+                "expectation_suite_name": "taxi.demo_pass",
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "oss_test_datasource",
+                    "data_connector_name": "oss_test_data_connector",
+                    "data_asset_name": "users",
+                },
+            },
+        ],
+    }
+    return checkpoint_config
+
+
+@pytest.fixture
+def mocked_datasource_get_response(
+    mock_response_factory: Callable,
+    datasource_config_with_names_and_ids: DatasourceConfig,
+    fake_datasource_id,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_response(*args, **kwargs):
+        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
+        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
+
+        return mock_response_factory(
+            {
+                "data": {
+                    "attributes": {
+                        "datasource_config": datasource_config_with_names_and_ids,
+                        "created_at": "2022-08-02T17:55:45.107550",
+                        "created_by_id": created_by_id,
+                        "deleted": False,
+                        "deleted_at": None,
+                        "desc": None,
+                        "name": datasource_config_with_names_and_ids.name,
+                        "organization_id": f"{organization_id}",
+                        "updated_at": "2022-08-02T17:55:45.107550",
+                    },
+                    "id": fake_datasource_id,
+                    "links": {
+                        "self": f"/organizations/{organization_id}/datasources/{fake_datasource_id}"
+                    },
+                    "type": "datasource",
+                },
+            },
+            200,
+        )
+
+    return _mocked_get_response
+
+
+@pytest.fixture
+def mocked_datasource_post_response(
+    mock_response_factory: Callable, fake_datasource_id
+) -> Callable[[], MockResponse]:
+    def _mocked_post_response(*args, **kwargs):
+        return mock_response_factory(
+            {
+                "data": {
+                    "id": fake_datasource_id,
+                }
+            },
+            201,
+        )
+
+    return _mocked_post_response
+
+
+@pytest.fixture
+def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
+    empty_data_context_in_cloud_mode: DataContext,
+    db_file,
+    mocked_datasource_get_response,
+):
+    context: DataContext = empty_data_context_in_cloud_mode
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    with patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ), patch(
+        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
+    return context

@@ -36,11 +36,11 @@ class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
 
     @property
     def path(self) -> str:
-        return self.get("path")
+        return self.get("path")  # type: ignore[return-value]
 
     @property
     def reader_method(self) -> str:
-        return self.get("reader_method")
+        return self.get("reader_method")  # type: ignore[return-value]
 
     @property
     def reader_options(self) -> dict:

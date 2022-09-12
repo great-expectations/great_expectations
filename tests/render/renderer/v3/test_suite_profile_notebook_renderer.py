@@ -2,6 +2,7 @@ import os
 from typing import Any, List, Set
 from unittest import mock
 
+import pytest
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -226,6 +227,7 @@ def test_suite_notebook_renderer_render_onboarding_data_assistant_configuration(
         ), f"Could not find snippet in Notebook: {snippet}"
 
 
+@pytest.mark.slow  # 9.23s
 def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -440,6 +442,7 @@ def test_suite_notebook_renderer_render_rule_based_profiler_configuration(
         ), f"Could not find snippet in Notebook: {snippet}"
 
 
+@pytest.mark.slow  # 15.16s
 def test_notebook_execution_rule_based_profiler_with_pandas_backend(
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
     bobby_columnar_table_multi_batch,
@@ -574,11 +577,10 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
         data_context=context,
     )
 
-    profiler_name: str = "bobby_user_workflow"
+    profiler_name = profiler.name
 
     context.save_profiler(
         profiler=profiler,
-        name=profiler_name,
     )
 
     # Create notebook

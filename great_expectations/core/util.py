@@ -26,14 +26,20 @@ from great_expectations.types.base import SerializableDotDict
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from great_expectations.util import convert_decimal_to_float
 
+try:
+    from pyspark.sql.types import StructType
+except ImportError:
+    StructType = None  # type: ignore
+
 logger = logging.getLogger(__name__)
 
 
 try:
-    from shapely.geometry import Point, Polygon
+    from shapely.geometry import LineString, Point, Polygon
 except ImportError:
     Point = None
     Polygon = None
+    LineString = None
 
 try:
     import sqlalchemy
@@ -213,7 +219,7 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
         return str(data)
 
     # noinspection PyTypeChecker
-    if Polygon and isinstance(data, (Point, Polygon)):
+    if Polygon and isinstance(data, (Point, Polygon, LineString)):
         return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
@@ -276,6 +282,11 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
 
     if isinstance(data, RunIdentifier):
         return data.to_json_dict()
+
+    # PySpark schema serialization
+    if StructType is not None:
+        if isinstance(data, StructType):
+            return dict(data.jsonValue())
 
     else:
         raise TypeError(
@@ -668,9 +679,11 @@ def get_or_create_spark_application(
         spark_config = {}
     else:
         spark_config = copy.deepcopy(spark_config)
+
     name: Optional[str] = spark_config.get("spark.app.name")
     if not name:
         name = "default_great_expectations_spark_application"
+
     spark_config.update({"spark.app.name": name})
 
     spark_session: Optional[SparkSession] = get_or_create_spark_session(
@@ -697,7 +710,7 @@ def get_or_create_spark_application(
         spark_session = get_or_create_spark_session(spark_config=spark_config)
         if spark_session is None:
             raise ValueError("SparkContext could not be started.")
-        # noinspection PyProtectedMember
+        # noinspection PyProtectedMember,PyUnresolvedReferences
         sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
 
     if sc_stopped:
@@ -736,13 +749,16 @@ def get_or_create_spark_session(
         app_name: Optional[str] = spark_config.get("spark.app.name")
         if app_name:
             builder.appName(app_name)
+
         for k, v in spark_config.items():
             if k != "spark.app.name":
                 builder.config(k, v)
+
         spark_session = builder.getOrCreate()
-        # noinspection PyProtectedMember
+        # noinspection PyProtectedMember,PyUnresolvedReferences
         if spark_session.sparkContext._jsc.sc().isStopped():
             raise ValueError("SparkContext stopped unexpectedly.")
+
     except AttributeError:
         logger.error(
             "Unable to load spark context; install optional spark dependency for support."

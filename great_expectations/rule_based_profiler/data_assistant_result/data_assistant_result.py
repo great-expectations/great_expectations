@@ -55,7 +55,6 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
 )
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
-    default_field,
     get_or_create_expectation_suite,
     sanitize_parameter_name,
 )
@@ -87,7 +86,8 @@ class RuleStats(SerializableDictDot):
     )
     num_parameter_builders: int = 0
     num_expectation_configuration_builders: int = 0
-    execution_time: Optional[float] = None
+    rule_domain_builder_execution_time: Optional[float] = None
+    rule_execution_time: Optional[float] = None
 
     def to_dict(self) -> dict:
         """
@@ -111,55 +111,19 @@ class DataAssistantResult(SerializableDictDot):
     Use "_batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
     """
 
-    # A mapping is defined for which metrics to plot and their associated expectations
-    METRIC_EXPECTATION_MAP: Dict[Union[str, Tuple[str]], str] = default_field(
-        {
-            "table.columns": "expect_table_columns_to_match_set",
-            "table.row_count": "expect_table_row_count_to_be_between",
-            "column.distinct_values.count": "expect_column_unique_value_count_to_be_between",
-            "column.min": "expect_column_min_to_be_between",
-            "column.max": "expect_column_max_to_be_between",
-            "column.mean": "expect_column_mean_to_be_between",
-            "column.median": "expect_column_median_to_be_between",
-            "column.standard_deviation": "expect_column_stdev_to_be_between",
-            "column.quantile_values": "expect_column_quantile_values_to_be_between",
-            ("column.min", "column.max"): "expect_column_values_to_be_between",
-        }
-    )
-
-    # A mapping is defined for the Altair data type associated with each metric
-    # Altair data types can be one of:
-    #     - Nominal: Metric is a discrete unordered category
-    #     - Ordinal: Metric is a discrete ordered quantity
-    #     - Quantitative: Metric is a continuous real-valued quantity
-    #     - Temporal: Metric is a time or date value
-    METRIC_TYPES: Dict[str, AltairDataTypes] = default_field(
-        {
-            "table.columns": AltairDataTypes.NOMINAL,
-            "table.row_count": AltairDataTypes.QUANTITATIVE,
-            "column.distinct_values.count": AltairDataTypes.QUANTITATIVE,
-            "column.min": AltairDataTypes.QUANTITATIVE,
-            "column.max": AltairDataTypes.QUANTITATIVE,
-            "column.mean": AltairDataTypes.QUANTITATIVE,
-            "column.median": AltairDataTypes.QUANTITATIVE,
-            "column.standard_deviation": AltairDataTypes.QUANTITATIVE,
-            "column.quantile_values": AltairDataTypes.QUANTITATIVE,
-        }
-    )
-
     ALLOWED_KEYS = {
         "_batch_id_to_batch_identifier_display_name_map",
         "profiler_config",
         "profiler_execution_time",
+        "rule_domain_builder_execution_time",
         "rule_execution_time",
         "metrics_by_domain",
         "expectation_configurations",
         "citation",
-        "execution_time",
     }
 
     IN_JUPYTER_NOTEBOOK_KEYS = {
-        "execution_time",
+        "profiler_execution_time",
     }
 
     _batch_id_to_batch_identifier_display_name_map: Optional[
@@ -168,22 +132,36 @@ class DataAssistantResult(SerializableDictDot):
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
     profiler_execution_time: Optional[
         float
-    ] = None  # Effective Rule-Based Profiler total execution time (in seconds).
+    ] = None  # Effective Rule-Based Profiler overall execution time (in seconds).
+    rule_domain_builder_execution_time: Optional[
+        Dict[str, float]
+    ] = None  # Effective Rule-Based Profiler per-Rule DomainBuilder execution time (in seconds).
     rule_execution_time: Optional[
         Dict[str, float]
-    ] = None  # Effective Rule-Based Profiler per-Rule execution time (in seconds).
+    ] = None  # Effective Rule-Based Profiler per-Rule total execution time (in seconds).
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
-    execution_time: Optional[
-        float
-    ] = None  # Overall DataAssistant execution time (in seconds).
     # Reference to "UsageStatisticsHandler" object for this "DataAssistantResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
+    @property
+    def metric_expectation_map(self) -> Dict[Union[str, Tuple[str]], str]:
+        """
+        A mapping is defined for which metrics to plot and their associated expectations.
+        """
+        raise NotImplementedError("Subclasses must implement this property.")
+
+    @property
+    def metric_types(self) -> Dict[str, AltairDataTypes]:
+        """
+        A mapping is defined for the Altair data type associated with each metric.
+        """
+        raise NotImplementedError("Subclasses must implement this property.")
+
     def show_expectations_by_domain_type(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> None:
@@ -199,7 +177,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def show_expectations_by_expectation_type(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> None:
@@ -215,7 +193,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def get_expectation_suite(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> ExpectationSuite:
@@ -248,6 +226,9 @@ class DataAssistantResult(SerializableDictDot):
             "profiler_execution_time": convert_to_json_serializable(
                 data=self.profiler_execution_time
             ),
+            "rule_domain_builder_execution_time": convert_to_json_serializable(
+                data=self.rule_domain_builder_execution_time
+            ),
             "rule_execution_time": convert_to_json_serializable(
                 data=self.rule_execution_time
             ),
@@ -266,7 +247,6 @@ class DataAssistantResult(SerializableDictDot):
                 for expectation_configuration in self.expectation_configurations
             ],
             "citation": convert_to_json_serializable(data=self.citation),
-            "execution_time": convert_to_json_serializable(data=self.execution_time),
         }
 
     def to_json_dict(self) -> dict:
@@ -337,17 +317,17 @@ class DataAssistantResult(SerializableDictDot):
     def _get_metric_expectation_map(self) -> Dict[Tuple[str], str]:
         if not all(
             [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
-            for metric_names in self.METRIC_EXPECTATION_MAP.keys()
+            for metric_names in self.metric_expectation_map.keys()
         ):
             raise ge_exceptions.DataAssistantResultExecutionError(
-                "All METRIC_EXPECTATION_MAP keys must be of type str or tuple."
+                "All metric_expectation_map keys must be of type str or tuple."
             )
 
         return {
             (
                 (metric_names,) if isinstance(metric_names, str) else metric_names
             ): expectation_name
-            for metric_names, expectation_name in self.METRIC_EXPECTATION_MAP.items()
+            for metric_names, expectation_name in self.metric_expectation_map.items()
         }
 
     def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:
@@ -392,7 +372,10 @@ class DataAssistantResult(SerializableDictDot):
                         ),
                     )
                     rule_name_to_rule_stats_map[rule_name] = rule_stats
-                    rule_stats.execution_time = self.rule_execution_time[rule_name]
+                    rule_stats.rule_domain_builder_execution_time = (
+                        self.rule_domain_builder_execution_time[rule_name]
+                    )
+                    rule_stats.rule_execution_time = self.rule_execution_time[rule_name]
 
                 if num_domains > 0:
                     for domain in domains:
@@ -433,7 +416,7 @@ class DataAssistantResult(SerializableDictDot):
     )
     def _get_expectation_suite_with_usage_statistics(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
     ) -> ExpectationSuite:
         """
@@ -447,7 +430,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_expectation_suite_without_usage_statistics(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
     ) -> ExpectationSuite:
         """
@@ -643,81 +626,84 @@ class DataAssistantResult(SerializableDictDot):
             charts=themed_charts
         )
 
-        display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {" ": None}
-        for idx in range(len(chart_titles)):
-            display_chart_dict[chart_titles[idx]] = themed_charts[idx]
+        if len(chart_titles) > 0:
+            display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {
+                " ": None
+            }
+            for idx in range(len(chart_titles)):
+                display_chart_dict[chart_titles[idx]] = themed_charts[idx]
 
-        dropdown_title_color: str = altair_theme["legend"]["titleColor"]
-        dropdown_font: str = altair_theme["font"]
-        dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
-        dropdown_text_color: str = altair_theme["axis"]["labelColor"]
+            dropdown_title_color: str = altair_theme["legend"]["titleColor"]
+            dropdown_font: str = altair_theme["font"]
+            dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
+            dropdown_text_color: str = altair_theme["axis"]["labelColor"]
 
-        # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
-        altair_dropdown_css: str = f"""
-            <style>
-            span.vega-bind-name {{
-                color: {dropdown_title_color};
-                font-family: {dropdown_font};
-                font-size: {dropdown_font_size}px;
-                font-weight: bold;
-            }}
-            form.vega-bindings {{
-                color: {dropdown_text_color};
-                font-family: {dropdown_font};
-                font-size: {dropdown_font_size}px;
-                position: absolute;
-                left: 75px;
-                top: 28px;
-            }}
-            </style>
-        """
-        display(HTML(altair_dropdown_css))
+            # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
+            altair_dropdown_css: str = f"""
+                <style>
+                span.vega-bind-name {{
+                    color: {dropdown_title_color};
+                    font-family: {dropdown_font};
+                    font-size: {dropdown_font_size}px;
+                    font-weight: bold;
+                }}
+                form.vega-bindings {{
+                    color: {dropdown_text_color};
+                    font-family: {dropdown_font};
+                    font-size: {dropdown_font_size}px;
+                    position: absolute;
+                    left: 75px;
+                    top: 28px;
+                }}
+                </style>
+            """
+            display(HTML(altair_dropdown_css))
 
-        # max rows for Altair charts is set to 5,000 without this
-        alt.data_transformers.disable_max_rows()
+            # max rows for Altair charts is set to 5,000 without this
+            alt.data_transformers.disable_max_rows()
 
-        ipywidgets_dropdown_css: str = f"""
-            <style>
-            .widget-inline-hbox .widget-label {{
-                color: {dropdown_title_color};
-                font-family: {dropdown_font};
-                font-size: {dropdown_font_size}px;
-                font-weight: bold;
-            }}
-            .widget-dropdown > select {{
-                padding-right: 21px;
-                padding-left: 3px;
-                color: {dropdown_text_color};
-                font-family: {dropdown_font};
-                font-size: {dropdown_font_size}px;
-                height: 20px;
-                line-height: {dropdown_font_size}px;
-                background-size: 20px;
-                border-radius: 2px;
-            }}
-            </style>
-        """
-        display(HTML(ipywidgets_dropdown_css))
+            ipywidgets_dropdown_css: str = f"""
+                <style>
+                .widget-inline-hbox .widget-label {{
+                    color: {dropdown_title_color};
+                    font-family: {dropdown_font};
+                    font-size: {dropdown_font_size}px;
+                    font-weight: bold;
+                }}
+                .widget-dropdown > select {{
+                    padding-right: 21px;
+                    padding-left: 3px;
+                    color: {dropdown_text_color};
+                    font-family: {dropdown_font};
+                    font-size: {dropdown_font_size}px;
+                    height: 20px;
+                    line-height: {dropdown_font_size}px;
+                    background-size: 20px;
+                    border-radius: 2px;
+                }}
+                </style>
+            """
+            display(HTML(ipywidgets_dropdown_css))
 
-        dropdown_selection: widgets.Dropdown = widgets.Dropdown(
-            options=chart_titles,
-            description="Select Plot Type: ",
-            style={"description_width": "initial"},
-            layout={"width": "max-content", "margin": "0px"},
-        )
+            dropdown_selection: widgets.Dropdown = widgets.Dropdown(
+                options=chart_titles,
+                description="Select Plot Type: ",
+                style={"description_width": "initial"},
+                layout={"width": "max-content", "margin": "0px"},
+            )
 
-        # As of 19 July, 2022 there is a Deprecation Warning due to the latest ipywidgets' interaction with
-        # ipykernel (Kernel._parent_header deprecated in v6.0.0). Rather than add a version constraint to ipykernel,
-        # we suppress Deprecation Warnings produced by module ipywidgets.widgets.widget_output.
-        warnings.filterwarnings(
-            action="ignore",
-            module="ipywidgets.widgets.widget_output",
-        )
-        widgets.interact(
-            DataAssistantResult._display_chart_from_dict,
-            display_chart_dict=widgets.fixed(display_chart_dict),
-            chart_title=dropdown_selection,
-        )
+            # As of 19 July, 2022 there is a Deprecation Warning due to the latest ipywidgets' interaction with
+            # ipykernel (Kernel._parent_header deprecated in v6.0.0). Rather than add a version constraint to ipykernel,
+            # we suppress Deprecation Warnings produced by module ipywidgets.widgets.widget_output.
+            warnings.filterwarnings(
+                action="ignore",
+                module="ipywidgets.widgets.widget_output",
+            )
+            widgets.interact(
+                DataAssistantResult._display_chart_from_dict,
+                display_chart_dict=widgets.fixed(display_chart_dict),
+                chart_title=dropdown_selection,
+            )
 
     @staticmethod
     def _display_chart_from_dict(
@@ -1490,7 +1476,9 @@ class DataAssistantResult(SerializableDictDot):
             An interactive chart
         """
         batch_name: str = "batch"
-        all_columns: List[str] = list(column_dfs[0].df.columns)
+        all_columns: List[str] = DataAssistantResult._get_all_columns_from_column_dfs(
+            column_dfs=column_dfs
+        )
         batch_identifiers: List[str] = [
             column
             for column in all_columns
@@ -1581,7 +1569,9 @@ class DataAssistantResult(SerializableDictDot):
         allow_relative_error: str = "allow_relative_error"
 
         batch_name: str = "batch"
-        all_columns: List[str] = list(column_dfs[0].df.columns)
+        all_columns: List[str] = DataAssistantResult._get_all_columns_from_column_dfs(
+            column_dfs=column_dfs
+        )
         batch_identifiers: List[str] = [
             column
             for column in all_columns
@@ -2352,16 +2342,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        if expectation_type is None:
-            input_dropdown_initial_state: pd.DataFrame = df.groupby(
-                [batch_plot_component.name], as_index=False
-            ).max()
-            input_dropdown_initial_state[
-                batch_plot_component.batch_identifiers + [domain_plot_component.name]
-            ] = " "
-            df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2442,16 +2423,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        if expectation_type is None:
-            input_dropdown_initial_state: pd.DataFrame = df.groupby(
-                [batch_plot_component.name], as_index=False
-            ).max()
-            input_dropdown_initial_state[
-                batch_plot_component.batch_identifiers + [domain_plot_component.name]
-            ] = " "
-            df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2509,16 +2481,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        if expectation_type is None:
-            input_dropdown_initial_state: pd.DataFrame = df.groupby(
-                [batch_plot_component.name], as_index=False
-            ).max()
-            input_dropdown_initial_state[
-                batch_plot_component.batch_identifiers + [domain_plot_component.name]
-            ] = " "
-            df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2615,19 +2578,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = df.groupby(
-            [batch_plot_component.name], as_index=False
-        ).max()
-        input_dropdown_initial_state[
-            batch_plot_component.batch_identifiers
-            + [
-                domain_plot_component.name,
-            ]
-            + expectation_kwargs_initial_dropdown_state
-        ] = " "
-        df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2778,19 +2729,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = df.groupby(
-            [batch_plot_component.name], as_index=False
-        ).max()
-        input_dropdown_initial_state[
-            batch_plot_component.batch_identifiers
-            + [
-                domain_plot_component.name,
-            ]
-            + expectation_kwargs_initial_dropdown_state
-        ] = " "
-        df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -2928,19 +2867,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
         )
 
-        input_dropdown_initial_state: pd.DataFrame = df.groupby(
-            [batch_plot_component.name], as_index=False
-        ).max()
-        input_dropdown_initial_state[
-            batch_plot_component.batch_identifiers
-            + [
-                domain_plot_component.name,
-            ]
-            + expectation_kwargs_initial_dropdown_state
-        ] = " "
-        df = pd.concat([input_dropdown_initial_state, df], axis=0)
-
-        columns: List[str] = pd.unique(df[domain_plot_component.name]).tolist()
+        columns: List[str] = [""] + pd.unique(df[domain_plot_component.name]).tolist()
         input_dropdown: alt.binding_select = alt.binding_select(
             options=columns, name="Select Column: "
         )
@@ -3152,11 +3079,16 @@ class DataAssistantResult(SerializableDictDot):
             ):
                 first_chart_idx = idx
 
-        sorted_charts: List[alt.Chart] = [charts[first_chart_idx]] + [
-            chart
-            for idx, chart in enumerate(charts)
-            if chart is not None and idx != first_chart_idx
-        ]
+        # return the sorted charts
+        sorted_charts: List[alt.Chart]
+        if len(charts) > 1:
+            sorted_charts = [charts[first_chart_idx]] + [
+                chart
+                for idx, chart in enumerate(charts)
+                if chart is not None and idx != first_chart_idx
+            ]
+        else:
+            sorted_charts = charts
 
         return sorted_charts
 
@@ -3466,13 +3398,18 @@ class DataAssistantResult(SerializableDictDot):
             plot_mode=plot_mode,
         )
 
-        return self._chart_column_values(
-            expectation_type=expectation_type,
-            column_dfs=column_dfs,
-            metric_names=metric_names,
-            plot_mode=plot_mode,
-            sequential=sequential,
-        )
+        # if all metrics in metric_names failed to resolve, the list will be empty and we return without attempting
+        # to chart column values
+        if len(column_dfs) > 0:
+            return self._chart_column_values(
+                expectation_type=expectation_type,
+                column_dfs=column_dfs,
+                metric_names=metric_names,
+                plot_mode=plot_mode,
+                sequential=sequential,
+            )
+        else:
+            return []
 
     def _create_return_charts_for_column_domain_expectation(
         self,
@@ -3665,7 +3602,7 @@ class DataAssistantResult(SerializableDictDot):
         self,
         metric_name: str,
         attributed_values: List[ParameterNode],
-        expectation_configuration: ExpectationConfiguration,
+        expectation_configuration: Optional[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> pd.DataFrame:
         batch_ids: KeysView[str] = attributed_values[0].keys()
@@ -3730,23 +3667,26 @@ class DataAssistantResult(SerializableDictDot):
         df = pd.concat([df, batch_identifier_df], axis=1)
 
         if plot_mode == PlotMode.DIAGNOSTIC:
-            for kwarg_name in expectation_configuration.kwargs:
-                # column name was already retrieved from the domain
-                if isinstance(expectation_configuration.kwargs[kwarg_name], dict):
-                    for key, value in expectation_configuration.kwargs[
-                        kwarg_name
-                    ].items():
-                        if isinstance(value, list):
-                            df[key] = [value for _ in df.index]
-                        else:
-                            df[key] = value
+            if expectation_configuration is not None:
+                for kwarg_name in expectation_configuration.kwargs:
+                    if isinstance(expectation_configuration.kwargs[kwarg_name], dict):
+                        for key, value in expectation_configuration.kwargs[
+                            kwarg_name
+                        ].items():
+                            if isinstance(value, list):
+                                df[key] = [value for _ in df.index]
+                            else:
+                                df[key] = value
 
-                elif isinstance(expectation_configuration.kwargs[kwarg_name], list):
-                    df[kwarg_name] = [
-                        expectation_configuration.kwargs[kwarg_name] for _ in df.index
-                    ]
-                else:
-                    df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
+                    elif isinstance(expectation_configuration.kwargs[kwarg_name], list):
+                        df[kwarg_name] = [
+                            expectation_configuration.kwargs[kwarg_name]
+                            for _ in df.index
+                        ]
+                    else:
+                        df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
+            else:
+                return pd.DataFrame()
 
         # if there are any lists in the dataframe
         if (df.applymap(type) == list).any().any():
@@ -3765,10 +3705,6 @@ class DataAssistantResult(SerializableDictDot):
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
     ) -> List[ColumnDataFrame]:
-        metric_expectation_map: Dict[
-            Tuple[str], str
-        ] = self._get_metric_expectation_map()
-
         sanitized_metric_names: Set[
             str
         ] = self._get_sanitized_metric_names_from_metric_names(
@@ -3784,29 +3720,28 @@ class DataAssistantResult(SerializableDictDot):
         df: pd.DataFrame
         column_df: ColumnDataFrame
         column_dfs: List[ColumnDataFrame] = []
-        for expectation_configuration in expectation_configurations:
-            column_name = expectation_configuration.kwargs["column"]
-
-            column_domain = [
-                d for d in metric_domains if d.domain_kwargs.column == column_name
-            ][0]
-
+        for metric_domain in metric_domains:
             attributed_values_by_metric_name: Dict[
                 str, List[ParameterNode]
-            ] = attributed_metrics_by_domain[column_domain]
+            ] = attributed_metrics_by_domain[metric_domain]
+            column_name = metric_domain.domain_kwargs.column
 
-            if (
-                metric_expectation_map.get(metric_names)
-                == expectation_configuration.expectation_type
-            ):
-                df = pd.DataFrame()
-                for metric_name in metric_names:
-                    metric_df = self._create_df_for_charting(
-                        metric_name=metric_name,
-                        attributed_values=attributed_values_by_metric_name[metric_name],
-                        expectation_configuration=expectation_configuration,
-                        plot_mode=plot_mode,
-                    )
+            metric_domain_expectation_configuration: Optional[
+                ExpectationConfiguration
+            ] = None
+            for expectation_configuration in expectation_configurations:
+                if expectation_configuration.kwargs["column"] == column_name:
+                    metric_domain_expectation_configuration = expectation_configuration
+
+            df = pd.DataFrame()
+            for metric_name in metric_names:
+                metric_df = self._create_df_for_charting(
+                    metric_name=metric_name,
+                    attributed_values=attributed_values_by_metric_name[metric_name],
+                    expectation_configuration=metric_domain_expectation_configuration,
+                    plot_mode=plot_mode,
+                )
+                if len(metric_df) > 0:
                     if len(df.index) == 0:
                         df = metric_df.copy()
                     else:
@@ -3816,7 +3751,7 @@ class DataAssistantResult(SerializableDictDot):
                             if column not in sanitized_metric_names
                         ]
                         df = df.merge(metric_df, on=join_keys).reset_index(drop=True)
-
+            if len(df.index) > 0:
                 column_df = ColumnDataFrame(column_name, df)
                 column_dfs.append(column_df)
 
@@ -3967,7 +3902,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_sanitized_metric_names_from_altair_type(
         self, altair_type: AltairDataTypes
     ) -> Set[str]:
-        metric_types: Dict[str, AltairDataTypes] = self.METRIC_TYPES
+        metric_types: Dict[str, AltairDataTypes] = self.metric_types
         return {
             sanitize_parameter_name(name=metric)
             for metric in metric_types.keys()
@@ -3987,6 +3922,15 @@ class DataAssistantResult(SerializableDictDot):
         metric_names: Set[str], iterable: Iterable[str]
     ) -> bool:
         return all([metric_name in iterable for metric_name in metric_names])
+
+    @staticmethod
+    def _get_all_columns_from_column_dfs(
+        column_dfs: List[ColumnDataFrame],
+    ) -> List[str]:
+        column_set: Set[str] = set()
+        for column_df in column_dfs:
+            column_set.update(column_df.df.columns)
+        return list(column_set)
 
     @staticmethod
     def _get_expect_domain_values_ordinal_chart(

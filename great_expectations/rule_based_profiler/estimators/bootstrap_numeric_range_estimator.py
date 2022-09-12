@@ -25,8 +25,9 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
-DEFAULT_BOOTSTRAP_QUANTILE_BIAS_STD_ERROR_RATIO_THRESHOLD: float = 2.5e-1
+DEFAULT_BOOTSTRAP_NUM_RESAMPLES = 9999
+DEFAULT_BOOTSTRAP_QUANTILE_STATISTIC_INTERPOLATION_METHOD = "linear"
+DEFAULT_BOOTSTRAP_QUANTILE_BIAS_STD_ERROR_RATIO_THRESHOLD = 2.5e-1
 
 
 class BootstrapNumericRangeEstimator(NumericRangeEstimator):
@@ -86,6 +87,10 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             variables=variables,
             parameters=parameters,
         )
+        if quantile_statistic_interpolation_method is None:
+            quantile_statistic_interpolation_method = (
+                DEFAULT_BOOTSTRAP_QUANTILE_STATISTIC_INTERPOLATION_METHOD
+            )
 
         # Obtain quantile_bias_correction override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         quantile_bias_correction: Optional[

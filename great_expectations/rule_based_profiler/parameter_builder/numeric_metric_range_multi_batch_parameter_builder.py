@@ -1,7 +1,8 @@
 import copy
+import datetime
 import itertools
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Union, cast
 
 import numpy as np
 
@@ -24,8 +25,8 @@ from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
 )
-from great_expectations.rule_based_profiler.estimators.oneshot_numeric_range_estimator import (
-    OneShotNumericRangeEstimator,
+from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_estimator import (
+    QuantilesNumericRangeEstimator,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
@@ -34,6 +35,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricValue,
     MetricValues,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -47,7 +49,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import is_numeric
+from great_expectations.util import (
+    convert_ndarray_decimal_to_float_dtype,
+    is_ndarray_datetime_dtype,
+    is_ndarray_decimal_dtype,
+    is_numeric,
+)
 
 MAX_DECIMALS: int = 9
 
@@ -61,22 +68,30 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     On the other hand, it is specific in the sense that the parameter names will always have the semantics of numeric
     ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
 
-    The implementation supports two methods of estimating parameter values from data:
-    * bootstrapped (default) -- a statistical technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)")
-    * one-shot -- assumes that metric values, computed on batch data, are normally distributed and computes the mean
-      and the standard error using the queried batches as the single sample of the distribution (fast, but inaccurate).
+    The implementation supports four methods of estimating parameter values from data:
+    * quantiles -- assumes that metric values, computed on batch data, are normally distributed and computes the mean
+      and the standard error using the queried batches as the single sample of the distribution.
+    * exact -- uses the minimum and maximum observations for range boundaries.
+    * bootstrap -- a statistical resampling technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)").
+    * kde -- a statistical technique that fits a gaussian to the distribution and resamples from it.
     """
 
     RECOGNIZED_SAMPLING_METHOD_NAMES: set = {
         "bootstrap",
         "exact",
         "kde",
-        "oneshot",
+        "quantiles",
     }
 
     RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
         "lower_bound",
         "upper_bound",
+    }
+
+    exclude_field_names: Set[
+        str
+    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "single_batch_mode",
     }
 
     def __init__(
@@ -122,7 +137,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
                 identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
-            estimator: choice of the estimation algorithm: "oneshot" (one observation), "bootstrap" (default), "exact"
+            estimator: choice of the estimation algorithm: "quantiles", "bootstrap", "exact"
                 (deterministic, incorporating entire observed value range), or "kde" (kernel density estimation).
             n_resamples: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 9999 is used (default in
@@ -156,6 +171,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             metric_name=metric_name,
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
+            single_batch_mode=False,
             enforce_numeric_metric=enforce_numeric_metric,
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
@@ -417,8 +433,8 @@ detected.
 """
             )
 
-        if estimator == "oneshot":
-            return OneShotNumericRangeEstimator(
+        if estimator == "quantiles":
+            return QuantilesNumericRangeEstimator(
                 configuration=Attributes(
                     {
                         "false_positive_rate": self.false_positive_rate,
@@ -512,25 +528,51 @@ detected.
         # Initialize value range estimate for multi-dimensional metric to all trivial values (to be updated in situ).
         # Since range includes min and max values, value range estimate contains 2-element least-significant dimension.
         metric_value_range_shape: tuple = metric_value_shape + (2,)
-        metric_value_range: np.ndarray = np.zeros(shape=metric_value_range_shape)
         # Initialize observed_values for multi-dimensional metric to all trivial values (to be updated in situ).
         # Return values of "numpy.histogram()", histogram and bin edges, are packaged in least-significant dimensions.
         estimation_histogram_shape: tuple = metric_value_shape + (
             2,
             NUM_HISTOGRAM_BINS + 1,
         )
-        estimation_histogram: np.ndarray = np.empty(shape=estimation_histogram_shape)
+        datetime_detected: bool = self._is_metric_values_ndarray_datetime_dtype(
+            metric_values=metric_values,
+            metric_value_vector_indices=metric_value_vector_indices,
+        )
 
+        metric_value_range: np.ndarray
+        estimation_histogram: np.ndarray
+        if datetime_detected:
+            metric_value_range = np.full(
+                shape=metric_value_range_shape, fill_value=datetime.datetime.min
+            )
+            estimation_histogram = np.full(
+                shape=estimation_histogram_shape, fill_value=datetime.datetime.min
+            )
+        else:
+            if self._is_metric_values_ndarray_decimal_dtype(
+                metric_values=metric_values,
+                metric_value_vector_indices=metric_value_vector_indices,
+            ):
+                metric_values = convert_ndarray_decimal_to_float_dtype(
+                    data=metric_values
+                )
+
+            metric_value_range = np.zeros(shape=metric_value_range_shape)
+            estimation_histogram = np.empty(shape=estimation_histogram_shape)
+
+        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         metric_value_vector: np.ndarray
         metric_value_range_min_idx: tuple
         metric_value_range_max_idx: tuple
         metric_value_estimation_histogram_idx: tuple
         numeric_range_estimation_result: NumericRangeEstimationResult
-        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         for metric_value_idx in metric_value_vector_indices:
             # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
             metric_value_vector = metric_values[metric_value_idx]
-            if np.all(np.isclose(metric_value_vector, metric_value_vector[0])):
+            metric_value: MetricValue
+            if not datetime_detected and np.all(
+                np.isclose(metric_value_vector, metric_value_vector[0])
+            ):
                 # Computation is unnecessary if distribution is degenerate.
                 numeric_range_estimation_result = build_numeric_range_estimation_result(
                     metric_values=metric_value_vector,
@@ -571,12 +613,16 @@ detected.
             metric_value_estimation_histogram_idx = metric_value_idx
 
             # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
-            metric_value_range[metric_value_range_min_idx] = round(
-                cast(float, min_value), round_decimals
-            )
-            metric_value_range[metric_value_range_max_idx] = round(
-                cast(float, max_value), round_decimals
-            )
+            if datetime_detected:
+                metric_value_range[metric_value_range_min_idx] = min_value
+                metric_value_range[metric_value_range_max_idx] = max_value
+            else:
+                metric_value_range[metric_value_range_min_idx] = round(
+                    cast(float, min_value), round_decimals
+                )
+                metric_value_range[metric_value_range_max_idx] = round(
+                    cast(float, max_value), round_decimals
+                )
 
             # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
             estimation_histogram[
@@ -595,6 +641,34 @@ detected.
             estimation_histogram=estimation_histogram,
             value_range=metric_value_range,
         )
+
+    @staticmethod
+    def _is_metric_values_ndarray_datetime_dtype(
+        metric_values: np.ndarray,
+        metric_value_vector_indices: List[tuple],
+    ) -> bool:
+        metric_value_vector: np.ndarray
+        for metric_value_idx in metric_value_vector_indices:
+            metric_value_vector = metric_values[metric_value_idx]
+            if not is_ndarray_datetime_dtype(
+                data=metric_value_vector, parse_strings_as_datetimes=True
+            ):
+                return False
+
+        return True
+
+    @staticmethod
+    def _is_metric_values_ndarray_decimal_dtype(
+        metric_values: np.ndarray,
+        metric_value_vector_indices: List[tuple],
+    ) -> bool:
+        metric_value_vector: np.ndarray
+        for metric_value_idx in metric_value_vector_indices:
+            metric_value_vector = metric_values[metric_value_idx]
+            if not is_ndarray_decimal_dtype(data=metric_value_vector):
+                return False
+
+        return True
 
     def _get_truncate_values_using_heuristics(
         self,
@@ -621,6 +695,7 @@ detected.
                 (
                     distribution_boundary is None
                     or is_numeric(value=distribution_boundary)
+                    or isinstance(distribution_boundary, datetime.datetime)
                 )
                 for distribution_boundary in truncate_values.values()
             ]
@@ -634,11 +709,12 @@ detected.
         lower_bound: Optional[Number] = truncate_values.get("lower_bound")
         upper_bound: Optional[Number] = truncate_values.get("upper_bound")
 
-        if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
-            lower_bound = 0.0
+        if metric_values.shape == 1 and np.issubdtype(metric_values.dtype, np.number):
+            if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
+                lower_bound = 0.0
 
-        if upper_bound is None and np.all(np.less(metric_values, (-NP_EPSILON))):
-            upper_bound = 0.0
+            if upper_bound is None and np.all(np.less(metric_values, (-NP_EPSILON))):
+                upper_bound = 0.0
 
         return {
             "lower_bound": lower_bound,

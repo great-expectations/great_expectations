@@ -1,10 +1,13 @@
 import copy
+import datetime
+import decimal
 import itertools
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
+import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase
@@ -41,6 +44,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     get_fully_qualified_parameter_names,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -136,7 +140,7 @@ class ParameterBuilder(ABC, Builder):
             or self.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
-            self.set_batch_list_or_batch_request(
+            self.set_batch_list_if_null_batch_request(
                 batch_list=batch_list,
                 batch_request=batch_request,
             )
@@ -236,6 +240,7 @@ class ParameterBuilder(ABC, Builder):
 
     def get_batch_ids(
         self,
+        limit: Optional[int] = None,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -244,6 +249,7 @@ class ParameterBuilder(ABC, Builder):
             data_context=self.data_context,
             batch_list=self.batch_list,
             batch_request=self.batch_request,
+            limit=limit,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -258,6 +264,7 @@ class ParameterBuilder(ABC, Builder):
         metric_value_kwargs: Optional[
             Union[Union[str, dict], List[Union[str, dict]]]
         ] = None,
+        limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         domain: Optional[Domain] = None,
@@ -272,6 +279,7 @@ class ParameterBuilder(ABC, Builder):
         :param metric_name: Name of metric of interest, being computed.
         :param metric_domain_kwargs: Metric Domain Kwargs is an essential parameter of the MetricConfiguration object.
         :param metric_value_kwargs: Metric Value Kwargs is an essential parameter of the MetricConfiguration object.
+        :param limit: Optional limit on number of "Batch" objects requested (supports single-Batch scenarios).
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
         :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
@@ -288,6 +296,7 @@ specified (empty "metric_name" value detected)."""
             )
 
         batch_ids: Optional[List[str]] = self.get_batch_ids(
+            limit=limit,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -394,7 +403,7 @@ specified (empty "metric_name" value detected)."""
         )
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
-            metric_configurations=metrics_to_resolve
+            metric_configurations=metrics_to_resolve,
         )
 
         # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.
@@ -473,6 +482,7 @@ specified (empty "metric_name" value detected)."""
             attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
             self._sanitize_metric_computation(
+                parameter_builder=self,
                 metric_name=metric_name,
                 attributed_resolved_metrics=attributed_resolved_metrics,
                 enforce_numeric_metric=enforce_numeric_metric,
@@ -498,8 +508,9 @@ specified (empty "metric_name" value detected)."""
             },
         )
 
+    @staticmethod
     def _sanitize_metric_computation(
-        self,
+        parameter_builder: "ParameterBuilder",  # noqa: F821
         metric_name: str,
         attributed_resolved_metrics: AttributedResolvedMetrics,
         enforce_numeric_metric: Union[str, bool] = False,
@@ -507,7 +518,7 @@ specified (empty "metric_name" value detected)."""
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> AttributedResolvedMetrics:
+    ) -> None:
         """
         This method conditions (or "sanitizes") data samples in the format "N x R^m", where "N" (most significant
         dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the multi-dimensional
@@ -535,16 +546,23 @@ specified (empty "metric_name" value detected)."""
         )
 
         if not (enforce_numeric_metric or replace_nan_with_zero):
-            return attributed_resolved_metrics
+            return
 
         metric_values_by_batch_id: Dict[str, MetricValue] = {}
 
+        # noinspection PyTypeChecker
+        conditioned_attributed_metric_values: Dict[str, MetricValues] = dict(
+            filter(
+                lambda element: element[1] is not None,
+                attributed_resolved_metrics.conditioned_attributed_metric_values.items(),
+            )
+        )
         batch_id: str
         metric_values: MetricValues
         for (
             batch_id,
             metric_values,
-        ) in attributed_resolved_metrics.conditioned_attributed_metric_values.items():
+        ) in conditioned_attributed_metric_values.items():
             batch_metric_values: MetricValues = []
 
             metric_value_shape: tuple = metric_values.shape
@@ -561,31 +579,37 @@ specified (empty "metric_name" value detected)."""
             for metric_value_idx in metric_value_indices:
                 metric_value: MetricValue = metric_values[metric_value_idx]
                 if enforce_numeric_metric:
-                    if not np.issubdtype(metric_value.dtype, np.number):
-                        raise ge_exceptions.ProfilerExecutionError(
-                            message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(metric_value.dtype)}" was computed).
-"""
-                        )
-
-                    if np.isnan(metric_value):
+                    if pd.isnull(metric_value):
                         if not replace_nan_with_zero:
                             raise ValueError(
-                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
-"""
+                                f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value."""
                             )
 
                         batch_metric_values.append(0.0)
+                    elif not (
+                        (
+                            isinstance(metric_value, (str, np.str_))
+                            and is_parseable_date(value=metric_value)
+                        )
+                        or isinstance(metric_value, datetime.datetime)
+                        or isinstance(metric_value, decimal.Decimal)
+                        or np.issubdtype(metric_value.dtype, np.number)
+                    ):
+                        raise ge_exceptions.ProfilerExecutionError(
+                            message=f"""Applicability of {parameter_builder.__class__.__name__} is restricted to \
+numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
+"""
+                        )
                     else:
                         batch_metric_values.append(metric_value)
+                else:
+                    batch_metric_values.append(metric_value)
 
             metric_values_by_batch_id[batch_id] = batch_metric_values
 
         attributed_resolved_metrics.metric_values_by_batch_id = (
             metric_values_by_batch_id
         )
-
-        return attributed_resolved_metrics
 
     @staticmethod
     def _get_best_candidate_above_threshold(
@@ -702,22 +726,12 @@ def resolve_evaluation_dependencies(
             or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
-            evaluation_parameter_builder.set_batch_list_or_batch_request(
+            evaluation_parameter_builder.set_batch_list_if_null_batch_request(
                 batch_list=parameter_builder.batch_list,
                 batch_request=parameter_builder.batch_request,
             )
 
             evaluation_parameter_builder.build_parameters(
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
-            )
-
-            # Step-4: Any "ParameterBuilder" object, including members of "evaluation_parameter_builders" list may be
-            # configured with its own "evaluation_parameter_builders" list.  Recursive call handles such situations.
-            resolve_evaluation_dependencies(
-                parameter_builder=evaluation_parameter_builder,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,

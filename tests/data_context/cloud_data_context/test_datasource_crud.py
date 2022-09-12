@@ -12,6 +12,10 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.datasource import BaseDatasource
+from great_expectations.datasource.datasource_serializer import (
+    JsonDatasourceConfigSerializer,
+)
+from tests.data_context.conftest import MockResponse
 
 
 @pytest.mark.cloud
@@ -40,7 +44,10 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     config_includes_name_setting: str,
     empty_base_data_context_in_cloud_mode: BaseDataContext,
     datasource_config: DatasourceConfig,
-    datasource_name: str,
+    datasource_config_with_names_and_ids: DatasourceConfig,
+    fake_datasource_id,
+    mocked_datasource_post_response: Callable[[], MockResponse],
+    mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     shared_called_with_request_kwargs: dict,
@@ -57,16 +64,15 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     assert len(context.list_datasources()) == 0
 
     # Setup
-    datasource_id: str = "some_uuid"
+    datasource_name = datasource_config_with_names_and_ids.name
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
-    def mocked_post_response(*args, **kwargs):
-        return mock_response_factory({"data": {"id": datasource_id}}, 201)
-
     with patch(
-        "requests.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post:
+        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
+    ) as mock_post, patch(
+        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    ):
 
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
@@ -94,11 +100,8 @@ def test_base_data_context_in_cloud_mode_add_datasource(
         # Make sure we have stored our datasource in the context
         assert len(context.list_datasources()) == 1
 
-        retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
-
-        expected_datasource_config = datasourceConfigSchema.dump(
-            datasource_config_with_name
-        )
+        serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
+        expected_datasource_config = serializer.serialize(datasource_config_with_name)
 
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
@@ -121,17 +124,13 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 
         if save_changes:
             # Make sure the id was populated correctly into the created datasource object and config
-            assert stored_datasource.id_ == datasource_id
-            assert retrieved_datasource.id_ == datasource_id
-            assert retrieved_datasource.config["id_"] == datasource_id
+            assert stored_datasource.id == fake_datasource_id
         else:
-            assert stored_datasource.id_ is None
-            assert retrieved_datasource.id_ is None
-            assert retrieved_datasource.config["id_"] is None
+            assert stored_datasource.id is None
 
         # Make sure the name is populated correctly into the created datasource
-        assert retrieved_datasource.name == datasource_name
-        assert retrieved_datasource.config["name"] == datasource_name
+        assert stored_datasource.name == datasource_name
+        assert stored_datasource.config["name"] == datasource_name
 
 
 @pytest.mark.cloud
@@ -152,7 +151,10 @@ def test_data_context_in_cloud_mode_add_datasource(
     config_includes_name_setting: str,
     empty_data_context_in_cloud_mode: DataContext,
     datasource_config: DatasourceConfig,
-    datasource_name: str,
+    datasource_config_with_names_and_ids: DatasourceConfig,
+    fake_datasource_id,
+    mocked_datasource_post_response: Callable[[], MockResponse],
+    mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     shared_called_with_request_kwargs: dict,
@@ -168,16 +170,15 @@ def test_data_context_in_cloud_mode_add_datasource(
     assert len(context.list_datasources()) == 0
 
     # Setup
-    datasource_id: str = "some_uuid"
+    datasource_name = datasource_config_with_names_and_ids.name
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
-    def mocked_post_response(*args, **kwargs):
-        return mock_response_factory({"data": {"id": datasource_id}}, 201)
-
     with patch(
-        "requests.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post:
+        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
+    ) as mock_post, patch(
+        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    ):
 
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
@@ -203,10 +204,8 @@ def test_data_context_in_cloud_mode_add_datasource(
         # Make sure we have stored our datasource in the context
         assert len(context.list_datasources()) == 1
 
-        retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
-        expected_datasource_config = datasourceConfigSchema.dump(
-            datasource_config_with_name
-        )
+        serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
+        expected_datasource_config = serializer.serialize(datasource_config_with_name)
 
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
@@ -225,13 +224,11 @@ def test_data_context_in_cloud_mode_add_datasource(
         )
 
         # Make sure the id was populated correctly into the created datasource object and config
-        assert stored_datasource.id_ == datasource_id
-        assert retrieved_datasource.id_ == datasource_id
-        assert retrieved_datasource.config["id_"] == datasource_id
+        assert stored_datasource.id == fake_datasource_id
 
         # Make sure the name is populated correctly into the created datasource
-        assert retrieved_datasource.name == datasource_name
-        assert retrieved_datasource.config["name"] == datasource_name
+        assert stored_datasource.name == datasource_name
+        assert stored_datasource.config["name"] == datasource_name
 
 
 @pytest.mark.cloud
@@ -252,7 +249,10 @@ def test_cloud_data_context_add_datasource(
     config_includes_name_setting: str,
     empty_cloud_data_context: CloudDataContext,
     datasource_config: DatasourceConfig,
-    datasource_name: str,
+    datasource_config_with_names_and_ids: DatasourceConfig,
+    fake_datasource_id,
+    mocked_datasource_post_response: Callable[[], MockResponse],
+    mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     shared_called_with_request_kwargs: dict,
@@ -268,16 +268,15 @@ def test_cloud_data_context_add_datasource(
     assert len(context.list_datasources()) == 0
 
     # Setup
-    datasource_id: str = "some_uuid"
+    datasource_name = datasource_config_with_names_and_ids.name
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
-    def mocked_post_response(*args, **kwargs):
-        return mock_response_factory({"data": {"id": datasource_id}}, 201)
-
     with patch(
-        "requests.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post:
+        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
+    ) as mock_post, patch(
+        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    ):
 
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
@@ -306,10 +305,8 @@ def test_cloud_data_context_add_datasource(
         # Make sure we have stored our datasource in the context
         assert len(context.list_datasources()) == 1
 
-        retrieved_datasource: BaseDatasource = context.get_datasource(datasource_name)
-        expected_datasource_config = datasourceConfigSchema.dump(
-            datasource_config_with_name
-        )
+        serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)
+        expected_datasource_config = serializer.serialize(datasource_config_with_name)
 
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
@@ -328,10 +325,8 @@ def test_cloud_data_context_add_datasource(
         )
 
         # Make sure the id was populated correctly into the created datasource object and config
-        assert stored_datasource.id_ == datasource_id
-        assert retrieved_datasource.id_ == datasource_id
-        assert retrieved_datasource.config["id_"] == datasource_id
+        assert stored_datasource.id == fake_datasource_id
 
         # Make sure the name is populated correctly into the created datasource
-        assert retrieved_datasource.name == datasource_name
-        assert retrieved_datasource.config["name"] == datasource_name
+        assert stored_datasource.name == datasource_name
+        assert stored_datasource.config["name"] == datasource_name

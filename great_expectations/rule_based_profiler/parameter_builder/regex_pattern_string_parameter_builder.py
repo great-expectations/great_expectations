@@ -8,6 +8,7 @@ from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
+    NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
@@ -42,7 +43,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         r"[A-Za-z0-9\.,;:!?()\"'%\-]+",  # general text
         r"^\s+",  # leading space
         r"\s+$",  # trailing space
-        r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  # Matching URL (including http(s) protocol)
+        r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,255}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  # Matching URL (including http(s) protocol)
         r"<\/?(?:p|a|b|img)(?: \/)?>",  # HTML tags
         r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}",  # IPv4 IP address
         r"(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",  # IPv6 IP address,
@@ -213,9 +214,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
             match_regex_unexpected_count: int = sum(metric_values)
-            success_ratio: float = (
-                nonnull_count - match_regex_unexpected_count
-            ) / nonnull_count
+            success_ratio: float = (nonnull_count - match_regex_unexpected_count) / (
+                nonnull_count + NP_EPSILON
+            )
             regex_string_success_ratios[
                 attributed_resolved_metrics.metric_attributes["regex"]
             ] = success_ratio

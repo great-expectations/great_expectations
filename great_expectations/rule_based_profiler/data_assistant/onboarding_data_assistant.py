@@ -76,6 +76,7 @@ class OnboardingDataAssistant(DataAssistant):
         )
 
         column_value_uniqueness_rule: Rule = build_map_metric_rule(
+            data_assistant_class_name=self.__class__.__name__,
             rule_name="column_value_uniqueness_rule",
             expectation_type="expect_column_values_to_be_unique",
             map_metric_name="column_values.unique",
@@ -93,6 +94,7 @@ class OnboardingDataAssistant(DataAssistant):
             min_max_unexpected_values_proportion=9.75e-1,
         )
         column_value_nullity_rule: Rule = build_map_metric_rule(
+            data_assistant_class_name=self.__class__.__name__,
             rule_name="column_value_nullity_rule",
             expectation_type="expect_column_values_to_be_null",
             map_metric_name="column_values.null",
@@ -110,6 +112,7 @@ class OnboardingDataAssistant(DataAssistant):
             min_max_unexpected_values_proportion=9.75e-1,
         )
         column_value_nonnullity_rule: Rule = build_map_metric_rule(
+            data_assistant_class_name=self.__class__.__name__,
             rule_name="column_value_nonnullity_rule",
             expectation_type="expect_column_values_to_not_be_null",
             map_metric_name="column_values.nonnull",
@@ -149,11 +152,11 @@ class OnboardingDataAssistant(DataAssistant):
             _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,
+            rule_domain_builder_execution_time=data_assistant_result.rule_domain_builder_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
-            execution_time=data_assistant_result.execution_time,
             _usage_statistics_handler=data_assistant_result._usage_statistics_handler,
         )
 
@@ -299,9 +302,8 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        column_partition_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_partition_parameter_builder(
+        column_histogram_single_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_histogram_single_batch_parameter_builder(
             name="column_values.partition",
-            bucketize_data=True,
         )
         column_min_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_min_metric_multi_batch_parameter_builder()
@@ -465,7 +467,7 @@ class OnboardingDataAssistant(DataAssistant):
                 **column_quantile_values_range_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expect_column_quantile_values_to_be_between_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_quantile_values_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
@@ -560,7 +562,7 @@ class OnboardingDataAssistant(DataAssistant):
             "round_decimals": 15,
         }
         parameter_builders: List[ParameterBuilder] = [
-            column_partition_parameter_builder_for_metrics,
+            column_histogram_single_batch_parameter_builder_for_metrics,
             column_min_metric_multi_batch_parameter_builder_for_metrics,
             column_max_metric_multi_batch_parameter_builder_for_metrics,
             column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,
@@ -572,7 +574,7 @@ class OnboardingDataAssistant(DataAssistant):
             expect_column_min_to_be_between_expectation_configuration_builder,
             expect_column_max_to_be_between_expectation_configuration_builder,
             expect_column_values_to_be_between_expectation_configuration_builder,
-            expect_expect_column_quantile_values_to_be_between_expectation_configuration_builder,
+            expect_column_quantile_values_to_be_between_expectation_configuration_builder,
             expect_column_median_to_be_between_expectation_configuration_builder,
             expect_column_mean_to_be_between_expectation_configuration_builder,
             expect_column_stdev_to_be_between_expectation_configuration_builder,
@@ -613,27 +615,11 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        column_partition_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_partition_parameter_builder(
-            name="column_values.partition",
-            bucketize_data=True,
-        )
         column_min_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_min_metric_multi_batch_parameter_builder()
         )
         column_max_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_max_metric_multi_batch_parameter_builder()
-        )
-        column_quantile_values_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_quantile_values_metric_multi_batch_parameter_builder()
-        )
-        column_median_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_median_metric_multi_batch_parameter_builder()
-        )
-        column_mean_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_mean_metric_multi_batch_parameter_builder()
-        )
-        column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_standard_deviation_metric_multi_batch_parameter_builder()
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
@@ -733,7 +719,6 @@ class OnboardingDataAssistant(DataAssistant):
             "mostly": 1.0,
             "strict_min": False,
             "strict_max": False,
-            "allow_relative_error": False,
             "false_positive_rate": 0.05,
             "estimator": "bootstrap",
             "n_resamples": 9999,
@@ -749,13 +734,8 @@ class OnboardingDataAssistant(DataAssistant):
             "round_decimals": 1,
         }
         parameter_builders: List[ParameterBuilder] = [
-            column_partition_parameter_builder_for_metrics,
             column_min_metric_multi_batch_parameter_builder_for_metrics,
             column_max_metric_multi_batch_parameter_builder_for_metrics,
-            column_quantile_values_metric_multi_batch_parameter_builder_for_metrics,
-            column_median_metric_multi_batch_parameter_builder_for_metrics,
-            column_mean_metric_multi_batch_parameter_builder_for_metrics,
-            column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics,
         ]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
             expect_column_min_to_be_between_expectation_configuration_builder,
@@ -959,6 +939,7 @@ class OnboardingDataAssistant(DataAssistant):
                 metric_value_kwargs={
                     "sort": "value",
                 },
+                single_batch_mode=False,
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
                 reduce_scalar_metric=True,

@@ -11,6 +11,7 @@ from collections.abc import Hashable
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse
+from marshmallow import ValidationError
 from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
@@ -48,7 +49,6 @@ from great_expectations.expectations.registry import (
     get_metric_provider,
     list_registered_expectation_implementations,
 )
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -150,7 +150,7 @@ class Validator:
             Any
         ] = None,  # Cannot type DataContext due to circular import
         batches: Optional[List[Batch]] = None,
-        include_rendered_content: bool = False,
+        include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
         """
@@ -284,7 +284,7 @@ class Validator:
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
             )
 
-    def validate_expectation(self, name: str) -> Callable:
+    def validate_expectation(self, name: str) -> Callable:  # noqa: C901 - complexity 16
         """
         Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the
                 expectation's validate method to obtain a validation result. Also adds in the runtime configuration
@@ -414,6 +414,11 @@ class Validator:
                     )
                 else:
                     raise err
+
+            if self._include_rendered_content:
+                validation_result.render()
+                validation_result.expectation_config.render()
+
             return validation_result
 
         inst_expectation.__name__ = name
@@ -806,11 +811,15 @@ class Validator:
         ]
 
     def compute_metrics(
-        self, metric_configurations: List[MetricConfiguration]
+        self,
+        metric_configurations: List[MetricConfiguration],
     ) -> Dict[Tuple[str, str, str], Any]:
         """
-        metrics: List of desired MetricConfiguration objects to be resolved.
-        Return Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+        Args:
+            metric_configurations: List of desired MetricConfiguration objects to be resolved.
+
+        Returns:
+            Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
         graph = ValidationGraph()
 
@@ -853,13 +862,19 @@ class Validator:
 
         return resolved_metrics
 
-    def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
+    def get_metrics(
+        self,
+        metrics: Dict[str, MetricConfiguration],
+    ) -> Dict[str, Any]:
         """
-        metrics: Dictionary of desired metrics to be resolved, with metric_name as key and MetricConfiguration as value.
-        Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
+        Args:
+            metrics: Dictionary of desired metrics to be resolved, with metric_name as key and MetricConfiguration as value.
+
+        Returns:
+            Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
         """
         resolved_metrics: Dict[Tuple[str, str, str], Any] = self.compute_metrics(
-            metric_configurations=list(metrics.values())
+            metric_configurations=list(metrics.values()),
         )
 
         return {
@@ -895,11 +910,14 @@ class Validator:
                     key
                 ] = metric_provider_cls.default_kwarg_values[key]
 
-    def get_metric(self, metric: MetricConfiguration) -> Any:
+    def get_metric(
+        self,
+        metric: MetricConfiguration,
+    ) -> Any:
         """return the value of the requested metric."""
-        return self.get_metrics(metrics={metric.metric_name: metric})[
-            metric.metric_name
-        ]
+        return self.get_metrics(
+            metrics={metric.metric_name: metric},
+        )[metric.metric_name]
 
     def graph_validate(
         self,
@@ -911,15 +929,15 @@ class Validator:
         then proceeds to add these dependencies to the validation graph, supply readily available metric implementations
         to fulfill current metric requirements, and validate these metrics.
 
-                Args:
-                    configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that
-                    will be used to supply domain and values for metrics.
-                    metrics (dict): A list of currently registered metrics in the registry
-                    runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics
-                    such as the result_format.
+        Args:
+            configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will be
+            used to supply domain and values for metrics.
+            metrics (dict): A list of currently registered metrics in the registry
+            runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics, such as the
+            result_format.
 
-                Returns:
-                    A list of Validations, validating that all necessary metrics are available.
+        Returns:
+            A list of Validations, validating that all necessary metrics are available.
         """
         if runtime_configuration is None:
             runtime_configuration = {}
@@ -1276,8 +1294,8 @@ class Validator:
                     desc="Calculating Metrics",
                     disable=disable,
                 )
-                progress_bar.update(0)
-                progress_bar.refresh()
+            progress_bar.update(0)
+            progress_bar.refresh()
 
             computable_metrics = set()
 
@@ -1965,9 +1983,11 @@ set as active.
                 configurations=expectations_to_evaluate,
                 runtime_configuration=runtime_configuration,
             )
+
             if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
+                    validation_result.expectation_config.render()
             statistics = _calc_validation_statistics(results)
 
             if only_return_failures:

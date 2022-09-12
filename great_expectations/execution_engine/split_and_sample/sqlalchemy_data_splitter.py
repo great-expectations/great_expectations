@@ -346,9 +346,12 @@ class SqlAlchemyDataSplitter(DataSplitter):
         Returns:
             List of dicts of the form [{column_name: {"key": value}}]
         """
-        if self._is_datetime_splitter(splitter_method_name):
+        processed_splitter_method_name: str = self._get_splitter_method_name(
+            splitter_method_name
+        )
+        if self._is_datetime_splitter(processed_splitter_method_name):
             splitter_fn_name: str = self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
-                splitter_method_name
+                processed_splitter_method_name
             ]
             batch_identifiers_list: List[dict] = getattr(self, splitter_fn_name)(
                 execution_engine, table_name, **splitter_kwargs
@@ -357,7 +360,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
             batch_identifiers_list: List[
                 dict
             ] = self.get_data_for_batch_identifiers_for_non_date_part_splitters(
-                execution_engine, table_name, splitter_method_name, splitter_kwargs
+                execution_engine,
+                table_name,
+                processed_splitter_method_name,
+                splitter_kwargs,
             )
 
         return batch_identifiers_list
@@ -494,29 +500,48 @@ class SqlAlchemyDataSplitter(DataSplitter):
         else:
             """
             # NOTE: <Alex>6/29/2022</Alex>
-            Certain SQLAlchemy-compliant backends (e.g., Amazon Redshift) allow only binary operators for "CONCAT".
+            Certain SQLAlchemy-compliant backends (e.g., Amazon Redshift, SQLite) allow only binary operators for "CONCAT".
             """
-            concat_date_parts: concat = sa.func.concat(
-                "",
-                sa.cast(
+            if self._dialect == "sqlite":
+                concat_date_parts = sa.cast(
                     sa.func.extract(date_parts[0].value, sa.column(column_name)),
                     sa.String,
-                ),
-            )
+                )
 
-            date_part: DatePart
-            for date_part in date_parts[1:]:
-                concat_date_parts = sa.func.concat(
-                    concat_date_parts,
+                date_part: DatePart
+                for date_part in date_parts[1:]:
+                    concat_date_parts = concat_date_parts.concat(
+                        sa.cast(
+                            sa.func.extract(date_part.value, sa.column(column_name)),
+                            sa.String,
+                        )
+                    )
+
+                concat_clause: List[Label] = [
+                    sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
+                ]
+            else:
+                concat_date_parts: concat = sa.func.concat(
+                    "",
                     sa.cast(
-                        sa.func.extract(date_part.value, sa.column(column_name)),
+                        sa.func.extract(date_parts[0].value, sa.column(column_name)),
                         sa.String,
                     ),
                 )
 
-            concat_clause: List[Label] = [
-                sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
-            ]
+                date_part: DatePart
+                for date_part in date_parts[1:]:
+                    concat_date_parts = sa.func.concat(
+                        concat_date_parts,
+                        sa.cast(
+                            sa.func.extract(date_part.value, sa.column(column_name)),
+                            sa.String,
+                        ),
+                    )
+
+                concat_clause: List[Label] = [
+                    sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
+                ]
 
         split_query: Selectable = sa.select(
             concat_clause
@@ -646,6 +671,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 splitter_method_name
             )
         )
+
         split_query: Selectable = getattr(self, get_split_query_method_name)(
             table_name=table_name, **splitter_kwargs
         )

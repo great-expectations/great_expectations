@@ -163,6 +163,7 @@ def parameterized_expectation_suite(empty_data_context_stats_enabled):
         return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
+@pytest.mark.unit
 def test_StoreBackendValidation():
     backend = InMemoryStoreBackend()
 
@@ -356,6 +357,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
 
 
 @mock_s3
+@pytest.mark.integration
 def test_TupleS3StoreBackend_store_backend_id():
     # TupleS3StoreBackend
     # Initialize without store_backend_id and check that it is generated correctly
@@ -390,6 +392,7 @@ def test_TupleS3StoreBackend_store_backend_id():
     )
 
 
+@pytest.mark.unit
 def test_InMemoryStoreBackend():
 
     my_store = InMemoryStoreBackend()
@@ -413,6 +416,7 @@ def test_InMemoryStoreBackend():
         my_store.get_url_for_key(my_key)
 
 
+@pytest.mark.integration
 def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
     path = str(
         tmp_path_factory.mktemp("test_tuple_filesystem_store_filepath_prefix_error")
@@ -436,6 +440,7 @@ def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
     assert "filepath_prefix may not end with" in e.value.message
 
 
+@pytest.mark.integration
 def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     path = str(
         tmp_path_factory.mktemp(
@@ -464,7 +469,7 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
         converted_string = my_store._convert_key_to_filepath(tuple_)
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_TupleFilesystemStoreBackend(tmp_path_factory):
     path = "dummy_str"
     full_test_dir = tmp_path_factory.mktemp("test_TupleFilesystemStoreBackend__dir")
@@ -513,7 +518,7 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     assert url == "http://www.test.com/my_file_CCC"
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
     tmp_path_factory,
 ):
@@ -552,6 +557,7 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
 
 
 @mock_s3
+@pytest.mark.integration
 def test_TupleS3StoreBackend_with_prefix():
     """
     What does this test test and why?
@@ -752,6 +758,7 @@ def test_TupleS3StoreBackend_with_prefix():
 
 
 @mock_s3
+@pytest.mark.integration
 def test_tuple_s3_store_backend_slash_conditions():
     bucket = "my_bucket"
     prefix = None
@@ -940,6 +947,7 @@ def test_tuple_s3_store_backend_slash_conditions():
 
 
 @mock_s3
+@pytest.mark.integration
 def test_TupleS3StoreBackend_with_empty_prefixes():
     """
     What does this test test and why?
@@ -997,6 +1005,7 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
 
 
 @mock_s3
+@pytest.mark.integration
 def test_TupleS3StoreBackend_with_s3_put_options():
 
     bucket = "leakybucket"
@@ -1033,6 +1042,7 @@ def test_TupleS3StoreBackend_with_s3_put_options():
     not is_library_loadable(library_name="google"),
     reason="google is not installed",
 )
+@pytest.mark.integration
 def test_TupleGCSStoreBackend_base_public_path():
     """
     What does this test and why?
@@ -1084,6 +1094,8 @@ def test_TupleGCSStoreBackend_base_public_path():
     not is_library_loadable(library_name="google"),
     reason="google is not installed",
 )
+@pytest.mark.slow  # 1.35s
+@pytest.mark.integration
 def test_TupleGCSStoreBackend():
     # pytest.importorskip("google-cloud-storage")
     """
@@ -1201,6 +1213,7 @@ def test_TupleGCSStoreBackend():
     )
 
 
+@pytest.mark.integration
 def test_TupleAzureBlobStoreBackend_connection_string():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
@@ -1243,6 +1256,7 @@ def test_TupleAzureBlobStoreBackend_connection_string():
         )
 
 
+@pytest.mark.integration
 def test_TupleAzureBlobStoreBackend_account_url():
     pytest.importorskip("azure.storage.blob")
     pytest.importorskip("azure.identity")
@@ -1276,6 +1290,8 @@ def test_TupleAzureBlobStoreBackend_account_url():
 
 
 @mock_s3
+@pytest.mark.slow  # 14.36s
+@pytest.mark.integration
 def test_TupleS3StoreBackend_list_over_1000_keys():
     """
     What does this test test and why?
@@ -1340,6 +1356,8 @@ def test_TupleS3StoreBackend_list_over_1000_keys():
     assert len(keys) == num_keys_to_add + 1
 
 
+@pytest.mark.cloud
+@pytest.mark.unit
 def test_GeCloudStoreBackend(
     shared_called_with_request_kwargs: dict, ge_cloud_access_token: str
 ):
@@ -1348,6 +1366,11 @@ def test_GeCloudStoreBackend(
 
     Since GeCloudStoreBackend relies on GE Cloud, we mock requests.post, requests.get, and
     requests.patch and assert that the right calls are made for set, get, list, and remove_key.
+
+    Note that although ge_cloud_access_token is provided (and is a valid UUID), no external
+    requests are actually made as part of this test. The actual value of the token does not
+    matter here but we leverage an existing fixture to mimic the contents of requests made
+    in production. The same logic applies to all UUIDs in this test.
     """
     ge_cloud_base_url = "https://app.greatexpectations.io/"
     ge_cloud_credentials = {
@@ -1462,7 +1485,7 @@ def test_GeCloudStoreBackend(
             json={
                 "data": {
                     "type": "checkpoint",
-                    "id_": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },
@@ -1547,7 +1570,7 @@ def test_GeCloudStoreBackend(
             json={
                 "data": {
                     "type": "rendered_data_doc",
-                    "id_": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "id": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
                     "attributes": {"deleted": True},
                 }
             },
@@ -1556,6 +1579,7 @@ def test_GeCloudStoreBackend(
 
 
 @pytest.mark.unit
+@pytest.mark.cloud
 def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() -> None:
     ge_cloud_base_url = "https://app.greatexpectations.io/"
     ge_cloud_credentials = {
@@ -1573,6 +1597,7 @@ def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() ->
     assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
 
 
+@pytest.mark.integration
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
@@ -1616,6 +1641,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
         "datasources",
         "evaluation_parameter_store_name",
         "expectations_store_name",
+        "include_rendered_content",
         "notebooks",
         "plugins_directory",
         "progress_bars",
@@ -1748,3 +1774,47 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
     datasources: dict = config_commented_map_from_yaml["datasources"]
     assert len(datasources) == 1
     assert datasources["my_datasource"] == datasource_config
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_move_overwrites_key() -> None:
+    store_backend = InMemoryStoreBackend()
+
+    key_1 = ("my_key_1",)
+    key_2 = ("my_key_2",)
+
+    store_backend.set(key_1, 123)
+    assert store_backend.has_key(key_1)
+    assert not store_backend.has_key(key_2)
+
+    store_backend.move(key_1, key_2)
+    assert not store_backend.has_key(key_1)
+    assert store_backend.has_key(key_2)
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_move_nonexistent_key_raises_error() -> None:
+    store_backend = InMemoryStoreBackend()
+
+    with pytest.raises(KeyError):
+        store_backend.move(("my_fake_key_1",), ("my_fake_key_2",))
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_config_and_defaults() -> None:
+    store_backend = InMemoryStoreBackend()
+    assert store_backend.config == {
+        "class_name": "InMemoryStoreBackend",
+        "fixed_length_key": False,
+        "module_name": "great_expectations.data_context.store.in_memory_store_backend",
+        "suppress_store_backend_id": False,
+    }
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_build_Key() -> None:
+    store_backend = InMemoryStoreBackend()
+    name = "my_backend_key"
+    assert store_backend.build_key(name=name) == DataContextVariableKey(
+        resource_name=name
+    )
