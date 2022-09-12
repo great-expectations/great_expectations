@@ -98,13 +98,17 @@ class SlackRenderer(Renderer):
                             report_element = self._get_report_element(docs_link)
                         else:
                             logger.critical(
-                                f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n"
+                                f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `"
+                                f"{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the "
+                                f"`great_expectations.yml`\n"
                             )
                             report_element = {
                                 "type": "section",
                                 "text": {
                                     "type": "mrkdwn",
-                                    "text": f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n",
+                                    "text": f"*ERROR*: Slack is trying to provide a link to the following DataDocs: "
+                                    f"`{str(docs_link_key)}`, but it is not configured under "
+                                    f"`data_docs_sites` in the `great_expectations.yml`\n",
                                 },
                             }
                         if report_element:
@@ -166,7 +170,8 @@ class SlackRenderer(Renderer):
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into a browser to view)\n",
+                            "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into "
+                            f"a browser to view)\n",
                         },
                     }
                 else:
@@ -192,9 +197,36 @@ class SlackRenderer(Renderer):
 
     def create_failed_expectations_text(self, validation_results: List[dict]) -> str:
         failed_expectations_str = "\n*Failed Expectations*:\n"
-        failure_emoji = ":x:"
         for expectation in validation_results:
             if not expectation["success"]:
                 expectation_name = expectation["expectation_config"]["expectation_type"]
-                failed_expectations_str += f"{failure_emoji}{expectation_name}\n"
+                expectation_kwargs = expectation["expectation_config"]["kwargs"]
+                failed_expectations_str += self.create_failed_expectation_text(
+                    expectation_kwargs, expectation_name
+                )
         return failed_expectations_str
+
+    def create_failed_expectation_text(self, expectation_kwargs, expectation_name):
+        expectation_entity = self.get_failed_expectation_entity(
+            expectation_name, expectation_kwargs
+        )
+        if expectation_entity:
+            return f":x:{expectation_name} ({expectation_entity})\n"
+        return f":x:{expectation_name}\n"
+
+    @staticmethod
+    def get_failed_expectation_entity(
+        expectation_name, expectation_config_kwargs: dict
+    ) -> str:
+        if "expect_table_" in expectation_name:
+            return "Table"
+
+        column_name, column_a, column_b = (
+            expectation_config_kwargs.get("column"),
+            expectation_config_kwargs.get("column_A"),
+            expectation_config_kwargs.get("column_B"),
+        )
+        if column_name:
+            return column_name
+        elif column_a and column_b:
+            return f"{column_a}, {column_b}"
