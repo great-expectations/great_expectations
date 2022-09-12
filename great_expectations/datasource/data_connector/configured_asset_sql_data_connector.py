@@ -22,6 +22,7 @@ from great_expectations.datasource.data_connector.sorter import (
 )
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
+    build_sorters_from_config,
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -67,6 +68,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         include_schema_name: bool = False,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
+        sorters: Optional[list] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         assets: Optional[Dict[str, dict]] = None,
@@ -83,6 +85,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             include_schema_name (bool): Should the data_asset_name include the schema as a prefix?
             splitter_method (str): A method to split the target table into multiple Batches
             splitter_kwargs (dict): Keyword arguments to pass to splitter_method
+            sorters (list): List if you want to override the default sort for the data_references
             sampling_method (str): A method to downsample within a target Batch
             sampling_kwargs (dict): Keyword arguments to pass to sampling_method
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
@@ -101,6 +104,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self._include_schema_name = include_schema_name
         self._splitter_method = splitter_method
         self._splitter_kwargs = splitter_kwargs
+
+        self._sorters = build_sorters_from_config(config_list=sorters)
+        self._validate_sorters_configuration()
+
         self._sampling_method = sampling_method
         self._sampling_kwargs = sampling_kwargs
 
