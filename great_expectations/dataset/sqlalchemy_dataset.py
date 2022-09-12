@@ -1450,7 +1450,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == GESqlDialect.TRINO.value:
             stmt = f"CREATE OR REPLACE VIEW {schema_name}.{table_name} AS {custom_sql}"
-        elif engine_dialect == GESqlDialect.DATABRICKS.value:
+        elif engine_dialect == "databricks":
             stmt = f"CREATE OR REPLACE TEMPORARY VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == GESqlDialect.DREMIO.value:
             stmt = f"CREATE OR REPLACE VDS {table_name} AS {custom_sql}"
