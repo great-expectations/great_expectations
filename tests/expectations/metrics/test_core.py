@@ -4011,7 +4011,7 @@ def test_value_counts_metric_spark(spark_session):
     )
 
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert pd.Series(index=[1.0, 2.0, 3.0, np.nan], data=[2, 2, 2, 1]).equals(
+    assert pd.Series(index=[1.0, 2.0, 3.0], data=[2, 2, 2]).equals(
         metrics[desired_metric.id]
     )
 
