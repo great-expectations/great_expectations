@@ -37,7 +37,14 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    CheckpointValidationConfig,
+)
+from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     substitute_all_config_variables,
@@ -66,8 +73,11 @@ class BaseCheckpoint(ConfigPeer):
         checkpoint_config: CheckpointConfig,
         data_context: "DataContext",  # noqa: F821
     ) -> None:
-        # Note the gross typechecking to avoid a circular import
-        if "DataContext" not in str(type(data_context)):
+        from great_expectations.data_context.data_context.abstract_data_context import (
+            AbstractDataContext,
+        )
+
+        if not isinstance(data_context, AbstractDataContext):
             raise TypeError("A Checkpoint requires a valid DataContext")
 
         self._usage_statistics_handler = data_context._usage_statistics_handler
@@ -334,9 +344,13 @@ class BaseCheckpoint(ConfigPeer):
             expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
                 "expectation_suite_ge_cloud_id"
             )
-            include_rendered_content: bool = substituted_validation_dict.get(
-                "include_rendered_content", False
+            include_rendered_content: Optional[bool] = substituted_validation_dict.get(
+                "include_rendered_content"
             )
+            if include_rendered_content is None:
+                include_rendered_content = (
+                    self._data_context._determine_if_expectation_validation_result_include_rendered_content()
+                )
 
             validator: Validator = self.data_context.get_validator(
                 batch_request=batch_request,
@@ -378,7 +392,10 @@ class BaseCheckpoint(ConfigPeer):
             )
             checkpoint_identifier = None
             if self.data_context.ge_cloud_mode:
-                checkpoint_identifier = self.ge_cloud_id
+                checkpoint_identifier = GeCloudIdentifier(
+                    resource_type=GeCloudRESTResource.CHECKPOINT,
+                    ge_cloud_id=str(self.ge_cloud_id),
+                )
 
             operator_run_kwargs = {}
 
@@ -484,7 +501,7 @@ is run), with each validation having its own defined "action_list" attribute.
             return []
 
     @property
-    def validations(self) -> List[Dict]:
+    def validations(self) -> List[CheckpointValidationConfig]:
         try:
             return self.config.validations
         except AttributeError:

@@ -159,7 +159,7 @@ def _get_unique_values_from_nested_collection_of_sets(
         flattened = set().union(*flattened)
 
     """
-    In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to
+    In multi-batch data analysis, values can be empty and missing, resulting in "None" added to set.  However, due to
     reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
     """

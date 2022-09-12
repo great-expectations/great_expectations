@@ -1,7 +1,11 @@
 import logging
-from typing import TYPE_CHECKING, List, Mapping, Optional, Union, cast
+from enum import Enum
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Union, cast
+
+import requests
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -17,19 +21,25 @@ from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     DataContextConfig,
     DataContextConfigDefaults,
-    DatasourceConfig,
     GeCloudConfig,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
-from great_expectations.datasource import Datasource
+from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
+
+
+class GECloudEnvironmentVariable(str, Enum):
+    BASE_URL = "base_url"
+    ACCOUNT_ID = "account_id"  # Deprecated
+    ORGANIZATION_ID = "organization_id"
+    ACCESS_TOKEN = "access_token"
 
 
 class CloudDataContext(AbstractDataContext):
@@ -63,6 +73,129 @@ class CloudDataContext(AbstractDataContext):
         super().__init__(
             runtime_environment=runtime_environment,
         )
+
+    @classmethod
+    def retrieve_data_context_config_from_ge_cloud(
+        cls, ge_cloud_config: GeCloudConfig
+    ) -> DataContextConfig:
+        """
+        Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
+        Given proper authorization, the request retrieves a data context config that is pre-populated with
+        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
+
+        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
+        over the wire.
+
+        :return: the configuration object retrieved from the Cloud API
+        """
+        base_url = ge_cloud_config.base_url  # type: ignore[union-attr]
+        organization_id = ge_cloud_config.organization_id  # type: ignore[union-attr]
+        ge_cloud_url = (
+            f"{base_url}/organizations/{organization_id}/data-context-configuration"
+        )
+        headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {ge_cloud_config.access_token}",  # type: ignore[union-attr]
+            "Gx-Version": __version__,
+        }
+
+        response = requests.get(ge_cloud_url, headers=headers)
+        if response.status_code != 200:
+            raise ge_exceptions.GeCloudError(
+                f"Bad request made to GE Cloud; {response.text}"
+            )
+        config = response.json()
+        return DataContextConfig(**config)
+
+    # TODO: deprecate ge_cloud_account_id
+    @classmethod
+    def get_ge_cloud_config(
+        cls,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_account_id: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
+    ) -> GeCloudConfig:
+        """
+        Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
+        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
+        """
+        ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_account_id=ge_cloud_account_id,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+
+        missing_keys = []
+        for key, val in ge_cloud_config_dict.items():
+            if not val:
+                missing_keys.append(key)
+        if len(missing_keys) > 0:
+            missing_keys_str = [f'"{key}"' for key in missing_keys]
+            global_config_path_str = [
+                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
+            ]
+            raise DataContextError(
+                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
+                f"environment or in global configs ({(', ').join(global_config_path_str)})."
+            )
+
+        return GeCloudConfig(**ge_cloud_config_dict)  # type: ignore[arg-type,misc]
+
+    # TODO: deprecate ge_cloud_account_id
+    @classmethod
+    def _get_ge_cloud_config_dict(
+        cls,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_account_id: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
+    ) -> Dict[GECloudEnvironmentVariable, Optional[str]]:
+        ge_cloud_base_url = (
+            ge_cloud_base_url
+            or CloudDataContext._get_global_config_value(
+                environment_variable=GECloudEnvironmentVariable.BASE_URL,
+                conf_file_section="ge_cloud_config",
+                conf_file_option="base_url",
+            )
+            or "https://app.greatexpectations.io/"
+        )
+
+        # TODO: remove if/else block when ge_cloud_account_id is deprecated.
+        if ge_cloud_account_id is not None:
+            logger.warning(
+                'The "ge_cloud_account_id" argument has been renamed "ge_cloud_organization_id" and will be '
+                "deprecated in the next major release."
+            )
+        else:
+            ge_cloud_account_id = CloudDataContext._get_global_config_value(
+                environment_variable=GECloudEnvironmentVariable.ACCOUNT_ID,
+                conf_file_section="ge_cloud_config",
+                conf_file_option="account_id",
+            )
+
+        if ge_cloud_organization_id is None:
+            ge_cloud_organization_id = CloudDataContext._get_global_config_value(
+                environment_variable=GECloudEnvironmentVariable.ORGANIZATION_ID,
+                conf_file_section="ge_cloud_config",
+                conf_file_option="organization_id",
+            )
+
+        ge_cloud_organization_id = ge_cloud_organization_id or ge_cloud_account_id
+        ge_cloud_access_token = (
+            ge_cloud_access_token
+            or CloudDataContext._get_global_config_value(
+                environment_variable=GECloudEnvironmentVariable.ACCESS_TOKEN,
+                conf_file_section="ge_cloud_config",
+                conf_file_option="access_token",
+            )
+        )
+        return {
+            GECloudEnvironmentVariable.BASE_URL: ge_cloud_base_url,
+            GECloudEnvironmentVariable.ORGANIZATION_ID: ge_cloud_organization_id,
+            GECloudEnvironmentVariable.ACCESS_TOKEN: ge_cloud_access_token,
+        }
 
     def _init_datasource_store(self) -> None:
         from great_expectations.data_context.store.datasource_store import (
@@ -183,30 +316,31 @@ class CloudDataContext(AbstractDataContext):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
+        existing_suite_names = self.list_expectation_suite_names()
+        if expectation_suite_name in existing_suite_names and not overwrite_existing:
+            raise ge_exceptions.DataContextError(
+                f"expectation_suite '{expectation_suite_name}' already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
+            )
+
         expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
         )
-        ge_cloud_id = expectation_suite.ge_cloud_id
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=ge_cloud_id,
         )
-        if (
-            self.expectations_store.has_key(key)  # noqa: W601
-            and not overwrite_existing
-        ):
-            raise ge_exceptions.DataContextError(
-                f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True."
-            )
-        self.expectations_store.set(key, expectation_suite, **kwargs)
+
+        response: Union[bool, GeCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        if isinstance(response, GeCloudResourceRef):
+            expectation_suite.ge_cloud_id = response.ge_cloud_id
+
         return expectation_suite
 
     def delete_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ):
+    ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
 
         Args:
@@ -223,22 +357,24 @@ class CloudDataContext(AbstractDataContext):
             raise ge_exceptions.DataContextError(
                 f"expectation_suite with id {ge_cloud_id} does not exist."
             )
-        else:
-            self.expectations_store.remove_key(key)
-            return True
+
+        return self.expectations_store.remove_key(key)
 
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
+        include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GE Cloud ID
         Args:
-            expectation_suite_name (str): the name for the Expectation Suite
-            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
+            expectation_suite_name (str): The name of the Expectation Suite
+            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+                ExpectationConfiguration.
+            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
 
         Returns:
-            expectation_suite
+            An existing ExpectationSuite
         """
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
@@ -246,12 +382,23 @@ class CloudDataContext(AbstractDataContext):
         )
         if not self.expectations_store.has_key(key):  # noqa: W601
             raise ge_exceptions.DataContextError(
-                f"expectation_suite {expectation_suite_name} not found"
+                f"expectation_suite with id {ge_cloud_id} not found"
             )
 
         expectations_schema_dict: dict = cast(dict, self.expectations_store.get(key))
+
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_suite_include_rendered_content()
+            )
+
         # create the ExpectationSuite from constructor
-        return ExpectationSuite(**expectations_schema_dict, data_context=self)
+        expectation_suite = ExpectationSuite(
+            **expectations_schema_dict, data_context=self
+        )
+        if include_rendered_content:
+            expectation_suite.render()
+        return expectation_suite
 
     def save_expectation_suite(
         self,
@@ -273,21 +420,15 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             None
         """
-        ge_cloud_id = expectation_suite.ge_cloud_id
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=ge_cloud_id
-            if ge_cloud_id is not None
-            else str(expectation_suite.ge_cloud_id),
+            ge_cloud_id=expectation_suite.ge_cloud_id,
+            resource_name=expectation_suite.expectation_suite_name,
         )
-        if (
-            self.expectations_store.has_key(key)  # noqa: W601
-            and not overwrite_existing
-        ):
-            raise ge_exceptions.DataContextError(
-                f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. "
-                f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
-            )
+
+        if not overwrite_existing:
+            self._validate_suite_unique_constaints_before_save(key)
+
         self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = (
             self._determine_if_expectation_suite_include_rendered_content(
@@ -296,7 +437,29 @@ class CloudDataContext(AbstractDataContext):
         )
         if include_rendered_content:
             expectation_suite.render()
-        self.expectations_store.set(key, expectation_suite, **kwargs)
+
+        response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        if isinstance(response, GeCloudResourceRef):
+            expectation_suite.ge_cloud_id = response.ge_cloud_id
+
+    def _validate_suite_unique_constaints_before_save(
+        self, key: GeCloudIdentifier
+    ) -> None:
+        ge_cloud_id = key.ge_cloud_id
+        if ge_cloud_id:
+            if self.expectations_store.has_key(key):  # noqa: W601
+                raise ge_exceptions.DataContextError(
+                    f"expectation_suite with GE Cloud ID {ge_cloud_id} already exists. "
+                    f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
+                )
+
+        suite_name = key.resource_name
+        existing_suite_names = self.list_expectation_suite_names()
+        if suite_name in existing_suite_names:
+            raise ge_exceptions.DataContextError(
+                f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
+            )
 
     @property
     def root_directory(self) -> Optional[str]:
@@ -307,72 +470,6 @@ class CloudDataContext(AbstractDataContext):
 
         """
         return self._context_root_directory
-
-    def _instantiate_datasource_from_config_and_update_project_config(
-        self,
-        name: str,
-        config: dict,
-        initialize: bool = True,
-        save_changes: bool = False,
-    ) -> Optional[Datasource]:
-        """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
-
-        Args:
-            name: Desired name for the datasource.
-            config: Config for the datasource.
-            initialize: Whether to initialize the datasource or return None.
-            save_changes: Whether to save the datasource config to the configured Datasource store.
-
-        Returns:
-            If initialize=True return an instantiated Datasource object, else None.
-        """
-
-        datasource_config: DatasourceConfig = datasourceConfigSchema.load(config)
-
-        if save_changes:
-
-            datasource_config["name"] = name
-            resource_ref: GeCloudResourceRef = self._datasource_store.create(  # type: ignore[assignment]
-                datasource_config
-            )
-            datasource_config.id = resource_ref.ge_cloud_id
-
-        self.config.datasources[name] = datasource_config  # type: ignore[index,assignment]
-
-        # Config must be persisted with ${VARIABLES} syntax but hydrated at time of use
-        substitutions: dict = self._determine_substitutions()
-        config = dict(datasourceConfigSchema.dump(datasource_config))
-
-        substituted_config_dict = substitute_all_config_variables(
-            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
-
-        # Round trip through schema validation and config creation to ensure "id" is present
-        #
-        # Chetan - 20220804 - This logic is utilized with other id-enabled objects and should
-        # be refactored to into the config/schema. Also, downstream methods should be refactored
-        # to accept the config object (as opposed to a dict).
-        substituted_config = DatasourceConfig(
-            **datasourceConfigSchema.load(substituted_config_dict)
-        )
-        schema_validated_substituted_config_dict = substituted_config.to_json_dict()
-
-        datasource: Optional[Datasource] = None
-        if initialize:
-            try:
-                datasource = self._instantiate_datasource_from_config(
-                    name=name, config=schema_validated_substituted_config_dict
-                )
-                self._cached_datasources[name] = datasource
-            except ge_exceptions.DatasourceInitializationError as e:
-                # Do not keep configuration that could not be instantiated.
-                if save_changes:
-                    self._datasource_store.delete(datasource_config)
-                # If the DatasourceStore uses an InlineStoreBackend, the config may already be updated
-                self.config.datasources.pop(name, None)  # type: ignore[union-attr]
-                raise e
-
-        return datasource
 
     def add_checkpoint(
         self,

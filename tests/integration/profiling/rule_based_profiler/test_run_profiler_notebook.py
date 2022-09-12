@@ -35,6 +35,8 @@ def clean_up_test_files(base_dir: str, paths: List[str]) -> None:
             os.remove(full_path)
 
 
+@pytest.mark.slow  # 19.49s
+@pytest.mark.e2e
 def test_run_rbp_notebook(tmp_path):
     """
     What does this test and why?
@@ -79,6 +81,8 @@ def test_run_rbp_notebook(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
+@pytest.mark.slow  # 8.92s
+@pytest.mark.e2e
 def test_run_data_assistants_notebook(tmp_path):
     """
     What does this test and why?
@@ -122,6 +126,8 @@ def test_run_data_assistants_notebook(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
+@pytest.mark.slow  # 5.72s
+@pytest.mark.e2e
 def test_run_self_initializing_expectations_notebook(tmp_path):
     """
     What does this test and why?
@@ -161,6 +167,7 @@ def test_run_self_initializing_expectations_notebook(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
+@pytest.mark.e2e
 def test_run_multibatch_inferred_asset_example_spark(tmp_path, spark_session):
     """
     What does this test and why?
@@ -210,6 +217,7 @@ def test_run_multibatch_inferred_asset_example_spark(tmp_path, spark_session):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
+@pytest.mark.e2e
 def test_run_multibatch_configured_asset_example_spark(tmp_path, spark_session):
     """
     What does this test and why?
@@ -258,6 +266,8 @@ def test_run_multibatch_configured_asset_example_spark(tmp_path, spark_session):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
+@pytest.mark.slow  # 7.41s
+@pytest.mark.e2e
 def test_run_multibatch_inferred_asset_example_pandas(tmp_path):
     """
     What does this test and why?
@@ -303,6 +313,8 @@ def test_run_multibatch_inferred_asset_example_pandas(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
+@pytest.mark.slow  # 7.53s
+@pytest.mark.e2e
 def test_run_multibatch_configured_asset_example_pandas(tmp_path):
     """
     What does this test and why?
@@ -348,12 +360,16 @@ def test_run_multibatch_configured_asset_example_pandas(tmp_path):
         clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
 
 
-def test_run_multibatch_sql_asset_example(tmp_path, sa, test_backends):
+@pytest.mark.slow  # 21s
+@pytest.mark.e2e
+def test_run_multibatch_sql_configured_asset_example(tmp_path, sa, test_backends):
     """
     What does this test and why?
     One of the resources we have for multi-batch Expectations is a Jupyter notebook that explains/shows the components
     in code. This test ensures the codepaths and examples described in the Notebook actually run and pass, nbconvert's
     `preprocess` function.
+
+    This test is for ConfiguredAssetSqlDataConnector
     """
     if "postgresql" not in test_backends:
         pytest.skip("testing multibatch in sql requires postgres backend")
@@ -363,7 +379,61 @@ def test_run_multibatch_sql_asset_example(tmp_path, sa, test_backends):
     base_dir: str = file_relative_path(
         __file__, "../../../test_fixtures/rule_based_profiler/example_notebooks"
     )
-    notebook_path: str = os.path.join(base_dir, "MultiBatchExample_SqlExample.ipynb")
+    notebook_path: str = os.path.join(
+        base_dir, "MultiBatchExample_ConfiguredAssetSQLExample_SQL.ipynb"
+    )
+    # temporary output notebook for traceback and debugging
+    output_notebook_path: str = os.path.join(
+        tmp_path, "MultiBatchExample_SqlExample_executed.ipynb"
+    )
+    with open(notebook_path) as f:
+        nb: NotebookNode = nbformat.read(f, as_version=4)
+
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=30, kernel_name="python3")
+
+    try:
+        ep.preprocess(nb, {"metadata": {"path": base_dir}})
+    except CellExecutionError:
+        msg: str = f'Error executing the notebook "{notebook_path}".\n\n'
+        msg += f'See notebook "{output_notebook_path}" for the traceback.'
+        raise GreatExpectationsError(msg)
+    finally:
+        with open(output_notebook_path, mode="w", encoding="utf-8") as f:
+            nbformat.write(nb, f)
+
+        paths_to_clean_up: List[str] = [
+            "great_expectations/expectations/tmp",
+            "great_expectations/expectations/.ge_store_backend_id",
+            "great_expectations/expectations/example_sql_suite.json",
+            "great_expectations/checkpoints/my_checkpoint.yml",
+            "great_expectations/uncommitted/data_docs",
+            "great_expectations/uncommitted/validations/example_sql_suite",
+        ]
+        clean_up_test_files(base_dir=base_dir, paths=paths_to_clean_up)
+
+
+@pytest.mark.slow  # 22s
+@pytest.mark.e2e
+def test_run_multibatch_sql_inferred_asset_example(tmp_path, sa, test_backends):
+    """
+    What does this test and why?
+    One of the resources we have for multi-batch Expectations is a Jupyter notebook that explains/shows the components
+    in code. This test ensures the codepaths and examples described in the Notebook actually run and pass, nbconvert's
+    `preprocess` function.
+
+    This test is for InferredAssetSqlDataConnector
+    """
+    if "postgresql" not in test_backends:
+        pytest.skip("testing multibatch in sql requires postgres backend")
+    else:
+        load_data_into_postgres_database(sa)
+
+    base_dir: str = file_relative_path(
+        __file__, "../../../test_fixtures/rule_based_profiler/example_notebooks"
+    )
+    notebook_path: str = os.path.join(
+        base_dir, "MultiBatchExample_InferredAssetSQLExample.ipynb"
+    )
     # temporary output notebook for traceback and debugging
     output_notebook_path: str = os.path.join(
         tmp_path, "MultiBatchExample_SqlExample_executed.ipynb"

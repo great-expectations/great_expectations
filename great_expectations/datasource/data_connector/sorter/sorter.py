@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, List
 
@@ -52,4 +53,4 @@ class Sorter:
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {"name": self.name, "reverse": self.reverse}
-        return str(doc_fields_dict)
+        return json.dumps(doc_fields_dict, indent=2)

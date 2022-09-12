@@ -95,53 +95,6 @@ def context_with_multiple_built_sites(empty_data_context):
     return context
 
 
-@pytest.fixture
-def context_with_multiple_local_sites_and_s3_site(empty_data_context):
-    context = empty_data_context
-    config = context.project_config_with_variables_substituted
-    multi_sites = {
-        "local_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/local_site/",
-            },
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-        },
-        "another_local_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/another_local_site/",
-            },
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-        },
-        "s3_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": "foo",
-            },
-            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-        },
-    }
-    config.data_docs_sites = multi_sites
-    context._project_config = config
-    obs = context.get_docs_sites_urls()
-    assert len(obs) == 2
-    assert obs[0]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
-    assert obs[0]["site_name"] == "local_site"
-
-    assert obs[1]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/another_local_site/index.html"
-    )
-    assert obs[1]["site_name"] == "another_local_site"
-
-    return context
-
-
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_open_docs_with_two_local_sites(
     mock_webbrowser, context_with_multiple_built_sites
