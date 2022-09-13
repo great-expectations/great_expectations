@@ -7,6 +7,7 @@ from great_expectations.core.batch import BatchDefinition, IDDict
 from great_expectations.datasource.data_connector.sorter import (
     CustomListSorter,
     DateTimeSorter,
+    DictionarySorter,
     LexicographicSorter,
     NumericSorter,
     Sorter,
@@ -94,6 +95,71 @@ def example_batch_def_list():
         batch_identifiers=IDDict(
             {"name": "james", "timestamp": "20200713", "price": "1567"}
         ),
+    )
+    return [a, b, c, d, e, f, g, h, i, j]
+
+
+@pytest.fixture()
+def example_hierarchical_batch_def_list():
+    a = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="a",
+        data_asset_name="alex_20220913_1000",
+        batch_identifiers=IDDict({"date": {"month": 1, "year": 2022}}),
+    )
+    b = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="b",
+        data_asset_name="will_20220913_1002",
+        batch_identifiers=IDDict({"date": {"year": 2022, "month": 4}}),
+    )
+    c = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="c",
+        data_asset_name="james_20220913_1003",
+        batch_identifiers=IDDict({"date": {"month": 1, "year": 2021}}),
+    )
+    d = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="d",
+        data_asset_name="james_20220913_1567",
+        batch_identifiers=IDDict({"date": {"month": 6, "year": 2022}}),
+    )
+    e = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="e",
+        data_asset_name="nathan_20220913_1500",
+        batch_identifiers=IDDict({"date": {"year": 2021, "month": 3}}),
+    )
+    f = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="f",
+        data_asset_name="abe_20220913_1040",
+        batch_identifiers=IDDict({"date": {"month": 2, "year": 2021}}),
+    )
+    g = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="g",
+        data_asset_name="alex_20220913_1300",
+        batch_identifiers=IDDict({"date": {"year": 2021, "month": 4}}),
+    )
+    h = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="h",
+        data_asset_name="james_20220913_1009",
+        batch_identifiers=IDDict({"date": {"month": 5, "year": 2022}}),
+    )
+    i = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="i",
+        data_asset_name="nathan_20220913_1900",
+        batch_identifiers=IDDict({"date": {"year": 2022, "month": 3}}),
+    )
+    j = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="j",
+        data_asset_name="will_20220913_1001",
+        batch_identifiers=IDDict({"date": {"month": 2, "year": 2022}}),
     )
     return [a, b, c, d, e, f, g, h, i, j]
 
@@ -256,6 +322,22 @@ def test_custom_list(periodic_table_of_elements):
     )
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [Hydrogen, Helium, Lithium]
+
+
+def test_dictionary(example_hierarchical_batch_def_list):
+    [a, b, c, d, e, f, g, h, i, j] = example_hierarchical_batch_def_list
+    batch_list = [a, b, c, d, e, f, g, h, i, j]
+    my_sorter = DictionarySorter(
+        name="date", orderby="desc", key_reference_list=["year", "month"]
+    )
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
+    assert sorted_batch_list == [d, h, b, i, j, a, g, e, f, c]
+
+    my_sorter = DictionarySorter(
+        name="date", orderby="asc", key_reference_list=["year", "month"]
+    )
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
+    assert sorted_batch_list == [c, f, e, g, a, j, i, b, h, d]
 
 
 def test_example_file_list_sorters(example_batch_def_list):

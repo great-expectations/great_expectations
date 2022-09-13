@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, List
+from typing import Any, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
