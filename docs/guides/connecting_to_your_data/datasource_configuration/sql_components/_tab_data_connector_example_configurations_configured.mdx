@@ -2,7 +2,7 @@ import TipConfiguredDataConnectorOverview from '../components/_tip_configured_da
 import PartNameTheDataConnector from '../components/_part_name_the_data_connector.mdx'
 import PartDataConnectorKeysOverview from './_part_data_connector_keys_overview.mdx'
 import TipCustomDataConnectorModuleName from '../components/_tip_custom_data_connector_module_name.mdx'
-import TipUsingAConfiguredConnectorLikeAnInferredConnector from '../components/_tip_using_a_configured_connector_like_an_inferred_connector.mdx'
+import NoteOptionalDataConnectorKeys from './_note_optional_data_connector_keys.mdx'
 
 <TipConfiguredDataConnectorOverview />
 
@@ -58,10 +58,4 @@ datasource_config: dict = {
 }
 ```
 
-:::note
-This guide will go over the optional `data_connector` keys in the section [Configure your Data Connector's Data Assets](#8-configure-your-data-connectors-data-assets).
-
-These optional keys can be defined at either the Data Connector or the Data Asset level.
-
-If defined at the Data Connector level, they will be applied to all subsequent Data Assets.  If defined at the Data Asset level, they will apply only to the Data Asset they are defined for.  Definitions for these optional keys at the Data Asset level will supersede the definitions at the Data Connector level, if these keys have been defined for the Data Connector.
-:::
+<NoteOptionalDataConnectorKeys />

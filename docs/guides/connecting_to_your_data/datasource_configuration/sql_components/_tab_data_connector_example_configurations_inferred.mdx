@@ -1,0 +1,58 @@
+import TipInferredDataConnectorOverview from '../components/_tip_inferred_data_connector_overview.mdx'
+import PartNameTheDataConnector from '../components/_part_name_the_data_connector.mdx'
+import PartDataConnectorKeysOverview from './_part_data_connector_keys_overview.mdx'
+import TipCustomDataConnectorModuleName from '../components/_tip_custom_data_connector_module_name.mdx'
+import NoteOptionalDataConnectorKeys from './_note_optional_data_connector_keys.mdx'
+
+<TipInferredDataConnectorOverview />
+
+<PartNameTheDataConnector data_connector_name="name_of_my_inferred_data_connector" />
+
+At this point, your configuration should look like:
+
+```python
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "SparkDFExecutionEngine",
+        "module_name": "great_expectations.execution_engine",
+    },
+    "data_connectors": {
+        "name_of_my_inferred_data_connector": {}
+        }
+    }
+}
+```
+
+<PartDataConnectorKeysOverview data_connector_type="InferredAssetSqlDataConnector" data_connector_name="name_of_my_inferred_data_connector" inferred={true} configured={false} runtime={false} />
+
+For this example, you will be using the `InferredAssetSqlDataConnector` as your `class_name`.  This is a subclass of the `InferredAssetDataConnector` that is specialized to support SQL Execution Engines, such as the `SqlAlchemyExecutionEngine`.  This key/value entry will therefore look like:
+
+```python
+        "class_name": "InferredAssetSqlDataConnector",
+```
+
+<TipCustomDataConnectorModuleName />
+
+With this value added your full configuration should now look like:
+
+```python
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "SparkDFExecutionEngine",
+        "module_name": "great_expectations.execution_engine",
+    },
+    "data_connectors": {
+        "name_of_my_inferred_data_connector": {
+            "class_name": "InferredAssetSqlDataConnector",
+        }
+    }
+}
+```
+
+<NoteOptionalDataConnectorKeys />>
