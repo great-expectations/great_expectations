@@ -155,11 +155,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         column: str = accessor_domain_kwargs["column"]
 
         value_counts_df: pyspark_sql_DataFrame = (
-            df.select(column)
-            .where(F.col(column).isNotNull())
-            .where(~F.isnan(F.col(column)))
-            .groupBy(column)
-            .count()
+            df.select(column).where(F.col(column).isNotNull()).groupBy(column).count()
         )
 
         if sort == "value":
