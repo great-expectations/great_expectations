@@ -62,6 +62,9 @@ class SplitterMethod(enum.Enum):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
 
+    def __hash__(self: SplitterMethod):
+        return hash(self.value)
+
 
 class DataSplitter(abc.ABC):
     """Abstract base class containing methods for splitting data accessible via Execution Engines.
