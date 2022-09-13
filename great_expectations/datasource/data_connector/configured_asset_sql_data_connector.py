@@ -219,9 +219,17 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             Dict[str, Union[str, list]]
         ] = data_asset.get("splitter_kwargs")
 
+        # if sorters have been explicitly passed to the data connector use them for sorting, otherwise sorting
+        # behavior can be inferred from splitter_method.
+        if self.sorters is not None and len(self.sorters) > 0:
+            batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list,
+                splitter_method_name=None,
+                splitter_kwargs=None,
+            )
         # if splitter_method and splitter_kwargs are configured at the asset level use that, otherwise look for
         # splitter_method and splitter_kwargs at the data connector level.
-        if data_asset_splitter_method is not None:
+        elif data_asset_splitter_method is not None:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list,
                 splitter_method_name=data_asset_splitter_method,
@@ -412,8 +420,8 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
     def _sort_batch_definition_list(
         self,
         batch_definition_list: List[BatchDefinition],
-        splitter_method_name: str,
-        splitter_kwargs: Dict[str, Union[str, dict, None]],
+        splitter_method_name: Optional[str],
+        splitter_kwargs: Optional[Dict[str, Union[str, dict, None]]],
     ) -> List[BatchDefinition]:
         """Sort a list of batch definitions given the splitter method used to define them.
 
@@ -425,9 +433,13 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
         Returns:
             a list of batch definitions sorted depending on splitter method used to define them.
         """
-        sorters: List[Sorter] = self._get_sorters_from_splitter_method_name(
-            splitter_method_name=splitter_method_name, splitter_kwargs=splitter_kwargs
-        )
+        if splitter_method_name is not None and splitter_kwargs is not None:
+            sorters = self._get_sorters_from_splitter_method_name(
+                splitter_method_name=splitter_method_name,
+                splitter_kwargs=splitter_kwargs,
+            )
+        else:
+            sorters = self.sorters
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(
                 batch_definitions=batch_definition_list
