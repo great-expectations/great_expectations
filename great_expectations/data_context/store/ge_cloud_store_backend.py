@@ -47,6 +47,55 @@ class ResponsePayload(TypedDict):
 AnyPayload = Union[ResponsePayload, ErrorPayload]
 
 
+class HTTPHandler:
+    def __init__(self, access_token: str, timeout: int = 20) -> None:
+        self._headers = self._init_headers(access_token)
+        self._timeout = timeout
+
+    def _init_headers(self, access_token: str) -> dict:
+        headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {access_token}",
+            "Gx-Version": __version__,
+        }
+        return headers
+
+    def get(self, url: str, params: Optional[dict] = None) -> requests.Response:
+        response = requests.get(
+            url=url, params=params, headers=self._headers, timeout=self._timeout
+        )
+        response.raise_for_status()
+        return response
+
+    def post(self, url: str, json: dict) -> requests.Response:
+        response = requests.post(
+            url, json=json, headers=self._headers, timeout=self._timeout
+        )
+        response.raise_for_status()
+        return response
+
+    def put(self, url: str, json: dict) -> requests.Response:
+        response = requests.put(
+            url, json=json, headers=self._headers, timeout=self._timeout
+        )
+        response.raise_for_status()
+        return response
+
+    def patch(self, url: str, json: dict) -> requests.Response:
+        response = requests.put(
+            url, json=json, headers=self._headers, timeout=self._timeout
+        )
+        response.raise_for_status()
+        return response
+
+    def delete(self, url: str, json: dict) -> requests.Response:
+        response = requests.delete(
+            url, json=json, headers=self._headers, timeout=self._timeout
+        )
+        response.raise_for_status()
+        return response
+
+
 def _get_user_friendly_error_message(
     http_exc: requests.exceptions.HTTPError,
 ) -> str:
@@ -142,8 +191,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     DEFAULT_BASE_URL: str = "https://app.greatexpectations.io/"
 
-    TIMEOUT: int = 20
-
     def __init__(
         self,
         ge_cloud_credentials: Dict,
@@ -196,6 +243,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
+        self._http_handler = HTTPHandler(
+            access_token=self._ge_cloud_credentials["access_token"]
+        )
+
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
         self._config = {
@@ -211,14 +262,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
         filter_properties_dict(properties=self._config, inplace=True)
 
-    @property
-    def headers(self) -> Dict[str, str]:
-        return {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f'Bearer {self.ge_cloud_credentials.get("access_token")}',
-            "Gx-Version": __version__,
-        }
-
     def _get(self, key: Tuple[str, ...]) -> ResponsePayload:  # type: ignore[override]
         ge_cloud_url = self.get_url_for_key(key=key)
         params: Optional[dict] = None
@@ -228,13 +271,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 params = {"name": key[2]}
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
-            response = requests.get(
+            response = self._http_handler.get(
                 ge_cloud_url,
-                headers=self.headers,
                 params=params,
-                timeout=self.TIMEOUT,
             )
-            response.raise_for_status()
             return response.json()
         except json.JSONDecodeError as jsonError:
             logger.debug(
@@ -286,9 +326,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             url = urljoin(f"{url}/", ge_cloud_id)
 
         try:
-            response = requests.put(
-                url, json=data, headers=self.headers, timeout=self.TIMEOUT
-            )
+            response = self._http_handler.put(url, json=data)
             response_status_code = response.status_code
 
             # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
@@ -298,9 +336,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code == 405
                 and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
             ):
-                response = requests.patch(
-                    url, json=data, headers=self.headers, timeout=self.TIMEOUT
-                )
+                response = self._http_handler.patch(url, json=data)
                 response_status_code = response.status_code
 
             response.raise_for_status()
@@ -379,9 +415,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"organizations/" f"{organization_id}/" f"{hyphen(resource_name)}",
         )
         try:
-            response = requests.post(
-                url, json=data, headers=self.headers, timeout=self.TIMEOUT
-            )
+            response = self._http_handler.post(url, json=data)
             response.raise_for_status()
             response_json = response.json()
 
@@ -434,7 +468,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         try:
-            response = requests.get(url, headers=self.headers, timeout=self.TIMEOUT)
+            response = self._http_handler.get(url=url)
             response.raise_for_status()
             response_json = response.json()
 
@@ -499,9 +533,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{ge_cloud_id}",
         )
         try:
-            response = requests.delete(
-                url, json=data, headers=self.headers, timeout=self.TIMEOUT
-            )
+            response = self._http_handler.delete(url, json=data)
             response.raise_for_status()
             return True
         except requests.HTTPError as http_exc:
