@@ -9,6 +9,7 @@ from great_expectations.core.batch import (
     IDDict,
 )
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.datasource.data_connector.asset.asset import Asset
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
@@ -109,9 +110,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self._splitter_method = splitter_method
         self._splitter_kwargs = splitter_kwargs
 
-        self._sorters = build_sorters_from_config(config_list=sorters)
-        self._validate_sorters_configuration()
-
         self._sampling_method = sampling_method
         self._sampling_kwargs = sampling_kwargs
 
@@ -120,6 +118,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self._refresh_data_assets_cache(assets=assets)
 
         self._data_references_cache = {}
+
+        self._sorters = build_sorters_from_config(config_list=sorters)
+        self._validate_sorters_configuration()
 
     @property
     def execution_engine(self) -> SqlAlchemyExecutionEngine:
@@ -136,6 +137,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     @property
     def splitter_kwargs(self) -> Optional[dict]:
         return self._splitter_kwargs
+
+    @property
+    def sorters(self) -> Optional[dict]:
+        return self._sorters
 
     @property
     def sampling_method(self) -> Optional[str]:
@@ -366,6 +371,28 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             return [NumericSorter(name=splitter_kwargs["column_name"])]
         else:
             return []
+
+    def _validate_sorters_configuration(self) -> None:
+        if self.sorters is not None and len(self.sorters) > 0:
+            for data_asset_name, data_asset_config in self.assets.items():
+                group_names: Optional[List[str]] = data_asset_config.get("group_names")
+                if any(
+                    [
+                        sorter_name not in group_names
+                        for sorter_name in self.sorters.keys()
+                    ]
+                ):
+                    raise ge_exceptions.DataConnectorError(
+                        f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
+configured group_name.
+                        """
+                    )
+                if len(group_names) < len(self.sorters):
+                    raise ge_exceptions.DataConnectorError(
+                        f"""DataConnector "{self.name}" is configured with {len(group_names)} group names;
+this is fewer than number of sorters specified, which is {len(self.sorters)}.
+                        """
+                    )
 
     @staticmethod
     def _get_splitter_method_name(splitter_method_name: str) -> str:
