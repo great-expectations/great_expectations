@@ -18,10 +18,9 @@ class DictionarySorter(Sorter):
         key_reference_list: Optional[List[Any]] = None,
     ) -> None:
         super().__init__(name=name, orderby=orderby)
-        self._order_keys_by = order_keys_by
         if order_keys_by is None or order_keys_by == "asc":
             reverse_keys = False
-        elif orderby == "desc":
+        elif order_keys_by == "desc":
             reverse_keys = True
         else:
             raise ge_exceptions.SorterError(
@@ -40,8 +39,8 @@ class DictionarySorter(Sorter):
         else:
             batch_keys = [
                 key
-                for key in batch_identifiers[self.name].keys()
-                if key in self.key_reference_list
+                for key in self.key_reference_list
+                if key in batch_identifiers[self.name].keys()
             ]
         batch_values: List[Any] = [
             batch_identifiers[self.name][key] for key in batch_keys
