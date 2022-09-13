@@ -480,7 +480,7 @@ class AbstractDataContext(ABC):
         datasource_name: str = datasource.name
 
         updated_datasource_config_from_store: DatasourceConfig = self._datasource_store.set(  # type: ignore[attr-defined]
-            key=None, config=datasource_config
+            key=None, value=datasource_config
         )
         # Use the updated datasource config, since the store may populate additional info on update.
         self.config.datasources[datasource_name] = updated_datasource_config_from_store  # type: ignore[index,assignment]
