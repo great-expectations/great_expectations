@@ -19,7 +19,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.datasource import BaseDatasource, Datasource
+from great_expectations.datasource import BaseDatasource, Datasource, LegacyDatasource
 from great_expectations.datasource.datasource_serializer import (
     JsonDatasourceConfigSerializer,
 )
