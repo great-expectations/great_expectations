@@ -529,7 +529,24 @@ def test_quantiles_metric_spark(spark_session):
 
 
 def test_column_histogram_metric_pd():
-    engine = build_pandas_engine(pd.DataFrame({"a": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}))
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                ]
+            }
+        )
+    )
 
     metrics: dict = {}
 
@@ -557,7 +574,37 @@ def test_column_histogram_metric_pd():
 
 
 def test_column_histogram_metric_sa(sa):
-    engine = build_sa_engine(pd.DataFrame({"a": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}), sa)
+    engine = build_sa_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                ],
+                "b": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+            }
+        ),
+        sa,
+    )
 
     metrics: dict = {}
 
@@ -583,11 +630,42 @@ def test_column_histogram_metric_sa(sa):
     metrics.update(results)
     assert results == {desired_metric.id: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
 
+    desired_metric = MetricConfiguration(
+        metric_name="column.histogram",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "bins": [0.0],
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [10]}
+
 
 def test_column_histogram_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
-        df=pd.DataFrame({"a": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}),
+        df=pd.DataFrame(
+            {
+                "a": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                ]
+            }
+        ),
         batch_id="my_id",
     )
 
@@ -4011,7 +4089,7 @@ def test_value_counts_metric_spark(spark_session):
     )
 
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert pd.Series(index=[1.0, 2.0, 3.0, np.nan], data=[2, 2, 2, 1]).equals(
+    assert pd.Series(index=[1.0, 2.0, 3.0], data=[2, 2, 2]).equals(
         metrics[desired_metric.id]
     )
 
