@@ -200,7 +200,7 @@ def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_b
                 expectation_suite_name="my_expectations",
             ).batches
         )
-        == 30
+        == 34
     )
 
     # A BatchRequest specified without a data_connector_query will return all 30 batches.
@@ -215,7 +215,7 @@ def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_b
                 expectation_suite_name="my_expectations",
             ).batches
         )
-        == 30
+        == 34
     )
 
     # Failed specification using an incomplete BatchRequest
