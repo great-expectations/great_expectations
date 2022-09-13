@@ -364,9 +364,47 @@ def test_cloud_data_context_add_datasource(
         assert stored_data_connector.name == data_connector_name
 
 
-# TODO: AJB 20220913 add correct markers / parametrization here
-def test_non_cloud_backed_data_context_save_datasource_empty_context():
-    raise NotImplementedError
+@pytest.mark.unit
+def test_non_cloud_backed_data_context_save_datasource_empty_store(
+    empty_data_context: DataContext,
+    datasource_config_with_names: DatasourceConfig,
+):
+    context: DataContext = empty_data_context
+    # Make sure the fixture has the right configuration
+    assert len(context.list_datasources()) == 0
+
+    datasource: Datasource = context._build_datasource_from_config(datasource_config_with_names)
+    datasource_name: str = datasource.name
+
+    with patch("great_expectations.data_context.store.datasource_store.DatasourceStore.set", autospec=True, return_value=datasource_config_with_names):
+        updated_datasource: Union[LegacyDatasource, BaseDatasource] = context.save_datasource(datasource)
+
+        # Make sure the datasource config got into the context config
+        assert len(context.config.datasources) == 1
+        assert context.config.datasources[datasource_name] == datasource_config_with_names
+
+        cached_datasource = context._cached_datasources[datasource_name]
+
+        # Make sure the datasource got into the cache
+        assert len(context._cached_datasources) == 1
+
+        # Make sure the stored and returned datasource is the same one as the cached datasource
+        assert id(updated_datasource) == id(cached_datasource)
+        assert updated_datasource == cached_datasource
+
+        # Make sure the stored and returned datasource is a different instance
+        assert not id(cached_datasource) == id(datasource)
+        assert not id(updated_datasource) == id(datasource)
+        assert not cached_datasource == datasource
+        assert not updated_datasource == datasource
+
+        # Make sure the stored and returned datasource are otherwise equal
+        serializer: AbstractConfigSerializer = DictConfigSerializer(schema=datasourceConfigSchema)
+        updated_datasource_dict = serializer.serialize(datasourceConfigSchema.load(updated_datasource.config))
+        orig_datasource_dict = serializer.serialize(datasourceConfigSchema.load(datasource.config))
+
+        for attribute in ("name", "execution_engine", "data_connectors"):
+            assert updated_datasource_dict[attribute] == orig_datasource_dict[attribute]
 
 
 # TODO: AJB 20220913 add correct markers / parametrization here
@@ -401,8 +439,6 @@ def test_cloud_backed_data_context_save_datasource_empty_store(
     data_context_type: Type[AbstractDataContext],
     datasource_config_with_names: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
-    mocked_datasource_post_response: Callable[[], MockResponse],
-    mocked_datasource_get_response: Callable[[], MockResponse],
     request: "FixtureRequest"
 ):
     """Any Data Context in cloud mode should save to the cloud backed Datasource store when calling save_datasource. When saving, it should use the id from the response to create the datasource, and update both the config and cache."""
@@ -440,6 +476,8 @@ def test_cloud_backed_data_context_save_datasource_empty_store(
         # Make sure the stored and returned datasource is a different instance (now has ids)
         assert not id(cached_datasource) == id(datasource)
         assert not id(updated_datasource) == id(datasource)
+        assert not cached_datasource == datasource
+        assert not updated_datasource == datasource
 
         # Make sure the stored and returned datasource are otherwise equal
         serializer: AbstractConfigSerializer = DictConfigSerializer(schema=datasourceConfigSchema)
