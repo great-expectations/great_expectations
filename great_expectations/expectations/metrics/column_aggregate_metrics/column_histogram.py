@@ -83,8 +83,10 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                         [
                             (
                                 sa.and_(
-                                    bins[0] - np.finfo(float).eps < sa.column(column),
-                                    sa.column(column) < bins[0] + np.finfo(float).eps,
+                                    float(bins[0] - np.finfo(float).eps)
+                                    < sa.column(column),
+                                    sa.column(column)
+                                    < float(bins[0] + np.finfo(float).eps),
                                 ),
                                 1,
                             )
