@@ -29,6 +29,9 @@ class GESqlDialect(enum.Enum):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
 
+    def __hash__(self: GESqlDialect):
+        return hash(self.value)
+
     @classmethod
     def _missing_(cls, value: Any) -> None:
         try:
