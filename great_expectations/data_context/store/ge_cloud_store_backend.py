@@ -230,6 +230,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 ge_cloud_url,
                 params=params,
             )
+            response.raise_for_status()
             return response.json()
         except json.JSONDecodeError as jsonError:
             logger.debug(
