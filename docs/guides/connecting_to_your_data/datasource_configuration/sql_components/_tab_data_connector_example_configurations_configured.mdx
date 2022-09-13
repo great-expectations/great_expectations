@@ -1,0 +1,67 @@
+import TipConfiguredDataConnectorOverview from '../components/_tip_configured_data_connector_overview.mdx'
+import PartNameTheDataConnector from '../components/_part_name_the_data_connector.mdx'
+import PartDataConnectorKeysOverview from './_part_data_connector_keys_overview.mdx'
+import TipCustomDataConnectorModuleName from '../components/_tip_custom_data_connector_module_name.mdx'
+import TipUsingAConfiguredConnectorLikeAnInferredConnector from '../components/_tip_using_a_configured_connector_like_an_inferred_connector.mdx'
+
+<TipConfiguredDataConnectorOverview />
+
+<PartNameTheDataConnector data_connector_name="name_of_my_configured_data_connector" />
+
+At this point, your configuration should look like:
+
+```python
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "SqlAlchemyExecutionEngine",
+        "module_name": "great_expectations.execution_engine",
+        "connection_string": CONNECTION_STRING,
+    },
+    "data_connectors": {
+        "name_of_my_configured_data_connector": {}
+        }
+    }
+}
+```
+
+<PartDataConnectorKeysOverview data_connector_type="ConfiguredAssetSqlDataConnector" data_connector_name="name_of_my_configured_data_connector" inferred={false} configured={true} runtime={false} />
+
+For this example, you will be using the `ConfiguredAssetSqlDataConnector` as your `class_name`.  This is a subclass of the `ConfiguredAssetDataConnector` that is specialized to support SQL Execution Engines, such as the `SqlAlchemyExecutionEngine`.  This key/value entry will therefore look like:
+
+```python
+        "class_name": "ConfiguredAssetSqlDataConnector",
+```
+
+<TipCustomDataConnectorModuleName />
+
+With this value added, along with a blank dictionary for `assets`, your full configuration should now look like:
+
+```python
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "SqlAlchemyExecutionEngine",
+        "module_name": "great_expectations.execution_engine",
+        "connection_string": CONNECTION_STRING,
+    },
+    "data_connectors": {
+        "name_of_my_configured_data_connector": {
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "assets": {}
+        }
+    }
+}
+```
+
+:::note
+This guide will go over the optional `data_connector` keys in the section [Configure your Data Connector's Data Assets](#8-configure-your-data-connectors-data-assets).
+
+These optional keys can be defined at either the Data Connector or the Data Asset level.
+
+If defined at the Data Connector level, they will be applied to all subsequent Data Assets.  If defined at the Data Asset level, they will apply only to the Data Asset they are defined for.  Definitions for these optional keys at the Data Asset level will supersede the definitions at the Data Connector level, if these keys have been defined for the Data Connector.
+:::
