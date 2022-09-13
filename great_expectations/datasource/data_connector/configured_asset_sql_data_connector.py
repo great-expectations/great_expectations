@@ -9,7 +9,6 @@ from great_expectations.core.batch import (
     IDDict,
 )
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.datasource.data_connector.asset.asset import Asset
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
