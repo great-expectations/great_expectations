@@ -266,36 +266,6 @@ stages:
               eval ${PYTEST}
             displayName: 'Pytest Spark'
 
-      - job: test_cloud
-        dependsOn: [ make_suffix, build_push ]
-        condition: succeeded()
-        strategy:
-          matrix:
-            Python37:
-              python.version: '3.7'
-            Python38:
-              python.version: '3.8'
-            Python39:
-              python.version: '3.9'
-        variables:
-          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
-        steps:
-          - bash: |
-              # These are integration/E2E tests that are specific to Great Expectations Cloud.
-              # In order to ensure coverage, we run them during each CI/CD cycle.
-              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PYTEST="docker run -e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) "
-              PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) "
-              PYTEST+="greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest --random-order --cloud -m \"cloud and e2e\""
-              echo ${PYTEST}
-              eval ${PYTEST}
-            env:
-              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
-              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
-              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
-            displayName: 'Pytest cloud integration'
-
       - job: test_mysql
         dependsOn: [ make_suffix, build_push ]
         condition: succeeded()
