@@ -108,6 +108,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self._include_schema_name = include_schema_name
         self._splitter_method = splitter_method
         self._splitter_kwargs = splitter_kwargs
+
+        self._sorters = build_sorters_from_config(config_list=sorters)
+
         self._sampling_method = sampling_method
         self._sampling_kwargs = sampling_kwargs
 
@@ -117,7 +120,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         self._data_references_cache = {}
 
-        self._sorters = build_sorters_from_config(config_list=sorters)
         self._validate_sorters_configuration()
 
     @property
@@ -209,6 +211,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         data_connector_splitter_kwargs: Optional[
             Dict[str, Union[str, list]]
         ] = self.splitter_kwargs
+        data_connector_sorters: Optional[dict] = self.sorters
         data_asset: Dict[str, Union[str, list, None]] = self.assets[
             batch_request.data_asset_name
         ]
@@ -216,14 +219,23 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         data_asset_splitter_kwargs: Optional[
             Dict[str, Union[str, list]]
         ] = data_asset.get("splitter_kwargs")
+        data_asset_sorters: Optional[dict] = data_asset.get("sorters")
 
-        # if sorters have been explicitly passed to the data connector use them for sorting, otherwise sorting
-        # behavior can be inferred from splitter_method.
-        if self.sorters is not None and len(self.sorters) > 0:
+        # if sorters have been explicitly passed to the data connector or data asset use them for sorting,
+        # otherwise sorting behavior can be inferred from splitter_method.
+        if data_asset_sorters is not None and len(data_asset_sorters) > 0:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list,
                 splitter_method_name=None,
                 splitter_kwargs=None,
+                sorters=data_asset_sorters,
+            )
+        elif data_connector_sorters is not None and len(data_connector_sorters) > 0:
+            batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list,
+                splitter_method_name=None,
+                splitter_kwargs=None,
+                sorters=data_connector_sorters,
             )
         # if splitter_method and splitter_kwargs are configured at the asset level use that, otherwise look for
         # splitter_method and splitter_kwargs at the data connector level.
@@ -232,12 +244,14 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 batch_definition_list=batch_definition_list,
                 splitter_method_name=data_asset_splitter_method,
                 splitter_kwargs=data_asset_splitter_kwargs,
+                sorters=None,
             )
         elif data_connector_splitter_method is not None:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list,
                 splitter_method_name=data_connector_splitter_method,
                 splitter_kwargs=data_connector_splitter_kwargs,
+                sorters=None,
             )
 
         if batch_request.data_connector_query is not None:
@@ -429,6 +443,7 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
         batch_definition_list: List[BatchDefinition],
         splitter_method_name: Optional[str],
         splitter_kwargs: Optional[Dict[str, Union[str, dict, None]]],
+        sorters: Optional[dict],
     ) -> List[BatchDefinition]:
         """Sort a list of batch definitions given the splitter method used to define them.
 
@@ -436,6 +451,7 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
             batch_definition_list: an unsorted list of batch definitions.
             splitter_method_name: splitter name used to define the batches, starting with or without preceding `_`.
             splitter_kwargs: splitter kwargs dictionary for splitter directives.
+            sorters:
 
         Returns:
             a list of batch definitions sorted depending on splitter method used to define them.
@@ -446,7 +462,7 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
                 splitter_kwargs=splitter_kwargs,
             )
         else:
-            sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
+            sorters: Iterator[Sorter] = reversed(list(sorters.values()))
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(
                 batch_definitions=batch_definition_list
@@ -463,6 +479,10 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
             data_asset_name: str
             data_asset_config: dict
             for data_asset_name, data_asset_config in assets.items():
+                sorters = data_asset_config.get("sorters")
+                if sorters is not None:
+                    sorters = build_sorters_from_config(config_list=sorters)
+
                 aux_config: dict = {
                     "splitter_method": data_asset_config.get(
                         "splitter_method", self.splitter_method
@@ -476,6 +496,7 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     "sampling_kwargs": data_asset_config.get(
                         "sampling_kwargs", self.sampling_kwargs
                     ),
+                    "sorters": sorters or self.sorters,
                 }
 
                 deep_filter_properties_iterable(

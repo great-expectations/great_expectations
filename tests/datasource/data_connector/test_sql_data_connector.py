@@ -2015,6 +2015,24 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
             """,
             [{"date": {"month": 3}}, {"date": {"month": 1}}],
         ),
+        (
+            """
+    name: my_sql_data_connector
+    datasource_name: my_test_datasource
+    assets:
+        table_partitioned_by_date_column__A:
+            splitter_method: split_on_date_parts
+            splitter_kwargs:
+                column_name: date
+                date_parts:
+                    - month
+            sorters:
+                - class_name: DictionarySorter
+                  name: date
+                  orderby: desc
+            """,
+            [{"date": {"month": 3}}, {"date": {"month": 1}}],
+        ),
     ],
 )
 def test_ConfiguredAssetSqlDataConnector_return_all_batch_definitions_sorted(
