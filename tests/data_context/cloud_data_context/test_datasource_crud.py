@@ -1,13 +1,20 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
-from typing import Callable, Type, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Type, Union
 from unittest.mock import patch
 
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.core.serializer import AbstractConfigSerializer, DictConfigSerializer
-from great_expectations.data_context import BaseDataContext, CloudDataContext, AbstractDataContext
+from great_expectations.core.serializer import (
+    AbstractConfigSerializer,
+    DictConfigSerializer,
+)
+from great_expectations.data_context import (
+    AbstractDataContext,
+    BaseDataContext,
+    CloudDataContext,
+)
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
@@ -373,15 +380,25 @@ def test_non_cloud_backed_data_context_save_datasource_empty_store(
     # Make sure the fixture has the right configuration
     assert len(context.list_datasources()) == 0
 
-    datasource: Datasource = context._build_datasource_from_config(datasource_config_with_names)
+    datasource: Datasource = context._build_datasource_from_config(
+        datasource_config_with_names
+    )
     datasource_name: str = datasource.name
 
-    with patch("great_expectations.data_context.store.datasource_store.DatasourceStore.set", autospec=True, return_value=datasource_config_with_names):
-        updated_datasource: Union[LegacyDatasource, BaseDatasource] = context.save_datasource(datasource)
+    with patch(
+        "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
+        autospec=True,
+        return_value=datasource_config_with_names,
+    ):
+        updated_datasource: Union[
+            LegacyDatasource, BaseDatasource
+        ] = context.save_datasource(datasource)
 
         # Make sure the datasource config got into the context config
         assert len(context.config.datasources) == 1
-        assert context.config.datasources[datasource_name] == datasource_config_with_names
+        assert (
+            context.config.datasources[datasource_name] == datasource_config_with_names
+        )
 
         cached_datasource = context._cached_datasources[datasource_name]
 
@@ -399,9 +416,15 @@ def test_non_cloud_backed_data_context_save_datasource_empty_store(
         assert not updated_datasource == datasource
 
         # Make sure the stored and returned datasource are otherwise equal
-        serializer: AbstractConfigSerializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        updated_datasource_dict = serializer.serialize(datasourceConfigSchema.load(updated_datasource.config))
-        orig_datasource_dict = serializer.serialize(datasourceConfigSchema.load(datasource.config))
+        serializer: AbstractConfigSerializer = DictConfigSerializer(
+            schema=datasourceConfigSchema
+        )
+        updated_datasource_dict = serializer.serialize(
+            datasourceConfigSchema.load(updated_datasource.config)
+        )
+        orig_datasource_dict = serializer.serialize(
+            datasourceConfigSchema.load(datasource.config)
+        )
 
         for attribute in ("name", "execution_engine", "data_connectors"):
             assert updated_datasource_dict[attribute] == orig_datasource_dict[attribute]
@@ -418,23 +441,35 @@ def test_non_cloud_backed_data_context_save_datasource_overwrite_existing(
     assert len(context.list_datasources()) == 0
 
     # 1. Add datasource to empty context
-    serializer: AbstractConfigSerializer = DictConfigSerializer(schema=datasourceConfigSchema)
-    datasource_config_with_names_dict = serializer.serialize(datasource_config_with_names)
+    serializer: AbstractConfigSerializer = DictConfigSerializer(
+        schema=datasourceConfigSchema
+    )
+    datasource_config_with_names_dict = serializer.serialize(
+        datasource_config_with_names
+    )
     context.add_datasource(**datasource_config_with_names_dict)
     assert len(context.list_datasources()) == 1
 
     # 2. Create new datasource (slightly different, but same name) and call context.save_datasource()
     datasource_config_with_names_modified = copy.deepcopy(datasource_config_with_names)
-    data_connector_name: str = tuple(datasource_config_with_names_modified.data_connectors.keys())[0]
-    data_connector_config = copy.deepcopy(datasource_config_with_names_modified.data_connectors[data_connector_name])
+    data_connector_name: str = tuple(
+        datasource_config_with_names_modified.data_connectors.keys()
+    )[0]
+    data_connector_config = copy.deepcopy(
+        datasource_config_with_names_modified.data_connectors[data_connector_name]
+    )
     datasource_config_with_names_modified.data_connectors.pop(data_connector_name, None)
 
     # Rename the data connector
     new_data_connector_name: str = "new_data_connector_name"
     data_connector_config["name"] = new_data_connector_name
-    datasource_config_with_names_modified.data_connectors[new_data_connector_name] = data_connector_config
+    datasource_config_with_names_modified.data_connectors[
+        new_data_connector_name
+    ] = data_connector_config
 
-    new_datasource: Datasource = context._build_datasource_from_config(datasource_config_with_names_modified)
+    new_datasource: Datasource = context._build_datasource_from_config(
+        datasource_config_with_names_modified
+    )
 
     orig_datasource_name: str = datasource_config_with_names.name
     datasource_name: str = new_datasource.name
@@ -444,14 +479,22 @@ def test_non_cloud_backed_data_context_save_datasource_overwrite_existing(
     assert tuple(pre_update_datasource.data_connectors.keys())[0] == data_connector_name
 
     # 3. Make sure no exceptions are raised when saving.
-    with patch("great_expectations.data_context.store.datasource_store.DatasourceStore.set", autospec=True,
-               return_value=datasource_config_with_names_modified):
+    with patch(
+        "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
+        autospec=True,
+        return_value=datasource_config_with_names_modified,
+    ):
 
-        updated_datasource: Union[LegacyDatasource, BaseDatasource] = context.save_datasource(new_datasource)
+        updated_datasource: Union[
+            LegacyDatasource, BaseDatasource
+        ] = context.save_datasource(new_datasource)
 
         # Make sure the datasource config got into the context config
         assert len(context.config.datasources) == 1
-        assert context.config.datasources[datasource_name] == datasource_config_with_names_modified
+        assert (
+            context.config.datasources[datasource_name]
+            == datasource_config_with_names_modified
+        )
 
         cached_datasource = context._cached_datasources[datasource_name]
 
@@ -459,7 +502,9 @@ def test_non_cloud_backed_data_context_save_datasource_overwrite_existing(
         assert len(context._cached_datasources) == 1
 
         # Make sure the name was updated
-        updated_datasource_data_connector_name: str = tuple(updated_datasource.data_connectors.keys())[0]
+        updated_datasource_data_connector_name: str = tuple(
+            updated_datasource.data_connectors.keys()
+        )[0]
         assert updated_datasource_data_connector_name == new_data_connector_name
 
         # Make sure the stored and returned datasource is the same one as the cached datasource
@@ -472,11 +517,16 @@ def test_non_cloud_backed_data_context_save_datasource_overwrite_existing(
         assert not cached_datasource == new_datasource
         assert not updated_datasource == new_datasource
 
-
         # Make sure the stored and returned datasource are otherwise equal
-        serializer: AbstractConfigSerializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        updated_datasource_dict = serializer.serialize(datasourceConfigSchema.load(updated_datasource.config))
-        orig_datasource_dict = serializer.serialize(datasourceConfigSchema.load(new_datasource.config))
+        serializer: AbstractConfigSerializer = DictConfigSerializer(
+            schema=datasourceConfigSchema
+        )
+        updated_datasource_dict = serializer.serialize(
+            datasourceConfigSchema.load(updated_datasource.config)
+        )
+        orig_datasource_dict = serializer.serialize(
+            datasourceConfigSchema.load(new_datasource.config)
+        )
 
         for attribute in ("name", "execution_engine", "data_connectors"):
             assert updated_datasource_dict[attribute] == orig_datasource_dict[attribute]
@@ -509,7 +559,7 @@ def test_cloud_backed_data_context_save_datasource_empty_store(
     data_context_type: Type[AbstractDataContext],
     datasource_config_with_names: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
-    request: "FixtureRequest"
+    request: "FixtureRequest",
 ):
     """Any Data Context in cloud mode should save to the cloud backed Datasource store when calling save_datasource. When saving, it should use the id from the response to create the datasource, and update both the config and cache."""
 
@@ -522,17 +572,27 @@ def test_cloud_backed_data_context_save_datasource_empty_store(
     assert context.ge_cloud_mode
     assert len(context.list_datasources()) == 0
 
-
-    datasource: Datasource = context._build_datasource_from_config(datasource_config_with_names)
+    datasource: Datasource = context._build_datasource_from_config(
+        datasource_config_with_names
+    )
     datasource_name: str = datasource.name
     data_connector_name: str = tuple(datasource.data_connectors.keys())[0]
 
-    with patch("great_expectations.data_context.store.datasource_store.DatasourceStore.set", autospec=True, return_value=datasource_config_with_names_and_ids):
-        updated_datasource: Union[LegacyDatasource, BaseDatasource] = context.save_datasource(datasource)
+    with patch(
+        "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
+        autospec=True,
+        return_value=datasource_config_with_names_and_ids,
+    ):
+        updated_datasource: Union[
+            LegacyDatasource, BaseDatasource
+        ] = context.save_datasource(datasource)
 
         # Make sure the datasource config got into the context config
         assert len(context.config.datasources) == 1
-        assert context.config.datasources[datasource_name] == datasource_config_with_names_and_ids
+        assert (
+            context.config.datasources[datasource_name]
+            == datasource_config_with_names_and_ids
+        )
 
         cached_datasource = context._cached_datasources[datasource_name]
 
@@ -550,21 +610,40 @@ def test_cloud_backed_data_context_save_datasource_empty_store(
         assert not updated_datasource == datasource
 
         # Make sure the stored and returned datasource are otherwise equal
-        serializer: AbstractConfigSerializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        updated_datasource_dict = serializer.serialize(datasourceConfigSchema.load(updated_datasource.config))
-        orig_datasource_dict = serializer.serialize(datasourceConfigSchema.load(datasource.config))
+        serializer: AbstractConfigSerializer = DictConfigSerializer(
+            schema=datasourceConfigSchema
+        )
+        updated_datasource_dict = serializer.serialize(
+            datasourceConfigSchema.load(updated_datasource.config)
+        )
+        orig_datasource_dict = serializer.serialize(
+            datasourceConfigSchema.load(datasource.config)
+        )
 
-        for attribute in ("name", "execution_engine", ):
+        for attribute in (
+            "name",
+            "execution_engine",
+        ):
             assert updated_datasource_dict[attribute] == orig_datasource_dict[attribute]
 
-        updated_datasource_dict_no_datasource_id = copy.deepcopy(updated_datasource_dict)
-        updated_datasource_dict_no_datasource_id["data_connectors"][data_connector_name].pop("id", None)
-        assert updated_datasource_dict_no_datasource_id["data_connectors"] == orig_datasource_dict["data_connectors"]
+        updated_datasource_dict_no_datasource_id = copy.deepcopy(
+            updated_datasource_dict
+        )
+        updated_datasource_dict_no_datasource_id["data_connectors"][
+            data_connector_name
+        ].pop("id", None)
+        assert (
+            updated_datasource_dict_no_datasource_id["data_connectors"]
+            == orig_datasource_dict["data_connectors"]
+        )
 
         # Make sure that the id is populated only in the updated and cached datasource
         assert datasource.id is None
         assert datasource.data_connectors[data_connector_name].id is None
         assert updated_datasource.id == datasource_config_with_names_and_ids.id
-        assert updated_datasource.data_connectors[data_connector_name].id == datasource_config_with_names_and_ids.data_connectors[data_connector_name]["id"]
-
-
+        assert (
+            updated_datasource.data_connectors[data_connector_name].id
+            == datasource_config_with_names_and_ids.data_connectors[
+                data_connector_name
+            ]["id"]
+        )

@@ -461,7 +461,9 @@ class AbstractDataContext(ABC):
         self._project_config = project_config
         self.variables.config = project_config
 
-    def save_datasource(self, datasource: Union[LegacyDatasource, BaseDatasource]) -> Union[LegacyDatasource, BaseDatasource]:
+    def save_datasource(
+        self, datasource: Union[LegacyDatasource, BaseDatasource]
+    ) -> Union[LegacyDatasource, BaseDatasource]:
         """Save a Datasource to the configured DatasourceStore.
 
         Stores the underlying DatasourceConfig in the store, updates the cached Datasource and returns the Datasource.
@@ -486,13 +488,14 @@ class AbstractDataContext(ABC):
         self.config.datasources[datasource_name] = updated_datasource_config_from_store  # type: ignore[index,assignment]
 
         # Also use the updated config to initialize a datasource for the cache and overwrite the existing datasource.
-        substituted_config = self._perform_substitutions_on_datasource_config(updated_datasource_config_from_store)
+        substituted_config = self._perform_substitutions_on_datasource_config(
+            updated_datasource_config_from_store
+        )
         updated_datasource: Datasource = self._instantiate_datasource_from_config(
             config=substituted_config
         )
         self._cached_datasources[datasource_name] = updated_datasource
         return updated_datasource
-
 
     def add_datasource(
         self,
