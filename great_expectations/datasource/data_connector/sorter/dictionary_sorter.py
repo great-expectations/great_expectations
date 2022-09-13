@@ -30,7 +30,7 @@ class DictionarySorter(Sorter):
                 by "day" value, then by "month" value, and finally by "year" value.
 
         Returns:
-            a list of batch definitions sorted depending on splitter method used to define them.
+            None
         """
         super().__init__(name=name, orderby=orderby)
         if order_keys_by is None or order_keys_by == "asc":
