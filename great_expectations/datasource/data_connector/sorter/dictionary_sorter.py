@@ -17,6 +17,21 @@ class DictionarySorter(Sorter):
         order_keys_by: str = "asc",
         key_reference_list: Optional[List[Any]] = None,
     ) -> None:
+        """Defines sorting behavior for
+
+        Args:
+            name: the name of the batch identifier key by which to sort the batch definitions.
+            orderby: one of "asc" (ascending) or "desc" (descending) - the method by which to sort the dictionary
+                values.
+            order_keys_by: one of "asc" (ascending) or "desc" (descending) - the method by which to sort the dictionary
+                keys.
+            key_reference_list: an ordered list of keys to use for sorting. The list should be provided in the order by
+                which the keys take precedence (e.g. the list ["year", "month", "day"] will first sort all dictionaries
+                by "day" value, then by "month" value, and finally by "year" value.
+
+        Returns:
+            a list of batch definitions sorted depending on splitter method used to define them.
+        """
         super().__init__(name=name, orderby=orderby)
         if order_keys_by is None or order_keys_by == "asc":
             reverse_keys = False

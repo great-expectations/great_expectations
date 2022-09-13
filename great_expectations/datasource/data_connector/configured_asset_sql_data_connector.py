@@ -392,7 +392,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 ):
                     raise ge_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-configured group_name.
+configured group_names.
                         """
                     )
                 if len(splitter_group_names) < len(self.sorters):
@@ -430,7 +430,7 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
             batch_definition_list: an unsorted list of batch definitions.
             splitter_method_name: splitter name used to define the batches, starting with or without preceding `_`.
             splitter_kwargs: splitter kwargs dictionary for splitter directives.
-            sorters:
+            sorters: sorters configured for the batch_definition_list
 
         Returns:
             a list of batch definitions sorted depending on splitter method used to define them.
