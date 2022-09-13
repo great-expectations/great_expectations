@@ -36,11 +36,6 @@ class HTTPHandler:
         * put
         * patch
         * delete
-
-    20220913 - Chetan - This class should be refactored to completely abstract away any
-    specific implementation details (explicit reference to `requests` lib). As it stands,
-    the handler returns a `requests.Response` object. Additionally, error checking is done
-    downstream in GeCloudStoreBackend that also directly references this lib.
     """
 
     def __init__(self, access_token: str, timeout: int = 20) -> None:

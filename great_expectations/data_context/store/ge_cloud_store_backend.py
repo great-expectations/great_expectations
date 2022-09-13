@@ -2,7 +2,7 @@ import json
 import logging
 from abc import ABCMeta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
@@ -231,7 +231,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 params=params,
             )
             response.raise_for_status()
-            return response.json()
+            return cast(ResponsePayload, response.json())
         except json.JSONDecodeError as jsonError:
             logger.debug(
                 "Failed to parse GE Cloud Response into JSON",
