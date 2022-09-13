@@ -207,11 +207,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
-        data_connector_splitter_method: Optional[str] = self.splitter_method
-        data_connector_splitter_kwargs: Optional[
-            Dict[str, Union[str, list]]
-        ] = self.splitter_kwargs
-        data_connector_sorters: Optional[dict] = self.sorters
         data_asset: Dict[str, Union[str, list, None]] = self.assets[
             batch_request.data_asset_name
         ]
@@ -221,7 +216,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         ] = data_asset.get("splitter_kwargs")
         data_asset_sorters: Optional[dict] = data_asset.get("sorters")
 
-        # if sorters have been explicitly passed to the data connector or data asset use them for sorting,
+        # if sorters have been explicitly passed to the data connector use them for sorting,
         # otherwise sorting behavior can be inferred from splitter_method.
         if data_asset_sorters is not None and len(data_asset_sorters) > 0:
             batch_definition_list = self._sort_batch_definition_list(
@@ -230,27 +225,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 splitter_kwargs=None,
                 sorters=data_asset_sorters,
             )
-        elif data_connector_sorters is not None and len(data_connector_sorters) > 0:
-            batch_definition_list = self._sort_batch_definition_list(
-                batch_definition_list=batch_definition_list,
-                splitter_method_name=None,
-                splitter_kwargs=None,
-                sorters=data_connector_sorters,
-            )
-        # if splitter_method and splitter_kwargs are configured at the asset level use that, otherwise look for
-        # splitter_method and splitter_kwargs at the data connector level.
         elif data_asset_splitter_method is not None:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list,
                 splitter_method_name=data_asset_splitter_method,
                 splitter_kwargs=data_asset_splitter_kwargs,
-                sorters=None,
-            )
-        elif data_connector_splitter_method is not None:
-            batch_definition_list = self._sort_batch_definition_list(
-                batch_definition_list=batch_definition_list,
-                splitter_method_name=data_connector_splitter_method,
-                splitter_kwargs=data_connector_splitter_kwargs,
                 sorters=None,
             )
 
