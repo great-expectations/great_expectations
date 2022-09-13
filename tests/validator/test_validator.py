@@ -1400,4 +1400,4 @@ def test_list_available_expectation_types(
 
     available = validator.list_available_expectation_types()
 
-    assert len(available) == 53
+    assert len(available) == 62
