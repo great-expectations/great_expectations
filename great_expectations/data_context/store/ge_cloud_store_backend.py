@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import requests
 
 from great_expectations import __version__
+from great_expectations.core.http_handler import HTTPHandler
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -45,55 +46,6 @@ class ResponsePayload(TypedDict):
 
 
 AnyPayload = Union[ResponsePayload, ErrorPayload]
-
-
-class HTTPHandler:
-    def __init__(self, access_token: str, timeout: int = 20) -> None:
-        self._headers = self._init_headers(access_token)
-        self._timeout = timeout
-
-    def _init_headers(self, access_token: str) -> dict:
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {access_token}",
-            "Gx-Version": __version__,
-        }
-        return headers
-
-    def get(self, url: str, params: Optional[dict] = None) -> requests.Response:
-        response = requests.get(
-            url=url, params=params, headers=self._headers, timeout=self._timeout
-        )
-        response.raise_for_status()
-        return response
-
-    def post(self, url: str, json: dict) -> requests.Response:
-        response = requests.post(
-            url, json=json, headers=self._headers, timeout=self._timeout
-        )
-        response.raise_for_status()
-        return response
-
-    def put(self, url: str, json: dict) -> requests.Response:
-        response = requests.put(
-            url, json=json, headers=self._headers, timeout=self._timeout
-        )
-        response.raise_for_status()
-        return response
-
-    def patch(self, url: str, json: dict) -> requests.Response:
-        response = requests.put(
-            url, json=json, headers=self._headers, timeout=self._timeout
-        )
-        response.raise_for_status()
-        return response
-
-    def delete(self, url: str, json: dict) -> requests.Response:
-        response = requests.delete(
-            url, json=json, headers=self._headers, timeout=self._timeout
-        )
-        response.raise_for_status()
-        return response
 
 
 def _get_user_friendly_error_message(
@@ -200,6 +152,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         suppress_store_backend_id: bool = True,
         manually_initialize_store_backend_id: str = "",
         store_name: Optional[str] = None,
+        http_handler: HTTPHandler = HTTPHandler(),
     ) -> None:
         super().__init__(
             fixed_length_key=True,
@@ -243,9 +196,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
-        self._http_handler = HTTPHandler(
-            access_token=self._ge_cloud_credentials["access_token"]
-        )
+        self._http_handler = http_handler
+        self._http_handler.headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {self._ge_cloud_credentials['access_token']}",
+            "Gx-Version": __version__,
+        }
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
