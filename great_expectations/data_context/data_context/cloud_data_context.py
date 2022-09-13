@@ -37,7 +37,6 @@ logger = logging.getLogger(__name__)
 
 class GECloudEnvironmentVariable(str, Enum):
     BASE_URL = "base_url"
-    ACCOUNT_ID = "account_id"  # Deprecated
     ORGANIZATION_ID = "organization_id"
     ACCESS_TOKEN = "access_token"
 
@@ -107,12 +106,10 @@ class CloudDataContext(AbstractDataContext):
         config = response.json()
         return DataContextConfig(**config)
 
-    # TODO: deprecate ge_cloud_account_id
     @classmethod
     def get_ge_cloud_config(
         cls,
         ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> GeCloudConfig:
@@ -122,7 +119,6 @@ class CloudDataContext(AbstractDataContext):
         """
         ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
             ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_account_id=ge_cloud_account_id,
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
@@ -143,12 +139,10 @@ class CloudDataContext(AbstractDataContext):
 
         return GeCloudConfig(**ge_cloud_config_dict)  # type: ignore[arg-type,misc]
 
-    # TODO: deprecate ge_cloud_account_id
     @classmethod
     def _get_ge_cloud_config_dict(
         cls,
         ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> Dict[GECloudEnvironmentVariable, Optional[str]]:
@@ -161,28 +155,14 @@ class CloudDataContext(AbstractDataContext):
             )
             or "https://app.greatexpectations.io/"
         )
-
-        # TODO: remove if/else block when ge_cloud_account_id is deprecated.
-        if ge_cloud_account_id is not None:
-            logger.warning(
-                'The "ge_cloud_account_id" argument has been renamed "ge_cloud_organization_id" and will be '
-                "deprecated in the next major release."
-            )
-        else:
-            ge_cloud_account_id = CloudDataContext._get_global_config_value(
-                environment_variable=GECloudEnvironmentVariable.ACCOUNT_ID,
-                conf_file_section="ge_cloud_config",
-                conf_file_option="account_id",
-            )
-
-        if ge_cloud_organization_id is None:
-            ge_cloud_organization_id = CloudDataContext._get_global_config_value(
+        ge_cloud_organization_id = (
+            ge_cloud_organization_id
+            or CloudDataContext._get_global_config_value(
                 environment_variable=GECloudEnvironmentVariable.ORGANIZATION_ID,
                 conf_file_section="ge_cloud_config",
                 conf_file_option="organization_id",
             )
-
-        ge_cloud_organization_id = ge_cloud_organization_id or ge_cloud_account_id
+        )
         ge_cloud_access_token = (
             ge_cloud_access_token
             or CloudDataContext._get_global_config_value(
