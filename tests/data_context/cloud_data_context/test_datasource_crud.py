@@ -1,21 +1,24 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
-from typing import Callable
+from typing import Callable, Type, Union, TYPE_CHECKING
 from unittest.mock import patch
 
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.data_context import BaseDataContext, CloudDataContext
+from great_expectations.data_context import BaseDataContext, CloudDataContext, AbstractDataContext
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.datasource import BaseDatasource
+from great_expectations.datasource import BaseDatasource, Datasource
 from great_expectations.datasource.datasource_serializer import (
     JsonDatasourceConfigSerializer,
 )
 from tests.data_context.conftest import MockResponse
+
+if TYPE_CHECKING:
+    from _pytest.fixtures import FixtureRequest
 
 
 @pytest.mark.cloud
@@ -358,3 +361,93 @@ def test_cloud_data_context_add_datasource(
         assert stored_datasource.name == datasource_name
         assert stored_datasource.config["name"] == datasource_name
         assert stored_data_connector.name == data_connector_name
+
+
+# TODO: AJB 20220913 add correct markers / parametrization here
+def test_non_cloud_backed_data_context_save_datasource_empty_context():
+    raise NotImplementedError
+
+
+# TODO: AJB 20220913 add correct markers / parametrization here
+def test_non_cloud_backed_data_context_save_datasource_overwrite_existing():
+    raise NotImplementedError
+
+# TODO: AJB 20220913 add correct markers / parametrization here
+@pytest.mark.parametrize(
+    "data_context_fixture_name,data_context_type",
+    [
+        pytest.param(
+            "empty_base_data_context_in_cloud_mode",
+            BaseDataContext,
+            id="BaseDataContext",
+        ),
+        pytest.param(
+            "empty_data_context_in_cloud_mode",
+            DataContext,
+            id="DataContext",
+        ),
+        pytest.param(
+            "empty_cloud_data_context",
+            CloudDataContext,
+            id="CloudDataContext",
+        ),
+    ],
+)
+def test_cloud_backed_data_context_save_datasource_empty_store(
+    data_context_fixture_name: str,
+    data_context_type: Type[AbstractDataContext],
+    datasource_config: DatasourceConfig,
+    datasource_name: str,
+    datasource_config_with_names_and_ids: DatasourceConfig,
+    mocked_datasource_post_response: Callable[[], MockResponse],
+    mocked_datasource_get_response: Callable[[], MockResponse],
+    request: "FixtureRequest"
+):
+    """Any Data Context in cloud mode should save to the cloud backed Datasource store when calling save_datasource. When saving, it should use the id from the response to create the datasource, and update both the config and cache."""
+
+    context: Union[
+        BaseDataContext, DataContext, CloudDataContext
+    ] = request.getfixturevalue(data_context_fixture_name)
+
+    # Make sure the fixture has the right configuration
+    assert isinstance(context, data_context_type)
+    assert context.ge_cloud_mode
+    assert len(context.list_datasources()) == 0
+
+    # Setup
+    datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
+    datasource_config_with_name.name = datasource_name
+
+    datasource: Datasource = context._build_datasource_from_config(datasource_config_with_name)
+
+    with patch("great_expectations.data_context.store.datasource_store.DatasourceStore.set", autospec=True, return_value=datasource_config_with_names_and_ids):
+        updated_datasource: Union[LegacyDatasource, BaseDatasource] = context.save_datasource(datasource)
+
+        # Make sure the datasource config got into the context config
+        assert len(context.config.datasources) == 1
+        assert context.config.datasources[datasource_name] == datasource_config_with_names_and_ids
+
+        cached_datasource = context._cached_datasources[datasource_name]
+
+        # Make sure the datasource got into the cache
+        assert len(context._cached_datasources) == 1
+
+        # Make sure the stored and returned datasource is the same one as the cached datasource
+        assert id(updated_datasource) == id(cached_datasource)
+        assert updated_datasource == cached_datasource
+
+        # Make sure the stored and returned datasource is different (now has ids)
+        assert not id(cached_datasource) == id(datasource)
+        assert not id(updated_datasource) == id(datasource)
+        # TODO: AJB 20220913 Make or use consistent datasource config fixtures so this assertion passes
+        for attribute in ("name", "data_connectors", "execution_engine"):
+            assert getattr(updated_datasource, attribute) == getattr(datasource, attribute)
+
+        # Make sure that the id is populated only in the updated and cached datasource
+        assert datasource.id is None
+        # TODO: AJB 20220913 Make or use consistent datasource config fixtures so this assertion passes
+        assert datasource.data_connectors["my_data_connector"]["id"] is None
+        assert updated_datasource.id == datasource_config_with_names_and_ids.id
+        assert updated_datasource.data_connectors["my_data_connector"]["id"] == datasource_config_with_names_and_ids.data_connectors["my_data_connector"]["id"]
+
+
