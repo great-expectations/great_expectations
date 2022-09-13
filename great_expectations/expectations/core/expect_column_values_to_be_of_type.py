@@ -14,6 +14,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.expectations.util import render_evaluation_parameter_string
@@ -375,7 +376,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 # bigquery geography requires installing an extra package
                 if (
                     expected_type.lower() == "geography"
-                    and execution_engine.engine.dialect.name.lower() == "bigquery"
+                    and execution_engine.engine.dialect.name.lower()
+                    == GESqlDialect.BIGQUERY
                     and not BIGQUERY_GEO_SUPPORT
                 ):
                     logger.warning(

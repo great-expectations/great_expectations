@@ -28,6 +28,9 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.split_and_sample.data_splitter import (
+    SplitterMethod,
+)
 from great_expectations.util import deep_filter_properties_iterable
 
 try:
@@ -47,17 +50,17 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     """
 
     SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[str, Optional[Sorter]] = {
-        "split_on_year": DictionarySorter,
-        "split_on_year_and_month": DictionarySorter,
-        "split_on_year_and_month_and_day": DictionarySorter,
-        "split_on_date_parts": DictionarySorter,
-        "split_on_whole_table": None,
-        "split_on_column_value": LexicographicSorter,
-        "split_on_converted_datetime": LexicographicSorter,
-        "split_on_divided_integer": NumericSorter,
-        "split_on_mod_integer": NumericSorter,
-        "split_on_multi_column_values": LexicographicSorter,
-        "split_on_hashed_column": LexicographicSorter,
+        SplitterMethod.SPLIT_ON_YEAR: DictionarySorter,
+        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH: DictionarySorter,
+        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH_AND_DAY: DictionarySorter,
+        SplitterMethod.SPLIT_ON_DATE_PARTS: DictionarySorter,
+        SplitterMethod.SPLIT_ON_WHOLE_TABLE: None,
+        SplitterMethod.SPLIT_ON_COLUMN_VALUE: LexicographicSorter,
+        SplitterMethod.SPLIT_ON_CONVERTED_DATETIME: LexicographicSorter,
+        SplitterMethod.SPLIT_ON_DIVIDED_INTEGER: NumericSorter,
+        SplitterMethod.SPLIT_ON_MOD_INTEGER: NumericSorter,
+        SplitterMethod.SPLIT_ON_MULTI_COLUMN_VALUES: LexicographicSorter,
+        SplitterMethod.SPLIT_ON_HASHED_COLUMN: LexicographicSorter,
     }
 
     def __init__(
@@ -338,7 +341,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         if sorter_method == DictionarySorter:
             return [DictionarySorter(name=splitter_kwargs["column_name"])]
         elif sorter_method == LexicographicSorter:
-            if splitter_method_name == "split_on_multi_column_values":
+            if splitter_method_name == SplitterMethod.SPLIT_ON_MULTI_COLUMN_VALUES:
                 return [
                     LexicographicSorter(name=column_name)
                     for column_name in splitter_kwargs["column_names"]
