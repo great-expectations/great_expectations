@@ -294,33 +294,41 @@ def test_SlackRenderer_get_report_element():
     assert slack_renderer._get_report_element(docs_link="i_should_work") is not None
 
 
-def test_SlackRenderer_get_failed_expectation_entity_table():
+def test_SlackRenderer_get_failed_expectation_domain_table():
     slack_renderer = SlackRenderer()
-    result = slack_renderer.get_failed_expectation_entity(
+    result = slack_renderer.get_failed_expectation_domain(
         "expect_table_columns_to_be_unique", {}
     )
     assert result == "Table"
 
 
-def test_SlackRenderer_get_failed_expectation_entity_column_pair():
+def test_SlackRenderer_get_failed_expectation_domain_column_pair():
     slack_renderer = SlackRenderer()
-    result = slack_renderer.get_failed_expectation_entity(
+    result = slack_renderer.get_failed_expectation_domain(
         "expect_column_pair_to_be_equal", {"column_A": "first", "column_B": "second"}
     )
     assert result == "first, second"
 
 
-def test_SlackRenderer_get_failed_expectation_entity_column():
+def test_SlackRenderer_get_failed_expectation_domain_column():
     slack_renderer = SlackRenderer()
-    result = slack_renderer.get_failed_expectation_entity(
+    result = slack_renderer.get_failed_expectation_domain(
         "expect_column_pair_to_be_equal", {"column": "first"}
     )
     assert result == "first"
 
 
-def test_SlackRenderer_get_failed_expectation_entity_no_entity():
+def test_SlackRenderer_get_failed_expectation_domain_column():
     slack_renderer = SlackRenderer()
-    result = slack_renderer.get_failed_expectation_entity(
+    result = slack_renderer.get_failed_expectation_domain(
+        "expect_multicolumn_sum_to_be_equal", {"column_list": ["col_a", "col_b"]}
+    )
+    assert result == "['col_a', 'col_b']"
+
+
+def test_SlackRenderer_get_failed_expectation_domain_no_domain():
+    slack_renderer = SlackRenderer()
+    result = slack_renderer.get_failed_expectation_domain(
         "expect_column_pair_to_be_equal", {"date_column": "kpi_date"}
     )
     assert result is None

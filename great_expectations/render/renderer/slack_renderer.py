@@ -207,7 +207,7 @@ class SlackRenderer(Renderer):
         return failed_expectations_str
 
     def create_failed_expectation_text(self, expectation_kwargs, expectation_name):
-        expectation_entity = self.get_failed_expectation_entity(
+        expectation_entity = self.get_failed_expectation_domain(
             expectation_name, expectation_kwargs
         )
         if expectation_entity:
@@ -215,18 +215,21 @@ class SlackRenderer(Renderer):
         return f":x:{expectation_name}\n"
 
     @staticmethod
-    def get_failed_expectation_entity(
+    def get_failed_expectation_domain(
         expectation_name, expectation_config_kwargs: dict
     ) -> str:
         if "expect_table_" in expectation_name:
             return "Table"
 
-        column_name, column_a, column_b = (
+        column_name, column_a, column_b, column_list = (
             expectation_config_kwargs.get("column"),
             expectation_config_kwargs.get("column_A"),
             expectation_config_kwargs.get("column_B"),
+            expectation_config_kwargs.get("column_list"),
         )
         if column_name:
             return column_name
         elif column_a and column_b:
             return f"{column_a}, {column_b}"
+        elif column_list:
+            return str(column_list)
