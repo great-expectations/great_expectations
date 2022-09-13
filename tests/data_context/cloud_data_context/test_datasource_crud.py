@@ -407,9 +407,79 @@ def test_non_cloud_backed_data_context_save_datasource_empty_store(
             assert updated_datasource_dict[attribute] == orig_datasource_dict[attribute]
 
 
-# TODO: AJB 20220913 add correct markers / parametrization here
-def test_non_cloud_backed_data_context_save_datasource_overwrite_existing():
-    raise NotImplementedError
+@pytest.mark.unit
+def test_non_cloud_backed_data_context_save_datasource_overwrite_existing(
+    empty_data_context: DataContext,
+    datasource_config_with_names: DatasourceConfig,
+):
+    """What does this test and why? This ensures there are no checks that stop an overwrite of an existing datasource in context.save_datasource(). It does not test the underlying store or store backend."""
+    context: DataContext = empty_data_context
+    # Make sure the fixture has the right configuration
+    assert len(context.list_datasources()) == 0
+
+    # 1. Add datasource to empty context
+    serializer: AbstractConfigSerializer = DictConfigSerializer(schema=datasourceConfigSchema)
+    datasource_config_with_names_dict = serializer.serialize(datasource_config_with_names)
+    context.add_datasource(**datasource_config_with_names_dict)
+    assert len(context.list_datasources()) == 1
+
+    # 2. Create new datasource (slightly different, but same name) and call context.save_datasource()
+    datasource_config_with_names_modified = copy.deepcopy(datasource_config_with_names)
+    data_connector_name: str = tuple(datasource_config_with_names_modified.data_connectors.keys())[0]
+    data_connector_config = copy.deepcopy(datasource_config_with_names_modified.data_connectors[data_connector_name])
+    datasource_config_with_names_modified.data_connectors.pop(data_connector_name, None)
+
+    # Rename the data connector
+    new_data_connector_name: str = "new_data_connector_name"
+    data_connector_config["name"] = new_data_connector_name
+    datasource_config_with_names_modified.data_connectors[new_data_connector_name] = data_connector_config
+
+    new_datasource: Datasource = context._build_datasource_from_config(datasource_config_with_names_modified)
+
+    orig_datasource_name: str = datasource_config_with_names.name
+    datasource_name: str = new_datasource.name
+    assert orig_datasource_name == datasource_name
+
+    pre_update_datasource = context.get_datasource(datasource_name)
+    assert tuple(pre_update_datasource.data_connectors.keys())[0] == data_connector_name
+
+    # 3. Make sure no exceptions are raised when saving.
+    with patch("great_expectations.data_context.store.datasource_store.DatasourceStore.set", autospec=True,
+               return_value=datasource_config_with_names_modified):
+
+        updated_datasource: Union[LegacyDatasource, BaseDatasource] = context.save_datasource(new_datasource)
+
+        # Make sure the datasource config got into the context config
+        assert len(context.config.datasources) == 1
+        assert context.config.datasources[datasource_name] == datasource_config_with_names_modified
+
+        cached_datasource = context._cached_datasources[datasource_name]
+
+        # Make sure the datasource did not get duplicated in the cache
+        assert len(context._cached_datasources) == 1
+
+        # Make sure the name was updated
+        updated_datasource_data_connector_name: str = tuple(updated_datasource.data_connectors.keys())[0]
+        assert updated_datasource_data_connector_name == new_data_connector_name
+
+        # Make sure the stored and returned datasource is the same one as the cached datasource
+        assert id(updated_datasource) == id(cached_datasource)
+        assert updated_datasource == cached_datasource
+
+        # Make sure the stored and returned datasource is a different instance
+        assert not id(cached_datasource) == id(new_datasource)
+        assert not id(updated_datasource) == id(new_datasource)
+        assert not cached_datasource == new_datasource
+        assert not updated_datasource == new_datasource
+
+
+        # Make sure the stored and returned datasource are otherwise equal
+        serializer: AbstractConfigSerializer = DictConfigSerializer(schema=datasourceConfigSchema)
+        updated_datasource_dict = serializer.serialize(datasourceConfigSchema.load(updated_datasource.config))
+        orig_datasource_dict = serializer.serialize(datasourceConfigSchema.load(new_datasource.config))
+
+        for attribute in ("name", "execution_engine", "data_connectors"):
+            assert updated_datasource_dict[attribute] == orig_datasource_dict[attribute]
 
 
 @pytest.mark.parametrize(
@@ -455,7 +525,7 @@ def test_cloud_backed_data_context_save_datasource_empty_store(
 
     datasource: Datasource = context._build_datasource_from_config(datasource_config_with_names)
     datasource_name: str = datasource.name
-    dataconnector_name: str = tuple(datasource.data_connectors.keys())[0]
+    data_connector_name: str = tuple(datasource.data_connectors.keys())[0]
 
     with patch("great_expectations.data_context.store.datasource_store.DatasourceStore.set", autospec=True, return_value=datasource_config_with_names_and_ids):
         updated_datasource: Union[LegacyDatasource, BaseDatasource] = context.save_datasource(datasource)
@@ -488,13 +558,13 @@ def test_cloud_backed_data_context_save_datasource_empty_store(
             assert updated_datasource_dict[attribute] == orig_datasource_dict[attribute]
 
         updated_datasource_dict_no_datasource_id = copy.deepcopy(updated_datasource_dict)
-        updated_datasource_dict_no_datasource_id["data_connectors"][dataconnector_name].pop("id", None)
+        updated_datasource_dict_no_datasource_id["data_connectors"][data_connector_name].pop("id", None)
         assert updated_datasource_dict_no_datasource_id["data_connectors"] == orig_datasource_dict["data_connectors"]
 
         # Make sure that the id is populated only in the updated and cached datasource
         assert datasource.id is None
-        assert datasource.data_connectors[dataconnector_name].id is None
+        assert datasource.data_connectors[data_connector_name].id is None
         assert updated_datasource.id == datasource_config_with_names_and_ids.id
-        assert updated_datasource.data_connectors[dataconnector_name].id == datasource_config_with_names_and_ids.data_connectors[dataconnector_name]["id"]
+        assert updated_datasource.data_connectors[data_connector_name].id == datasource_config_with_names_and_ids.data_connectors[data_connector_name]["id"]
 
 
