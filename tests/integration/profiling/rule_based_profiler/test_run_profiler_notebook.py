@@ -14,7 +14,8 @@ from great_expectations.exceptions.exceptions import GreatExpectationsError
 logger = logging.getLogger(__name__)
 
 # constants used by the sql example
-CONNECTION_STRING: str = "postgresql+psycopg2://postgres:@localhost/test_ci"
+pg_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+CONNECTION_STRING: str = f"postgresql+psycopg2://postgres:@{pg_hostname}/test_ci"
 table_name: str = "yellow_tripdata_sample_2020"
 
 
