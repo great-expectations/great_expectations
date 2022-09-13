@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, Iterator, List, Optional, Tuple, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -381,10 +381,19 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _validate_sorters_configuration(self) -> None:
         if self.sorters is not None and len(self.sorters) > 0:
             for data_asset_name, data_asset_config in self.assets.items():
-                group_names: Optional[List[str]] = data_asset_config.get("group_names")
+                splitter_group_names: List[str]
+                if "column_names" in data_asset_config["splitter_kwargs"]:
+                    splitter_group_names = data_asset_config["splitter_kwargs"][
+                        "column_names"
+                    ]
+                else:
+                    splitter_group_names = [
+                        data_asset_config["splitter_kwargs"]["column_name"]
+                    ]
+
                 if any(
                     [
-                        sorter_name not in group_names
+                        sorter_name not in splitter_group_names
                         for sorter_name in self.sorters.keys()
                     ]
                 ):
@@ -393,9 +402,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 configured group_name.
                         """
                     )
-                if len(group_names) < len(self.sorters):
+                if len(splitter_group_names) < len(self.sorters):
                     raise ge_exceptions.DataConnectorError(
-                        f"""DataConnector "{self.name}" is configured with {len(group_names)} group names;
+                        f"""DataConnector "{self.name}" is configured with {len(splitter_group_names)} group names;
 this is fewer than number of sorters specified, which is {len(self.sorters)}.
                         """
                     )
@@ -437,7 +446,7 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
                 splitter_kwargs=splitter_kwargs,
             )
         else:
-            sorters = self.sorters
+            sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(
                 batch_definitions=batch_definition_list
