@@ -1,0 +1,50 @@
+# This pipeline is responsible for verifying the great expectations open source and cloud integration.
+
+schedules:
+- cron: 0 */3 * * *
+  displayName: Scheduled Runs
+  branches:
+    include:
+    - develop
+  always: true # This will always trigger because the cloud codebase may have changed.
+
+# The pipeline is run under two primary conditions: scheduled by the above cron job or manually run
+variables:
+  isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
+  isManual: $[eq(variables['Build.Reason'], 'Manual')]
+
+stages:
+  - stage: cloud_integration_tests
+    pool:
+      vmImage: ubuntu-latest
+    jobs:
+      - job: cloud_integration_tests
+        condition: or(eq(variables.isScheduled, true), eq(variables.isManual, true))
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+        steps:
+          - bash: |
+              TAG="greatexpectations:py$(python.version)" 
+              BUILD="docker buildx build -f docker/Dockerfile.tests --tag ${TAG} "
+              BUILD+="--target test --build-arg PYTHON_VERSION=$(python.version) ."
+              echo ${BUILD}
+              eval ${BUILD}
+
+              PYTEST="docker run -e GE_CLOUD_ORGANIZATION_ID=$(GE_CLOUD_ORGANIZATION_ID) "
+              PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=$(GE_CLOUD_ACCESS_TOKEN) -e GE_CLOUD_BASE_URL=$(GE_CLOUD_BASE_URL) "
+              PYTEST+="$TAG "
+              PYTEST+="pytest --random-order --cloud -m \"cloud and e2e\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            env:
+              GE_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
+            displayName: 'Cloud integration Tests'
+
