@@ -2486,11 +2486,11 @@ def empty_data_context_in_cloud_mode(
     with mock.patch(
         "great_expectations.data_context.DataContext._save_project_config"
     ), mock.patch(
-        "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_ge_cloud",
         autospec=True,
         side_effect=mocked_config,
     ), mock.patch(
-        "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
+        "great_expectations.data_context.data_context.CloudDataContext.get_ge_cloud_config",
         autospec=True,
         side_effect=mocked_get_ge_cloud_config,
     ):
