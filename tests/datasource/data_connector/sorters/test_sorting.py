@@ -342,6 +342,34 @@ def test_dictionary(example_hierarchical_batch_def_list):
     my_sorter = DictionarySorter(
         name="date",
         orderby="desc",
+        order_keys_by="desc",
+    )
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
+    assert sorted_batch_list == [d, h, b, i, j, a, g, e, f, c]
+
+    my_sorter = DictionarySorter(
+        name="date",
+        orderby="asc",
+        order_keys_by="desc",
+    )
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
+    assert sorted_batch_list == [c, f, e, g, a, j, i, b, h, d]
+
+    my_sorter = DictionarySorter(
+        name="date", orderby="desc", key_reference_list=["month"]
+    )
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
+    assert sorted_batch_list == [d, h, b, g, e, i, f, j, a, c]
+
+    my_sorter = DictionarySorter(
+        name="date", orderby="asc", key_reference_list=["month"]
+    )
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
+    assert sorted_batch_list == [a, c, f, j, e, i, b, g, h, d]
+
+    my_sorter = DictionarySorter(
+        name="date",
+        orderby="desc",
     )
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [d, h, b, g, i, e, j, f, a, c]

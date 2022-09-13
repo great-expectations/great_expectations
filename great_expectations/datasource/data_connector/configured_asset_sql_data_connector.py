@@ -109,7 +109,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self._include_schema_name = include_schema_name
         self._splitter_method = splitter_method
         self._splitter_kwargs = splitter_kwargs
-
         self._sampling_method = sampling_method
         self._sampling_kwargs = sampling_kwargs
 
