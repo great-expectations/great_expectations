@@ -2325,7 +2325,6 @@ set as active.
         try:
             success_percent = successful_expectations / evaluated_expectations * 100
         except ZeroDivisionError:
-            # success_percent = float("nan")
             success_percent = None
 
         return ValidationStatistics(
