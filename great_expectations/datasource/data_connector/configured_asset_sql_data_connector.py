@@ -28,6 +28,7 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
 from great_expectations.util import deep_filter_properties_iterable
 
 try:
@@ -336,6 +337,14 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         if sorter_method == DictionarySorter:
+            sorted_date_parts = [
+                DatePart.YEAR,
+                DatePart.MONTH,
+                DatePart.DAY,
+                DatePart.HOUR,
+                DatePart.MINUTE,
+                DatePart.SECOND,
+            ]
             return [DictionarySorter(name=splitter_kwargs["column_name"])]
         elif sorter_method == LexicographicSorter:
             if splitter_method_name == "split_on_multi_column_values":
