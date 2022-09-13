@@ -7,7 +7,6 @@ from urllib.parse import urljoin
 
 import requests
 
-from great_expectations import __version__
 from great_expectations.core.http_handler import HTTPHandler
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
