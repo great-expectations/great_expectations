@@ -47,7 +47,7 @@ import AdditionalInfoIntrospectionDirectives from './sql_components/_part_intros
 
 <SectionSpecifyTheDatasourceClassAndModule />
 
-### 5. Add the SimpleSqlAlchemy Execution Engine to your Datasource configuration
+### 5. Add the SqlAlchemy Execution Engine to your Datasource configuration
 
 <SectionAddTheExecutionEngineToYourDatasourceConfiguration />
 
@@ -55,7 +55,7 @@ import AdditionalInfoIntrospectionDirectives from './sql_components/_part_intros
 
 <SectionAddADictionaryAsTheValueOfTheDataConnectorsKey />
 
-### 7. Configure your individual Data Connectors
+### 7. Configure your individual Data Connectors (Splitting, sampling, etc.)
 
 <SectionConfigureYourIndividualDataConnectors backend="SQL" />
 
@@ -63,7 +63,7 @@ import AdditionalInfoIntrospectionDirectives from './sql_components/_part_intros
 
 <SectionDataConnectorExampleConfigurations />
 
-### 8. Configure your Data Connector's Data Assets
+### 8. Configure your Data Connector's Data Assets (Splitting, sampling, etc.)
 
 <SectionConfigureYourDataAssets />
 
