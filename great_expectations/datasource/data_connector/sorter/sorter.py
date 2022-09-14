@@ -27,11 +27,10 @@ class Sorter:
         none_batches: List[int] = []
         value_batches: List[int] = []
         for idx, batch_definition in enumerate(batch_definitions):
-            for value in batch_definition.batch_identifiers.values():
-                if value is None:
-                    none_batches.append(idx)
-                else:
-                    value_batches.append(idx)
+            if any(batch_definition.batch_identifiers.values()) is None:
+                none_batches.append(idx)
+            else:
+                value_batches.append(idx)
 
         none_batch_definitions: List[BatchDefinition] = [
             batch_definitions[idx] for idx in none_batches
