@@ -592,7 +592,7 @@ class DataAssistantResult(SerializableDictDot):
         display_charts.extend(column_domain_display_charts)
         return_charts.extend(column_domain_return_charts)
 
-        self._display(charts=display_charts, theme=theme)
+        self._display(charts=display_charts, plot_mode=plot_mode, theme=theme)
 
         return_charts = self._apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
@@ -600,6 +600,7 @@ class DataAssistantResult(SerializableDictDot):
     @staticmethod
     def _display(
         charts: Union[List[alt.Chart], List[alt.VConcatChart]],
+        plot_mode: PlotMode,
         theme: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
@@ -627,6 +628,16 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         if len(chart_titles) > 0:
+            if plot_mode.PRESCRIPTIVE:
+                print(
+                    f"""Y Expectations produced, {len(chart_titles)} Expectation and Metric plots implemented: Use DataAssistantResult.__name__.show_expectations_by_domain_type()
+or DataAssistantResult.show_expectations_by_expectation_type() to show all produced Expectations."""
+                )
+            else:
+                print(
+                    f"W Metrics calculated, {len(chart_titles)} Metric plots implemented: Use DataAssistantResult.metrics_by_domain to show all calculated Metrics."
+                )
+
             display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {
                 " ": None
             }
