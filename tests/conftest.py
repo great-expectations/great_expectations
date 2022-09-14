@@ -4479,7 +4479,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "quantile_statistic_interpolation_method": "auto",
                         "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
-                        "round_decimals": 2,
+                        "round_decimals": None,
                         "evaluation_parameter_builder_configs": None,
                     },
                     {
@@ -4501,7 +4501,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "quantile_statistic_interpolation_method": "auto",
                         "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
-                        "round_decimals": 2,
+                        "round_decimals": None,
                         "evaluation_parameter_builder_configs": None,
                     },
                 ],

@@ -617,12 +617,20 @@ detected.
                 metric_value_range[metric_value_range_min_idx] = min_value
                 metric_value_range[metric_value_range_max_idx] = max_value
             else:
-                metric_value_range[metric_value_range_min_idx] = round(
-                    cast(float, min_value), round_decimals
-                )
-                metric_value_range[metric_value_range_max_idx] = round(
-                    cast(float, max_value), round_decimals
-                )
+                if round_decimals is None:
+                    metric_value_range[metric_value_range_min_idx] = cast(
+                        float, min_value
+                    )
+                    metric_value_range[metric_value_range_max_idx] = cast(
+                        float, max_value
+                    )
+                else:
+                    metric_value_range[metric_value_range_min_idx] = round(
+                        cast(float, min_value), round_decimals
+                    )
+                    metric_value_range[metric_value_range_max_idx] = round(
+                        cast(float, max_value), round_decimals
+                    )
 
             # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
             estimation_histogram[
@@ -736,15 +744,15 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        if round_decimals is None:
-            round_decimals = MAX_DECIMALS
-        else:
-            if not isinstance(round_decimals, int) or (round_decimals < 0):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
+        if not (
+            round_decimals is None
+            or (isinstance(round_decimals, int) and (round_decimals >= 0))
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).
 """
-                )
+            )
 
         if np.issubdtype(metric_values.dtype, np.integer):
             round_decimals = 0
