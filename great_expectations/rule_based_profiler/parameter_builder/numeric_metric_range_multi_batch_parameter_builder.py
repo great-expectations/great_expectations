@@ -2,7 +2,7 @@ import copy
 import datetime
 import itertools
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Set, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -592,11 +592,11 @@ detected.
 
             min_value = numeric_range_estimation_result.value_range[0]
             if lower_bound is not None:
-                min_value = max(cast(float, min_value), lower_bound)
+                min_value = max(np.float64(min_value), np.float64(lower_bound))
 
             max_value = numeric_range_estimation_result.value_range[1]
             if upper_bound is not None:
-                max_value = min(cast(float, max_value), upper_bound)
+                max_value = min(np.float64(max_value), np.float64(upper_bound))
 
             # Obtain index of metric element (by discarding "N"-element samples dimension).
             metric_value_idx = metric_value_idx[1:]
@@ -618,18 +618,18 @@ detected.
                 metric_value_range[metric_value_range_max_idx] = max_value
             else:
                 if round_decimals is None:
-                    metric_value_range[metric_value_range_min_idx] = cast(
-                        float, min_value
+                    metric_value_range[metric_value_range_min_idx] = np.float64(
+                        min_value
                     )
-                    metric_value_range[metric_value_range_max_idx] = cast(
-                        float, max_value
+                    metric_value_range[metric_value_range_max_idx] = np.float64(
+                        max_value
                     )
                 else:
                     metric_value_range[metric_value_range_min_idx] = round(
-                        cast(float, min_value), round_decimals
+                        np.float64(min_value), round_decimals
                     )
                     metric_value_range[metric_value_range_max_idx] = round(
-                        cast(float, max_value), round_decimals
+                        np.float64(max_value), round_decimals
                     )
 
             # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
