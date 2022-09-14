@@ -1485,40 +1485,19 @@ class ConcurrencyConfigSchema(Schema):
 
 
 class GeCloudConfig(DictDot):
-    # TODO: deprecate account_id arg
     def __init__(
         self,
         base_url: str,
-        account_id: str = None,
-        access_token: str = None,
-        organization_id: str = None,
+        access_token: Optional[str] = None,
+        organization_id: Optional[str] = None,
     ) -> None:
-        # access_token was given a default value to maintain arg position of account_id
+        # access_token was given a default value to maintain arg position of organization_id
         if access_token is None:
             raise ValueError("Access token cannot be None.")
-        # exclusive or
-        if not (bool(account_id) ^ bool(organization_id)):
-            raise ValueError(
-                "Must provide either (and only) account_id or organization_id."
-            )
-        if account_id is not None:
-            logger.warning(
-                'The "account_id" argument has been renamed "organization_id" and will be deprecated in '
-                "the next major release."
-            )
 
         self.base_url = base_url
-        self.organization_id = organization_id or account_id
+        self.organization_id = organization_id
         self.access_token = access_token
-
-    # TODO: remove property when account_id is deprecated
-    @property
-    def account_id(self):
-        logger.warning(
-            'The "account_id" attribute has been renamed to "organization_id" and will be deprecated in '
-            "the next major release."
-        )
-        return self.organization_id
 
     def to_json_dict(self):
         # postpone importing to avoid circular imports
@@ -1528,7 +1507,6 @@ class GeCloudConfig(DictDot):
             "base_url": self.base_url,
             "organization_id": self.organization_id,
             "access_token": PasswordMasker.MASKED_PASSWORD_STRING,
-            "account_id": self.account_id,  # TODO: remove when account_id is deprecated
         }
 
 
