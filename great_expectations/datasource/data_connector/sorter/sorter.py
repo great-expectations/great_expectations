@@ -24,21 +24,29 @@ class Sorter:
     def get_sorted_batch_definitions(
         self, batch_definitions: List[BatchDefinition]
     ) -> List[BatchDefinition]:
-        return sorted(
-            batch_definitions,
-            key=self._verify_sorting_directives_and_get_partition_key,
+        none_batches: List[int] = []
+        value_batches: List[int] = []
+        for idx, batch_definition in enumerate(batch_definitions):
+            for value in batch_definition.batch_identifiers.values():
+                if value is None:
+                    none_batches.append(idx)
+                else:
+                    value_batches.append(idx)
+
+        none_batch_definitions: List[BatchDefinition] = [
+            batch_definitions[idx] for idx in none_batches
+        ]
+        value_batch_definitiions: List[BatchDefinition] = sorted(
+            [batch_definitions[idx] for idx in value_batches],
+            key=self.get_batch_key,
             reverse=self.reverse,
         )
 
-    def _verify_sorting_directives_and_get_partition_key(
-        self, batch_definition: BatchDefinition
-    ) -> Any:
-        batch_identifiers: dict = batch_definition.batch_identifiers
-        if batch_identifiers.get(self.name) is None:
-            raise ge_exceptions.SorterError(
-                f'Unable to sort batch_definition "{batch_definition}" by attribute "{self.name}".'
-            )
-        return self.get_batch_key(batch_definition=batch_definition)
+        # the convention for ORDER BY in SQL is for NULL values to be first in the sort order for ascending
+        # and last in the sort order for descending
+        if self.reverse:
+            return value_batch_definitiions + none_batch_definitions
+        return none_batch_definitions + value_batch_definitiions
 
     def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
         raise NotImplementedError
