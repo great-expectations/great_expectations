@@ -452,7 +452,18 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+  default_configured_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {schema_name}.{table_name}:
+        include_schema_name: true
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset
+"""'''
         return yaml_str
 
     def _yaml_innards(self) -> str:
@@ -624,6 +635,10 @@ authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' u
             snippet += """
 private_key_path = "YOUR_KEY_PATH"  # Path to the private key used for authentication
 private_key_passphrase = ""   # Passphrase for the private key used for authentication (optional -- leave blank for none)"""
+
+        snippet += '''\n
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
 
         return snippet
 

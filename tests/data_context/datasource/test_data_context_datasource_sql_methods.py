@@ -1,9 +1,11 @@
 import json
+import os
 from typing import List, Union
 
 import pytest
 
 from great_expectations.core.batch import Batch, BatchRequest, IDDict
+from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -374,3 +376,84 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
     )
     assert batch.batch_definition["batch_identifiers"] == {"date": "2020-01-15"}
     assert isinstance(batch.data, SqlAlchemyBatchData)
+
+
+def test_snowflake_datasource_new(sa, empty_data_context):
+    context = empty_data_context
+    datasource_name = "my_datasource"
+
+    host = (
+        "oca29081.us-east-1"  # The account name (include region -- ex 'ABCD.us-east-1')
+    )
+    username = os.environ["SNOWFLAKE_USER"]
+    database = "DEMO_DB"  # The database name
+    schema_name = "test_schema"  # The schema name
+    warehouse = "COMPUTE_WH"  # The warehouse name
+    role = "public"  # The role name
+    table_name = (
+        "test_taxi_copy"  # A table that you would like to add initially as a Data Asset
+    )
+    password = os.environ["SNOWFLAKE_PW"]
+
+    asset_name = f"{schema_name}.{table_name}"
+
+    inferred_data_connector_name = "default_inferred_data_connector_name"
+    configured_data_connector_name = "default_configured_data_connector_name"
+
+    example_yaml = f"""
+    name: {datasource_name}
+    class_name: Datasource
+    execution_engine:
+      class_name: SqlAlchemyExecutionEngine
+      credentials:
+        host: {host}
+        username: {username}
+        database: {database}
+        query:
+          schema: {schema_name}
+          warehouse: {warehouse}
+          role: {role}
+        password: {password}
+        drivername: snowflake
+    data_connectors:
+      default_runtime_data_connector_name:
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+          - default_identifier_name
+      {inferred_data_connector_name}:
+        class_name: InferredAssetSqlDataConnector
+        include_schema_name: True
+        introspection_directives:
+          schema_name: {schema_name}
+      {configured_data_connector_name}:
+        class_name: ConfiguredAssetSqlDataConnector
+        module_name: great_expectations.datasource.data_connector
+        assets:
+          {asset_name}:
+            module_name: great_expectations.datasource.data_connector.asset
+            table_name: {table_name}
+            schema_name: {schema_name}
+            class_name: Asset
+    """
+
+    context.test_yaml_config(yaml_config=example_yaml)
+    # add_datasource only if it doesn't already exist in our configuration
+    context.add_datasource(**yaml.load(example_yaml))
+
+    # Inferred
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name=datasource_name,
+        data_connector_name=inferred_data_connector_name,
+        data_asset_name=asset_name,
+    )
+    batch_list = context.get_batch_list(batch_request=single_batch_batch_request)
+    assert len(batch_list) == 1
+
+    # Configured
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name=datasource_name,
+        data_connector_name=configured_data_connector_name,
+        data_asset_name=asset_name,
+    )
+    batch_list = context.get_batch_list(batch_request=single_batch_batch_request)
+    assert len(batch_list) == 1
