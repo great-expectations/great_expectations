@@ -460,6 +460,8 @@ data_connectors:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
+        schema_name: {schema_name}
+        table_name: {table_name}
 """'''
         return yaml_str
 
