@@ -1993,9 +1993,12 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
             "categorical_columns_rule"
         ]["domain_builder"]["exclude_semantic_types"]
     )
-    assert (
-        data_assistant_result_profiler_config_as_json_dict
-        == quentin_expected_rule_based_profiler_configuration_as_json_dict
+    assert sorted(
+        data_assistant_result_profiler_config_as_json_dict,
+        key=lambda element: element[0],
+    ) == sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict,
+        key=lambda element: element[0],
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
