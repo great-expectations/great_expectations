@@ -621,7 +621,7 @@ class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
 host = "{self.host}"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "{self.username}"
 database = ""  # The database name
-schema = ""  # The schema name
+schema_name = ""  # The schema name
 warehouse = ""  # The warehouse name
 role = ""  # The role name"""
 
@@ -649,7 +649,7 @@ table_name = "YOUR_TABLE_NAME"'''
     username: {username}
     database: {database}
     query:
-      schema: {schema}
+      schema: {schema_name}
       warehouse: {warehouse}
       role: {role}
 """
