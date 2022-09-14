@@ -167,6 +167,8 @@ class SorterConfig(DictDot):
         module_name=None,
         orderby="asc",
         reference_list=None,
+        order_keys_by=None,
+        key_reference_list=None,
         datetime_format=None,
         **kwargs,
     ) -> None:
@@ -179,6 +181,12 @@ class SorterConfig(DictDot):
 
         if reference_list is not None:
             self._reference_list = reference_list
+
+        if order_keys_by is not None:
+            self._order_keys_by = order_keys_by
+
+        if key_reference_list is not None:
+            self._key_reference_list = key_reference_list
 
         if datetime_format is not None:
             self._datetime_format = datetime_format
@@ -202,6 +210,14 @@ class SorterConfig(DictDot):
     @property
     def reference_list(self):  # type: ignore[no-untyped-def]
         return self._reference_list
+
+    @property
+    def order_keys_by(self):  # type: ignore[no-untyped-def]
+        return self._order_keys_by
+
+    @property
+    def key_reference_list(self):  # type: ignore[no-untyped-def]
+        return self._key_reference_list
 
     @property
     def datetime_format(self):  # type: ignore[no-untyped-def]
@@ -230,6 +246,17 @@ class SorterConfigSchema(Schema):
 
     # allow_none = True because it is only used by some Sorters
     reference_list = fields.List(
+        cls_or_instance=fields.Str(),
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+    order_keys_by = fields.String(
+        required=False,
+        allow_none=True,
+        missing="asc",
+    )
+    key_reference_list = fields.List(
         cls_or_instance=fields.Str(),
         required=False,
         missing=None,
