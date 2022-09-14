@@ -50,12 +50,9 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
 
         # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
         if self._profiler_name:
-            if self._profiler_name == "onboarding-data-assistant":
-                self._add_onboarding_data_assistant_cells()
-            else:
-                self._add_rule_based_profiler_cells()
+            self._add_rule_based_profiler_cells()
         else:
-            self._add_user_configurable_profiler_cells()
+            self._add_onboarding_data_assistant_cells()
 
         self.add_footer()
 

@@ -1051,17 +1051,19 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "round_decimals": 15,
                     },
                     "domain_builder": {
-                        "allowed_semantic_types_passthrough": ["logic"],
-                        "class_name": "CategoricalColumnDomainBuilder",
-                        "cardinality_limit_mode": "$variables.cardinality_limit_mode",
+                        "exclude_column_name_suffixes": ["_id", "_ID"],
                         "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
+                        "allowed_semantic_types_passthrough": ["logic"],
                         "exclude_column_names": sorted(
                             [
                                 "id",
+                                "ID",
+                                "Id",
                             ]
                             + exclude_column_names
                         ),
-                        "exclude_column_name_suffixes": ["_id"],
+                        "class_name": "CategoricalColumnDomainBuilder",
+                        "cardinality_limit_mode": "$variables.cardinality_limit_mode",
                         "exclude_semantic_types": ["binary", "currency", "identifier"],
                     },
                     "parameter_builders": [
@@ -1753,14 +1755,20 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
         == expected_expectation_suite.expectations
     )
 
-    assert deep_filter_properties_iterable(
-        properties=data_assistant_result.profiler_config.to_json_dict(),
-        delete_fields={"random_seed"},
-    ) == deep_filter_properties_iterable(
-        properties=quentin_expected_rule_based_profiler_configuration(
-            name=data_assistant_name,
-        ).to_json_dict(),
-        delete_fields={"random_seed"},
+    assert sorted(
+        deep_filter_properties_iterable(
+            properties=data_assistant_result.profiler_config.to_json_dict(),
+            delete_fields={"random_seed"},
+        ),
+        key=lambda element: element[0],
+    ) == sorted(
+        deep_filter_properties_iterable(
+            properties=quentin_expected_rule_based_profiler_configuration(
+                name=data_assistant_name,
+            ).to_json_dict(),
+            delete_fields={"random_seed"},
+        ),
+        key=lambda element: element[0],
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
@@ -1837,9 +1845,12 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
             delete_fields={"random_seed"},
         )
     )
-    assert (
-        data_assistant_result_profiler_config_as_json_dict
-        == quentin_expected_rule_based_profiler_configuration_as_json_dict
+    assert sorted(
+        data_assistant_result_profiler_config_as_json_dict,
+        key=lambda element: element[0],
+    ) == sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict,
+        key=lambda element: element[0],
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
@@ -1982,9 +1993,12 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
             "categorical_columns_rule"
         ]["domain_builder"]["exclude_semantic_types"]
     )
-    assert (
-        data_assistant_result_profiler_config_as_json_dict
-        == quentin_expected_rule_based_profiler_configuration_as_json_dict
+    assert sorted(
+        data_assistant_result_profiler_config_as_json_dict,
+        key=lambda element: element[0],
+    ) == sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict,
+        key=lambda element: element[0],
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
