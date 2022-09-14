@@ -77,11 +77,12 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError""",
     # Batch request
-    """batch_request = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "Titanic_1912",
-    }
+    """
+batch_request = {
+    "datasource_name": "my_datasource",
+    "data_connector_name": "my_basic_data_connector",
+    "data_asset_name": "Titanic_1912",
+}
 """,
     # OnboardingDataAssistant instantiation/usage
     """\
@@ -219,7 +220,7 @@ def test_suite_notebook_renderer_render_onboarding_data_assistant_configuration(
     )
     notebook = renderer.render()
 
-    snippets = SNIPPETS_USER_CONFIGURABLE_PROFILER
+    snippets = SNIPPETS_ONBOARDING_DATA_ASSISTANT
 
     for snippet in snippets:
         assert find_code_in_notebook(
@@ -380,10 +381,9 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         "success_percent": 100.0,
     }
 
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
     expected_expectation_configurations: List[
         ExpectationConfiguration
-    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -411,8 +411,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         expectations_from_suite,
     ) = get_set_of_columns_and_expectations_from_suite(suite=suite)
 
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-    expected_expectations: Set[str] = EXPECTED_EXPECTATIONS_USER_CONFIGURABLE_PROFILER
+    expected_expectations: Set[str] = EXPECTED_EXPECTATIONS_ONBOARDING_DATA_ASSISTANT
 
     assert columns_with_expectations == set()
     assert expectations_from_suite == expected_expectations
