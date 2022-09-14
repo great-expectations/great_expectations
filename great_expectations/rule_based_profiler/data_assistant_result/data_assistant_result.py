@@ -626,9 +626,10 @@ class DataAssistantResult(SerializableDictDot):
         chart_titles: List[str] = self._get_chart_titles(charts=themed_charts)
 
         if len(chart_titles) > 0:
+            metric_plot_count = self._get_metric_plot_count(charts=themed_charts)
             if plot_mode == plot_mode.DIAGNOSTIC:
                 print(
-                    f"""{len(self.expectation_configurations)} Expectations produced, {len(chart_titles)} Expectation and Metric plots implemented
+                    f"""{len(self.expectation_configurations)} Expectations produced, {metric_plot_count} Expectation and Metric plots implemented
 Use DataAssistantResult.show_expectations_by_domain_type() or
 DataAssistantResult.show_expectations_by_expectation_type() to show all produced Expectations"""
                 )
@@ -637,7 +638,7 @@ DataAssistantResult.show_expectations_by_expectation_type() to show all produced
                     [len(metrics) for _, metrics in self.metrics_by_domain.items()]
                 )
                 print(
-                    f"""{metrics_count} Metrics calculated, {len(chart_titles)} Metric plots implemented
+                    f"""{metrics_count} Metrics calculated, {metric_plot_count} Metric plots implemented
 Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
 
@@ -764,6 +765,16 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             chart_titles.append(chart_title)
 
         return chart_titles
+
+    @staticmethod
+    def _get_metric_plot_count(charts: List[Union[alt.Chart, alt.LayerChart]]) -> int:
+        plot_count = 0
+        for chart in charts:
+            if "column" in chart.data.columns:
+                plot_count += chart.data.column.nunique()
+            else:
+                plot_count += 1
+        return plot_count
 
     @staticmethod
     def _apply_theme(
