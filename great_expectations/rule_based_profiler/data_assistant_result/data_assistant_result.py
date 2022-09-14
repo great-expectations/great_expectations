@@ -597,8 +597,8 @@ class DataAssistantResult(SerializableDictDot):
         return_charts = self._apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
 
-    @staticmethod
     def _display(
+        self,
         charts: Union[List[alt.Chart], List[alt.VConcatChart]],
         plot_mode: PlotMode,
         theme: Optional[Dict[str, Any]] = None,
@@ -615,30 +615,25 @@ class DataAssistantResult(SerializableDictDot):
         """
         altair_theme: Dict[str, Any]
         if theme:
-            altair_theme = DataAssistantResult._get_theme(theme=theme)
+            altair_theme = self._get_theme(theme=theme)
         else:
             altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
 
-        themed_charts: List[alt.Chart] = DataAssistantResult._apply_theme(
+        themed_charts: List[alt.Chart] = self._apply_theme(
             charts=charts, theme=altair_theme
         )
 
-        chart_titles: List[str] = DataAssistantResult._get_chart_titles(
-            charts=themed_charts
-        )
+        chart_titles: List[str] = self._get_chart_titles(charts=themed_charts)
 
         if len(chart_titles) > 0:
             if plot_mode.PRESCRIPTIVE:
                 print(
-                    f"""{len(DataAssistantResult.expectation_configurations)} Expectations produced, {len(chart_titles)} Expectation and Metric plots implemented: Use DataAssistantResult.__name__.show_expectations_by_domain_type()
+                    f"""{len(self.expectation_configurations)} Expectations produced, {len(chart_titles)} Expectation and Metric plots implemented: Use DataAssistantResult.__name__.show_expectations_by_domain_type()
 or DataAssistantResult.show_expectations_by_expectation_type() to show all produced Expectations."""
                 )
             else:
                 metrics_count: int = sum(
-                    [
-                        len(metrics)
-                        for _, metrics in DataAssistantResult.metrics_by_domain.items()
-                    ]
+                    [len(metrics) for _, metrics in self.metrics_by_domain.items()]
                 )
                 print(
                     f"{metrics_count} Metrics calculated, {len(chart_titles)} Metric plots implemented: Use DataAssistantResult.metrics_by_domain to show all calculated Metrics."
