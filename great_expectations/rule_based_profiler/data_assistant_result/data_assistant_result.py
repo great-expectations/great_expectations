@@ -630,12 +630,18 @@ class DataAssistantResult(SerializableDictDot):
         if len(chart_titles) > 0:
             if plot_mode.PRESCRIPTIVE:
                 print(
-                    f"""Y Expectations produced, {len(chart_titles)} Expectation and Metric plots implemented: Use DataAssistantResult.__name__.show_expectations_by_domain_type()
+                    f"""{len(DataAssistantResult.expectation_configurations)} Expectations produced, {len(chart_titles)} Expectation and Metric plots implemented: Use DataAssistantResult.__name__.show_expectations_by_domain_type()
 or DataAssistantResult.show_expectations_by_expectation_type() to show all produced Expectations."""
                 )
             else:
+                metrics_count: int = sum(
+                    [
+                        len(metrics)
+                        for _, metrics in DataAssistantResult.metrics_by_domain.items()
+                    ]
+                )
                 print(
-                    f"W Metrics calculated, {len(chart_titles)} Metric plots implemented: Use DataAssistantResult.metrics_by_domain to show all calculated Metrics."
+                    f"{metrics_count} Metrics calculated, {len(chart_titles)} Metric plots implemented: Use DataAssistantResult.metrics_by_domain to show all calculated Metrics."
                 )
 
             display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {
