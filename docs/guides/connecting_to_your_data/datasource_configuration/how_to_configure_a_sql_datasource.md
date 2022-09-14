@@ -15,12 +15,15 @@ import SectionAddTheExecutionEngineToYourDatasourceConfiguration from './sql_com
 import SectionAddADictionaryAsTheValueOfTheDataConnectorsKey from './sql_components/_section_add_a_dictionary_as_the_value_of_the_data_connectors_key.mdx'
 import SectionConfigureYourIndividualDataConnectors from './sql_components/_section_configure_your_individual_data_connectors.mdx'
 import SectionDataConnectorExampleConfigurations from './sql_components/_section_data_connector_example_configurations.mdx'
-import SectionBatchSpecPassthrough from './sql_components/_section_configure_batch_spec_passthrough.mdx'
 import SectionConfigureYourDataAssets from './sql_components/_section_configure_your_data_assets.mdx'
 import SectionTestYourConfigurationWithTestYamlConfig from './components/_section_test_your_configuration_with_test_yaml_config.mdx'
 import SectionAddMoreDataConnectorsToYourConfig from './components/_section_add_more_data_connectors_to_your_config.mdx'
 import SectionAddYourNewDatasourceToYourDataContext from './components/_section_add_your_new_datasource_to_your_data_context.mdx'
 import SectionNextSteps from './components/_section_next_steps.mdx'
+
+import AdditionalInfoSplittingMethods from './sql_components/_table_splitting_methods.mdx'
+import AdditionalInfoSamplingMethods from './sql_components/_table_sampling_methods.mdx'
+import AdditionalInfoIntrospectionDirectives from './sql_components/_part_introspection_directives.mdx'
 
 <UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/>
 
@@ -60,26 +63,36 @@ import SectionNextSteps from './components/_section_next_steps.mdx'
 
 <SectionDataConnectorExampleConfigurations />
 
-### 8. Configure the values for `batch_spec_passthrough`
-
-<SectionBatchSpecPassthrough />
-
-### 9. Configure your Data Connector's Data Assets
+### 8. Configure your Data Connector's Data Assets
 
 <SectionConfigureYourDataAssets />
 
-### 10. Test your configuration with `.test_yaml_config(...)`
+### 9. Test your configuration with `.test_yaml_config(...)`
 
 <SectionTestYourConfigurationWithTestYamlConfig />
 
-### 11. (Optional) Add more Data Connectors to your configuration
+### 10. (Optional) Add more Data Connectors to your configuration
 
 <SectionAddMoreDataConnectorsToYourConfig />
 
-### 12. Add your new Datasource to your Data Context
+### 11. Add your new Datasource to your Data Context
 
 <SectionAddYourNewDatasourceToYourDataContext />
 
-## Next Steps
+## Next steps
 
 <SectionNextSteps />
+
+## Additional notes
+
+### Splitting methods
+
+<AdditionalInfoSplittingMethods />
+
+### Sampling methods
+
+<AdditionalInfoSamplingMethods />
+
+### Introspection directives
+
+<AdditionalInfoIntrospectionDirectives />

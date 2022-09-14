@@ -36,6 +36,18 @@ datasource_config: dict = {
 }
 ```
 
-:::tip
+:::tip Tip: Using `credentials` instead of `connection_string`
 The `credentials` key uses a dictionary to provide the elements of your connection string as separate, individual values.  For information on how to populate the `credentials` dictionary and how to configure your `great_expectations.yml` project config file to populate credentials from either a YAML file or a secret manager, please see our guide on [How to configure credentials](.../.../setup/configuring_data_contexts/how_to_configure_credentials).
+:::
+
+:::info Info: Additional (optional) Execution Engine keys
+
+In addition to substituting `credentials` for `connection_string`, there are a few other optional keys that you can add to your `execution_engine` dictionary.
+
+The first of these is the optional key `create_temp_table`.  Creating a temp table to improve query efficiency is the default behaviour of the `SqlAlchemyExecutionEngine`.  However, you can change this to `False` if you don't have the permissions to create a temp table on the database you are working with.
+
+The other valid keys are not actually defined by the Great Expectations code.  Instead, any other key/value pairs that you add to the Execution Engine configuration will be passed directly to SqlAlchemy's `create_engine(...)` method.  This allows you to fully leverage all the capabilities supported by SqlAlchemy through that method.
+
+For more information on what keys `create_engine(...)` will accept as parameters and how you can utilize this feature, please refer to [SqlAlchemy's documentation](https://docs.sqlalchemy.org/).
+
 :::
