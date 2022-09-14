@@ -27,10 +27,16 @@ class Sorter:
         none_batches: List[int] = []
         value_batches: List[int] = []
         for idx, batch_definition in enumerate(batch_definitions):
-            if (
-                any(batch_definition.batch_identifiers.values()) is None
-                or len(batch_definition.batch_identifiers.values()) == 0
-            ):
+            # if the batch_identifiers take the form of a nested dictionary, we need to extract the values of the
+            # inner dict to check for special case sorting of None
+            if isinstance(list(batch_definition.batch_identifiers.values())[0], dict):
+                batch_identifier_values = dict(
+                    batch_definition.batch_identifiers.values()
+                ).values()
+            else:
+                batch_identifier_values = batch_definition.batch_identifiers.values()
+
+            if None in batch_identifier_values or len(batch_identifier_values) == 0:
                 none_batches.append(idx)
             else:
                 value_batches.append(idx)
