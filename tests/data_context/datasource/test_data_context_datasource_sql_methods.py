@@ -462,77 +462,15 @@ def test_mysql_datasource_new(sa, empty_data_context):
     context.test_yaml_config(yaml_config=example_yaml)
 
 
-def test_snowflake_datasource_new(sa, empty_data_context):
-    context = empty_data_context
-    datasource_name = "my_datasource"
-
-    host = (
-        "oca29081.us-east-1"  # The account name (include region -- ex 'ABCD.us-east-1')
-    )
-    username = "azure_devops"
-    database = "DEMO_DB"  # The database name
-    schema_name = "TEST_SCHEMA"  # The schema name
-    warehouse = "COMPUTE_WH"  # The warehouse name
-    role = "PUBLIC"  # The role name
-    table_name = (
-        "TAXI_DATA_COPY"  # A table that you would like to add initially as a Data Asset
-    )
-    password = "8BH2uqUx8RZbfKgP"
-
-    example_yaml = f"""
-    name: {datasource_name}
-    class_name: Datasource
-    execution_engine:
-      class_name: SqlAlchemyExecutionEngine
-      credentials:
-        host: {host}
-        username: {username}
-        database: {database}
-        query:
-          schema: {schema_name}
-          warehouse: {warehouse}
-          role: {role}
-        password: {password}
-        drivername: snowflake
-    data_connectors:
-      default_runtime_data_connector_name:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - default_identifier_name
-      default_inferred_data_connector_name:
-        class_name: InferredAssetSqlDataConnector
-        include_schema_name: True
-        introspection_directives:
-          schema_name: {schema_name}
-      default_configured_data_connector_name:
-        class_name: ConfiguredAssetSqlDataConnector
-        module_name: great_expectations.datasource.data_connector
-        assets:
-          {schema_name}.{table_name}:
-            include_schema_name: True
-            module_name: great_expectations.datasource.data_connector.asset
-            class_name: Asset
-            table_name: {table_name}
-            schema_name: {schema_name}
-    """
-    # this is a bug : inferred
-    # this is a big : configured
-
-    context.test_yaml_config(yaml_config=example_yaml)
-    # add_datasource only if it doesn't already exist in our configuration
-    # context.add_datasource(**yaml.load(example_yaml))
-    # single_batch_batch_request: BatchRequest = BatchRequest(
-    # datasource_name="my_datasource",
-    # data_connector_name="default_configured_data_connector_name",
-    # data_asset_name="TEST_SCHEMA.TAXI_DATA_COPY",
-    # )
-    # batch_list = context.get_batch_list(batch_request=single_batch_batch_request)
-
-
+# OK SO THIS WORKS!!
 def test_bigquery_datasource_new(sa, empty_data_context):
     context = empty_data_context
     datasource_name = "my_datasource"
-    connection_string = ""
+    connection_string = "bigquery://ge-oss-ci-cd/demo"
+
+    schema_name = "demo"  # or database name (datset name)
+    table_name = "taxi_data"
+
     example_yaml = f"""
     name: {datasource_name}
     class_name: Datasource
@@ -547,15 +485,14 @@ def test_bigquery_datasource_new(sa, empty_data_context):
       default_inferred_data_connector_name:
         class_name: InferredAssetSqlDataConnector
         include_schema_name: True
-        introspection_directives:
-          schema_name: {schema_name}
       default_configured_data_connector_name:
         class_name: ConfiguredAssetSqlDataConnector
         module_name: great_expectations.datasource.data_connector
         assets:
           {schema_name}.{table_name}:
-            include_schema_name: True
             module_name: great_expectations.datasource.data_connector.asset
+            table_name: {table_name}
+            schema_name: {schema_name}
             class_name: Asset
     """
     # this is a bug : inferred
@@ -563,10 +500,17 @@ def test_bigquery_datasource_new(sa, empty_data_context):
 
     context.test_yaml_config(yaml_config=example_yaml)
     # add_datasource only if it doesn't already exist in our configuration
-    # context.add_datasource(**yaml.load(example_yaml))
-    # single_batch_batch_request: BatchRequest = BatchRequest(
-    # datasource_name="my_datasource",
-    # data_connector_name="default_configured_data_connector_name",
-    # data_asset_name="TEST_SCHEMA.TAXI_DATA_COPY",
-    # )
-    # batch_list = context.get_batch_list(batch_request=single_batch_batch_request)
+    context.add_datasource(**yaml.load(example_yaml))
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="default_inferred_data_connector_name",
+        data_asset_name="demo.taxi_data",
+    )
+    batch_list = context.get_batch_list(batch_request=single_batch_batch_request)
+
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="default_configured_data_connector_name",
+        data_asset_name="demo.taxi_data",
+    )
+    batch_list = context.get_batch_list(batch_request=single_batch_batch_request)
