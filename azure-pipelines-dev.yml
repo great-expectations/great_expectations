@@ -246,7 +246,7 @@ stages:
               pip install pytest-cov pytest-icdiff pytest-mock pytest-azurepipelines invoke
 
               # Run unit-tests
-              invoke tests --ci --cloud  --timeout=3.0
+              invoke tests --ci --cloud --timeout=3.0
 
             displayName: 'Unit Tests'
 
@@ -359,7 +359,7 @@ stages:
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              pip install pytest pytest-azurepipelines
+              pip install pytest-azurepipelines
               pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
@@ -411,7 +411,6 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install --requirement requirements.txt
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
@@ -494,7 +493,6 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install --requirement requirements.txt
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
@@ -535,6 +533,6 @@ stages:
 
           - script: |
               # Run pytest
-              pytest great_expectations --filter 'tests/cli' --aws-integration -v
+              pytest tests --aws-integration -v
 
             displayName: 'pytest'
