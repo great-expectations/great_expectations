@@ -1327,3 +1327,76 @@ def test_validator_include_rendered_content_evaluation_parameters(
         ]
         == 8000
     )
+
+
+@pytest.fixture
+def validator_with_mock_execution_engine() -> Validator:
+    execution_engine = mock.MagicMock()
+    validator = Validator(execution_engine=execution_engine)
+    return validator
+
+
+@pytest.mark.unit
+def test___dir___contains_expectation_impls(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    attrs = validator.__dir__()
+    expectation_impls = list(filter(lambda a: a.startswith("expect_"), attrs))
+    assert len(expectation_impls) > 0
+
+
+@pytest.mark.unit
+def test_show_progress_bars_property_and_setter(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    assert validator.show_progress_bars is True
+    validator.show_progress_bars = False
+    assert validator.show_progress_bars is False
+
+
+@pytest.mark.unit
+def test_expose_dataframe_methods_property_and_setter(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    assert validator.expose_dataframe_methods is False
+    validator.expose_dataframe_methods = True
+    assert validator.expose_dataframe_methods is True
+
+
+@pytest.mark.unit
+def test___get_attr___retrieves_existing_expectation(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    # Does not raise error if properly registered
+    # Avoiding invocation to only test registration (and not actual expectation)
+    validator.expect_column_max_to_be_between
+
+
+@pytest.mark.unit
+def test__get_attr___raises_attribute_error_with_invalid_attr(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    with pytest.raises(AttributeError) as e:
+        validator.my_fake_attr
+
+    assert "'Validator'  object has no attribute 'my_fake_attr'" in str(e.value)
+
+
+@pytest.mark.unit
+def test_list_available_expectation_types(
+    validator_with_mock_execution_engine: Validator,
+) -> None:
+    validator = validator_with_mock_execution_engine
+
+    available = validator.list_available_expectation_types()
+    assert all(e.startswith("expect_") for e in available)

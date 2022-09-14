@@ -36,9 +36,9 @@ logger = logging.getLogger(__name__)
 
 
 class GECloudEnvironmentVariable(str, Enum):
-    BASE_URL = "base_url"
-    ORGANIZATION_ID = "organization_id"
-    ACCESS_TOKEN = "access_token"
+    BASE_URL = "GE_CLOUD_BASE_URL"
+    ORGANIZATION_ID = "GE_CLOUD_ORGANIZATION_ID"
+    ACCESS_TOKEN = "GE_CLOUD_ACCESS_TOKEN"
 
 
 class CloudDataContext(AbstractDataContext):
@@ -137,7 +137,18 @@ class CloudDataContext(AbstractDataContext):
                 f"environment or in global configs ({(', ').join(global_config_path_str)})."
             )
 
-        return GeCloudConfig(**ge_cloud_config_dict)  # type: ignore[arg-type,misc]
+        base_url = ge_cloud_config_dict[GECloudEnvironmentVariable.BASE_URL]
+        assert base_url is not None
+        access_token = ge_cloud_config_dict[GECloudEnvironmentVariable.ACCESS_TOKEN]
+        organization_id = ge_cloud_config_dict[
+            GECloudEnvironmentVariable.ORGANIZATION_ID
+        ]
+
+        return GeCloudConfig(
+            base_url=base_url,
+            access_token=access_token,
+            organization_id=organization_id,
+        )
 
     @classmethod
     def _get_ge_cloud_config_dict(
@@ -400,9 +411,14 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             None
         """
+        id = (
+            str(expectation_suite.ge_cloud_id)
+            if expectation_suite.ge_cloud_id
+            else None
+        )
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=expectation_suite.ge_cloud_id,
+            ge_cloud_id=id,
             resource_name=expectation_suite.expectation_suite_name,
         )
 
