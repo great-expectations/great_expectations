@@ -254,7 +254,6 @@ class SorterConfigSchema(Schema):
     order_keys_by = fields.String(
         required=False,
         allow_none=True,
-        missing="asc",
     )
     key_reference_list = fields.List(
         cls_or_instance=fields.Str(),
