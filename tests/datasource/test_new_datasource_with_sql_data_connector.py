@@ -161,7 +161,7 @@ data_connectors:
                 "example_data_asset_names": ["table_partitioned_by_date_column__A"],
                 "data_assets": {
                     "table_partitioned_by_date_column__A": {
-                        "batch_definition_count": 5,
+                        "batch_definition_count": 9,
                         "example_data_references": [
                             {"date": "2020-00"},
                             {"date": "2020-01"},
@@ -243,7 +243,7 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
                 "example_data_asset_names": ["table_partitioned_by_date_column__A"],
                 "data_assets": {
                     "table_partitioned_by_date_column__A": {
-                        "batch_definition_count": 5,
+                        "batch_definition_count": 9,
                         "example_data_references": [
                             {"date": "2020-00"},
                             {"date": "2020-01"},
@@ -334,7 +334,7 @@ data_connectors:
                         ],
                     },
                     "prefix__table_partitioned_by_date_column__A__xiffus": {
-                        "batch_definition_count": 5,
+                        "batch_definition_count": 9,
                         "example_data_references": [
                             {"date": "2020-00"},
                             {"date": "2020-01"},
@@ -422,7 +422,7 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
                         ],
                     },
                     "prefix__table_partitioned_by_date_column__A__xiffus": {
-                        "batch_definition_count": 5,
+                        "batch_definition_count": 9,
                         "example_data_references": [
                             {"date": "2020-00"},
                             {"date": "2020-01"},

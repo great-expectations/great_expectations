@@ -24,6 +24,7 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
@@ -383,7 +384,7 @@ Would you like to continue?"""
                 )
 
     if (
-        datasource.execution_engine.engine.dialect.name.lower() == "bigquery"
+        datasource.execution_engine.engine.dialect.name.lower() == GESqlDialect.BIGQUERY
         and parse_bigquery_url is not None
     ):
         # bigquery table needs to contain the project id if it differs from the credentials project
