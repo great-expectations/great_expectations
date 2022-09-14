@@ -655,7 +655,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         else:
             # build s3 endpoint when no endpoint_url is configured
 
-            location = self._create_client().get_bucket_location(Bucket=self.bucket)[
+            location = os.getenv("AWS_DEFAULT_REGION") or self._create_client().get_bucket_location(Bucket=self.bucket)[
                 "LocationConstraint"
             ]
 
