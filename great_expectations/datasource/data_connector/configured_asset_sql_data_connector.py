@@ -449,7 +449,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
                 splitter_kwargs=splitter_kwargs,
             )
         else:
-            sorters: Iterator[Sorter] = list(sorters.values())
+            sorters: Iterator[Sorter] = reversed(list(sorters.values()))
 
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(
