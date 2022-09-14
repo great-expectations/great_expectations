@@ -2978,7 +2978,7 @@ def alice_columnar_table_single_batch(empty_data_context):
             "my_rule_for_user_ids": {
                 "variables": {},
                 "domain_builder": {
-                    "column_name_suffixes": ["_id"],
+                    "column_name_suffixes": ["_id", "_ID"],
                     "class_name": "MyCustomSemanticTypeColumnDomainBuilder",
                     "module_name": "tests.test_fixtures.rule_based_profiler.plugins.my_custom_semantic_type_column_domain_builder",
                     "semantic_types": ["user_id"],
