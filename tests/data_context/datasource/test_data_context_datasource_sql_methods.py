@@ -1,11 +1,9 @@
 import json
-import os
 from typing import List, Union
 
 import pytest
 
 from great_expectations.core.batch import Batch, BatchRequest, IDDict
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
