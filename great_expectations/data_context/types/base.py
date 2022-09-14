@@ -159,81 +159,6 @@ class BaseYamlConfig(SerializableDictDot):
         raise NotImplementedError
 
 
-class AssetConfig(SerializableDictDot):
-    def __init__(  # noqa: C901 - complexity 16
-        self,
-        name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        module_name: Optional[str] = None,
-        bucket: Optional[str] = None,
-        prefix: Optional[str] = None,
-        delimiter: Optional[str] = None,
-        max_keys: Optional[int] = None,
-        schema_name: Optional[str] = None,
-        batch_spec_passthrough: Optional[Dict[str, Any]] = None,
-        batch_identifiers: Optional[List[str]] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[Dict[str, str]] = None,
-        sorters: Optional[dict] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[Dict[str, str]] = None,
-        reader_options: Optional[Dict[str, Any]] = None,
-        **kwargs: Optional[dict],
-    ) -> None:
-        if name is not None:
-            self.name = name
-        self._class_name = class_name
-        self._module_name = module_name
-        if bucket is not None:
-            self.bucket = bucket
-        if prefix is not None:
-            self.prefix = prefix
-        if delimiter is not None:
-            self.delimiter = delimiter
-        if max_keys is not None:
-            self.max_keys = max_keys
-        if schema_name is not None:
-            self.schema_name = schema_name
-        if batch_spec_passthrough is not None:
-            self.batch_spec_passthrough = batch_spec_passthrough
-        if batch_identifiers is not None:
-            self.batch_identifiers = batch_identifiers
-        if splitter_method is not None:
-            self.splitter_method = splitter_method
-        if splitter_kwargs is not None:
-            self.splitter_kwargs = splitter_kwargs
-        if sorters is not None:
-            self.sorters = sorters
-        if sampling_method is not None:
-            self.sampling_method = sampling_method
-        if sampling_kwargs is not None:
-            self.sampling_kwargs = sampling_kwargs
-        if reader_options is not None:
-            self.reader_options = reader_options
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-    @property
-    def class_name(self) -> Optional[str]:
-        return self._class_name
-
-    @property
-    def module_name(self) -> Optional[str]:
-        return self._module_name
-
-    def to_json_dict(self) -> dict:
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
-        dict_obj: dict = self.to_dict()
-        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
-        return serializeable_dict
-
-
 class SorterConfig(DictDot):
     def __init__(  # type: ignore[no-untyped-def]
         self,
@@ -326,6 +251,81 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
+class AssetConfig(SerializableDictDot):
+    def __init__(  # noqa: C901 - complexity 16
+        self,
+        name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        bucket: Optional[str] = None,
+        prefix: Optional[str] = None,
+        delimiter: Optional[str] = None,
+        max_keys: Optional[int] = None,
+        schema_name: Optional[str] = None,
+        batch_spec_passthrough: Optional[Dict[str, Any]] = None,
+        batch_identifiers: Optional[List[str]] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[Dict[str, str]] = None,
+        sorters: Optional[dict] = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[Dict[str, str]] = None,
+        reader_options: Optional[Dict[str, Any]] = None,
+        **kwargs: Optional[dict],
+    ) -> None:
+        if name is not None:
+            self.name = name
+        self._class_name = class_name
+        self._module_name = module_name
+        if bucket is not None:
+            self.bucket = bucket
+        if prefix is not None:
+            self.prefix = prefix
+        if delimiter is not None:
+            self.delimiter = delimiter
+        if max_keys is not None:
+            self.max_keys = max_keys
+        if schema_name is not None:
+            self.schema_name = schema_name
+        if batch_spec_passthrough is not None:
+            self.batch_spec_passthrough = batch_spec_passthrough
+        if batch_identifiers is not None:
+            self.batch_identifiers = batch_identifiers
+        if splitter_method is not None:
+            self.splitter_method = splitter_method
+        if splitter_kwargs is not None:
+            self.splitter_kwargs = splitter_kwargs
+        if sorters is not None:
+            self.sorters = sorters
+        if sampling_method is not None:
+            self.sampling_method = sampling_method
+        if sampling_kwargs is not None:
+            self.sampling_kwargs = sampling_kwargs
+        if reader_options is not None:
+            self.reader_options = reader_options
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def class_name(self) -> Optional[str]:
+        return self._class_name
+
+    @property
+    def module_name(self) -> Optional[str]:
+        return self._module_name
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
@@ -368,7 +368,9 @@ class AssetConfigSchema(Schema):
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sorters = fields.List(
-        fields.Nested(SorterConfigSchema, required=False, allow_none=True),
+        cls_or_instance=fields.Nested(
+            SorterConfigSchema, required=False, allow_none=True
+        ),
         required=False,
         allow_none=True,
     )
@@ -582,11 +584,6 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
 
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
-    sorters = fields.List(
-        fields.Nested(SorterConfigSchema, required=False, allow_none=True),
-        required=False,
-        allow_none=True,
-    )
     default_regex = fields.Dict(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
     batch_identifiers = fields.List(
@@ -625,7 +622,13 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     include_schema_name = fields.Boolean(required=False, allow_none=True)
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
-    sorters = fields.Dict(required=False, allow_none=True)
+    sorters = fields.List(
+        cls_or_instance=fields.Nested(
+            SorterConfigSchema, required=False, allow_none=True
+        ),
+        required=False,
+        allow_none=True,
+    )
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
 
