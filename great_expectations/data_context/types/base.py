@@ -174,6 +174,7 @@ class AssetConfig(SerializableDictDot):
         batch_identifiers: Optional[List[str]] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[Dict[str, str]] = None,
+        sorters: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
         reader_options: Optional[Dict[str, Any]] = None,
@@ -201,6 +202,8 @@ class AssetConfig(SerializableDictDot):
             self.splitter_method = splitter_method
         if splitter_kwargs is not None:
             self.splitter_kwargs = splitter_kwargs
+        if sorters is not None:
+            self.sorters = sorters
         if sampling_method is not None:
             self.sampling_method = sampling_method
         if sampling_kwargs is not None:
@@ -229,83 +232,6 @@ class AssetConfig(SerializableDictDot):
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
-
-
-class AssetConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    name = fields.String(required=False, allow_none=True)
-    class_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="Asset",
-    )
-    module_name = fields.String(
-        required=False,
-        all_none=True,
-        missing="great_expectations.datasource.data_connector.asset",
-    )
-    base_directory = fields.String(required=False, allow_none=True)
-    glob_directive = fields.String(required=False, allow_none=True)
-    pattern = fields.String(required=False, allow_none=True)
-    group_names = fields.List(
-        cls_or_instance=fields.Str(), required=False, allow_none=True
-    )
-    bucket = fields.String(required=False, allow_none=True)
-    prefix = fields.String(required=False, allow_none=True)
-    delimiter = fields.String(required=False, allow_none=True)
-    max_keys = fields.Integer(required=False, allow_none=True)
-    schema_name = fields.String(required=False, allow_none=True)
-    batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
-
-    # Necessary addition for Cloud assets
-    table_name = fields.String(required=False, allow_none=True)
-    type = fields.String(required=False, allow_none=True)
-
-    batch_identifiers = fields.List(
-        cls_or_instance=fields.Str(), required=False, allow_none=True
-    )
-
-    data_asset_name_prefix = fields.String(required=False, allow_none=True)
-    data_asset_name_suffix = fields.String(required=False, allow_none=True)
-    include_schema_name = fields.Boolean(required=False, allow_none=True)
-    splitter_method = fields.String(required=False, allow_none=True)
-    splitter_kwargs = fields.Dict(required=False, allow_none=True)
-    sampling_method = fields.String(required=False, allow_none=True)
-    sampling_kwargs = fields.Dict(required=False, allow_none=True)
-
-    reader_options = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
-
-    @validates_schema
-    def validate_schema(self, data, **kwargs) -> None:  # type: ignore[no-untyped-def]
-        pass
-
-    @pre_dump
-    def prepare_dump(self, data, **kwargs):
-        """
-        Schemas in Spark Dataframes are defined as StructType, which is not serializable
-        This method calls the schema's jsonValue() method, which translates the object into a json
-        """
-        # check whether spark exists
-        if StructType is None:
-            return data
-
-        batch_spec_passthrough_config = data.get("batch_spec_passthrough")
-        if batch_spec_passthrough_config:
-            reader_options: dict = batch_spec_passthrough_config.get("reader_options")
-            if reader_options:
-                schema = reader_options.get("schema")
-                if schema and isinstance(schema, StructType):
-                    data["batch_spec_passthrough"]["reader_options"][
-                        "schema"
-                    ] = schema.jsonValue()
-        return data
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_asset_config(self, data, **kwargs):  # type: ignore[no-untyped-def]
-        return AssetConfig(**data)
 
 
 class SorterConfig(DictDot):
@@ -400,6 +326,88 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
+class AssetConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    name = fields.String(required=False, allow_none=True)
+    class_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="Asset",
+    )
+    module_name = fields.String(
+        required=False,
+        all_none=True,
+        missing="great_expectations.datasource.data_connector.asset",
+    )
+    base_directory = fields.String(required=False, allow_none=True)
+    glob_directive = fields.String(required=False, allow_none=True)
+    pattern = fields.String(required=False, allow_none=True)
+    group_names = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+    bucket = fields.String(required=False, allow_none=True)
+    prefix = fields.String(required=False, allow_none=True)
+    delimiter = fields.String(required=False, allow_none=True)
+    max_keys = fields.Integer(required=False, allow_none=True)
+    schema_name = fields.String(required=False, allow_none=True)
+    batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
+
+    # Necessary addition for Cloud assets
+    table_name = fields.String(required=False, allow_none=True)
+    type = fields.String(required=False, allow_none=True)
+
+    batch_identifiers = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+
+    data_asset_name_prefix = fields.String(required=False, allow_none=True)
+    data_asset_name_suffix = fields.String(required=False, allow_none=True)
+    include_schema_name = fields.Boolean(required=False, allow_none=True)
+    splitter_method = fields.String(required=False, allow_none=True)
+    splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sorters = fields.List(
+        fields.Nested(SorterConfigSchema, required=False, allow_none=True),
+        required=False,
+        allow_none=True,
+    )
+    sampling_method = fields.String(required=False, allow_none=True)
+    sampling_kwargs = fields.Dict(required=False, allow_none=True)
+
+    reader_options = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs) -> None:  # type: ignore[no-untyped-def]
+        pass
+
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        """
+        Schemas in Spark Dataframes are defined as StructType, which is not serializable
+        This method calls the schema's jsonValue() method, which translates the object into a json
+        """
+        # check whether spark exists
+        if StructType is None:
+            return data
+
+        batch_spec_passthrough_config = data.get("batch_spec_passthrough")
+        if batch_spec_passthrough_config:
+            reader_options: dict = batch_spec_passthrough_config.get("reader_options")
+            if reader_options:
+                schema = reader_options.get("schema")
+                if schema and isinstance(schema, StructType):
+                    data["batch_spec_passthrough"]["reader_options"][
+                        "schema"
+                    ] = schema.jsonValue()
+        return data
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_asset_config(self, data, **kwargs):  # type: ignore[no-untyped-def]
+        return AssetConfig(**data)
+
+
 class DataConnectorConfig(AbstractConfig):
     def __init__(  # noqa: C901 - 20
         self,
@@ -413,7 +421,6 @@ class DataConnectorConfig(AbstractConfig):
         glob_directive=None,
         default_regex=None,
         batch_identifiers=None,
-        sorters=None,
         # S3
         boto3_options=None,
         bucket=None,
@@ -434,6 +441,7 @@ class DataConnectorConfig(AbstractConfig):
         include_schema_name=None,
         splitter_method=None,
         splitter_kwargs=None,
+        sorters=None,
         sampling_method=None,
         sampling_kwargs=None,
         excluded_tables=None,
@@ -457,8 +465,6 @@ class DataConnectorConfig(AbstractConfig):
             self.default_regex = default_regex
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
-        if sorters is not None:
-            self.sorters = sorters
         if data_asset_name_prefix is not None:
             self.data_asset_name_prefix = data_asset_name_prefix
         if data_asset_name_suffix is not None:
@@ -469,6 +475,8 @@ class DataConnectorConfig(AbstractConfig):
             self.splitter_method = splitter_method
         if splitter_kwargs is not None:
             self.splitter_kwargs = splitter_kwargs
+        if sorters is not None:
+            self.sorters = sorters
         if sampling_method is not None:
             self.sampling_method = sampling_method
         if sampling_kwargs is not None:
@@ -617,6 +625,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     include_schema_name = fields.Boolean(required=False, allow_none=True)
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sorters = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
 
