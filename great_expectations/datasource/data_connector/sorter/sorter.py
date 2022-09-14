@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, List
+from typing import Any, List, Union, ValuesView
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
@@ -29,7 +29,10 @@ class Sorter:
         for idx, batch_definition in enumerate(batch_definitions):
             # if the batch_identifiers take the form of a nested dictionary, we need to extract the values of the
             # inner dict to check for special case sorting of None
-            if isinstance(list(batch_definition.batch_identifiers.values())[0], dict):
+            batch_identifier_values: Union[list, ValuesView]
+            if len(list(batch_definition.batch_identifiers.values())) == 0:
+                batch_identifier_values = [None]
+            elif isinstance(list(batch_definition.batch_identifiers.values())[0], dict):
                 batch_identifier_values = dict(
                     batch_definition.batch_identifiers.values()
                 ).values()
