@@ -253,7 +253,7 @@ stages:
           - script: |
               # Run pytest
               pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit' --durations=10
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit and not e2e' --durations=10
 
             displayName: 'pytest'
 
@@ -324,7 +324,7 @@ stages:
 
               # Run pytest
               pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not e2e'
 
             displayName: 'pytest'
 
