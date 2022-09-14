@@ -159,7 +159,7 @@ class BaseYamlConfig(SerializableDictDot):
         raise NotImplementedError
 
 
-class AssetConfig(SerializableDictDot):
+class AssetConfig(SerializableDictDot):  # noqa: C901 - complexity 16
     def __init__(
         self,
         name: Optional[str] = None,
