@@ -431,9 +431,14 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             None
         """
+        id = (
+            str(expectation_suite.ge_cloud_id)
+            if expectation_suite.ge_cloud_id
+            else None
+        )
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=str(expectation_suite.ge_cloud_id),
+            ge_cloud_id=id,
             resource_name=expectation_suite.expectation_suite_name,
         )
 

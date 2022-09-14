@@ -426,6 +426,7 @@ def test_save_expectation_suite_overwrites_existing_suite(
 @pytest.mark.cloud
 def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
+    mock_expectations_store_has_key: mock.MagicMock,
     mock_list_expectation_suite_names: mock.MagicMock,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
@@ -437,6 +438,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
     existing_suite_names = [suite_name]
 
     with pytest.raises(DataContextError) as e:
+        mock_expectations_store_has_key.return_value = False
         mock_list_expectation_suite_names.return_value = existing_suite_names
         context.save_expectation_suite(
             expectation_suite=suite, overwrite_existing=False
