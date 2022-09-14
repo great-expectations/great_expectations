@@ -549,6 +549,6 @@ stages:
 
           - script: |
               # Run pytest
-              pytest tests --aws-integration -v
+              pytest --postgresql --spark --aws-integration tests/cli
 
             displayName: 'pytest'
