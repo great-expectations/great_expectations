@@ -1061,7 +1061,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             ]
                             + exclude_column_names
                         ),
-                        "exclude_column_name_suffixes": ["_id"],
+                        "exclude_column_name_suffixes": ["_id", "_ID"],
                         "exclude_semantic_types": ["binary", "currency", "identifier"],
                     },
                     "parameter_builders": [
