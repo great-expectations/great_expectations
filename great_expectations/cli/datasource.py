@@ -454,7 +454,6 @@ data_connectors:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True
   default_configured_data_connector_name:
-  default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {schema_name}.{table_name}:
