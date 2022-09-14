@@ -25,7 +25,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 from great_expectations.util import deep_filter_properties_iterable, lint_code
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.render.renderer.v3.test_suite_profile_notebook_renderer import (
-    EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER,
+    EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT,
 )
 from tests.render.test_util import (
     find_code_in_notebook,
@@ -48,11 +48,13 @@ suite = profiler.build_suite()
 validator.expectation_suite = suite
 """
 PROFILER_CODE_CELL_ONBOARDING_DATA_ASSISTANT: str = """\
-data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+result = context.assistants.onboarding.run(
     batch_request=batch_request,
     exclude_column_names=exclude_column_names,
 )
-validator.expectation_suite = data_assistant_result.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
+)
 """
 
 
@@ -3147,7 +3149,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = lint_code(
-        code=PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER
+        code=PROFILER_CODE_CELL_ONBOARDING_DATA_ASSISTANT
     ).rstrip("\n")
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
@@ -3166,10 +3168,9 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
     expected_expectation_configurations: List[
         ExpectationConfiguration
-    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -3373,7 +3374,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = lint_code(
-        code=PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER
+        code=PROFILER_CODE_CELL_ONBOARDING_DATA_ASSISTANT
     ).rstrip("\n")
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
@@ -3392,10 +3393,9 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
     expected_expectation_configurations: List[
         ExpectationConfiguration
-    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name

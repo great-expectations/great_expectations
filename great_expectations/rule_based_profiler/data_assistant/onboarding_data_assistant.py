@@ -288,6 +288,7 @@ class OnboardingDataAssistant(DataAssistant):
             include_column_name_suffixes=None,
             exclude_column_name_suffixes=[
                 "_id",
+                "_ID",
             ],
             semantic_type_filter_module_name=None,
             semantic_type_filter_class_name=None,

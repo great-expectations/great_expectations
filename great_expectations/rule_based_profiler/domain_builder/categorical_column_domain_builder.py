@@ -92,11 +92,14 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         if exclude_column_names is None:
             exclude_column_names = [
                 "id",
+                "ID",
+                "Id",
             ]
 
         if exclude_column_name_suffixes is None:
             exclude_column_name_suffixes = [
                 "_id",
+                "_ID",
             ]
 
         if exclude_semantic_types is None:

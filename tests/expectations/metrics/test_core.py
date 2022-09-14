@@ -3965,7 +3965,133 @@ def test_table_metric_spark(spark_session):
     assert results == {desired_metric.id: 3}
 
 
-def test_median_metric_spark(spark_session):
+def test_column_median_metric_pd():
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {"a": [1, 2, 3]},
+        )
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.median",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: 2}
+
+
+@pytest.mark.parametrize(
+    "dataframe,median,",
+    [
+        pytest.param(
+            pd.DataFrame({"a": [1, 2, 3]}),
+            2,
+        ),
+        pytest.param(
+            pd.DataFrame({"a": [1]}),
+            1,
+        ),
+    ],
+)
+def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
+    engine = build_sa_engine(
+        dataframe,
+        sa,
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    partial_metric = MetricConfiguration(
+        metric_name="table.row_count.aggregate_fn",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(partial_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    table_row_count_metric = MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": partial_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(table_row_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    column_values_null_condition_metric = MetricConfiguration(
+        metric_name="column_values.null.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(column_values_null_condition_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    column_values_nonnull_count_metric = MetricConfiguration(
+        metric_name="column_values.null.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": column_values_null_condition_metric,
+            "metric_partial_fn": partial_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(column_values_nonnull_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.median",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "table.row_count": table_row_count_metric,
+            "column_values.nonnull.count": column_values_nonnull_count_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: median}
+
+
+def test_column_median_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -4089,7 +4215,7 @@ def test_value_counts_metric_spark(spark_session):
     )
 
     metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert pd.Series(index=[1.0, 2.0, 3.0], data=[2, 2, 2]).equals(
+    assert pd.Series(index=[1.0, 2.0, 3.0, np.nan], data=[2, 2, 2, 1]).equals(
         metrics[desired_metric.id]
     )
 
