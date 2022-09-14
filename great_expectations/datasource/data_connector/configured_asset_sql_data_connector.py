@@ -439,7 +439,11 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         Returns:
             a list of batch definitions sorted depending on splitter method used to define them.
         """
-        if splitter_method_name is not None and splitter_kwargs is not None:
+        if (
+            splitter_method_name is not None
+            and splitter_kwargs is not None
+            and sorters is None
+        ):
             sorters = self._get_sorters_from_splitter_method_name(
                 splitter_method_name=splitter_method_name,
                 splitter_kwargs=splitter_kwargs,
