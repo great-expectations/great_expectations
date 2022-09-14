@@ -17,7 +17,7 @@ class DictionarySorter(Sorter):
         order_keys_by: str = "asc",
         key_reference_list: Optional[List[Any]] = None,
     ) -> None:
-        """Defines sorting behavior for
+        """Defines sorting behavior for batch definitions based on batch identifiers in nested dictionary form.
 
         Args:
             name: the name of the batch identifier key by which to sort the batch definitions.

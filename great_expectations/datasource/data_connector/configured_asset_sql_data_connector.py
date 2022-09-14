@@ -372,33 +372,37 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             return []
 
     def _validate_sorters_configuration(self) -> None:
-        if self.sorters is not None and len(self.sorters) > 0:
-            for data_asset_name, data_asset_config in self.assets.items():
+        for data_asset_name, data_asset_config in self.assets.items():
+            sorters = data_asset_config.get("sorters")
+            splitter_method = data_asset_config.get("splitter_method")
+            splitter_kwargs = data_asset_config.get("splitter_kwargs")
+            if (
+                splitter_method is not None
+                and splitter_kwargs is not None
+                and sorters is not None
+                and len(sorters) > 0
+            ):
                 splitter_group_names: List[str]
-                if "column_names" in data_asset_config["splitter_kwargs"]:
-                    splitter_group_names = data_asset_config["splitter_kwargs"][
-                        "column_names"
-                    ]
+                if "column_names" in splitter_kwargs:
+                    splitter_group_names = splitter_kwargs["column_names"]
                 else:
-                    splitter_group_names = [
-                        data_asset_config["splitter_kwargs"]["column_name"]
-                    ]
+                    splitter_group_names = [splitter_kwargs["column_name"]]
 
                 if any(
                     [
                         sorter_name not in splitter_group_names
-                        for sorter_name in self.sorters.keys()
+                        for sorter_name in sorters.keys()
                     ]
                 ):
                     raise ge_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
-configured group_names.
+keys used for splitting.
                         """
                     )
-                if len(splitter_group_names) < len(self.sorters):
+                if len(splitter_group_names) < len(sorters):
                     raise ge_exceptions.DataConnectorError(
-                        f"""DataConnector "{self.name}" is configured with {len(splitter_group_names)} group names;
-this is fewer than number of sorters specified, which is {len(self.sorters)}.
+                        f"""DataConnector "{self.name}" is configured with {len(splitter_group_names)} splitter groups;
+this is fewer than number of sorters specified, which is {len(sorters)}.
                         """
                     )
 
