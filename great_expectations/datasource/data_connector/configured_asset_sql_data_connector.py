@@ -543,9 +543,44 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
                 )
             )
 
-            # TODO Abe 20201029 : Apply sorters to batch_identifiers_list here
-            # TODO Will 20201102 : add sorting code here
-            self._data_references_cache[data_asset_name] = batch_identifiers_list
+            batch_definition_list = [
+                BatchDefinition(
+                    batch_identifiers=IDDict(batch_identifiers),
+                    datasource_name=self.datasource_name,
+                    data_connector_name=self.name,
+                    data_asset_name=data_asset_name,
+                )
+                for batch_identifiers in batch_identifiers_list
+            ]
+
+            data_asset_splitter_method: Optional[str] = data_asset_config.get(
+                "splitter_method"
+            )
+            data_asset_splitter_kwargs: Optional[
+                Dict[str, Union[str, list]]
+            ] = data_asset_config.get("splitter_kwargs")
+            data_asset_sorters: Optional[dict] = data_asset_config.get("sorters")
+
+            # if sorters have been explicitly passed to the data connector use them for sorting,
+            # otherwise sorting behavior can be inferred from splitter_method.
+            if data_asset_sorters is not None and len(data_asset_sorters) > 0:
+                batch_definition_list = self._sort_batch_definition_list(
+                    batch_definition_list=batch_definition_list,
+                    splitter_method_name=None,
+                    splitter_kwargs=None,
+                    sorters=data_asset_sorters,
+                )
+            elif data_asset_splitter_method is not None:
+                batch_definition_list = self._sort_batch_definition_list(
+                    batch_definition_list=batch_definition_list,
+                    splitter_method_name=data_asset_splitter_method,
+                    splitter_kwargs=data_asset_splitter_kwargs,
+                    sorters=None,
+                )
+            self._data_references_cache[data_asset_name] = [
+                batch_definition.batch_identifiers
+                for batch_definition in batch_definition_list
+            ]
 
     def _get_batch_identifiers_list_from_data_asset_config(
         self,

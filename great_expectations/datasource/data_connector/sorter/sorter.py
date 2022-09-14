@@ -27,7 +27,10 @@ class Sorter:
         none_batches: List[int] = []
         value_batches: List[int] = []
         for idx, batch_definition in enumerate(batch_definitions):
-            if any(batch_definition.batch_identifiers.values()) is None:
+            if (
+                any(batch_definition.batch_identifiers.values()) is None
+                or len(batch_definition.batch_identifiers.values()) == 0
+            ):
                 none_batches.append(idx)
             else:
                 value_batches.append(idx)
@@ -35,7 +38,7 @@ class Sorter:
         none_batch_definitions: List[BatchDefinition] = [
             batch_definitions[idx] for idx in none_batches
         ]
-        value_batch_definitiions: List[BatchDefinition] = sorted(
+        value_batch_definitions: List[BatchDefinition] = sorted(
             [batch_definitions[idx] for idx in value_batches],
             key=self.get_batch_key,
             reverse=self.reverse,
@@ -44,8 +47,8 @@ class Sorter:
         # the convention for ORDER BY in SQL is for NULL values to be first in the sort order for ascending
         # and last in the sort order for descending
         if self.reverse:
-            return value_batch_definitiions + none_batch_definitions
-        return none_batch_definitions + value_batch_definitiions
+            return value_batch_definitions + none_batch_definitions
+        return none_batch_definitions + value_batch_definitions
 
     def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
         raise NotImplementedError
