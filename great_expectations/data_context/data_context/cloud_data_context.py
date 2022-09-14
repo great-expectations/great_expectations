@@ -53,7 +53,6 @@ class CloudDataContext(AbstractDataContext):
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
@@ -70,7 +69,6 @@ class CloudDataContext(AbstractDataContext):
 
         self._ge_cloud_config = self.get_ge_cloud_config(
             ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_account_id=ge_cloud_account_id,
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
