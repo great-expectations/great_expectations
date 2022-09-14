@@ -411,7 +411,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         expectations_from_suite,
     ) = get_set_of_columns_and_expectations_from_suite(suite=suite)
 
-    expected_expectations: Set[str] = EXPECTED_EXPECTATIONS_USER_CONFIGURABLE_PROFILER
+    expected_expectations: Set[str] = EXPECTED_EXPECTATIONS_ONBOARDING_DATA_ASSISTANT
 
     assert columns_with_expectations == set()
     assert expectations_from_suite == expected_expectations
