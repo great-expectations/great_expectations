@@ -895,6 +895,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     expectations_produced = 160
     expectations_and_metrics_plots_implemented = 117
 
+    f = io.StringIO()
     with redirect_stdout(f):
         data_assistant_result.plot_expectations_and_metrics()
     stdout = f.getvalue()
