@@ -410,6 +410,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         password: str = "YOUR_PASSWORD",
         database: str = "YOUR_DATABASE",
         schema_name: str = "YOUR_SCHEMA",
+        table_name: str = "YOUR_TABLE_NAME",
     ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.SQL,
@@ -423,6 +424,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         self.password = password
         self.database = database
         self.schema_name = schema_name
+        self.table_name = table_name
 
     def credentials_snippet(self) -> str:
         return f'''\
@@ -431,7 +433,10 @@ port = "{self.port}"
 username = "{self.username}"
 password = "{self.password}"
 database = "{self.database}"
-schema_name = "{self.schema_name}"'''
+schema_name = "{self.schema_name}"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "{self.table_name}"'''
 
     def yaml_snippet(self) -> str:
         yaml_str = '''f"""
@@ -453,15 +458,16 @@ data_connectors:
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
+    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
-        schema_name: {schema_name}
-        table_name: {table_name}
 """'''
         return yaml_str
 
@@ -473,8 +479,7 @@ data_connectors:
     port: '{port}'
     username: {username}
     password: {password}
-    database: {database}
-    schema_name: {schema_name}"""
+    database: {database}"""
 
     def get_notebook_renderer(
         self, context: DataContext
@@ -622,7 +627,8 @@ username = "{self.username}"
 database = ""  # The database name
 schema_name = ""  # The schema name
 warehouse = ""  # The warehouse name
-role = ""  # The role name"""
+role = ""  # The role name
+table_name = ""  # A table that you would like to add initially as a Data Asset"""
 
         if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
             snippet += '''
@@ -634,10 +640,6 @@ authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' u
             snippet += """
 private_key_path = "YOUR_KEY_PATH"  # Path to the private key used for authentication
 private_key_passphrase = ""   # Passphrase for the private key used for authentication (optional -- leave blank for none)"""
-
-        snippet += '''\n
-# A table that you would like to add initially as a Data Asset
-table_name = "YOUR_TABLE_NAME"'''
 
         return snippet
 
@@ -680,7 +682,10 @@ class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
         return '''\
 # The SQLAlchemy url/connection string for the BigQuery connection
 # (reference: https://github.com/googleapis/python-bigquery-sqlalchemy#connection-string-parameters)"""
-connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
+connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"
+
+schema_name = ""  # or dataset name
+table_name = ""'''
 
     def verify_libraries_installed(self) -> bool:
         pybigquery_ok = verify_library_dependent_modules(
