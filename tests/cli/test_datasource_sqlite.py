@@ -215,10 +215,6 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     return context
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="datasource new workflow with SQLite requires manual modification of YAML before run",
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -294,10 +290,18 @@ def test_cli_datasource_new_connection_string(
     with open(expected_notebook) as f:
         nb = nbformat.read(f, as_version=4)
 
-    # mock the user adding a connection string into the notebook by overwriting the right cell
+    # Mock the user adding a connection string into the notebook by overwriting the right cell
+    credentials_cell = nb["cells"][5]["source"]
 
-    assert "connection_string" in nb["cells"][5]["source"]
-    nb["cells"][5]["source"] = '  connection_string = "sqlite://"'
+    credentials = ("connection_string", "schema_name", "table_name")
+    for credential in credentials:
+        assert credential in credentials_cell
+
+    # Replace placeholder with actual value to allow remainder of notebook to execute successfully
+    nb["cells"][5]["source"] = credentials_cell.replace(
+        "YOUR_CONNECTION_STRING", "sqlite://"
+    )
+
     ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
@@ -323,6 +327,20 @@ def test_cli_datasource_new_connection_string(
                     "class_name": "InferredAssetSqlDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
                     "include_schema_name": True,
+                    "introspection_directives": {
+                        "schema_name": "YOUR_SCHEMA",
+                    },
+                },
+                "default_configured_data_connector_name": {
+                    "assets": {
+                        "YOUR_SCHEMA.YOUR_TABLE_NAME": {
+                            "class_name": "Asset",
+                            "include_schema_name": True,
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                        },
+                    },
+                    "class_name": "ConfiguredAssetSqlDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
                 },
             },
             "name": "my_datasource",
