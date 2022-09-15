@@ -1256,10 +1256,6 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         Returns:
             An altair line chart
         """
-        df = DataAssistantResult._clean_quantitative_metrics_df(
-            df=df, sanitized_metric_names=sanitized_metric_names
-        )
-
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
