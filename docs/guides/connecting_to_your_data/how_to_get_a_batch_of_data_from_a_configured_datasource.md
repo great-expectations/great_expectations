@@ -6,7 +6,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you load a <TechnicalTag tag="batch" text="Batch" /> for introspection and validation using an active <TechnicalTag tag="data_connector" text="Data Connector" />. For guides on loading batches of data from specific <TechnicalTag tag="datasource" text="Datasources" /> using a Data Connector see the [Datasource specific guides in the "Connecting to your data" section](./index.md).
 
-What used to be called a “Batch” in the old API was replaced with <TechnicalTag tag="validator" text="Validator" />. A Validator knows how to <TechnicalTag tag="validation" text="Validate" /> a particular Batch of data on a particular <TechnicalTag tag="execution_engine" text="Execution Engine" /> against a particular <TechnicalTag tag="expectation_suite" text="Expectation Suite" />. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
+A <TechnicalTag tag="validator" text="Validator" /> is used to interact with a Batch of data, it knows how to <TechnicalTag tag="validation" text="Validate" /> a particular Batch of data on a particular <TechnicalTag tag="execution_engine" text="Execution Engine" /> against a particular <TechnicalTag tag="expectation_suite" text="Expectation Suite" />. The Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
 
 You can read more about the core classes that make Great Expectations run in our [Core Concepts reference guide](../../reference/core_concepts.md).
 
