@@ -822,7 +822,8 @@ def test_convert_ndarray_datetime_to_float_dtype(
     element: Any
 
     assert convert_ndarray_datetime_to_float_dtype(data=datetime_array).tolist() == [
-        element.timestamp() for element in datetime_array
+        element.replace(tzinfo=datetime.timezone.utc).timestamp()
+        for element in datetime_array
     ]
 
     with pytest.raises(AttributeError) as e:
@@ -843,7 +844,10 @@ def test_convert_ndarray_float_to_datetime_tuple(
     element: Any
 
     assert convert_ndarray_float_to_datetime_tuple(
-        data=[element.timestamp() for element in datetime_array]
+        data=[
+            element.replace(tzinfo=datetime.timezone.utc).timestamp()
+            for element in datetime_array
+        ]
     ) == tuple([element for element in datetime_array])
 
     with pytest.raises(TypeError) as e:
