@@ -300,7 +300,7 @@ execution_engine:
     database: {database}
     query:
       sslmode: prefer
-    drivername: redshift
+    drivername: postgresql+psycopg2
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector

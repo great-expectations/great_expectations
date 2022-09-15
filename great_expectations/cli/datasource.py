@@ -562,7 +562,7 @@ class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
                 "db": SupportedDatabaseBackends.REDSHIFT.value,
                 "api_version": "v3",
             },
-            driver="redshift",
+            driver="postgresql+psycopg2",
             port=5439,
         )
 
