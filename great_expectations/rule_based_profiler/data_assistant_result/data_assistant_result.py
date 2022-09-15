@@ -169,11 +169,15 @@ class DataAssistantResult(SerializableDictDot):
         Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
         and displays this "ExpectationConfiguration" list, grouped by "domain_type", in predetermined order.
         """
-        self.get_expectation_suite(
+        expectation_suite: ExpectationSuite = self.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             include_profiler_config=include_profiler_config,
             send_usage_event=send_usage_event,
-        ).show_expectations_by_domain_type()
+        )
+        if in_jupyter_notebook():
+            display(expectation_suite.show_expectations_by_domain_type())
+        else:
+            expectation_suite.show_expectations_by_domain_type()
 
     def show_expectations_by_expectation_type(
         self,
@@ -185,11 +189,15 @@ class DataAssistantResult(SerializableDictDot):
         Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
         and displays this "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined order.
         """
-        self.get_expectation_suite(
+        expectation_suite: ExpectationSuite = self.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             include_profiler_config=include_profiler_config,
             send_usage_event=send_usage_event,
-        ).show_expectations_by_expectation_type()
+        )
+        if in_jupyter_notebook():
+            display(expectation_suite.show_expectations_by_expectation_type())
+        else:
+            expectation_suite.show_expectations_by_expectation_type()
 
     def get_expectation_suite(
         self,
