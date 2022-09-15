@@ -1231,6 +1231,10 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair line chart
         """
+        df = DataAssistantResult._clean_quantitative_metrics_df(
+            df=df, sanitized_metric_names=sanitized_metric_names
+        )
+
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
@@ -1475,6 +1479,10 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An interactive chart
         """
+        column_dfs = DataAssistantResult._clean_quantitative_metrics(
+            column_dfs=column_dfs, sanitized_metric_names=sanitized_metric_names
+        )
+
         batch_name: str = "batch"
         all_columns: List[str] = DataAssistantResult._get_all_columns_from_column_dfs(
             column_dfs=column_dfs
@@ -3931,6 +3939,24 @@ class DataAssistantResult(SerializableDictDot):
         for column_df in column_dfs:
             column_set.update(column_df.df.columns)
         return list(column_set)
+
+    @staticmethod
+    def _clean_quantitative_metrics_column_dfs(
+        column_dfs: List[ColumnDataFrame],
+        sanitized_metric_names: Set[str],
+    ) -> List[ColumnDataFrame]:
+        for column_name, column_df in column_dfs:
+            cleaned_column_df = DataAssistantResult._clean_quantitative_metrics_df(
+                df=column_df, sanitized_metric_names=sanitized_metric_names
+            )
+            column_dfs[column_name] = cleaned_column_df
+        return column_dfs
+
+    @staticmethod
+    def _clean_quantitative_metrics_df(
+        df: pd.DataFrame, sanitized_metric_names: Set[str]
+    ) -> pd.DataFrame:
+        return df[pd.to_numeric(df[sanitized_metric_names], errors="coerce").notnull()]
 
     @staticmethod
     def _get_expect_domain_values_ordinal_chart(
