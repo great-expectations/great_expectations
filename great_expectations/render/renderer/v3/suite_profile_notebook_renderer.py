@@ -319,7 +319,7 @@ You can find more information about OnboardingDataAssistant and other DataAssist
 
 Performance considerations:
 - Latency: We optimized for an explicit "question/answer" design, which means we issue **lots** of queries. Connection latency will impact performance.
-- Data Volume: Small samples of data will often give you a great starting point for understanding the dataset. Consider configuring a sampled asset and profiling small number of batches.
+- Data Volume: Small samples of data will often give you a great starting point for understanding the dataset. Consider configuring a sampled asset and profiling a small number of batches.
     """
         )
 
