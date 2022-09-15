@@ -1256,6 +1256,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         Returns:
             An altair line chart
         """
+        df = DataAssistantResult._clean_quantitative_metrics_df(
+            df=df, sanitized_metric_names=sanitized_metric_names
+        )
+
         metric_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []
@@ -3974,13 +3978,15 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
     ) -> List[ColumnDataFrame]:
-        cleaned_column_dfs: List[ColumnDataFrame]
+        cleaned_column_dfs: List[ColumnDataFrame] = []
         for idx, (column_name, column_df) in enumerate(column_dfs):
             cleaned_column_df = DataAssistantResult._clean_quantitative_metrics_df(
                 df=column_df, sanitized_metric_names=sanitized_metric_names
             )
             if len(cleaned_column_df.index) > 0:
-                cleaned_column_dfs.append(ColumnDataFrame(column_name, column_df))
+                cleaned_column_dfs.append(
+                    ColumnDataFrame(column_name, cleaned_column_df)
+                )
 
         return cleaned_column_dfs
 
@@ -3988,9 +3994,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _clean_quantitative_metrics_df(
         df: pd.DataFrame, sanitized_metric_names: Set[str]
     ) -> pd.DataFrame:
-        return df[
-            pd.to_numeric(df[list(sanitized_metric_names)], errors="coerce").notnull()
-        ]
+        sanitized_metric_names_list = list(sanitized_metric_names)
+        df[sanitized_metric_names_list] = df[sanitized_metric_names_list].apply(
+            pd.to_numeric, errors="coerce"
+        )
+        return df[df[sanitized_metric_names_list].notnull()]
 
     @staticmethod
     def _get_expect_domain_values_ordinal_chart(
