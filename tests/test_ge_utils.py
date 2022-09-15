@@ -828,12 +828,12 @@ def test_convert_ndarray_datetime_to_float_dtype(
     with pytest.raises(AttributeError) as e:
         _ = convert_ndarray_datetime_to_float_dtype(data=numeric_array)
 
-    assert str(e.value) == "'int' object has no attribute 'replace'"
+    assert "'int' object has no attribute 'replace'" in str(e.value)
 
     with pytest.raises(TypeError) as e:
         _ = convert_ndarray_datetime_to_float_dtype(data=datetime_string_array)
 
-    assert str(e.value) == "str.replace() takes no keyword arguments"
+    assert "replace() takes no keyword arguments" in str(e.value)
 
 
 @pytest.mark.unit
