@@ -276,6 +276,10 @@ class SqlAlchemyBatchData(BatchData):
             stmt = 'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 temp_table_name=temp_table_name, query=query
             )
+        elif dialect == GESqlDialect.REDSHIFT:
+            query_str = str(query)
+            query_str = query_str.replace('"', "")
+            stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query_str}'
         else:
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
         if dialect == GESqlDialect.ORACLE:
