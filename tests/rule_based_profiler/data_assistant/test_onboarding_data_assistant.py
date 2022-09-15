@@ -872,7 +872,7 @@ def test_onboarding_data_assistant_result_empty_suite_plot_metrics_and_expectati
 
 
 @pytest.mark.integration
-def test_onboarding_data_assistant_plot_stdout(
+def test_onboarding_data_assistant_plot_metrics_stdout(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ):
     data_assistant_result: OnboardingDataAssistantResult = (
@@ -890,6 +890,15 @@ def test_onboarding_data_assistant_plot_stdout(
         f"""{metrics_calculated} Metrics calculated, {metrics_plots_implemented} Metric plots implemented
 Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         in stdout
+    )
+
+
+@pytest.mark.integration
+def test_onboarding_data_assistant_plot_expectations_and_metrics_stdout(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+):
+    data_assistant_result: OnboardingDataAssistantResult = (
+        bobby_onboarding_data_assistant_result
     )
 
     expectations_produced = 160
