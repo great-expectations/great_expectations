@@ -97,13 +97,13 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 
 2. The second cell allows you to specify which columns you want to **ignore** when creating Expectations. For our tutorial, we're going to ensure that the number of passengers recorded in our data is reasonable.  To do this, we'll want our Profiler to examine the `passenger_count` column and determine just what a reasonable range _is_ based on our January data. **Let’s comment just this one line to include it**:
 
-```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L88-L108
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L86-L105
 ```
 
 **Cell 3**
-![Cell3](../../images/getting_started_tutorial/tutorial_create_expectations_cell3.png)
+![Cell3](../../images/getting_started_tutorial/tutorial_create_expectations_cell3_onboarding_assistant.png)
 
-3. The next cell is where you configure a `UserConfigurableProfiler` and instantiate it, which will then profile the data and create the relevant Expectations to add to your `taxi.demo` suite.
+3. Cell 3 is where you run a Data Assistant.  In this case, the assistant being used is the Onboarding Assistant, which will Profile the data provided by your Batch Request and create the relevant Expectations to add to your `taxi.demo` suite.
 
 **Cell 4**
 ![Cell4](../../images/getting_started_tutorial/tutorial_create_expectations_cell4.png)
