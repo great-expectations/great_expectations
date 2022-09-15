@@ -820,7 +820,6 @@ def test_convert_ndarray_datetime_to_float_dtype(
     numeric_array,
 ):
     element: Any
-
     assert convert_ndarray_datetime_to_float_dtype(data=datetime_array).tolist() == [
         element.replace(tzinfo=datetime.timezone.utc).timestamp()
         for element in datetime_array
@@ -829,12 +828,12 @@ def test_convert_ndarray_datetime_to_float_dtype(
     with pytest.raises(AttributeError) as e:
         _ = convert_ndarray_datetime_to_float_dtype(data=numeric_array)
 
-    assert str(e.value) == "'int' object has no attribute 'timestamp'"
+    assert str(e.value) == "'int' object has no attribute 'replace'"
 
-    with pytest.raises(AttributeError) as e:
+    with pytest.raises(TypeError) as e:
         _ = convert_ndarray_datetime_to_float_dtype(data=datetime_string_array)
 
-    assert str(e.value) == "'str' object has no attribute 'timestamp'"
+    assert str(e.value) == "str.replace() takes no keyword arguments"
 
 
 @pytest.mark.unit
@@ -842,7 +841,6 @@ def test_convert_ndarray_float_to_datetime_tuple(
     datetime_array,
 ):
     element: Any
-
     assert convert_ndarray_float_to_datetime_tuple(
         data=[
             element.replace(tzinfo=datetime.timezone.utc).timestamp()
