@@ -150,7 +150,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                         "lower_bound": 0.0,
                         "upper_bound": 1.0,
                     },
-                    "round_decimals": 3,
+                    "round_decimals": None,
                 },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
