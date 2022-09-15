@@ -3995,10 +3995,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         df: pd.DataFrame, sanitized_metric_names: Set[str]
     ) -> pd.DataFrame:
         sanitized_metric_names_list = list(sanitized_metric_names)
-        df[sanitized_metric_names_list] = df[sanitized_metric_names_list].apply(
-            pd.to_numeric, errors="coerce"
-        )
-        return df[df[sanitized_metric_names_list].notnull()]
+        return df[
+            df[sanitized_metric_names_list]
+            .apply(pd.to_numeric, errors="coerce")
+            .notnull()
+        ]
 
     @staticmethod
     def _get_expect_domain_values_ordinal_chart(
