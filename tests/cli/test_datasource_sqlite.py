@@ -335,7 +335,6 @@ def test_cli_datasource_new_connection_string(
                     "assets": {
                         "YOUR_SCHEMA.YOUR_TABLE_NAME": {
                             "class_name": "Asset",
-                            "include_schema_name": True,
                             "module_name": "great_expectations.datasource.data_connector.asset",
                         },
                     },
