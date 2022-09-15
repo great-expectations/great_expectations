@@ -449,7 +449,7 @@ execution_engine:
             yaml_str += f"""
     drivername: {self.driver}"""
 
-        yaml_str += '''
+        yaml_str += f'''
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
@@ -459,17 +459,22 @@ data_connectors:
     class_name: InferredAssetSqlDataConnector
     include_schema_name: True
     introspection_directives:
-      schema_name: {schema_name}
-  default_configured_data_connector_name:
+      schema_name: {{schema_name}}
+  default_configured_data_connector_name: {self._configured_asset_sql_data_connector_yaml_snippet()}
+"""
+'''
+
+        return yaml_str
+
+    def _configured_asset_sql_data_connector_yaml_snippet(self) -> str:
+        """Differs for different backends - override if needed."""
+        return """
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
         module_name: great_expectations.datasource.data_connector.asset
-        class_name: Asset
-"""'''
-        return yaml_str
+        class_name: Asset """
 
     def _yaml_innards(self) -> str:
         """Override if needed."""
@@ -581,6 +586,14 @@ class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
             module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
         )
         return redshift_success or postgresql_success
+
+    def _configured_asset_sql_data_connector_yaml_snippet(self) -> str:
+        return """
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        module_name: great_expectations.datasource.data_connector.asset
+        class_name: Asset """
 
     def _yaml_innards(self) -> str:
         return (
@@ -719,10 +732,17 @@ class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
         return True
 
     def credentials_snippet(self) -> str:
-        return '''\
+        return """\
 # The url/connection string for the sqlalchemy connection
 # (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
-connection_string = "YOUR_CONNECTION_STRING"'''
+connection_string = "YOUR_CONNECTION_STRING"
+
+# If schema_name is not relevant to your SQL backend (i.e. SQLite),
+# please remove from the following line and the configuration below
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME" """
 
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
