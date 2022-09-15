@@ -3989,7 +3989,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _clean_quantitative_metrics_df(
         df: pd.DataFrame, sanitized_metric_names: Set[str]
     ) -> pd.DataFrame:
-        return df[pd.to_numeric(df[sanitized_metric_names], errors="coerce").notnull()]
+        return df[
+            pd.to_numeric(df[list(sanitized_metric_names)], errors="coerce").notnull()
+        ]
 
     @staticmethod
     def _get_expect_domain_values_ordinal_chart(
