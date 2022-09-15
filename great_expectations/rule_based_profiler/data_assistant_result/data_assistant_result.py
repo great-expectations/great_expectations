@@ -1479,7 +1479,7 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An interactive chart
         """
-        column_dfs = DataAssistantResult._clean_quantitative_metrics(
+        column_dfs = DataAssistantResult._clean_quantitative_metrics_column_dfs(
             column_dfs=column_dfs, sanitized_metric_names=sanitized_metric_names
         )
 
