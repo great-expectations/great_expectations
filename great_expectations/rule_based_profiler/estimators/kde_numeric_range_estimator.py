@@ -81,7 +81,7 @@ class KdeNumericRangeEstimator(NumericRangeEstimator):
 
         quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
             quantile_statistic_interpolation_method=self.configuration.quantile_statistic_interpolation_method,
-            round_decimals=self.configuration.quantile_statistic_interpolation_method,
+            round_decimals=self.configuration.round_decimals,
             domain=domain,
             variables=variables,
             parameters=parameters,

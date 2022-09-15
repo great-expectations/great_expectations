@@ -1944,7 +1944,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                             "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                             "quantile_bias_correction": "$variables.quantile_bias_correction",
                             "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
-                            "round_decimals": 2,
+                            "round_decimals": None,
                         }
                     ],
                     "expectation_configuration_builders": [
