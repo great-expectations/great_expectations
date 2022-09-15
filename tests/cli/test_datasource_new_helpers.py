@@ -58,11 +58,9 @@ data_connectors:
       schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
 """'''
     )
@@ -114,11 +112,9 @@ data_connectors:
       schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
 """'''
     )
@@ -170,11 +166,9 @@ data_connectors:
       schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
 """'''
     )
@@ -242,11 +236,9 @@ data_connectors:
       schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
 """'''
     )
@@ -313,11 +305,8 @@ data_connectors:
       schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
-      {schema_name}.{table_name}:
-        include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
+      {table_name}:
         class_name: Asset
 """'''
     )
@@ -395,11 +384,9 @@ data_connectors:
       schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
 """'''
     )
@@ -462,11 +449,9 @@ data_connectors:
       schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
 """'''
     )
@@ -530,11 +515,9 @@ data_connectors:
       schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
 """'''
     )
@@ -597,11 +580,9 @@ data_connectors:
       schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
 """'''
     )
@@ -631,10 +612,7 @@ def test_ConnectionStringCredentialYamlHelper(
     helper = ConnectionStringCredentialYamlHelper("my_datasource")
     assert (
         helper.credentials_snippet()
-        == '''\
-# The url/connection string for the sqlalchemy connection
-# (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
-connection_string = "YOUR_CONNECTION_STRING"'''
+        == '# The url/connection string for the sqlalchemy connection\n# (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)\nconnection_string = "YOUR_CONNECTION_STRING"\n\n# If schema_name is not relevant to your SQL backend (i.e. SQLite),\n# please remove from the following line and the configuration below\nschema_name = "YOUR_SCHEMA"\n\n# A table that you would like to add initially as a Data Asset\ntable_name = "YOUR_TABLE_NAME"'
     )
 
     assert (
@@ -657,11 +635,9 @@ data_connectors:
       schema_name: {schema_name}
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
 """'''
     )

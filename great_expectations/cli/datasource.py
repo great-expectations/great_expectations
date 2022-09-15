@@ -460,9 +460,8 @@ data_connectors:
     include_schema_name: True
     introspection_directives:
       schema_name: {{schema_name}}
-  default_configured_data_connector_name: {self._configured_asset_sql_data_connector_yaml_snippet()}
-"""
-'''
+  default_configured_data_connector_name:{self._configured_asset_sql_data_connector_yaml_snippet()}
+"""'''
 
         return yaml_str
 
@@ -473,8 +472,7 @@ data_connectors:
     assets:
       {schema_name}.{table_name}:
         include_schema_name: True
-        module_name: great_expectations.datasource.data_connector.asset
-        class_name: Asset """
+        class_name: Asset"""
 
     def _yaml_innards(self) -> str:
         """Override if needed."""
@@ -592,8 +590,7 @@ class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {table_name}:
-        module_name: great_expectations.datasource.data_connector.asset
-        class_name: Asset """
+        class_name: Asset"""
 
     def _yaml_innards(self) -> str:
         return (
@@ -732,7 +729,7 @@ class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
         return True
 
     def credentials_snippet(self) -> str:
-        return """\
+        return '''\
 # The url/connection string for the sqlalchemy connection
 # (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
 connection_string = "YOUR_CONNECTION_STRING"
@@ -742,7 +739,7 @@ connection_string = "YOUR_CONNECTION_STRING"
 schema_name = "YOUR_SCHEMA"
 
 # A table that you would like to add initially as a Data Asset
-table_name = "YOUR_TABLE_NAME" """
+table_name = "YOUR_TABLE_NAME"'''
 
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
