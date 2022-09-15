@@ -589,6 +589,7 @@ class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {table_name}:
+        schema_name: {schema_name}
         class_name: Asset"""
 
     def _yaml_innards(self) -> str:

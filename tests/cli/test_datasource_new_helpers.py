@@ -303,6 +303,7 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {table_name}:
+        schema_name: {schema_name}
         class_name: Asset
 """'''
     )
