@@ -1515,8 +1515,8 @@ def convert_ndarray_datetime_to_float_dtype(data: np.ndarray) -> np.ndarray:
     Convert all elements of 1-D "np.ndarray" argument from "datetime.datetime" type to "timestamp" "float" type objects.
     """
     value: Any
-    return np.asarray(
-        [value.replace(tzinfo=datetime.timezone.utc).timestamp() for value in data]
+    return np.vectorize(lambda x: x.replace(tzinfo=datetime.timezone.utc).timestamp())(
+        data
     )
 
 
@@ -1525,7 +1525,7 @@ def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
     Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type objects.
     """
     value: Any
-    return np.asarray([datetime.datetime.utcfromtimestamp(value) for value in data])
+    return np.vectorize(lambda x: datetime.datetime.utcfromtimestamp(x))(data)
 
 
 def convert_ndarray_float_to_datetime_tuple(
