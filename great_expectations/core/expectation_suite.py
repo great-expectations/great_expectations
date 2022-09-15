@@ -720,19 +720,23 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configuration: ExpectationConfiguration
         domain_type: MetricDomainTypes
         kwargs: dict
+        pprint_objects: List[dict] = []
         for expectation_configuration in expectation_configurations:
             domain_type = expectation_configuration.get_domain_type()
             kwargs = expectation_configuration.kwargs
-            pprint.pprint(  # type: ignore[call-arg]
-                object={
+            pprint_objects.append(
+                {
                     expectation_configuration.expectation_type: {
                         "domain": domain_type.value,
                         **kwargs,
                     }
-                },
-                indent=2,
-                sort_dicts=False,
+                }
             )
+        pprint.pprint(  # type: ignore[call-arg]
+            object=pprint_objects,
+            indent=2,
+            sort_dicts=False,
+        )
 
     def get_grouped_and_ordered_expectations_by_domain_type(
         self,
