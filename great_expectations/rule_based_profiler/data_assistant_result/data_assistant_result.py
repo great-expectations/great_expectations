@@ -592,14 +592,15 @@ class DataAssistantResult(SerializableDictDot):
         display_charts.extend(column_domain_display_charts)
         return_charts.extend(column_domain_return_charts)
 
-        self._display(charts=display_charts, theme=theme)
+        self._display(charts=display_charts, plot_mode=plot_mode, theme=theme)
 
         return_charts = self._apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
 
-    @staticmethod
     def _display(
+        self,
         charts: Union[List[alt.Chart], List[alt.VConcatChart]],
+        plot_mode: PlotMode,
         theme: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
@@ -614,19 +615,33 @@ class DataAssistantResult(SerializableDictDot):
         """
         altair_theme: Dict[str, Any]
         if theme:
-            altair_theme = DataAssistantResult._get_theme(theme=theme)
+            altair_theme = self._get_theme(theme=theme)
         else:
             altair_theme = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
 
-        themed_charts: List[alt.Chart] = DataAssistantResult._apply_theme(
+        themed_charts: List[alt.Chart] = self._apply_theme(
             charts=charts, theme=altair_theme
         )
 
-        chart_titles: List[str] = DataAssistantResult._get_chart_titles(
-            charts=themed_charts
-        )
+        chart_titles: List[str] = self._get_chart_titles(charts=themed_charts)
 
         if len(chart_titles) > 0:
+            metric_plot_count = self._get_metric_plot_count(charts=themed_charts)
+            if plot_mode == plot_mode.DIAGNOSTIC:
+                print(
+                    f"""{len(self.expectation_configurations)} Expectations produced, {metric_plot_count} Expectation and Metric plots implemented
+Use DataAssistantResult.show_expectations_by_domain_type() or
+DataAssistantResult.show_expectations_by_expectation_type() to show all produced Expectations"""
+                )
+            else:
+                metrics_count: int = sum(
+                    [len(metrics) for _, metrics in self.metrics_by_domain.items()]
+                )
+                print(
+                    f"""{metrics_count} Metrics calculated, {metric_plot_count} Metric plots implemented
+Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
+                )
+
             display_chart_dict: Dict[str, Union[alt.Chart, alt.LayerChart]] = {
                 " ": None
             }
@@ -750,6 +765,16 @@ class DataAssistantResult(SerializableDictDot):
             chart_titles.append(chart_title)
 
         return chart_titles
+
+    @staticmethod
+    def _get_metric_plot_count(charts: List[Union[alt.Chart, alt.LayerChart]]) -> int:
+        plot_count = 0
+        for chart in charts:
+            if "column" in chart.data.columns:
+                plot_count += chart.data.column.nunique()
+            else:
+                plot_count += 1
+        return plot_count
 
     @staticmethod
     def _apply_theme(
