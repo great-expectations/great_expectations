@@ -1330,7 +1330,6 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
-
         if subtitle:
             domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN
         else:
@@ -1500,6 +1499,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         Returns:
             An interactive chart
         """
+        column_dfs = DataAssistantResult._clean_quantitative_metrics_column_dfs(
+            column_dfs=column_dfs, sanitized_metric_names=sanitized_metric_names
+        )
+
         batch_name: str = "batch"
         all_columns: List[str] = DataAssistantResult._get_all_columns_from_column_dfs(
             column_dfs=column_dfs
@@ -1585,6 +1588,10 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         Returns:
             An interactive expect_column_values_to_be_between chart
         """
+        column_dfs = DataAssistantResult._clean_quantitative_metrics_column_dfs(
+            column_dfs=column_dfs, sanitized_metric_names=sanitized_metric_names
+        )
+
         column_name: str = "column"
         min_value: str = "min_value"
         max_value: str = "max_value"
@@ -3964,6 +3971,33 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         for column_df in column_dfs:
             column_set.update(column_df.df.columns)
         return list(column_set)
+
+    @staticmethod
+    def _clean_quantitative_metrics_column_dfs(
+        column_dfs: List[ColumnDataFrame],
+        sanitized_metric_names: Set[str],
+    ) -> List[ColumnDataFrame]:
+        cleaned_column_dfs: List[ColumnDataFrame] = []
+        for idx, (column_name, column_df) in enumerate(column_dfs):
+            cleaned_column_df = DataAssistantResult._clean_quantitative_metrics_df(
+                df=column_df, sanitized_metric_names=sanitized_metric_names
+            )
+            if len(cleaned_column_df.index) > 0:
+                cleaned_column_dfs.append(
+                    ColumnDataFrame(column_name, cleaned_column_df)
+                )
+
+        return cleaned_column_dfs
+
+    @staticmethod
+    def _clean_quantitative_metrics_df(
+        df: pd.DataFrame, sanitized_metric_names: Set[str]
+    ) -> pd.DataFrame:
+        sanitized_metric_names_list = list(sanitized_metric_names)
+        df[sanitized_metric_names_list] = df[sanitized_metric_names_list].apply(
+            pd.to_numeric, errors="coerce"
+        )
+        return df.dropna()
 
     @staticmethod
     def _get_expect_domain_values_ordinal_chart(
