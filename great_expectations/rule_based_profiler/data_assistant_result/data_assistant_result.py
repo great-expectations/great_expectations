@@ -3656,8 +3656,6 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             for batch_id in batch_ids
         ]
 
-        # make sure batch_identifier keys are sorted the same from batch to batch
-        # e.g. prevent batch 1 from having keys "month", "year" and batch 2 from having keys "year", "month"
         batch_identifier_set: Set
         batch_identifier_list_sorted: List
         batch_identifier_key: str
@@ -3666,6 +3664,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         batch_identifier_record: List
         batch_identifier_records: List[List] = []
         for batch_identifier_set in batch_identifier_list:
+            # make sure batch_identifier keys are sorted the same from batch to batch
+            # e.g. prevent batch 1 from displaying keys "month", "year" and batch 2 from displaying keys "year", "month"
             batch_identifier_list_sorted = sorted(
                 batch_identifier_set,
                 key=lambda batch_identifier_tuple: batch_identifier_tuple[0].casefold(),
@@ -3676,6 +3676,14 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 batch_identifier_value,
             ) in batch_identifier_list_sorted:
                 batch_identifier_keys.add(batch_identifier_key)
+                # if dictionary type batch_identifier values are detected, format them as a string for tooltip display
+                if isinstance(batch_identifier_value, dict):
+                    batch_identifier_value = str(
+                        {
+                            str(key).title(): value
+                            for key, value in batch_identifier_value.items()
+                        }
+                    ).replace("'", "")
                 batch_identifier_record.append(batch_identifier_value)
 
             batch_identifier_records.append(batch_identifier_record)
