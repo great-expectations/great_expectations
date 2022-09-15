@@ -872,7 +872,7 @@ def test_onboarding_data_assistant_result_empty_suite_plot_metrics_and_expectati
 
 
 @pytest.mark.integration
-def test_onboarding_data_assistant_result_empty_suite_plot_metrics_and_expectations(
+def test_onboarding_data_assistant_plot_stdout(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ):
     data_assistant_result: OnboardingDataAssistantResult = (
