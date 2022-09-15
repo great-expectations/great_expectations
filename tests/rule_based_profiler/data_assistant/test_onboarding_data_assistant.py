@@ -1,4 +1,6 @@
+import io
 import os
+from contextlib import redirect_stdout
 from typing import Any, Dict, List, Optional, cast
 from unittest import mock
 
@@ -867,3 +869,25 @@ def test_onboarding_data_assistant_result_empty_suite_plot_metrics_and_expectati
         assert (
             False
         ), f"DataAssistantResult.plot_expectations_and_metrics raised an exception '{exc}'"
+
+
+@pytest.mark.integration
+def test_onboarding_data_assistant_plot_metrics_stdout(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+):
+    data_assistant_result: OnboardingDataAssistantResult = (
+        bobby_onboarding_data_assistant_result
+    )
+
+    metrics_calculated = 150
+    metrics_plots_implemented = 102
+
+    f = io.StringIO()
+    with redirect_stdout(f):
+        data_assistant_result.plot_metrics()
+    stdout = f.getvalue()
+    assert (
+        f"""{metrics_calculated} Metrics calculated, {metrics_plots_implemented} Metric plots implemented
+Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
+        in stdout
+    )

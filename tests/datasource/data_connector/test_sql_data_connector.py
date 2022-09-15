@@ -5,13 +5,14 @@ from unittest import mock
 import pytest
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest, IDDict
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetSqlDataConnector,
     InferredAssetSqlDataConnector,
 )
+from great_expectations.datasource.data_connector.sorter import DictionarySorter
 from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
 
 try:
@@ -1956,7 +1957,6 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
             },
         },
     )
-    assert "taxi__main.my_asset__asset" in my_data_connector.assets
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -1977,3 +1977,93 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
         for batch_definition in batch_definition_list[-3:]
     ]
     assert last_3_batch_identifiers_actual == last_3_batch_identifiers_expected
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "data_connector_yaml,expected_batch_identifiers_list",
+    [
+        (
+            """
+    name: my_sql_data_connector
+    datasource_name: my_test_datasource
+    assets:
+        table_partitioned_by_date_column__A:
+            splitter_method: split_on_date_parts
+            splitter_kwargs:
+                column_name: date
+                date_parts:
+                    - month
+            """,
+            [{"date": {"month": 1}}, {"date": {"month": 3}}],
+        ),
+        (
+            """
+    name: my_sql_data_connector
+    datasource_name: my_test_datasource
+    assets:
+        table_partitioned_by_date_column__A:
+            splitter_method: split_on_date_parts
+            splitter_kwargs:
+                column_name: date
+                date_parts:
+                    - month
+    sorters:
+        - class_name: DictionarySorter
+          name: date
+          orderby: desc
+            """,
+            [{"date": {"month": 3}}, {"date": {"month": 1}}],
+        ),
+        (
+            """
+    name: my_sql_data_connector
+    datasource_name: my_test_datasource
+    assets:
+        table_partitioned_by_date_column__A:
+            splitter_method: split_on_date_parts
+            splitter_kwargs:
+                column_name: date
+                date_parts:
+                    - month
+            sorters:
+                - class_name: DictionarySorter
+                  name: date
+                  orderby: desc
+            """,
+            [{"date": {"month": 3}}, {"date": {"month": 1}}],
+        ),
+    ],
+)
+def test_ConfiguredAssetSqlDataConnector_return_all_batch_definitions_sorted(
+    data_connector_yaml,
+    expected_batch_identifiers_list,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+    data_connector_config = yaml.load(data_connector_yaml)
+    data_connector_config["execution_engine"] = execution_engine
+
+    my_data_connector = ConfiguredAssetSqlDataConnector(**data_connector_config)
+
+    sorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_test_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+            )
+        )
+    )
+
+    expected = [
+        BatchDefinition(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            data_asset_name="table_partitioned_by_date_column__A",
+            batch_identifiers=IDDict(batch_identifiers),
+        )
+        for batch_identifiers in expected_batch_identifiers_list
+    ]
+
+    assert expected == sorted_batch_definition_list
