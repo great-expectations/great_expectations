@@ -3974,12 +3974,15 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
     ) -> List[ColumnDataFrame]:
-        for column_name, column_df in column_dfs:
+        cleaned_column_dfs: List[ColumnDataFrame]
+        for idx, (column_name, column_df) in enumerate(column_dfs):
             cleaned_column_df = DataAssistantResult._clean_quantitative_metrics_df(
                 df=column_df, sanitized_metric_names=sanitized_metric_names
             )
-            column_dfs[column_name] = cleaned_column_df
-        return column_dfs
+            if len(cleaned_column_df.index) > 0:
+                cleaned_column_dfs.append(ColumnDataFrame(column_name, column_df))
+
+        return cleaned_column_dfs
 
     @staticmethod
     def _clean_quantitative_metrics_df(
