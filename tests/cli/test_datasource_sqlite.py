@@ -215,6 +215,10 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     return context
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="datasource new workflow with SQLite requires manual modification of YAML before run",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
