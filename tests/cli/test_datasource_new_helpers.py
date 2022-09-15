@@ -60,7 +60,6 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {schema_name}.{table_name}:
-        include_schema_name: True
         class_name: Asset
 """'''
     )
@@ -114,7 +113,6 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {schema_name}.{table_name}:
-        include_schema_name: True
         class_name: Asset
 """'''
     )
@@ -168,7 +166,6 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {schema_name}.{table_name}:
-        include_schema_name: True
         class_name: Asset
 """'''
     )
@@ -238,7 +235,6 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {schema_name}.{table_name}:
-        include_schema_name: True
         class_name: Asset
 """'''
     )
@@ -386,7 +382,6 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {schema_name}.{table_name}:
-        include_schema_name: True
         class_name: Asset
 """'''
     )
@@ -451,7 +446,6 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {schema_name}.{table_name}:
-        include_schema_name: True
         class_name: Asset
 """'''
     )
@@ -517,7 +511,6 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {schema_name}.{table_name}:
-        include_schema_name: True
         class_name: Asset
 """'''
     )
@@ -582,7 +575,6 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {schema_name}.{table_name}:
-        include_schema_name: True
         class_name: Asset
 """'''
     )
@@ -637,7 +629,6 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {schema_name}.{table_name}:
-        include_schema_name: True
         class_name: Asset
 """'''
     )
