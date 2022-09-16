@@ -493,51 +493,23 @@ def test_non_cloud_backed_data_context_save_datasource_overwrite_existing(
         return_value=datasource_config_with_names_modified,
     ):
 
-        updated_datasource: Union[
+        saved_datasource: Union[
             LegacyDatasource, BaseDatasource
         ] = context.save_datasource(new_datasource)
 
-        # Make sure the datasource config got into the context config
-        assert len(context.config.datasources) == 1
-        assert (
-            context.config.datasources[datasource_name]
-            == datasource_config_with_names_modified
+        _save_datasource_assertions(
+            context=context,
+            datasource_to_save_config=datasource_config_with_names_modified,
+            datasource_to_save=new_datasource,
+            saved_datasource=saved_datasource,
         )
-
-        cached_datasource = context._cached_datasources[datasource_name]
-
-        # Make sure the datasource did not get duplicated in the cache
-        assert len(context._cached_datasources) == 1
 
         # Make sure the name was updated
         updated_datasource_data_connector_name: str = tuple(
-            updated_datasource.data_connectors.keys()
+            saved_datasource.data_connectors.keys()
         )[0]
         assert updated_datasource_data_connector_name == new_data_connector_name
 
-        # Make sure the stored and returned datasource is the same one as the cached datasource
-        assert id(updated_datasource) == id(cached_datasource)
-        assert updated_datasource == cached_datasource
-
-        # Make sure the stored and returned datasource is a different instance
-        assert not id(cached_datasource) == id(new_datasource)
-        assert not id(updated_datasource) == id(new_datasource)
-        assert not cached_datasource == new_datasource
-        assert not updated_datasource == new_datasource
-
-        # Make sure the stored and returned datasource are otherwise equal
-        serializer: AbstractConfigSerializer = DictConfigSerializer(
-            schema=datasourceConfigSchema
-        )
-        updated_datasource_dict = serializer.serialize(
-            datasourceConfigSchema.load(updated_datasource.config)
-        )
-        orig_datasource_dict = serializer.serialize(
-            datasourceConfigSchema.load(new_datasource.config)
-        )
-
-        for attribute in ("name", "execution_engine", "data_connectors"):
-            assert updated_datasource_dict[attribute] == orig_datasource_dict[attribute]
 
 
 @pytest.mark.parametrize(
