@@ -95,9 +95,10 @@ Regardless of the source data system that the Datasource being referenced by a B
 
 A `RuntimeBatchRequest` will need a Datasource that has been configured with a `RuntimeDataConnector`.  You will then use a `RuntimeBatchRequest` to specify the Batch that you will be working with.
 
-For more information and examples regarding setting up a Datasource for use with `RuntimeBatchRequest`s, see:
-
-- [Our guide on how to configure a `RuntimeDataConnector`](../guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector.md)
+For more information and examples regarding setting up a Datasource for use with `RuntimeBatchRequest`s, see the `RuntimeDataConnector` guidance in our documents:
+- [How to configure a Pandas Datasource](../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.md)
+- [How to configure a Spark Datasource](../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.md)
+- [How to configure a SQL Datasource](../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
 
 
 ## More Details

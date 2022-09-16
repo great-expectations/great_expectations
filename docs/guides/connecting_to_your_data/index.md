@@ -5,9 +5,10 @@ title: "Connect to Data: Index"
 
 ## Core skills
 - [How to choose which DataConnector to use](../../guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.md)
-- [How to configure an InferredAssetDataConnector](../../guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.md)
-- [How to configure a ConfiguredAssetDataConnector](../../guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.md)
-- [How to configure a RuntimeDataConnector](../../guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector.md)
+-[ How to choose between working with a single or multiple batches of data](../../guides/connecting_to_your_data/how_to_choose_between_working_with_a_single_or_multiple_batches_of_data.md)
+- [How to configure a Pandas Datasource](../../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.md)
+- [How to configure a Spark Datasource](../../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.md)
+- [How to configure a SQL Datasource](../../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
 - [How to configure a DataConnector to introspect and partition a file system or blob store](../../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store.md)
 - [How to configure a DataConnector to introspect and partition tables in SQL](../../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md)
 - [How to create a Batch of data from an in-memory Spark or Pandas dataframe or path](../../guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe.md)
@@ -42,5 +43,4 @@ title: "Connect to Data: Index"
 
 ## Advanced
 - [How to configure a DataConnector for splitting and sampling a file system or blob store](../../guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store.md)
-- [How to configure a DataConnector for splitting and sampling tables in SQL](../../guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql.md)
 
