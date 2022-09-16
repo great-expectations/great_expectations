@@ -376,7 +376,7 @@ def _save_datasource_assertions(
     context: AbstractDataContext,
     datasource_to_save_config: DatasourceConfig,
     datasource_to_save: Datasource,
-    saved_datasource: Datasource,
+    saved_datasource: Union[LegacyDatasource, BaseDatasource],
     attributes_to_verify: Tuple[str, ...] = ("name", "execution_engine", "data_connectors"),
 ):
     datasource_name: str = datasource_to_save.name
@@ -513,44 +513,18 @@ def test_non_cloud_backed_data_context_save_datasource_overwrite_existing(
 
 
 
-@pytest.mark.parametrize(
-    "data_context_fixture_name,data_context_type",
-    [
-        pytest.param(
-            "empty_base_data_context_in_cloud_mode",
-            BaseDataContext,
-            id="BaseDataContext",
-        ),
-        pytest.param(
-            "empty_data_context_in_cloud_mode",
-            DataContext,
-            id="DataContext",
-        ),
-        pytest.param(
-            "empty_cloud_data_context",
-            CloudDataContext,
-            id="CloudDataContext",
-        ),
-    ],
-)
 @pytest.mark.cloud
 @pytest.mark.unit
-def test_cloud_backed_data_context_save_datasource_empty_store(
-    data_context_fixture_name: str,
-    data_context_type: Type[AbstractDataContext],
+def test_cloud_data_context_save_datasource_empty_store(
+    empty_cloud_data_context: CloudDataContext,
     datasource_config_with_names: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
-    request: "FixtureRequest",
 ):
     """Any Data Context in cloud mode should save to the cloud backed Datasource store when calling save_datasource. When saving, it should use the id from the response to create the datasource, and update both the config and cache."""
 
-    context: Union[
-        BaseDataContext, DataContext, CloudDataContext
-    ] = request.getfixturevalue(data_context_fixture_name)
+    context: CloudDataContext = empty_cloud_data_context
 
     # Make sure the fixture has the right configuration
-    assert isinstance(context, data_context_type)
-    assert context.ge_cloud_mode
     assert len(context.list_datasources()) == 0
 
     datasource_to_save: Datasource = context._build_datasource_from_config(
