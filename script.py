@@ -15,5 +15,5 @@ def retrieve_suites(context: AbstractDataContext) -> None:
 
 if __name__ == "__main__":
     # context = CloudDataContext()
-    context = DataContext()
+    context = DataContext(ge_cloud_mode=True)
     retrieve_suites(context)
