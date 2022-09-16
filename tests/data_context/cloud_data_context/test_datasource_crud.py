@@ -414,6 +414,11 @@ def test_non_cloud_backed_data_context_save_datasource_empty_store(
     empty_data_context: DataContext,
     datasource_config_with_names: DatasourceConfig,
 ):
+    """What does this test and why?
+
+    This tests that context.save_datasource() does store config in the context
+    config and in the cache, and also returns the datasource.
+    """
     context: DataContext = empty_data_context
     # Make sure the fixture has the right configuration
     assert len(context.list_datasources()) == 0
@@ -444,7 +449,10 @@ def test_non_cloud_backed_data_context_save_datasource_overwrite_existing(
     empty_data_context: DataContext,
     datasource_config_with_names: DatasourceConfig,
 ):
-    """What does this test and why? This ensures there are no checks that stop an overwrite of an existing datasource in context.save_datasource(). It does not test the underlying store or store backend."""
+    """What does this test and why?
+    This ensures there are no checks that stop an overwrite/update of an
+    existing datasource in context.save_datasource(). It does not test the
+    underlying store or store backend."""
     context: DataContext = empty_data_context
     # Make sure the fixture has the right configuration
     assert len(context.list_datasources()) == 0
@@ -520,7 +528,11 @@ def test_cloud_data_context_save_datasource_empty_store(
     datasource_config_with_names: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
 ):
-    """Any Data Context in cloud mode should save to the cloud backed Datasource store when calling save_datasource. When saving, it should use the id from the response to create the datasource, and update both the config and cache."""
+    """What does this test and why?
+    Any Data Context in cloud mode should save to the cloud backed Datasource
+    store when calling save_datasource. When saving, it should use the id from
+    the response to create the datasource, and update both the
+    config and cache."""
 
     context: CloudDataContext = empty_cloud_data_context
 
