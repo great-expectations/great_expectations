@@ -145,7 +145,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
                         "lower_bound": 0,
                         "upper_bound": None,
                     },
-                    "round_decimals": 2,
+                    "round_decimals": None,
                 },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
