@@ -1,13 +1,13 @@
 
-:::note NOTES ON SPLITTING METHODS
+:::note NOTES ON SPLITTER METHODS
 
-- The names of `splitting_method` values can be specified with or without a preceding underscore.
+- The names of `splitter_method` values can be specified with or without a preceding underscore.
 
 :::
 
-#### Available methods for `splitting_method` values and their configuration parameters:
+#### Available methods for `splitter_method` values and their configuration parameters:
 
-| `splitting_method`                | `splitting_kwargs`                                                       | Returned Batch Data                                                                                                                                                                                           |
+| `splitter_method`                | `splitter_kwargs`                                                       | Returned Batch Data                                                                                                                                                                                           |
 |-----------------------------------|--------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `split_on_whole_table`            | N/A                                                                      | Identical to original                                                                                                                                                                                         |
 | `split_on_column_value`           | `column_name='col'`                                                      | Rows where value of column_name are same                                                                                                                                                                      |
