@@ -182,14 +182,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_name]
         )
 
-        # TOTO: remove when account_id is deprecated
-        if ge_cloud_credentials.get("account_id"):
-            logger.warning(
-                'The "account_id" ge_cloud_credentials key has been renamed to "organization_id" and will '
-                "be deprecated in the next major release."
-            )
-            ge_cloud_credentials["organization_id"] = ge_cloud_credentials["account_id"]
-            ge_cloud_credentials.pop("account_id")
         self._ge_cloud_credentials = ge_cloud_credentials
 
         # Initialize with store_backend_id if not part of an HTMLSiteStore

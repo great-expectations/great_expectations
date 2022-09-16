@@ -88,9 +88,11 @@ Also, if you would like to learn more about the **DataConnectors** used in this 
                 "cell_type": "markdown",
                 "source": """### For SQL based Datasources:
 
-Here we are creating an example configuration based on the database backend you specified in the CLI.  The configuration contains an **InferredAssetSqlDataConnector**, which will add a Data Asset for each table in the database, and a **RuntimeDataConnector** which can accept SQL queries. This is just an example, and you may customize this as you wish!
+Here we are creating an example configuration based on the database backend you specified in the CLI.  The configuration contains an **InferredAssetSqlDataConnector**, which will add a Data Asset for each table in the database, a **ConfiguredAssetDataConnector**, which will add explicitly defined Data Assets, and a **RuntimeDataConnector**, which can accept SQL queries.
 
-Also, if you would like to learn more about the **DataConnectors** used in this configuration, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector) and [RuntimeDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector).
+If any of these configuration options are not applicable, they can be removed. This is just an example, and you may customize this as you wish!
+
+Also, if you would like to learn more about the **DataConnectors** used in this configuration, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector), [ConfiguredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector), and [RuntimeDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector).
 
 Credentials will not be saved until you run the last cell. The credentials will be saved in `uncommitted/config_variables.yml` which should not be added to source control.""",
                 "metadata": {},

@@ -174,7 +174,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                         "lower_bound": None,
                         "upper_bound": None,
                     },
-                    "round_decimals": 1,
+                    "round_decimals": None,
                 },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
