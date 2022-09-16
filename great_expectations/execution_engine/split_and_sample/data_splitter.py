@@ -26,8 +26,10 @@ class DatePart(enum.Enum):
     MINUTE = "minute"
     SECOND = "second"
 
-    def __eq__(self, other: DatePart):
-        return self.value == other.value
+    def __eq__(self, other: Union[str, DatePart]):
+        if isinstance(other, str):
+            return self.value.lower() == other.lower()
+        return self.value.lower() == other.value.lower()
 
     def __hash__(self: DatePart):
         return hash(self.value)

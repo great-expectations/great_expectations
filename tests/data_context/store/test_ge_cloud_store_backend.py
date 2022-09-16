@@ -165,35 +165,6 @@ def test_appropriate_casting_of_str_resource_type_to_GeCloudRESTResource(
     assert store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
 
 
-@pytest.mark.cloud
-@pytest.mark.unit
-def test___init___with_deprecated_arg(ge_cloud_access_token: str, caplog) -> None:
-    ge_cloud_base_url = "https://app.greatexpectations.io/"
-    ge_cloud_credentials = {
-        "access_token": ge_cloud_access_token,
-        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-    }
-    ge_cloud_resource_type = GeCloudRESTResource.CHECKPOINT
-
-    store_backend = GeCloudStoreBackend(
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_credentials=ge_cloud_credentials,
-        ge_cloud_resource_type=ge_cloud_resource_type,
-    )
-
-    log_messages = caplog.messages
-    assert len(log_messages) == 1
-    assert (
-        'The "account_id" ge_cloud_credentials key has been renamed to "organization_id" and will be deprecated'
-        in log_messages[0]
-    )
-
-    assert store_backend.ge_cloud_credentials == {
-        "access_token": ge_cloud_access_token,
-        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-    }
-
-
 @pytest.mark.parametrize(
     "resource_type,expected_set_kwargs",
     [
