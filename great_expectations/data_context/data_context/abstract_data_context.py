@@ -491,7 +491,7 @@ class AbstractDataContext(ABC):
         substituted_config = self._perform_substitutions_on_datasource_config(
             updated_datasource_config_from_store
         )
-        updated_datasource: Datasource = self._instantiate_datasource_from_config(
+        updated_datasource: Union[LegacyDatasource, BaseDatasource] = self._instantiate_datasource_from_config(
             config=substituted_config
         )
         self._cached_datasources[datasource_name] = updated_datasource
