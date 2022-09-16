@@ -1,6 +1,6 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
-from typing import TYPE_CHECKING, Callable, Type, Union, Tuple
+from typing import TYPE_CHECKING, Callable, Tuple, Type, Union
 from unittest.mock import patch
 
 import pytest
@@ -371,20 +371,21 @@ def test_cloud_data_context_add_datasource(
         assert stored_data_connector.name == data_connector_name
 
 
-
 def _save_datasource_assertions(
     context: AbstractDataContext,
     datasource_to_save_config: DatasourceConfig,
     datasource_to_save: Datasource,
     saved_datasource: Union[LegacyDatasource, BaseDatasource],
-    attributes_to_verify: Tuple[str, ...] = ("name", "execution_engine", "data_connectors"),
+    attributes_to_verify: Tuple[str, ...] = (
+        "name",
+        "execution_engine",
+        "data_connectors",
+    ),
 ):
     datasource_name: str = datasource_to_save.name
     # Make sure the datasource config got into the context config
     assert len(context.config.datasources) == 1
-    assert (
-            context.config.datasources[datasource_name] == datasource_to_save_config
-    )
+    assert context.config.datasources[datasource_name] == datasource_to_save_config
 
     # Make sure the datasource got into the cache
     assert len(context._cached_datasources) == 1
@@ -520,7 +521,6 @@ def test_non_cloud_backed_data_context_save_datasource_overwrite_existing(
         assert updated_datasource_data_connector_name == new_data_connector_name
 
 
-
 @pytest.mark.cloud
 @pytest.mark.unit
 def test_cloud_data_context_save_datasource_empty_store(
@@ -558,7 +558,10 @@ def test_cloud_data_context_save_datasource_empty_store(
             datasource_to_save_config=datasource_config_with_names_and_ids,
             datasource_to_save=datasource_to_save,
             saved_datasource=saved_datasource,
-            attributes_to_verify=("name", "execution_engine",)
+            attributes_to_verify=(
+                "name",
+                "execution_engine",
+            ),
         )
 
         serializer: AbstractConfigSerializer = DictConfigSerializer(
@@ -571,9 +574,7 @@ def test_cloud_data_context_save_datasource_empty_store(
             datasourceConfigSchema.load(datasource_to_save.config)
         )
 
-        updated_datasource_dict_no_datasource_id = copy.deepcopy(
-            saved_datasource_dict
-        )
+        updated_datasource_dict_no_datasource_id = copy.deepcopy(saved_datasource_dict)
         updated_datasource_dict_no_datasource_id["data_connectors"][
             data_connector_name
         ].pop("id", None)
