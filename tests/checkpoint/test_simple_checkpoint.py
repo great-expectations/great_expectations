@@ -3551,7 +3551,7 @@ def test_running_spark_simplecheckpoint(
 
 
 @pytest.mark.integration
-def run_spark_checkpoint_with_schema(
+def test_run_spark_checkpoint_with_schema(
     context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
 ):
     context = context_with_single_csv_spark_and_suite
