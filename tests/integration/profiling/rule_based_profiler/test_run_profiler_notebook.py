@@ -110,7 +110,7 @@ def test_run_data_assistants_notebook_spark(tmp_path, spark_session):
     with open(notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
 
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=300, kernel_name="python3")
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=1000, kernel_name="python3")
 
     try:
         ep.preprocess(nb, {"metadata": {"path": base_dir}})
