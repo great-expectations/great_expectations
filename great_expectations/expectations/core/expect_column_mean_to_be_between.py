@@ -148,7 +148,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
                         "lower_bound": None,
                         "upper_bound": None,
                     },
-                    "round_decimals": 2,
+                    "round_decimals": None,
                 },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
