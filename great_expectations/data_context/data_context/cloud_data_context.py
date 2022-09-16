@@ -1,4 +1,5 @@
 import logging
+import os
 from enum import Enum
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Union, cast
 
@@ -72,6 +73,8 @@ class CloudDataContext(AbstractDataContext):
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
 
+        if context_root_dir is None:
+            context_root_dir = os.getcwd()
         self._context_root_directory = context_root_dir
 
         if project_config is None:
