@@ -371,6 +371,43 @@ def test_cloud_data_context_add_datasource(
         assert stored_data_connector.name == data_connector_name
 
 
+
+def _save_datasource_assertions(
+    context,
+    datasource_to_save_config: DatasourceConfig,
+    datasource_to_save,
+    saved_datasource,
+):
+    datasource_name: str = datasource_to_save.name
+    # Make sure the datasource config got into the context config
+    assert len(context.config.datasources) == 1
+    assert (
+            context.config.datasources[datasource_name] == datasource_to_save_config
+    )
+
+    # Make sure the datasource got into the cache
+    assert len(context._cached_datasources) == 1
+    cached_datasource = context._cached_datasources[datasource_name]
+
+    # Make sure the stored and returned datasource is the same one as the cached datasource
+    assert id(saved_datasource) == id(cached_datasource)
+    assert saved_datasource == cached_datasource
+
+    # Make sure the stored and returned datasource are otherwise equal
+    serializer: AbstractConfigSerializer = DictConfigSerializer(
+        schema=datasourceConfigSchema
+    )
+    saved_datasource_dict = serializer.serialize(
+        datasourceConfigSchema.load(saved_datasource.config)
+    )
+    datasource_to_save_dict = serializer.serialize(
+        datasourceConfigSchema.load(datasource_to_save.config)
+    )
+
+    for attribute in ("name", "execution_engine", "data_connectors"):
+        assert saved_datasource_dict[attribute] == datasource_to_save_dict[attribute]
+
+
 @pytest.mark.unit
 def test_non_cloud_backed_data_context_save_datasource_empty_store(
     empty_data_context: DataContext,
@@ -383,7 +420,6 @@ def test_non_cloud_backed_data_context_save_datasource_empty_store(
     datasource_to_save: Datasource = context._build_datasource_from_config(
         datasource_config_with_names
     )
-    datasource_name: str = datasource_to_save.name
 
     with patch(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
@@ -394,33 +430,12 @@ def test_non_cloud_backed_data_context_save_datasource_empty_store(
             LegacyDatasource, BaseDatasource
         ] = context.save_datasource(datasource_to_save)
 
-        # Make sure the datasource config got into the context config
-        assert len(context.config.datasources) == 1
-        assert (
-            context.config.datasources[datasource_name] == datasource_config_with_names
+        _save_datasource_assertions(
+            context=context,
+            datasource_to_save_config=datasource_config_with_names,
+            datasource_to_save=datasource_to_save,
+            saved_datasource=saved_datasource,
         )
-
-        # Make sure the datasource got into the cache
-        assert len(context._cached_datasources) == 1
-        cached_datasource = context._cached_datasources[datasource_name]
-
-        # Make sure the stored and returned datasource is the same one as the cached datasource
-        assert id(saved_datasource) == id(cached_datasource)
-        assert saved_datasource == cached_datasource
-
-        # Make sure the stored and returned datasource are otherwise equal
-        serializer: AbstractConfigSerializer = DictConfigSerializer(
-            schema=datasourceConfigSchema
-        )
-        saved_datasource_dict = serializer.serialize(
-            datasourceConfigSchema.load(saved_datasource.config)
-        )
-        datasource_to_save_dict = serializer.serialize(
-            datasourceConfigSchema.load(datasource_to_save.config)
-        )
-
-        for attribute in ("name", "execution_engine", "data_connectors"):
-            assert saved_datasource_dict[attribute] == datasource_to_save_dict[attribute]
 
 
 @pytest.mark.unit
