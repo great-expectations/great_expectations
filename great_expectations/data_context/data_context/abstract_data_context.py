@@ -466,9 +466,11 @@ class AbstractDataContext(ABC):
     ) -> Union[LegacyDatasource, BaseDatasource]:
         """Save a Datasource to the configured DatasourceStore.
 
-        Stores the underlying DatasourceConfig in the store, updates the cached Datasource and returns the Datasource.
-        The cached and returned Datasource is re-constructed from the config that was stored as some store implementations
-        make edits to the stored config (e.g. adding identifiers).
+        Stores the underlying DatasourceConfig in the store and Data Context config,
+        updates the cached Datasource and returns the Datasource.
+        The cached and returned Datasource is re-constructed from the config
+        that was stored as some store implementations make edits to the stored
+        config (e.g. adding identifiers).
 
         Args:
             datasource: Datasource to store.
