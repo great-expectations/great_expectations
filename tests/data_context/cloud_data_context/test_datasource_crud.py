@@ -400,10 +400,9 @@ def test_non_cloud_backed_data_context_save_datasource_empty_store(
             context.config.datasources[datasource_name] == datasource_config_with_names
         )
 
-        cached_datasource = context._cached_datasources[datasource_name]
-
         # Make sure the datasource got into the cache
         assert len(context._cached_datasources) == 1
+        cached_datasource = context._cached_datasources[datasource_name]
 
         # Make sure the stored and returned datasource is the same one as the cached datasource
         assert id(updated_datasource) == id(cached_datasource)
