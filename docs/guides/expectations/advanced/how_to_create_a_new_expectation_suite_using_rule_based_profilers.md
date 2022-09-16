@@ -16,7 +16,7 @@ While the contents of this document accurately reflect the state of the feature,
 <Prerequisites>
 
 - Have a basic understanding of <TechnicalTag tag="metric" text="Metrics" /> in Great Expectations.
-- Have a basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations).
+- Have a basic understanding of how to edit Expectation Configurations (as detailed in [our guide on How to create and edit Expectations based on domain knowledge](../how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md)).
 - Have read the overview of <TechnicalTag tag="profiler" text="Profilers" /> and the section on [Rule-Based Profilers](../../../terms/profiler.md#rule-based-profilers) in particular.
 
 </Prerequisites>
