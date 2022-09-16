@@ -288,6 +288,7 @@ class OnboardingDataAssistant(DataAssistant):
             include_column_name_suffixes=None,
             exclude_column_name_suffixes=[
                 "_id",
+                "_ID",
             ],
             semantic_type_filter_module_name=None,
             semantic_type_filter_class_name=None,
@@ -559,7 +560,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "lower_bound": None,
                 "upper_bound": None,
             },
-            "round_decimals": 15,
+            "round_decimals": None,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_histogram_single_batch_parameter_builder_for_metrics,
@@ -731,7 +732,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "lower_bound": None,
                 "upper_bound": None,
             },
-            "round_decimals": 1,
+            "round_decimals": None,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_min_metric_multi_batch_parameter_builder_for_metrics,
@@ -1053,7 +1054,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "lower_bound": 0.0,
                 "upper_bound": None,
             },
-            "round_decimals": 15,
+            "round_decimals": None,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,
