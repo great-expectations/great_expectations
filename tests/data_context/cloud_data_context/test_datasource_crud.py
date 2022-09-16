@@ -1,6 +1,6 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
-from typing import TYPE_CHECKING, Callable, Type, Union
+from typing import TYPE_CHECKING, Callable, Type, Union, Tuple
 from unittest.mock import patch
 
 import pytest
@@ -373,10 +373,11 @@ def test_cloud_data_context_add_datasource(
 
 
 def _save_datasource_assertions(
-    context,
+    context: AbstractDataContext,
     datasource_to_save_config: DatasourceConfig,
-    datasource_to_save,
-    saved_datasource,
+    datasource_to_save: Datasource,
+    saved_datasource: Datasource,
+    attributes_to_verify: Tuple[str, ...] = ("name", "execution_engine", "data_connectors"),
 ):
     datasource_name: str = datasource_to_save.name
     # Make sure the datasource config got into the context config
@@ -404,7 +405,7 @@ def _save_datasource_assertions(
         datasourceConfigSchema.load(datasource_to_save.config)
     )
 
-    for attribute in ("name", "execution_engine", "data_connectors"):
+    for attribute in attributes_to_verify:
         assert saved_datasource_dict[attribute] == datasource_to_save_dict[attribute]
 
 
@@ -552,62 +553,40 @@ def test_cloud_backed_data_context_save_datasource_empty_store(
     assert context.ge_cloud_mode
     assert len(context.list_datasources()) == 0
 
-    datasource: Datasource = context._build_datasource_from_config(
+    datasource_to_save: Datasource = context._build_datasource_from_config(
         datasource_config_with_names
     )
-    datasource_name: str = datasource.name
-    data_connector_name: str = tuple(datasource.data_connectors.keys())[0]
+    data_connector_name: str = tuple(datasource_to_save.data_connectors.keys())[0]
 
     with patch(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names_and_ids,
     ):
-        updated_datasource: Union[
+        saved_datasource: Union[
             LegacyDatasource, BaseDatasource
-        ] = context.save_datasource(datasource)
+        ] = context.save_datasource(datasource_to_save)
 
-        # Make sure the datasource config got into the context config
-        assert len(context.config.datasources) == 1
-        assert (
-            context.config.datasources[datasource_name]
-            == datasource_config_with_names_and_ids
+        _save_datasource_assertions(
+            context=context,
+            datasource_to_save_config=datasource_config_with_names_and_ids,
+            datasource_to_save=datasource_to_save,
+            saved_datasource=saved_datasource,
+            attributes_to_verify=("name", "execution_engine",)
         )
 
-        cached_datasource = context._cached_datasources[datasource_name]
-
-        # Make sure the datasource got into the cache
-        assert len(context._cached_datasources) == 1
-
-        # Make sure the stored and returned datasource is the same one as the cached datasource
-        assert id(updated_datasource) == id(cached_datasource)
-        assert updated_datasource == cached_datasource
-
-        # Make sure the stored and returned datasource is a different instance (now has ids)
-        assert not id(cached_datasource) == id(datasource)
-        assert not id(updated_datasource) == id(datasource)
-        assert not cached_datasource == datasource
-        assert not updated_datasource == datasource
-
-        # Make sure the stored and returned datasource are otherwise equal
         serializer: AbstractConfigSerializer = DictConfigSerializer(
             schema=datasourceConfigSchema
         )
-        updated_datasource_dict = serializer.serialize(
-            datasourceConfigSchema.load(updated_datasource.config)
+        saved_datasource_dict = serializer.serialize(
+            datasourceConfigSchema.load(saved_datasource.config)
         )
         orig_datasource_dict = serializer.serialize(
-            datasourceConfigSchema.load(datasource.config)
+            datasourceConfigSchema.load(datasource_to_save.config)
         )
 
-        for attribute in (
-            "name",
-            "execution_engine",
-        ):
-            assert updated_datasource_dict[attribute] == orig_datasource_dict[attribute]
-
         updated_datasource_dict_no_datasource_id = copy.deepcopy(
-            updated_datasource_dict
+            saved_datasource_dict
         )
         updated_datasource_dict_no_datasource_id["data_connectors"][
             data_connector_name
@@ -618,11 +597,11 @@ def test_cloud_backed_data_context_save_datasource_empty_store(
         )
 
         # Make sure that the id is populated only in the updated and cached datasource
-        assert datasource.id is None
-        assert datasource.data_connectors[data_connector_name].id is None
-        assert updated_datasource.id == datasource_config_with_names_and_ids.id
+        assert datasource_to_save.id is None
+        assert datasource_to_save.data_connectors[data_connector_name].id is None
+        assert saved_datasource.id == datasource_config_with_names_and_ids.id
         assert (
-            updated_datasource.data_connectors[data_connector_name].id
+            saved_datasource.data_connectors[data_connector_name].id
             == datasource_config_with_names_and_ids.data_connectors[
                 data_connector_name
             ]["id"]
