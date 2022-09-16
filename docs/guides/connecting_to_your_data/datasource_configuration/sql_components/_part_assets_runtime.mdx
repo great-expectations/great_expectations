@@ -1,0 +1,27 @@
+import ConfigForAssetsRuntime from '../sql_components/_config_for_assets_runtime.mdx'
+import CautionRuntimeBatchIdentifierValues from '../components/_caution_runtime_batch_identifier_values.mdx'
+
+<ConfigForAssetsRuntime />
+
+The full configuration for your Datasource should now look like:
+
+```python
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "SqlAlchemyExecutionEngine",
+        "module_name": "great_expectations.execution_engine",
+        "connection_string": CONNECTION_STRING,
+    },
+    "data_connectors": {
+        "name_of_my_runtime_data_connector": {
+            "class_name": "RuntimeDataConnector",
+            "batch_identifiers": ["batch_timestamp"],
+        }
+    }
+}
+```
+
+<CautionRuntimeBatchIdentifierValues />
