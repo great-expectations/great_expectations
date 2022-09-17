@@ -6,11 +6,10 @@ import pytest
 import great_expectations as ge
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
 
-yaml = YAMLHandler()
+yaml: YAMLHandler = YAMLHandler()
 # constants used by the sql example
 pg_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
 CONNECTION_STRING: str = f"postgresql+psycopg2://postgres:@{pg_hostname}/test_ci"
@@ -18,7 +17,24 @@ CONNECTION_STRING: str = f"postgresql+psycopg2://postgres:@{pg_hostname}/test_ci
 
 @pytest.mark.integration
 @pytest.mark.slow  # 19s
-def test_pandas_happy_path(empty_data_context) -> None:
+def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None:
+    """
+    What does this test and why?
+
+    The intent of this test is to ensure that our "happy path", exercised by notebooks
+    in great_expectations/tests/test_fixtures/rule_based_profiler/example_notebooks/ are in working order
+
+    The code in the notebooks (excluding explanations) and the code in the following test exercise an identical codepath.
+
+    1. Setting up Datasource to load 2019 taxi data and 2020 taxi data
+    2. Configuring BatchRequest to load 2019 data as multiple batches
+    3. Running Onboarding DataAssistant and saving resulting ExpectationSuite as 'taxi_data_2019_suite'
+    4. Configuring BatchRequest to load 2020 January data
+    5. Configuring and running Checkpoint using BatchRequest for 2020-01, and 'taxi_data_2019_suite'.
+
+    This test tests the code in `DataAssistants_Instantiation_And_Running-OnboardingAssistant-Pandas.ipynb`
+
+    """
     data_context: ge.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
@@ -49,9 +65,9 @@ def test_pandas_happy_path(empty_data_context) -> None:
             },
         },
     }
-
-    # data_context.test_yaml_config(yaml.dump(datasource_config))
     data_context.add_datasource(**datasource_config)
+
+    # Batch Request
     multi_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_data",
         data_connector_name="configured_data_connector_multi_batch_asset",
@@ -61,18 +77,20 @@ def test_pandas_happy_path(empty_data_context) -> None:
     batch_list = data_context.get_batch_list(batch_request=batch_request)
     assert len(batch_list) == 12
 
+    # Running onboarding data assistant
     result = data_context.assistants.onboarding.run(
         batch_request=multi_batch_batch_request
     )
+
+    # saving resulting ExpectationSuite
     suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name="taxi_data_2019_suite"
     )
-    resulting_configurations: List[
-        ExpectationConfiguration
-    ] = suite.add_expectation_configurations(
+    suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
     data_context.save_expectation_suite(expectation_suite=suite)
+
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_data",
@@ -82,6 +100,8 @@ def test_pandas_happy_path(empty_data_context) -> None:
             "batch_filter_parameters": {"year": "2020", "month": "01"}
         },
     )
+
+    # configuring and running checkpoint
     checkpoint_config: dict = {
         "name": "my_checkpoint",
         "config_version": 1,
@@ -100,38 +120,29 @@ def test_pandas_happy_path(empty_data_context) -> None:
 
 @pytest.mark.integration
 @pytest.mark.slow  # 149 seconds
-def test_spark_happy_path(empty_data_context, spark_session) -> None:
-    from pyspark.sql.types import (
-        DoubleType,
-        IntegerType,
-        StringType,
-        StructField,
-        StructType,
-        TimestampType,
-    )
+def test_spark_happy_path_onboarding_data_assistant(
+    empty_data_context, spark_session, spark_df_taxi_data_schema
+) -> None:
+    """
+    What does this test and why?
 
-    schema: StructType = StructType(
-        [
-            StructField("vendor_id", IntegerType(), True),
-            StructField("pickup_datetime", TimestampType(), True),
-            StructField("dropoff_datetime", TimestampType(), True),
-            StructField("passenger_count", IntegerType(), True),
-            StructField("trip_distance", DoubleType(), True),
-            StructField("rate_code_id", IntegerType(), True),
-            StructField("store_and_fwd_flag", StringType(), True),
-            StructField("pickup_location_id", IntegerType(), True),
-            StructField("dropoff_location_id", IntegerType(), True),
-            StructField("payment_type", IntegerType(), True),
-            StructField("fare_amount", DoubleType(), True),
-            StructField("extra", DoubleType(), True),
-            StructField("mta_tax", DoubleType(), True),
-            StructField("tip_amount", DoubleType(), True),
-            StructField("tolls_amount", DoubleType(), True),
-            StructField("improvement_surcharge", DoubleType(), True),
-            StructField("total_amount", DoubleType(), True),
-            StructField("congestion_surcharge", DoubleType(), True),
-        ]
-    )
+    The intent of this test is to ensure that our "happy path", exercised by notebooks
+    in great_expectations/tests/test_fixtures/rule_based_profiler/example_notebooks/ are in working order
+
+    The code in the notebooks (excluding explanations) and the code in the following test exercise an identical codepath.
+
+    1. Setting up Datasource to load 2019 taxi data and 2020 taxi data
+    2. Configuring BatchRequest to load 2019 data as multiple batches
+    3. Running Onboarding DataAssistant and saving resulting ExpectationSuite as 'taxi_data_2019_suite'
+    4. Configuring BatchRequest to load 2020 January data
+    5. Configuring and running Checkpoint using BatchRequest for 2020-01, and 'taxi_data_2019_suite'.
+
+    This test tests the code in `DataAssistants_Instantiation_And_Running-OnboardingAssistant-Spark.ipynb`
+
+    """
+    from pyspark.sql.types import StructType
+
+    schema: StructType = spark_df_taxi_data_schema
     data_context: ge.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
@@ -185,9 +196,7 @@ def test_spark_happy_path(empty_data_context, spark_session) -> None:
     suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name="taxi_data_2019_suite"
     )
-    resulting_configurations: List[
-        ExpectationConfiguration
-    ] = suite.add_expectation_configurations(
+    suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
     data_context.save_expectation_suite(expectation_suite=suite)
@@ -217,10 +226,29 @@ def test_spark_happy_path(empty_data_context, spark_session) -> None:
 
 
 @pytest.mark.integration
-@pytest.mark.slow  # 142 seconds
-def test_sql_happy_path(empty_data_context, test_backends, sa) -> None:
+@pytest.mark.slow  # 104 seconds
+def test_sql_happy_path_onboarding_data_assistant(
+    empty_data_context, test_backends, sa
+) -> None:
+    """
+    What does this test and why?
+
+    The intent of this test is to ensure that our "happy path", exercised by notebooks
+    in great_expectations/tests/test_fixtures/rule_based_profiler/example_notebooks/ are in working order
+
+    The code in the notebooks (excluding explanations) and the code in the following test exercise an identical codepath.
+    1. Loading tables into postgres Docker container by calling helper method load_data_into_postgres_database()
+    2. Setting up Datasource to load 2019 taxi data and 2020 taxi data
+    3. Configuring BatchRequest to load 2019 data as multiple batches
+    4. Running Onboarding DataAssistant and saving resulting ExpectationSuite as 'taxi_data_2019_suite'
+    5. Configuring BatchRequest to load 2020 January data
+    6. Configuring and running Checkpoint using BatchRequest for 2020-01, and 'taxi_data_2019_suite'.
+
+    This test tests the code in `DataAssistants_Instantiation_And_Running-OnboardingAssistant-Sql.ipynb`
+
+    """
     if "postgresql" not in test_backends:
-        pytest.skip("testing multibatch in sql requires postgres backend")
+        pytest.skip("testing data assistant in sql requires postgres backend")
     else:
         load_data_into_postgres_database(sa)
 
@@ -304,8 +332,8 @@ def test_sql_happy_path(empty_data_context, test_backends, sa) -> None:
 
 def load_data_into_postgres_database(sa):
     """
-    Method to load our 2020 taxi data into a postgres database.  This is a helper method
-    called by test_run_multibatch_sql_asset_example().
+    Method to load our 2019 and 2020 taxi data into a postgres database.  This is a helper method
+    called by test_sql_happy_path_onboarding_data_assistant().
     """
 
     from tests.test_utils import load_data_into_test_database
