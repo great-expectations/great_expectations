@@ -461,6 +461,44 @@ class AbstractDataContext(ABC):
         self._project_config = project_config
         self.variables.config = project_config
 
+    def save_datasource(
+        self, datasource: Union[LegacyDatasource, BaseDatasource]
+    ) -> Union[LegacyDatasource, BaseDatasource]:
+        """Save a Datasource to the configured DatasourceStore.
+
+        Stores the underlying DatasourceConfig in the store and Data Context config,
+        updates the cached Datasource and returns the Datasource.
+        The cached and returned Datasource is re-constructed from the config
+        that was stored as some store implementations make edits to the stored
+        config (e.g. adding identifiers).
+
+        Args:
+            datasource: Datasource to store.
+
+        Returns:
+            The datasource, after storing and retrieving the stored config.
+        """
+
+        datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
+        datasource_config = DatasourceConfig(**datasource_config_dict)
+        datasource_name: str = datasource.name
+
+        updated_datasource_config_from_store: DatasourceConfig = self._datasource_store.set(  # type: ignore[attr-defined]
+            key=None, value=datasource_config
+        )
+        # Use the updated datasource config, since the store may populate additional info on update.
+        self.config.datasources[datasource_name] = updated_datasource_config_from_store  # type: ignore[index,assignment]
+
+        # Also use the updated config to initialize a datasource for the cache and overwrite the existing datasource.
+        substituted_config = self._perform_substitutions_on_datasource_config(
+            updated_datasource_config_from_store
+        )
+        updated_datasource: Union[
+            LegacyDatasource, BaseDatasource
+        ] = self._instantiate_datasource_from_config(config=substituted_config)
+        self._cached_datasources[datasource_name] = updated_datasource
+        return updated_datasource
+
     def add_datasource(
         self,
         name: str,
