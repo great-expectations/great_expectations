@@ -86,7 +86,8 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         )
         column_name: str = accessor_domain_kwargs["column"]
         distinct_values: List[pyspark_sql_Row] = (
-            df.distinct()
+            df.select(F.col(column_name))
+            .distinct()
             .where(F.col(column_name).isNotNull())
             .rdd.flatMap(lambda x: x)
             .collect()
