@@ -71,7 +71,6 @@ assert len(validator.batches) == 12
 data_connector_query_2020 = {
     "batch_filter_parameters": {
         "group_name_from_your_data_connector_eg_year": "2020",
-        "index": ":5",
     }
 }
 batch_request_2020 = BatchRequest(
@@ -79,6 +78,7 @@ batch_request_2020 = BatchRequest(
     data_connector_name="insert_your_data_connector_name_here",
     data_asset_name="insert_your_data_asset_name_here",
     data_connector_query=data_connector_query_2020,
+    limit=5,
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
 validator = context.get_validator(
