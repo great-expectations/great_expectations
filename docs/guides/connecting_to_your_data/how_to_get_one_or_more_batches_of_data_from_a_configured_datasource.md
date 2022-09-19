@@ -1,5 +1,5 @@
 ---
-title: How to get a Batch of data from a configured Datasource
+title: How to get one or more Batches of data from a configured Datasource
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
@@ -23,43 +23,43 @@ To load a `Batch`, the steps you will take are the same regardless of the type o
 
 ### 1. Construct a BatchRequest
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L39-L44
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L39-L44
 ```
 
 Since a `BatchRequest` can return multiple `Batch(es)`, you can optionally provide additional parameters to filter the retrieved `Batch(es)`. See [Datasources Core Concepts Guide](../../reference/datasources.md) for more info on filtering besides `batch_filter_parameters` and `limit` including custom filter functions and sampling. The example `BatchRequest`s below shows several non-exhaustive possibilities. 
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L61-L71
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L61-L71
 ```
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L75-L89
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L75-L89
 ```
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L94-L104
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L94-L104
 ```
 
 You may also wish to list available batches to verify that your `BatchRequest` is retrieving the correct `Batch(es)`, or to see which are available. You can use `context.get_batch_list()` for this purpose, which can take a variety of flexible input types similar to a `BatchRequest`. Some examples are shown below:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L109-L114
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L109-L114
 ```
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L117-L118
-```
-
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L121-L127
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L117-L118
 ```
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L136-L142
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L121-L127
+```
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L136-L142
 ```
 
 ### 2. Get access to your Batch via a Validator
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L147-L154
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L147-L154
 ```
 
 ### 3. Check your data
 
 You can check that the first few lines of the `Batch` you loaded into your `Validator` are what you expect by running:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py#L156
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L156
 ```
 
 Now that you have a `Validator`, you can use it to create `Expectations` or validate the data.
