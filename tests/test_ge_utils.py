@@ -830,10 +830,24 @@ def test_convert_ndarray_datetime_to_float_dtype(
     with pytest.raises(AttributeError) as e:
         _ = convert_ndarray_datetime_to_float_dtype(data=numeric_array)
 
+    assert "'int' object has no attribute 'timestamp'" in str(e.value)
+
+    with pytest.raises(AttributeError) as e:
+        _ = convert_ndarray_datetime_to_float_dtype(data=datetime_string_array)
+
+    assert "'str' object has no attribute 'timestamp'" in str(e.value)
+
+    with pytest.raises(AttributeError) as e:
+        _ = convert_ndarray_datetime_to_float_dtype(
+            data=numeric_array, convert_to_utc=True
+        )
+
     assert "'int' object has no attribute 'replace'" in str(e.value)
 
     with pytest.raises(TypeError) as e:
-        _ = convert_ndarray_datetime_to_float_dtype(data=datetime_string_array)
+        _ = convert_ndarray_datetime_to_float_dtype(
+            data=datetime_string_array, convert_to_utc=True
+        )
 
     assert "replace() takes no keyword arguments" in str(e.value)
 
