@@ -24,8 +24,8 @@ data_connectors:
         base_directory: ./
         group_names:
           - name
-          - param_1_from_your_data_connector_eg_year
-          - param_2_from_your_data_connector_eg_month
+          - group_name_from_your_data_connector_eg_year
+          - group_name_from_your_data_connector_eg_month
         module_name: great_expectations.datasource.data_connector.asset
         class_name: Asset
         pattern: (.+)_(\d.*)-(\d.*)\.csv
@@ -47,7 +47,7 @@ assert len(context.get_batch_list(batch_request=batch_request)) == 36
 
 # This BatchRequest adds a query to retrieve only the twelve batches from 2020
 data_connector_query_2020 = {
-    "batch_filter_parameters": {"param_1_from_your_data_connector_eg_year": "2020"}
+    "batch_filter_parameters": {"group_name_from_your_data_connector_eg_year": "2020"}
 }
 batch_request_2020 = BatchRequest(
     datasource_name="insert_your_datasource_name_here",
@@ -60,7 +60,7 @@ assert len(context.get_batch_list(batch_request=batch_request_2020)) == 12
 
 # This BatchRequest adds a query and limit to retrieve only the first 5 batches from 2020
 data_connector_query_2020 = {
-    "batch_filter_parameters": {"param_1_from_your_data_connector_eg_year": "2020"}
+    "batch_filter_parameters": {"group_name_from_your_data_connector_eg_year": "2020"}
 }
 batch_request_2020 = BatchRequest(
     datasource_name="insert_your_datasource_name_here",
@@ -76,8 +76,8 @@ assert len(context.get_batch_list(batch_request=batch_request_2020)) == 5
 # previously defined in a regex pattern in your Data Connector:
 data_connector_query_202001 = {
     "batch_filter_parameters": {
-        "param_1_from_your_data_connector_eg_year": "2020",
-        "param_2_from_your_data_connector_eg_month": "01",
+        "group_name_from_your_data_connector_eg_year": "2020",
+        "group_name_from_your_data_connector_eg_month": "01",
     }
 }
 # This BatchRequest will use the above filter to retrieve only the batch from Jan 2020
@@ -173,13 +173,13 @@ assert (
 )
 assert (
     validator.active_batch.batch_definition.batch_identifiers[
-        "param_1_from_your_data_connector_eg_year"
+        "group_name_from_your_data_connector_eg_year"
     ]
     == "2020"
 )
 assert (
     validator.active_batch.batch_definition.batch_identifiers[
-        "param_2_from_your_data_connector_eg_month"
+        "group_name_from_your_data_connector_eg_month"
     ]
     == "12"
 )
@@ -190,13 +190,13 @@ assert (
 )
 assert (
     batch_list_last_index_batch_request[0].batch_definition.batch_identifiers[
-        "param_1_from_your_data_connector_eg_year"
+        "group_name_from_your_data_connector_eg_year"
     ]
     == "2020"
 )
 assert (
     batch_list_last_index_batch_request[0].batch_definition.batch_identifiers[
-        "param_2_from_your_data_connector_eg_month"
+        "group_name_from_your_data_connector_eg_month"
     ]
     == "12"
 )
