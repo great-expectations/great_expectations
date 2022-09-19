@@ -4,6 +4,15 @@
 Changelog
 #########
 
+0.15.24
+-----------------
+* [FEATURE] context.save_datasource (#6009)
+* [BUGFIX] Standardize `ConfiguredAssetSqlDataConnector` config in `datasource new` CLI workflow (#6044)
+* [DOCS] DOC-371 update the getting started tutorial for data assistants (#6024)
+* [DOCS] DOCS-369 sql data connector configuration guide (#6002)
+* [MAINTENANCE] Remove outdated entry from release schedule JSON (#6032)
+* [MAINTENANCE] Clean up Spark schema tests to have proper names (#6033)
+
 0.15.23
 -----------------
 * [FEATURE] do not require expectation_suite_name in DataAssistantResult.show_expectations_by...() methods (#5976)
