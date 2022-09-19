@@ -71,7 +71,7 @@ class HTTPHandler:
         return self._make_request(fn=requests.put, url=url, json=json)
 
     def patch(self, url: str, json: dict) -> HTTPResponse:
-        return self._make_request(fn=requests.put, url=url, json=json)
+        return self._make_request(fn=requests.patch, url=url, json=json)
 
     def delete(self, url: str, json: dict) -> HTTPResponse:
         return self._make_request(fn=requests.delete, url=url, json=json)
