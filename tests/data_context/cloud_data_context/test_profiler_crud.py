@@ -141,8 +141,7 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     )
 
     mock_get.assert_called_once_with(
-        f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
-        params=None,
+        url=f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
         **shared_called_with_request_kwargs,
     )
 
@@ -195,8 +194,7 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     )
 
     mock_get.assert_called_once_with(
-        f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
-        params=None,
+        url=f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
         **shared_called_with_request_kwargs,
     )
 
