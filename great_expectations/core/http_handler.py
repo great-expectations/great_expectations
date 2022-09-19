@@ -38,7 +38,9 @@ class HTTPHandler:
         * delete
     """
 
-    def __init__(self, access_token: str, timeout: int = 20) -> None:
+    TIMEOUT = 20
+
+    def __init__(self, access_token: str, timeout: int = TIMEOUT) -> None:
         self._headers = self._init_headers(access_token)
         self._timeout = timeout
 
@@ -58,7 +60,7 @@ class HTTPHandler:
         params: Optional[dict] = None,
     ) -> HTTPResponse:
         response = fn(
-            url=url, params=params, json=json, headers=self._headers, time=self._timeout
+            url, params=params, json=json, headers=self._headers, timeout=self._timeout
         )
         return HTTPResponse(response=response)
 

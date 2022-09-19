@@ -11,6 +11,7 @@ import requests
 
 import great_expectations as ge
 from great_expectations import DataContext
+from great_expectations.core.http_handler import HTTPHandler
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
@@ -548,7 +549,7 @@ def shared_called_with_request_kwargs(request_headers) -> dict:
     Standard request kwargs that all GeCloudStoreBackend http calls are made with.
     Use in combination with `assert_called_with()`
     """
-    return dict(timeout=GeCloudStoreBackend.TIMEOUT, headers=request_headers)
+    return dict(timeout=HTTPHandler.TIMEOUT, headers=request_headers, params=None)
 
 
 @pytest.fixture
