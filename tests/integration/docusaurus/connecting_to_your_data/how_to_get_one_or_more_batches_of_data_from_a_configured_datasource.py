@@ -67,7 +67,7 @@ validator = context.get_validator(
 )
 assert len(validator.batches) == 12
 
-# This BatchRequest adds a query to retrieve only the first 5 batches from 2020
+# This BatchRequest adds a query and limit to retrieve only the first 5 batches from 2020
 data_connector_query_2020 = {
     "batch_filter_parameters": {
         "group_name_from_your_data_connector_eg_year": "2020",
