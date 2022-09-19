@@ -460,18 +460,15 @@ data_connectors:
     include_schema_name: True
     introspection_directives:
       schema_name: {{schema_name}}
-  default_configured_data_connector_name:{self._configured_asset_sql_data_connector_yaml_snippet()}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {{table_name}}:
+        class_name: Asset
+        schema_name: {{schema_name}}
 """'''
 
         return yaml_str
-
-    def _configured_asset_sql_data_connector_yaml_snippet(self) -> str:
-        """Differs for different backends - override if needed."""
-        return """
-    class_name: ConfiguredAssetSqlDataConnector
-    assets:
-      {schema_name}.{table_name}:
-        class_name: Asset"""
 
     def _yaml_innards(self) -> str:
         """Override if needed."""
@@ -583,14 +580,6 @@ class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
             module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
         )
         return redshift_success or postgresql_success
-
-    def _configured_asset_sql_data_connector_yaml_snippet(self) -> str:
-        return """
-    class_name: ConfiguredAssetSqlDataConnector
-    assets:
-      {table_name}:
-        schema_name: {schema_name}
-        class_name: Asset"""
 
     def _yaml_innards(self) -> str:
         return (
