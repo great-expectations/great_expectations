@@ -56,21 +56,32 @@ batch_request_2020 = BatchRequest(
     data_connector_query=data_connector_query_2020,
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
-assert len(context.get_batch_list(batch_request=batch_request_2020)) == 12
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=batch_request_2020, expectation_suite_name="test_suite"
+)
+assert len(validator.batches) == 12
 
-# This BatchRequest adds a query and limit to retrieve only the first 5 batches from 2020
+# This BatchRequest adds a query to retrieve only the first 5 batches from 2020
 data_connector_query_2020 = {
-    "batch_filter_parameters": {"group_name_from_your_data_connector_eg_year": "2020"}
+    "batch_filter_parameters": {
+        "group_name_from_your_data_connector_eg_year": "2020",
+        "index": ":5",
+    }
 }
 batch_request_2020 = BatchRequest(
     datasource_name="insert_your_datasource_name_here",
     data_connector_name="insert_your_data_connector_name_here",
     data_asset_name="insert_your_data_asset_name_here",
     data_connector_query=data_connector_query_2020,
-    limit=5,
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
-assert len(context.get_batch_list(batch_request=batch_request_2020)) == 5
+validator = context.get_validator(
+    batch_request=batch_request_2020, expectation_suite_name="test_suite"
+)
+assert len(validator.batches) == 5
 
 # Here is an example `data_connector_query` filtering based on parameters from `group_names`
 # previously defined in a regex pattern in your Data Connector:
@@ -88,7 +99,10 @@ batch_request_202001 = BatchRequest(
     data_connector_query=data_connector_query_202001,
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
-assert len(context.get_batch_list(batch_request=batch_request_202001)) == 1
+validator = context.get_validator(
+    batch_request=batch_request_202001, expectation_suite_name="test_suite"
+)
+assert len(validator.batches) == 1
 
 
 # Here is an example `data_connector_query` filtering based on an `index` which can be
@@ -103,44 +117,10 @@ last_index_batch_request = BatchRequest(
     data_connector_query=data_connector_query_last_index,
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
-assert len(context.get_batch_list(batch_request=last_index_batch_request)) == 1
-
-
-# List all Batches associated with the DataAsset
-batch_list_all_a = context.get_batch_list(
-    datasource_name="insert_your_datasource_name_here",
-    data_connector_name="insert_your_data_connector_name_here",
-    data_asset_name="insert_your_data_asset_name_here",
+validator = context.get_validator(
+    batch_request=batch_request_202001, expectation_suite_name="test_suite"
 )
-assert len(batch_list_all_a) == 36
-
-# Alternatively you can use the previously created batch_request to achieve the same thing
-batch_list_all_b = context.get_batch_list(batch_request=batch_request)
-assert len(batch_list_all_b) == 36
-
-# You can use a query to filter the batch_list
-batch_list_202001_query = context.get_batch_list(
-    datasource_name="insert_your_datasource_name_here",
-    data_connector_name="insert_your_data_connector_name_here",
-    data_asset_name="insert_your_data_asset_name_here",
-    data_connector_query=data_connector_query_202001,
-)
-assert len(batch_list_202001_query) == 1
-
-# Which is equivalent to the batch_request
-batch_list_last_index_batch_request = context.get_batch_list(
-    batch_request=last_index_batch_request
-)
-assert len(batch_list_last_index_batch_request) == 1
-
-# Or limit to a specific number of batches
-batch_list_all_limit_10 = context.get_batch_list(
-    datasource_name="insert_your_datasource_name_here",
-    data_connector_name="insert_your_data_connector_name_here",
-    data_asset_name="insert_your_data_asset_name_here",
-    limit=10,
-)
-assert len(batch_list_all_limit_10) == 10
+assert len(validator.batches) == 1
 
 # Now we can review a sample of data using a Validator
 
@@ -157,7 +137,6 @@ print(validator.head())
 
 
 # NOTE: The following assertions are only for testing and can be ignored by users.
-assert validator.active_batch_id == batch_list_last_index_batch_request[0].id
 assert len(validator.batches) == 1
 
 row_count = validator.get_metric(
@@ -179,23 +158,6 @@ assert (
 )
 assert (
     validator.active_batch.batch_definition.batch_identifiers[
-        "group_name_from_your_data_connector_eg_month"
-    ]
-    == "12"
-)
-
-assert (
-    batch_list_last_index_batch_request[0].batch_definition.batch_identifiers["name"]
-    == "yellow_tripdata_sample"
-)
-assert (
-    batch_list_last_index_batch_request[0].batch_definition.batch_identifiers[
-        "group_name_from_your_data_connector_eg_year"
-    ]
-    == "2020"
-)
-assert (
-    batch_list_last_index_batch_request[0].batch_definition.batch_identifiers[
         "group_name_from_your_data_connector_eg_month"
     ]
     == "12"
