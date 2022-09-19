@@ -19,6 +19,10 @@ from typing import (
     cast,
 )
 
+from great_expectations.core import ExpectationSuiteValidationResult
+
+from great_expectations.data_context.data_context_migrator import DataContextCloudMigrator
+
 if TYPE_CHECKING:
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
@@ -2922,3 +2926,23 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         self._synchronize_self_with_underlying_data_context()
         return datasource
+
+
+    def _get_all_datasource_configs(self) -> List[DatasourceConfig]:
+        return [DatasourceConfig(**datasource_config_dict) for datasource_config_dict in self.list_datasources()]
+
+    def _get_all_validation_results(self) -> List[ExpectationSuiteValidationResult]:
+        pass
+
+    def _build_cloud_migrator(self) -> DataContextCloudMigrator:
+        # TODO: Add checkpoints, expectation suites, profilers, etc. Or just full config
+        cloud_migrator = DataContextCloudMigrator(
+            datasources=self._get_all_datasource_configs(),
+            validation_results=self._get_all_validation_results()
+        )
+        return cloud_migrator
+
+    def migrate_to_cloud(self, test_migrate: bool) -> None:
+        cloud_migrator: DataContextCloudMigrator = self._build_cloud_migrator()
+        cloud_migrator.migrate_to_cloud(test_migrate=test_migrate)
+
