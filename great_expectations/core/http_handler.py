@@ -55,13 +55,10 @@ class HTTPHandler:
     def _make_request(
         self,
         fn: Callable,
-        url: str,
-        json: Optional[dict] = None,
-        params: Optional[dict] = None,
+        **kwargs,
     ) -> HTTPResponse:
-        response = fn(
-            url, params=params, json=json, headers=self._headers, timeout=self._timeout
-        )
+        non_null_args = {k: v for k, v in kwargs.items() if v is not None}
+        response = fn(**non_null_args, headers=self._headers, timeout=self._timeout)
         return HTTPResponse(response=response)
 
     def get(self, url: str, params: Optional[dict] = None) -> HTTPResponse:

@@ -218,7 +218,7 @@ def test_datasource_store_set_cloud_mode(
         expected_datasource_config = serializer.serialize(datasource_config)
 
         mock_post.assert_called_with(
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
+            url=f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {
                     "type": "datasource",

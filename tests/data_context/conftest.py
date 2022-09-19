@@ -549,7 +549,7 @@ def shared_called_with_request_kwargs(request_headers) -> dict:
     Standard request kwargs that all GeCloudStoreBackend http calls are made with.
     Use in combination with `assert_called_with()`
     """
-    return dict(timeout=HTTPHandler.TIMEOUT, headers=request_headers, params=None)
+    return dict(timeout=HTTPHandler.TIMEOUT, headers=request_headers)
 
 
 @pytest.fixture
