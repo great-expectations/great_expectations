@@ -17,9 +17,9 @@ You can read more about the core classes that make Great Expectations run in our
   
 </Prerequisites>
 
-## Steps: Loading a Batch of data
+## Steps: Loading one or more Batches of data
 
-To load a `Batch`, the steps you will take are the same regardless of the type of `Datasource` or `Data Connector` you have set up. To learn more about `Datasources`, `Data Connectors` and `Batch(es)` see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md). 
+To load one or more `Batch(es)`, the steps you will take are the same regardless of the type of `Datasource` or `Data Connector` you have set up. To learn more about `Datasources`, `Data Connectors` and `Batch(es)` see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md). 
 
 ### 1. Construct a BatchRequest
 
