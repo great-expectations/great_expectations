@@ -43,7 +43,13 @@ batch_request = BatchRequest(
     data_asset_name="insert_your_data_asset_name_here",
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
-assert len(context.get_batch_list(batch_request=batch_request)) == 36
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="test_suite"
+)
+assert len(validator.batches) == 36
 
 # This BatchRequest adds a query to retrieve only the twelve batches from 2020
 data_connector_query_2020 = {
@@ -56,9 +62,6 @@ batch_request_2020 = BatchRequest(
     data_connector_query=data_connector_query_2020,
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
 validator = context.get_validator(
     batch_request=batch_request_2020, expectation_suite_name="test_suite"
 )
