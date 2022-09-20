@@ -75,7 +75,7 @@ The following code shows how to run the Onboarding Assistant. In this code block
 
 :::note
 If you consider your `BatchRequest` data valid, and want to produce Expectations with ranges that are identical to the 
-  data in the `BatchRequest`, there is no need to alter the command above. You will be using the default `estimation` parameter (`exact`).
+  data in the `BatchRequest`, there is no need to alter the command above. You will be using the default `estimation` parameter (`"exact"`).
   If you want to identify potential outliers in your `BatchRequest` data, pass `estimation="flag_outliers"` to the `run(...)` method.
 :::
 
