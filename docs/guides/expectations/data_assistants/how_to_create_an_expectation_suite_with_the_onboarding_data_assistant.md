@@ -46,7 +46,7 @@ And this is the configuration that you will use for your `BatchRequest`:
 :::caution
 The Onboarding Data Assistant will run a high volume of queries against your `Datasource`. Data Assistant performance 
   can vary significantly depending on the number of batches, count of records per batch, and network latency. It is 
-  recommended that you start with a smaller `BatchRequest` if you find that Data Assistant runtimes are long.
+  recommended that you start with a smaller `BatchRequest` if you find that Data Assistant runtimes are too long.
 :::
 
 ### 2. Prepare a new Expectation Suite
