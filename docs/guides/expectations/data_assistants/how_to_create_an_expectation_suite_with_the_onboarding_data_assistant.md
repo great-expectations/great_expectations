@@ -45,7 +45,7 @@ And this is the configuration that you will use for your Batch Request:
 
 ### 2. Prepare a new Expectation Suite
 
-Preparing a new Expectation Suite is done with the Data Context's `.create_expectation_suite(...)` method, as seen in
+Preparing a new Expectation Suite is done with the Data Context's `create_expectation_suite(...)` method, as seen in
 this code example:
 
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L66-L70
@@ -94,10 +94,14 @@ Once you have our `SimpleCheckpoint`'s configuration defined, you can instantiat
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L144-L151
 ```
 
-### 6. Plot the Data Assistant's calculated Metrics and produced Expectaions
+### 6. Plot the Data Assistant's calculated Metrics and produced Expectations
+
+To see a batch-level visualization of each Metric computed by the Onboarding Data Assistant run:
 
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L163
 ```
+
+To see the associated Expectations produced by the Onboarding Data Assistant run:
 
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L168
 ```
