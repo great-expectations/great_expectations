@@ -17,28 +17,32 @@ from great_expectations.datasource import BaseDatasource, LegacyDatasource
 
 
 class StubDatasourceStore(DatasourceStore):
+    """Used for mocking the set() call."""
     def __init__(self):
         pass
 
 
 class FakeAbstractDataContext(AbstractDataContext):
     def __init__(self):
+        """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
         self._cached_datasources: dict = {}
 
     def _init_variables(self):
+        """Using EphemeralDataContextVariables to store in memory."""
         return EphemeralDataContextVariables(config=DataContextConfig())
 
     def _determine_substitutions(self):
+        """No substitutions required for these tests."""
         return {}
 
     def save_expectation_suite(self):
-        """Abstract method."""
+        """Abstract method. Only a stub is needed."""
         pass
 
     def _init_datasource_store(self):
-        """Abstract method."""
+        """Abstract method. Only a stub is needed."""
         pass
 
 
@@ -68,7 +72,7 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
 
     # Make sure the datasource config got into the context config
     assert len(context.list_datasources()) == 1
-    assert context.config.datasources[datasource_to_save.name] == datasource_config_with_names  # type: ignore[index]
+    assert context.config.datasources[datasource_to_save.name] == datasource_config_with_names
 
     # Make sure the datasource got into the cache
     assert len(context._cached_datasources) == 1
