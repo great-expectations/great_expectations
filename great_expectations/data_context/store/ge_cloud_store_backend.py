@@ -480,7 +480,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{ge_cloud_id}",
         )
         try:
-            response = self._http_handler.delete(url, json=data)
+            response = self._session.delete(url, json=data, timeout=self.TIMEOUT)
             response.raise_for_status()
             return True
         except requests.HTTPError as http_exc:
