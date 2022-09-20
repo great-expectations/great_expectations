@@ -51,8 +51,8 @@ validator = context.get_validator(
 )
 assert len(validator.batches) == 36
 
-# Here is an example `data_connector_query` filtering based on an `index` which can be
-# any valid python slice. The example here is retrieving the latest batch using `-1`:
+# Here is an example data_connector_query filtering based on an index which can be
+# any valid python slice. The example here is retrieving the latest batch using -1:
 data_connector_query_last_index = {
     "index": -1,
 }
@@ -84,7 +84,9 @@ validator = context.get_validator(
 )
 assert len(validator.batches) == 12
 
-# This BatchRequest adds a query and limit to retrieve only the first 5 batches from 2020
+# This BatchRequest adds a query and limit to retrieve only the first 5 batches from 2020.
+# Note that the limit is applied after the data_connector_query filtering. This behavior is
+# different than using an index, which is applied before the other query filters.
 data_connector_query_2020 = {
     "batch_filter_parameters": {
         "group_name_from_your_data_connector_eg_year": "2020",
@@ -103,7 +105,7 @@ validator = context.get_validator(
 )
 assert len(validator.batches) == 5
 
-# Here is an example `data_connector_query` filtering based on parameters from `group_names`
+# Here is an example data_connector_query filtering based on parameters from group_names
 # previously defined in a regex pattern in your Data Connector:
 data_connector_query_202001 = {
     "batch_filter_parameters": {
@@ -111,7 +113,6 @@ data_connector_query_202001 = {
         "group_name_from_your_data_connector_eg_month": "01",
     }
 }
-# This BatchRequest will use the above filter to retrieve only the batch from Jan 2020
 batch_request_202001 = BatchRequest(
     datasource_name="insert_your_datasource_name_here",
     data_connector_name="insert_your_data_connector_name_here",
@@ -139,7 +140,7 @@ print(validator.head())
 
 
 # NOTE: The following assertions are only for testing and can be ignored by users.
-assert len(validator.batches) == 1
+assert len(validator.batches) == 36
 
 row_count = validator.get_metric(
     MetricConfiguration(
