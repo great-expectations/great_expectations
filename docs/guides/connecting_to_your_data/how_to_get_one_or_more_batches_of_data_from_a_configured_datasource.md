@@ -23,7 +23,9 @@ To load one or more `Batch(es)`, the steps you will take are the same regardless
 
 ### 1. Construct a BatchRequest
 
-Note: As outlined in the `Datasource` and `Data Connector` docs mentioned above, this `Batch Request` must reference a previously configured `Datasource` and `Data Connector`.
+:::note
+As outlined in the `Datasource` and `Data Connector` docs mentioned above, this `Batch Request` must reference a previously configured `Datasource` and `Data Connector`.
+:::
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L39-L44
 ```
