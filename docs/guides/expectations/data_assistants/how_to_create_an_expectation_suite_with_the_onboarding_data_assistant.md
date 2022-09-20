@@ -29,7 +29,7 @@ great_expectations suite new --profile
 
 ### 1. Prepare your Batch Request
 
-Data Assistants excel at automating the Profiling process across multiple batches. Therefore, for this guide you will
+Data Assistants excel at automating the Profiling process across multiple Batches. Therefore, for this guide you will
  be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Datasource that our Batch 
  Request queries will consist of a sample of the New York taxi trip data.
 
@@ -45,7 +45,7 @@ And this is the configuration that you will use for your `BatchRequest`:
 
 :::caution
 The Onboarding Data Assistant will run a high volume of queries against your `Datasource`. Data Assistant performance 
-  can vary significantly depending on the number of batches, count of records per batch, and network latency. It is 
+  can vary significantly depending on the number of Batches, count of records per Batch, and network latency. It is 
   recommended that you start with a smaller `BatchRequest` if you find that Data Assistant runtimes are too long.
 :::
 
@@ -114,14 +114,14 @@ Once you have our `SimpleCheckpoint`'s configuration defined, you can instantiat
 
 ### 6. Plot the Data Assistant's calculated Metrics and produced Expectations
 
-To see a batch-level visualization of each Metric computed by the Onboarding Data Assistant run:
+To see a Batch-level visualization of each Metric computed by the Onboarding Data Assistant run:
 
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L163
 ```
 
 ![Plot Metrics](../../../images/data_assistant_plot_metrics.png)
 
-Hovering over a data point will provide more information about the batch and its calculated Metric value.
+Hovering over a data point will provide more information about the Batch and its calculated Metric value.
 
 To see the Expectations produced, and the associated Metrics calculated by the Onboarding Data Assistant run:
 
