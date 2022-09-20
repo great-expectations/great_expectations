@@ -45,11 +45,9 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> NumericRangeEstimationResult:
         ndarray_is_datetime_type: bool
-        conversion_ndarray_to_datetime_type_performed: bool
         metric_values_converted: np.ndarray
         (
             ndarray_is_datetime_type,
-            conversion_ndarray_to_datetime_type_performed,
             metric_values_converted,
         ) = convert_metric_values_to_float_dtype_best_effort(
             metric_values=metric_values
@@ -60,8 +58,7 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
 
         if ndarray_is_datetime_type:
             min_value, max_value = convert_ndarray_float_to_datetime_tuple(
-                data=[min_value, max_value],
-                convert_to_utc=conversion_ndarray_to_datetime_type_performed,
+                data=[min_value, max_value]
             )
 
         return build_numeric_range_estimation_result(
