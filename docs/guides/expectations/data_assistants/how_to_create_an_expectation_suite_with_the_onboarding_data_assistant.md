@@ -73,6 +73,18 @@ The following code shows how to run the Onboarding Assistant. In this code block
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L109-L112
 ```
 
+:::note
+If you consider your `BatchRequest` data valid, and want to produce Expectations with ranges that are identical to the 
+  data in the `BatchRequest`, there is no need to alter the command above. You will be using the default `estimation` parameter (`exact`).
+  If you want to identify potential outliers in your `BatchRequest` data, pass `estimation="flag_outliers"` to the `run(...)` method.
+:::
+
+:::note
+The Onboarding Data Assistant can accept additional parameters such as `include_column_names`, `include_semantic_types`, 
+  `exclude_semantic_types`, `cardinality_limit_mode`, `max_unique_values`, and `max_proportion_unique`. For a 
+  description of the available parameters please see this docstring [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/domain_builder/categorical_column_domain_builder.py#L56).
+:::
+
 ### 4. Save your Expectation Suite
 
 Once you have executed the Onboarding Data Assistant's `run(...)` method and generated Expectations for your data, you
