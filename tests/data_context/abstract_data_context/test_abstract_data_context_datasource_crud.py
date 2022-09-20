@@ -80,7 +80,7 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
 
 @pytest.mark.unit
 def test_save_datasource_overwrites_on_name_collision(
-    datasource_config_with_names: DatasourceConfig
+    datasource_config_with_names: DatasourceConfig,
 ):
 
     context = FakeAbstractDataContext()

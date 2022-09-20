@@ -45,7 +45,9 @@ def test_datasource_store_set(
         "requests.get", autospec=True, side_effect=mocked_datasource_get_response
     ):
 
-        saved_datasource_config: DatasourceConfig = datasource_store_ge_cloud_backend.set(key=key, value=datasource_config)
+        saved_datasource_config: DatasourceConfig = (
+            datasource_store_ge_cloud_backend.set(key=key, value=datasource_config)
+        )
 
     serializer = DictConfigSerializer(schema=datasourceConfigSchema)
     expected_datasource_config = serializer.serialize(datasource_config)
@@ -64,7 +66,9 @@ def test_datasource_store_set(
         **shared_called_with_request_kwargs,
     )
 
-    assert serializer.serialize(saved_datasource_config) == serializer.serialize(datasource_config_with_names_and_ids)
+    assert serializer.serialize(saved_datasource_config) == serializer.serialize(
+        datasource_config_with_names_and_ids
+    )
 
 
 @pytest.mark.cloud
