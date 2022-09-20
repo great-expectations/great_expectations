@@ -206,7 +206,9 @@ class SlackRenderer(Renderer):
                 )
         return failed_expectations_str
 
-    def create_failed_expectation_text(self, expectation_kwargs, expectation_name):
+    def create_failed_expectation_text(
+        self, expectation_kwargs, expectation_name
+    ) -> str:
         expectation_entity = self.get_failed_expectation_domain(
             expectation_name, expectation_kwargs
         )

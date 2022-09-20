@@ -318,7 +318,7 @@ def test_SlackRenderer_get_failed_expectation_domain_column():
     assert result == "first"
 
 
-def test_SlackRenderer_get_failed_expectation_domain_column():
+def test_SlackRenderer_get_failed_expectation_domain_column_list():
     slack_renderer = SlackRenderer()
     result = slack_renderer.get_failed_expectation_domain(
         "expect_multicolumn_sum_to_be_equal", {"column_list": ["col_a", "col_b"]}
