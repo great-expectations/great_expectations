@@ -1,13 +1,11 @@
 """TODO: Add docstring"""
 
-from typing import Optional, List
+from typing import List, Optional
 
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
-
 from great_expectations.data_context.types.base import DatasourceConfig, GeCloudConfig
-
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -18,8 +16,8 @@ class ConfigurationBundle:
     # TODO: Can we leverage DataContextVariables here?
 
     def __init__(self) -> None:
-        self._datasource_configs = []
-        self._validation_results = []
+        self._datasource_configs: List[DatasourceConfig] = []
+        self._validation_results: List[ExpectationSuiteValidationResult] = []
 
     def build_configuration_bundle(self, context: AbstractDataContext):
         self._datasource_configs = self._get_all_datasource_configs(context)
