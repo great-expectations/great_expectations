@@ -4,6 +4,7 @@ from typing import Optional, List
 
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
 
 from great_expectations.data_context.types.base import DatasourceConfig, GeCloudConfig
 
@@ -13,6 +14,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 
 
 class ConfigurationBundle:
+
+    # TODO: Can we leverage DataContextVariables here?
+
     def __init__(self) -> None:
         self._datasource_configs = []
         self._validation_results = []
@@ -20,6 +24,7 @@ class ConfigurationBundle:
     def build_configuration_bundle(self, context: AbstractDataContext):
         self._datasource_configs = self._get_all_datasource_configs(context)
         self._validation_results = self._get_all_validation_results(context)
+        # TODO: Add other methods to retrieve the rest of the configs
 
     def _get_all_datasource_configs(
         self,
@@ -37,11 +42,6 @@ class ConfigurationBundle:
         pass
 
     # TODO: Add other methods to retrieve the rest of the configs
-
-
-class HTTPResponse:
-    # TODO: Implementation
-    pass
 
 
 class SendValidationResultsErrorDetails:
@@ -93,14 +93,16 @@ class CloudMigrator:
         Returns:
             None
         """
-        cloud_migrator: CloudMigrator = cls(
-            context=context,
-            test_migrate=test_migrate,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-        )
-        cloud_migrator._migrate_to_cloud()
+        raise NotImplementedError("This will be implemented soon!")
+        # This code will be uncommented when the migrator is implemented:
+        # cloud_migrator: CloudMigrator = cls(
+        #     context=context,
+        #     test_migrate=test_migrate,
+        #     ge_cloud_base_url=ge_cloud_base_url,
+        #     ge_cloud_access_token=ge_cloud_access_token,
+        #     ge_cloud_organization_id=ge_cloud_organization_id,
+        # )
+        # cloud_migrator._migrate_to_cloud()
 
     @classmethod
     def migrate_validation_result(
@@ -111,19 +113,22 @@ class CloudMigrator:
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ):
-        pass
+        raise NotImplementedError("This will be implemented soon!")
 
     def _migrate_to_cloud(self):
-        """TODO: This is a rough outline of the steps to take during the migration, verify against the spec."""
-        self._warn_if_test_migrate(self.test_migrate)
+        """TODO: This is a rough outline of the steps to take during the migration, verify against the spec before release."""
+        self._warn_if_test_migrate()
         self._warn_if_usage_stats_disabled()
         configuration_bundle: ConfigurationBundle = self._build_configuration_bundle()
         self._print_configuration_bundle(configuration_bundle)
         if not self.test_migrate:
-            configuration_bundle_response: HTTPResponse = (
-                self._send_configuration_bundle(configuration_bundle)
+            configuration_bundle_response: AnyPayload = self._send_configuration_bundle(
+                configuration_bundle
             )
             self._print_send_configuration_bundle_error(configuration_bundle_response)
+            self._break_for_send_configuration_bundle_error(
+                configuration_bundle_response
+            )
         errors: List[
             SendValidationResultsErrorDetails
         ] = self._send_and_print_validation_results(self.test_migrate)
@@ -158,10 +163,11 @@ class CloudMigrator:
 
         """
         # TODO: Use GECloudEnvironmentVariable enum for environment variables
-        # TODO: Merge with existing logic in Data Context
+        # TODO: Merge with existing logic in Data Context - could be static method on CloudDataContext or
+        #  module level method in cloud_data_context.py Let's not duplicate this code.
         pass
 
-    def _warn_if_test_migrate(self, test_migrate: bool) -> None:
+    def _warn_if_test_migrate(self) -> None:
         pass
 
     def _warn_if_usage_stats_disabled(self) -> None:
@@ -177,18 +183,21 @@ class CloudMigrator:
 
     def _send_configuration_bundle(
         self, configuration_bundle: ConfigurationBundle
-    ) -> HTTPResponse:
+    ) -> AnyPayload:
         pass
 
-    def _print_send_configuration_bundle_error(
-        self, http_response: HTTPResponse
+    def _print_send_configuration_bundle_error(self, http_response: AnyPayload) -> None:
+        pass
+
+    def _break_for_send_configuration_bundle_error(
+        self, http_response: AnyPayload
     ) -> None:
         pass
 
     def _send_and_print_validation_results(
-        self, test_migrate: bool
+        self,
     ) -> List[SendValidationResultsErrorDetails]:
-        # TODO: Uses migrate_validation_result in a loop
+        # TODO: Uses migrate_validation_result in a loop. Only sends if not self.test_migrate
         pass
 
     def _print_validation_result_error_summary(
