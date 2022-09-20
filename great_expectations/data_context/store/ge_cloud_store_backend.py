@@ -151,7 +151,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         suppress_store_backend_id: bool = True,
         manually_initialize_store_backend_id: str = "",
         store_name: Optional[str] = None,
-        http_handler: Optional[HTTPHandler] = None,
     ) -> None:
         super().__init__(
             fixed_length_key=True,
@@ -187,11 +186,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
-        if http_handler is None:
-            http_handler = HTTPHandler(
-                access_token=self._ge_cloud_credentials["access_token"]
-            )
-        self._http_handler = http_handler
+        self._http_handler = HTTPHandler(
+            access_token=self._ge_cloud_credentials["access_token"]
+        )
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
