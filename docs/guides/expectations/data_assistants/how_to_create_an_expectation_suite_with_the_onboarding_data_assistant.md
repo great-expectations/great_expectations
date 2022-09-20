@@ -30,18 +30,24 @@ great_expectations suite new --profile
 ### 1. Prepare your Batch Request
 
 Data Assistants excel at automating the Profiling process across multiple batches. Therefore, for this guide you will
- be using a Batch Request that covers multiple Batches. The Datasource that our Batch Request queries will consist of
- the New York taxi trip data.
+ be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Datasource that our Batch 
+ Request queries will consist of a sample of the New York taxi trip data.
 
-This is the configuration that you will use for your Datasource:
+This is the configuration that you will use for your `Datasource`:
 
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L27-L45
 ```
 
-And this is the configuration that you will use for your Batch Request:
+And this is the configuration that you will use for your `BatchRequest`:
 
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L76-L80
 ```
+
+:::caution
+The Onboarding Data Assistant will run a high volume of queries against your `Datasource`. Data Assistant performance 
+  can vary significantly depending on the number of batches, count of records per batch, and network latency. It is 
+  recommended that you start with a smaller `BatchRequest` if you find that Data Assistant runtimes are long.
+:::
 
 ### 2. Prepare a new Expectation Suite
 
