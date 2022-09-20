@@ -101,10 +101,14 @@ To see a batch-level visualization of each Metric computed by the Onboarding Dat
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L163
 ```
 
+<img src="https://github.com/great-expectations/great_expectations/blob/develop/docs/guides/expectations/data_assistants/plot_metrics.png", title="Plot Metrics">
+
 To see the associated Expectations produced by the Onboarding Data Assistant run:
 
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L168
 ```
+
+<img src="https://github.com/great-expectations/great_expectations/blob/develop/docs/guides/expectations/data_assistants/plot_expectations_and_metrics.png", title="Plot Expectations and Metrics">
 
 ### 7. (Optional) Edit your Expectation Suite, save, and test again.
 
