@@ -18,6 +18,7 @@ from great_expectations.datasource import BaseDatasource, LegacyDatasource
 
 class StubDatasourceStore(DatasourceStore):
     """Used for mocking the set() call."""
+
     def __init__(self):
         pass
 
@@ -72,7 +73,10 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
 
     # Make sure the datasource config got into the context config
     assert len(context.list_datasources()) == 1
-    assert context.config.datasources[datasource_to_save.name] == datasource_config_with_names
+    assert (
+        context.config.datasources[datasource_to_save.name]
+        == datasource_config_with_names
+    )
 
     # Make sure the datasource got into the cache
     assert len(context._cached_datasources) == 1
