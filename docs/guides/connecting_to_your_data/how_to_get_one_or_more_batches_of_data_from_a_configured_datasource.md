@@ -52,9 +52,13 @@ You may also wish to list available batches to verify that your `BatchRequest` i
 
 ### 3. Check your data
 
-You can check that the first few lines of the `Batch` you loaded into your `Validator` are what you expect by running:
+You can check that the `Batch(es)` that were loaded into your `Validator` are what you expect by running:
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L138
+```
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L139
+You can also check that the first few lines of the `Batch(es)` you loaded into your `Validator` are what you expect by running:
+
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L140
 ```
 
 Now that you have a `Validator`, you can use it to create `Expectations` or validate the data.

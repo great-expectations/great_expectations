@@ -135,6 +135,7 @@ context.create_expectation_suite(
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
+print(validator.batches)
 # View the first few lines of the loaded Batches
 print(validator.head())
 
