@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 
 import requests
 
-from great_expectations.core.http_handler import HTTPHandler
+from great_expectations.core.http import session_factory
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -140,7 +140,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
-    DEFAULT_BASE_URL: str = "https://app.greatexpectations.io/"
+    DEFAULT_BASE_URL = "https://app.greatexpectations.io/"
+
+    TIMEOUT = 20
 
     def __init__(
         self,
@@ -186,7 +188,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
-        self._http_handler = HTTPHandler(
+        self._session = session_factory(
             access_token=self._ge_cloud_credentials["access_token"]
         )
 
@@ -214,9 +216,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 params = {"name": key[2]}
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
-            response = self._http_handler.get(
+            response = self._session.get(
                 ge_cloud_url,
                 params=params,
+                timeout=self.TIMEOUT,
             )
             response.raise_for_status()
             return cast(ResponsePayload, response.json())
@@ -270,7 +273,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             url = urljoin(f"{url}/", ge_cloud_id)
 
         try:
-            response = self._http_handler.put(url, json=data)
+            response = self._session.put(url, json=data, timeout=self.TIMEOUT)
             response_status_code = response.status_code
 
             # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
@@ -280,7 +283,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code == 405
                 and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
             ):
-                response = self._http_handler.patch(url, json=data)
+                response = self._session.patch(url, json=data, timeout=self.TIMEOUT)
                 response_status_code = response.status_code
 
             response.raise_for_status()
@@ -359,7 +362,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"organizations/" f"{organization_id}/" f"{hyphen(resource_name)}",
         )
         try:
-            response = self._http_handler.post(url, json=data)
+            response = self._session.post(url, json=data, timeout=self.TIMEOUT)
             response.raise_for_status()
             response_json = response.json()
 
@@ -412,7 +415,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         try:
-            response = self._http_handler.get(url=url)
+            response = self._session.get(url=url, timeout=self.TIMEOUT)
             response.raise_for_status()
             response_json = response.json()
 
