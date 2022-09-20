@@ -51,6 +51,23 @@ validator = context.get_validator(
 )
 assert len(validator.batches) == 36
 
+# Here is an example `data_connector_query` filtering based on an `index` which can be
+# any valid python slice. The example here is retrieving the latest batch using `-1`:
+data_connector_query_last_index = {
+    "index": -1,
+}
+last_index_batch_request = BatchRequest(
+    datasource_name="insert_your_datasource_name_here",
+    data_connector_name="insert_your_data_connector_name_here",
+    data_asset_name="insert_your_data_asset_name_here",
+    data_connector_query=data_connector_query_last_index,
+)
+# NOTE: The following assertion is only for testing and can be ignored by users.
+validator = context.get_validator(
+    batch_request=last_index_batch_request, expectation_suite_name="test_suite"
+)
+assert len(validator.batches) == 1
+
 # This BatchRequest adds a query to retrieve only the twelve batches from 2020
 data_connector_query_2020 = {
     "batch_filter_parameters": {"group_name_from_your_data_connector_eg_year": "2020"}
@@ -107,35 +124,17 @@ validator = context.get_validator(
 )
 assert len(validator.batches) == 1
 
-
-# Here is an example `data_connector_query` filtering based on an `index` which can be
-# any valid python slice. The example here is retrieving the latest batch using `-1`:
-data_connector_query_last_index = {
-    "index": -1,
-}
-last_index_batch_request = BatchRequest(
-    datasource_name="insert_your_datasource_name_here",
-    data_connector_name="insert_your_data_connector_name_here",
-    data_asset_name="insert_your_data_asset_name_here",
-    data_connector_query=data_connector_query_last_index,
-)
-# NOTE: The following assertion is only for testing and can be ignored by users.
-validator = context.get_validator(
-    batch_request=batch_request_202001, expectation_suite_name="test_suite"
-)
-assert len(validator.batches) == 1
+# List all Batches retrieved by the Batch Request
+batch_list = context.get_batch_list(batch_request=batch_request)
 
 # Now we can review a sample of data using a Validator
-
-# First create an expectation suite to use with our validator
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
-# Now create our validator
 validator = context.get_validator(
-    batch_request=last_index_batch_request, expectation_suite_name="test_suite"
+    batch_request=batch_request, expectation_suite_name="test_suite"
 )
-# View the first few lines of the loaded Batch
+# View the first few lines of the loaded Batches
 print(validator.head())
 
 
