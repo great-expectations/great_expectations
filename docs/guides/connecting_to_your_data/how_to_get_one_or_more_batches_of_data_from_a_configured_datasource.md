@@ -45,7 +45,7 @@ You may also wish to list available batches to verify that your `BatchRequest` i
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L129
 ```
 
-### 2. Get access to your Batch via a Validator
+### 2. Get access to your Batches via a Validator
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L131-L137
 ```
