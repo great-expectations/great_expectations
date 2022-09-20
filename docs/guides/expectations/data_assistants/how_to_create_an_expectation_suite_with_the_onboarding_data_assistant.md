@@ -103,12 +103,18 @@ To see a batch-level visualization of each Metric computed by the Onboarding Dat
 
 ![Plot Metrics](../../../images/data_assistant_plot_metrics.png)
 
-To see the associated Expectations produced by the Onboarding Data Assistant run:
+Hovering over a data point will provide more information about the batch and its calculated Metric value.
+
+To see the Expectations produced, and the associated Metrics calculated by the Onboarding Data Assistant run:
 
 ```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L168
 ```
 
 ![Plot Expectations and Metrics](../../../images/data_assistant_plot_expectations_and_metrics.png)
+
+:::note
+If no Expectation was produced by the Data Assistant for a given Metric, it will not be visualized by the `plot_expectations_and_metrics()` method.
+:::
 
 ### 7. (Optional) Edit your Expectation Suite, save, and test again.
 
