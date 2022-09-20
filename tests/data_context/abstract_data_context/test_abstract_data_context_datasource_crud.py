@@ -67,7 +67,7 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
     mock_set.assert_called_once()
 
     # Make sure the datasource config got into the context config
-    assert len(context.config.datasources) == 1  # type: ignore[arg-type]
+    assert len(context.list_datasources()) == 1
     assert context.config.datasources[datasource_to_save.name] == datasource_config_with_names  # type: ignore[index]
 
     # Make sure the datasource got into the cache
@@ -80,6 +80,34 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
 
 @pytest.mark.unit
 def test_save_datasource_overwrites_on_name_collision(
-    datasource_config_with_names: DatasourceConfig,
+    datasource_config_with_names: DatasourceConfig
 ):
-    pass
+
+    context = FakeAbstractDataContext()
+    # Make sure the fixture has the right configuration
+    assert len(context.list_datasources()) == 0
+
+    # add_datasource used to create a datasource object for use in save_datasource
+    datasource_to_save = context.add_datasource(
+        **datasource_config_with_names.to_json_dict(), save_changes=False
+    )
+
+    with mock.patch(
+        "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
+        autospec=True,
+        return_value=datasource_config_with_names,
+    ) as mock_set:
+
+        context.save_datasource(datasource_to_save)
+
+        assert len(context.list_datasources()) == 1
+        assert len(context._cached_datasources) == 1
+
+        # Let's re-save
+        context.save_datasource(datasource_to_save)
+
+        # Make sure we still only have 1 datasource
+        assert len(context.list_datasources()) == 1
+        assert len(context._cached_datasources) == 1
+
+    assert mock_set.call_count == 2
