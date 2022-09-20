@@ -59,8 +59,9 @@ data_connectors:
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
-      {schema_name}.{table_name}:
+      {table_name}:
         class_name: Asset
+        schema_name: {schema_name}
 """'''
     )
 
@@ -112,8 +113,9 @@ data_connectors:
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
-      {schema_name}.{table_name}:
+      {table_name}:
         class_name: Asset
+        schema_name: {schema_name}
 """'''
     )
 
@@ -165,8 +167,9 @@ data_connectors:
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
-      {schema_name}.{table_name}:
+      {table_name}:
         class_name: Asset
+        schema_name: {schema_name}
 """'''
     )
 
@@ -234,8 +237,9 @@ data_connectors:
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
-      {schema_name}.{table_name}:
+      {table_name}:
         class_name: Asset
+        schema_name: {schema_name}
 """'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -303,8 +307,8 @@ data_connectors:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
       {table_name}:
-        schema_name: {schema_name}
         class_name: Asset
+        schema_name: {schema_name}
 """'''
     )
 
@@ -382,8 +386,9 @@ data_connectors:
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
-      {schema_name}.{table_name}:
+      {table_name}:
         class_name: Asset
+        schema_name: {schema_name}
 """'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -446,8 +451,9 @@ data_connectors:
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
-      {schema_name}.{table_name}:
+      {table_name}:
         class_name: Asset
+        schema_name: {schema_name}
 """'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -511,8 +517,9 @@ data_connectors:
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
-      {schema_name}.{table_name}:
+      {table_name}:
         class_name: Asset
+        schema_name: {schema_name}
 """'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -575,8 +582,9 @@ data_connectors:
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
-      {schema_name}.{table_name}:
+      {table_name}:
         class_name: Asset
+        schema_name: {schema_name}
 """'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -629,8 +637,9 @@ data_connectors:
   default_configured_data_connector_name:
     class_name: ConfiguredAssetSqlDataConnector
     assets:
-      {schema_name}.{table_name}:
+      {table_name}:
         class_name: Asset
+        schema_name: {schema_name}
 """'''
     )
 
