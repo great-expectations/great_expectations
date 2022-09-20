@@ -1,24 +1,27 @@
-from typing import Union, Optional
+from typing import Optional, Union
 from unittest import mock
 
 import pytest
-from great_expectations.data_context.data_context_variables import EphemeralDataContextVariables, DataContextVariables
-
-from great_expectations.data_context.store import DatasourceStore
-
-from great_expectations.datasource import LegacyDatasource, BaseDatasource, Datasource
-
-from great_expectations.data_context.types.base import DatasourceConfig, DataContextConfig
 
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariables,
+    EphemeralDataContextVariables,
+)
+from great_expectations.data_context.store import DatasourceStore
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    DatasourceConfig,
+)
+from great_expectations.datasource import BaseDatasource, LegacyDatasource
 
 
 class StubDatasourceStore(DatasourceStore):
     def __init__(self):
         pass
 
-class FakeAbstractDataContext(AbstractDataContext):
 
+class FakeAbstractDataContext(AbstractDataContext):
     def __init__(self):
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
@@ -39,7 +42,6 @@ class FakeAbstractDataContext(AbstractDataContext):
         pass
 
 
-
 @pytest.mark.unit
 def test_save_datasource_empty_store(datasource_config_with_names: DatasourceConfig):
 
@@ -48,7 +50,9 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
     assert len(context.list_datasources()) == 0
 
     # add_datasource used to create a datasource object for use in save_datasource
-    datasource_to_save = context.add_datasource(**datasource_config_with_names.to_json_dict(), save_changes=False)
+    datasource_to_save = context.add_datasource(
+        **datasource_config_with_names.to_json_dict(), save_changes=False
+    )
 
     with mock.patch(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
@@ -75,5 +79,7 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
 
 
 @pytest.mark.unit
-def test_save_datasource_overwrites_on_name_collision(datasource_config_with_names: DatasourceConfig):
+def test_save_datasource_overwrites_on_name_collision(
+    datasource_config_with_names: DatasourceConfig,
+):
     pass

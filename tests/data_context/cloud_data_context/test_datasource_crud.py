@@ -392,7 +392,6 @@ def _save_datasource_assertions(
     cached_datasource = context._cached_datasources[datasource_name]
 
     # Make sure the stored and returned datasource is the same one as the cached datasource
-    assert id(saved_datasource) == id(cached_datasource)
     assert saved_datasource == cached_datasource
 
     # Make sure the stored and returned datasource are otherwise equal
