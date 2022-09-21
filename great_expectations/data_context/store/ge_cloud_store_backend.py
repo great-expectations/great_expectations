@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 
 import requests
 
-from great_expectations.core.http import session_factory
+from great_expectations.core.http import create_session
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -186,7 +186,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
-        self._session = session_factory(
+        self._session = create_session(
             access_token=self._ge_cloud_credentials["access_token"]
         )
 

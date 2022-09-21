@@ -6,24 +6,22 @@ from great_expectations import __version__
 DEFAULT_TIMEOUT = 20
 
 
-class TimeoutHTTPAdapter(HTTPAdapter):
+class _TimeoutHTTPAdapter(HTTPAdapter):
     # https://stackoverflow.com/a/62044100
     # Session-wide timeouts are not supported by requests
     # but are discussed in detail here: https://github.com/psf/requests/issues/3070
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
+        self.timeout = DEFAULT_TIMEOUT
         if "timeout" in kwargs:
-            self.timeout = kwargs["timeout"]
-            del kwargs["timeout"]
+            self.timeout = kwargs.pop("timeout")
         super().__init__(*args, **kwargs)
 
-    def send(self, request, **kwargs):
-        timeout = kwargs.get("timeout")
-        if timeout is None:
-            kwargs["timeout"] = self.timeout
+    def send(self, request: requests.PreparedRequest, **kwargs) -> requests.Response:
+        kwargs["timeout"] = kwargs.get("timeout", self.timeout)
         return super().send(request, **kwargs)
 
 
-def session_factory(
+def create_session(
     access_token: str,
     retry_count: int = 5,
     backoff_factor: float = 1.0,
@@ -54,7 +52,7 @@ def _mount_adapter(
     session: requests.Session, timeout: int, retry_count: int, backoff_factor: float
 ) -> requests.Session:
     retries = Retry(total=retry_count, backoff_factor=backoff_factor)
-    adapter = TimeoutHTTPAdapter(timeout=timeout, max_retries=retries)
+    adapter = _TimeoutHTTPAdapter(timeout=timeout, max_retries=retries)
     for protocol in ("http://", "https://"):
         session.mount(protocol, adapter)
     return session
