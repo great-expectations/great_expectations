@@ -486,6 +486,33 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
     )
 
 
+def datetime_semantic_domain_type(domain: Domain) -> bool:
+    """
+    This method examines "INFERRED_SEMANTIC_TYPE_KEY" attribute of "Domain" argument to check whether or not underlying
+    "SemanticDomainTypes" enum value is "SemanticDomainTypes.DATETIME".
+
+    Note: Inability to assess underlying "SemanticDomainTypes" details of "Domain" object produces "False" return value.
+
+    Args:
+        domain: "Domain" object to inspect for underlying "SemanticDomainTypes" details
+
+    Returns:
+        Boolean value indicating whether or not specified "Domain" is inferred as "SemanticDomainTypes.DATETIME"
+    """
+
+    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
+        INFERRED_SEMANTIC_TYPE_KEY
+    )
+
+    semantic_domain_type: SemanticDomainTypes
+    return inferred_semantic_domain_type and all(
+        [
+            semantic_domain_type == SemanticDomainTypes.DATETIME
+            for semantic_domain_type in inferred_semantic_domain_type.values()
+        ]
+    )
+
+
 def get_false_positive_rate_from_rule_state(
     false_positive_rate: Union[str, float],
     domain: Domain,
