@@ -105,7 +105,6 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     mocked_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     """
     What does this test do and why?
@@ -138,14 +137,12 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
                 "type": "profiler",
             },
         },
-        **shared_called_with_request_kwargs,
     )
 
     mock_get.assert_called_once_with(
         mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
         params=None,
-        **shared_called_with_request_kwargs,
     )
 
     assert return_profiler.ge_cloud_id == profiler_with_id.ge_cloud_id
@@ -161,7 +158,6 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     mocked_post_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     """
     What does this test do and why?
@@ -194,14 +190,12 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
                 },
             },
         },
-        **shared_called_with_request_kwargs,
     )
 
     mock_get.assert_called_once_with(
         mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
         params=None,
-        **shared_called_with_request_kwargs,
     )
 
     assert return_profiler.ge_cloud_id == profiler_id

@@ -154,7 +154,6 @@ def test_cloud_backed_data_context_add_checkpoint(
     checkpoint_config: dict,
     mocked_post_response: Callable[[], MockResponse],
     mocked_get_response: Callable[[], MockResponse],
-    shared_called_with_request_kwargs: dict,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     request,
@@ -195,14 +194,12 @@ def test_cloud_backed_data_context_add_checkpoint(
                     },
                 },
             },
-            **shared_called_with_request_kwargs,
         )
 
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
             params={"name": checkpoint_config["name"]},
-            **shared_called_with_request_kwargs,
         )
 
     assert checkpoint.ge_cloud_id == checkpoint_id
@@ -243,7 +240,6 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
     mocked_post_response: Callable[[], MockResponse],
     mocked_put_response: Callable[[], MockResponse],
     mocked_get_response: Callable[[], MockResponse],
-    shared_called_with_request_kwargs: dict,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     request,
@@ -284,7 +280,6 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
                     },
                 },
             },
-            **shared_called_with_request_kwargs,
         )
 
         # Always called by store after POST and PATCH calls
@@ -293,7 +288,6 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
             mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
             params={"name": checkpoint_config["name"]},
-            **shared_called_with_request_kwargs,
         )
 
         expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
@@ -312,7 +306,6 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
                     "id": checkpoint_id,
                 },
             },
-            **shared_called_with_request_kwargs,
         )
 
     assert checkpoint_1.ge_cloud_id == checkpoint_2.ge_cloud_id

@@ -54,7 +54,6 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ):
     """A BaseDataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource
     with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response
@@ -129,7 +128,6 @@ def test_base_data_context_in_cloud_mode_add_datasource(
                         },
                     }
                 },
-                **shared_called_with_request_kwargs,
             )
         else:
             assert not mock_post.called
@@ -176,7 +174,6 @@ def test_data_context_in_cloud_mode_add_datasource(
     mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ):
     """A DataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
     to create the datasource."""
@@ -247,7 +244,6 @@ def test_data_context_in_cloud_mode_add_datasource(
                     },
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
         data_connector_name = tuple(stored_datasource.data_connectors.keys())[0]
@@ -288,7 +284,6 @@ def test_cloud_data_context_add_datasource(
     mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ):
     """A CloudDataContext should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
     to create the datasource."""
@@ -362,7 +357,6 @@ def test_cloud_data_context_add_datasource(
                     },
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
         data_connector_name = tuple(stored_datasource.data_connectors.keys())[0]

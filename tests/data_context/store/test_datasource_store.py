@@ -187,7 +187,6 @@ def test_datasource_store_set_cloud_mode(
     ge_cloud_base_url: str,
     ge_cloud_access_token: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     ge_cloud_store_backend_config: dict = {
         "class_name": "GeCloudStoreBackend",
@@ -233,7 +232,6 @@ def test_datasource_store_set_cloud_mode(
                     },
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
         json_serializer = JsonDatasourceConfigSerializer(schema=datasourceConfigSchema)

@@ -50,7 +50,6 @@ def test_set(
     construct_ge_cloud_store_backend: Callable[
         [GeCloudRESTResource], GeCloudStoreBackend
     ],
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
 
@@ -97,7 +96,6 @@ def test_set(
                     },
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
 
@@ -107,7 +105,6 @@ def test_list_keys(
     construct_ge_cloud_store_backend: Callable[
         [GeCloudRESTResource], GeCloudStoreBackend
     ],
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
 
@@ -116,7 +113,6 @@ def test_list_keys(
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            **shared_called_with_request_kwargs,
         )
 
 
@@ -126,7 +122,6 @@ def test_remove_key(
     construct_ge_cloud_store_backend: Callable[
         [GeCloudRESTResource], GeCloudStoreBackend
     ],
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
 
@@ -152,7 +147,6 @@ def test_remove_key(
                     "attributes": {"deleted": True},
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
 

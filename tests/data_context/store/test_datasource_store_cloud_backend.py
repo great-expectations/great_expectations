@@ -22,7 +22,6 @@ from tests.data_context.conftest import MockResponse
 def test_datasource_store_set(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
     datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
@@ -68,7 +67,6 @@ def test_datasource_store_set(
                 },
             }
         },
-        **shared_called_with_request_kwargs,
     )
 
     assert serializer.serialize(saved_datasource_config) == serializer.serialize(
@@ -81,7 +79,6 @@ def test_datasource_store_set(
 def test_datasource_store_get_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
     datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
@@ -118,7 +115,6 @@ def test_datasource_store_get_by_id(
             mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id}",
             params=None,
-            **shared_called_with_request_kwargs,
         )
 
 
@@ -127,7 +123,6 @@ def test_datasource_store_get_by_id(
 def test_datasource_store_get_by_name(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
     datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
@@ -167,7 +162,6 @@ def test_datasource_store_get_by_name(
             mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             params={"name": datasource_name},
-            **shared_called_with_request_kwargs,
         )
 
 
@@ -176,7 +170,6 @@ def test_datasource_store_get_by_name(
 def test_datasource_store_delete_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
     """What does this test and why?
@@ -204,7 +197,6 @@ def test_datasource_store_delete_by_id(
                     "attributes": {"deleted": True},
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
 

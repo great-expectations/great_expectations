@@ -534,15 +534,6 @@ def datasource_config_with_names_and_ids(
 
 
 @pytest.fixture
-def shared_called_with_request_kwargs(request_headers) -> dict:
-    """
-    Standard request kwargs that all GeCloudStoreBackend http calls are made with.
-    Use in combination with `assert_called_with()`
-    """
-    return dict(timeout=GeCloudStoreBackend.TIMEOUT)
-
-
-@pytest.fixture
 def mock_http_unavailable(mock_response_factory: Callable):
     """Mock all request http calls to return a 503 Unavailable response."""
 
