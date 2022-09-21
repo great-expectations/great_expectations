@@ -1,8 +1,6 @@
 ---
 id: data_assistant
-title: Data Assistant 
-hoverText: A utility for introspecting one or more Batches and creating
-Expectations from the result.
+title: Data Assistant
 ---
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
