@@ -12,7 +12,7 @@ makefun>=1.7.0,<2
 marshmallow>=3.7.1,<4.0.0
 mistune>=0.8.4
 nbformat>=5.0
-notebook>=6.1
+notebook>=6.1,<6.4.2
 numpy>=1.18.5
 packaging
 pandas>=1.1.0
