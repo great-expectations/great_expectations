@@ -83,7 +83,7 @@ class OnboardingDataAssistant(DataAssistant):
 
     By default the estimation will be done by the `exact` estimator by default, which takes in the values across all Batches in the batch list (in our example 12 months of data from 2019).
 
-    If you do `data_assistant.run()` with the `estimator` parameter set to `drop_outliers` then `bootstrapping` will be done done behind-the-scenes to estimate outliers.
+    If you do `data_assistant.run()` with the `estimator` parameter set to `flag_outliers` then `bootstrapping` will be done done behind-the-scenes to estimate outliers.
 
     The parameters for `bootstrapping` are:
 
@@ -116,7 +116,7 @@ class OnboardingDataAssistant(DataAssistant):
     * `expect_column_max_to_be_between`
     * `expect_column_values_to_be_between`
 
-    Estimation will be done using the `exact` estimator by default, but if you select `drop_outliers` then `bootstrapping` will use the following parameters:
+    Estimation will be done using the `exact` estimator by default, but if you select `flag_outliers` then `bootstrapping` will use the following parameters:
 
     * `n_resamples` : For bootstrapping. It is set by default to `9999` which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
     * `false_positive_rate`: user-configured fraction between 0 and 1 expressing desired false positive rate for
@@ -135,7 +135,7 @@ class OnboardingDataAssistant(DataAssistant):
 
     For `expect_column_value_lengths_to_be_between` will have the parameters `min_value` and `max_value` estimated.
 
-    Estimation will be done using the `exact` estimator by default, but if you select `drop_outliers` then the following parameters are set by default for `bootstrap` estimation
+    Estimation will be done using the `exact` estimator by default, but if you select `flag_outliers` then the following parameters are set by default for `bootstrap` estimation
 
     * `n_resamples` : For bootstrapping. It is set by default to `9999` which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
     * `false_positive_rate`: user-configured fraction between 0 and 1 expressing desired false positive rate for
@@ -182,20 +182,15 @@ class OnboardingDataAssistant(DataAssistant):
     Great Expectations gets around this by only building the unique value set for columns that have less than a certain number of unique values, which is determined by the cardinality threshold. The default threshold is `FEW` which means Great Expectations will generate parameters for `expect_column_values_to_be_in_set()` for columns where the number of unique values are less than or equal to 100.
 
     Other values for cardinality values include:
-
-    ```python
-    ZERO = AbsoluteCardinalityLimit("ZERO", 0)
-    ONE = AbsoluteCardinalityLimit("ONE", 1)
-    TWO = AbsoluteCardinalityLimit("TWO", 2)
-    VERY_FEW = AbsoluteCardinalityLimit("VERY_FEW", 10)
-    FEW = AbsoluteCardinalityLimit("FEW", 100)
-    SOME = AbsoluteCardinalityLimit("SOME", 1000)
-    MANY = AbsoluteCardinalityLimit("MANY", 10000)
-    VERY_MANY = AbsoluteCardinalityLimit("VERY_MANY", 100000)
-    UNIQUE = RelativeCardinalityLimit("UNIQUE", 1.0)
-
-    ... # and more
-    ```
+        ZERO = AbsoluteCardinalityLimit("ZERO", 0)
+        ONE = AbsoluteCardinalityLimit("ONE", 1)
+        TWO = AbsoluteCardinalityLimit("TWO", 2)
+        VERY_FEW = AbsoluteCardinalityLimit("VERY_FEW", 10)
+        FEW = AbsoluteCardinalityLimit("FEW", 100)
+        SOME = AbsoluteCardinalityLimit("SOME", 1000)
+        MANY = AbsoluteCardinalityLimit("MANY", 10000)
+        VERY_MANY = AbsoluteCardinalityLimit("VERY_MANY", 100000)
+        UNIQUE = RelativeCardinalityLimit("UNIQUE", 1.0)
 
     The full list of cardinality values used by Great Expectations can be found in the [great_expectations repo here](https://github.com/great-expectations/great_expectations/blob/da2376b613843844afc041538269bb7683444b1f/great_expectations/rule_based_profiler/helpers/cardinality_checker.py#L55).
 
@@ -205,7 +200,7 @@ class OnboardingDataAssistant(DataAssistant):
 
     `expect_column_unique_value_count_to_be_between` has `column` (column name) and `min_value` and `max_value`.
 
-    Estimation will be done using the `exact` estimator by default, but if you select `drop_outliers` then the following parameters are set by default for `bootstrap` estimation
+    Estimation will be done using the `exact` estimator by default, but if you select `flag_outliers` then the following parameters are set by default for `bootstrap` estimation
 
     * `n_resamples` : For bootstrapping. It is set by default to `9999` which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
     * `false_positive_rate`: user-configured fraction between 0 and 1 expressing desired false positive rate for
@@ -220,7 +215,7 @@ class OnboardingDataAssistant(DataAssistant):
     * `strict_min`: determine whether the minimum proportion of unique values must be strictly greater than min value, with the `default=False`
     * `strict_max`: determine whether the minimum proportion of unique values must be strictly smaller than max value, with the `default=False`
 
-    Estimation will be done using the `exact` estimator by default, but if you select `drop_outliers` then the following parameters are set by default for `bootstrap` estimation
+    Estimation will be done using the `exact` estimator by default, but if you select `flag_outliers` then the following parameters are set by default for `bootstrap` estimation
 
     * `n_resamples` : For bootstrapping. It is set by default to `9999` which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
     * `false_positive_rate`: user-configured fraction between 0 and 1 expressing desired false positive rate for
