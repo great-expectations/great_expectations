@@ -11,7 +11,7 @@ import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 
 ### Definition
 
-A Data Assistant is a utility that asks questions about your data, gathering Metrics to describe what is observed in the dataset, and then proposes Expectations based on the answers.
+A Data Assistant is a utility that asks questions about your data, gathering information to describe what is observed, and then presents Metrics and proposes Expectations based on the answers.
 
 ### Features and promises
 
