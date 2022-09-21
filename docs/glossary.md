@@ -19,7 +19,7 @@ title: "Glossary of Terms"
 
 [**Data Asset:**](./terms/data_asset.md) A collection of records within a Datasource which is usually named based on the underlying data system and sliced to correspond to a desired specification.
 
-[**Data Assistant**](./terms/data_assistant.md) A utility for introspecting one or more Batches and creating Expectations from the result.
+[**Data Assistant:**](./terms/data_assistant.md) A utility that asks questions about your data — gathering Metrics to describe what is observed in the dataset — and then proposes Expectations based on the answers.
 
 [**Data Connector:**](./terms/data_connector.md) Provides the configuration details based on the source data system which are needed by a Datasource to define Data Assets.
 
