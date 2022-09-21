@@ -22,7 +22,7 @@ class ConfigurationBundle:
 
         self._data_context_config: DataContextConfig = context.project_config_with_variables_substituted
 
-        self._expectations: List[ExpectationSuite] = self._get_all_expectation_suites(context)
+        self._expectation_suites: List[ExpectationSuite] = self._get_all_expectation_suites(context)
         self._checkpoints: List[CheckpointConfig] = self._get_all_checkpoints(context)
         self._profilers: List[RuleBasedProfilerConfig] = self._get_all_profilers(context)
         self._validation_results: List[ExpectationSuiteValidationResult] = self._get_all_validation_results(context)
