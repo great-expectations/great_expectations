@@ -89,7 +89,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 temp_column, min_value, max_value, strict_min, strict_max
             )
         elif (
-            column.dtype == np.dtype("datetime64[ns]")
+            isinstance(column.dtype, pd.DatetimeTZDtype)
             and not allow_cross_type_comparisons
         ):
             # NOTE: 20220818 - JPC
