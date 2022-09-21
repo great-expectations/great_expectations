@@ -30,7 +30,7 @@ from inspect import (
 from numbers import Number
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -1556,7 +1556,68 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
-def get_context():
+def get_context(
+    context_root_dir: Optional[str] = None,
+    runtime_environment: Optional[dict] = None,
+    project_config: Optional[Any] = None,
+    ge_cloud_mode: bool = False,
+    ge_cloud_base_url: Optional[str] = None,
+    ge_cloud_access_token: Optional[str] = None,
+    ge_cloud_organization_id: Optional[str] = None,
+    ge_cloud_config: Optional[Any] = None,
+):
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        GeCloudConfig,
+    )
+
+    if (
+        all(
+            [
+                context_root_dir,
+                runtime_environment,
+                project_config,
+                ge_cloud_mode,
+                ge_cloud_base_url,
+                ge_cloud_access_token,
+                ge_cloud_organization_id,
+            ]
+        )
+        is None
+    ):
+        from great_expectations.data_context.data_context import DataContext
+
+        return DataContext()
+    elif context_root_dir:
+        from great_expectations.data_context.data_context import FileDataContext
+
+        return FileDataContext(  # type: ignore[assignment]
+            project_config=project_config,
+            context_root_dir=context_root_dir,  # type: ignore[arg-type]
+            runtime_environment=runtime_environment,
+        )
+    elif ge_cloud_mode:
+        from great_expectations.data_context.data_context import CloudDataContext
+
+        return CloudDataContext(
+            project_config=project_config,
+            runtime_environment=runtime_environment,
+            context_root_dir=context_root_dir,  # type: ignore[arg-type]
+            ge_cloud_config=ge_cloud_config,  # type: ignore[assignment,arg-type]
+        )
+    else:
+        # this is going to be BaseDataContext for now
+        # until we can pull out EphemeralDataContext
+        # this will become
+        # return EphemeralDataContext(project_config=project_config, runtime_environment=runtime_environment)
+        from great_expectations.data_context.data_context import BaseDataContext
+
+        return BaseDataContext(  # type: ignore[assignment]
+            project_config=project_config, runtime_environment=runtime_environment
+        )
+
+
+def get_context_old():
     from great_expectations.data_context.data_context import DataContext
 
     return DataContext()

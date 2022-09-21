@@ -284,7 +284,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             runtime_environment: a dictionary of config variables that
                 override both those set in config_variables.yml and the environment
             ge_cloud_mode: boolean flag that describe whether DataContext is being instantiated by ge_cloud
-           ge_cloud_config: config for ge_cloud
+            ge_cloud_config: config for ge_cloud
         Returns:
             None
         """
