@@ -11,7 +11,6 @@ jsonschema>=2.5.1
 makefun>=1.7.0,<2
 marshmallow>=3.7.1,<4.0.0
 mistune>=0.8.4
-nbconvert>=6.4.5,<7.0.0
 nbformat>=5.0
 notebook>=6.1
 numpy>=1.18.5
