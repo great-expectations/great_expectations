@@ -415,7 +415,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         try:
-            response = self._session.get(url=url, timeout=self.TIMEOUT)
+            response = self._session.get(url, timeout=self.TIMEOUT)
             response.raise_for_status()
             response_json = response.json()
 
