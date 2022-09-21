@@ -76,7 +76,7 @@ To take advantage of the multi-batch awareness of Data Assistants, your Datasour
 - [How to configure a SQL Datasource](../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
 
 For guidance on how to request multiple Batches in a single Batch Request, please see the guide:
-- [How to get one or more Batches of data from a configured Datasource]
+- [How to get one or more Batches of data from a configured Datasource](../guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 
 For an overview of working with the Onboarding Data Assistant, please see the guide:
 - [How to create an Expectation Suite with the Onboarding Data Assistant](../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
