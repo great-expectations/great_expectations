@@ -1,7 +1,7 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
-from typing import TYPE_CHECKING, Callable, Tuple, Type, Union
-from unittest.mock import patch
+from typing import TYPE_CHECKING, Callable, Tuple, Union
+from unittest import mock
 
 import pytest
 
@@ -79,10 +79,14 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
-    with patch(
-        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
-    ) as mock_post, patch(
-        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    with mock.patch(
+        "requests.Session.post",
+        autospec=True,
+        side_effect=mocked_datasource_post_response,
+    ) as mock_post, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_datasource_get_response,
     ):
 
         # Call add_datasource with and without the name field included in the datasource config
@@ -122,6 +126,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
         # It should have been called with the datasource name in the config.
         if save_changes:
             mock_post.assert_called_with(
+                mock.ANY,  # requests.Session object
                 f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
                 json={
                     "data": {
@@ -195,10 +200,14 @@ def test_data_context_in_cloud_mode_add_datasource(
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
-    with patch(
-        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
-    ) as mock_post, patch(
-        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    with mock.patch(
+        "requests.Session.post",
+        autospec=True,
+        side_effect=mocked_datasource_post_response,
+    ) as mock_post, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_datasource_get_response,
     ):
 
         # Call add_datasource with and without the name field included in the datasource config
@@ -235,6 +244,7 @@ def test_data_context_in_cloud_mode_add_datasource(
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
         mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {
@@ -302,10 +312,14 @@ def test_cloud_data_context_add_datasource(
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
-    with patch(
-        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
-    ) as mock_post, patch(
-        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    with mock.patch(
+        "requests.Session.post",
+        autospec=True,
+        side_effect=mocked_datasource_post_response,
+    ) as mock_post, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_datasource_get_response,
     ):
 
         # Call add_datasource with and without the name field included in the datasource config
@@ -345,6 +359,7 @@ def test_cloud_data_context_add_datasource(
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
         mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {
@@ -428,7 +443,7 @@ def test_non_cloud_backed_data_context_save_datasource_empty_store(
         datasource_config_with_names
     )
 
-    with patch(
+    with mock.patch(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names,
@@ -497,7 +512,7 @@ def test_non_cloud_backed_data_context_save_datasource_overwrite_existing(
     assert tuple(pre_update_datasource.data_connectors.keys())[0] == data_connector_name
 
     # 3. Make sure no exceptions are raised when saving.
-    with patch(
+    with mock.patch(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names_modified,
@@ -544,7 +559,7 @@ def test_cloud_data_context_save_datasource_empty_store(
     )
     data_connector_name: str = tuple(datasource_to_save.data_connectors.keys())[0]
 
-    with patch(
+    with mock.patch(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names_and_ids,

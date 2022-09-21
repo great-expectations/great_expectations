@@ -1,7 +1,7 @@
 import copy
 import pathlib
 from typing import Callable, List, Optional, cast
-from unittest.mock import patch
+from unittest import mock
 
 import pytest
 
@@ -206,10 +206,14 @@ def test_datasource_store_set_cloud_mode(
         serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
     )
 
-    with patch(
-        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
-    ) as mock_post, patch(
-        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    with mock.patch(
+        "requests.Session.post",
+        autospec=True,
+        side_effect=mocked_datasource_post_response,
+    ) as mock_post, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_datasource_get_response,
     ):
 
         retrieved_datasource_config = store.set(key=None, value=datasource_config)
@@ -218,6 +222,7 @@ def test_datasource_store_set_cloud_mode(
         expected_datasource_config = serializer.serialize(datasource_config)
 
         mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {

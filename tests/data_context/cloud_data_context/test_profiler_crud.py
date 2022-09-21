@@ -115,8 +115,8 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     """
     context = empty_base_data_context_in_cloud_mode
 
-    with mock.patch("requests.put", autospec=True) as mock_put, mock.patch(
-        "requests.get", autospec=True, side_effect=mocked_get_response
+    with mock.patch("requests.Session.put", autospec=True) as mock_put, mock.patch(
+        "requests.Session.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
         return_profiler = context.save_profiler(profiler=profiler_with_id)
 
@@ -126,6 +126,7 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     )
 
     mock_put.assert_called_once_with(
+        mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
         json={
             "data": {
@@ -141,6 +142,7 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     )
 
     mock_get.assert_called_once_with(
+        mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
         params=None,
         **shared_called_with_request_kwargs,
@@ -170,9 +172,9 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     context = empty_base_data_context_in_cloud_mode
 
     with mock.patch(
-        "requests.post", autospec=True, side_effect=mocked_post_response
+        "requests.Session.post", autospec=True, side_effect=mocked_post_response
     ) as mock_post, mock.patch(
-        "requests.get", autospec=True, side_effect=mocked_get_response
+        "requests.Session.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
         return_profiler = context.save_profiler(profiler=profiler_without_id)
 
@@ -181,6 +183,7 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     )
 
     mock_post.assert_called_once_with(
+        mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers",
         json={
             "data": {
@@ -195,6 +198,7 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     )
 
     mock_get.assert_called_once_with(
+        mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
         params=None,
         **shared_called_with_request_kwargs,
@@ -359,7 +363,7 @@ def test_list_profilers(
     profiler_name_1, profiler_id_1 = profiler_1
     profiler_name_2, profiler_id_2 = profiler_2
 
-    with mock.patch("requests.get", autospec=True) as mock_get:
+    with mock.patch("requests.Session.get", autospec=True) as mock_get:
         mock_get.return_value = mock.Mock(
             status_code=200, json=lambda: mock_get_all_profilers_json
         )
