@@ -2,10 +2,13 @@
 
 from typing import List, Optional
 
-from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+
+from great_expectations.core import ExpectationSuiteValidationResult, ExpectationSuite
+from great_expectations.data_context import AbstractDataContext, BaseDataContext
 from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
-from great_expectations.data_context.types.base import DatasourceConfig, GeCloudConfig
+from great_expectations.data_context.types.base import DatasourceConfig, GeCloudConfig, DataContextConfig, \
+    CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -15,31 +18,44 @@ class ConfigurationBundle:
 
     # TODO: Can we leverage DataContextVariables here?
 
-    def __init__(self) -> None:
-        self._datasource_configs: List[DatasourceConfig] = []
-        self._validation_results: List[ExpectationSuiteValidationResult] = []
+    def __init__(self, context: BaseDataContext) -> None:
 
-    def build_configuration_bundle(self, context: AbstractDataContext):
-        self._datasource_configs = self._get_all_datasource_configs(context)
-        self._validation_results = self._get_all_validation_results(context)
-        # TODO: Add other methods to retrieve the rest of the configs
+        self._data_context_config: DataContextConfig = context.project_config_with_variables_substituted
 
-    def _get_all_datasource_configs(
-        self,
-        context: AbstractDataContext,
-    ) -> List[DatasourceConfig]:
-        return [
-            DatasourceConfig(**datasource_config_dict)
-            for datasource_config_dict in context.list_datasources()
-        ]
+        self._expectations: List[ExpectationSuite] = self._get_all_expectation_suites(context)
+        self._checkpoints: List[CheckpointConfig] = self._get_all_checkpoints(context)
+        self._profilers: List[RuleBasedProfilerConfig] = self._get_all_profilers(context)
+        self._validation_results: List[ExpectationSuiteValidationResult] = self._get_all_validation_results(context)
+
+    def is_usage_statistics_key_set(self, context: BaseDataContext) -> bool:
+        # TODO: Is this needed and if so should it be a public method?
+        return context.project_config_with_variables_substituted.anonymous_usage_statistics.enabled
+
+    def _get_all_expectation_suites(self, context: BaseDataContext) -> List[ExpectationSuite]:
+        return [context.get_expectation_suite(name) for name in context.list_expectation_suite_names()]
+
+    def _get_all_checkpoints(self, context: BaseDataContext) -> List[CheckpointConfig]:
+        return [context.checkpoint_store.get_checkpoint(name=checkpoint_name, ge_cloud_id=None) for checkpoint_name in context.list_checkpoints()]
+
+    def _get_all_profilers(self, context: BaseDataContext) -> List[RuleBasedProfilerConfig]:
+        return [context.get_profiler(name).config for name in context.list_profilers()]
 
     def _get_all_validation_results(
         self,
-        context: AbstractDataContext,
+        context: BaseDataContext,
     ) -> List[ExpectationSuiteValidationResult]:
-        pass
+        return [context.validations_store.get(key) for key in context.validations_store.list_keys()]
 
-    # TODO: Add other methods to retrieve the rest of the configs
+
+
+class ConfigurationBundleSchema:
+    """Marshmallow Schema for the Configuration Bundle."""
+    pass
+
+
+class ConfigurationBundleJsonSerializer:
+    """Special handling for removing usage stats key."""
+    pass
 
 
 class SendValidationResultsErrorDetails:
@@ -116,8 +132,8 @@ class CloudMigrator:
     def _migrate_to_cloud(self):
         """TODO: This is a rough outline of the steps to take during the migration, verify against the spec before release."""
         self._warn_if_test_migrate()
-        self._warn_if_usage_stats_disabled()
         configuration_bundle: ConfigurationBundle = self._build_configuration_bundle()
+        self._warn_if_usage_stats_disabled(configuration_bundle)
         self._print_configuration_bundle(configuration_bundle)
         if not self.test_migrate:
             configuration_bundle_response: AnyPayload = self._send_configuration_bundle(
@@ -168,7 +184,7 @@ class CloudMigrator:
     def _warn_if_test_migrate(self) -> None:
         pass
 
-    def _warn_if_usage_stats_disabled(self) -> None:
+    def _warn_if_usage_stats_disabled(self, configuration_bundle: ConfigurationBundle) -> None:
         pass
 
     def _build_configuration_bundle(self) -> ConfigurationBundle:
