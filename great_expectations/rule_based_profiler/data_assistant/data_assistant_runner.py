@@ -193,6 +193,7 @@ class DataAssistantRunner:
         func_sig = Signature(
             parameters=parameters, return_annotation=DataAssistantResult
         )
+        run.__doc__ = self._data_assistant_cls.__doc__
         gen_func: Callable = create_function(func_signature=func_sig, func_impl=run)
 
         return gen_func
