@@ -429,15 +429,6 @@ def fake_data_connector_id() -> str:
     return "0c08e6ba-8ed9-4715-a179-da2f08aab13e"
 
 
-@pytest.fixture
-def request_headers(ge_cloud_access_token) -> Dict[str, str]:
-    return {
-        "Content-Type": "application/vnd.api+json",
-        "Authorization": f"Bearer {ge_cloud_access_token}",
-        "Gx-Version": ge.__version__,
-    }
-
-
 JSONData = Union[AnyPayload, Dict[str, Any]]
 RequestError = Union[requests.exceptions.HTTPError, requests.exceptions.Timeout]
 

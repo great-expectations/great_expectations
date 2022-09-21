@@ -2351,6 +2351,15 @@ def ge_cloud_access_token() -> str:
 
 
 @pytest.fixture
+def request_headers(ge_cloud_access_token: str) -> Dict[str, str]:
+    return {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+        "Gx-Version": ge.__version__,
+    }
+
+
+@pytest.fixture
 def ge_cloud_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token):
     return GeCloudConfig(
         base_url=ge_cloud_base_url,
