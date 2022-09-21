@@ -11,9 +11,7 @@ class _TimeoutHTTPAdapter(HTTPAdapter):
     # Session-wide timeouts are not supported by requests
     # but are discussed in detail here: https://github.com/psf/requests/issues/3070
     def __init__(self, *args, **kwargs) -> None:
-        self.timeout = DEFAULT_TIMEOUT
-        if "timeout" in kwargs:
-            self.timeout = kwargs.pop("timeout")
+        self.timeout = kwargs.pop("timeout", DEFAULT_TIMEOUT)
         super().__init__(*args, **kwargs)
 
     def send(self, request: requests.PreparedRequest, **kwargs) -> requests.Response:
