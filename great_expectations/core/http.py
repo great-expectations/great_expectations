@@ -14,7 +14,7 @@ class _TimeoutHTTPAdapter(HTTPAdapter):
         self.timeout = kwargs.pop("timeout", DEFAULT_TIMEOUT)
         super().__init__(*args, **kwargs)
 
-    def send(self, request: requests.PreparedRequest, **kwargs) -> requests.Response:
+    def send(self, request: requests.PreparedRequest, **kwargs) -> requests.Response:  # type: ignore[override]
         kwargs["timeout"] = kwargs.get("timeout", self.timeout)
         return super().send(request, **kwargs)
 
