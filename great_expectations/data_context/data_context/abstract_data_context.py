@@ -20,6 +20,8 @@ from typing import (
     cast,
 )
 
+from great_expectations.core.data_context_key import DataContextKey
+
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
@@ -813,7 +815,7 @@ class AbstractDataContext(ABC):
         sorted_expectation_suite_names.sort()
         return sorted_expectation_suite_names
 
-    def list_expectation_suites(self) -> Optional[List[str]]:
+    def list_expectation_suites(self) -> List[DataContextKey]:
         """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
@@ -821,7 +823,7 @@ class AbstractDataContext(ABC):
             raise ge_exceptions.InvalidConfigError(
                 f"Unable to find configured store: {str(e)}"
             )
-        return keys  # type: ignore[return-value]
+        return keys
 
     def get_validator(
         self,
