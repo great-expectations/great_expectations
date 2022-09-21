@@ -52,7 +52,6 @@ class OnboardingDataAssistant(DataAssistant):
     - `TextColumnRule`
     - `CategoricalColumnRule`
 
-
     #### Table Rule
     This Rule will take the data as a table and try to calculate the following parameter values for Expectations across batches that we pass in.
 
@@ -71,7 +70,6 @@ class OnboardingDataAssistant(DataAssistant):
     * `expect_column_values_to_not_be_null`
 
     They each take 2 parameters. `column`, which is the name of the column being validated, and `mostly`, which is an optional `float` value between `0` and `1` which specifies the fraction of values that match the expectation. Default for the `DataAssistant` is `1.0`.
-
 
     #### NumericColumnRule
     The `NumericColumnRule` will calculate the `min_value` and `max_value` for the following expectations.
@@ -111,7 +109,6 @@ class OnboardingDataAssistant(DataAssistant):
         (default), then 0.25 is used (as minimum ratio of bias to standard error for applying bias correction).
     * `include_estimator_samples_histogram_in_details`: Determines whether the estimator samples are included in the results. (default is `False`).
 
-
     #### DateColumnRules
     The `DateColumnRule` will take a `datetime` column and calculate the `min_value` and `max_value` for the following Expectations.
 
@@ -128,7 +125,6 @@ class OnboardingDataAssistant(DataAssistant):
     * `round_decimals` A user-configured non-negative integer indicating the number of decimals of the
         rounding precision of the computed parameter values (i.e., `min_value`, `max_value`) prior to packaging them
         on output. Default for `DateColumnRules` is  `1` which means calculations are done 1 digit after the decimal point
-
 
     #### TextColumnsRule
 
