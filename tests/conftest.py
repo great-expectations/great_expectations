@@ -6331,6 +6331,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.raw.my_pickup_location_id_value_set": {
                 "value": [1, 2, 4],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "VendorID"},
@@ -6343,6 +6344,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.my_pickup_location_id_value_set": {
                 "value": [1, 2, 4],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "VendorID"},
@@ -6373,6 +6375,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.raw.my_pickup_location_id_value_set": {
                 "value": [0, 1, 2, 3, 4, 5, 6],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "passenger_count"},
@@ -6385,6 +6388,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.my_pickup_location_id_value_set": {
                 "value": [0, 1, 2, 3, 4, 5, 6],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "passenger_count"},
