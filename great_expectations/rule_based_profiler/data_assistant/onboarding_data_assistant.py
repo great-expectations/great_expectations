@@ -44,34 +44,133 @@ class OnboardingDataAssistant(DataAssistant):
     """
     OnboardingDataAssistant provides dataset exploration and validation to help with Great Expectations "Onboarding".
 
-    The OnboardingDataAssistant is built with the following Rules that are passed internally to the RuleBasedProfiler.
-    - TableRule
-    - Column Uniqueness and Nullity Rules
-    - NumericColumnRule
-    - DateColumnRule
-    - TextColumnRule
-    - CategoricalColumnRule
+    OnboardingDataAssistant.run() Args:
+        - batch_request (BatchRequestBase or dict):
+        - estimation (NumericRangeEstimator, str, or None):
+        - include_column_names:
+        - exclude_column_names:
+        - include_column_name_suffixes:
+        - exclude_column_name_suffixes: ??????
+        - semantic_type_filter_module_name:
+        - semantic_type_filter_class_name:
+        - max_unexpected_values:
+        - max_unexpected_ratio:
+        - min_max_unexpected_values_proportion:
+        - allowed_semantic_types_passthrough:
+        - cardinality_limit_mode:
+        - max_unique_values:
+        - max_proportion_unique:
+        - table_rule (dict): This Rule will calculate metrics and if applicable, estimate Expectation parameters and produce Expectations for the table Domain.
+            * false_positive_rate:
+            * estimator:
+            * n_resamples:
+            * random_seed:
+            * quantile_statistic_interpolation_method:
+            * quantile_bias_correction:
+            * quantile_bias_std_error_ratio_threshold:
+            * include_estimator_samples_histogram_in_details:
+            * truncate_values:
+                - lower_bound:
+                - upper_bound:
+            * round_decimals:
+            * exact_match:
+            * success_ratio:
+        - column_value_uniqueness_rule (dict):
+            * success_ratio:
+        - column_value_nullity_rule (dict):
+            * success_ratio:
+        - column_value_nonnullity_rule (dict):
+            * success_ratio:
+        - numeric_columns_rule (dict):
+            * mostly:
+            * strict_min:
+            * strict_max:
+            * quantiles:
+            * allow_relative_error:
+            * false_postiive_rate:
+            * estimator:
+            * n_resamples:
+            * random_seed:
+            * quantile_statistic_interpolation_method:
+            * quantile_bias_correction:
+            * quantile_bias_std_error_ratio_threshold:
+            * include_estimator_samples_in_histogram_details:
+            * truncate_values:
+                - lower_bound:
+                - upper_bound:
+            * round_decimals:
+        - datetime_columns_rule (dict):
+            * mostly:
+            * strict_min:
+            * strict_max:
+            * false_positive_rate:
+            * estimator:
+            * n_resamples:
+            * random_seed:
+            * quantile_statistic_interpolation_method:
+            * quantile_bias_correction:
+            * quantile_bias_std_error_ratio_threshold:
+            * include_estimator_samples_histogram_in_details:
+            * truncate_values:
+                - lower_bound:
+                - upper_bound:
+            * round_decimals:
+        - text_columns_rule (dict):
+            * mostly:
+            * strict_min:
+            * strict_max:
+            * false_positive_rate:
+            * estimator:
+            * bootstrap:
+            * n_resamples:
+            * random_seed:
+            * quantile_statistic_interpolation_method:
+            * quantile_bias_correction:
+            * quantile_bias_std_error_ratio_thresohld:
+            * include_estimator_samples_histogram_in_details:
+            * truncate_values:
+                - lower_bound:
+                - upper_bound:
+            * round_decimals:
+            * success_ratio:
+        - categorical_columns_rule (dict):
+            * cardinality_limit_mode:
+            * mostly:
+            * strict_min:
+            * strict_max:
+            * false_positive_rate:
+            * estimator:
+            * n_resamples:
+            * random_seed:
+            * quantile_statistic_interpolation_method:
+            * quantile_bias_correction:
+            * quantile_bias_std_error_ratio_threshold:
+            * include_estimator_samples_histogram_in_details:
+            * truncate_values:
+                - lower_bound:
+                - upper_bound:
+            * round_decimals:
+
+    Returns:
+        OnboardingDataAssistantResult
+
 
     #### Table Rule
-    This Rule will calculate metrics and if applicable, estimate Expectation parameters for the table Domain.
+    This Rule will calculate metrics and if applicable, estimate Expectation parameters and produce Expectations for the table Domain.
 
-    * expect_table_row_count_to_be_between:
-        - min_value: maximum threshold for table row count.
-        - max_value: minimum threshold for table row count.
-    * expect_table_columns_to_match_set:
-        - column_set: A list or set of strings, that contains the columns of the Table.
-        - exact_match: Boolean (default=True) which determines whether the list of columns must exactly match the observed columns.
+    Expectations Produced:
+        * expect_table_row_count_to_be_between:
+        * expect_table_columns_to_match_set:
 
-    #### Column Uniqueness and Nullity
-    This is not a Rule in the strictest sense, but the DataAssistant will generate ExpectationConfigurations for the following Expectations for each column in our data.
+    #### Column Uniqueness Rule
+    This Rule will calculate metrics for uniqueness and nullity and if applicable, produce Expectations for each column Domain.
 
-    * expect_column_values_to_be_unique
-    * expect_column_values_to_be_null
-    * expect_column_values_to_not_be_null
+    Expectations Produced:
+        * expect_column_values_to_be_unique
+        * expect_column_values_to_be_null
+        * expect_column_values_to_not_be_null
 
-    They each take 2 parameters. column, which is the name of the column being validated, and mostly, which is an optional float value between 0 and 1 which specifies the fraction of values that match the expectation. Default for the DataAssistant is 1.0.
-
-    #### NumericColumnRule
+    #### Numeric Column Rule
     The NumericColumnRule will calculate the min_value and max_value for the following expectations.
 
     * expect_column_min_to_be_between
