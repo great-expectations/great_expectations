@@ -1510,9 +1510,13 @@ def convert_ndarray_to_datetime_dtype_best_effort(
     return False, False, data
 
 
-def convert_ndarray_datetime_to_float_dtype(data: np.ndarray) -> np.ndarray:
+def convert_ndarray_datetime_to_float_dtype_utc_timezone(
+    data: np.ndarray,
+) -> np.ndarray:
     """
     Convert all elements of 1-D "np.ndarray" argument from "datetime.datetime" type to "timestamp" "float" type objects.
+
+    Note: Conversion of "datetime.datetime" to "float" uses "UTC" TimeZone to normalize all "datetime.datetime" values.
     """
     value: Any
     return np.asarray(
@@ -1523,6 +1527,8 @@ def convert_ndarray_datetime_to_float_dtype(data: np.ndarray) -> np.ndarray:
 def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
     """
     Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type objects.
+
+    Note: Converts to "naive" "datetime.datetime" values (assumes "UTC" TimeZone based floating point timestamps).
     """
     value: Any
     return np.asarray([datetime.datetime.utcfromtimestamp(value) for value in data])
@@ -1533,6 +1539,8 @@ def convert_ndarray_float_to_datetime_tuple(
 ) -> Tuple[datetime.datetime, ...]:
     """
     Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type tuple elements.
+
+    Note: Converts to "naive" "datetime.datetime" values (assumes "UTC" TimeZone based floating point timestamps).
     """
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 

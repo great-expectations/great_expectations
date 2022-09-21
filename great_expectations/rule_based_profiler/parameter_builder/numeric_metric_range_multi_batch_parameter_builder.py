@@ -659,7 +659,9 @@ detected.
         for metric_value_idx in metric_value_vector_indices:
             metric_value_vector = metric_values[metric_value_idx]
             if not is_ndarray_datetime_dtype(
-                data=metric_value_vector, parse_strings_as_datetimes=True
+                data=metric_value_vector,
+                parse_strings_as_datetimes=True,
+                fuzzy=False,
             ):
                 return False
 

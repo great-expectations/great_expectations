@@ -19,6 +19,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effort
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -68,8 +69,17 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
                 DEFAULT_QUANTILES_QUANTILE_STATISTIC_INTERPOLATION_METHOD
             )
 
+        metric_values_converted: np.ndaarray
+        (
+            _,
+            _,
+            metric_values_converted,
+        ) = convert_ndarray_to_datetime_dtype_best_effort(
+            data=metric_values,
+            parse_strings_as_datetimes=True,
+        )
         return compute_quantiles(
-            metric_values=metric_values,
+            metric_values=metric_values_converted,
             false_positive_rate=false_positive_rate,
             quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
         )
