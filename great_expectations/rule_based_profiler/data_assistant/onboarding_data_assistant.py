@@ -44,113 +44,113 @@ class OnboardingDataAssistant(DataAssistant):
     """
     OnboardingDataAssistant provides dataset exploration and validation to help with Great Expectations "Onboarding".
 
-    The `OnboardingDataAssistant` is built with the following `Rules` that are run internally by the `RuleBasedProfiler`.
-    - `TableRule`
-    - `Column Uniqueness and Nullity Rules`
-    - `NumericColumnRule`
-    - `DateColumnRule`
-    - `TextColumnRule`
-    - `CategoricalColumnRule`
+    The OnboardingDataAssistant is built with the following Rules that are passed internally to the RuleBasedProfiler.
+    - TableRule
+    - Column Uniqueness and Nullity Rules
+    - NumericColumnRule
+    - DateColumnRule
+    - TextColumnRule
+    - CategoricalColumnRule
 
     #### Table Rule
-    This Rule will take the data as a table and try to calculate the following parameter values for Expectations across batches that we pass in.
+    This Rule will calculate metrics and if applicable, estimate Expectation parameters for the table Domain.
 
-    * `expect_table_row_count_to_be_between`:
-        - `min_value` : maximum threshold for table row count.
-        - `max_value` : minimum threshold for table row count.
-    * `expect_table_columns_to_match_set`:
-        - `column_set`: Either a list or set of strings, that describe the columns of the Table
-        - `exact_match`: Boolean (default=True) which determines whether the list of columns must exactly match the observed columns.
+    * expect_table_row_count_to_be_between:
+        - min_value: maximum threshold for table row count.
+        - max_value: minimum threshold for table row count.
+    * expect_table_columns_to_match_set:
+        - column_set: A list or set of strings, that contains the columns of the Table.
+        - exact_match: Boolean (default=True) which determines whether the list of columns must exactly match the observed columns.
 
     #### Column Uniqueness and Nullity
-    This is not a `Rule` in the strictest sense, but the `DataAssistant` will generate `ExpectationConfigurations` for the following `Expectations` for each column in our data.
+    This is not a Rule in the strictest sense, but the DataAssistant will generate ExpectationConfigurations for the following Expectations for each column in our data.
 
-    * `expect_column_values_to_be_unique`
-    * `expect_column_values_to_be_null`
-    * `expect_column_values_to_not_be_null`
+    * expect_column_values_to_be_unique
+    * expect_column_values_to_be_null
+    * expect_column_values_to_not_be_null
 
-    They each take 2 parameters. `column`, which is the name of the column being validated, and `mostly`, which is an optional `float` value between `0` and `1` which specifies the fraction of values that match the expectation. Default for the `DataAssistant` is `1.0`.
+    They each take 2 parameters. column, which is the name of the column being validated, and mostly, which is an optional float value between 0 and 1 which specifies the fraction of values that match the expectation. Default for the DataAssistant is 1.0.
 
     #### NumericColumnRule
-    The `NumericColumnRule` will calculate the `min_value` and `max_value` for the following expectations.
+    The NumericColumnRule will calculate the min_value and max_value for the following expectations.
 
-    * `expect_column_min_to_be_between`
-    * `expect_column_max_to_be_between`
-    * `expect_column_values_to_be_between`
-    * `expect_column_median_to_be_between`
-    * `expect_column_mean_to_be_between`
-    * `expect_column_stdev_to_be_between`
+    * expect_column_min_to_be_between
+    * expect_column_max_to_be_between
+    * expect_column_values_to_be_between
+    * expect_column_median_to_be_between
+    * expect_column_mean_to_be_between
+    * expect_column_stdev_to_be_between
 
-    By default the estimation will be done by the `exact` estimator by default, which takes in the values across all Batches in the batch list (in our example 12 months of data from 2019).
+    By default the estimation will be done by the exact estimator by default, which takes in the values across all Batches in the batch list (in our example 12 months of data from 2019).
 
-    If you do `data_assistant.run()` with the `estimator` parameter set to `flag_outliers` then `bootstrapping` will be done done behind-the-scenes to estimate outliers.
+    If you do data_assistant.run() with the estimator parameter set to flag_outliers then bootstrapping will be done done behind-the-scenes to estimate outliers.
 
-    The parameters for `bootstrapping` are:
+    The parameters for bootstrapping are:
 
-    * `n_resamples` : It is set by default to `9999` which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
+    * n_resamples : It is set by default to 9999 which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
 
-    * `false_positive_rate`: A user-configured fraction between 0 and 1 expressing desired false positive rate for
-        identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data. Set by default to be `0.05`.
-    * `random_seed`: Seed for randomization. If omitted (which is the default), then we use `np.random.choice`. otherwise, we use `np.random.Generator(np.random.PCG64(random_seed))`.
-    * `round_decimals`: A user-configured non-negative integer indicating the number of decimals of
-        rounding precision of the computed parameter values (i.e., `min_value`, `max_value`) prior to packaging them
-        on output. For `NumericColumnRule` the default is `15` which means calculations are done 15 digits after the decimal point.
-    * `mostly`: is `1.0` by default
-    * `strict_min` and `strict_max` are `False`, and these are parameters that determine whether the minimum proportion of unique values must be strictly smaller than max or min value.
-    * `truncate_values`:  User-configured directive for whether or not to allow the computed parameter values (i.e.,`lower_bound`, `upper_bound`) to take on values outside the specified bounds when packaged on output
-    * `allow_relative_error`:  Whether to allow relative error in quantile communications on backends that support or require it.
+    * false_positive_rate: A user-configured fraction between 0 and 1 expressing desired false positive rate for
+        identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data. Set by default to be 0.05.
+    * random_seed: Seed for randomization. If omitted (which is the default), then we use np.random.choice. otherwise, we use np.random.Generator(np.random.PCG64(random_seed)).
+    * round_decimals: A user-configured non-negative integer indicating the number of decimals of
+        rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them
+        on output. For NumericColumnRule the default is 15 which means calculations are done 15 digits after the decimal point.
+    * mostly: is 1.0 by default
+    * strict_min and strict_max are False, and these are parameters that determine whether the minimum proportion of unique values must be strictly smaller than max or min value.
+    * truncate_values:  User-configured directive for whether or not to allow the computed parameter values (i.e.,lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output
+    * allow_relative_error:  Whether to allow relative error in quantile communications on backends that support or require it.
 
-    In addition, the `expect_column_quantile_values_to_be_between` Expectation takes in the following parameters:
+    In addition, the expect_column_quantile_values_to_be_between Expectation takes in the following parameters:
 
-    * `quantiles` : Quantiles and associated value ranges for the column, with the default being`[0.25, 0.5, 0.75]`
-    * `quantile_statistic_interpolation_method`: which is used when estimating quantile values. Recognized values include `auto`, `nearest`, and `linear`. (default is `nearest`).
-    * `quantile_bias_correction`: Used when determining whether to correct for quantile bias. Recognized values are `True` and  `False` with default being `False`.
-    * `quantile_bias_std_error_ratio_threshold`: If omitted
+    * quantiles : Quantiles and associated value ranges for the column, with the default being[0.25, 0.5, 0.75]
+    * quantile_statistic_interpolation_method: which is used when estimating quantile values. Recognized values include auto, nearest, and linear. (default is nearest).
+    * quantile_bias_correction: Used when determining whether to correct for quantile bias. Recognized values are True and  False with default being False.
+    * quantile_bias_std_error_ratio_threshold: If omitted
         (default), then 0.25 is used (as minimum ratio of bias to standard error for applying bias correction).
-    * `include_estimator_samples_histogram_in_details`: Determines whether the estimator samples are included in the results. (default is `False`).
+    * include_estimator_samples_histogram_in_details: Determines whether the estimator samples are included in the results. (default is False).
 
     #### DateColumnRules
-    The `DateColumnRule` will take a `datetime` column and calculate the `min_value` and `max_value` for the following Expectations.
+    The DateColumnRule will take a datetime column and calculate the min_value and max_value for the following Expectations.
 
-    * `expect_column_min_to_be_between`
-    * `expect_column_max_to_be_between`
-    * `expect_column_values_to_be_between`
+    * expect_column_min_to_be_between
+    * expect_column_max_to_be_between
+    * expect_column_values_to_be_between
 
-    Estimation will be done using the `exact` estimator by default, but if you select `flag_outliers` then `bootstrapping` will use the following parameters:
+    Estimation will be done using the exact estimator by default, but if you select flag_outliers then bootstrapping will use the following parameters:
 
-    * `n_resamples` : For bootstrapping. It is set by default to `9999` which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
-    * `false_positive_rate`: user-configured fraction between 0 and 1 expressing desired false positive rate for
-        identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data. Default is `0.05`.
-    * `random_seed`: Seed for randomization. If omitted (which is the default), then we use `np.random.choice`. otherwise, we use `np.random.Generator(np.random.PCG64(random_seed))`.
-    * `round_decimals` A user-configured non-negative integer indicating the number of decimals of the
-        rounding precision of the computed parameter values (i.e., `min_value`, `max_value`) prior to packaging them
-        on output. Default for `DateColumnRules` is  `1` which means calculations are done 1 digit after the decimal point
+    * n_resamples : For bootstrapping. It is set by default to 9999 which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
+    * false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
+        identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data. Default is 0.05.
+    * random_seed: Seed for randomization. If omitted (which is the default), then we use np.random.choice. otherwise, we use np.random.Generator(np.random.PCG64(random_seed)).
+    * round_decimals A user-configured non-negative integer indicating the number of decimals of the
+        rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them
+        on output. Default for DateColumnRules is  1 which means calculations are done 1 digit after the decimal point
 
     #### TextColumnsRule
 
-    The `TextColumnRule` will generate parameters for the following 2 `Expectations`.
+    The TextColumnRule will generate parameters for the following 2 Expectations.
 
-    * `expect_column_value_lengths_to_be_between`
-    * `expect_column_values_to_match_regex`
+    * expect_column_value_lengths_to_be_between
+    * expect_column_values_to_match_regex
 
-    For `expect_column_value_lengths_to_be_between` will have the parameters `min_value` and `max_value` estimated.
+    For expect_column_value_lengths_to_be_between will have the parameters min_value and max_value estimated.
 
-    Estimation will be done using the `exact` estimator by default, but if you select `flag_outliers` then the following parameters are set by default for `bootstrap` estimation
+    Estimation will be done using the exact estimator by default, but if you select flag_outliers then the following parameters are set by default for bootstrap estimation
 
-    * `n_resamples` : For bootstrapping. It is set by default to `9999` which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
-    * `false_positive_rate`: user-configured fraction between 0 and 1 expressing desired false positive rate for
-        identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data. Default is `0.05`.
-    * `random_seed`: Seed for randomization. If omitted (which is the default), then we use `np.random.choice`. otherwise, we use `np.random.Generator(np.random.PCG64(random_seed))`.
-    * `round_decimals` A user-configured non-negative integer indicating the number of decimals of the
-        rounding precision of the computed parameter values (i.e., `min_value`, `max_value`) prior to packaging them
-        on output. Default for `TextColumnRule` is  `0` which means calculations are done to the nearest integer.
+    * n_resamples : For bootstrapping. It is set by default to 9999 which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
+    * false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
+        identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data. Default is 0.05.
+    * random_seed: Seed for randomization. If omitted (which is the default), then we use np.random.choice. otherwise, we use np.random.Generator(np.random.PCG64(random_seed)).
+    * round_decimals A user-configured non-negative integer indicating the number of decimals of the
+        rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them
+        on output. Default for TextColumnRule is  0 which means calculations are done to the nearest integer.
 
-    For `expect_column_values_to_match_regex`, the values in the column be matched against a candidate list of common `regex` values which were built from the following sources:
+    For expect_column_values_to_match_regex, the values in the column be matched against a candidate list of common regex values which were built from the following sources:
 
        - [20 Most Common Regular Expressions](https://regexland.com/most-common-regular-expressions/)
        - [Stackoverflow on how to test for valid uuid](https://stackoverflow.com/questions/7905929/how-to-test-valid-uuid-guid/13653180#13653180)
 
-    * This is the regex list used by the `TextColumnsRule`.
+    * This is the regex list used by the TextColumnsRule.
 
     CANDIDATE_REGEX: Set[str] = {
         r"\\d+",  # whole number with 1 or more digits
@@ -172,14 +172,14 @@ class OnboardingDataAssistant(DataAssistant):
 
     The CategoricalColumnsRule will generate parameters for the following 3 Expectations:
 
-    * `expect_column_values_to_be_in_set`
-    * `expect_column_unique_value_count_to_be_between`
-    * `expect_column_proportion_of_unique_values_to_be_between`
+    * expect_column_values_to_be_in_set
+    * expect_column_unique_value_count_to_be_between
+    * expect_column_proportion_of_unique_values_to_be_between
 
 
-    Categorical columns are determined to be ones that meet a certain cardinality threshold. This prevents us from calculating the number of `unique` value in a column with millions of rows, with each value being slightly different from another (which is theoretically possible).
+    Categorical columns are determined to be ones that meet a certain cardinality threshold. This prevents us from calculating the number of unique value in a column with millions of rows, with each value being slightly different from another (which is theoretically possible).
 
-    Great Expectations gets around this by only building the unique value set for columns that have less than a certain number of unique values, which is determined by the cardinality threshold. The default threshold is `FEW` which means Great Expectations will generate parameters for `expect_column_values_to_be_in_set()` for columns where the number of unique values are less than or equal to 100.
+    Great Expectations gets around this by only building the unique value set for columns that have less than a certain number of unique values, which is determined by the cardinality threshold. The default threshold is FEW which means Great Expectations will generate parameters for expect_column_values_to_be_in_set() for columns where the number of unique values are less than or equal to 100.
 
     Other values for cardinality values include:
         ZERO = AbsoluteCardinalityLimit("ZERO", 0)
@@ -196,38 +196,38 @@ class OnboardingDataAssistant(DataAssistant):
 
     The three Expectations each have their own parameters
 
-    `expect_column_values_to_be_in_set` requires `column` (column name) and `value_set`, which is calculated for all columns that meet the cardinality threshold.
+    expect_column_values_to_be_in_set requires column (column name) and value_set, which is calculated for all columns that meet the cardinality threshold.
 
-    `expect_column_unique_value_count_to_be_between` has `column` (column name) and `min_value` and `max_value`.
+    expect_column_unique_value_count_to_be_between has column (column name) and min_value and max_value.
 
-    Estimation will be done using the `exact` estimator by default, but if you select `flag_outliers` then the following parameters are set by default for `bootstrap` estimation
+    Estimation will be done using the exact estimator by default, but if you select flag_outliers then the following parameters are set by default for bootstrap estimation
 
-    * `n_resamples` : For bootstrapping. It is set by default to `9999` which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
-    * `false_positive_rate`: user-configured fraction between 0 and 1 expressing desired false positive rate for
-        identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data. Default is `0.05`.
-    * `random_seed`: Seed for randomization. If omitted (which is the default), then we use `np.random.choice`. otherwise, we use `np.random.Generator(np.random.PCG64(random_seed))`.
+    * n_resamples : For bootstrapping. It is set by default to 9999 which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
+    * false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
+        identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data. Default is 0.05.
+    * random_seed: Seed for randomization. If omitted (which is the default), then we use np.random.choice. otherwise, we use np.random.Generator(np.random.PCG64(random_seed)).
 
-    `expect_column_proportion_of_unique_values_to_be_between` has the following parameters
+    expect_column_proportion_of_unique_values_to_be_between has the following parameters
 
-    * `column`: column name
-    * `min_value`:  minimum proportion of unique values, ranging from 0 to 1
-    * `max_value`:  minimum proportion of unique values, ranging from 0 to 1
-    * `strict_min`: determine whether the minimum proportion of unique values must be strictly greater than min value, with the `default=False`
-    * `strict_max`: determine whether the minimum proportion of unique values must be strictly smaller than max value, with the `default=False`
+    * column: column name
+    * min_value:  minimum proportion of unique values, ranging from 0 to 1
+    * max_value:  minimum proportion of unique values, ranging from 0 to 1
+    * strict_min: determine whether the minimum proportion of unique values must be strictly greater than min value, with the default=False
+    * strict_max: determine whether the minimum proportion of unique values must be strictly smaller than max value, with the default=False
 
-    Estimation will be done using the `exact` estimator by default, but if you select `flag_outliers` then the following parameters are set by default for `bootstrap` estimation
+    Estimation will be done using the exact estimator by default, but if you select flag_outliers then the following parameters are set by default for bootstrap estimation
 
-    * `n_resamples` : For bootstrapping. It is set by default to `9999` which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
-    * `false_positive_rate`: user-configured fraction between 0 and 1 expressing desired false positive rate for
-        identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data. Default is `0.05`.
-    * `random_seed`: Seed for randomization. If omitted (which is the default), then then we use `np.random.choice`. otherwise, we use `np.random.Generator(np.random.PCG64(random_seed))`.
-    * `round_decimals`: A user-configured non-negative integer indicating the number of decimals of the
-        rounding precision of the computed parameter values (i.e., `min_value`, `max_value`) prior to packaging them
-        on output. For `CategoricalColumnsRule` the default is `15` which means calculations are done 15 digits after the decimal point.
-    * `mostly`: is `1.0` by default
-    * `strict_min` and `strict_max` are `False`, and these are parameters that determine whether the minimum proportion of unique values must be strictly smaller than max or min value.
-    * `truncate_values`:  User-configured directive for whether or not to allow the computed parameter values (i.e.,`lower_bound`, `upper_bound`) to take on values outside the specified bounds when packaged on output
-    * `allow_relative_error`:  Whether to allow relative error in quantile communications on backends that support or require it.
+    * n_resamples : For bootstrapping. It is set by default to 9999 which is the default in https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.htm
+    * false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
+        identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data. Default is 0.05.
+    * random_seed: Seed for randomization. If omitted (which is the default), then then we use np.random.choice. otherwise, we use np.random.Generator(np.random.PCG64(random_seed)).
+    * round_decimals: A user-configured non-negative integer indicating the number of decimals of the
+        rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them
+        on output. For CategoricalColumnsRule the default is 15 which means calculations are done 15 digits after the decimal point.
+    * mostly: is 1.0 by default
+    * strict_min and strict_max are False, and these are parameters that determine whether the minimum proportion of unique values must be strictly smaller than max or min value.
+    * truncate_values:  User-configured directive for whether or not to allow the computed parameter values (i.e.,lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output
+    * allow_relative_error:  Whether to allow relative error in quantile communications on backends that support or require it.
     """
 
     __alias__: str = "onboarding"
