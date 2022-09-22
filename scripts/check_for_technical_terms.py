@@ -173,9 +173,9 @@ def phrase_is_tagged_in_generic_tag(line_working_contents, phrase):
     return is_tagged, is_present
 
 
-def scan_file(file_path, phrases):
+def scan_file(file_path, phrases):  # noqa: C901 - complexity 21
     output = [file_path]
-    with open(file_path, "r") as active_file:
+    with open(file_path) as active_file:
         for phrase in phrases:
             tag_found = False
             valid_lines = []
