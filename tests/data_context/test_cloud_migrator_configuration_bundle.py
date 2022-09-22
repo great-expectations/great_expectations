@@ -38,3 +38,14 @@ def test_configuration_bundle_init(in_memory_runtime_context: BaseDataContext):
 
 
 
+@pytest.mark.integration
+def test_configuration_bundle_serialization(in_memory_runtime_context: BaseDataContext):
+    """What does this test and why?
+
+    This test is an integration test using a real DataContext to prove out the
+    ConfigurationBundle serialization. We can replace this test with unit tests.
+    """
+
+    raise NotImplementedError
+
+
