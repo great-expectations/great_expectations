@@ -2,36 +2,33 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
+from marshmallow import Schema, fields, post_dump
+
+from great_expectations.core import (
+    ExpectationSuite,
+    ExpectationSuiteSchema,
+    ExpectationSuiteValidationResult,
+    ExpectationSuiteValidationResultSchema,
 )
-
 from great_expectations.core.util import convert_to_json_serializable
-from marshmallow import fields, post_dump, Schema
-
+from great_expectations.data_context import AbstractDataContext, BaseDataContext
 from great_expectations.data_context.data_context_variables import DataContextVariables
-
+from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    CheckpointConfigSchema,
+    DataContextConfigSchema,
+    GeCloudConfig,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
+)
 from great_expectations.rule_based_profiler.config import (
     RuleBasedProfilerConfig,
     RuleBasedProfilerConfigSchema,
 )
-
-from great_expectations.core import (
-    ExpectationSuiteValidationResult,
-    ExpectationSuite,
-    ExpectationSuiteSchema,
-    ExpectationSuiteValidationResultSchema,
-)
-from great_expectations.data_context import AbstractDataContext, BaseDataContext
-from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
-from great_expectations.data_context.types.base import (
-    GeCloudConfig,
-    CheckpointConfig,
-    CheckpointConfigSchema,
-    DataContextConfigSchema,
-)
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
 )
 
 
@@ -220,7 +217,9 @@ class CloudMigrator:
         )
         self._print_configuration_bundle(configuration_bundle)
         if not test_migrate:
-            configuration_bundle_serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
+            configuration_bundle_serializer = ConfigurationBundleJsonSerializer(
+                schema=ConfigurationBundleSchema()
+            )
             configuration_bundle_response: AnyPayload = self._send_configuration_bundle(
                 configuration_bundle, configuration_bundle_serializer
             )

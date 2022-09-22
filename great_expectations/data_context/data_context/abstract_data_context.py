@@ -21,7 +21,6 @@ from typing import (
 )
 
 from great_expectations.core.data_context_key import DataContextKey
-
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,

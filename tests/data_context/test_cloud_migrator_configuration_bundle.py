@@ -2,33 +2,27 @@
 from dataclasses import dataclass
 
 import pytest
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
-)
-
-from great_expectations.core.util import convert_to_json_serializable
-
-from great_expectations.rule_based_profiler import RuleBasedProfiler
-
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
-    ExpectationSuiteIdentifier,
-)
 
 from great_expectations.checkpoint import Checkpoint
-
 from great_expectations.core import (
     ExpectationSuite,
     ExpectationSuiteValidationResult,
     RunIdentifier,
 )
-
-
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.cloud_migrator import (
     ConfigurationBundle,
-    ConfigurationBundleSchema,
     ConfigurationBundleJsonSerializer,
+    ConfigurationBundleSchema,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
+)
+from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
 )
 
 
