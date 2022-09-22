@@ -80,8 +80,8 @@ If you consider your `BatchRequest` data valid, and want to produce Expectations
 :::
 
 :::note
-The Onboarding Data Assistant can accept other parameters in addition to `exclude_column_names` such as `include_column_names`, 
-  `include_column_name_suffixes`, and `cardinality_limit_mode`. 
+The Onboarding Data Assistant `run(...)` method can accept other parameters in addition to `exclude_column_names` such 
+  as `include_column_names`, `include_column_name_suffixes`, and `cardinality_limit_mode`. 
   For a description of the available parameters please see this docstring [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/data_assistant/onboarding_data_assistant.py#L44).
 :::
 
