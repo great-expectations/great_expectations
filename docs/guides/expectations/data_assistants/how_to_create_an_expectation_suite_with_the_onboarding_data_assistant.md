@@ -66,11 +66,11 @@ That said, there are numerous parameters available for the `run(...)` method of 
 
 For this guide, you will exclude the following columns:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L86-L105
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L86-L101
 ```
 
 The following code shows how to run the Onboarding Assistant. In this code block, `context` is an instance of your Data Context.
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L109-L112
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L105-L108
 ```
 
 :::note
@@ -80,9 +80,9 @@ If you consider your `BatchRequest` data valid, and want to produce Expectations
 :::
 
 :::note
-The Onboarding Data Assistant can accept additional parameters such as `include_column_names`, `include_semantic_types`, 
-  `exclude_semantic_types`, `cardinality_limit_mode`, `max_unique_values`, and `max_proportion_unique`. For a 
-  description of the available parameters please see this docstring [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/domain_builder/categorical_column_domain_builder.py#L68).
+The Onboarding Data Assistant `run(...)` method can accept other parameters in addition to `exclude_column_names` such 
+  as `include_column_names`, `include_column_name_suffixes`, and `cardinality_limit_mode`. 
+  For a description of the available parameters please see this docstring [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/data_assistant/onboarding_data_assistant.py#L44).
 :::
 
 ### 4. Save your Expectation Suite
@@ -90,12 +90,12 @@ The Onboarding Data Assistant can accept additional parameters such as `include_
 Once you have executed the Onboarding Data Assistant's `run(...)` method and generated Expectations for your data, you
  need to load them into your Expectation Suite and save them. You will do this by using the Data Assistant result:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L118-L120
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L114-L116
 ```
 
 And once the Expectation Suite has been retrieved from the Data Assistant result, you can save it like so:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L124-L126
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L120-L122
 ```
 
 ### 5. Test your Expectation Suite with a `SimpleCheckpoint`
@@ -103,36 +103,53 @@ And once the Expectation Suite has been retrieved from the Data Assistant result
 To verify that your Expectation Suite is working, you can use a `SimpleCheckpoint`. First, you will configure one to
  operate with the Expectation Suite and Batch Request that you have already defined:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L132-L140
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L128-L136
 ```
 
 Once you have our `SimpleCheckpoint`'s configuration defined, you can instantiate a `SimpleCheckpoint` and run it. You
  can check the `"success"` key of the `SimpleCheckpoint`'s results to verify that your Expectation Suite worked.
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L144-L151
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L140-L147
 ```
 
-### 6. Plot the Data Assistant's calculated Metrics and produced Expectations
+### 6. Plot and inspect the Data Assistant's calculated Metrics and produced Expectations
 
-To see a Batch-level visualization of each Metric computed by the Onboarding Data Assistant run:
+To see Batch-level visualizations of Metrics computed by the Onboarding Data Assistant run:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L163
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L159
 ```
 
 ![Plot Metrics](../../../images/data_assistant_plot_metrics.png)
 
-Hovering over a data point will provide more information about the Batch and its calculated Metric value.
+:::note
+Hovering over a data point will provide more information about the Batch and its calculated Metric value in a tooltip.
+:::
 
-To see the Expectations produced, and the associated Metrics calculated by the Onboarding Data Assistant run:
+To see all Metrics computed by the Onboarding Data Assistant run:
 
-```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L168
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L163
+```
+
+To plot the Expectations produced, and the associated Metrics calculated by the Onboarding Data Assistant run:
+
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L167
 ```
 
 ![Plot Expectations and Metrics](../../../images/data_assistant_plot_expectations_and_metrics.png)
 
 :::note
-If no Expectation was produced by the Data Assistant for a given Metric, it will not be visualized by the `plot_expectations_and_metrics()` method.
+If no Expectation was produced by the Data Assistant for a given Metric, neither the Expectation nor the Metric will be visualized by the `plot_expectations_and_metrics()` method.
 :::
+
+To see the Expectations produced and grouped by Domain run:
+
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L171
+```
+
+To see the Expectations produced and grouped by Expectation type run:
+
+```python file=../../../../tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py#L175
+```
 
 ### 7. (Optional) Edit your Expectation Suite, save, and test again.
 
