@@ -62,7 +62,7 @@ Data Assistants come pre-configured!  All you need to provide is a Batch Request
 
 ### Design motivation
 
-Data Assistants were designed to make creating Expectations easier for users of Great Expectations.  A Data Assistant will help solve the problem of "where to start" when working with a large, new, or complex dataset by greedily asking questions and building a list of all the relevant Expectations that it can determine from the answers to those questions.  Branching question paths ensure that additional relevant Expectations are built on the groundwork of the earlier questions asked.  The result is a comprehensive Expectation Suite that you can then edit and trim down to meet your desired use cases.
+Data Assistants were designed to make creating Expectations easier for users of Great Expectations.  A Data Assistant will help solve the problem of "where to start" when working with a large, new, or complex dataset by greedily asking questions according to a set theme and then building a list of all the relevant Metrics that it can determine from the answers to those questions.  Branching question paths ensure that additional relevant Metrics are gathered on the groundwork of the earlier questions asked.  The result is a comprehensive gathering of Metrics that can then be saved, reviewed as graphical plots, or used by the Data Assistant to generate a set of proposed Expectations.
 
 ### Additional documentation
 
