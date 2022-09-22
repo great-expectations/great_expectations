@@ -2514,7 +2514,9 @@ def empty_cloud_data_context(
     cloud_data_context: CloudDataContext = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_config=ge_cloud_config,
+        ge_cloud_base_url=ge_cloud_config.base_url,
+        ge_cloud_access_token=ge_cloud_config.access_token,
+        ge_cloud_organization_id=ge_cloud_config.organization_id,
     )
     return cloud_data_context
 
@@ -2978,7 +2980,7 @@ def alice_columnar_table_single_batch(empty_data_context):
             "my_rule_for_user_ids": {
                 "variables": {},
                 "domain_builder": {
-                    "column_name_suffixes": ["_id"],
+                    "column_name_suffixes": ["_id", "_ID"],
                     "class_name": "MyCustomSemanticTypeColumnDomainBuilder",
                     "module_name": "tests.test_fixtures.rule_based_profiler.plugins.my_custom_semantic_type_column_domain_builder",
                     "semantic_types": ["user_id"],
@@ -4479,7 +4481,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "quantile_statistic_interpolation_method": "auto",
                         "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
-                        "round_decimals": 2,
+                        "round_decimals": None,
                         "evaluation_parameter_builder_configs": None,
                     },
                     {
@@ -4501,7 +4503,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "quantile_statistic_interpolation_method": "auto",
                         "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
-                        "round_decimals": 2,
+                        "round_decimals": None,
                         "evaluation_parameter_builder_configs": None,
                     },
                 ],
@@ -6329,6 +6331,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.raw.my_pickup_location_id_value_set": {
                 "value": [1, 2, 4],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "VendorID"},
@@ -6341,6 +6344,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.my_pickup_location_id_value_set": {
                 "value": [1, 2, 4],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "VendorID"},
@@ -6371,6 +6375,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.raw.my_pickup_location_id_value_set": {
                 "value": [0, 1, 2, 3, 4, 5, 6],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "passenger_count"},
@@ -6383,6 +6388,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.my_pickup_location_id_value_set": {
                 "value": [0, 1, 2, 3, 4, 5, 6],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "passenger_count"},

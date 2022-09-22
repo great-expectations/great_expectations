@@ -223,14 +223,12 @@ class DataContext(BaseDataContext):
         )
         shutil.copyfile(styles_template, styles_destination_path)
 
-    # TODO: deprecate ge_cloud_account_id
     def __init__(
         self,
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         ge_cloud_mode: bool = False,
         ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
@@ -238,7 +236,6 @@ class DataContext(BaseDataContext):
         self._ge_cloud_config = self._init_ge_cloud_config(
             ge_cloud_mode=ge_cloud_mode,
             ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_account_id=ge_cloud_account_id,
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
@@ -265,7 +262,6 @@ class DataContext(BaseDataContext):
         self,
         ge_cloud_mode: bool,
         ge_cloud_base_url: Optional[str],
-        ge_cloud_account_id: Optional[str],
         ge_cloud_access_token: Optional[str],
         ge_cloud_organization_id: Optional[str],
     ) -> Optional[GeCloudConfig]:
@@ -274,7 +270,6 @@ class DataContext(BaseDataContext):
 
         ge_cloud_config = CloudDataContext.get_ge_cloud_config(
             ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_account_id=ge_cloud_account_id,
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
@@ -282,10 +277,8 @@ class DataContext(BaseDataContext):
 
     def _init_context_root_directory(self, context_root_dir: Optional[str]) -> str:
         if self.ge_cloud_mode and context_root_dir is None:
-            context_root_dir = os.getcwd()
-            logger.info(
-                f'context_root_dir was not provided - defaulting to current working directory "'
-                f'{context_root_dir}".'
+            context_root_dir = CloudDataContext.determine_context_root_directory(
+                context_root_dir
             )
         else:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir

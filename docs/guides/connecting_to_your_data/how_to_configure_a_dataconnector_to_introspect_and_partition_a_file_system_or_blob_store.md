@@ -225,7 +225,7 @@ Finally, once your `Data Connector` configuration satisfies your requirements, s
 ```
 
 Consult the
-[How to get a Batch of data from a configured Datasource](./how_to_get_a_batch_of_data_from_a_configured_datasource.md)
+[How to get one or more Batches of data from a configured Datasource](./how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 guide for examples of considerable flexibility in querying `Batch` objects along the different dimensions materialized
 as a result of partitioning the dataset as specified by the `taxi_data_flat` and `taxi_data_year_month` `Data Assets`.
 

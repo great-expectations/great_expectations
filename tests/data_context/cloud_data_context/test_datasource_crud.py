@@ -1,21 +1,32 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
-from typing import Callable
+from typing import TYPE_CHECKING, Callable, Tuple, Type, Union
 from unittest.mock import patch
 
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.data_context import BaseDataContext, CloudDataContext
+from great_expectations.core.serializer import (
+    AbstractConfigSerializer,
+    DictConfigSerializer,
+)
+from great_expectations.data_context import (
+    AbstractDataContext,
+    BaseDataContext,
+    CloudDataContext,
+)
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.datasource import BaseDatasource
+from great_expectations.datasource import BaseDatasource, Datasource, LegacyDatasource
 from great_expectations.datasource.datasource_serializer import (
     JsonDatasourceConfigSerializer,
 )
 from tests.data_context.conftest import MockResponse
+
+if TYPE_CHECKING:
+    from _pytest.fixtures import FixtureRequest
 
 
 @pytest.mark.cloud
