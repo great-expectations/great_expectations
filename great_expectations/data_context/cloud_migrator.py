@@ -13,7 +13,7 @@ from great_expectations.core import ExpectationSuiteValidationResult, Expectatio
     ExpectationSuiteValidationResultSchema
 from great_expectations.data_context import AbstractDataContext, BaseDataContext
 from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
-from great_expectations.data_context.types.base import DatasourceConfig, GeCloudConfig, DataContextConfig, \
+from great_expectations.data_context.types.base import GeCloudConfig, \
     CheckpointConfig, CheckpointConfigSchema, DataContextConfigSchema
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -41,6 +41,7 @@ class ConfigurationBundle:
 
     def _get_all_checkpoints(self) -> List[CheckpointConfig]:
         return [self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, ge_cloud_id=None) for checkpoint_name in self._context.list_checkpoints()]
+                # type: ignore[arg-type]
 
     def _get_all_profilers(self) -> List[RuleBasedProfilerConfig]:
         return [self._context.get_profiler(name).config for name in self._context.list_profilers()]
