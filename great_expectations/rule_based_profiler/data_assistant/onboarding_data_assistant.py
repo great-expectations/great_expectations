@@ -43,6 +43,21 @@ from great_expectations.validator.validator import Validator
 class OnboardingDataAssistant(DataAssistant):
     """
     OnboardingDataAssistant provides dataset exploration and validation to help with Great Expectations "Onboarding".
+
+    OnboardingDataAssistant.run() Args:
+        - batch_request (BatchRequestBase or dict): The Batch Request to be passed to the Data Assistant.
+        - estimation (str): One of "exact" (default) or "flag_outliers" indicating the type of data you believe the
+            Batch Request to contain. Valid or trusted data should use "exact", while Expectations produced with data
+            that is suspected to have quality issues may benefit from "flag_outliers".
+        - include_column_names (list): A list containing the column names you wish to include.
+        - exclude_column_names (list): A list containing the column names you with to exclude.
+        - include_column_name_suffixes (list): A list containing the column name suffixes you with to include.
+        - cardinality_limit_mode (str): A string defined by the CardinalityLimitMode Enum, which limits the maximum
+            unique value count allowable in column distinct value count Metrics and Expectations.
+            Some examples: "very_few", "few", and "some"; corresponding to 10, 100, and 1,000 respectively.
+
+    OnboardingDataAssistant.run() Returns:
+        OnboardingDataAssistantResult
     """
 
     __alias__: str = "onboarding"
