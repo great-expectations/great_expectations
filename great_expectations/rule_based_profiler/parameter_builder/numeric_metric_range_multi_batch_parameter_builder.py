@@ -434,7 +434,11 @@ detected.
 """
             )
 
-        if estimator == "quantiles":
+        if estimator == "exact":
+            return ExactNumericRangeEstimator()
+
+        # Since complex numerical calculations do not support DateTime/TimeStamp data types, use "quantiles" estimator.
+        if estimator == "quantiles" or datetime_semantic_domain_type(domain=domain):
             return QuantilesNumericRangeEstimator(
                 configuration=Attributes(
                     {
@@ -444,9 +448,6 @@ detected.
                     }
                 )
             )
-
-        if estimator == "exact":
-            return ExactNumericRangeEstimator()
 
         if estimator == "bootstrap":
             return BootstrapNumericRangeEstimator(
