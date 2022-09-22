@@ -57,9 +57,6 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     if config_defaults is None:
         config_defaults = {}
 
-    # what is my config?
-    print(config)
-
     config = copy.deepcopy(config)
 
     module_name = config.pop("module_name", None)
