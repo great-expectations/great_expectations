@@ -26,6 +26,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import is_ndarray_datetime_dtype
 
 
 class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
@@ -132,8 +133,16 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             collection=metric_values
         )
 
+        unique_values_as_array: np.ndarray = np.asarray(unique_values)
+        if unique_values_as_array.ndim == 0:
+            unique_values_as_array = np.asarray([unique_values])
+
         details["parse_strings_as_datetimes"] = datetime_semantic_domain_type(
             domain=domain
+        ) or is_ndarray_datetime_dtype(
+            data=unique_values_as_array,
+            parse_strings_as_datetimes=False,
+            fuzzy=False,
         )
 
         return Attributes(

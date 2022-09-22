@@ -12,6 +12,7 @@ from great_expectations.rule_based_profiler.estimators.numeric_range_estimator i
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     build_numeric_range_estimation_result,
+    datetime_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import MetricValue
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -43,6 +44,7 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> NumericRangeEstimationResult:
+        datetime_detected: bool = datetime_semantic_domain_type(domain=domain)
         metric_values_converted: np.ndaarray
         (
             _,
@@ -50,7 +52,9 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
             metric_values_converted,
         ) = convert_ndarray_to_datetime_dtype_best_effort(
             data=metric_values,
+            datetime_detected=datetime_detected,
             parse_strings_as_datetimes=True,
+            fuzzy=False,
         )
         min_value: MetricValue = np.amin(a=metric_values_converted)
         max_value: MetricValue = np.amax(a=metric_values_converted)

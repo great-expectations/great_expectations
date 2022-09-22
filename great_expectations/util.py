@@ -1479,7 +1479,10 @@ def is_ndarray_datetime_dtype(
 
 
 def convert_ndarray_to_datetime_dtype_best_effort(
-    data: np.ndarray, parse_strings_as_datetimes: bool = False, fuzzy: bool = False
+    data: np.ndarray,
+    datetime_detected: bool = False,
+    parse_strings_as_datetimes: bool = False,
+    fuzzy: bool = False,
 ) -> Tuple[bool, bool, np.ndarray]:
     """
     Attempt to parse all elements of 1-D "np.ndarray" argument into "datetime.datetime" type objects.
@@ -1495,7 +1498,7 @@ def convert_ndarray_to_datetime_dtype_best_effort(
         return True, False, data
 
     value: Any
-    if is_ndarray_datetime_dtype(
+    if datetime_detected or is_ndarray_datetime_dtype(
         data=data, parse_strings_as_datetimes=parse_strings_as_datetimes, fuzzy=fuzzy
     ):
         try:

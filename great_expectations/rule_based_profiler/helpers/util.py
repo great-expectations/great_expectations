@@ -919,7 +919,9 @@ def convert_metric_values_to_float_dtype_best_effort(
         metric_values_converted,
     ) = convert_ndarray_to_datetime_dtype_best_effort(
         data=metric_values,
+        datetime_detected=False,
         parse_strings_as_datetimes=True,
+        fuzzy=False,
     )
     ndarray_is_datetime_type: bool = (
         original_ndarray_is_datetime_type

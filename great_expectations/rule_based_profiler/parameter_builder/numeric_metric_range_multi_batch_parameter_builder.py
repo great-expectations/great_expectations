@@ -31,6 +31,7 @@ from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_e
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     build_numeric_range_estimation_result,
+    datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
     integer_semantic_domain_type,
 )
@@ -534,7 +535,10 @@ detected.
             2,
             NUM_HISTOGRAM_BINS + 1,
         )
-        datetime_detected: bool = self._is_metric_values_ndarray_datetime_dtype(
+
+        datetime_detected: bool = datetime_semantic_domain_type(
+            domain=domain
+        ) or self._is_metric_values_ndarray_datetime_dtype(
             metric_values=metric_values,
             metric_value_vector_indices=metric_value_vector_indices,
         )
