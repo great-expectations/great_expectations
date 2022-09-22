@@ -1,4 +1,5 @@
 import copy
+import os
 import pathlib
 import random
 import string
@@ -82,6 +83,18 @@ def data_context_config_dict() -> dict:
 
 
 @pytest.fixture
+def data_context_directory(tmp_path: pathlib.Path) -> str:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+    DataContext.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    return project_path
+
+
+@pytest.fixture
 def data_context_config(data_context_config_dict: dict) -> DataContextConfig:
     config: DataContextConfig = DataContextConfig(**data_context_config_dict)
     return config
@@ -119,15 +132,15 @@ def cloud_data_context_variables(
 
 
 @pytest.fixture
-def file_data_context(
-    tmp_path: pathlib.Path, data_context_config: DataContextConfig
-) -> FileDataContext:
-    project_path = tmp_path / "file_data_context"
+def file_data_context(tmp_path: pathlib.Path) -> FileDataContext:
+    project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    context_root_dir = project_path / "great_expectations"
-    context = FileDataContext(
-        project_config=data_context_config, context_root_dir=str(context_root_dir)
-    )
+    project_path = str(project_path)
+    DataContext.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    context = FileDataContext(context_root_dir=context_path)
     return context
 
 
