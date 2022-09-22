@@ -65,6 +65,7 @@ exclude = [
     'datasource/data_connector/inferred_asset_file_path_data_connector\.py',  # 1
     'datasource/data_connector/inferred_asset_sql_data_connector\.py',  # 4
     'datasource/data_connector/runtime_data_connector\.py',  # 15
+    'datasource/data_connector/sorter/dictionary_sorter\.py', # 1
     'datasource/data_connector/sorter/sorter\.py',  # 1
     'datasource/data_connector/util\.py',  # 4
     'execution_engine/execution_engine\.py',  # 7
@@ -101,6 +102,7 @@ exclude = [
     'render/renderer/page_renderer\.py',  # 10
     'render/renderer/profiling_results_overview_section_renderer\.py',  # 2
     'render/renderer/site_builder\.py',  # 3
+    'render/renderer/slack_renderer\.py',  # 9
     'render/renderer/suite_edit_notebook_renderer\.py',  # 7
     'render/renderer/suite_scaffold_notebook_renderer\.py',  # 7
     'render/renderer/v3/suite_edit_notebook_renderer\.py',  # 11
@@ -128,6 +130,7 @@ exclude = [
     'rule_based_profiler/estimators',  # 23
     'rule_based_profiler/expectation_configuration_builder',  # 13
     'rule_based_profiler/helpers', # 16
+    'rule_based_profiler/parameter_builder/histogram_single_batch_parameter_builder\.py',  # 7
     'rule_based_profiler/parameter_builder/mean_table_columns_set_match_multi_batch_parameter_builder\.py',  # 2
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
     'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15
@@ -137,6 +140,7 @@ exclude = [
     'rule_based_profiler/parameter_builder/partition_parameter_builder\.py',  # 9
     'rule_based_profiler/parameter_builder/regex_pattern_string_parameter_builder\.py',  # 21
     'rule_based_profiler/parameter_builder/simple_date_format_string_parameter_builder\.py',  # 20
+    'rule_based_profiler/parameter_builder/value_counts_single_batch_parameter_builder\.py',  # 3
     'rule_based_profiler/parameter_builder/value_set_multi_batch_parameter_builder\.py',  # 2
     'rule_based_profiler/parameter_container\.py',  # 7
     'rule_based_profiler/rule',  # 51
