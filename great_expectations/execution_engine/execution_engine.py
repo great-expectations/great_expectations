@@ -395,8 +395,8 @@ class ExecutionEngine(ABC):
                 )
             except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
-                    message=str(e), failed_metrics=(metric_to_resolve,)
-                )
+                    message="Metric could not be resolved", failed_metrics=(metric_to_resolve,)
+                ) from e
 
         if len(metric_fn_bundle) > 0:
             try:
@@ -408,9 +408,9 @@ class ExecutionEngine(ABC):
                 resolved_metrics.update(new_resolved)
             except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
-                    message=str(e),
+                    message="Metric bundle could not be resolved",
                     failed_metrics=[x.metric_configuration for x in metric_fn_bundle],
-                )
+                ) from e
 
         if self._caching:
             self._metric_cache.update(resolved_metrics)
