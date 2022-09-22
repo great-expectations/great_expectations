@@ -1,6 +1,7 @@
 import copy
 import datetime
 import itertools
+import logging
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
@@ -56,6 +57,9 @@ from great_expectations.util import (
     is_ndarray_decimal_dtype,
     is_numeric,
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 MAX_DECIMALS: int = 9
 
@@ -437,8 +441,22 @@ detected.
         if estimator == "exact":
             return ExactNumericRangeEstimator()
 
+        if estimator == "quantiles":
+            return QuantilesNumericRangeEstimator(
+                configuration=Attributes(
+                    {
+                        "false_positive_rate": self.false_positive_rate,
+                        "round_decimals": round_decimals,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                    }
+                )
+            )
+
         # Since complex numerical calculations do not support DateTime/TimeStamp data types, use "quantiles" estimator.
-        if estimator == "quantiles" or datetime_semantic_domain_type(domain=domain):
+        if datetime_semantic_domain_type(domain=domain):
+            logger.warning(
+                f'Estimator "{estimator}" does not support DateTime/TimeStamp data types (downgrading to "quantiles").'
+            )
             return QuantilesNumericRangeEstimator(
                 configuration=Attributes(
                     {
