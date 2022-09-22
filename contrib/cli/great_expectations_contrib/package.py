@@ -295,7 +295,13 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         expectations: List[Type[Expectation]] = []
         names: List[str] = []
         for name, obj in inspect.getmembers(expectations_module):
-            if inspect.isclass(obj) and issubclass(obj, Expectation):
+            # ProfileNumericColumnsDiffExpectation from capitalone_dataprofiler_expectations
+            # is a base class that the contrib Expectations in that package all inherit from
+            if (
+                inspect.isclass(obj)
+                and issubclass(obj, Expectation)
+                and not obj.is_abstract()
+            ):
                 expectations.append(obj)
                 names.append(name)
 

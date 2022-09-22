@@ -950,3 +950,133 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
     )
     # check that the batch_spec_passthrough has worked
     assert batch[0].data.dataframe.head() == Row(x="1", y="2")
+
+
+@pytest.mark.integration
+def test_spark_with_batch_spec_passthrough_and_schema_in_batch_request(
+    tmp_path_factory, spark_session, spark_df_taxi_data_schema
+):
+    base_directory: str = str(tmp_path_factory.mktemp("basic_spark_datasource_taxi"))
+    # copy files into tmp directory
+    taxi_file: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "yellow_tripdata_sample_2019-01.csv",
+        ),
+    )
+    # copy the taxi_file into the base_directory
+    shutil.copy(taxi_file, base_directory)
+
+    datasource_config: dict = {
+        "name": "taxi_data",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "module_name": "great_expectations.execution_engine",
+            "class_name": "SparkDFExecutionEngine",
+        },
+        "data_connectors": {
+            "configured_data_connector_multi_batch_asset": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "base_directory": base_directory,
+                "assets": {
+                    "yellow_tripdata_2019": {
+                        "group_names": ["year", "month"],
+                        "pattern": "yellow_tripdata_sample_(2019)-(\\d.*)\\.csv",
+                    },
+                },
+            },
+        },
+    }
+
+    basic_datasource: Datasource = instantiate_class_from_config(
+        datasource_config,
+        runtime_environment={"name": "taxi_data"},
+        config_defaults={"module_name": "great_expectations.datasource"},
+    )
+
+    multi_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_data",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2019",
+        batch_spec_passthrough={
+            "reader_method": "csv",
+            "reader_options": {
+                "header": True,
+                "schema": spark_df_taxi_data_schema,
+            },
+        },
+    )
+
+    batch_list = basic_datasource.get_batch_list_from_batch_request(
+        batch_request=multi_batch_batch_request
+    )
+    assert batch_list[0].data.dataframe.schema == spark_df_taxi_data_schema
+
+
+@pytest.mark.integration
+def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
+    tmp_path_factory, spark_session, spark_df_taxi_data_schema
+):
+    base_directory: str = str(tmp_path_factory.mktemp("basic_spark_datasource_taxi"))
+    # copy files into tmp directory
+    taxi_file: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "yellow_tripdata_sample_2019-01.csv",
+        ),
+    )
+    # copy the taxi_file into the base_directory
+    shutil.copy(taxi_file, base_directory)
+
+    datasource_config: dict = {
+        "name": "taxi_data",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "module_name": "great_expectations.execution_engine",
+            "class_name": "SparkDFExecutionEngine",
+        },
+        "data_connectors": {
+            "configured_data_connector_multi_batch_asset": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "base_directory": base_directory,
+                "assets": {
+                    "yellow_tripdata_2019": {
+                        "group_names": ["year", "month"],
+                        "pattern": "yellow_tripdata_sample_(2019)-(\\d.*)\\.csv",
+                    },
+                },
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "schema": spark_df_taxi_data_schema,
+                    },
+                },
+            },
+        },
+    }
+
+    basic_datasource: Datasource = instantiate_class_from_config(
+        datasource_config,
+        runtime_environment={"name": "taxi_data"},
+        config_defaults={"module_name": "great_expectations.datasource"},
+    )
+
+    multi_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_data",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2019",
+    )
+
+    batch_list = basic_datasource.get_batch_list_from_batch_request(
+        batch_request=multi_batch_batch_request
+    )
+    assert batch_list[0].data.dataframe.schema == spark_df_taxi_data_schema

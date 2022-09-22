@@ -214,7 +214,7 @@ def test_validate_using_data_context_path(
     assert res["statistics"]["evaluated_expectations"] == 2
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.slow  # 1.61s
 def test_validate_invalid_parameters(
     dataset, basic_expectation_suite, data_context_parameterized_expectation_suite
@@ -820,20 +820,20 @@ def test_convert_ndarray_datetime_to_float_dtype(
     numeric_array,
 ):
     element: Any
-
     assert convert_ndarray_datetime_to_float_dtype(data=datetime_array).tolist() == [
-        element.timestamp() for element in datetime_array
+        element.replace(tzinfo=datetime.timezone.utc).timestamp()
+        for element in datetime_array
     ]
 
     with pytest.raises(AttributeError) as e:
         _ = convert_ndarray_datetime_to_float_dtype(data=numeric_array)
 
-    assert str(e.value) == "'int' object has no attribute 'timestamp'"
+    assert "'int' object has no attribute 'replace'" in str(e.value)
 
-    with pytest.raises(AttributeError) as e:
+    with pytest.raises(TypeError) as e:
         _ = convert_ndarray_datetime_to_float_dtype(data=datetime_string_array)
 
-    assert str(e.value) == "'str' object has no attribute 'timestamp'"
+    assert "replace() takes no keyword arguments" in str(e.value)
 
 
 @pytest.mark.unit
@@ -841,9 +841,11 @@ def test_convert_ndarray_float_to_datetime_tuple(
     datetime_array,
 ):
     element: Any
-
     assert convert_ndarray_float_to_datetime_tuple(
-        data=[element.timestamp() for element in datetime_array]
+        data=[
+            element.replace(tzinfo=datetime.timezone.utc).timestamp()
+            for element in datetime_array
+        ]
     ) == tuple([element for element in datetime_array])
 
     with pytest.raises(TypeError) as e:
