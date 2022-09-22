@@ -2,7 +2,8 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from marshmallow import fields, post_dump
+from great_expectations.core.util import convert_to_json_serializable
+from marshmallow import fields, post_dump, Schema
 
 from great_expectations.core.serializer import AbstractConfigSerializer
 from great_expectations.data_context.data_context_variables import DataContextVariables
@@ -33,6 +34,10 @@ class ConfigurationBundle:
         self._profilers: List[RuleBasedProfilerConfig] = self._get_all_profilers()
         self._validation_results: List[ExpectationSuiteValidationResult] = self._get_all_validation_results()
 
+    @property
+    def data_context_variables(self) -> DataContextVariables:
+        return self._data_context_variables
+
     def is_usage_statistics_key_set(self) -> bool:
         return self._data_context_variables.anonymous_usage_statistics.enabled
 
@@ -53,19 +58,44 @@ class ConfigurationBundle:
 
 
 
-class ConfigurationBundleSchema:
+class ConfigurationBundleSchema(Schema):
     """Marshmallow Schema for the Configuration Bundle."""
-    data_context_variables = fields.Nested(DataContextConfigSchema, allow_none=False)
-    expectation_suites = fields.List(fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True), required=True)
-    checkpoints = fields.List(fields.Nested(CheckpointConfigSchema, allow_none=True, required=True), required=True)
-    profilers = fields.List(fields.Nested(RuleBasedProfilerConfigSchema, allow_none=True, required=True), required=True)
-    validation_results = fields.List(fields.Nested(ExpectationSuiteValidationResultSchema, allow_none=True, required=True), required=True)
+    _data_context_variables = fields.Nested(DataContextConfigSchema, allow_none=False, data_key="data_context_variables")
+    _expectation_suites = fields.List(fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True), required=True, data_key="expectation_suites")
+    _checkpoints = fields.List(fields.Nested(CheckpointConfigSchema, allow_none=True, required=True), required=True, data_key="checkpoints")
+    _profilers = fields.List(fields.Nested(RuleBasedProfilerConfigSchema, allow_none=True, required=True), required=True, data_key="profilers")
+    _validation_results = fields.List(fields.Nested(ExpectationSuiteValidationResultSchema, allow_none=True, required=True), required=True, data_key="validation_results")
 
     @post_dump
     def clean_up(self, data, **kwargs):
         data_context_variables = data.get("data_context_variables", {})
         data_context_variables.pop("anonymous_usage_statistics", None)
         return data
+
+
+class ConfigurationBundleJsonSerializer:
+    def __init__(self, schema: Schema) -> None:
+        """
+
+        Args:
+            schema: Marshmallow schema defining raw serialized version of object.
+        """
+        self.schema = schema
+
+    def serialize(self, obj: ConfigurationBundle) -> dict:
+        """Serialize config to json dict.
+
+        Args:
+            obj: AbstractConfig object to serialize.
+
+        Returns:
+            Representation of object as a dict suitable for serializing to json.
+        """
+        config: dict = self.schema.dump(obj)
+
+        json_serializable_dict: dict = convert_to_json_serializable(data=config)
+
+        return json_serializable_dict
 
 
 @dataclass
