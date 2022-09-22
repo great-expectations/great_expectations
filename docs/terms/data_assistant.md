@@ -34,7 +34,7 @@ Even when working with data that you are familiar with and know is good, a Data 
 
 ### Easy profiling
 
-Data Assistants can function as pre-configured Profilers.  Since you can access them directly from your Data Context, they are easily accessible.  This ensures that they will always provide a quick, simple entry point to creating Expectations and <TechnicalTag tag="profiling" text="Profiling" /> your data.  However, the rules implemented by a Data Assistant are fully exposed in the parameters for its `run(...)` method.  This means that while you can use a Data Assistant easily out of the box, you can also customize it behavior to take advantage of the domain knowledge possessed by subject-matter experts.
+Data Assistants implement pre-configured Rule-Based Profilers under the hood, but also provide extended functionality.  They are easily accessible: You can call them directly from your Data Context.  This ensures that they will always provide a quick, simple entry point to creating Expectations and <TechnicalTag tag="profiling" text="Profiling" /> your data.  However, the rules implemented by a Data Assistant are also fully exposed in the parameters for its `run(...)` method.  This means that while you can use a Data Assistant easily out of the box, you can also customize it behavior to take advantage of the domain knowledge possessed by subject-matter experts.
 
 ### Multi-Batch introspection
 
