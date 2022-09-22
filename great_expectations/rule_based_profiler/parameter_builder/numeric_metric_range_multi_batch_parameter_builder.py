@@ -2,7 +2,7 @@ import copy
 import datetime
 import itertools
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Set, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -49,7 +49,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import is_ndarray_datetime_dtype, is_numeric
+from great_expectations.util import (
+    convert_ndarray_decimal_to_float_dtype,
+    is_ndarray_datetime_dtype,
+    is_ndarray_decimal_dtype,
+    is_numeric,
+)
 
 MAX_DECIMALS: int = 9
 
@@ -544,6 +549,14 @@ detected.
                 shape=estimation_histogram_shape, fill_value=datetime.datetime.min
             )
         else:
+            if self._is_metric_values_ndarray_decimal_dtype(
+                metric_values=metric_values,
+                metric_value_vector_indices=metric_value_vector_indices,
+            ):
+                metric_values = convert_ndarray_decimal_to_float_dtype(
+                    data=metric_values
+                )
+
             metric_value_range = np.zeros(shape=metric_value_range_shape)
             estimation_histogram = np.empty(shape=estimation_histogram_shape)
 
@@ -579,11 +592,11 @@ detected.
 
             min_value = numeric_range_estimation_result.value_range[0]
             if lower_bound is not None:
-                min_value = max(cast(float, min_value), lower_bound)
+                min_value = max(np.float64(min_value), np.float64(lower_bound))
 
             max_value = numeric_range_estimation_result.value_range[1]
             if upper_bound is not None:
-                max_value = min(cast(float, max_value), upper_bound)
+                max_value = min(np.float64(max_value), np.float64(upper_bound))
 
             # Obtain index of metric element (by discarding "N"-element samples dimension).
             metric_value_idx = metric_value_idx[1:]
@@ -604,12 +617,20 @@ detected.
                 metric_value_range[metric_value_range_min_idx] = min_value
                 metric_value_range[metric_value_range_max_idx] = max_value
             else:
-                metric_value_range[metric_value_range_min_idx] = round(
-                    cast(float, min_value), round_decimals
-                )
-                metric_value_range[metric_value_range_max_idx] = round(
-                    cast(float, max_value), round_decimals
-                )
+                if round_decimals is None:
+                    metric_value_range[metric_value_range_min_idx] = np.float64(
+                        min_value
+                    )
+                    metric_value_range[metric_value_range_max_idx] = np.float64(
+                        max_value
+                    )
+                else:
+                    metric_value_range[metric_value_range_min_idx] = round(
+                        np.float64(min_value), round_decimals
+                    )
+                    metric_value_range[metric_value_range_max_idx] = round(
+                        np.float64(max_value), round_decimals
+                    )
 
             # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
             estimation_histogram[
@@ -640,6 +661,19 @@ detected.
             if not is_ndarray_datetime_dtype(
                 data=metric_value_vector, parse_strings_as_datetimes=True
             ):
+                return False
+
+        return True
+
+    @staticmethod
+    def _is_metric_values_ndarray_decimal_dtype(
+        metric_values: np.ndarray,
+        metric_value_vector_indices: List[tuple],
+    ) -> bool:
+        metric_value_vector: np.ndarray
+        for metric_value_idx in metric_value_vector_indices:
+            metric_value_vector = metric_values[metric_value_idx]
+            if not is_ndarray_decimal_dtype(data=metric_value_vector):
                 return False
 
         return True
@@ -710,15 +744,15 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        if round_decimals is None:
-            round_decimals = MAX_DECIMALS
-        else:
-            if not isinstance(round_decimals, int) or (round_decimals < 0):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
+        if not (
+            round_decimals is None
+            or (isinstance(round_decimals, int) and (round_decimals >= 0))
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).
 """
-                )
+            )
 
         if np.issubdtype(metric_values.dtype, np.integer):
             round_decimals = 0

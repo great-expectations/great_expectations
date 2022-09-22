@@ -81,6 +81,10 @@ class DataConnector:
         return self._name
 
     @property
+    def id(self) -> Optional[str]:
+        return self._id
+
+    @property
     def datasource_name(self) -> str:
         return self._datasource_name
 
