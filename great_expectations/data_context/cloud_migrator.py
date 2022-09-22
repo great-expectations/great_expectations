@@ -2,69 +2,115 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
+
 from great_expectations.core.util import convert_to_json_serializable
 from marshmallow import fields, post_dump, Schema
 
-from great_expectations.core.serializer import AbstractConfigSerializer
 from great_expectations.data_context.data_context_variables import DataContextVariables
 
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig, RuleBasedProfilerConfigSchema
+from great_expectations.rule_based_profiler.config import (
+    RuleBasedProfilerConfig,
+    RuleBasedProfilerConfigSchema,
+)
 
-from great_expectations.core import ExpectationSuiteValidationResult, ExpectationSuite, ExpectationSuiteSchema, \
-    ExpectationSuiteValidationResultSchema
+from great_expectations.core import (
+    ExpectationSuiteValidationResult,
+    ExpectationSuite,
+    ExpectationSuiteSchema,
+    ExpectationSuiteValidationResultSchema,
+)
 from great_expectations.data_context import AbstractDataContext, BaseDataContext
 from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
-from great_expectations.data_context.types.base import GeCloudConfig, \
-    CheckpointConfig, CheckpointConfigSchema, DataContextConfigSchema
+from great_expectations.data_context.types.base import (
+    GeCloudConfig,
+    CheckpointConfig,
+    CheckpointConfigSchema,
+    DataContextConfigSchema,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 
 
 class ConfigurationBundle:
-
     def __init__(self, context: BaseDataContext) -> None:
 
         self._context = context
 
         self._data_context_variables: DataContextVariables = context.variables
 
-        self._expectation_suites: List[ExpectationSuite] = self._get_all_expectation_suites()
+        self._expectation_suites: List[
+            ExpectationSuite
+        ] = self._get_all_expectation_suites()
         self._checkpoints: List[CheckpointConfig] = self._get_all_checkpoints()
         self._profilers: List[RuleBasedProfilerConfig] = self._get_all_profilers()
-        self._validation_results: List[ExpectationSuiteValidationResult] = self._get_all_validation_results()
-
-    @property
-    def data_context_variables(self) -> DataContextVariables:
-        return self._data_context_variables
+        self._validation_results: List[
+            ExpectationSuiteValidationResult
+        ] = self._get_all_validation_results()
 
     def is_usage_statistics_key_set(self) -> bool:
         return self._data_context_variables.anonymous_usage_statistics.enabled
 
     def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
-        return [self._context.get_expectation_suite(name) for name in self._context.list_expectation_suite_names()]
+        return [
+            self._context.get_expectation_suite(name)
+            for name in self._context.list_expectation_suite_names()
+        ]
 
     def _get_all_checkpoints(self) -> List[CheckpointConfig]:
-        return [self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, ge_cloud_id=None) for checkpoint_name in self._context.list_checkpoints()]
-                # type: ignore[arg-type]
+        return [self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, ge_cloud_id=None) for checkpoint_name in self._context.list_checkpoints()]  # type: ignore[arg-type]
 
     def _get_all_profilers(self) -> List[RuleBasedProfilerConfig]:
-        return [self._context.get_profiler(name).config for name in self._context.list_profilers()]
+        def round_trip_profiler_config(profiler_config: RuleBasedProfilerConfig):
+            return ruleBasedProfilerConfigSchema.load(
+                ruleBasedProfilerConfigSchema.dump(profiler_config)
+            )
+
+        return [
+            round_trip_profiler_config(self._context.get_profiler(name).config)
+            for name in self._context.list_profilers()
+        ]
 
     def _get_all_validation_results(
         self,
     ) -> List[ExpectationSuiteValidationResult]:
-        return [self._context.validations_store.get(key) for key in self._context.validations_store.list_keys()]
-
+        return [
+            self._context.validations_store.get(key)
+            for key in self._context.validations_store.list_keys()
+        ]
 
 
 class ConfigurationBundleSchema(Schema):
     """Marshmallow Schema for the Configuration Bundle."""
-    _data_context_variables = fields.Nested(DataContextConfigSchema, allow_none=False, data_key="data_context_variables")
-    _expectation_suites = fields.List(fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True), required=True, data_key="expectation_suites")
-    _checkpoints = fields.List(fields.Nested(CheckpointConfigSchema, allow_none=True, required=True), required=True, data_key="checkpoints")
-    _profilers = fields.List(fields.Nested(RuleBasedProfilerConfigSchema, allow_none=True, required=True), required=True, data_key="profilers")
-    _validation_results = fields.List(fields.Nested(ExpectationSuiteValidationResultSchema, allow_none=True, required=True), required=True, data_key="validation_results")
+
+    _data_context_variables = fields.Nested(
+        DataContextConfigSchema, allow_none=False, data_key="data_context_variables"
+    )
+    _expectation_suites = fields.List(
+        fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True),
+        required=True,
+        data_key="expectation_suites",
+    )
+    _checkpoints = fields.List(
+        fields.Nested(CheckpointConfigSchema, allow_none=True, required=True),
+        required=True,
+        data_key="checkpoints",
+    )
+    _profilers = fields.List(
+        fields.Nested(RuleBasedProfilerConfigSchema, allow_none=True, required=True),
+        required=True,
+        data_key="profilers",
+    )
+    _validation_results = fields.List(
+        fields.Nested(
+            ExpectationSuiteValidationResultSchema, allow_none=True, required=True
+        ),
+        required=True,
+        data_key="validation_results",
+    )
 
     @post_dump
     def clean_up(self, data, **kwargs):
@@ -117,7 +163,6 @@ class CloudMigrator:
         self._ge_cloud_access_token = ge_cloud_access_token
         self._ge_cloud_organization_id = ge_cloud_organization_id
 
-
     @classmethod
     def migrate(
         cls,
@@ -167,12 +212,17 @@ class CloudMigrator:
     def _migrate_to_cloud(self, test_migrate: bool):
         """TODO: This is a rough outline of the steps to take during the migration, verify against the spec before release."""
         self._warn_if_test_migrate()
-        configuration_bundle: ConfigurationBundle = ConfigurationBundle(context=self._context)
-        self._warn_if_usage_stats_disabled(configuration_bundle.is_usage_statistics_key_set())
+        configuration_bundle: ConfigurationBundle = ConfigurationBundle(
+            context=self._context
+        )
+        self._warn_if_usage_stats_disabled(
+            configuration_bundle.is_usage_statistics_key_set()
+        )
         self._print_configuration_bundle(configuration_bundle)
         if not test_migrate:
+            configuration_bundle_serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
             configuration_bundle_response: AnyPayload = self._send_configuration_bundle(
-                configuration_bundle
+                configuration_bundle, configuration_bundle_serializer
             )
             self._print_send_configuration_bundle_error(configuration_bundle_response)
             self._break_for_send_configuration_bundle_error(
@@ -231,7 +281,9 @@ class CloudMigrator:
         pass
 
     def _send_configuration_bundle(
-        self, configuration_bundle: ConfigurationBundle, serializer: AbstractConfigSerializer
+        self,
+        configuration_bundle: ConfigurationBundle,
+        serializer: ConfigurationBundleJsonSerializer,
     ) -> AnyPayload:
         # Serialize
         # Use session to send to backend
@@ -246,8 +298,7 @@ class CloudMigrator:
         pass
 
     def _send_and_print_validation_results(
-        self,
-        test_migrate: bool
+        self, test_migrate: bool
     ) -> List[SendValidationResultsErrorDetails]:
         # TODO: Uses migrate_validation_result in a loop. Only sends if not self.test_migrate
         pass

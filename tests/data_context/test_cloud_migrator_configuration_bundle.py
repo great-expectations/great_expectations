@@ -2,6 +2,10 @@
 from dataclasses import dataclass
 
 import pytest
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
+
 from great_expectations.core.util import convert_to_json_serializable
 
 from great_expectations.rule_based_profiler import RuleBasedProfiler
@@ -10,9 +14,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
     ExpectationSuiteIdentifier,
 )
-
-
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 from great_expectations.checkpoint import Checkpoint
 
@@ -26,12 +27,13 @@ from great_expectations.core import (
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.cloud_migrator import (
     ConfigurationBundle,
-    ConfigurationBundleSchema, ConfigurationBundleJsonSerializer,
+    ConfigurationBundleSchema,
+    ConfigurationBundleJsonSerializer,
 )
 
 
 @dataclass
-class SavedItems:
+class DataContextWithSavedItems:
     context: BaseDataContext
     expectation_suite: ExpectationSuite
     checkpoint: Checkpoint
@@ -42,7 +44,7 @@ class SavedItems:
 @pytest.fixture
 def in_memory_runtime_context_with_configs_in_stores(
     in_memory_runtime_context: BaseDataContext, profiler_rules: dict
-) -> SavedItems:
+) -> DataContextWithSavedItems:
 
     context: BaseDataContext = in_memory_runtime_context
 
@@ -67,7 +69,6 @@ def in_memory_runtime_context_with_configs_in_stores(
     # Add validation result
     expectation_suite_validation_result = ExpectationSuiteValidationResult(
         success=True,
-        # meta=expectation_suite_validation_result_meta,
     )
     context.validations_store.set(
         key=ValidationResultIdentifier(
@@ -78,7 +79,7 @@ def in_memory_runtime_context_with_configs_in_stores(
         value=expectation_suite_validation_result,
     )
 
-    return SavedItems(
+    return DataContextWithSavedItems(
         context=context,
         expectation_suite=expectation_suite,
         checkpoint=checkpoint,
@@ -104,10 +105,7 @@ def list_of_dicts_equal(list_1: list, list_2: list) -> bool:
 
 @pytest.mark.integration
 def test_configuration_bundle_init(
-    in_memory_runtime_context_with_configs_in_stores: SavedItems,
-    in_memory_runtime_context: BaseDataContext,
-    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
-    profiler_rules: dict,
+    in_memory_runtime_context_with_configs_in_stores: DataContextWithSavedItems,
 ):
     """What does this test and why?
 
@@ -127,18 +125,24 @@ def test_configuration_bundle_init(
         config_bundle._data_context_variables.checkpoint_store_name
         == "checkpoint_store"
     )
+    assert config_bundle._data_context_variables.progress_bars is None
 
     assert config_bundle._expectation_suites == [
         in_memory_runtime_context_with_configs_in_stores.expectation_suite
     ]
 
-    # TODO: Add these assets:
     assert list_of_dicts_equal(
         config_bundle._checkpoints,
         [in_memory_runtime_context_with_configs_in_stores.checkpoint.config],
     )
-    # assert list_of_dicts_equal(config_bundle._profilers, [in_memory_runtime_context_with_configs_in_stores.profiler.config])
-    # assert config_bundle._profilers[0] == profiler.config
+
+    roundtripped_profiler_config = ruleBasedProfilerConfigSchema.load(
+        ruleBasedProfilerConfigSchema.dump(
+            in_memory_runtime_context_with_configs_in_stores.profiler.config
+        )
+    )
+    assert list_of_dicts_equal(config_bundle._profilers, [roundtripped_profiler_config])
+
     assert config_bundle._validation_results == [
         in_memory_runtime_context_with_configs_in_stores.validation_result
     ]
@@ -146,7 +150,7 @@ def test_configuration_bundle_init(
 
 @pytest.mark.integration
 def test_configuration_bundle_serialization(
-    in_memory_runtime_context_with_configs_in_stores: SavedItems,
+    in_memory_runtime_context_with_configs_in_stores: DataContextWithSavedItems,
 ):
     """What does this test and why?
 
@@ -162,7 +166,7 @@ def test_configuration_bundle_serialization(
 
     serialized_bundle: dict = serializer.serialize(config_bundle)
 
-    assert serialized_bundle == {
+    expected_serialized_bundle = {
         "checkpoints": [
             {
                 "action_list": [
@@ -302,3 +306,9 @@ def test_configuration_bundle_serialization(
             }
         ],
     }
+
+    # Remove meta before comparing since it contains the GX version
+    serialized_bundle["expectation_suites"][0].pop("meta", None)
+    expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
+
+    assert serialized_bundle == expected_serialized_bundle
