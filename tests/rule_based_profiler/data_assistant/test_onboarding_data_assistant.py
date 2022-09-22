@@ -1,4 +1,6 @@
+import io
 import os
+from contextlib import redirect_stdout
 from typing import Any, Dict, List, Optional, cast
 from unittest import mock
 
@@ -318,9 +320,9 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
 @pytest.mark.integration
 @pytest.mark.slow  # 39.26s
 def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
-    quentin_columnar_table_multi_batch_data_context,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -425,6 +427,7 @@ def test_onboarding_data_assistant_get_metrics_and_expectations_using_implicit_i
     )
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 25.61s
 def test_onboarding_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
@@ -848,4 +851,43 @@ def test_onboarding_data_assistant_metrics_and_expectations_plot_descriptive_non
         context=context,
         new_cell=new_cell,
         implicit=True,
+    )
+
+
+@pytest.mark.integration
+def test_onboarding_data_assistant_result_empty_suite_plot_metrics_and_expectations(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+):
+    data_assistant_result: OnboardingDataAssistantResult = (
+        bobby_onboarding_data_assistant_result
+    )
+    data_assistant_result.expectation_configurations = []
+
+    try:
+        data_assistant_result.plot_expectations_and_metrics()
+    except Exception as exc:
+        assert (
+            False
+        ), f"DataAssistantResult.plot_expectations_and_metrics raised an exception '{exc}'"
+
+
+@pytest.mark.integration
+def test_onboarding_data_assistant_plot_metrics_stdout(
+    bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
+):
+    data_assistant_result: OnboardingDataAssistantResult = (
+        bobby_onboarding_data_assistant_result
+    )
+
+    metrics_calculated = 150
+    metrics_plots_implemented = 102
+
+    f = io.StringIO()
+    with redirect_stdout(f):
+        data_assistant_result.plot_metrics()
+    stdout = f.getvalue()
+    assert (
+        f"""{metrics_calculated} Metrics calculated, {metrics_plots_implemented} Metric plots implemented
+Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
+        in stdout
     )

@@ -104,13 +104,14 @@ module.exports = {
             'guides/connecting_to_your_data/how_to_choose_between_working_with_a_single_or_multiple_batches_of_data',
             'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource',
             'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource',
+            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource',
             'guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector',
             'guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector',
             'guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector',
             'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
             'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
             'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-            'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource'
+            'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource'
           ]
         },
         {
@@ -402,6 +403,7 @@ module.exports = {
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
+            'terms/data_assistant',
             'terms/data_connector',
             'terms/data_docs',
             'terms/evaluation_parameter',

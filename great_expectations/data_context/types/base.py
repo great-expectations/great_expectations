@@ -159,8 +159,126 @@ class BaseYamlConfig(SerializableDictDot):
         raise NotImplementedError
 
 
+class SorterConfig(DictDot):
+    def __init__(  # type: ignore[no-untyped-def]
+        self,
+        name,
+        class_name=None,
+        module_name=None,
+        orderby="asc",
+        reference_list=None,
+        order_keys_by=None,
+        key_reference_list=None,
+        datetime_format=None,
+        **kwargs,
+    ) -> None:
+        self._name = name
+        self._class_name = class_name
+        self._module_name = module_name
+        self._orderby = orderby
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+        if reference_list is not None:
+            self._reference_list = reference_list
+
+        if order_keys_by is not None:
+            self._order_keys_by = order_keys_by
+
+        if key_reference_list is not None:
+            self._key_reference_list = key_reference_list
+
+        if datetime_format is not None:
+            self._datetime_format = datetime_format
+
+    @property
+    def name(self):  # type: ignore[no-untyped-def]
+        return self._name
+
+    @property
+    def module_name(self):  # type: ignore[no-untyped-def]
+        return self._module_name
+
+    @property
+    def class_name(self):  # type: ignore[no-untyped-def]
+        return self._class_name
+
+    @property
+    def orderby(self):  # type: ignore[no-untyped-def]
+        return self._orderby
+
+    @property
+    def reference_list(self):  # type: ignore[no-untyped-def]
+        return self._reference_list
+
+    @property
+    def order_keys_by(self):  # type: ignore[no-untyped-def]
+        return self._order_keys_by
+
+    @property
+    def key_reference_list(self):  # type: ignore[no-untyped-def]
+        return self._key_reference_list
+
+    @property
+    def datetime_format(self):  # type: ignore[no-untyped-def]
+        return self._datetime_format
+
+
+class SorterConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    name = fields.String(required=True)
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
+    )
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.datasource.data_connector.sorter",
+    )
+    orderby = fields.String(
+        required=False,
+        allow_none=True,
+        missing="asc",
+    )
+
+    # allow_none = True because it is only used by some Sorters
+    reference_list = fields.List(
+        cls_or_instance=fields.Str(),
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+    order_keys_by = fields.String(
+        required=False,
+        allow_none=True,
+    )
+    key_reference_list = fields.List(
+        cls_or_instance=fields.Str(),
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+    datetime_format = fields.String(
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs) -> None:
+        pass
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_sorter_config(self, data, **kwargs):
+        return SorterConfig(**data)
+
+
 class AssetConfig(SerializableDictDot):
-    def __init__(
+    def __init__(  # noqa: C901 - complexity 16
         self,
         name: Optional[str] = None,
         class_name: Optional[str] = None,
@@ -174,6 +292,7 @@ class AssetConfig(SerializableDictDot):
         batch_identifiers: Optional[List[str]] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[Dict[str, str]] = None,
+        sorters: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[Dict[str, str]] = None,
         reader_options: Optional[Dict[str, Any]] = None,
@@ -201,6 +320,8 @@ class AssetConfig(SerializableDictDot):
             self.splitter_method = splitter_method
         if splitter_kwargs is not None:
             self.splitter_kwargs = splitter_kwargs
+        if sorters is not None:
+            self.sorters = sorters
         if sampling_method is not None:
             self.sampling_method = sampling_method
         if sampling_kwargs is not None:
@@ -267,8 +388,18 @@ class AssetConfigSchema(Schema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
 
+    data_asset_name_prefix = fields.String(required=False, allow_none=True)
+    data_asset_name_suffix = fields.String(required=False, allow_none=True)
+    include_schema_name = fields.Boolean(required=False, allow_none=True)
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sorters = fields.List(
+        cls_or_instance=fields.Nested(
+            SorterConfigSchema, required=False, allow_none=True
+        ),
+        required=False,
+        allow_none=True,
+    )
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
 
@@ -305,98 +436,6 @@ class AssetConfigSchema(Schema):
         return AssetConfig(**data)
 
 
-class SorterConfig(DictDot):
-    def __init__(  # type: ignore[no-untyped-def]
-        self,
-        name,
-        class_name=None,
-        module_name=None,
-        orderby="asc",
-        reference_list=None,
-        datetime_format=None,
-        **kwargs,
-    ) -> None:
-        self._name = name
-        self._class_name = class_name
-        self._module_name = module_name
-        self._orderby = orderby
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-        if reference_list is not None:
-            self._reference_list = reference_list
-
-        if datetime_format is not None:
-            self._datetime_format = datetime_format
-
-    @property
-    def name(self):  # type: ignore[no-untyped-def]
-        return self._name
-
-    @property
-    def module_name(self):  # type: ignore[no-untyped-def]
-        return self._module_name
-
-    @property
-    def class_name(self):  # type: ignore[no-untyped-def]
-        return self._class_name
-
-    @property
-    def orderby(self):  # type: ignore[no-untyped-def]
-        return self._orderby
-
-    @property
-    def reference_list(self):  # type: ignore[no-untyped-def]
-        return self._reference_list
-
-    @property
-    def datetime_format(self):  # type: ignore[no-untyped-def]
-        return self._datetime_format
-
-
-class SorterConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    name = fields.String(required=True)
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
-    module_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="great_expectations.datasource.data_connector.sorter",
-    )
-    orderby = fields.String(
-        required=False,
-        allow_none=True,
-        missing="asc",
-    )
-
-    # allow_none = True because it is only used by some Sorters
-    reference_list = fields.List(
-        cls_or_instance=fields.Str(),
-        required=False,
-        missing=None,
-        allow_none=True,
-    )
-    datetime_format = fields.String(
-        required=False,
-        missing=None,
-        allow_none=True,
-    )
-
-    @validates_schema
-    def validate_schema(self, data, **kwargs) -> None:
-        pass
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_sorter_config(self, data, **kwargs):
-        return SorterConfig(**data)
-
-
 class DataConnectorConfig(AbstractConfig):
     def __init__(  # noqa: C901 - 20
         self,
@@ -410,8 +449,6 @@ class DataConnectorConfig(AbstractConfig):
         glob_directive=None,
         default_regex=None,
         batch_identifiers=None,
-        sorters=None,
-        batch_spec_passthrough=None,
         # S3
         boto3_options=None,
         bucket=None,
@@ -427,6 +464,19 @@ class DataConnectorConfig(AbstractConfig):
         prefix=None,
         # Both S3/Azure
         delimiter=None,
+        data_asset_name_prefix=None,
+        data_asset_name_suffix=None,
+        include_schema_name=None,
+        splitter_method=None,
+        splitter_kwargs=None,
+        sorters=None,
+        sampling_method=None,
+        sampling_kwargs=None,
+        excluded_tables=None,
+        included_tables=None,
+        skip_inapplicable_tables=None,
+        introspection_directives=None,
+        batch_spec_passthrough=None,
         **kwargs,
     ) -> None:
         self._class_name = class_name
@@ -443,8 +493,30 @@ class DataConnectorConfig(AbstractConfig):
             self.default_regex = default_regex
         if batch_identifiers is not None:
             self.batch_identifiers = batch_identifiers
+        if data_asset_name_prefix is not None:
+            self.data_asset_name_prefix = data_asset_name_prefix
+        if data_asset_name_suffix is not None:
+            self.data_asset_name_suffix = data_asset_name_suffix
+        if include_schema_name is not None:
+            self.include_schema_name = include_schema_name
+        if splitter_method is not None:
+            self.splitter_method = splitter_method
+        if splitter_kwargs is not None:
+            self.splitter_kwargs = splitter_kwargs
         if sorters is not None:
             self.sorters = sorters
+        if sampling_method is not None:
+            self.sampling_method = sampling_method
+        if sampling_kwargs is not None:
+            self.sampling_kwargs = sampling_kwargs
+        if excluded_tables is not None:
+            self.excluded_tables = excluded_tables
+        if included_tables is not None:
+            self.included_tables = included_tables
+        if skip_inapplicable_tables is not None:
+            self.skip_inapplicable_tables = skip_inapplicable_tables
+        if introspection_directives is not None:
+            self.introspection_directives = introspection_directives
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
 
@@ -538,11 +610,6 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
 
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
-    sorters = fields.List(
-        fields.Nested(SorterConfigSchema, required=False, allow_none=True),
-        required=False,
-        allow_none=True,
-    )
     default_regex = fields.Dict(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
     batch_identifiers = fields.List(
@@ -581,8 +648,16 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     include_schema_name = fields.Boolean(required=False, allow_none=True)
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
+    sorters = fields.List(
+        cls_or_instance=fields.Nested(
+            SorterConfigSchema, required=False, allow_none=True
+        ),
+        required=False,
+        allow_none=True,
+    )
     sampling_method = fields.String(required=False, allow_none=True)
     sampling_kwargs = fields.Dict(required=False, allow_none=True)
+
     excluded_tables = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
@@ -590,6 +665,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
+    introspection_directives = fields.Dict(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
@@ -1079,6 +1155,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
+
         if (
             "connection_string" in data
             or "credentials" in data
@@ -1408,40 +1485,19 @@ class ConcurrencyConfigSchema(Schema):
 
 
 class GeCloudConfig(DictDot):
-    # TODO: deprecate account_id arg
     def __init__(
         self,
         base_url: str,
-        account_id: str = None,
-        access_token: str = None,
-        organization_id: str = None,
+        access_token: Optional[str] = None,
+        organization_id: Optional[str] = None,
     ) -> None:
-        # access_token was given a default value to maintain arg position of account_id
+        # access_token was given a default value to maintain arg position of organization_id
         if access_token is None:
             raise ValueError("Access token cannot be None.")
-        # exclusive or
-        if not (bool(account_id) ^ bool(organization_id)):
-            raise ValueError(
-                "Must provide either (and only) account_id or organization_id."
-            )
-        if account_id is not None:
-            logger.warning(
-                'The "account_id" argument has been renamed "organization_id" and will be deprecated in '
-                "the next major release."
-            )
 
         self.base_url = base_url
-        self.organization_id = organization_id or account_id
+        self.organization_id = organization_id
         self.access_token = access_token
-
-    # TODO: remove property when account_id is deprecated
-    @property
-    def account_id(self):
-        logger.warning(
-            'The "account_id" attribute has been renamed to "organization_id" and will be deprecated in '
-            "the next major release."
-        )
-        return self.organization_id
 
     def to_json_dict(self):
         # postpone importing to avoid circular imports
@@ -1451,7 +1507,6 @@ class GeCloudConfig(DictDot):
             "base_url": self.base_url,
             "organization_id": self.organization_id,
             "access_token": PasswordMasker.MASKED_PASSWORD_STRING,
-            "account_id": self.account_id,  # TODO: remove when account_id is deprecated
         }
 
 

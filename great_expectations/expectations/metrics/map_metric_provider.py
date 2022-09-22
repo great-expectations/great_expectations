@@ -22,6 +22,7 @@ from great_expectations.execution_engine.execution_engine import (
 from great_expectations.execution_engine.polars_execution_engine import (
     PolarsExecutionEngine,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
@@ -2532,7 +2533,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         count_selectable = count_selectable.select_from(selectable)
 
     try:
-        if execution_engine.engine.dialect.name.lower() == "mssql":
+        if execution_engine.engine.dialect.name.lower() == GESqlDialect.MSSQL:
             temp_table_name: str = generate_temporary_table_name(
                 default_table_name_prefix="#ge_temp_"
             )
@@ -2634,7 +2635,7 @@ def _sqlalchemy_column_map_condition_values(
         query = query.limit(result_format["partial_unexpected_count"])
     elif (
         result_format["result_format"] == "COMPLETE"
-        and execution_engine.engine.dialect.name.lower() == "bigquery"
+        and execution_engine.engine.dialect.name.lower() == GESqlDialect.BIGQUERY
     ):
         logger.warning(
             "BigQuery imposes a limit of 10000 parameters on individual queries; "

@@ -122,9 +122,10 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         ).fetchall()
         # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.
         series = pd.Series(
-            [row[1] for row in results],
+            data=[row[1] for row in results],
             index=pd.Index(data=[row[0] for row in results], name="value"),
             name="count",
+            dtype="object",
         )
         return series
 
@@ -156,15 +157,23 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         value_counts_df: pyspark_sql_DataFrame = (
             df.select(column).where(F.col(column).isNotNull()).groupBy(column).count()
         )
+
         if sort == "value":
             value_counts_df = value_counts_df.orderBy(column)
         elif sort == "count":
             value_counts_df = value_counts_df.orderBy(F.desc("count"))
+
         value_counts: List[pyspark_sql_Row] = value_counts_df.collect()
+
         # Numpy does not always infer the correct DataTypes for Spark df, so we cannot use vectorized approach.
-        values: Any
-        counts: int
-        values, counts = zip(*value_counts)
+        values: List[Any]
+        counts: List[int]
+        if len(value_counts) > 0:
+            values, counts = zip(*value_counts)
+        else:
+            values = []
+            counts = []
+
         series = pd.Series(
             counts,
             index=pd.Index(data=values, name="value"),

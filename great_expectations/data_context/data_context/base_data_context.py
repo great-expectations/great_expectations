@@ -300,11 +300,20 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # initialize runtime_environment as empty dict if None
         runtime_environment = runtime_environment or {}
         if self._ge_cloud_mode:
+            ge_cloud_base_url: Optional[str] = None
+            ge_cloud_access_token: Optional[str] = None
+            ge_cloud_organization_id: Optional[str] = None
+            if ge_cloud_config:
+                ge_cloud_base_url = ge_cloud_config.base_url
+                ge_cloud_access_token = ge_cloud_config.access_token
+                ge_cloud_organization_id = ge_cloud_config.organization_id
             self._data_context = CloudDataContext(
                 project_config=project_config,
                 runtime_environment=runtime_environment,
                 context_root_dir=context_root_dir,  # type: ignore[arg-type]
-                ge_cloud_config=ge_cloud_config,  # type: ignore[assignment,arg-type]
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_access_token=ge_cloud_access_token,
+                ge_cloud_organization_id=ge_cloud_organization_id,
             )
         elif self._context_root_directory:
             self._data_context = FileDataContext(  # type: ignore[assignment]

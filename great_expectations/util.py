@@ -25,6 +25,7 @@ from inspect import (
     getclosurevars,
     getmodule,
     signature,
+    stack,
 )
 from numbers import Number
 from pathlib import Path
@@ -1199,6 +1200,12 @@ def deep_filter_properties_iterable(
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
 ) -> Optional[Union[dict, list, set]]:
+    if keep_fields is None:
+        keep_fields = set()
+
+    if delete_fields is None:
+        delete_fields = set()
+
     if isinstance(properties, dict):
         if not inplace:
             properties = copy.deepcopy(properties)
@@ -1226,10 +1233,11 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         keys_to_delete: List[str] = list(
             filter(
-                lambda k: _is_to_be_removed_from_deep_filter_properties_iterable(
+                lambda k: k not in keep_fields
+                and _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=properties[k],
                     clean_nulls=clean_nulls,
                     clean_falsy=clean_falsy,
@@ -1257,7 +1265,7 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         properties_type: type = type(properties)
         properties = properties_type(
             filter(
@@ -1283,7 +1291,7 @@ def _is_to_be_removed_from_deep_filter_properties_iterable(
     conditions: Tuple[bool, ...] = (
         clean_nulls and value is None,
         not keep_falsy_numerics and is_numeric(value) and value == 0,
-        clean_falsy and not is_numeric(value) and not value,
+        clean_falsy and not (is_numeric(value) or value),
     )
     return any(condition for condition in conditions)
 
@@ -1340,7 +1348,20 @@ def convert_decimal_to_float(d: decimal.Decimal) -> float:
     """
     This method convers "decimal.Decimal" to standard "float" type.
     """
-    if requires_lossy_conversion(d=d):
+    rule_based_profiler_call: bool = (
+        len(
+            list(
+                filter(
+                    lambda frame_info: Path(frame_info.filename).name
+                    == "parameter_builder.py"
+                    and frame_info.function == "get_metrics",
+                    stack(),
+                )
+            )
+        )
+        > 0
+    )
+    if not rule_based_profiler_call and requires_lossy_conversion(d=d):
         logger.warning(
             f"Using lossy conversion for decimal {d} to float object to support serialization."
         )
@@ -1494,7 +1515,9 @@ def convert_ndarray_datetime_to_float_dtype(data: np.ndarray) -> np.ndarray:
     Convert all elements of 1-D "np.ndarray" argument from "datetime.datetime" type to "timestamp" "float" type objects.
     """
     value: Any
-    return np.asarray([value.timestamp() for value in data])
+    return np.asarray(
+        [value.replace(tzinfo=datetime.timezone.utc).timestamp() for value in data]
+    )
 
 
 def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
@@ -1502,7 +1525,7 @@ def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
     Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type objects.
     """
     value: Any
-    return np.asarray([datetime.datetime.fromtimestamp(value) for value in data])
+    return np.asarray([datetime.datetime.utcfromtimestamp(value) for value in data])
 
 
 def convert_ndarray_float_to_datetime_tuple(

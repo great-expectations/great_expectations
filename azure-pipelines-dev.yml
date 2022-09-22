@@ -1,12 +1,10 @@
-# This file is responsible for configuring the `dependency_graph` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+# This file is responsible for configuring the `dev` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
 #
 # The pipeline is run under the following conditions:
 #   - On the develop branch whenever a commit is made to an open PR
 #
-# `dependency_graph` runs a subset of test suite, aiming to only test what's relevant to attain coverage over a given set of changes.
+# `dev` runs unit tests for any directories that have sufficient coverage and integration tests for those that don't.
 # The pipeline aims to balance both performance and safety to improve the developer experience but is innately less thorough than `great_expectations`.
-#
-# Note that `dependency_graph` makes heavy use of dgtest (https://github.com/superconductive/dgtest)
 
 trigger:
   branches:
@@ -133,7 +131,7 @@ stages:
       steps:
       - script: |
           pip install flake8
-          # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
+          # https://www.flake8rules.com/rules/F401.html
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
 
@@ -248,20 +246,16 @@ stages:
               pip install pytest-cov pytest-icdiff pytest-mock pytest-azurepipelines invoke
 
               # Run unit-tests
-              invoke tests --ci --cloud  --timeout=3.0
+              invoke tests --ci --cloud --timeout=3.0
 
             displayName: 'Unit Tests'
 
           - script: |
-              # Install dependencies
-              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
-              pip install pytest-cov pytest-azurepipelines
+              # Run pytest
+              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit and not e2e' --durations=10
 
-              # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit' --durations=10
-
-            displayName: 'dgtest'
+            displayName: 'pytest'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -326,41 +320,20 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              # Install dependencies
-              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
 
-              # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              # Run pytest
+              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not e2e'
 
-            displayName: 'dgtest'
-
-          - script: |
-              # These are tests that are missed by the dgtest dependency graph.
-              # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest \
-                tests/core/test_urn.py \
-                tests/core/usage_statistics/test_package_dependencies.py \
-                tests/data_asset/test_data_asset_util.py \
-                tests/data_context/test_data_context_store_configs.py \
-                tests/data_context/test_templates.py \
-                tests/dataset/test_pandas_dataset_conditionals.py \
-                tests/datasource/test_batch_kwargs.py \
-                tests/datasource/test_sqlalchemy_datasource_workarounds.py \
-                tests/expectations/test_generate_diagnostic_checklist.py \
-                tests/test_deprecation.py \
-                tests/test_packaging.py \
-                tests/test_release.py
-
-            displayName: 'dgtest-general-overrides'
+            displayName: 'pytest'
 
           - script: |
               # These are tests that are specific to Great Expectations Cloud.
               # In order to ensure coverage, we run them during each CI/CD cycle.
               pytest tests --cloud -m "cloud and not e2e"
 
-            displayName: 'dgtest-cloud-overrides'
+            displayName: 'cloud-overrides'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -402,7 +375,7 @@ stages:
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              pip install pytest pytest-azurepipelines
+              pip install pytest-azurepipelines
               pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
@@ -454,15 +427,13 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install --requirement requirements.txt
-              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
 
-              # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
+              # Run pytest
+              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-            displayName: 'dgtest'
+            displayName: 'pytest'
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
@@ -494,14 +465,13 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
 
-              # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
+              # Run pytest
+              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-            displayName: 'dgtest'
+            displayName: 'pytest'
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
@@ -539,15 +509,13 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install --requirement requirements.txt
-              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
               pip install pytest-cov pytest-azurepipelines
 
-              # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
+              # Run pytest
+              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
-            displayName: 'dgtest'
+            displayName: 'pytest'
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, import_ge, custom_checks]
@@ -580,10 +548,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              # Install dependencies
-              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
+              # Run pytest
+              pytest --postgresql --spark --aws-integration tests/cli
 
-              # Run dgtest
-              dgtest run great_expectations --filter 'tests/cli' --aws-integration -v
-
-            displayName: 'dgtest'
+            displayName: 'pytest'
