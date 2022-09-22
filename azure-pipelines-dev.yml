@@ -263,9 +263,6 @@ stages:
               COVERALLS_REPO_TOKEN: $(coveralls)
 
           - script: |
-              # Install dependencies
-              pip install -e git+https://github.com/superconductive/dgtest/#egg=dgtest
-              pip install pytest-cov pytest-azurepipelines
               # Run pytest
               pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit and not e2e' --durations=10
