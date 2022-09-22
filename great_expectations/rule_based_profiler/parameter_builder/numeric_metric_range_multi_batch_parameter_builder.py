@@ -454,7 +454,7 @@ detected.
 
         # Since complex numerical calculations do not support DateTime/TimeStamp data types, use "quantiles" estimator.
         if datetime_semantic_domain_type(domain=domain):
-            logger.warning(
+            logger.info(
                 f'Estimator "{estimator}" does not support DateTime/TimeStamp data types (downgrading to "quantiles").'
             )
             return QuantilesNumericRangeEstimator(
