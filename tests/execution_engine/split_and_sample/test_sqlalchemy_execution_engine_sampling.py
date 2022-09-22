@@ -114,6 +114,8 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
     split_on_limit should build the appropriate query based on input parameters.
     This tests dialects that differ from the standard dialect, not each dialect exhaustively.
     """
+    if "demio" in dialect_name.value:
+        pytest.xfail("DREMIO ISSUES")
 
     # 1. Setup
     class MockSqlAlchemyExecutionEngine:
