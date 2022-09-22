@@ -317,7 +317,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         elif self._context_root_directory:
             self._data_context = FileDataContext(  # type: ignore[assignment]
-                project_config=project_config,
                 context_root_dir=context_root_dir,  # type: ignore[arg-type]
                 runtime_environment=runtime_environment,
             )

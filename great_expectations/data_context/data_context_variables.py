@@ -302,6 +302,7 @@ class EphemeralDataContextVariables(DataContextVariables):
         return store
 
 
+# Marker
 @dataclass(repr=False)
 class FileDataContextVariables(DataContextVariables):
     data_context: Optional["DataContext"] = None
