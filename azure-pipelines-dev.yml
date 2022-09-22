@@ -256,7 +256,7 @@ stages:
               pip install coveralls
               export CIRCLE_BRANCH=$BUILD_SOURCEBRANCH
               coveralls
-            displayName: 'coveralls'
+            displayName: 'coveralls for Unit Tests'
             env:
               CIRCLECI: 1
               CIRCLE_BUILD_NUM: $(Build.BuildNumber)
