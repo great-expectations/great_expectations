@@ -36,7 +36,7 @@ class FileDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: Union[DataContextConfig, Mapping],
+        # project_config: Union[DataContextConfig, Mapping],
         context_root_dir: str,
         runtime_environment: Optional[dict] = None,
     ) -> None:
@@ -50,9 +50,10 @@ class FileDataContext(AbstractDataContext):
                 config_variables.yml and the environment
         """
         self._context_root_directory = context_root_dir
-        self._project_config = self._apply_global_config_overrides(
-            config=project_config
-        )
+        # self._project_config = self._apply_global_config_overrides(
+        #    config=project_config
+        # )
+        # self._project_config = self._load_config_variables()
         self._variables: FileDataContextVariables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 

@@ -1556,6 +1556,8 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
+# import great_expectations as ge
+# ge.get_context()
 def get_context(
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
@@ -1566,33 +1568,27 @@ def get_context(
     ge_cloud_organization_id: Optional[str] = None,
     ge_cloud_config: Optional[Any] = None,
 ):
-    from great_expectations.data_context.types.base import (
-        DataContextConfig,
-        GeCloudConfig,
-    )
-
-    if (
-        all(
-            [
-                context_root_dir,
-                runtime_environment,
-                project_config,
-                ge_cloud_mode,
-                ge_cloud_base_url,
-                ge_cloud_access_token,
-                ge_cloud_organization_id,
-            ]
-        )
-        is None
+    if all(
+        param is None
+        for param in [
+            context_root_dir,
+            runtime_environment,
+            project_config,
+            ge_cloud_base_url,
+            ge_cloud_access_token,
+            ge_cloud_organization_id,
+            ge_cloud_config,
+        ]
     ):
         from great_expectations.data_context.data_context import DataContext
 
         return DataContext()
+
     elif context_root_dir:
         from great_expectations.data_context.data_context import FileDataContext
 
         return FileDataContext(  # type: ignore[assignment]
-            project_config=project_config,
+            # project_config=project_config,
             context_root_dir=context_root_dir,  # type: ignore[arg-type]
             runtime_environment=runtime_environment,
         )
