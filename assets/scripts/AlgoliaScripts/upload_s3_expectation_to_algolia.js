@@ -57,7 +57,7 @@ loadFromS3(expecS3URL).then(response => {
         deleteIndex(algDataset);
     }
 }).catch((error) => {
-    console.log('Error ferching data from s3', error);
+    console.log('Error fetching data from s3', error);
 })
 
 //delete exisitng index
