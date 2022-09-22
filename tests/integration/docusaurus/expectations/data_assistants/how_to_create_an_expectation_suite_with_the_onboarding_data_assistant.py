@@ -159,7 +159,18 @@ assert checkpoint_result["success"] is True
 data_assistant_result.plot_metrics()
 # </snippet>
 
+# <snippet>
+data_assistant_result.metrics_by_domain
+# </snippet>
 
 # <snippet>
 data_assistant_result.plot_expectations_and_metrics()
+# </snippet>
+
+# <snippet>
+data_assistant_result.show_expectations_by_domain_type()
+# </snippet>
+
+# <snippet>
+data_assistant_result.show_expectations_by_expectation_type()
 # </snippet>
