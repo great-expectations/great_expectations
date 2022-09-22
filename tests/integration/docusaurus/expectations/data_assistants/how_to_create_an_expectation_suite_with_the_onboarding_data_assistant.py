@@ -84,15 +84,12 @@ multi_batch_all_years_batch_request: BatchRequest = BatchRequest(
 
 # <snippet>
 exclude_column_names = [
-    "vendor_id",
+    "VendorID",
     "pickup_datetime",
     "dropoff_datetime",
-    "passenger_count",
-    "trip_distance",
-    "rate_code_id",
-    "store_and_fwd_flag",
-    "pickup_location_id",
-    "dropoff_location_id",
+    "RatecodeID",
+    "PULocationID",
+    "DOLocationID",
     "payment_type",
     "fare_amount",
     "extra",
@@ -100,7 +97,6 @@ exclude_column_names = [
     "tip_amount",
     "tolls_amount",
     "improvement_surcharge",
-    "total_amount",
     "congestion_surcharge",
 ]
 # </snippet>

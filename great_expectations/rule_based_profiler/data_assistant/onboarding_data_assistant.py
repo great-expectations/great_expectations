@@ -47,12 +47,10 @@ class OnboardingDataAssistant(DataAssistant):
     OnboardingDataAssistant.run() Args:
         - batch_request (BatchRequestBase or dict):
         - estimation (NumericRangeEstimator, str, or None):
-        - include_column_names:
-        - exclude_column_names:
-        - include_column_name_suffixes:
-        - exclude_column_name_suffixes: ??????
-        - semantic_type_filter_module_name:
-        - semantic_type_filter_class_name:
+        - include_column_names (list):
+        - exclude_column_names (list):
+        - include_column_name_suffixes (list):
+        - exclude_column_name_suffixes (list): ??????
         - max_unexpected_values:
         - max_unexpected_ratio:
         - min_max_unexpected_values_proportion:
@@ -60,99 +58,9 @@ class OnboardingDataAssistant(DataAssistant):
         - cardinality_limit_mode:
         - max_unique_values:
         - max_proportion_unique:
-        - table_rule (dict): This Rule will calculate metrics and if applicable, estimate Expectation parameters and produce Expectations for the table Domain.
-            * false_positive_rate:
-            * estimator:
-            * n_resamples:
-            * random_seed:
-            * quantile_statistic_interpolation_method:
-            * quantile_bias_correction:
-            * quantile_bias_std_error_ratio_threshold:
-            * include_estimator_samples_histogram_in_details:
-            * truncate_values:
-                - lower_bound:
-                - upper_bound:
-            * round_decimals:
-            * exact_match:
-            * success_ratio:
-        - column_value_uniqueness_rule (dict):
-            * success_ratio:
-        - column_value_nullity_rule (dict):
-            * success_ratio:
-        - column_value_nonnullity_rule (dict):
-            * success_ratio:
-        - numeric_columns_rule (dict):
-            * mostly:
-            * strict_min:
-            * strict_max:
-            * quantiles:
-            * allow_relative_error:
-            * false_postiive_rate:
-            * estimator:
-            * n_resamples:
-            * random_seed:
-            * quantile_statistic_interpolation_method:
-            * quantile_bias_correction:
-            * quantile_bias_std_error_ratio_threshold:
-            * include_estimator_samples_in_histogram_details:
-            * truncate_values:
-                - lower_bound:
-                - upper_bound:
-            * round_decimals:
-        - datetime_columns_rule (dict):
-            * mostly:
-            * strict_min:
-            * strict_max:
-            * false_positive_rate:
-            * estimator:
-            * n_resamples:
-            * random_seed:
-            * quantile_statistic_interpolation_method:
-            * quantile_bias_correction:
-            * quantile_bias_std_error_ratio_threshold:
-            * include_estimator_samples_histogram_in_details:
-            * truncate_values:
-                - lower_bound:
-                - upper_bound:
-            * round_decimals:
-        - text_columns_rule (dict):
-            * mostly:
-            * strict_min:
-            * strict_max:
-            * false_positive_rate:
-            * estimator:
-            * bootstrap:
-            * n_resamples:
-            * random_seed:
-            * quantile_statistic_interpolation_method:
-            * quantile_bias_correction:
-            * quantile_bias_std_error_ratio_thresohld:
-            * include_estimator_samples_histogram_in_details:
-            * truncate_values:
-                - lower_bound:
-                - upper_bound:
-            * round_decimals:
-            * success_ratio:
-        - categorical_columns_rule (dict):
-            * cardinality_limit_mode:
-            * mostly:
-            * strict_min:
-            * strict_max:
-            * false_positive_rate:
-            * estimator:
-            * n_resamples:
-            * random_seed:
-            * quantile_statistic_interpolation_method:
-            * quantile_bias_correction:
-            * quantile_bias_std_error_ratio_threshold:
-            * include_estimator_samples_histogram_in_details:
-            * truncate_values:
-                - lower_bound:
-                - upper_bound:
-            * round_decimals:
 
     Returns:
-        OnboardingDataAssistantResult
+        OnboardingDataAssistant.run() OnboardingDataAssistantResult
 
 
     #### Table Rule
