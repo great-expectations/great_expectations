@@ -1,33 +1,43 @@
 import dataclasses as dc
 import functools
-from typing import Optional
+import re
+from typing import Optional, Union
 
 from typing_extensions import Protocol
 
 
-@dc.dataclass
+@dc.dataclass(frozen=True)
 class PandasSourceConfig:
     name: str
     base_dir: str
+    identifier_template: str
+    parse_by: Union[str, re.Pattern]
+    # order_by: "StringSorter"
+    # period: "DataAssetPeriod"
 
 
-@dc.dataclass
+@dc.dataclass(frozen=True)
 class SQLSourceConfig:
     name: str
     connection_string: str
-    database_file: Optional[str] = None
 
 
 class Source(Protocol):
-    pass
+    ...
+    # def add_asset(self):
+    #     ...
 
 
 class PandasSource:
-    pass
+    ...
+    # def add_asset(self):
+    #     pass
 
 
 class SQLSource:
-    pass
+    ...
+    # def add_asset(self):
+    #     pass
 
 
 @functools.singledispatch
