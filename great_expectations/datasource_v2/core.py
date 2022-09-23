@@ -77,7 +77,7 @@ def sql_source(config: SQLSourceConfig) -> SQLSource:
 
 
 if __name__ == "__main__":
-    create_source(PandasSourceConfig(name="taxi", base_dir="."))
     create_source(SQLSourceConfig(name="taxi", connection_string="taxi.db"))
+    create_source(PandasSourceConfig(name="taxi", base_dir="."))
     create_source({"name": "taxi", "base_dir": "."})
     create_source({"foo": "bar"})
