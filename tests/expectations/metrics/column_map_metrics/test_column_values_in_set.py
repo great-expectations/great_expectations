@@ -18,7 +18,10 @@ except ImportError:
 
 
 @pytest.mark.unit
-@pytest.mark.skipif(sqlalchemy is None or sqlalchemy_bigquery is None)
+@pytest.mark.skipif(
+    sqlalchemy is None or sqlalchemy_bigquery is None,
+    reason="sqlalchemy or sqlalchemy_bigquery is not installed",
+)
 @pytest.mark.parametrize(
     "value_set", [[False, True], [False, True, None], [True], [False], [None]]
 )
@@ -38,7 +41,7 @@ def test_sqlalchemy_impl_bigquery_bool(value_set: List[Optional[bool]]):
 
 
 @pytest.mark.unit
-@pytest.mark.skipif(sqlalchemy is None)
+@pytest.mark.skipif(sqlalchemy is None, reason="sqlalchemy is not installed")
 @pytest.mark.parametrize("dialect", [mysql, postgresql, sqlite])
 @pytest.mark.parametrize(
     "value_set", [[False, True], [False, True, None], [True], [False], [None]]
