@@ -13,15 +13,23 @@ def test_onboarding_data_assistant_runner_top_level_kwargs(
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
-    context.assistants.onboarding.run(
-        batch_request=batch_request,
-        include_column_names=["passenger_count"],
-        exclude_column_names=["tpep_pickup_datetime"],
-        include_column_name_suffixes=["amount"],
-        exclude_column_name_suffixes=["ID"],
-        cardinality_limit_mode="very_few",
-    )
-    with pytest.raises(TypeError):
+    try:
+        context.assistants.onboarding.run(
+            batch_request=batch_request,
+            include_column_names=["passenger_count"],
+            exclude_column_names=["tpep_pickup_datetime"],
+            include_column_name_suffixes=["amount"],
+            exclude_column_name_suffixes=["ID"],
+            cardinality_limit_mode="very_few",
+        )
+    except Exception as exc:
+        assert (False, f"context.assistants.onboarding.run raise an exception '{exc}'")
+
+    with pytest.raises(TypeError) as e:
         context.assistants.onboarding.run(
             batch_request=batch_request, non_existent_parameter="break_this"
         )
+    assert (
+        e.value.args[0]
+        == "run() got an unexpected keyword argument 'non_existent_parameter'"
+    )
