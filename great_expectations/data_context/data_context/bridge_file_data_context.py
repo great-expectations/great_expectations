@@ -24,10 +24,32 @@ from great_expectations.datasource.datasource_serializer import (
 logger = logging.getLogger(__name__)
 
 
-class BridgeFileDataContext(AbstractDataContext):
+class _BridgeFileDataContext(AbstractDataContext):
     """
-    TODO: add explanation before pushing
+    # NOTE: <DataContextRefactor>  09232022
 
+    The _BridgeFileDataContext was created as part of the DataContextRefactor work:
+        - It is most closely related to the FileDataContext, but intends to preserve behavior that already exists in
+        BaseDataContext.
+
+    More specifically, we currently allow BaseDataContext to have both
+        - project_config : an in-memory configuration
+        - context_root_dir : path on the filesystem that contains our `great_expectations.yml` file.
+
+    And there are also tests for BaseDataContext that test that `project_config` can override the config in
+    `context_root_dir`.
+
+    As part of the DataContextRefactor, we are intending to split the responsibilities of BaseDataContext (and DataContext)
+    between FileDataContext and EphemeralDataContext.
+
+    FileDataContext will only consume configurations from `context_root_dir`
+    EphemeralDataContext will only consume configurations from the in-memory `project_config`.
+
+    _BridgeFileDataContext is intended to "bridge" and preserve current behavior while we complete the migration into
+    FileDataContext and EphemeralDataContext.
+
+    Therefore it is only instantiated from BaseDataContext (using the `from_base_data_context` flag) and will
+    give an DataContext error if a user tries to instantiate it on its own.
     """
 
     GE_YML = "great_expectations.yml"
@@ -36,6 +58,7 @@ class BridgeFileDataContext(AbstractDataContext):
         self,
         project_config: Union[DataContextConfig, Mapping],
         context_root_dir: str,
+        from_base_data_context: bool = False,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """FileDataContext constructor
@@ -44,9 +67,17 @@ class BridgeFileDataContext(AbstractDataContext):
             project_config (DataContextConfig):  Config for current DataContext
             context_root_dir (Optional[str]): location to look for the ``great_expectations.yml`` file. If None,
                 searches for the file based on conventions for project subdirectories.
+            from_base_data_context (bool): Flag to ensure that `_BridgeFileDataContext` is not instantiated on its own.
+                The only path that we support instantiating is through BaseDataContext.
+                Will give a DataContextError otherwise.
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
+        if not from_base_data_context:
+            raise ge_exceptions.DataContextError(
+                "_BridgeFileDataContext should not be instantiated on it's own"
+            )
+
         self._context_root_directory = context_root_dir
         self._project_config = self._apply_global_config_overrides(
             config=project_config
