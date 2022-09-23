@@ -26,11 +26,10 @@ except ImportError:
     "value_set", [[False, True], [False, True, None], [True], [False], [None]]
 )
 def test_sqlalchemy_impl_bigquery_bool(value_set: List[Optional[bool]]):
-    metric = ColumnValuesInSet()
     column_name = "my_bool_col"
     column = sqlalchemy.column(column_name)
     kwargs = _make_sqlalchemy_kwargs(column_name, sqlalchemy_bigquery)
-    predicate = metric._sqlalchemy_impl(column, value_set, **kwargs)
+    predicate = ColumnValuesInSet._sqlalchemy_impl(column, value_set, **kwargs)
     # If a value in value_set is None we expect "column_name is null" otherwise we expect
     # "column_name = value"
     expected_predicates = [
@@ -49,11 +48,10 @@ def test_sqlalchemy_impl_bigquery_bool(value_set: List[Optional[bool]]):
 def test_sqlalchemy_impl_not_bigquery_bool(
     dialect: ModuleType, value_set: List[Optional[bool]]
 ):
-    metric = ColumnValuesInSet()
     column_name = "my_bool_col"
     column = sqlalchemy.column(column_name)
     kwargs = _make_sqlalchemy_kwargs(column_name, dialect)
-    predicate = metric._sqlalchemy_impl(column, value_set, **kwargs)
+    predicate = ColumnValuesInSet._sqlalchemy_impl(column, value_set, **kwargs)
     expected_predicates = ", ".join(
         ["null" if value is None else str(value) for value in value_set]
     ).lower()
