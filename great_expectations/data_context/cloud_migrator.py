@@ -87,7 +87,10 @@ class ConfigurationBundle:
         self,
     ) -> List[ExpectationSuiteValidationResult]:
         return [
-            cast(ExpectationSuiteValidationResult, self._context.validations_store.get(key))
+            cast(
+                ExpectationSuiteValidationResult,
+                self._context.validations_store.get(key),
+            )
             for key in self._context.validations_store.list_keys()
         ]
 
