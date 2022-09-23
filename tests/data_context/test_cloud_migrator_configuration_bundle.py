@@ -316,3 +316,32 @@ def test_is_usage_statistics_key_set_if_key_not_present():
     """
     # TODO: Implementation
     pass
+
+
+@pytest.mark.integration
+def test_anonymous_usage_statistics_removed_during_serialization(
+    in_memory_runtime_context_with_configs_in_stores: DataContextWithSavedItems,
+):
+    """What does this test and why?
+
+    When serializing a ConfigurationBundle we need to remove the
+    anonymous_usage_statistics key.
+
+    This is currently an integration test using a real Data Context, it can
+    be converted to a unit test.
+    """
+
+    context: BaseDataContext = in_memory_runtime_context_with_configs_in_stores.context
+
+    assert context.anonymous_usage_statistics is not None
+
+    config_bundle = ConfigurationBundle(context)
+
+    serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
+
+    serialized_bundle: dict = serializer.serialize(config_bundle)
+
+    assert (
+        serialized_bundle["data_context_variables"].get("anonymous_usage_statistics")
+        is None
+    )
