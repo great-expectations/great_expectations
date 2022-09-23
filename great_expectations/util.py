@@ -30,10 +30,20 @@ from inspect import (
 from numbers import Number
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
@@ -44,6 +54,10 @@ from great_expectations.exceptions import (
     PluginModuleNotFoundError,
 )
 from great_expectations.expectations.registry import _registered_expectations
+
+if TYPE_CHECKING:
+    # needed until numpy min version 1.20
+    import numpy.typing as npt
 
 try:
     from typing import TypeGuard  # type: ignore[attr-defined]
@@ -1556,8 +1570,8 @@ def convert_ndarray_float_to_datetime_tuple(
 
 
 def is_ndarray_decimal_dtype(
-    data: npt.NDArray,
-) -> TypeGuard[npt.NDArray[decimal.Decimal]]:
+    data: "npt.NDArray",
+) -> TypeGuard["npt.NDArray"]:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
     """
@@ -1566,7 +1580,7 @@ def is_ndarray_decimal_dtype(
     return result
 
 
-def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
+def convert_ndarray_decimal_to_float_dtype(data: "np.ndarray") -> "np.ndarray":
     """
     Convert all elements of N-D "np.ndarray" argument from "decimal.Decimal" type to "float" type objects.
     """
