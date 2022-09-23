@@ -122,7 +122,7 @@ class ConfigurationBundleSchema(Schema):
     )
 
     @post_dump
-    def clean_up(self, data, **kwargs):
+    def clean_up(self, data, **kwargs) -> dict:
         data_context_variables = data.get("data_context_variables", {})
         data_context_variables.pop("anonymous_usage_statistics", None)
         return data
