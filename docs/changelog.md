@@ -2,6 +2,28 @@
 title: Changelog
 ---
 
+### 0.15.25
+* [FEATURE] Since value set in expectation kwargs is list of strings, do not emit expect_column_values_to_be_in_set for datetime valued columns (#6046)
+* [FEATURE] add failed expectations list to slack message (#5812) (thanks @itaise)
+* [FEATURE] Enable only ExactNumericRangeEstimator and QuantilesNumericRangeEstimator in "datetime_columns_rule" of OnboardingDataAssistant (#6063)
+* [BUGFIX] numpy typing behind `if TYPE_CHECKING` (#6076)
+* [DOCS] Update "How to create an Expectation Suite with the Onboarding Data Assistant" (#6050)
+* [DOCS] How to get one or more Batches of data from a configured Datasource (#6043)
+* [DOCS] DOC-298 Data Assistant technical term page (#6057)
+* [DOCS] Update OnboardingDataAssistant documentation (#6059)
+* [MAINTENANCE] Clean up of DataAssistant tests that depend on Jupyter notebooks (#6039)
+* [MAINTENANCE] AbstractDataContext.datasource_save() test simplifications (#6052)
+* [MAINTENANCE] Rough architecture for cloud migration tool (#6054)
+* [MAINTENANCE] Include git commit info when building docker image. (#6060)
+* [MAINTENANCE] Allow `CloudDataContext` to retrieve and initialize its own project config (#6006)
+* [MAINTENANCE] Removing Jupyter notebook-based tests for DataAssistants (#6062)
+* [MAINTENANCE] pinned dremio, fixed linting (#6067)
+* [MAINTENANCE] usage-stats, & utils.py typing (#5925)
+* [MAINTENANCE] Refactor external HTTP request logic into a `Session` factory function (#6007)
+* [MAINTENANCE] Remove tag validity stage from release pipeline (#6069)
+* [MAINTENANCE] Remove unused test fixtures from test suite (#6058)
+* [MAINTENANCE] Remove outdated release files (#6074)
+
 ### 0.15.24
 * [FEATURE] context.save_datasource (#6009)
 * [BUGFIX] Standardize `ConfiguredAssetSqlDataConnector` config in `datasource new` CLI workflow (#6044)
