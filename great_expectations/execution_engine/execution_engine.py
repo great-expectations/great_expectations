@@ -395,7 +395,8 @@ class ExecutionEngine(ABC):
                 )
             except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
-                    message="Metric could not be resolved", failed_metrics=(metric_to_resolve,)
+                    message="Metric could not be resolved",
+                    failed_metrics=(metric_to_resolve,),
                 ) from e
 
         if len(metric_fn_bundle) > 0:
