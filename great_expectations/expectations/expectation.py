@@ -1811,11 +1811,6 @@ class TableExpectation(Expectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-        if min_val is not None and max_val is not None and min_val > max_val:
-            raise InvalidExpectationConfigurationError(
-                "Minimum Threshold cannot be larger than Maximum Threshold"
-            )
-
         return True
 
     def _validate_metric_value_between(
