@@ -1,6 +1,6 @@
 """TODO: Add docstring"""
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, cast
 
 from marshmallow import Schema, fields, post_dump
 
@@ -87,7 +87,7 @@ class ConfigurationBundle:
         self,
     ) -> List[ExpectationSuiteValidationResult]:
         return [
-            self._context.validations_store.get(key)
+            cast(ExpectationSuiteValidationResult, self._context.validations_store.get(key))
             for key in self._context.validations_store.list_keys()
         ]
 
