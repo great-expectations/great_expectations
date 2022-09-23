@@ -363,11 +363,6 @@ def test_get_site_names_with_site(titanic_data_context_stats_enabled_config_vers
     assert context.get_site_names() == ["local_site"]
 
 
-@pytest.mark.xfail(
-    reason="Do we want to be able to support both Inline Store and FileSystem Config",
-    run=True,
-    strict=True,
-)
 def test_get_site_names_with_three_sites(tmpdir, basic_data_context_config):
     basic_data_context_config.data_docs_sites = {}
     for i in range(3):

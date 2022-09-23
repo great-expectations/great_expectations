@@ -83,14 +83,13 @@ def data_context_config_dict() -> dict:
 
 
 @pytest.fixture
-def data_context_directory(tmp_path: pathlib.Path) -> str:
+def data_context_directory(tmp_path: pathlib.Path) -> pathlib.Path:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    project_path = str(project_path)
-    DataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
+    DataContext.create(str(project_path))
+    context_path = project_path / "great_expectations"
+    asset_config_path = context_path / "expectations"
+    asset_config_path.mkdir(exist_ok=True)
     return project_path
 
 
@@ -135,12 +134,11 @@ def cloud_data_context_variables(
 def file_data_context(tmp_path: pathlib.Path) -> FileDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    project_path = str(project_path)
-    DataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
-    context = FileDataContext(context_root_dir=context_path)
+    DataContext.create(str(project_path))
+    context_path = project_path / "great_expectations"
+    asset_config_path = context_path / "expectations"
+    asset_config_path.mkdir(exist_ok=True)
+    context = FileDataContext(context_root_dir=str(context_path))
     return context
 
 

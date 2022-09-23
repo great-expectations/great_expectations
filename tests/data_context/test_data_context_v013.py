@@ -158,11 +158,6 @@ def test__normalize_absolute_or_relative_path(
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
-@pytest.mark.xfail(
-    reason="Combined behavior of FileDataContext and EphemeralDataContext",
-    run=True,
-    strict=True,
-)
 def test_load_config_variables_file(
     basic_data_context_v013_config, empty_data_context_directory, monkeypatch
 ):

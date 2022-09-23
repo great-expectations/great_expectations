@@ -1393,11 +1393,11 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
 
 
-@pytest.mark.xfail(
-    reason="Combined behavior of FileDataContext and EphemeralDataContext",
-    run=True,
-    strict=True,
-)
+# @pytest.mark.xfail(
+#     reason="Combined behavior of FileDataContext and EphemeralDataContext",
+#     run=True,
+#     strict=True,
+# )
 def test_load_config_variables_property(
     basic_data_context_config, tmp_path_factory, monkeypatch
 ):

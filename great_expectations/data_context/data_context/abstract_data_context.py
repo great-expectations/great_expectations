@@ -279,8 +279,6 @@ class AbstractDataContext(ABC):
     def project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
 
-    # plugins directory for EphemeralDataContextVariables
-    # this isn't really being checked
     @property
     def plugins_directory(self) -> Optional[str]:
         """The directory in which custom plugin modules should be placed."""
