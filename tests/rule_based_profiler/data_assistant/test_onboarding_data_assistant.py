@@ -879,13 +879,15 @@ def test_onboarding_data_assistant_plot_methods_stdout(
         bobby_onboarding_data_assistant_result
     )
 
+    f = io.StringIO()
+    with redirect_stdout(f):
+        data_assistant_result.plot_metrics()
+        data_assistant_result.plot_expectations_and_metrics()
+    stdout = f.getvalue()
+
     metrics_calculated = 150
     metrics_plots_implemented = 102
 
-    m = io.StringIO()
-    with redirect_stdout(m):
-        data_assistant_result.plot_metrics()
-    stdout = m.getvalue()
     assert (
         f"""{metrics_calculated} Metrics calculated, {metrics_plots_implemented} Metric plots implemented
 Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
@@ -895,10 +897,6 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     expectations_produced = 160
     expectations_and_metrics_plots_implemented = 117
 
-    e = io.StringIO()
-    with redirect_stdout(e):
-        data_assistant_result.plot_expectations_and_metrics()
-    stdout = e.getvalue()
     assert (
         f"""{expectations_produced} Expectations produced, {expectations_and_metrics_plots_implemented} Expectation and Metric plots implemented
 Use DataAssistantResult.show_expectations_by_domain_type() or
