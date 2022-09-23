@@ -48,8 +48,18 @@ class ConfigurationBundle:
             ExpectationSuiteValidationResult
         ] = self._get_all_validation_results()
 
-    def is_usage_statistics_key_set(self) -> bool:
-        return self._data_context_variables.anonymous_usage_statistics.enabled
+    def is_usage_stats_enabled(self) -> bool:
+        """Determine whether usage stats are enabled.
+
+        Also returns false if there are no usage stats settings provided.
+
+        Returns: Boolean of whether the usage statistics are enabled.
+
+        """
+        if self._data_context_variables.anonymous_usage_statistics:
+            return self._data_context_variables.anonymous_usage_statistics.enabled
+        else:
+            return False
 
     def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
         return [
@@ -61,7 +71,7 @@ class ConfigurationBundle:
         return [self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, ge_cloud_id=None) for checkpoint_name in self._context.list_checkpoints()]  # type: ignore[arg-type]
 
     def _get_all_profilers(self) -> List[RuleBasedProfilerConfig]:
-        def round_trip_profiler_config(profiler_config: RuleBasedProfilerConfig):
+        def round_trip_profiler_config(profiler_config: RuleBasedProfilerConfig) -> RuleBasedProfilerConfig:
             return ruleBasedProfilerConfigSchema.load(
                 ruleBasedProfilerConfigSchema.dump(profiler_config)
             )
@@ -213,7 +223,7 @@ class CloudMigrator:
             context=self._context
         )
         self._warn_if_usage_stats_disabled(
-            configuration_bundle.is_usage_statistics_key_set()
+            configuration_bundle.is_usage_stats_enabled()
         )
         self._print_configuration_bundle(configuration_bundle)
         if not test_migrate:
@@ -268,7 +278,7 @@ class CloudMigrator:
     def _warn_if_test_migrate(self) -> None:
         pass
 
-    def _warn_if_usage_stats_disabled(self, is_usage_statistics_key_set: bool) -> None:
+    def _warn_if_usage_stats_disabled(self, is_usage_stats_enabled: bool) -> None:
         pass
 
     def _build_configuration_bundle(self) -> ConfigurationBundle:
