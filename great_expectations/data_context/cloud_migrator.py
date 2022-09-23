@@ -218,15 +218,12 @@ class CloudMigrator:
         )
 
         serialized_bundle = serializer.serialize(configuration_bundle)
-        data = {
-            "data": {
-                "type": "migration",
-                "attributes": {
-                    "organization_id": self._ge_cloud_organization_id,
-                    "bundle": serialized_bundle,
-                },
-            }
-        }
+        data = GeCloudStoreBackend.construct_json_payload(
+            resource_type="migration",
+            organization_id=self._ge_cloud_organization_id,
+            attributes_key="bundle",
+            attributes_value=serialized_bundle,
+        )
 
         try:
             response = self._session.post(url, json=data)

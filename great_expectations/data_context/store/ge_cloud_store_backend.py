@@ -248,15 +248,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
-        data = {
-            "data": {
-                "type": resource_type.value,
-                "attributes": {
-                    attributes_key: value,
-                    "organization_id": organization_id,
-                },
-            }
-        }
+        data = self.construct_json_payload(
+            resource_type=resource_type.value,
+            attributes_key=attributes_key,
+            attributes_value=value,
+            organization_id=organization_id,
+        )
 
         url = self.construct_url(
             base_url=self.ge_cloud_base_url,
@@ -342,16 +339,14 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
-        data = {
-            "data": {
-                "type": resource_type,
-                "attributes": {
-                    "organization_id": organization_id,
-                    attributes_key: value,
-                    **(kwargs if self.validate_set_kwargs(kwargs) else {}),
-                },
-            }
-        }
+        kwargs = kwargs if self.validate_set_kwargs(kwargs) else {}
+        data = self.construct_json_payload(
+            resource_type=resource_type,
+            attributes_key=attributes_key,
+            attributes_value=value,
+            organization_id=organization_id,
+            **kwargs,
+        )
 
         url = self.construct_url(
             base_url=self.ge_cloud_base_url,
@@ -543,3 +538,23 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if id:
             url = urljoin(url, id)
         return url
+
+    @staticmethod
+    def construct_json_payload(
+        resource_type: str,
+        organization_id: str,
+        attributes_key: str,
+        attributes_value: str,
+        **kwargs: dict,
+    ) -> dict:
+        data = {
+            "data": {
+                "type": resource_type,
+                "attributes": {
+                    "organization_id": organization_id,
+                    attributes_key: attributes_value,
+                    **kwargs,
+                },
+            }
+        }
+        return data
