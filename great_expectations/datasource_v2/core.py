@@ -1,6 +1,6 @@
 import dataclasses as dc
 import functools
-from typing import Union
+from typing import Optional
 
 from typing_extensions import Protocol
 
@@ -11,11 +11,22 @@ class PandasSourceConfig:
     base_dir: str
 
 
+@dc.dataclass
+class SQLSourceConfig:
+    name: str
+    connection_string: str
+    database_file: Optional[str] = None
+
+
 class Source(Protocol):
     pass
 
 
 class PandasSource:
+    pass
+
+
+class SQLSource:
     pass
 
 
@@ -33,6 +44,14 @@ def pandas_source(config: PandasSourceConfig) -> PandasSource:
     return source
 
 
+@create_source.register(SQLSourceConfig)
+def sql_source(config: SQLSourceConfig) -> SQLSource:
+    source = SQLSource()
+    print(f"creating {source.__class__.__name__} ...")
+    return source
+
+
 if __name__ == "__main__":
     create_source(PandasSourceConfig(name="taxi", base_dir="."))
+    create_source(SQLSourceConfig(name="taxi", connection_string="taxi.db"))
     create_source({"foo": "bar"})
