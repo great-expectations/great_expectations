@@ -83,14 +83,13 @@ def data_context_config_dict() -> dict:
 
 
 @pytest.fixture
-def data_context_directory(tmp_path: pathlib.Path) -> str:
+def data_context_directory(tmp_path: pathlib.Path) -> pathlib.Path:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    project_path = str(project_path)
-    DataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
+    DataContext.create(str(project_path))
+    context_path = project_path / "great_expectations"
+    asset_config_path = context_path / "expectations"
+    asset_config_path.mkdir(exist_ok=True)
     return project_path
 
 
@@ -135,12 +134,11 @@ def cloud_data_context_variables(
 def file_data_context(tmp_path: pathlib.Path) -> FileDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    project_path = str(project_path)
-    DataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
-    context = FileDataContext(context_root_dir=context_path)
+    DataContext.create(str(project_path))
+    context_path = project_path / "great_expectations"
+    asset_config_path = context_path / "expectations"
+    asset_config_path.mkdir(exist_ok=True)
+    context = FileDataContext(context_root_dir=str(context_path))
     return context
 
 
@@ -439,7 +437,6 @@ def test_data_context_variables_save_config(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
-    shared_called_with_request_kwargs: dict,
     # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -467,7 +464,7 @@ def test_data_context_variables_save_config(
         assert mock_save.call_count == 1
 
     # CloudDataContextVariables
-    with mock.patch("requests.put", autospec=True) as mock_put:
+    with mock.patch("requests.Session.put", autospec=True) as mock_put:
         type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
 
         cloud_data_context_variables.save_config()
@@ -486,6 +483,7 @@ def test_data_context_variables_save_config(
 
         assert mock_put.call_count == 1
         mock_put.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
             json={
                 "data": {
@@ -496,7 +494,6 @@ def test_data_context_variables_save_config(
                     },
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
 

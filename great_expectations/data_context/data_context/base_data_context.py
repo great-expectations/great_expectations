@@ -65,6 +65,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.data_context.bridge_file_data_context import (
+    BridgeFileDataContext,
+)
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -314,6 +317,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_access_token=ge_cloud_access_token,
                 ge_cloud_organization_id=ge_cloud_organization_id,
+            )
+        elif self._context_root_directory and project_config:
+            self._data_context = BridgeFileDataContext(  # type: ignore[assignment]
+                project_config=project_config,
+                context_root_dir=context_root_dir,  # type: ignore[arg-type]
+                runtime_environment=runtime_environment,
             )
         elif self._context_root_directory:
             self._data_context = FileDataContext(  # type: ignore[assignment]

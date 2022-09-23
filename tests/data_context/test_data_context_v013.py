@@ -109,20 +109,18 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
 
 
 def test_ConfigOnlyDataContext_v013__initialization(
-    tmp_path_factory, basic_data_context_v013_config
+    empty_data_context_directory, basic_data_context_v013_config
 ):
-    config_path = str(
-        tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
-    )
+    config_path = empty_data_context_directory
     context = BaseDataContext(
-        basic_data_context_v013_config,
-        config_path,
+        project_config=basic_data_context_v013_config,
+        context_root_dir=config_path,
     )
 
     assert len(context.plugins_directory.split("/")[-3:]) == 3
     assert "" in context.plugins_directory.split("/")[-3:]
 
-    pattern = re.compile(r"test_ConfigOnlyDataContext__initialization__dir\d*")
+    pattern = re.compile("great_expectations")
     assert (
         len(
             list(
@@ -141,13 +139,10 @@ def test_ConfigOnlyDataContext_v013__initialization(
 
 @pytest.mark.unit
 def test__normalize_absolute_or_relative_path(
-    tmp_path_factory, basic_data_context_v013_config
+    empty_data_context_directory, basic_data_context_v013_config
 ):
-    full_test_path = tmp_path_factory.mktemp(
-        "test__normalize_absolute_or_relative_path__dir"
-    )
-    test_dir = full_test_path.parts[-1]
-    config_path = str(full_test_path)
+    config_path = empty_data_context_directory
+    test_dir = "great_expectations"
     context = BaseDataContext(
         basic_data_context_v013_config,
         config_path,
@@ -164,11 +159,9 @@ def test__normalize_absolute_or_relative_path(
 
 
 def test_load_config_variables_file(
-    basic_data_context_v013_config, tmp_path_factory, monkeypatch
+    basic_data_context_v013_config, empty_data_context_directory, monkeypatch
 ):
-    # Setup:
-    base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
-    os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
+    base_path = empty_data_context_directory
     with open(
         os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"
     ) as outfile:
@@ -180,7 +173,6 @@ def test_load_config_variables_file(
     basic_data_context_v013_config[
         "config_variables_file_path"
     ] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
-
     try:
         # We should be able to load different files based on an environment variable
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")

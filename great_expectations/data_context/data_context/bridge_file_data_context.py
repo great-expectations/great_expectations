@@ -1,13 +1,8 @@
 import logging
-import os
-from typing import Optional
-
-from ruamel.yaml import YAMLError
-from ruamel.yaml.constructor import DuplicateKeyError
+from typing import Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -17,7 +12,6 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    DataContextConfigDefaults,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -28,47 +22,32 @@ from great_expectations.datasource.datasource_serializer import (
 )
 
 logger = logging.getLogger(__name__)
-yaml: YAMLHandler = YAMLHandler()
 
 
-class FileDataContext(AbstractDataContext):
+class BridgeFileDataContext(AbstractDataContext):
     """
-    Extends AbstractDataContext, contains only functionality necessary to hydrate state from disk.
+    TODO: add explanation before pushing
 
-    TODO: Most of the functionality in DataContext will be refactored into this class, and the current DataContext
-    class will exist only for backwards-compatibility reasons.
     """
 
-    UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
-    GE_UNCOMMITTED_DIR = "uncommitted"
-    BASE_DIRECTORIES = [
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
-        DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
-        DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
-        GE_UNCOMMITTED_DIR,
-    ]
-    GE_DIR = "great_expectations"
-    GE_EDIT_NOTEBOOK_DIR = GE_UNCOMMITTED_DIR
     GE_YML = "great_expectations.yml"
 
     def __init__(
         self,
+        project_config: Union[DataContextConfig, Mapping],
         context_root_dir: str,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """FileDataContext constructor
 
         Args:
+            project_config (DataContextConfig):  Config for current DataContext
             context_root_dir (Optional[str]): location to look for the ``great_expectations.yml`` file. If None,
                 searches for the file based on conventions for project subdirectories.
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
-        self._context_root_directory = self._init_context_root_directory(
-            context_root_dir=context_root_dir,
-        )
-        project_config: DataContextConfig = self._load_project_config()
+        self._context_root_directory = context_root_dir
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
@@ -102,52 +81,6 @@ class FileDataContext(AbstractDataContext):
             ),
         )
         self._datasource_store = datasource_store
-
-    def _init_context_root_directory(self, context_root_dir: str) -> str:
-        # Determine the "context root directory" - this is the parent of "great_expectations" dir
-        context_root_dir = (
-            self.find_context_root_dir()
-            if context_root_dir is None
-            else context_root_dir
-        )
-        return os.path.abspath(os.path.expanduser(context_root_dir))
-
-    def _load_project_config(self):
-        """
-        Reads the project configuration from the project configuration file.
-        The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
-        for how these are substituted.
-
-        For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
-        - see CloudDataContext.retrieve_data_context_config_from_ge_cloud for more details.
-
-        :return: the configuration object read from the file or template
-        """
-        path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
-        try:
-            with open(path_to_yml) as data:
-                config_commented_map_from_yaml = yaml.load(data)
-
-        except DuplicateKeyError:
-            raise ge_exceptions.InvalidConfigurationYamlError(
-                "Error: duplicate key found in project YAML file."
-            )
-        except YAMLError as err:
-            raise ge_exceptions.InvalidConfigurationYamlError(
-                "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
-                    err
-                )
-            )
-        except OSError:
-            raise ge_exceptions.ConfigNotFoundError()
-
-        try:
-            return DataContextConfig.from_commented_map(
-                commented_map=config_commented_map_from_yaml
-            )
-        except ge_exceptions.InvalidDataContextConfigError:
-            # Just to be explicit about what we intended to catch
-            raise
 
     def save_expectation_suite(
         self,
@@ -214,50 +147,3 @@ class FileDataContext(AbstractDataContext):
             data_context=self,  # type: ignore[arg-type]
         )
         return variables
-
-    @classmethod
-    def find_context_root_dir(cls):
-        result = None
-        yml_path = None
-        ge_home_environment = os.getenv("GE_HOME")
-        if ge_home_environment:
-            ge_home_environment = os.path.expanduser(ge_home_environment)
-            if os.path.isdir(ge_home_environment) and os.path.isfile(
-                os.path.join(ge_home_environment, "great_expectations.yml")
-            ):
-                result = ge_home_environment
-        else:
-            yml_path = cls.find_context_yml_file()
-            if yml_path:
-                result = os.path.dirname(yml_path)
-
-        if result is None:
-            raise ge_exceptions.ConfigNotFoundError()
-
-        logger.debug(f"Using project config: {yml_path}")
-        return result
-
-    @classmethod
-    def find_context_yml_file(cls, search_start_dir=None):
-        """Search for the yml file starting here and moving upward."""
-        yml_path = None
-        if search_start_dir is None:
-            search_start_dir = os.getcwd()
-
-        for i in range(4):
-            logger.debug(
-                f"Searching for config file {search_start_dir} ({i} layer deep)"
-            )
-
-            potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
-
-            if os.path.isdir(potential_ge_dir):
-                potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
-                if os.path.isfile(potential_yml):
-                    yml_path = potential_yml
-                    logger.debug(f"Found config file at {str(yml_path)}")
-                    break
-            # move up one directory
-            search_start_dir = os.path.dirname(search_start_dir)
-
-        return yml_path

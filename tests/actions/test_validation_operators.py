@@ -210,8 +210,6 @@ def test_errors_warnings_validation_operator_run_slack_query(
 
     import json
 
-    print(json.dumps(slack_query, indent=2))
-    print(json.dumps(expected_slack_query, indent=2))
     assert slack_query == expected_slack_query
 
 

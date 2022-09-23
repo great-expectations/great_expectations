@@ -4,6 +4,9 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
+from great_expectations.data_context.data_context.bridge_file_data_context import (
+    BridgeFileDataContext,
+)
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
