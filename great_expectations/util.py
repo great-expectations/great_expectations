@@ -30,9 +30,10 @@ from inspect import (
 from numbers import Number
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
@@ -45,16 +46,21 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import _registered_expectations
 
 try:
+    from typing import TypeGuard  # type: ignore[attr-defined]
+except ImportError:
+    from typing_extensions import TypeGuard
+
+try:
     import black
 except ImportError:
-    black = None
+    black = None  # type: ignore[assignment]
 
 try:
     # This library moved in python 3.8
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
     # Fallback for python < 3.8
-    import importlib_metadata
+    import importlib_metadata  # type: ignore[no-redef]
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +90,7 @@ class bidict(dict):
 
     def __init__(self, *args: List[Any], **kwargs: Dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
-        self.inverse = {}
+        self.inverse: Dict = {}
         for key, value in self.items():
             self.inverse.setdefault(value, []).append(key)
 
@@ -133,7 +139,7 @@ def hyphen(txt: str):
     return txt.replace("_", "-")
 
 
-def profile(func: Callable = None) -> Callable:
+def profile(func: Callable) -> Callable:
     @wraps(func)
     def profile_function_call(*args, **kwargs) -> Any:
         pr: cProfile.Profile = cProfile.Profile()
@@ -198,7 +204,7 @@ def measure_execution_time(
                 if kwargs is None:
                     kwargs = {}
 
-                execution_time_holder: type = kwargs.get(
+                execution_time_holder: type = kwargs.get(  # type: ignore[assignment]
                     execution_time_holder_object_reference_name
                 )
                 if execution_time_holder is not None and hasattr(
@@ -238,15 +244,15 @@ def get_project_distribution() -> Optional[Distribution]:
         except ValueError:
             pass
         else:
-            if relative_path in distr.files:
-                return distr
+            if relative_path in distr.files:  # type: ignore[operator]
+                return distr  # type: ignore[return-value]
     return None
 
 
 # Returns the object reference to the currently running function (i.e., the immediate function under execution).
 def get_currently_executing_function() -> Callable:
-    cf: FrameType = currentframe()
-    fb: FrameType = cf.f_back
+    cf = cast(FrameType, currentframe())
+    fb = cast(FrameType, cf.f_back)
     fc: CodeType = fb.f_code
     func_obj: Callable = [
         referer
@@ -278,8 +284,8 @@ def get_currently_executing_function_call_arguments(
     )
     filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
     """
-    cf: FrameType = currentframe()
-    fb: FrameType = cf.f_back
+    cf = cast(FrameType, currentframe())
+    fb = cast(FrameType, cf.f_back)
     argvs: ArgInfo = getargvalues(fb)
     fc: CodeType = fb.f_code
     cur_func_obj: Callable = [
@@ -313,7 +319,7 @@ def get_currently_executing_function_call_arguments(
         call_args_dict.update(value)
 
     if include_module_name:
-        call_args_dict.update({"module_name": cur_mod.__name__})
+        call_args_dict.update({"module_name": cur_mod.__name__})  # type: ignore[union-attr]
 
     if not include_caller_names:
         if call_args.get("cls"):
@@ -326,18 +332,20 @@ def get_currently_executing_function_call_arguments(
     return call_args_dict
 
 
-def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:
+def verify_dynamic_loading_support(
+    module_name: str, package_name: Optional[str] = None
+) -> None:
     """
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
     """
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
+        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[assignment,attr-defined]
             module_name, package=package_name
         )
     except ModuleNotFoundError:
-        module_spec = None
+        module_spec = None  # type: ignore[assignment]
     if not module_spec:
         if not package_name:
             package_name = ""
@@ -1236,7 +1244,7 @@ def deep_filter_properties_iterable(
         # Upon unwinding the call stack, do a sanity check to ensure cleaned properties.
         keys_to_delete: List[str] = list(
             filter(
-                lambda k: k not in keep_fields
+                lambda k: k not in keep_fields  # type: ignore[arg-type]
                 and _is_to_be_removed_from_deep_filter_properties_iterable(
                     value=properties[k],
                     clean_nulls=clean_nulls,
@@ -1253,7 +1261,6 @@ def deep_filter_properties_iterable(
         if not inplace:
             properties = copy.deepcopy(properties)
 
-        value: Any
         for value in properties:
             deep_filter_properties_iterable(
                 properties=value,
@@ -1408,17 +1415,17 @@ def isclose(
     if isinstance(operand_a, datetime.datetime) and isinstance(
         operand_b, datetime.datetime
     ):
-        operand_a = operand_a.timestamp()
-        operand_b = operand_b.timestamp()
+        operand_a = operand_a.timestamp()  # type: ignore[assignment]
+        operand_b = operand_b.timestamp()  # type: ignore[assignment]
     elif isinstance(operand_a, datetime.timedelta) and isinstance(
         operand_b, datetime.timedelta
     ):
-        operand_a = operand_a.total_seconds()
-        operand_b = operand_b.total_seconds()
+        operand_a = operand_a.total_seconds()  # type: ignore[assignment]
+        operand_b = operand_b.total_seconds()  # type: ignore[assignment]
 
     return np.isclose(
-        a=np.float64(operand_a),
-        b=np.float64(operand_b),
+        a=np.float64(operand_a),  # type: ignore[arg-type]
+        b=np.float64(operand_b),  # type: ignore[arg-type]
         rtol=rtol,
         atol=atol,
         equal_nan=equal_nan,
@@ -1515,7 +1522,9 @@ def convert_ndarray_datetime_to_float_dtype(data: np.ndarray) -> np.ndarray:
     Convert all elements of 1-D "np.ndarray" argument from "datetime.datetime" type to "timestamp" "float" type objects.
     """
     value: Any
-    return np.asarray([value.timestamp() for value in data])
+    return np.asarray(
+        [value.replace(tzinfo=datetime.timezone.utc).timestamp() for value in data]
+    )
 
 
 def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
@@ -1523,7 +1532,7 @@ def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
     Convert all elements of 1-D "np.ndarray" argument from "float" type to "datetime.datetime" type objects.
     """
     value: Any
-    return np.asarray([datetime.datetime.fromtimestamp(value) for value in data])
+    return np.asarray([datetime.datetime.utcfromtimestamp(value) for value in data])
 
 
 def convert_ndarray_float_to_datetime_tuple(
@@ -1535,7 +1544,9 @@ def convert_ndarray_float_to_datetime_tuple(
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
-def is_ndarray_decimal_dtype(data: np.ndarray) -> bool:
+def is_ndarray_decimal_dtype(
+    data: npt.NDArray,
+) -> TypeGuard[npt.NDArray[decimal.Decimal]]:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
     """
@@ -1568,7 +1579,7 @@ def is_sane_slack_webhook(url: str) -> bool:
     return url.strip().startswith("https://hooks.slack.com/")
 
 
-def is_list_of_strings(_list) -> bool:
+def is_list_of_strings(_list) -> TypeGuard[List[str]]:
     return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
 
 
@@ -1714,7 +1725,7 @@ def numpy_quantile(
     """
     quantile: np.ndarray
     if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(
+        quantile = np.quantile(  # type: ignore[call-arg]
             a=a,
             q=q,
             axis=axis,

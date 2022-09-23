@@ -4,7 +4,7 @@ import os
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
-from unittest.mock import Mock, PropertyMock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 import requests
@@ -425,12 +425,8 @@ def fake_datasource_id() -> str:
 
 
 @pytest.fixture
-def request_headers(ge_cloud_access_token) -> Dict[str, str]:
-    return {
-        "Content-Type": "application/vnd.api+json",
-        "Authorization": f"Bearer {ge_cloud_access_token}",
-        "Gx-Version": ge.__version__,
-    }
+def fake_data_connector_id() -> str:
+    return "0c08e6ba-8ed9-4715-a179-da2f08aab13e"
 
 
 JSONData = Union[AnyPayload, Dict[str, Any]]
@@ -515,20 +511,26 @@ def datasource_config() -> DatasourceConfig:
 
 @pytest.fixture
 def datasource_config_with_names_and_ids(
-    datasource_config_with_names: DatasourceConfig, fake_datasource_id
+    datasource_config_with_names: DatasourceConfig,
+    fake_datasource_id: str,
+    fake_data_connector_id: str,
 ) -> DatasourceConfig:
+    """
+    An extension of the `datasource_config_with_names` fixture
+    but contains ids for BOTH the top-level Datasource as well
+    as the nested DataConnectors.
+    """
     updated_config = copy.deepcopy(datasource_config_with_names)
+
+    # Update top-level Datasource
     updated_config["id"] = fake_datasource_id
+
+    # Update nested DataConnectors
+    data_connector_name = tuple(datasource_config_with_names.data_connectors.keys())[0]
+    updated_config.data_connectors[data_connector_name]["name"] = data_connector_name
+    updated_config.data_connectors[data_connector_name]["id"] = fake_data_connector_id
+
     return updated_config
-
-
-@pytest.fixture
-def shared_called_with_request_kwargs(request_headers) -> dict:
-    """
-    Standard request kwargs that all GeCloudStoreBackend http calls are made with.
-    Use in combination with `assert_called_with()`
-    """
-    return dict(timeout=GeCloudStoreBackend.TIMEOUT, headers=request_headers)
 
 
 @pytest.fixture
@@ -544,7 +546,7 @@ def mock_http_unavailable(mock_response_factory: Callable):
 
     # should have been able to do this by mocking `requests.request` but this didn't work
     with unittest.mock.patch.multiple(
-        "requests",
+        "requests.Session",
         autospec=True,
         get=unittest.mock.DEFAULT,
         post=unittest.mock.DEFAULT,
@@ -586,7 +588,7 @@ def checkpoint_config() -> dict:
 def mocked_datasource_get_response(
     mock_response_factory: Callable,
     datasource_config_with_names_and_ids: DatasourceConfig,
-    fake_datasource_id,
+    fake_datasource_id: str,
 ) -> Callable[[], MockResponse]:
     def _mocked_get_response(*args, **kwargs):
         created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
@@ -596,7 +598,7 @@ def mocked_datasource_get_response(
             {
                 "data": {
                     "attributes": {
-                        "datasource_config": datasource_config_with_names_and_ids,
+                        "datasource_config": datasource_config_with_names_and_ids.to_json_dict(),
                         "created_at": "2022-08-02T17:55:45.107550",
                         "created_by_id": created_by_id,
                         "deleted": False,
@@ -621,7 +623,8 @@ def mocked_datasource_get_response(
 
 @pytest.fixture
 def mocked_datasource_post_response(
-    mock_response_factory: Callable, fake_datasource_id
+    mock_response_factory: Callable,
+    fake_datasource_id: str,
 ) -> Callable[[], MockResponse]:
     def _mocked_post_response(*args, **kwargs):
         return mock_response_factory(
@@ -660,7 +663,9 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
     ), patch(
         "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
     ), patch(
-        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_datasource_get_response,
     ):
         context.add_datasource(
             "my_datasource",

@@ -65,7 +65,7 @@ except ValueError:
 # <snippet>
 expectation_suite_name = "my_onboarding_assistant_suite"
 
-suite = context.create_expectation_suite(
+expectation_suite = context.create_expectation_suite(
     expectation_suite_name=expectation_suite_name, overwrite_existing=True
 )
 # </snippet>
@@ -77,7 +77,6 @@ multi_batch_all_years_batch_request: BatchRequest = BatchRequest(
     datasource_name="taxi_multi_batch_datasource",
     data_connector_name="inferred_data_connector_all_years",
     data_asset_name="yellow_tripdata_sample",
-    limit=1000,
 )
 # </snippet>
 
@@ -85,15 +84,12 @@ multi_batch_all_years_batch_request: BatchRequest = BatchRequest(
 
 # <snippet>
 exclude_column_names = [
-    "vendor_id",
+    "VendorID",
     "pickup_datetime",
     "dropoff_datetime",
-    "passenger_count",
-    "trip_distance",
-    "rate_code_id",
-    "store_and_fwd_flag",
-    "pickup_location_id",
-    "dropoff_location_id",
+    "RatecodeID",
+    "PULocationID",
+    "DOLocationID",
     "payment_type",
     "fare_amount",
     "extra",
@@ -101,37 +97,29 @@ exclude_column_names = [
     "tip_amount",
     "tolls_amount",
     "improvement_surcharge",
-    "total_amount",
     "congestion_surcharge",
 ]
 # </snippet>
 
 # <snippet>
-result = context.assistants.onboarding.run(
+data_assistant_result = context.assistants.onboarding.run(
     batch_request=multi_batch_all_years_batch_request,
     exclude_column_names=exclude_column_names,
-)
-# </snippet>
-
-# Prepare a Validator
-
-# <snippet>
-validator = context.get_validator(
-    batch_request=multi_batch_all_years_batch_request,
-    expectation_suite_name=expectation_suite_name,
 )
 # </snippet>
 
 # Save your Expectation Suite
 
 # <snippet>
-validator.expectation_suite = result.get_expectation_suite(
+expectation_suite = data_assistant_result.get_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )
 # </snippet>
 
 # <snippet>
-validator.save_expectation_suite(discard_failed_expectations=False)
+context.save_expectation_suite(
+    expectation_suite=expectation_suite, discard_failed_expectations=False
+)
 # </snippet>
 
 # Use a SimpleCheckpoint to verify that your new Expectation Suite works.
@@ -150,7 +138,7 @@ checkpoint_config = {
 
 # <snippet>
 checkpoint = SimpleCheckpoint(
-    f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}",
+    f"yellow_tripdata_sample_{expectation_suite_name}",
     context,
     **checkpoint_config,
 )
@@ -165,3 +153,24 @@ assert checkpoint_result["success"] is True
 # context.build_data_docs()
 # validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
 # context.open_data_docs(resource_identifier=validation_result_identifier)
+
+
+# <snippet>
+data_assistant_result.plot_metrics()
+# </snippet>
+
+# <snippet>
+data_assistant_result.metrics_by_domain
+# </snippet>
+
+# <snippet>
+data_assistant_result.plot_expectations_and_metrics()
+# </snippet>
+
+# <snippet>
+data_assistant_result.show_expectations_by_domain_type()
+# </snippet>
+
+# <snippet>
+data_assistant_result.show_expectations_by_expectation_type()
+# </snippet>

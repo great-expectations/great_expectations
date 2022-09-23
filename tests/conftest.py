@@ -2414,6 +2414,15 @@ def ge_cloud_access_token() -> str:
 
 
 @pytest.fixture
+def request_headers(ge_cloud_access_token: str) -> Dict[str, str]:
+    return {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+        "Gx-Version": ge.__version__,
+    }
+
+
+@pytest.fixture
 def ge_cloud_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token):
     return GeCloudConfig(
         base_url=ge_cloud_base_url,
@@ -2549,11 +2558,11 @@ def empty_data_context_in_cloud_mode(
     with mock.patch(
         "great_expectations.data_context.DataContext._save_project_config"
     ), mock.patch(
-        "great_expectations.data_context.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_ge_cloud",
         autospec=True,
         side_effect=mocked_config,
     ), mock.patch(
-        "great_expectations.data_context.data_context.DataContext.get_ge_cloud_config",
+        "great_expectations.data_context.data_context.CloudDataContext.get_ge_cloud_config",
         autospec=True,
         side_effect=mocked_get_ge_cloud_config,
     ):
@@ -2577,7 +2586,9 @@ def empty_cloud_data_context(
     cloud_data_context: CloudDataContext = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_config=ge_cloud_config,
+        ge_cloud_base_url=ge_cloud_config.base_url,
+        ge_cloud_access_token=ge_cloud_config.access_token,
+        ge_cloud_organization_id=ge_cloud_config.organization_id,
     )
     return cloud_data_context
 
@@ -3041,7 +3052,7 @@ def alice_columnar_table_single_batch(empty_data_context):
             "my_rule_for_user_ids": {
                 "variables": {},
                 "domain_builder": {
-                    "column_name_suffixes": ["_id"],
+                    "column_name_suffixes": ["_id", "_ID"],
                     "class_name": "MyCustomSemanticTypeColumnDomainBuilder",
                     "module_name": "tests.test_fixtures.rule_based_profiler.plugins.my_custom_semantic_type_column_domain_builder",
                     "semantic_types": ["user_id"],
@@ -4542,7 +4553,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "quantile_statistic_interpolation_method": "auto",
                         "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
-                        "round_decimals": 2,
+                        "round_decimals": None,
                         "evaluation_parameter_builder_configs": None,
                     },
                     {
@@ -4564,7 +4575,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "quantile_statistic_interpolation_method": "auto",
                         "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
-                        "round_decimals": 2,
+                        "round_decimals": None,
                         "evaluation_parameter_builder_configs": None,
                     },
                 ],
@@ -6392,6 +6403,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.raw.my_pickup_location_id_value_set": {
                 "value": [1, 2, 4],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "VendorID"},
@@ -6404,6 +6416,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.my_pickup_location_id_value_set": {
                 "value": [1, 2, 4],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "VendorID"},
@@ -6434,6 +6447,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.raw.my_pickup_location_id_value_set": {
                 "value": [0, 1, 2, 3, 4, 5, 6],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "passenger_count"},
@@ -6446,6 +6460,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.my_pickup_location_id_value_set": {
                 "value": [0, 1, 2, 3, 4, 5, 6],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "passenger_count"},

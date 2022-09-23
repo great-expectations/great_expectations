@@ -2,12 +2,12 @@ import json
 import logging
 from abc import ABCMeta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
 
-from great_expectations import __version__
+from great_expectations.core.http import create_session
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -140,9 +140,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
-    DEFAULT_BASE_URL: str = "https://app.greatexpectations.io/"
-
-    TIMEOUT: int = 20
+    DEFAULT_BASE_URL = "https://app.greatexpectations.io/"
 
     def __init__(
         self,
@@ -182,19 +180,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             or self.RESOURCE_PLURALITY_LOOKUP_DICT[ge_cloud_resource_name]
         )
 
-        # TOTO: remove when account_id is deprecated
-        if ge_cloud_credentials.get("account_id"):
-            logger.warning(
-                'The "account_id" ge_cloud_credentials key has been renamed to "organization_id" and will '
-                "be deprecated in the next major release."
-            )
-            ge_cloud_credentials["organization_id"] = ge_cloud_credentials["account_id"]
-            ge_cloud_credentials.pop("account_id")
         self._ge_cloud_credentials = ge_cloud_credentials
 
         # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
+
+        self._session = create_session(
+            access_token=self._ge_cloud_credentials["access_token"]
+        )
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
@@ -211,14 +205,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
         filter_properties_dict(properties=self._config, inplace=True)
 
-    @property
-    def headers(self) -> Dict[str, str]:
-        return {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f'Bearer {self.ge_cloud_credentials.get("access_token")}',
-            "Gx-Version": __version__,
-        }
-
     def _get(self, key: Tuple[str, ...]) -> ResponsePayload:  # type: ignore[override]
         ge_cloud_url = self.get_url_for_key(key=key)
         params: Optional[dict] = None
@@ -228,14 +214,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 params = {"name": key[2]}
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
-            response = requests.get(
+            response = self._session.get(
                 ge_cloud_url,
-                headers=self.headers,
                 params=params,
-                timeout=self.TIMEOUT,
             )
             response.raise_for_status()
-            return response.json()
+            return cast(ResponsePayload, response.json())
         except json.JSONDecodeError as jsonError:
             logger.debug(
                 "Failed to parse GE Cloud Response into JSON",
@@ -286,9 +270,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             url = urljoin(f"{url}/", ge_cloud_id)
 
         try:
-            response = requests.put(
-                url, json=data, headers=self.headers, timeout=self.TIMEOUT
-            )
+            response = self._session.put(url, json=data)
             response_status_code = response.status_code
 
             # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
@@ -298,9 +280,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response_status_code == 405
                 and resource_type is GeCloudRESTResource.EXPECTATION_SUITE
             ):
-                response = requests.patch(
-                    url, json=data, headers=self.headers, timeout=self.TIMEOUT
-                )
+                response = self._session.patch(url, json=data)
                 response_status_code = response.status_code
 
             response.raise_for_status()
@@ -379,9 +359,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"organizations/" f"{organization_id}/" f"{hyphen(resource_name)}",
         )
         try:
-            response = requests.post(
-                url, json=data, headers=self.headers, timeout=self.TIMEOUT
-            )
+            response = self._session.post(url, json=data)
             response.raise_for_status()
             response_json = response.json()
 
@@ -434,7 +412,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         try:
-            response = requests.get(url, headers=self.headers, timeout=self.TIMEOUT)
+            response = self._session.get(url)
             response.raise_for_status()
             response_json = response.json()
 
@@ -499,9 +477,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             f"{ge_cloud_id}",
         )
         try:
-            response = requests.delete(
-                url, json=data, headers=self.headers, timeout=self.TIMEOUT
-            )
+            response = self._session.delete(url, json=data)
             response.raise_for_status()
             return True
         except requests.HTTPError as http_exc:
