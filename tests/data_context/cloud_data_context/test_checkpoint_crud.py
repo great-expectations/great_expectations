@@ -154,7 +154,6 @@ def test_cloud_backed_data_context_add_checkpoint(
     checkpoint_config: dict,
     mocked_post_response: Callable[[], MockResponse],
     mocked_get_response: Callable[[], MockResponse],
-    shared_called_with_request_kwargs: dict,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     request,
@@ -172,9 +171,9 @@ def test_cloud_backed_data_context_add_checkpoint(
     validation_id_1, validation_id_2 = validation_ids
 
     with mock.patch(
-        "requests.post", autospec=True, side_effect=mocked_post_response
+        "requests.Session.post", autospec=True, side_effect=mocked_post_response
     ) as mock_post, mock.patch(
-        "requests.get", autospec=True, side_effect=mocked_get_response
+        "requests.Session.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
         checkpoint = context.add_checkpoint(**checkpoint_config)
 
@@ -184,6 +183,7 @@ def test_cloud_backed_data_context_add_checkpoint(
         )
 
         mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
             json={
                 "data": {
@@ -194,13 +194,12 @@ def test_cloud_backed_data_context_add_checkpoint(
                     },
                 },
             },
-            **shared_called_with_request_kwargs,
         )
 
         mock_get.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
             params={"name": checkpoint_config["name"]},
-            **shared_called_with_request_kwargs,
         )
 
     assert checkpoint.ge_cloud_id == checkpoint_id
@@ -241,7 +240,6 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
     mocked_post_response: Callable[[], MockResponse],
     mocked_put_response: Callable[[], MockResponse],
     mocked_get_response: Callable[[], MockResponse],
-    shared_called_with_request_kwargs: dict,
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     request,
@@ -253,11 +251,11 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
     assert context.ge_cloud_mode
 
     with mock.patch(
-        "requests.post", autospec=True, side_effect=mocked_post_response
+        "requests.Session.post", autospec=True, side_effect=mocked_post_response
     ) as mock_post, mock.patch(
-        "requests.put", autospec=True, side_effect=mocked_put_response
+        "requests.Session.put", autospec=True, side_effect=mocked_put_response
     ) as mock_put, mock.patch(
-        "requests.get", autospec=True, side_effect=mocked_get_response
+        "requests.Session.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
         checkpoint_1 = context.add_checkpoint(**checkpoint_config)
         checkpoint_2 = context.add_checkpoint(
@@ -271,6 +269,7 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
 
         # Called during creation of `checkpoint_1`
         mock_post.assert_called_once_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
             json={
                 "data": {
@@ -281,21 +280,21 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
                     },
                 },
             },
-            **shared_called_with_request_kwargs,
         )
 
         # Always called by store after POST and PATCH calls
         assert mock_get.call_count == 2
         mock_get.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
             params={"name": checkpoint_config["name"]},
-            **shared_called_with_request_kwargs,
         )
 
         expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
 
         # Called during creation of `checkpoint_2` (which is `checkpoint_1` but updated)
         mock_put.assert_called_once_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
             json={
                 "data": {
@@ -307,7 +306,6 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
                     "id": checkpoint_id,
                 },
             },
-            **shared_called_with_request_kwargs,
         )
 
     assert checkpoint_1.ge_cloud_id == checkpoint_2.ge_cloud_id
@@ -460,7 +458,7 @@ def test_list_checkpoints(
     checkpoint_name_1, checkpoint_id_1 = checkpoint_1
     checkpoint_name_2, checkpoint_id_2 = checkpoint_2
 
-    with mock.patch("requests.get", autospec=True) as mock_get:
+    with mock.patch("requests.Session.get", autospec=True) as mock_get:
         mock_get.return_value = mock.Mock(
             status_code=200, json=lambda: mock_get_all_checkpoints_json
         )

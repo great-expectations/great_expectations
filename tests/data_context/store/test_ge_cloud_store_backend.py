@@ -50,7 +50,6 @@ def test_set(
     construct_ge_cloud_store_backend: Callable[
         [GeCloudRESTResource], GeCloudStoreBackend
     ],
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
 
@@ -65,9 +64,10 @@ def test_set(
         )
     )
 
-    with mock.patch("requests.post", autospec=True) as mock_post:
+    with mock.patch("requests.Session.post", autospec=True) as mock_post:
         store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             json={
                 "data": {
@@ -96,7 +96,6 @@ def test_set(
                     },
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
 
@@ -106,15 +105,14 @@ def test_list_keys(
     construct_ge_cloud_store_backend: Callable[
         [GeCloudRESTResource], GeCloudStoreBackend
     ],
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
 
-    with mock.patch("requests.get", autospec=True) as mock_get:
+    with mock.patch("requests.Session.get", autospec=True) as mock_get:
         store_backend.list_keys()
         mock_get.assert_called_with(
+            mock.ANY,  # requests.Session object
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            **shared_called_with_request_kwargs,
         )
 
 
@@ -124,11 +122,10 @@ def test_remove_key(
     construct_ge_cloud_store_backend: Callable[
         [GeCloudRESTResource], GeCloudStoreBackend
     ],
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     store_backend = construct_ge_cloud_store_backend(GeCloudRESTResource.CHECKPOINT)
 
-    with mock.patch("requests.delete", autospec=True) as mock_delete:
+    with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         mock_response = mock_delete.return_value
         mock_response.status_code = 200
 
@@ -139,6 +136,7 @@ def test_remove_key(
             )
         )
         mock_delete.assert_called_with(
+            mock.ANY,  # requests.Session object
             "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
@@ -149,7 +147,6 @@ def test_remove_key(
                     "attributes": {"deleted": True},
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
 
