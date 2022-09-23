@@ -8,7 +8,7 @@ def test_onboarding_data_assistant_runner_top_level_kwargs(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
-    batch_request: dict = {
+    batch_request = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
@@ -23,5 +23,5 @@ def test_onboarding_data_assistant_runner_top_level_kwargs(
     )
     with pytest.raises(TypeError):
         context.assistants.onboarding.run(
-            batch_request=batch_request, non_existant_parameter="break_this"
+            batch_request=batch_request, non_existent_parameter="break_this"
         )
