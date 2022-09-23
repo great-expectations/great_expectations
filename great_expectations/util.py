@@ -1571,7 +1571,6 @@ def get_context(
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
     project_config: Optional[Any] = None,
-    ge_cloud_mode: bool = False,
     ge_cloud_base_url: Optional[str] = None,
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
@@ -1601,23 +1600,25 @@ def get_context(
             context_root_dir=context_root_dir,  # type: ignore[arg-type]
             runtime_environment=runtime_environment,
         )
-    elif ge_cloud_mode:
+    elif ge_cloud_base_url and ge_cloud_access_token and ge_cloud_organization_id:
+        # add check to see if these are not
+        # cloud mode
+        # what does it mean?
         from great_expectations.data_context.data_context import CloudDataContext
 
         return CloudDataContext(
             project_config=project_config,
             runtime_environment=runtime_environment,
             context_root_dir=context_root_dir,  # type: ignore[arg-type]
-            ge_cloud_config=ge_cloud_config,  # type: ignore[assignment,arg-type]
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
         )
     else:
         # this is going to be BaseDataContext for now
-        # until we can pull out EphemeralDataContext
-        # this will become
-        # return EphemeralDataContext(project_config=project_config, runtime_environment=runtime_environment)
-        from great_expectations.data_context.data_context import BaseDataContext
+        from great_expectations.data_context.data_context import EphemeralDataContext
 
-        return BaseDataContext(  # type: ignore[assignment]
+        return EphemeralDataContext(  # type: ignore[assignment]
             project_config=project_config, runtime_environment=runtime_environment
         )
 

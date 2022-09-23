@@ -24,25 +24,6 @@ yaml = YAMLHandler()
 
 
 @pytest.fixture()
-def basic_in_memory_data_context_config_just_stores():
-    return DataContextConfig(
-        config_version=3.0,
-        plugins_directory=None,
-        evaluation_parameter_store_name="evaluation_parameter_store",
-        expectations_store_name="expectations_store",
-        datasources={},
-        stores={
-            "expectations_store": {"class_name": "ExpectationsStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
-        },
-        validations_store_name="validation_result_store",
-        data_docs_sites={},
-        validation_operators={},
-    )
-
-
-@pytest.fixture()
 def basic_in_memory_data_context_just_stores(
     basic_in_memory_data_context_config_just_stores,
 ):
