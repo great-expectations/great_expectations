@@ -175,6 +175,9 @@ class AbstractDataContext(ABC):
         self._config_variables: Optional[dict] = None
 
         # Init plugin support
+        print("hello")
+        print(self.plugins_directory)
+        print("hello")
         if self.plugins_directory is not None and os.path.exists(
             self.plugins_directory
         ):
@@ -279,6 +282,8 @@ class AbstractDataContext(ABC):
     def project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
 
+    # plugins directory for EphemeralDataContextVariables
+    # this isn't really being checked
     @property
     def plugins_directory(self) -> Optional[str]:
         """The directory in which custom plugin modules should be placed."""

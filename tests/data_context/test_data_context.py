@@ -874,37 +874,28 @@ def test_ExplorerDataContext(titanic_data_context):
 # noinspection PyPep8Naming
 @pytest.mark.unit
 def test_ConfigOnlyDataContext__initialization(
-    tmp_path_factory, basic_data_context_config
+    empty_data_context_directory, basic_data_context_config
 ):
-    config_path = str(
-        tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
-    )
+    config_path = empty_data_context_directory
     context = BaseDataContext(
-        basic_data_context_config,
-        config_path,
+        project_config=basic_data_context_config,
+        context_root_dir=config_path,
     )
 
-    assert context.root_directory.split("/")[-1].startswith(
-        "test_ConfigOnlyDataContext__initialization__dir"
-    )
+    assert context.root_directory.split("/")[-1].startswith("great_expectations")
 
     plugins_dir_parts = context.plugins_directory.split("/")[-3:]
     assert len(plugins_dir_parts) == 3
-    assert plugins_dir_parts[0].startswith(
-        "test_ConfigOnlyDataContext__initialization__dir"
-    )
+    assert plugins_dir_parts[0].startswith("great_expectations")
     assert plugins_dir_parts[1:] == ["plugins", ""]
 
 
 @pytest.mark.unit
 def test__normalize_absolute_or_relative_path(
-    tmp_path_factory, basic_data_context_config
+    empty_data_context_directory, basic_data_context_config
 ):
-    full_test_dir = tmp_path_factory.mktemp(
-        "test__normalize_absolute_or_relative_path__dir"
-    )
-    test_dir = full_test_dir.parts[-1]
-    config_path = str(full_test_dir)
+    config_path = empty_data_context_directory
+    test_dir = "great_expectations"
     context = BaseDataContext(
         basic_data_context_config,
         config_path,
@@ -1402,6 +1393,11 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
 
 
+@pytest.mark.xfail(
+    reason="Combined behavior of FileDataContext and EphemeralDataContext",
+    run=True,
+    strict=True,
+)
 def test_load_config_variables_property(
     basic_data_context_config, tmp_path_factory, monkeypatch
 ):

@@ -734,6 +734,18 @@ def empty_data_context(
     return context
 
 
+@pytest.fixture(scope="function")
+def empty_data_context_directory(tmp_path) -> str:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context = ge.data_context.DataContext.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    return context_path
+
+
 @pytest.fixture
 def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
