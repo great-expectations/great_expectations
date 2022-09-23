@@ -112,7 +112,7 @@ def test_configuration_bundle_init(
 
     config_bundle = ConfigurationBundle(context)
 
-    assert not config_bundle.is_usage_statistics_key_set()
+    assert not config_bundle.is_usage_stats_enabled()
 
     # Spot check items in variables
     assert (
