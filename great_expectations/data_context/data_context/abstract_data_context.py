@@ -175,9 +175,6 @@ class AbstractDataContext(ABC):
         self._config_variables: Optional[dict] = None
 
         # Init plugin support
-        print("hello")
-        print(self.plugins_directory)
-        print("hello")
         if self.plugins_directory is not None and os.path.exists(
             self.plugins_directory
         ):

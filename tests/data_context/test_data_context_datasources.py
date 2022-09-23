@@ -70,6 +70,11 @@ def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
     assert isinstance(context._datasource_store.store_backend, GeCloudStoreBackend)
 
 
+@pytest.mark.xfail(
+    reason="Do we want to be able to support both Inline Store and FileSystem Config",
+    run=True,
+    strict=True,
+)
 @pytest.mark.integration
 def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
     tmp_path: pathlib,
