@@ -205,7 +205,7 @@ def test_list_expectation_suites(
         ge_cloud_mode=True,
     )
 
-    with mock.patch("requests.get", autospec=True) as mock_get:
+    with mock.patch("requests.Session.get", autospec=True) as mock_get:
         mock_get.return_value = mock.Mock(
             status_code=200, json=lambda: mock_get_all_suites_json
         )
@@ -237,7 +237,9 @@ def test_create_expectation_suite_saves_suite_to_cloud(
     suite_name = "my_suite"
     existing_suite_names = []
 
-    with mock.patch("requests.post", autospec=True, side_effect=mocked_post_response):
+    with mock.patch(
+        "requests.Session.post", autospec=True, side_effect=mocked_post_response
+    ):
         mock_list_expectation_suite_names.return_value = existing_suite_names
         suite = context.create_expectation_suite(suite_name)
 
@@ -256,7 +258,9 @@ def test_create_expectation_suite_overwrites_existing_suite(
     suite_name = "my_suite"
     existing_suite_names = [suite_name]
 
-    with mock.patch("requests.post", autospec=True, side_effect=mocked_post_response):
+    with mock.patch(
+        "requests.Session.post", autospec=True, side_effect=mocked_post_response
+    ):
         mock_list_expectation_suite_names.return_value = existing_suite_names
         suite = context.create_expectation_suite(suite_name, overwrite_existing=True)
 
@@ -291,7 +295,7 @@ def test_delete_expectation_suite_deletes_suite_in_cloud(
     context = empty_base_data_context_in_cloud_mode
     suite_id = suite_1.id
 
-    with mock.patch("requests.delete", autospec=True) as mock_delete:
+    with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         mock_expectations_store_has_key.return_value = True
         context.delete_expectation_suite(ge_cloud_id=suite_id)
 
@@ -338,7 +342,9 @@ def test_get_expectation_suite_retrieves_suite_from_cloud(
     context = empty_base_data_context_in_cloud_mode
     suite_id = suite_1.id
 
-    with mock.patch("requests.get", autospec=True, side_effect=mocked_get_response):
+    with mock.patch(
+        "requests.Session.get", autospec=True, side_effect=mocked_get_response
+    ):
         mock_expectations_store_has_key.return_value = True
         suite = context.get_expectation_suite(ge_cloud_id=suite_id)
 
@@ -382,7 +388,9 @@ def test_save_expectation_suite_saves_suite_to_cloud(
 
     assert suite.ge_cloud_id is None
 
-    with mock.patch("requests.post", autospec=True, side_effect=mocked_post_response):
+    with mock.patch(
+        "requests.Session.post", autospec=True, side_effect=mocked_post_response
+    ):
         context.save_expectation_suite(suite)
 
     assert suite.ge_cloud_id is not None
@@ -401,8 +409,8 @@ def test_save_expectation_suite_overwrites_existing_suite(
     suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
 
     with mock.patch(
-        "requests.put", autospec=True, return_value=mock.Mock(status_code=405)
-    ) as mock_put, mock.patch("requests.patch", autospec=True) as mock_patch:
+        "requests.Session.put", autospec=True, return_value=mock.Mock(status_code=405)
+    ) as mock_put, mock.patch("requests.Session.patch", autospec=True) as mock_patch:
         context.save_expectation_suite(suite)
 
     expected_suite_json = {
