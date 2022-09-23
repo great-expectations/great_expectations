@@ -348,13 +348,8 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     assert not os.path.isfile(index_path)
 
 
-@pytest.mark.xfail(
-    reason="Do we want to be able to support both Inline Store and FileSystem Config",
-    run=True,
-    strict=True,
-)
-def test_get_site_names_with_no_sites(basic_data_context_config):
-    context = BaseDataContext(basic_data_context_config)
+def test_get_site_names_with_no_sites(tmp_dir, basic_data_context_config):
+    context = BaseDataContext(basic_data_context_config, context_root_dir=tmp_dir)
     assert context.get_site_names() == []
 
 
