@@ -216,10 +216,20 @@ class CloudMigrator:
             organization_id=self._ge_cloud_organization_id,
             resource_name="migration",
         )
-        payload = serializer.serialize(configuration_bundle)
+
+        serialized_bundle = serializer.serialize(configuration_bundle)
+        data = {
+            "data": {
+                "type": "migration",
+                "attributes": {
+                    "organization_id": self._ge_cloud_organization_id,
+                    "bundle": serialized_bundle,
+                },
+            }
+        }
 
         try:
-            response = self._session.post(url, json=payload)
+            response = self._session.post(url, json=data)
             response.raise_for_status()
             return response.json()
 
