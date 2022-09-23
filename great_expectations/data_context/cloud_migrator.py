@@ -71,7 +71,9 @@ class ConfigurationBundle:
         return [self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, ge_cloud_id=None) for checkpoint_name in self._context.list_checkpoints()]  # type: ignore[arg-type]
 
     def _get_all_profilers(self) -> List[RuleBasedProfilerConfig]:
-        def round_trip_profiler_config(profiler_config: RuleBasedProfilerConfig) -> RuleBasedProfilerConfig:
+        def round_trip_profiler_config(
+            profiler_config: RuleBasedProfilerConfig,
+        ) -> RuleBasedProfilerConfig:
             return ruleBasedProfilerConfigSchema.load(
                 ruleBasedProfilerConfigSchema.dump(profiler_config)
             )
