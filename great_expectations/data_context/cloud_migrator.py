@@ -160,38 +160,6 @@ class CloudMigrator:
         self._print_validation_result_error_summary(errors)
         self._print_migration_conclusion_message()
 
-    def _process_cloud_credential_overrides(
-        self,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> GeCloudConfig:
-        """Get cloud credentials from environment variables or parameters.
-
-        Check first for ge_cloud_base_url, ge_cloud_access_token and
-        ge_cloud_organization_id provided via params, if not then check
-        for the corresponding environment variable.
-
-        Args:
-            ge_cloud_base_url: Optional, you may provide this alternatively via
-                environment variable GE_CLOUD_BASE_URL
-            ge_cloud_access_token: Optional, you may provide this alternatively
-                via environment variable GE_CLOUD_ACCESS_TOKEN
-            ge_cloud_organization_id: Optional, you may provide this alternatively
-                via environment variable GE_CLOUD_ORGANIZATION_ID
-
-        Returns:
-            GeCloudConfig
-
-        Raises:
-            GeCloudError
-
-        """
-        # TODO: Use GECloudEnvironmentVariable enum for environment variables
-        # TODO: Merge with existing logic in Data Context - could be static method on CloudDataContext or
-        #  module level method in cloud_data_context.py Let's not duplicate this code.
-        pass
-
     def _warn_if_test_migrate(self) -> None:
         pass
 
