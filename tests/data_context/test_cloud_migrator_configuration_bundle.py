@@ -306,3 +306,13 @@ def test_configuration_bundle_serialization(
     expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
 
     assert serialized_bundle == expected_serialized_bundle
+
+
+def test_is_usage_statistics_key_set_if_key_not_present():
+    """What does this test and why?
+
+    The ConfigurationBundle should handle a context that has not set the config for
+     anonymous_usage_statistics.
+    """
+    # TODO: Implementation
+    pass
