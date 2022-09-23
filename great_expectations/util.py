@@ -1580,7 +1580,7 @@ def is_ndarray_decimal_dtype(
     return result
 
 
-def convert_ndarray_decimal_to_float_dtype(data: "np.ndarray") -> "np.ndarray":
+def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     """
     Convert all elements of N-D "np.ndarray" argument from "decimal.Decimal" type to "float" type objects.
     """
