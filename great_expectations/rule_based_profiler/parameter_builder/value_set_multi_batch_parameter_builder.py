@@ -9,6 +9,7 @@ from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
+    datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
@@ -131,11 +132,14 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         unique_values: Set[Any] = _get_unique_values_from_nested_collection_of_sets(
             collection=metric_values
         )
+
         unique_values_as_array: np.ndarray = np.asarray(unique_values)
         if unique_values_as_array.ndim == 0:
             unique_values_as_array = np.asarray([unique_values])
 
-        details["parse_strings_as_datetimes"] = is_ndarray_datetime_dtype(
+        details["parse_strings_as_datetimes"] = datetime_semantic_domain_type(
+            domain=domain
+        ) or is_ndarray_datetime_dtype(
             data=unique_values_as_array,
             parse_strings_as_datetimes=False,
             fuzzy=False,

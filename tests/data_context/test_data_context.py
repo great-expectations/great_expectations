@@ -60,18 +60,6 @@ yaml = YAML()
 parameterized_expectation_suite_name = "my_dag_node.default"
 
 
-@pytest.fixture()
-def parameterized_expectation_suite():
-    fixture_path = file_relative_path(
-        __file__,
-        "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
-    )
-    with open(
-        fixture_path,
-    ) as suite:
-        return json.load(suite)
-
-
 @pytest.fixture(scope="function")
 def titanic_multibatch_data_context(
     tmp_path,
