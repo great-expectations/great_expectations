@@ -26,10 +26,8 @@ logger = logging.getLogger(__name__)
 
 class BridgeFileDataContext(AbstractDataContext):
     """
-    Extends AbstractDataContext, contains only functionality necessary to hydrate state from disk.
+    TODO: add explanation before pushing
 
-    TODO: Most of the functionality in DataContext will be refactored into this class, and the current DataContext
-    class will exist only for backwards-compatibility reasons.
     """
 
     GE_YML = "great_expectations.yml"
