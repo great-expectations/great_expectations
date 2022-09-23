@@ -205,7 +205,7 @@ class GEDependencies:
         "zipcodes",
     ]
 
-    GE_DEV_DEPENDENCIES: List[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(
+    GE_DEV_DEPENDENCIES: Set[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(
         GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
     )
 
@@ -219,8 +219,8 @@ class GEDependencies:
         """Sorted list of required GE dependencies"""
         return self.GE_REQUIRED_DEPENDENCIES
 
-    def get_dev_dependency_names(self) -> List[str]:
-        """Sorted list of dev GE dependencies"""
+    def get_dev_dependency_names(self) -> Set[str]:
+        """Set of dev GE dependencies"""
         return self.GE_DEV_DEPENDENCIES
 
     def get_required_dependency_names_from_requirements_file(self) -> List[str]:
