@@ -1,8 +1,8 @@
 import logging
 import os
-from typing import Mapping, Optional, Union
+from typing import Optional
 
-from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml import YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
