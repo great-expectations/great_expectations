@@ -1,7 +1,7 @@
 """TODO: Add docstring"""
 
 import logging
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import requests
 
@@ -14,9 +14,11 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     AnyPayload,
     GeCloudStoreBackend,
+    construct_json_payload,
+    construct_url,
     get_user_friendly_error_message,
 )
-from great_expectations.data_context.types.base import DatasourceConfig, GeCloudConfig
+from great_expectations.data_context.types.base import DatasourceConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -82,6 +84,8 @@ class CloudMigrator:
         ge_cloud_base_url = cloud_config.base_url
         ge_cloud_access_token = cloud_config.access_token
         ge_cloud_organization_id = cloud_config.organization_id
+        if ge_cloud_organization_id is None:
+            raise ValueError("Must set all Cloud variables before migration")
 
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_access_token = ge_cloud_access_token
@@ -179,14 +183,14 @@ class CloudMigrator:
         configuration_bundle: ConfigurationBundle,
         serializer,
     ) -> AnyPayload:
-        url = GeCloudStoreBackend.construct_url(
+        url = construct_url(
             base_url=self._ge_cloud_base_url,
             organization_id=self._ge_cloud_organization_id,
             resource_name="migration",
         )
 
         serialized_bundle = serializer.serialize(configuration_bundle)
-        data = GeCloudStoreBackend.construct_json_payload(
+        data = construct_json_payload(
             resource_type="migration",
             organization_id=self._ge_cloud_organization_id,
             attributes_key="bundle",

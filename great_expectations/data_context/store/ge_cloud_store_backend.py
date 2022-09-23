@@ -47,6 +47,41 @@ class ResponsePayload(TypedDict):
 AnyPayload = Union[ResponsePayload, ErrorPayload]
 
 
+def construct_url(
+    base_url: str,
+    organization_id: str,
+    resource_name: str,
+    id: Optional[str] = None,
+) -> str:
+    url = urljoin(
+        base_url,
+        f"organizations/{organization_id}/{hyphen(resource_name)}",
+    )
+    if id:
+        url = f"{url}/{id}"
+    return url
+
+
+def construct_json_payload(
+    resource_type: str,
+    organization_id: str,
+    attributes_key: str,
+    attributes_value: str,
+    **kwargs: dict,
+) -> dict:
+    data = {
+        "data": {
+            "type": resource_type,
+            "attributes": {
+                "organization_id": organization_id,
+                attributes_key: attributes_value,
+                **kwargs,
+            },
+        }
+    }
+    return data
+
+
 def get_user_friendly_error_message(
     http_exc: requests.exceptions.HTTPError,
 ) -> str:
@@ -248,14 +283,14 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
-        data = self.construct_json_payload(
+        data = construct_json_payload(
             resource_type=resource_type.value,
             attributes_key=attributes_key,
             attributes_value=value,
             organization_id=organization_id,
         )
 
-        url = self.construct_url(
+        url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=organization_id,
             resource_name=self.ge_cloud_resource_name,
@@ -340,7 +375,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         kwargs = kwargs if self.validate_set_kwargs(kwargs) else {}
-        data = self.construct_json_payload(
+        data = construct_json_payload(
             resource_type=resource_type,
             attributes_key=attributes_key,
             attributes_value=value,
@@ -348,7 +383,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             **kwargs,
         )
 
-        url = self.construct_url(
+        url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=organization_id,
             resource_name=resource_name,
@@ -398,7 +433,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._ge_cloud_credentials
 
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GeCloudRESTResource, str, Optional[str]]]:  # type: ignore[override]
-        url = self.construct_url(
+        url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
             resource_name=self.ge_cloud_resource_name,
@@ -443,7 +478,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self, key: Tuple[str, ...], protocol: Optional[Any] = None
     ) -> str:
         ge_cloud_id = key[1]
-        url = self.construct_url(
+        url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
             resource_name=self.ge_cloud_resource_name,
@@ -467,7 +502,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             }
         }
 
-        url = self.construct_url(
+        url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
             resource_name=self.ge_cloud_resource_name,
@@ -523,38 +558,3 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ge_cloud_id=id,
             resource_name=name,
         )
-
-    @staticmethod
-    def construct_url(
-        base_url: str,
-        organization_id: str,
-        resource_name: str,
-        id: Optional[str] = None,
-    ) -> str:
-        url = urljoin(
-            base_url,
-            f"organizations/{organization_id}/{hyphen(resource_name)}",
-        )
-        if id:
-            url = urljoin(url, id)
-        return url
-
-    @staticmethod
-    def construct_json_payload(
-        resource_type: str,
-        organization_id: str,
-        attributes_key: str,
-        attributes_value: str,
-        **kwargs: dict,
-    ) -> dict:
-        data = {
-            "data": {
-                "type": resource_type,
-                "attributes": {
-                    "organization_id": organization_id,
-                    attributes_key: attributes_value,
-                    **kwargs,
-                },
-            }
-        }
-        return data
