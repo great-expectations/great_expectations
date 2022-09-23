@@ -16,9 +16,6 @@ try:
 except ImportError:
     sqlalchemy_bigquery = None
 
-    pytest.skip("sqlalchemy is not installed", allow_module_level=True)
-import sqlalchemy
-
 
 @pytest.mark.unit
 @pytest.mark.skipif(sqlalchemy is None or sqlalchemy_bigquery is None)
