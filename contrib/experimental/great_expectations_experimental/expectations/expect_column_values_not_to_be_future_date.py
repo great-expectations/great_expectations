@@ -4,19 +4,17 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 import json
+from datetime import date
 from typing import Optional
 
-from datetime import date
 from dateutil.parser import parse
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import \
+    ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.metrics import (
-    ColumnMapMetricProvider,
-    column_condition_partial,
-)
+from great_expectations.expectations.metrics import (ColumnMapMetricProvider,
+                                                     column_condition_partial)
 
 
 def is_not_a_future_date(date_in: str) -> bool:
