@@ -34,6 +34,7 @@ datasource_config = {
         "name_of_my_configured_data_connector": {
             "class_name": "ConfiguredAssetFilesystemDataConnector",
             "base_directory": "../data",
+            "assets": {
                 "yellow_tripdata_jan": {
                   "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
                   "group_names": ["month"],
@@ -67,6 +68,7 @@ datasource_config = {
         "name_of_my_configured_data_connector": {
             "class_name": "ConfiguredAssetFilesystemDataConnector",
             "base_directory": "../data",
+            "assets": {
                 "yellow_tripdata_jan": {
                   "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
                   "group_names": ["month"],
