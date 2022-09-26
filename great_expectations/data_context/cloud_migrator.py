@@ -202,9 +202,10 @@ class CloudMigrator:
         ge_cloud_organization_id = cloud_config.organization_id
 
         # Invariant due to `get_ge_cloud_config` raising an error if any config values are missing
-        assert (
-            ge_cloud_organization_id
-        ), "An organization id must be present when performing a migration"
+        if not ge_cloud_organization_id:
+            raise ValueError(
+                "An organization id must be present when performing a migration"
+            )
 
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_access_token = ge_cloud_access_token
