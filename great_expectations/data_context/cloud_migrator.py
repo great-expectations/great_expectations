@@ -39,7 +39,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfigSchema,
     DatasourceConfig,
     DatasourceConfigSchema,
-    GeCloudConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -83,6 +82,31 @@ class ConfigurationBundle:
             return self._data_context_variables.anonymous_usage_statistics.enabled
         else:
             return False
+
+    @property
+    def data_context_variables(self) -> DataContextVariables:
+        return self._data_context_variables
+
+    @property
+    def datasources(self) -> List[DatasourceConfig]:
+        return self._datasources
+
+    @property
+    def expectation_suites(self) -> List[ExpectationSuite]:
+        return self._expectation_suites
+
+    @property
+    def checkpoints(self) -> List[CheckpointConfig]:
+        return self._checkpoints
+
+    @property
+    def profilers(self) -> List[RuleBasedProfilerConfig]:
+        return self._profilers
+
+    @property
+    def validation_results(self) -> List[ExpectationSuiteValidationResult]:
+        return self._validation_results
+
 
     def _get_all_datasources(self) -> List[DatasourceConfig]:
 
@@ -136,35 +160,30 @@ class ConfigurationBundle:
 class ConfigurationBundleSchema(Schema):
     """Marshmallow Schema for the Configuration Bundle."""
 
-    _data_context_variables = fields.Nested(
-        DataContextConfigSchema, allow_none=False, data_key="data_context_variables"
+    data_context_variables = fields.Nested(
+        DataContextConfigSchema, allow_none=False
     )
-    _datasources = fields.List(
+    datasources = fields.List(
         fields.Nested(DatasourceConfigSchema, allow_none=True, required=True),
         required=True,
-        data_key="datasources",
     )
-    _expectation_suites = fields.List(
+    expectation_suites = fields.List(
         fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True),
         required=True,
-        data_key="expectation_suites",
     )
-    _checkpoints = fields.List(
+    checkpoints = fields.List(
         fields.Nested(CheckpointConfigSchema, allow_none=True, required=True),
         required=True,
-        data_key="checkpoints",
     )
-    _profilers = fields.List(
+    profilers = fields.List(
         fields.Nested(RuleBasedProfilerConfigSchema, allow_none=True, required=True),
         required=True,
-        data_key="profilers",
     )
-    _validation_results = fields.List(
+    validation_results = fields.List(
         fields.Nested(
             ExpectationSuiteValidationResultSchema, allow_none=True, required=True
         ),
         required=True,
-        data_key="validation_results",
     )
 
     @post_dump

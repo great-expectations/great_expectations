@@ -158,6 +158,7 @@ def stub_base_data_context_no_anonymous_usage_stats() -> StubBaseDataContext:
 
 
 class TestConfigurationBundleCreate:
+    @pytest.mark.cloud
     @pytest.mark.unit
     def test_configuration_bundle_created(
         self,
@@ -174,11 +175,13 @@ class TestConfigurationBundleCreate:
 
         assert config_bundle.is_usage_stats_enabled()
         assert config_bundle._data_context_variables is not None
-        assert len(config_bundle._expectation_suites) == 1
-        assert len(config_bundle._checkpoints) == 1
-        assert len(config_bundle._profilers) == 1
-        assert len(config_bundle._validation_results) == 1
+        assert len(config_bundle.expectation_suites) == 1
+        assert len(config_bundle.checkpoints) == 1
+        assert len(config_bundle.profilers) == 1
+        assert len(config_bundle.validation_results) == 1
+        assert len(config_bundle.datasources) == 1
 
+    @pytest.mark.cloud
     @pytest.mark.unit
     def test_configuration_bundle_created_usage_stats_disabled(
         self,
@@ -285,6 +288,7 @@ def stub_serialized_configuration_bundle():
 
 
 class TestConfigurationBundleSerialization:
+    @pytest.mark.cloud
     @pytest.mark.unit
     def test_configuration_bundle_serialization(
         self,
@@ -314,6 +318,7 @@ class TestConfigurationBundleSerialization:
 
         assert serialized_bundle == expected_serialized_bundle
 
+    @pytest.mark.cloud
     @pytest.mark.unit
     def test_anonymous_usage_statistics_removed_during_serialization(
         self,
