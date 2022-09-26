@@ -41,6 +41,7 @@ from typing import (
     Tuple,
     Union,
     cast,
+    overload,
 )
 
 import numpy as np
@@ -60,10 +61,17 @@ if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
 
+    from great_expectations.data_context.data_context import (
+        CloudDataContext,
+        DataContext,
+        EphemeralDataContext,
+        FileDataContext,
+    )
+
 try:
     from typing import TypeGuard  # type: ignore[attr-defined]
 except ImportError:
-    from typing_extensions import TypeGuard
+    from typing_extensions import TypeGuard, reveal_type
 
 try:
     import black
@@ -1591,6 +1599,38 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
+@overload
+def get_context() -> "DataContext":
+    ...
+
+
+@overload
+def get_context(
+    ge_cloud_base_url: str,
+    ge_cloud_access_token: str,
+    ge_cloud_organization_id: str,
+    runtime_environment: Optional[dict] = None,
+    project_config: Optional[Any] = None,
+) -> "CloudDataContext":
+    ...
+
+
+@overload
+def get_context(
+    context_root_dir: str,
+    runtime_environment: Optional[dict] = None,
+) -> "FileDataContext":
+    ...
+
+
+@overload
+def get_context(
+    project_config: str,
+    runtime_environment: Optional[dict] = None,
+) -> "EphemeralDataContext":
+    ...
+
+
 def get_context(
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
@@ -1620,16 +1660,16 @@ def get_context(
         ):
             raise DataContextError(
                 """
-                    CloudDataContext must be initialized with proper parameters:
-                        ge_cloud_base_url, ge_cloud_access_token, and ge_cloud_organization_id are all needed
-                    """
+                CloudDataContext must be initialized with proper parameters:
+                ge_cloud_base_url, ge_cloud_access_token, and ge_cloud_organization_id are all needed
+                """
             )
         from great_expectations.data_context.data_context import CloudDataContext
 
         return CloudDataContext(
             project_config=project_config,
             runtime_environment=runtime_environment,
-            context_root_dir=context_root_dir,  # type: ignore[arg-type]
+            context_root_dir=context_root_dir,
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
@@ -1637,14 +1677,14 @@ def get_context(
     elif context_root_dir and not project_config:
         from great_expectations.data_context.data_context import FileDataContext
 
-        return FileDataContext(  # type: ignore[assignment]
-            context_root_dir=context_root_dir,  # type: ignore[arg-type]
+        return FileDataContext(
+            context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
     elif project_config and not context_root_dir:
         from great_expectations.data_context.data_context import EphemeralDataContext
 
-        return EphemeralDataContext(  # type: ignore[assignment]
+        return EphemeralDataContext(
             project_config=project_config, runtime_environment=runtime_environment
         )
     else:

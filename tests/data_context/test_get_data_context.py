@@ -8,6 +8,7 @@ from typing import Any, Optional
 from unittest import mock
 
 import pytest
+from typing_extensions import reveal_type
 
 import great_expectations as gx
 from great_expectations.data_context import EphemeralDataContext
