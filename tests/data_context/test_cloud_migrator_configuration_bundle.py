@@ -1,7 +1,18 @@
 """TODO: Add docstring"""
 from dataclasses import dataclass
+from typing import List, Optional
 
 import pytest
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariables,
+    EphemeralDataContextVariables,
+)
+
+from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
+    DataContextConfig,
+    CheckpointConfig,
+)
 
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core import (
@@ -24,6 +35,76 @@ from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+
+
+class StubUsageStats:
+    @property
+    def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
+        return AnonymizedUsageStatisticsConfig(enabled=True)
+
+
+class StubCheckpointStore:
+    def get_checkpoint(self, name: str, ge_cloud_id: Optional[str]) -> CheckpointConfig:
+        return CheckpointConfig(name=name, class_name="Checkpoint")
+
+
+class StubValidationsStore:
+    def list_keys(self):
+        # Note: Key just has to return an iterable here
+        return ["some_key"]
+
+    def get(self, key):
+        # Note: Key is unused
+        return ExpectationSuiteValidationResult(
+            success=True,
+        )
+
+
+class StubBaseDataContext:
+    """Stub for testing ConfigurationBundle."""
+
+    @property
+    def _data_context_variables(self) -> StubUsageStats:
+        return StubUsageStats()
+
+    @property
+    def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
+        return self.variables.anonymous_usage_statistics
+
+    @property
+    def variables(self) -> DataContextVariables:
+        config = DataContextConfig(
+            anonymous_usage_statistics=AnonymizedUsageStatisticsConfig(enabled=True)
+        )
+        return EphemeralDataContextVariables(config=config)
+
+    @property
+    def checkpoint_store(self) -> StubCheckpointStore:
+        return StubCheckpointStore()
+
+    @property
+    def validations_store(self) -> StubValidationsStore:
+        return StubValidationsStore()
+
+    def list_expectation_suite_names(self) -> List[str]:
+        return ["my_suite"]
+
+    def get_expectation_suite(self, name: str) -> ExpectationSuite:
+        return ExpectationSuite(expectation_suite_name=name)
+
+    def list_checkpoints(self) -> List[str]:
+        return ["my_checkpoint"]
+
+    def list_profilers(self) -> List[str]:
+        return ["my_profiler"]
+
+    def get_profiler(self, name: str) -> RuleBasedProfiler:
+        return RuleBasedProfiler(name, config_version=1.0, rules={})
+
+
+@pytest.fixture
+def stub_base_data_context() -> StubBaseDataContext:
+    return StubBaseDataContext()
 
 
 @dataclass
@@ -181,7 +262,7 @@ def test_is_usage_statistics_key_set_if_key_not_present():
 
 
 @pytest.mark.integration
-def test_anonymous_usage_statistics_removed_during_serialization(
+def test_anonymous_usage_statistics_removed_during_serialization_integration(
     in_memory_runtime_context_with_configs_in_stores: DataContextWithSavedItems,
 ):
     """What does this test and why?
@@ -194,6 +275,33 @@ def test_anonymous_usage_statistics_removed_during_serialization(
     """
 
     context: BaseDataContext = in_memory_runtime_context_with_configs_in_stores.context
+
+    assert context.anonymous_usage_statistics is not None
+
+    config_bundle = ConfigurationBundle(context)
+
+    serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
+
+    serialized_bundle: dict = serializer.serialize(config_bundle)
+
+    assert (
+        serialized_bundle["data_context_variables"].get("anonymous_usage_statistics")
+        is None
+    )
+
+
+@pytest.mark.unit
+def test_anonymous_usage_statistics_removed_during_serialization(
+    stub_base_data_context: StubBaseDataContext
+):
+    """What does this test and why?
+    When serializing a ConfigurationBundle we need to remove the
+    anonymous_usage_statistics key.
+    This is currently an integration test using a real Data Context, it can
+    be converted to a unit test.
+    """
+
+    context: StubBaseDataContext = stub_base_data_context
 
     assert context.anonymous_usage_statistics is not None
 
