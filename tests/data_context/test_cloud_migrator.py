@@ -43,7 +43,7 @@ def test__send_configuration_bundle_sends_valid_http_request(
         )
 
     mock_post.assert_called_once_with(
-        mock.ANY,
+        mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/migration",
         json={
             "data": {
