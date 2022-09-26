@@ -284,7 +284,6 @@ def test_configuration_bundle_serialization_integration(
 @pytest.mark.unit
 def test_configuration_bundle_created(
     stub_base_data_context: StubBaseDataContext,
-    stub_serialized_configuration_bundle: dict,
 ):
     """What does this test and why?
 
@@ -301,6 +300,23 @@ def test_configuration_bundle_created(
     assert len(config_bundle._checkpoints) == 1
     assert len(config_bundle._profilers) == 1
     assert len(config_bundle._validation_results) == 1
+
+
+@pytest.mark.unit
+def test_configuration_bundle_created_usage_stats_disabled(
+    stub_base_data_context_anonymous_usage_stats_present_but_disabled: StubBaseDataContext,
+):
+    """What does this test and why?
+
+    Make sure the configuration bundle successfully parses the usage stats settings.
+    """
+
+    context: BaseDataContext = stub_base_data_context_anonymous_usage_stats_present_but_disabled
+
+    config_bundle = ConfigurationBundle(context)
+
+    assert not config_bundle.is_usage_stats_enabled()
+
 
 
 
