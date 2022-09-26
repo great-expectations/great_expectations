@@ -32,7 +32,7 @@ class EphemeralDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: Union[DataContextConfig, Mapping],
+        project_config: Optional[Union[DataContextConfig, Mapping]] = None,
         runtime_environment: Optional[dict] = None,
     ) -> None:
         """EphemeralDataContext constructor
@@ -42,6 +42,11 @@ class EphemeralDataContext(AbstractDataContext):
                 override both those set in config_variables.yml and the environment
 
         """
+        if not project_config:
+            raise ge_exceptions.DataContextError(
+                "Cannot instantiate EphemeralDataContext without project_config"
+            )
+
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )

@@ -66,7 +66,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context.bridge_file_data_context import (
-    BridgeFileDataContext,
+    _BridgeFileDataContext,
 )
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -273,7 +273,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     )
     def __init__(
         self,
-        project_config: Union[DataContextConfig, Mapping],
+        project_config: Optional[Union[DataContextConfig, Mapping]] = None,
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         ge_cloud_mode: bool = False,
@@ -291,7 +291,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if not BaseDataContext.validate_config(project_config):
+        if project_config and not BaseDataContext.validate_config(project_config):
             raise ge_exceptions.InvalidConfigError(
                 "Your project_config is not valid. Try using the CLI check-config command."
             )
@@ -319,9 +319,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 ge_cloud_organization_id=ge_cloud_organization_id,
             )
         elif self._context_root_directory and project_config:
-            self._data_context = BridgeFileDataContext(  # type: ignore[assignment]
+            self._data_context = _BridgeFileDataContext(  # type: ignore[assignment]
                 project_config=project_config,
                 context_root_dir=context_root_dir,  # type: ignore[arg-type]
+                from_base_data_context=True,
                 runtime_environment=runtime_environment,
             )
         elif self._context_root_directory:
