@@ -34,7 +34,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
     being the other one) designed for connecting to data through AWS Glue Data Catalog.
 
     A ConfiguredAssetAWSGlueDataCatalogDataConnector requires an explicit listing of each DataAsset one want to
-    connect to. This allows more fine-tuning, but also requires more setup. One will need define to the
+    connect to. This allows more fine-tuning, but also requires more setup. One will need define the
     database and table names.
     """
 
@@ -47,7 +47,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         assets: Optional[Dict[str, dict]] = None,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ):
         """
         A DataConnector that requires explicit listing of AWS Glue Data Catalog tables one want to connect to.
@@ -57,7 +57,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             datasource_name (str): Name of datasource that this DataConnector is connected to
             execution_engine (ExecutionEngine): Execution Engine object to actually read the data
             catalog_id (str): Optional catalog ID from which to retrieve databases. If none is provided, the AWS account ID is used by default.
-            assets (dict): dict of asset configuration
+            assets (dict): dict of assets configuration
             boto3_options (dict): optional boto3 options
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
@@ -66,29 +66,37 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             "experimental. Methods, APIs, and core behavior may change in the future."
         )
 
-        self._catalog_id = catalog_id
-        if boto3_options is None:
-            boto3_options = {}
-
-        self._assets: dict = {}
-        if assets:
-            for asset_name, config in assets.items():
-                self.add_data_asset(asset_name, config)
-
-        try:
-            self._glue: Any = boto3.client("glue", **boto3_options)
-        except (TypeError, AttributeError):
-            raise ImportError(
-                "Unable to load boto3 (it is required for ConfiguredAssetAWSGlueDataCatalogDataConnector)."
-            )
-
         super().__init__(
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
-            id_=id_,
+            id=id,
         )
+        if boto3_options is None:
+            boto3_options = {}
+
+        try:
+            self._glue_client: Any = boto3.client("glue", **boto3_options)
+        except (TypeError, AttributeError):
+            raise ImportError(
+                "Unable to load boto3 (it is required for ConfiguredAssetAWSGlueDataCatalogDataConnector)."
+            )
+
+        self._catalog_id = catalog_id
+
+        self._assets: Dict[str, dict] = {}
+        self._refresh_data_assets_cache(assets=assets)
+
+        self._data_references_cache: Dict[str, List[dict]] = {}
+
+    @property
+    def catalog_id(self) -> Optional[str]:
+        return self._catalog_id
+
+    @property
+    def glue_client(self) -> Any:
+        return self._glue_client
 
     @property
     def assets(self) -> Dict[str, dict]:
@@ -157,6 +165,10 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         """
         Retrieve batch_definitions that match batch_request
 
+        First retrieves all batch_definitions that match batch_request
+            - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.
+            - NOTE : currently glue data connectors do not support sorters.
+
         Args:
             batch_request (BatchRequestBase): BatchRequestBase (BatchRequest without attribute validation) to process
 
@@ -168,7 +180,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
-        sub_cache: Optional[List[dict]] = None
+        batch_definition_list: List[BatchDefinition] = []
         try:
             sub_cache = self._get_data_reference_list_from_cache_by_data_asset_name(
                 data_asset_name=batch_request.data_asset_name
@@ -178,7 +190,6 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
                 f"data_asset_name {batch_request.data_asset_name} is not recognized."
             )
 
-        batch_definition_list: List[BatchDefinition] = []
         for batch_identifiers in sub_cache:
             batch_definition = BatchDefinition(
                 datasource_name=self.datasource_name,
@@ -215,61 +226,79 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset config as value.
         """
-        name: str = self._update_data_asset_name_from_config(name, config)
+        if "database_name" not in config:
+            raise DataConnectorError(
+                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'database_name' was not specified"
+            )
+        if "table_name" not in config:
+            raise DataConnectorError(
+                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'table_name' was not specified"
+            )
+
+        partitions = config.get("partitions")
+        if partitions and not isinstance(partitions, list):
+            raise DataConnectorError(
+                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'partitions' must be a list, got {type(partitions)}"
+            )
+
+        name = self._update_data_asset_name_from_config(
+            data_asset_name=name, data_asset_config=config
+        )
+
         self._assets[name] = config
 
     def _get_glue_paginator_kwargs(self) -> dict:
-        return {"CatalogId": self._catalog_id} if self._catalog_id else {}
+        return {"CatalogId": self.catalog_id} if self.catalog_id else {}
 
     def _get_table_partitions(self, database_name: str, table_name: str) -> List[str]:
         paginator_kwargs = self._get_glue_paginator_kwargs()
         paginator_kwargs["DatabaseName"] = database_name
         paginator_kwargs["Name"] = table_name
         try:
-            table = self._glue.get_table(**paginator_kwargs)
+            table = self.glue_client.get_table(**paginator_kwargs)
             return [p["Name"] for p in table["Table"]["PartitionKeys"]]
-        except self._glue.exceptions.EntityNotFoundException:
+        except self.glue_client.exceptions.EntityNotFoundException:
             raise DataConnectorError(
                 f"ConfiguredAssetAWSGlueDataCatalogDataConnector could not find a table with name: {database_name}.{table_name}"
             )
 
     def _get_batch_identifiers(
-        self, partition_names: List[str], database_name: str, table_name: str
+        self, partition_keys: List[str], database_name: str, table_name: str
     ) -> List[dict]:
-        batch_identifiers = []
-        table_partitions = self._get_table_partitions(
+        batch_identifiers: List[dict] = []
+        table_partitions: List[str] = self._get_table_partitions(
             database_name=database_name, table_name=table_name
         )
 
-        paginator_kwargs = self._get_glue_paginator_kwargs()
+        paginator_kwargs: dict = self._get_glue_paginator_kwargs()
         paginator_kwargs["DatabaseName"] = database_name
         paginator_kwargs["TableName"] = table_name
-        paginator = self._glue.get_paginator("get_partitions")
+        paginator = self.glue_client.get_paginator("get_partitions")
         iterator = paginator.paginate(**paginator_kwargs)
         for page in iterator:
             for partition in page["Partitions"]:
                 partition_values = partition["Values"]
                 batch_id = dict(zip(table_partitions, partition_values))
                 filtered_batch_id = dict(
-                    filter(lambda k: k[0] in partition_names, batch_id.items())
+                    filter(lambda k: k[0] in partition_keys, batch_id.items())
                 )
 
                 if filtered_batch_id not in batch_identifiers:
                     batch_identifiers.append(filtered_batch_id)
 
-        return batch_identifiers or [{}]
+        return batch_identifiers
 
     def _get_batch_identifiers_list_from_data_asset_config(
         self, data_asset_config: dict
     ) -> List[dict]:
-
         table_name: str = data_asset_config["table_name"]
         database_name: str = data_asset_config["database_name"]
+        partitions: Optional[list] = data_asset_config.get("partitions")
 
         batch_identifiers_list: List[dict] = [{}]
-        if "partitions" in data_asset_config:
+        if partitions:
             batch_identifiers_list = self._get_batch_identifiers(
-                partition_names=data_asset_config["partitions"],
+                partition_keys=partitions,
                 database_name=database_name,
                 table_name=table_name,
             )
@@ -277,14 +306,14 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         return batch_identifiers_list
 
     def _refresh_data_references_cache(self) -> None:
-        self._data_references_cache: Dict[str, List[dict]] = {}
+        self._data_references_cache = {}
 
         for data_asset_name in self.assets:
             data_asset_config: dict = self.assets[data_asset_name]
             batch_identifiers_list: List[
                 dict
             ] = self._get_batch_identifiers_list_from_data_asset_config(
-                data_asset_config
+                data_asset_config=data_asset_config
             )
             self._data_references_cache[data_asset_name] = batch_identifiers_list
 
@@ -294,40 +323,23 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         return self._data_references_cache[data_asset_name]
 
     def _update_data_asset_name_from_config(
-        self, data_asset_name: str, data_asset_config: Optional[dict]
+        self, data_asset_name: str, data_asset_config: dict
     ) -> str:
-        if data_asset_config is None:
-            data_asset_config: dict = {}
-
         data_asset_name_prefix: str = data_asset_config.get(
             "data_asset_name_prefix", ""
         )
+
         data_asset_name_suffix: str = data_asset_config.get(
             "data_asset_name_suffix", ""
         )
 
-        if "database_name" not in data_asset_config:
-            raise DataConnectorError(
-                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'database_name' was not specified"
-            )
-        if "table_name" not in data_asset_config:
-            raise DataConnectorError(
-                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'table_name' was not specified"
-            )
-
-        partitions = data_asset_config.get("partitions")
-        if partitions and not isinstance(partitions, list):
-            raise DataConnectorError(
-                message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'partitions' must be a list, got {type(partitions)}"
-            )
-
-        data_asset_name: str = (
+        data_asset_name = (
             f"{data_asset_name_prefix}{data_asset_name}{data_asset_name_suffix}"
         )
         return data_asset_name
 
     def _map_data_reference_to_batch_definition_list(
-        self, data_reference, data_asset_name: Optional[str] = None  #: Any,
+        self, data_reference, data_asset_name: str = None  #: Any,
     ) -> Optional[List[BatchDefinition]]:
         # Note: data references *are* dictionaries, allowing us to invoke `IDDict(data_reference)`
         return [
@@ -355,9 +367,19 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             dict built from batch_definition
         """
         data_asset_name: str = batch_definition.data_asset_name
-        data_asset_dict: dict = self.assets[data_asset_name]
+        data_asset_config: dict = self.assets[data_asset_name]
         return {
             "data_asset_name": data_asset_name,
             "batch_identifiers": batch_definition.batch_identifiers,
-            **data_asset_dict,
+            **data_asset_config,
         }
+
+    def _refresh_data_assets_cache(
+        self, assets: Optional[Dict[str, dict]] = None
+    ) -> None:
+        # Clear assets already stored in memory.
+        self._assets = {}
+
+        assets = assets or {}
+        for data_asset_name, data_asset_config in assets.items():
+            self.add_data_asset(name=data_asset_name, config=data_asset_config)

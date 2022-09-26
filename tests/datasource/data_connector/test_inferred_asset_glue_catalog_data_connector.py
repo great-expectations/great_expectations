@@ -66,12 +66,16 @@ def test_basic_instantiation(glue_titanic_catalog):
         "database_name": "db_test",
         "table_name": "tb_titanic_with_partitions",
         "partitions": ["PClass", "SexCode"],
+        "data_asset_name_prefix": "",
+        "data_asset_name_suffix": "",
     }
     assert "db_test.tb_titanic_without_partitions" in my_data_connector.assets
     assert my_data_connector.assets["db_test.tb_titanic_without_partitions"] == {
         "database_name": "db_test",
         "table_name": "tb_titanic_without_partitions",
         "partitions": [],
+        "data_asset_name_prefix": "",
+        "data_asset_name_suffix": "",
     }
 
 

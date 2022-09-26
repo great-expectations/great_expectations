@@ -290,7 +290,7 @@ Please check your config."""
         elif isinstance(batch_spec, (PathBatchSpec, GlueDataCatalogBatchSpec)):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            reader_arg: str = batch_spec.path
+            reader_path: str = batch_spec.path
             schema: Optional[
                 Union[pyspark.sql.types.StructType, dict, str]
             ] = reader_options.get("schema")
@@ -321,9 +321,9 @@ Please check your config."""
                 reader_fn: Callable = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
-                    path=reader_arg,
+                    path=reader_path,
                 )
-                batch_data = reader_fn(reader_arg)
+                batch_data = reader_fn(reader_path)
             except AttributeError:
                 raise ExecutionEngineError(
                     """
@@ -333,7 +333,7 @@ Please check your config."""
             # pyspark will raise an AnalysisException error if path is incorrect
             except pyspark.sql.utils.AnalysisException:
                 raise ExecutionEngineError(
-                    f"""Unable to read in batch from the following: {reader_arg}. Please check your configuration."""
+                    f"""Unable to read in batch from the following: {reader_path}. Please check your configuration."""
                 )
 
         else:

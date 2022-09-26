@@ -381,12 +381,13 @@ class AssetConfigSchema(Schema):
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
     """
-    Necessary addition for AWS Glue Data Catalog assets. By using AWS Glue Data Catalog,
-    we need to have both database and table names. The partitions are optional, it
-    must match the partitions defined in the table and it is used to create batch
-    identifiers that would allow the validation of a single partition. Example: if we have two
-    partitions (year, month), specifying these would create one batch id per combination of year
-    and month. The connector gets the partitions values from the catalog.
+    Necessary addition for AWS Glue Data Catalog assets.
+    By using AWS Glue Data Catalog, we need to have both database and table names.
+    The partitions are optional, it must match the partitions defined in the table
+    and it is used to create batch identifiers that allows the validation of a single
+    partition. Example: if we have two partitions (year, month), specifying these would
+    create one batch id per combination of year and month. The connector gets the partition
+    values from the AWS Glue Data Catalog.
     """
     database_name = fields.String(required=False, allow_none=True)
     partitions = fields.List(
@@ -687,7 +688,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
 
     # noinspection PyUnusedLocal
     @validates_schema
-    def validate_schema(self, data, **kwargs):
+    def validate_schema(self, data, **kwargs):  # noqa: C901 - complexity 16
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return

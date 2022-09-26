@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Iterator, List, Optional, Tuple
+from typing import Iterator, List, Optional
 
 from great_expectations.datasource.data_connector.configured_asset_aws_glue_data_catalog_data_connector import (
     ConfiguredAssetAWSGlueDataCatalogDataConnector,
@@ -17,10 +17,8 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
     The InferredAssetAWSGlueDataCatalogDataConnector is one of two classes (ConfiguredAssetAWSGlueDataCatalogDataConnector being the
     other one) designed for connecting to data through AWS Glue Data Catalog.
 
-    It connects to assets (database and tables) inferred from AWS Glue Data Catalog.
-
-    InferredAssetAWSGlueDataCatalogDataConnector that operates on AWS Glue Data Catalog and determines
-    the data_asset_name implicitly (e.g., by listing all database and table names from AWS Glue Data Catalog)
+    InferredAssetAWSGlueDataCatalogDataConnector operates on AWS Glue Data Catalog and determines the data_asset_name
+    implicitly (e.g., by listing all databases, tables, and partitions from AWS Glue Data Catalog)
     """
 
     def __init__(
@@ -36,6 +34,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         glue_introspection_directives: Optional[dict] = None,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        id: Optional[str] = None,
     ):
         """
         DataConnector for connecting to AWS Glue Data Catalog.
@@ -57,12 +56,6 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
             "Warning: great_expectations.datasource.data_connector.InferredAssetAWSGlueDataCatalogDataConnector is "
             "experimental. Methods, APIs, and core behavior may change in the future."
         )
-        self._data_asset_name_prefix = data_asset_name_prefix
-        self._data_asset_name_suffix = data_asset_name_suffix
-        self._excluded_tables = excluded_tables
-        self._included_tables = included_tables
-        self._glue_introspection_directives = glue_introspection_directives or {}
-
         super().__init__(
             name=name,
             datasource_name=datasource_name,
@@ -71,101 +64,103 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
             assets=None,
             batch_spec_passthrough=batch_spec_passthrough,
             boto3_options=boto3_options,
+            id=id,
         )
 
-        self._introspected_assets_cache: dict = {}
-        self._refresh_introspected_assets_cache(
-            self._data_asset_name_prefix,
-            self._data_asset_name_suffix,
-            self._excluded_tables,
-            self._included_tables,
-        )
+        self._data_asset_name_prefix = data_asset_name_prefix
+        self._data_asset_name_suffix = data_asset_name_suffix
+        self._excluded_tables = excluded_tables
+        self._included_tables = included_tables
+        self._glue_introspection_directives = glue_introspection_directives or {}
+
+        self._refresh_introspected_assets_cache()
 
     @property
-    def assets(self) -> Dict[str, dict]:
-        return self._introspected_assets_cache
+    def data_asset_name_prefix(self) -> str:
+        return self._data_asset_name_prefix
+
+    @property
+    def data_asset_name_suffix(self) -> str:
+        return self._data_asset_name_suffix
+
+    @property
+    def excluded_tables(self) -> Optional[list]:
+        return self._excluded_tables
+
+    @property
+    def included_tables(self) -> Optional[list]:
+        return self._included_tables
+
+    @property
+    def glue_introspection_directives(self) -> dict:
+        return self._glue_introspection_directives
 
     def _refresh_data_references_cache(self) -> None:
-        self._refresh_introspected_assets_cache(
-            self._data_asset_name_prefix,
-            self._data_asset_name_suffix,
-            self._excluded_tables,
-            self._included_tables,
-        )
+        self._refresh_introspected_assets_cache()
         super()._refresh_data_references_cache()
 
-    def _refresh_introspected_assets_cache(
-        self,
-        data_asset_name_prefix: str = None,
-        data_asset_name_suffix: str = None,
-        excluded_tables: List = None,
-        included_tables: List = None,
-    ) -> None:
-        data_asset_name_prefix = data_asset_name_prefix or ""
-        data_asset_name_suffix = data_asset_name_suffix or ""
+    def _refresh_introspected_assets_cache(self) -> None:
         introspected_table_metadata = self._introspect_catalog(
-            **self._glue_introspection_directives
+            **self.glue_introspection_directives
         )
+
+        introspected_assets: dict = {}
         for metadata in introspected_table_metadata:
-            table = f"{metadata['database_name']}.{metadata['table_name']}"
-            if (excluded_tables is not None) and (table in excluded_tables):
+            # For the inferred glue connector, the data asset name is database.table
+            data_asset_name = f"{metadata['database_name']}.{metadata['table_name']}"
+
+            if (self.excluded_tables is not None) and (
+                data_asset_name in self.excluded_tables
+            ):
                 continue
 
-            if (included_tables is not None) and (table not in included_tables):
+            if (self.included_tables is not None) and (
+                data_asset_name not in self.included_tables
+            ):
                 continue
 
-            data_asset_name = (
-                data_asset_name_prefix
-                + metadata["database_name"]
-                + "."
-                + metadata["table_name"]
-                + data_asset_name_suffix
-            )
-
-            data_asset_config = {
+            data_asset_config: dict = {
                 "database_name": metadata["database_name"],
                 "table_name": metadata["table_name"],
                 "partitions": metadata["partitions"],
+                "data_asset_name_prefix": self.data_asset_name_prefix,
+                "data_asset_name_suffix": self.data_asset_name_suffix,
             }
 
-            # Store an asset config for each introspected data asset.
-            self._introspected_assets_cache[data_asset_name] = data_asset_config
+            introspected_assets[data_asset_name] = data_asset_config
+
+        self._refresh_data_assets_cache(assets=introspected_assets)
 
     def _get_databases(self) -> Iterator[str]:
-        paginator = self._glue.get_paginator("get_databases")
+        paginator = self.glue_client.get_paginator("get_databases")
         iterator = paginator.paginate(**self._get_glue_paginator_kwargs())
         for page in iterator:
             for db in page["DatabaseList"]:
                 yield db["Name"]
 
-    def _get_tables(self, database: str = None) -> Iterator[Tuple[str, str, str]]:
-        paginator = self._glue.get_paginator("get_tables")
+    def _introspect_catalog(self, database_name: str = None) -> List[dict]:
+        paginator = self.glue_client.get_paginator("get_tables")
         paginator_kwargs = self._get_glue_paginator_kwargs()
 
-        databases: List[str] = [database] if database else list(self._get_databases())
+        databases: List[str] = (
+            [database_name] if database_name else list(self._get_databases())
+        )
+        tables: List[dict] = []
         for db in databases:
             paginator_kwargs["DatabaseName"] = db
             iterator = paginator.paginate(**paginator_kwargs)
             try:
                 for page in iterator:
                     for tb in page["TableList"]:
-                        database_name = tb["DatabaseName"]
-                        table_name = tb["Name"]
-                        partitions = [p["Name"] for p in tb["PartitionKeys"]]
-                        yield database_name, table_name, partitions
-            except self._glue.exceptions.EntityNotFoundException:
+                        tables.append(
+                            {
+                                "database_name": tb["DatabaseName"],
+                                "table_name": tb["Name"],
+                                "partitions": [p["Name"] for p in tb["PartitionKeys"]],
+                            }
+                        )
+            except self.glue_client.exceptions.EntityNotFoundException:
                 raise DataConnectorError(
                     f"InferredAssetAWSGlueDataCatalogDataConnector could not find a database with name: {db}."
                 )
-
-    def _introspect_catalog(self, database_name: str = None) -> List[dict]:
-        tables: List[dict] = []
-        for db_name, table_name, partitions in self._get_tables(database_name):
-            tables.append(
-                {
-                    "database_name": db_name,
-                    "table_name": table_name,
-                    "partitions": partitions,
-                }
-            )
         return tables

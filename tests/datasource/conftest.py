@@ -24,6 +24,21 @@ from great_expectations.self_check.util import get_sqlite_connection_url
 def create_partitions_for_table(
     glue_client, database_name: str, table_name: str, partitions: dict
 ):
+    """
+    This function is used to create partitions for a table in the Glue Data Catalog. It
+    will create one partition per combination of partition values. Example: if we define
+    the partitions {'year': [21, 22], 'month': [1,2]}, this function will create 4 partitions
+    in the table:
+        1. {'year': 21, 'month': 1}
+        2. {'year': 21, 'month': 2}
+        3. {'year': 22, 'month': 1}
+        4. {'year': 22, 'month': 2}
+
+    It is useful to test if the AWS Glue Data Connector can get the table partitions from
+    the catalog and create one batch identifier per combination of partitions. The Glue connector
+    will create batch ids based on the table partitions, like: {year=21, month=1}
+    and {year=22, month=2}.
+    """
     partition_values = list(product(*partitions.values()))
     partition_path = "={}/".join(partitions.keys()) + "={}/"
 
@@ -62,8 +77,11 @@ def glue_titanic_catalog():
         region_name: str = "us-east-1"
         client = boto3.client("glue", region_name=region_name)
         database_name = "db_test"
-        ## Database A
+
+        # Create Database
         client.create_database(DatabaseInput={"Name": database_name})
+
+        # Create Table with Partitions
         client.create_table(
             DatabaseName=database_name,
             TableInput={
@@ -86,6 +104,8 @@ def glue_titanic_catalog():
             table_name="tb_titanic_with_partitions",
             partitions={"PClass": ["1st", "2nd", "3rd"], "SexCode": ["0", "1"]},
         )
+
+        # Create Table without Partitions
         client.create_table(
             DatabaseName=database_name,
             TableInput={
