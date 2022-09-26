@@ -4,7 +4,6 @@ from typing import List, Optional, cast
 
 from marshmallow import Schema, fields, post_dump
 import logging
-from typing import List, Optional, Tuple
 
 import requests
 
@@ -17,16 +16,13 @@ from great_expectations.core import (
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext, BaseDataContext
 from great_expectations.data_context.data_context_variables import DataContextVariables
-from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointConfigSchema,
     DataContextConfigSchema,
-    GeCloudConfig,
+    GeCloudConfig, DatasourceConfigSchema,DatasourceConfig
 )
-from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.http import create_session
-from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -35,7 +31,6 @@ from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudStoreBackend,
     get_user_friendly_error_message,
 )
-from great_expectations.data_context.types.base import DatasourceConfig, GeCloudConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -58,6 +53,8 @@ class ConfigurationBundle:
 
         self._data_context_variables: DataContextVariables = context.variables
 
+
+        self._datasources: List[DatasourceConfig] = self._get_all_datasources()
         self._expectation_suites: List[
             ExpectationSuite
         ] = self._get_all_expectation_suites()
@@ -79,6 +76,20 @@ class ConfigurationBundle:
             return self._data_context_variables.anonymous_usage_statistics.enabled
         else:
             return False
+
+    def _get_all_datasources(self) -> List[DatasourceConfig]:
+
+        datasource_names: List[str] = list(self._context.datasources.keys())
+
+        # Note: we are accessing the protected _datasource_store to not add a public property
+        # to all Data Contexts.
+        datasource_configs: List[DatasourceConfig] = [
+            self._context._datasource_store.retrieve_by_name(
+                datasource_name=datasource_name
+            ) for datasource_name in datasource_names
+        ]
+
+        return datasource_configs
 
     def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
         return [
@@ -119,6 +130,11 @@ class ConfigurationBundleSchema(Schema):
 
     _data_context_variables = fields.Nested(
         DataContextConfigSchema, allow_none=False, data_key="data_context_variables"
+    )
+    _datasources = fields.List(
+        fields.Nested(DatasourceConfigSchema, allow_none=True, required=True),
+        required=True,
+        data_key="datasources",
     )
     _expectation_suites = fields.List(
         fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True),
@@ -190,7 +206,6 @@ class CloudMigrator:
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         self._context = context
-        self._test_migrate = test_migrate
 
         cloud_config = CloudDataContext.get_ge_cloud_config(
             ge_cloud_base_url=ge_cloud_base_url,

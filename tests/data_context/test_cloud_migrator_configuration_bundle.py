@@ -1,7 +1,9 @@
 """These tests are meant to exercise ConfigurationBundle and related."""
-from typing import List, Optional
+from typing import List, Optional, Dict, Union
 
 import pytest
+from great_expectations.datasource import LegacyDatasource, BaseDatasource
+
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,
     EphemeralDataContextVariables,
@@ -11,6 +13,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     CheckpointConfig,
+    DatasourceConfig,
 )
 
 from great_expectations.core import (
@@ -47,6 +50,25 @@ class StubValidationsStore:
         return ExpectationSuiteValidationResult(
             success=True,
         )
+
+
+class StubDatasourceStore:
+    def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig:
+        datasource_config_dict: dict = {
+            "name": datasource_name,
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "class_name": "PandasExecutionEngine",
+            },
+            "data_connectors": {},
+        }
+        return DatasourceConfig(**datasource_config_dict)
+
+
+class DummyDatasource:
+    pass
 
 
 class StubBaseDataContext:
@@ -90,6 +112,16 @@ class StubBaseDataContext:
             anonymous_usage_statistics=anonymous_usage_statistics
         )
         return EphemeralDataContextVariables(config=config)
+
+    @property
+    def _datasource_store(self):
+        return StubDatasourceStore()
+
+    @property
+    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
+        # Datasource is a dummy since we just want the DatasourceConfig from the store, not an
+        # actual initialized datasource.
+        return {"my_datasource": DummyDatasource()}
 
     @property
     def checkpoint_store(self) -> StubCheckpointStore:
@@ -215,6 +247,18 @@ def stub_serialized_configuration_bundle():
             "stores": None,
             "validations_store_name": None,
         },
+        "datasources": [
+            {
+                "class_name": "Datasource",
+                "data_connectors": {},
+                "execution_engine": {
+                    "class_name": "PandasExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "module_name": "great_expectations.datasource",
+                "name": "my_datasource",
+            }
+        ],
         "expectation_suites": [
             {
                 "data_asset_type": None,
