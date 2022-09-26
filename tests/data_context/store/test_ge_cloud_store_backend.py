@@ -111,6 +111,26 @@ def test_construct_url(
             "my_resource",
             "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
             "my_attribute",
+            {"key1": {"nested_key1": 1}, "key2": {"nested_key2": 2}},
+            {},
+            {
+                "data": {
+                    "type": "my_resource",
+                    "attributes": {
+                        "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+                        "my_attribute": {
+                            "key1": {"nested_key1": 1},
+                            "key2": {"nested_key2": 2},
+                        },
+                    },
+                },
+            },
+            id="with nested value",
+        ),
+        pytest.param(
+            "my_resource",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "my_attribute",
             "my_value",
             {
                 "kwarg1": 1,
