@@ -677,6 +677,7 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
 @pytest.fixture
 def serialized_configuration_bundle() -> dict:
     return {
+        "data_context_id": "877166bd-08f2-4d7b-b473-a2b97ab5e36f",
         "checkpoints": [
             {
                 "action_list": [

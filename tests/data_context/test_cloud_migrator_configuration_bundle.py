@@ -152,16 +152,18 @@ def test_configuration_bundle_serialization(
     This test is an integration test using a real DataContext to prove out the
     ConfigurationBundle serialization. We can replace this test with unit tests.
     """
-
     context: BaseDataContext = in_memory_runtime_context_with_configs_in_stores.context
+
+    # Overwrite expected data_context_id to match the context we're using
+    expected_serialized_bundle = serialized_configuration_bundle
+    assert "data_context_id" in expected_serialized_bundle
+    expected_serialized_bundle["data_context_id"] = context.data_context_id
 
     config_bundle = ConfigurationBundle(context)
 
     serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
 
     serialized_bundle: dict = serializer.serialize(config_bundle)
-
-    expected_serialized_bundle = serialized_configuration_bundle
 
     # Remove meta before comparing since it contains the GX version
     serialized_bundle["expectation_suites"][0].pop("meta", None)
