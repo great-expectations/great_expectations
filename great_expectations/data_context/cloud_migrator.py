@@ -59,7 +59,7 @@ class ConfigurationBundle:
 
         self._data_context_variables: DataContextVariables = context.variables
 
-        self._datasources = []
+        self._datasources: List[DatasourceConfig] = []
         self._expectation_suites: List[
             ExpectationSuite
         ] = self._get_all_expectation_suites()
@@ -346,7 +346,9 @@ class CloudMigrator:
         for name, collection in to_print:
             self._print_object_summary(obj_name=name, obj_collection=collection)
 
-    def _print_object_summary(self, obj_name: str, obj_collection: list) -> None:
+    def _print_object_summary(
+        self, obj_name: str, obj_collection: List[AbstractConfig]
+    ) -> None:
         length = len(obj_collection)
         self._print(f"Bundled {length} {obj_name}s:", indent=2)
         for obj in obj_collection[:10]:
@@ -413,11 +415,22 @@ class CloudMigrator:
     ) -> None:
         pass
 
-    def _print_migration_introduction_message(self):
-        pass
+    def _print_migration_introduction_message(self) -> None:
+        self._print("Thank you for using Great Expectations!")
+        self._print("We will now begin the migration process to GX Cloud.")
+        self._print(
+            "First, we will bundle your existing context configuration and send it to the Cloud backend."
+        )
+        self._print("Then, we will send each of your validation results.")
 
-    def _print_migration_conclusion_message(self):
-        pass
+    def _print_migration_conclusion_message(self) -> None:
+        self._print("Success!")
+        self._print(
+            "Now that you have migrated your Data Context to GX Cloud, you should use your CloudDataContext from now on to interact with Great Expectations."
+        )
+        self._print(
+            "If you continue to use your existing Data Context your configurations could become out of sync."
+        )
 
     def _print(self, text: str, indent: int = 0) -> None:
         print(f"{indent * ' '}{text}")
