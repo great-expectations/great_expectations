@@ -66,7 +66,7 @@ def construct_json_payload(
     resource_type: str,
     organization_id: str,
     attributes_key: str,
-    attributes_value: str,
+    attributes_value: Any,
     **kwargs: dict,
 ) -> dict:
     data = {
