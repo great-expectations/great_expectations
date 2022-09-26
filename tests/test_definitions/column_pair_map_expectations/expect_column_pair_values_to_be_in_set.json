@@ -25,6 +25,14 @@
         "z": "IntegerType",
         "a": "IntegerType",
         "b": "IntegerType"
+      },
+      "mysql": {
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "TEXT",
+        "z": "INTEGER",
+        "a": "INTEGER",
+        "b": "INTEGER"
       }
     },
     "tests" : [{
