@@ -209,7 +209,7 @@ class Expectation(metaclass=MetaExpectation):
         raise NotImplementedError
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.kwargs")
+    @renderer(renderer_type="atomic.prescriptive.failed")
     def _prescriptive_kwargs(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -221,13 +221,24 @@ class Expectation(metaclass=MetaExpectation):
         """
         Default rendering function that is utilized by GE Cloud Front-end if no other atomic renderers apply
         """
+        (
+            template_str,
+            params_with_json_schema,
+            styling,
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
         value_obj = renderedAtomicValueSchema.load(
-            {"schema": {"type": "UnknownType"}, "kwargs": configuration.kwargs}
+            {
+                "template": template_str,
+                "params": params_with_json_schema,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
         )
         rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.kwargs",
+            name="atomic.prescriptive.failed",
             value=value_obj,
-            value_type="UnknownType",
+            value_type="StringValueType",
         )
         return rendered
 

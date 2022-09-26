@@ -90,16 +90,16 @@ class InlineRenderer(Renderer):
         renderer_names: List[str],
         expectation_type: str,
     ) -> List[RenderedAtomicContent]:
-        default_prescriptive_renderer_name: str = "atomic.prescriptive.kwargs"
-        non_default_prescriptive_renderer_names: List[str] = [
+        failed_prescriptive_renderer_name: str = "atomic.prescriptive.failed"
+        prescriptive_renderer_names: List[str] = [
             renderer_name
             for renderer_name in renderer_names
-            if renderer_name != default_prescriptive_renderer_name
+            if renderer_name != failed_prescriptive_renderer_name
         ]
 
         renderer_rendered_content: Optional[RenderedAtomicContent]
         rendered_content: List[RenderedAtomicContent] = []
-        for renderer_name in non_default_prescriptive_renderer_names:
+        for renderer_name in prescriptive_renderer_names:
             try:
                 renderer_rendered_content = self._get_renderer_atomic_rendered_content(
                     render_object=render_object,
@@ -117,14 +117,14 @@ class InlineRenderer(Renderer):
         ):
             logger.info(
                 f"""The following renderers failed to render Expectation "{expectation_type}":
-{non_default_prescriptive_renderer_names}
-Default renderer "{default_prescriptive_renderer_name}" will be used to render prescriptive content for ExpectationConfiguration.
+{prescriptive_renderer_names}
+Renderer "{failed_prescriptive_renderer_name}" will be used to render prescriptive content for ExpectationConfiguration.
 """
             )
             renderer_rendered_content = (
                 InlineRenderer._get_renderer_atomic_rendered_content(
                     render_object=render_object,
-                    renderer_name=default_prescriptive_renderer_name,
+                    renderer_name=failed_prescriptive_renderer_name,
                     expectation_type=expectation_type,
                 )
             )
