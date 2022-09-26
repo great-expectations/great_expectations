@@ -102,6 +102,10 @@ class ExpectationSuite(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
 
+    @property
+    def name(self) -> str:
+        return self.expectation_suite_name
+
     def add_citation(
         self,
         comment: str,
