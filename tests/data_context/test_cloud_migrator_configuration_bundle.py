@@ -52,7 +52,11 @@ class StubValidationsStore:
 class StubBaseDataContext:
     """Stub for testing ConfigurationBundle."""
 
-    def __init__(self, anonymous_usage_stats_enabled: bool = True, anonymous_usage_stats_is_none: bool = False):
+    def __init__(
+        self,
+        anonymous_usage_stats_enabled: bool = True,
+        anonymous_usage_stats_is_none: bool = False,
+    ):
         """Set the anonymous usage statistics configuration.
 
         Args:
@@ -61,7 +65,6 @@ class StubBaseDataContext:
         """
         self._anonymous_usage_stats_enabled = anonymous_usage_stats_enabled
         self._anonymous_usage_stats_is_none = anonymous_usage_stats_is_none
-
 
     @property
     def _data_context_variables(self) -> StubUsageStats:
@@ -79,7 +82,9 @@ class StubBaseDataContext:
         if self._anonymous_usage_stats_is_none:
             anonymous_usage_statistics = None
         else:
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(enabled=self._anonymous_usage_stats_enabled)
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
+                enabled=self._anonymous_usage_stats_enabled
+            )
 
         config = DataContextConfig(
             anonymous_usage_statistics=anonymous_usage_statistics
@@ -125,43 +130,61 @@ def stub_base_data_context_no_anonymous_usage_stats() -> StubBaseDataContext:
     return StubBaseDataContext(anonymous_usage_stats_is_none=True)
 
 
-@pytest.mark.unit
-def test_configuration_bundle_created(
-    stub_base_data_context: StubBaseDataContext,
-):
-    """What does this test and why?
+class TestConfigurationBundleCreate:
+    @pytest.mark.unit
+    def test_configuration_bundle_created(
+        self,
+        stub_base_data_context: StubBaseDataContext,
+    ):
+        """What does this test and why?
 
-    Make sure the configuration bundle is created successfully from a data context.
-    """
+        Make sure the configuration bundle is created successfully from a data context.
+        """
 
-    context: BaseDataContext = stub_base_data_context
+        context: BaseDataContext = stub_base_data_context
 
-    config_bundle = ConfigurationBundle(context)
+        config_bundle = ConfigurationBundle(context)
 
-    assert config_bundle.is_usage_stats_enabled()
-    assert config_bundle._data_context_variables is not None
-    assert len(config_bundle._expectation_suites) == 1
-    assert len(config_bundle._checkpoints) == 1
-    assert len(config_bundle._profilers) == 1
-    assert len(config_bundle._validation_results) == 1
+        assert config_bundle.is_usage_stats_enabled()
+        assert config_bundle._data_context_variables is not None
+        assert len(config_bundle._expectation_suites) == 1
+        assert len(config_bundle._checkpoints) == 1
+        assert len(config_bundle._profilers) == 1
+        assert len(config_bundle._validation_results) == 1
 
+    @pytest.mark.unit
+    def test_configuration_bundle_created_usage_stats_disabled(
+        self,
+        stub_base_data_context_anonymous_usage_stats_present_but_disabled: StubBaseDataContext,
+    ):
+        """What does this test and why?
 
-@pytest.mark.unit
-def test_configuration_bundle_created_usage_stats_disabled(
-    stub_base_data_context_anonymous_usage_stats_present_but_disabled: StubBaseDataContext,
-):
-    """What does this test and why?
+        Make sure the configuration bundle successfully parses the usage stats settings.
+        """
 
-    Make sure the configuration bundle successfully parses the usage stats settings.
-    """
+        context: BaseDataContext = (
+            stub_base_data_context_anonymous_usage_stats_present_but_disabled
+        )
 
-    context: BaseDataContext = stub_base_data_context_anonymous_usage_stats_present_but_disabled
+        config_bundle = ConfigurationBundle(context)
 
-    config_bundle = ConfigurationBundle(context)
+        assert not config_bundle.is_usage_stats_enabled()
 
-    assert not config_bundle.is_usage_stats_enabled()
+    def test_is_usage_statistics_key_set_if_key_not_present(
+        self, stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
+    ):
+        """What does this test and why?
 
+        The ConfigurationBundle should handle a context that has not set the config for
+         anonymous_usage_statistics.
+        """
+        context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
 
+        config_bundle = ConfigurationBundle(context)
+
+        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
+        # DataContextConfig
+        assert config_bundle.is_usage_stats_enabled()
 
 
 @pytest.fixture
@@ -222,71 +245,61 @@ def stub_serialized_configuration_bundle():
     }
 
 
-@pytest.mark.unit
-def test_configuration_bundle_serialization(
-    stub_base_data_context: StubBaseDataContext,
-    stub_serialized_configuration_bundle: dict,
-):
-    """What does this test and why?
+class TestConfigurationBundleSerialization:
+    @pytest.mark.unit
+    def test_configuration_bundle_serialization(
+        self,
+        stub_base_data_context: StubBaseDataContext,
+        stub_serialized_configuration_bundle: dict,
+    ):
+        """What does this test and why?
 
-    Ensure configuration bundle is serialized correctly.
-    """
+        Ensure configuration bundle is serialized correctly.
+        """
 
-    context: BaseDataContext = stub_base_data_context
+        context: BaseDataContext = stub_base_data_context
 
-    config_bundle = ConfigurationBundle(context)
+        config_bundle = ConfigurationBundle(context)
 
-    serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
+        serializer = ConfigurationBundleJsonSerializer(
+            schema=ConfigurationBundleSchema()
+        )
 
-    serialized_bundle: dict = serializer.serialize(config_bundle)
+        serialized_bundle: dict = serializer.serialize(config_bundle)
 
-    expected_serialized_bundle = stub_serialized_configuration_bundle
+        expected_serialized_bundle = stub_serialized_configuration_bundle
 
-    # Remove meta before comparing since it contains the GX version
-    serialized_bundle["expectation_suites"][0].pop("meta", None)
-    expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
+        # Remove meta before comparing since it contains the GX version
+        serialized_bundle["expectation_suites"][0].pop("meta", None)
+        expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
 
-    assert serialized_bundle == expected_serialized_bundle
+        assert serialized_bundle == expected_serialized_bundle
 
+    @pytest.mark.unit
+    def test_anonymous_usage_statistics_removed_during_serialization(
+        self,
+        stub_base_data_context: StubBaseDataContext,
+    ):
+        """What does this test and why?
+        When serializing a ConfigurationBundle we need to remove the
+        anonymous_usage_statistics key.
+        """
 
-def test_is_usage_statistics_key_set_if_key_not_present(
-    stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
-):
-    """What does this test and why?
+        context: StubBaseDataContext = stub_base_data_context
 
-    The ConfigurationBundle should handle a context that has not set the config for
-     anonymous_usage_statistics.
-    """
-    context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
+        assert context.anonymous_usage_statistics is not None
 
-    config_bundle = ConfigurationBundle(context)
+        config_bundle = ConfigurationBundle(context)
 
-    # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
-    # DataContextConfig
-    assert config_bundle.is_usage_stats_enabled()
+        serializer = ConfigurationBundleJsonSerializer(
+            schema=ConfigurationBundleSchema()
+        )
 
+        serialized_bundle: dict = serializer.serialize(config_bundle)
 
-
-@pytest.mark.unit
-def test_anonymous_usage_statistics_removed_during_serialization(
-    stub_base_data_context: StubBaseDataContext,
-):
-    """What does this test and why?
-    When serializing a ConfigurationBundle we need to remove the
-    anonymous_usage_statistics key.
-    """
-
-    context: StubBaseDataContext = stub_base_data_context
-
-    assert context.anonymous_usage_statistics is not None
-
-    config_bundle = ConfigurationBundle(context)
-
-    serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
-
-    serialized_bundle: dict = serializer.serialize(config_bundle)
-
-    assert (
-        serialized_bundle["data_context_variables"].get("anonymous_usage_statistics")
-        is None
-    )
+        assert (
+            serialized_bundle["data_context_variables"].get(
+                "anonymous_usage_statistics"
+            )
+            is None
+        )
