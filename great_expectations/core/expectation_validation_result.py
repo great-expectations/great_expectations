@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 try:
     from typing import TypedDict
@@ -229,7 +229,21 @@ class ExpectationValidationResult(SerializableDictDot):
                 class_name=inline_renderer_config["class_name"],
             )
 
-        self.rendered_content = inline_renderer.get_rendered_content()
+        rendered_content: List[
+            RenderedAtomicContent
+        ] = inline_renderer.get_rendered_content()
+        rendered_content_block_names: List[str] = [
+            rendered_content_block.name for rendered_content_block in rendered_content
+        ]
+
+        # If we don't have any exiting rendered_content we want to populate some, even if it renders the failure
+        # message string. If we do have some existing rendered_content, and all we were able to render was a single
+        # failure message, then leave the existing rendered_content as-is.
+        if self.rendered_content is None or not (
+            len(rendered_content) == 1
+            and "atomic.diagnostic.failed" in rendered_content_block_names
+        ):
+            self.rendered_content = rendered_content
 
     @staticmethod
     def validate_result_dict(result):
