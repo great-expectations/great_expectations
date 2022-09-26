@@ -19,6 +19,8 @@ from typing import (
     cast,
 )
 
+from great_expectations.data_context import AbstractDataContext
+
 if TYPE_CHECKING:
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
@@ -132,8 +134,8 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-# TODO: <WILL> Most of the logic here will be migrated to EphemeralDataContext
-class BaseDataContext(EphemeralDataContext, ConfigPeer):
+# TODO: <WILL> Most of the logic here will be migrated to AbstractDataContext
+class BaseDataContext(AbstractDataContext, ConfigPeer):
     """
         This class implements most of the functionality of DataContext, with a few exceptions.
 
