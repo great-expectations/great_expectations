@@ -1353,8 +1353,6 @@ class AbstractDataContext(ABC):
         """
         validation_errors: dict = {}
         config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)  # type: ignore[assignment]
-        print(config)
-        print(config_with_global_config_overrides)
         usage_stats_opted_out: bool = self._check_global_usage_statistics_opt_out()
         # if usage_stats_opted_out then usage_statistics is false
         # NOTE: <DataContextRefactor> 202207 Refactor so that this becomes usage_stats_enabled

@@ -985,9 +985,3 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
         logger.info(f"Could not find the following target strings: {strings}")
 
     return success
-
-
-def test_get_data_context_DataContext():
-    import great_expectations.util as utils
-
-    res = utils.get_context()
