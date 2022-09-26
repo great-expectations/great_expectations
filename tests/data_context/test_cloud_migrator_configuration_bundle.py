@@ -63,6 +63,17 @@ class StubValidationsStore:
 class StubBaseDataContext:
     """Stub for testing ConfigurationBundle."""
 
+    def __init__(self, anonymous_usage_stats_enabled: bool = True, anonymous_usage_stats_is_none: bool = False):
+        """Set the anonymous usage statistics configuration.
+
+        Args:
+            anonymous_usage_stats_enabled: Set usage stats "enabled" flag in config.
+            anonymous_usage_stats_is_none: Set usage stats to None, overrides anonymous_usage_stats_enabled.
+        """
+        self._anonymous_usage_stats_enabled = anonymous_usage_stats_enabled
+        self._anonymous_usage_stats_is_none = anonymous_usage_stats_is_none
+
+
     @property
     def _data_context_variables(self) -> StubUsageStats:
         return StubUsageStats()
@@ -73,8 +84,16 @@ class StubBaseDataContext:
 
     @property
     def variables(self) -> DataContextVariables:
+
+        # anonymous_usage_statistics set based on constructor parameters.
+        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig]
+        if self._anonymous_usage_stats_is_none:
+            anonymous_usage_statistics = None
+        else:
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(enabled=self._anonymous_usage_stats_enabled)
+
         config = DataContextConfig(
-            anonymous_usage_statistics=AnonymizedUsageStatisticsConfig(enabled=True)
+            anonymous_usage_statistics=anonymous_usage_statistics
         )
         return EphemeralDataContextVariables(config=config)
 
@@ -105,6 +124,16 @@ class StubBaseDataContext:
 @pytest.fixture
 def stub_base_data_context() -> StubBaseDataContext:
     return StubBaseDataContext()
+
+
+@pytest.fixture
+def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
+    return StubBaseDataContext(anonymous_usage_stats_enabled=False)
+
+
+@pytest.fixture
+def stub_base_data_context_no_anonymous_usage_stats() -> StubBaseDataContext:
+    return StubBaseDataContext(anonymous_usage_stats_is_none=True)
 
 
 @dataclass
@@ -274,14 +303,6 @@ def test_configuration_bundle_created(
     assert len(config_bundle._validation_results) == 1
 
 
-@pytest.mark.unit
-def test_configuration_bundle_serializer():
-    """What does this test and why?
-
-    Make sure a configuration bundle is serialized correctly.
-    """
-    raise NotImplementedError
-
 
 @pytest.fixture
 def stub_serialized_configuration_bundle():
@@ -368,14 +389,22 @@ def test_configuration_bundle_serialization(
     assert serialized_bundle == expected_serialized_bundle
 
 
-def test_is_usage_statistics_key_set_if_key_not_present():
+def test_is_usage_statistics_key_set_if_key_not_present(
+    stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
+):
     """What does this test and why?
 
     The ConfigurationBundle should handle a context that has not set the config for
      anonymous_usage_statistics.
     """
-    # TODO: Implementation
-    pass
+    context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
+
+    config_bundle = ConfigurationBundle(context)
+
+    # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
+    # DataContextConfig
+    assert config_bundle.is_usage_stats_enabled()
+
 
 
 @pytest.mark.unit
