@@ -1,6 +1,5 @@
 const fs = require('fs');
 const glob = require('glob');
-const visit = require('unist-util-visit');
 const htmlparser2 = require("htmlparser2");
 
 function constructSnippetMap(dir) {
@@ -9,7 +8,11 @@ function constructSnippetMap(dir) {
     let snippetMap = {}
     for (let i in snippets) {
         let snippet = snippets[i]
-        snippetMap[snippet.name] = snippet
+        let name = snippet.name
+        if (name in snippetMap) {
+            throw new Error()
+        }
+        snippetMap[name] = snippet
     }
 
     return snippetMap
@@ -52,7 +55,7 @@ function parseFile(file) {
             if (stack.length == 0) {
                 return
             }
-            stack[stack.length - 1].contents = text;
+            stack[stack.length - 1].contents = sanitize_text(text);
         },
         onclosetag(tagname) {
             if (tagname != "snippet") {
@@ -71,42 +74,9 @@ function parseFile(file) {
     return snippets
 }
 
-const snippetMap = constructSnippetMap("tests")
-
-function codeImport(options = {}) {
-    return function transformer(tree, file) {
-        const codes = [];
-        const promises = [];
-
-        visit(tree, 'code', (node, index, parent) => {
-            codes.push([node, index, parent]);
-        });
-
-        for (const [node] of codes) {
-            const nameMeta = (node.meta || '')
-                .split(' ')
-                .find(meta => meta.startsWith('name='));
-
-            if (!nameMeta) {
-                continue;
-            }
-
-            const res = /^name=(?<path>.+?)$/.exec(
-                nameMeta
-            );
-
-            if (!res || !res.groups || !res.groups.path) {
-                throw new Error(`Unable to parse named reference ${nameMeta}`);
-            }
-
-            let path = eval(res.groups.path)
-            node.value = snippetMap[path].contents
-        }
-
-        if (promises.length) {
-            return Promise.all(promises);
-        }
-    };
+function sanitize_text(text) {
+    return text
 }
 
-module.exports = codeImport;
+
+module.exports = constructSnippetMap;

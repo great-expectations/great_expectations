@@ -1,7 +1,7 @@
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 
 const lineNumberRemarks = require('remark-code-import')
-const namedSnippetRemarks = require('./src/index')
+const namedSnippetRemarks = require('./scripts/named_snippets/index')
 
 module.exports = {
   title: 'Great Expectations',
