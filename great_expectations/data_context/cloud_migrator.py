@@ -194,7 +194,6 @@ class CloudMigrator:
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         self._context = context
-
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_access_token = ge_cloud_access_token
         self._ge_cloud_organization_id = ge_cloud_organization_id
@@ -321,7 +320,7 @@ class CloudMigrator:
     def _send_configuration_bundle(
         self,
         configuration_bundle: ConfigurationBundle,
-        serializer,
+        serializer: ConfigurationBundleJsonSerializer,
     ) -> AnyPayload:
         # Serialize
         # Use session to send to backend
