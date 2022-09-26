@@ -59,7 +59,7 @@ function parseFile(file) {
     let stack = []
 
     // Once the top snippet on the stack recieves an end tag, we pop it from the stack
-    // and add it out our result snippets.
+    // and add it to our result snippets.
     let snippets = []
 
     const parser = new htmlparser2.Parser({
