@@ -12,8 +12,7 @@ function constructSnippetMap(dir) {
     let snippets = parseDirectory(dir)
 
     let snippetMap = {}
-    for (let i in snippets) {
-        let snippet = snippets[i]
+    for (const snippet of snippets) {
         let name = snippet.name
         if (name in snippetMap) {
             throw new Error(`A snippet named ${name} has already been defined elsewhere`)
@@ -35,10 +34,10 @@ function parseDirectory(dir) {
     let files = glob.sync(dir + "/**/*.py")
 
     let allSnippets = []
-    for (let i in files) {
-        let snippets = parseFile(files[i])
-        for (let i in snippets) {
-            allSnippets.push(snippets[i])
+    for (const file of files) {
+        let snippets = parseFile(file)
+        for (const snippet of snippets) {
+            allSnippets.push(snippet)
         }
     }
 
@@ -64,36 +63,42 @@ function parseFile(file) {
 
     const parser = new htmlparser2.Parser({
         onopentag(tagname, attrs) {
-            if (tagname != "snippet") {
+            if (tagname !== "snippet") {
                 return
             }
 
             let snippetName = attrs["name"]
-            if (!snippetName) {
-                return
-            }
-
             stack.push({ "name": snippetName, "file": file, "contents": "" })
         },
         ontext(text) {
             if (stack.length == 0) {
                 return
             }
-            stack[stack.length - 1].contents = sanitize_text(text);
+            text = sanitizeText(text)
+
+            // If we have nested snippets, all snippets on the stack need to be updated
+            // to reflect any nested content
+            for (let i = 0; i < stack.length; i++) {
+                stack[i].contents += text
+            }
         },
         onclosetag(tagname) {
-            if (tagname != "snippet") {
+            if (tagname !== "snippet") {
                 return
             }
 
-            let popped = stack.pop();
-            if (popped) {
-                snippets.push(popped)
+            if (stack.length === 0) {
+                throw new Error(`Closing tag found before any opening tags in ${file}`)
             }
+
+            let popped = stack.pop();
+            snippets.push(popped)
         },
     });
     parser.write(data);
     parser.end();
+
+    snippets = snippets.filter(s => s.name)
 
     let length = snippets.length;
     if (length) {
@@ -103,18 +108,21 @@ function parseFile(file) {
 }
 
 /**
- * Strips any unnecessary whitespace and source code comments from the input string.
+ * Strips any unnecessary whitespace and source code comments from the ends of the input string.
+ * Additionally, removes any nested snippet tags (as applicable).
  *
  * @param {string} text - The text to be sanitized.
  * @returns {string} The sanitized string.
  */
-function sanitize_text(text) {
+function sanitizeText(text) {
     text = text.trim()
     if (text.endsWith("#")) {
         text = text.substring(0, text.length - 1)
     }
-    text = text.trim()
-    return text
+    lines = text.split("\n")
+    // TODO: This logic here should probably be cleaned up with regex? Let's also remove the resulting whitespace
+    lines = lines.filter(l => !(l.includes("<snippet") || l.includes("snippet>")))
+    return lines.join("\n")
 }
 
 

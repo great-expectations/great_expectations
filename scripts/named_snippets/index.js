@@ -24,9 +24,11 @@ Named snippets are defined with the following syntax:
 const visit = require('unist-util-visit');
 const constructSnippetMap = require("./snippet")
 
-const SNIPPET_MAP = constructSnippetMap("tests")
-
 function codeImport() {
+
+    // Instantiated within the import so it can be hot-reloaded
+    const snippetMap = constructSnippetMap(".")
+
     return function transformer(tree, file) {
         const codes = [];
         const promises = [];
@@ -37,7 +39,6 @@ function codeImport() {
         });
 
         for (const [node] of codes) {
-            // Syntax: ```python name="my_python_snippet"
             const nameMeta = (node.meta || '')
                 .split(' ')
                 .find(meta => meta.startsWith('name='));
@@ -56,10 +57,10 @@ function codeImport() {
             }
 
             name = eval(name) // Remove any surrounding quotes
-            if (!(name in SNIPPET_MAP)) {
+            if (!(name in snippetMap)) {
                 throw new Error(`Could not find any snippet named ${name}`)
             }
-            node.value = SNIPPET_MAP[name].contents
+            node.value = snippetMap[name].contents
         }
 
         if (promises.length) {
