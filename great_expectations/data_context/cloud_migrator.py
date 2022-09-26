@@ -107,7 +107,6 @@ class ConfigurationBundle:
     def validation_results(self) -> List[ExpectationSuiteValidationResult]:
         return self._validation_results
 
-
     def _get_all_datasources(self) -> List[DatasourceConfig]:
 
         datasource_names: List[str] = list(self._context.datasources.keys())
@@ -160,9 +159,7 @@ class ConfigurationBundle:
 class ConfigurationBundleSchema(Schema):
     """Marshmallow Schema for the Configuration Bundle."""
 
-    data_context_variables = fields.Nested(
-        DataContextConfigSchema, allow_none=False
-    )
+    data_context_variables = fields.Nested(DataContextConfigSchema, allow_none=False)
     datasources = fields.List(
         fields.Nested(DatasourceConfigSchema, allow_none=True, required=True),
         required=True,
