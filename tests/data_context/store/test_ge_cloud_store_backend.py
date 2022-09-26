@@ -11,7 +11,7 @@ in production. The same logic applies to all UUIDs in this test.
 """
 
 from collections import OrderedDict
-from typing import Callable, Set, Union
+from typing import Callable, Optional, Set, Union
 from unittest import mock
 
 import pytest
@@ -19,6 +19,8 @@ import pytest
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
     GeCloudStoreBackend,
+    construct_json_payload,
+    construct_url,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
 
@@ -42,6 +44,163 @@ def construct_ge_cloud_store_backend(
         return store_backend
 
     return _closure
+
+
+@pytest.mark.parametrize(
+    "base_url,organization_id,resource_name,id,expected",
+    [
+        pytest.param(
+            "https://app.test.greatexpectations.io",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "my_resource",
+            None,
+            "https://app.test.greatexpectations.io/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/my-resource",
+            id="no id",
+        ),
+        pytest.param(
+            "https://app.test.greatexpectations.io",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "my_resource",
+            "8746e25c-de4d-450d-967b-df0d5546590d",
+            "https://app.test.greatexpectations.io/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/my-resource/8746e25c-de4d-450d-967b-df0d5546590d",
+            id="with id",
+        ),
+    ],
+)
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_construct_url(
+    base_url: str,
+    organization_id: str,
+    resource_name: str,
+    id: Optional[str],
+    expected: str,
+) -> None:
+    assert (
+        construct_url(
+            base_url=base_url,
+            organization_id=organization_id,
+            resource_name=resource_name,
+            id=id,
+        )
+        == expected
+    )
+
+
+@pytest.mark.parametrize(
+    "resource_type,organization_id,attributes_key,attributes_value,kwargs,expected",
+    [
+        pytest.param(
+            "my_resource",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "my_attribute",
+            "my_value",
+            {},
+            {
+                "data": {
+                    "type": "my_resource",
+                    "attributes": {
+                        "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+                        "my_attribute": "my_value",
+                    },
+                },
+            },
+            id="no kwargs",
+        ),
+        pytest.param(
+            "my_resource",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "my_attribute",
+            {"key1": {"nested_key1": 1}, "key2": {"nested_key2": 2}},
+            {},
+            {
+                "data": {
+                    "type": "my_resource",
+                    "attributes": {
+                        "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+                        "my_attribute": {
+                            "key1": {"nested_key1": 1},
+                            "key2": {"nested_key2": 2},
+                        },
+                    },
+                },
+            },
+            id="with nested value",
+        ),
+        pytest.param(
+            "my_resource",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "my_attribute",
+            "my_value",
+            {
+                "kwarg1": 1,
+                "kwarg2": 2,
+            },
+            {
+                "data": {
+                    "type": "my_resource",
+                    "attributes": {
+                        "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+                        "my_attribute": "my_value",
+                        "kwarg1": 1,
+                        "kwarg2": 2,
+                    },
+                },
+            },
+            id="with basic kwargs",
+        ),
+        pytest.param(
+            "my_resource",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "my_attribute",
+            "my_value",
+            {
+                "kwarg1": {
+                    "nested1": 1,
+                },
+                "kwarg2": {
+                    "nested2": 2,
+                },
+            },
+            {
+                "data": {
+                    "type": "my_resource",
+                    "attributes": {
+                        "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+                        "my_attribute": "my_value",
+                        "kwarg1": {
+                            "nested1": 1,
+                        },
+                        "kwarg2": {
+                            "nested2": 2,
+                        },
+                    },
+                },
+            },
+            id="with nested kwargs",
+        ),
+    ],
+)
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_construct_json_payload(
+    resource_type: str,
+    organization_id: str,
+    attributes_key: str,
+    attributes_value: str,
+    kwargs: dict,
+    expected: dict,
+) -> None:
+    assert (
+        construct_json_payload(
+            resource_type=resource_type,
+            organization_id=organization_id,
+            attributes_key=attributes_key,
+            attributes_value=attributes_value,
+            **kwargs
+        )
+        == expected
+    )
 
 
 @pytest.mark.cloud
