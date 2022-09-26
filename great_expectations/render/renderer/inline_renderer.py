@@ -91,15 +91,17 @@ class InlineRenderer(Renderer):
         expectation_type: str,
     ) -> List[RenderedAtomicContent]:
         failed_prescriptive_renderer_name: str = "atomic.prescriptive.failed"
-        prescriptive_renderer_names: List[str] = [
+        failed_diagnostic_renderer_name: str = "atomic.diagnostic.failed"
+        try_renderer_names: List[str] = [
             renderer_name
             for renderer_name in renderer_names
-            if renderer_name != failed_prescriptive_renderer_name
+            if renderer_name
+            not in [failed_prescriptive_renderer_name, failed_diagnostic_renderer_name]
         ]
 
         renderer_rendered_content: Optional[RenderedAtomicContent]
         rendered_content: List[RenderedAtomicContent] = []
-        for renderer_name in prescriptive_renderer_names:
+        for renderer_name in try_renderer_names:
             try:
                 renderer_rendered_content = self._get_renderer_atomic_rendered_content(
                     render_object=render_object,
@@ -112,19 +114,26 @@ class InlineRenderer(Renderer):
                     f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type}".'
                 )
 
-        if len(rendered_content) == 0 and isinstance(
-            render_object, ExpectationConfiguration
-        ):
-            logger.info(
-                f"""The following renderers failed to render Expectation "{expectation_type}":
-{prescriptive_renderer_names}
-Renderer "{failed_prescriptive_renderer_name}" will be used to render prescriptive content for ExpectationConfiguration.
+        if len(rendered_content) == 0:
+            failed_renderer_name: str
+            if isinstance(render_object, ExpectationConfiguration):
+                failed_renderer_name = failed_prescriptive_renderer_name
+                logger.info(
+                    f"""The following renderers failed to render Expectation "{expectation_type}": {try_renderer_names}
+Renderer "{failed_renderer_name}" will be used to render prescriptive content for ExpectationConfiguration.
 """
-            )
+                )
+            else:
+                failed_renderer_name = failed_diagnostic_renderer_name
+                logger.info(
+                    f"""The following renderers failed to render ExpectationValidationResult for Expectation "{expectation_type}": {try_renderer_names}
+Renderer "{failed_renderer_name}" will be used to render diagnostic content for ExpectationValidationResult.
+"""
+                )
             renderer_rendered_content = (
                 InlineRenderer._get_renderer_atomic_rendered_content(
                     render_object=render_object,
-                    renderer_name=failed_prescriptive_renderer_name,
+                    renderer_name=failed_renderer_name,
                     expectation_type=expectation_type,
                 )
             )
