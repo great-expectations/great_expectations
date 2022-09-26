@@ -1,5 +1,4 @@
 """TODO: Add docstring"""
-import logging
 from dataclasses import dataclass
 from typing import List, Optional, cast
 
@@ -13,11 +12,8 @@ from great_expectations.core import (
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext, BaseDataContext
-
 from great_expectations.data_context.data_context_variables import DataContextVariables
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    AnyPayload,
-)
+from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointConfigSchema,
@@ -36,8 +32,6 @@ from great_expectations.rule_based_profiler.config import (
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-
-logger = logging.getLogger(__name__)
 
 
 class ConfigurationBundle:
