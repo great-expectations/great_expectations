@@ -47,7 +47,7 @@ class ResponsePayload(TypedDict):
 AnyPayload = Union[ResponsePayload, ErrorPayload]
 
 
-def _get_user_friendly_error_message(
+def get_user_friendly_error_message(
     http_exc: requests.exceptions.HTTPError,
 ) -> str:
     # TODO: define a GeCloud service/client for this & other related behavior
@@ -231,7 +231,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.HTTPError as http_err:
             raise StoreBackendError(
-                f"Unable to get object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_err)}"
+                f"Unable to get object in GE Cloud Store Backend: {get_user_friendly_error_message(http_err)}"
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
@@ -258,11 +258,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             }
         }
 
-        url = urljoin(
-            self.ge_cloud_base_url,
-            f"organizations/"
-            f"{organization_id}/"
-            f"{hyphen(self.ge_cloud_resource_name)}",
+        url = self.construct_url(
+            base_url=self.ge_cloud_base_url,
+            organization_id=organization_id,
+            resource_name=self.ge_cloud_resource_name,
         )
 
         if ge_cloud_id:
@@ -288,7 +287,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
-                f"Unable to update object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+                f"Unable to update object in GE Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
@@ -354,10 +353,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             }
         }
 
-        url = urljoin(
-            self.ge_cloud_base_url,
-            f"organizations/" f"{organization_id}/" f"{hyphen(resource_name)}",
+        url = self.construct_url(
+            base_url=self.ge_cloud_base_url,
+            organization_id=organization_id,
+            resource_name=resource_name,
         )
+
         try:
             response = self._session.post(url, json=data)
             response.raise_for_status()
@@ -372,7 +373,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
-                f"Unable to set object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+                f"Unable to set object in GE Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
@@ -402,12 +403,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         return self._ge_cloud_credentials
 
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GeCloudRESTResource, str, Optional[str]]]:  # type: ignore[override]
-        url = urljoin(
-            self.ge_cloud_base_url,
-            f"organizations/"
-            f"{self.ge_cloud_credentials['organization_id']}/"
-            f"{hyphen(self.ge_cloud_resource_name)}",
+        url = self.construct_url(
+            base_url=self.ge_cloud_base_url,
+            organization_id=self.ge_cloud_credentials["organization_id"],
+            resource_name=self.ge_cloud_resource_name,
         )
+
         resource_type = self.ge_cloud_resource_type
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
@@ -447,9 +448,11 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self, key: Tuple[str, ...], protocol: Optional[Any] = None
     ) -> str:
         ge_cloud_id = key[1]
-        url = urljoin(
-            self.ge_cloud_base_url,
-            f"organizations/{self.ge_cloud_credentials['organization_id']}/{hyphen(self.ge_cloud_resource_name)}/{ge_cloud_id}",
+        url = self.construct_url(
+            base_url=self.ge_cloud_base_url,
+            organization_id=self.ge_cloud_credentials["organization_id"],
+            resource_name=self.ge_cloud_resource_name,
+            id=ge_cloud_id,
         )
         return url
 
@@ -469,13 +472,13 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             }
         }
 
-        url = urljoin(
-            self.ge_cloud_base_url,
-            f"organizations/"
-            f"{self.ge_cloud_credentials['organization_id']}/"
-            f"{hyphen(self.ge_cloud_resource_name)}/"
-            f"{ge_cloud_id}",
+        url = self.construct_url(
+            base_url=self.ge_cloud_base_url,
+            organization_id=self.ge_cloud_credentials["organization_id"],
+            resource_name=self.ge_cloud_resource_name,
+            id=ge_cloud_id,
         )
+
         try:
             response = self._session.delete(url, json=data)
             response.raise_for_status()
@@ -483,7 +486,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except requests.HTTPError as http_exc:
             # TODO: GG 20220819 should we raise an error here instead of returning False
             logger.warning(
-                f"Unable to delete object in GE Cloud Store Backend: {_get_user_friendly_error_message(http_exc)}"
+                f"Unable to delete object in GE Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
             return False
         except requests.Timeout as timeout_exc:
@@ -525,3 +528,18 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ge_cloud_id=id,
             resource_name=name,
         )
+
+    @staticmethod
+    def construct_url(
+        base_url: str,
+        organization_id: str,
+        resource_name: str,
+        id: Optional[str] = None,
+    ) -> str:
+        url = urljoin(
+            base_url,
+            f"organizations/{organization_id}/{hyphen(resource_name)}",
+        )
+        if id:
+            url = urljoin(url, id)
+        return url

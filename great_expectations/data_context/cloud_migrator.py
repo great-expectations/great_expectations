@@ -3,6 +3,10 @@ from dataclasses import dataclass
 from typing import List, Optional, cast
 
 from marshmallow import Schema, fields, post_dump
+import logging
+from typing import List, Optional, Tuple
+
+import requests
 
 from great_expectations.core import (
     ExpectationSuite,
@@ -20,6 +24,18 @@ from great_expectations.data_context.types.base import (
     DataContextConfigSchema,
     GeCloudConfig,
 )
+from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.core.http import create_session
+from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    AnyPayload,
+    GeCloudStoreBackend,
+    get_user_friendly_error_message,
+)
+from great_expectations.data_context.types.base import DatasourceConfig, GeCloudConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -30,6 +46,9 @@ from great_expectations.rule_based_profiler.config import (
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.exceptions.exceptions import GeCloudError
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigurationBundle:
@@ -171,9 +190,23 @@ class CloudMigrator:
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         self._context = context
+        self._test_migrate = test_migrate
+
+        cloud_config = CloudDataContext.get_ge_cloud_config(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+
+        ge_cloud_base_url = cloud_config.base_url
+        ge_cloud_access_token = cloud_config.access_token
+        ge_cloud_organization_id = cloud_config.organization_id
+
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_access_token = ge_cloud_access_token
         self._ge_cloud_organization_id = ge_cloud_organization_id
+
+        self._session = create_session(access_token=ge_cloud_access_token)
 
     @classmethod
     def migrate(
@@ -297,11 +330,32 @@ class CloudMigrator:
     def _send_configuration_bundle(
         self,
         configuration_bundle: ConfigurationBundle,
-        serializer: ConfigurationBundleJsonSerializer,
+        serializer,
     ) -> AnyPayload:
-        # Serialize
-        # Use session to send to backend
-        pass
+        url = GeCloudStoreBackend.construct_url(
+            base_url=self._ge_cloud_base_url,
+            organization_id=self._ge_cloud_organization_id,
+            resource_name="migration",
+        )
+        payload = serializer.serialize(configuration_bundle)
+
+        try:
+            response = self._session.post(url, json=payload)
+            response.raise_for_status()
+            return response.json()
+
+        except requests.HTTPError as http_exc:
+            raise GeCloudError(
+                f"Unable to migrate config to Cloud: {get_user_friendly_error_message(http_exc)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise GeCloudError(
+                "Unable to migrate config to Cloud: This is likely a transient error. Please try again."
+            )
+        except Exception as e:
+            logger.debug(str(e))
+            raise GeCloudError(f"Something went wrong while migrating to Cloud: {e}")
 
     def _print_send_configuration_bundle_error(self, http_response: AnyPayload) -> None:
         pass
