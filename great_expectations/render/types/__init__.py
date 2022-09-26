@@ -587,9 +587,6 @@ class RenderedAtomicValueSchema(Schema):
     # for GraphType
     graph = fields.Dict(required=False, allow_none=True)
 
-    # for UnknownType
-    kwargs = fields.Dict(required=False, allow_none=True)
-
     @post_load
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
@@ -601,7 +598,6 @@ class RenderedAtomicValueSchema(Schema):
         "header_row",
         "table",
         "graph",
-        "kwargs",
     ]
 
     @post_dump
