@@ -5,9 +5,7 @@ from dataclasses import dataclass
 from typing import List, Optional, cast
 
 import requests
-from marshmallow import fields
-from marshmallow.decorators import post_dump
-from marshmallow.schema import Schema
+from marshmallow import Schema, fields, post_dump
 
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -203,7 +201,9 @@ class CloudMigrator:
         ge_cloud_access_token = cloud_config.access_token
         ge_cloud_organization_id = cloud_config.organization_id
         if ge_cloud_organization_id is None:
-            raise ValueError("Must set all Cloud variables before migration")
+            raise ValueError(
+                "An organization id must be present when performing a migration"
+            )
 
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_access_token = ge_cloud_access_token
@@ -303,9 +303,6 @@ class CloudMigrator:
         configuration_bundle: ConfigurationBundle,
         serializer: ConfigurationBundleJsonSerializer,
     ) -> AnyPayload:
-        # Serialize
-        # Use session to send to backend
-        pass
         url = construct_url(
             base_url=self._ge_cloud_base_url,
             organization_id=self._ge_cloud_organization_id,
