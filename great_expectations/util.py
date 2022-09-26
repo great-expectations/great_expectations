@@ -50,6 +50,7 @@ from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.exceptions import (
+    DataContextError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -1590,8 +1591,6 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
-# import great_expectations as ge
-# ge.get_context()
 def get_context(
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
@@ -1599,7 +1598,6 @@ def get_context(
     ge_cloud_base_url: Optional[str] = None,
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
-    ge_cloud_config: Optional[Any] = None,
 ):
     if all(
         param is None
@@ -1610,25 +1608,22 @@ def get_context(
             ge_cloud_base_url,
             ge_cloud_access_token,
             ge_cloud_organization_id,
-            ge_cloud_config,
         ]
     ):
         from great_expectations.data_context.data_context import DataContext
 
         return DataContext()
 
-    elif context_root_dir:
-        from great_expectations.data_context.data_context import FileDataContext
-
-        return FileDataContext(  # type: ignore[assignment]
-            # project_config=project_config,
-            context_root_dir=context_root_dir,  # type: ignore[arg-type]
-            runtime_environment=runtime_environment,
-        )
-    elif ge_cloud_base_url and ge_cloud_access_token and ge_cloud_organization_id:
-        # add check to see if these are not
-        # cloud mode
-        # what does it mean?
+    if any([ge_cloud_base_url, ge_cloud_access_token, ge_cloud_organization_id]):
+        if not all(
+            [ge_cloud_base_url, ge_cloud_access_token, ge_cloud_organization_id]
+        ):
+            raise DataContextError(
+                """
+                    CloudDataContext must be initialized with proper parameters:
+                        ge_cloud_base_url, ge_cloud_access_token, and ge_cloud_organization_id are all needed
+                    """
+            )
         from great_expectations.data_context.data_context import CloudDataContext
 
         return CloudDataContext(
@@ -1639,19 +1634,26 @@ def get_context(
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
-    else:
-        # this is going to be BaseDataContext for now
+    elif context_root_dir and not project_config:
+        from great_expectations.data_context.data_context import FileDataContext
+
+        return FileDataContext(  # type: ignore[assignment]
+            context_root_dir=context_root_dir,  # type: ignore[arg-type]
+            runtime_environment=runtime_environment,
+        )
+    elif project_config and not context_root_dir:
         from great_expectations.data_context.data_context import EphemeralDataContext
 
         return EphemeralDataContext(  # type: ignore[assignment]
             project_config=project_config, runtime_environment=runtime_environment
         )
-
-
-def get_context_old():
-    from great_expectations.data_context.data_context import DataContext
-
-    return DataContext()
+    else:
+        raise DataContextError(
+            """
+            get_context() is being called with an invalid (or deprecated) combination of parameters. Please
+            check your configuration and try again.
+        """
+        )
 
 
 def is_sane_slack_webhook(url: str) -> bool:

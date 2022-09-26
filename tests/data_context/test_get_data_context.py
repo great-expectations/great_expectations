@@ -3,23 +3,18 @@ Why does this exist?
 
 """
 import os
-from typing import List
+import pathlib
+from typing import Any, Optional
 from unittest import mock
 
 import pytest
 
-# from https://jmcgeheeiv.github.io/pyfakefs/release/usage.html
-from pyfakefs.fake_filesystem_unittest import TestCase
-
 import great_expectations as gx
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    FilesystemStoreBackendDefaults,
-)
-from great_expectations.exceptions import ConfigNotFoundError
+from great_expectations.data_context import EphemeralDataContext
+from great_expectations.data_context.types.base import DataContextConfig
 
 
+@pytest.mark.unit
 def test_DataContextOnly(tmp_path):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
@@ -34,8 +29,32 @@ def test_DataContextOnly(tmp_path):
     assert isinstance(gx.get_context(), DataContext)
 
 
-def test_DataContextOnly_file(tmp_path):
-    # anonymous usage statistics
+# @pytest.mark.parametrize("project_config", "expected", [(DataContextConfig(
+#         config_version=3.0,
+#         plugins_directory=None,
+#         evaluation_parameter_store_name="evaluation_parameter_store",
+#         expectations_store_name="expectations_store",
+#         datasources={},
+#         stores={
+#             "expectations_store": {"class_name": "ExpectationsStore"},
+#             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+#             "validation_result_store": {"class_name": "ValidationsStore"},
+#         },
+#         validations_store_name="validation_result_store",
+#         data_docs_sites={},
+#         validation_operators={},
+#     ), EphemeralDataContext)])
+# def test_get_context(
+#     project_config: Any,
+#     expected: Any
+# ):
+#     # is there a way to pass in a ClassName as Parameterized test?
+#     assert isinstance(gx.get_context(project_config=project_config), expected)
+
+
+def test_get_data_context_file(
+    tmp_path: pathlib.Path,
+):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
