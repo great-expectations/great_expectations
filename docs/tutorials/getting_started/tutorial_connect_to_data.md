@@ -4,7 +4,7 @@ title: 'Tutorial, Step 2: Connect to data'
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/>
+<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/> 
 
 :::note Prerequisites
 
