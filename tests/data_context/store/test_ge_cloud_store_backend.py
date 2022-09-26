@@ -50,21 +50,19 @@ def construct_ge_cloud_store_backend(
     "base_url,organization_id,resource_name,id,expected",
     [
         pytest.param(
-            "https://app.test.greatexpectations.io"
+            "https://app.test.greatexpectations.io",
             "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
             "my_resource",
-            "my_value",
             None,
-            "https://app.test.greatexpectations.iode5b9ca6-caf7-43c8-a820-5540ec6df9b2/organizations/my_resource/my-value",
+            "https://app.test.greatexpectations.io/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/my-resource",
             id="no id",
         ),
         pytest.param(
-            "https://app.test.greatexpectations.io"
+            "https://app.test.greatexpectations.io",
             "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
             "my_resource",
-            "my_value",
             "8746e25c-de4d-450d-967b-df0d5546590d",
-            "https://app.test.greatexpectations.iode5b9ca6-caf7-43c8-a820-5540ec6df9b2/organizations/my_resource/my-value/8746e25c-de4d-450d-967b-df0d5546590d",
+            "https://app.test.greatexpectations.io/organizations/de5b9ca6-caf7-43c8-a820-5540ec6df9b2/my-resource/8746e25c-de4d-450d-967b-df0d5546590d",
             id="with id",
         ),
     ],
@@ -129,7 +127,37 @@ def test_construct_url(
                     },
                 },
             },
-            id="with kwargs",
+            id="with basic kwargs",
+        ),
+        pytest.param(
+            "my_resource",
+            "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+            "my_attribute",
+            "my_value",
+            {
+                "kwarg1": {
+                    "nested1": 1,
+                },
+                "kwarg2": {
+                    "nested2": 2,
+                },
+            },
+            {
+                "data": {
+                    "type": "my_resource",
+                    "attributes": {
+                        "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
+                        "my_attribute": "my_value",
+                        "kwarg1": {
+                            "nested1": 1,
+                        },
+                        "kwarg2": {
+                            "nested2": 2,
+                        },
+                    },
+                },
+            },
+            id="with nested kwargs",
         ),
     ],
 )
