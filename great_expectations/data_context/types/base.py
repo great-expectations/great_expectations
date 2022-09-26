@@ -687,7 +687,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     catalog_id = fields.String(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
-    @validates_schema
+    @validates_schema  # noqa: C901
     def validate_schema(self, data, **kwargs):  # noqa: C901 - complexity 16
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":

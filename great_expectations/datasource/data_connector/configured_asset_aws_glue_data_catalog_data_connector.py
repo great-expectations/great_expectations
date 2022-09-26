@@ -69,7 +69,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         super().__init__(
             name=name,
             datasource_name=datasource_name,
-            execution_engine=execution_engine,
+            execution_engine=execution_engine,  # type: ignore[arg-type]
             batch_spec_passthrough=batch_spec_passthrough,
             id=id,
         )
@@ -339,14 +339,14 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         return data_asset_name
 
     def _map_data_reference_to_batch_definition_list(
-        self, data_reference, data_asset_name: str = None  #: Any,
+        self, data_reference, data_asset_name: str = None
     ) -> Optional[List[BatchDefinition]]:
         # Note: data references *are* dictionaries, allowing us to invoke `IDDict(data_reference)`
         return [
             BatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
-                data_asset_name=data_asset_name,
+                data_asset_name=data_asset_name,  # type: ignore[arg-type]
                 batch_identifiers=IDDict(data_reference),
             )
         ]
