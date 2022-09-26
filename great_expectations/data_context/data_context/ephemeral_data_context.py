@@ -42,6 +42,11 @@ class EphemeralDataContext(AbstractDataContext):
                 override both those set in config_variables.yml and the environment
 
         """
+        if not project_config:
+            raise ge_exceptions.DataContextError(
+                "Cannot instantiate EphemeralDataContext without project_config"
+            )
+
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
