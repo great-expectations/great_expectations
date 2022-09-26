@@ -906,6 +906,16 @@ anonymized_rule_based_profiler_run_schema = {
     ],
 }
 
+cloud_migrate_schema = {
+    "$schema": SCHEMA,
+    "title": "cloud-migrate",
+    "type": "object",
+    "properties": {
+        "organization_id": {"type": "string", "maxLength": 256},
+    },
+    "additionalProperties": False,
+}
+
 anonymized_usage_statistics_record_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-usage-statistics-record",
@@ -943,6 +953,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_rule": anonymized_rule_schema,
         "anonymized_rule_based_profiler_run": anonymized_rule_based_profiler_run_schema,
         "package_info": package_info_schema,
+        "cloud_migrate": cloud_migrate_schema,
     },
     "type": "object",
     "properties": {
@@ -1118,6 +1129,18 @@ anonymized_usage_statistics_record_schema = {
                     "$ref": "#/definitions/anonymized_rule_based_profiler_run"
                 },
             },
+        },
+        {
+          "type": "object",
+          "properties": {
+              "event": {
+                  "enum": ["migrate_to_cloud"]
+              },
+              "event_payload": {
+                  "$ref": "#/definitions/cloud_migrate"
+
+              },
+          },
         },
         {
             "type": "object",
