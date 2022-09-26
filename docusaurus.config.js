@@ -1,7 +1,7 @@
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 
-const lineNumberRemarks = require('remark-code-import')
-const namedSnippetRemarks = require('./scripts/named_snippets/index')
+const remarkCodeImport = require('remark-code-import')
+const remarkNamedSnippets = require('./scripts/remark-named-snippets/index')
 
 module.exports = {
   title: 'Great Expectations',
@@ -163,7 +163,7 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          remarkPlugins: [lineNumberRemarks, namedSnippetRemarks],
+          remarkPlugins: [remarkCodeImport, remarkNamedSnippets],
           editUrl:
                         'https://github.com/great-expectations/great_expectations/tree/develop/'
         },
