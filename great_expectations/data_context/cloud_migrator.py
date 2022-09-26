@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import List, Optional, cast
 
 import requests
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from marshmallow import Schema, fields, post_dump
 
 from great_expectations.core.expectation_suite import (
@@ -239,14 +240,31 @@ class CloudMigrator:
             None
         """
         raise NotImplementedError("This will be implemented soon!")
-        # This code will be uncommented when the migrator is implemented:
-        # cloud_migrator: CloudMigrator = cls(
-        #     context=context,
-        #     ge_cloud_base_url=ge_cloud_base_url,
-        #     ge_cloud_access_token=ge_cloud_access_token,
-        #     ge_cloud_organization_id=ge_cloud_organization_id,
-        # )
-        # cloud_migrator._migrate_to_cloud(test_migrate)
+        # event = "cloud_migrate"
+        # event_payload = {"organization_id": ge_cloud_organization_id}
+        # try:
+        #     # This code will be uncommented when the migrator is implemented:
+        #     cloud_migrator: CloudMigrator = cls(
+        #         context=context,
+        #         ge_cloud_base_url=ge_cloud_base_url,
+        #         ge_cloud_access_token=ge_cloud_access_token,
+        #         ge_cloud_organization_id=ge_cloud_organization_id,
+        #     )
+        #     cloud_migrator._migrate_to_cloud(test_migrate)
+        #     send_usage_message(
+        #         data_context=context,
+        #         event=event,
+        #         event_payload=event_payload,
+        #         success=True,
+        #     )
+        # except Exception as e:
+        #     # Note we send an event on any exception here
+        #     send_usage_message(
+        #         data_context=context,
+        #         event=event,
+        #         event_payload=event_payload,
+        #         success=False,
+        #     )
 
     @classmethod
     def migrate_validation_result(
