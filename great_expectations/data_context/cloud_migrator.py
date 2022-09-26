@@ -1,35 +1,54 @@
 """TODO: Add docstring"""
+
+import logging
 from dataclasses import dataclass
 from typing import List, Optional, cast
 
+import requests
 from marshmallow import Schema, fields, post_dump
 
-from great_expectations.core import (
+from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
+)
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
+from great_expectations.core.http import create_session
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context import AbstractDataContext, BaseDataContext
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
+from great_expectations.data_context.data_context.base_data_context import (
+    BaseDataContext,
+)
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.data_context_variables import DataContextVariables
-from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    AnyPayload,
+    construct_json_payload,
+    construct_url,
+    get_user_friendly_error_message,
+)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointConfigSchema,
     DataContextConfigSchema,
-    GeCloudConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.rule_based_profiler.config import (
+from great_expectations.exceptions.exceptions import GeCloudError
+from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     RuleBasedProfilerConfigSchema,
-)
-from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigurationBundle:
@@ -171,9 +190,28 @@ class CloudMigrator:
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         self._context = context
+
+        cloud_config = CloudDataContext.get_ge_cloud_config(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+
+        ge_cloud_base_url = cloud_config.base_url
+        ge_cloud_access_token = cloud_config.access_token
+        ge_cloud_organization_id = cloud_config.organization_id
+
+        # Invariant due to `get_ge_cloud_config` raising an error if any config values are missing
+        if not ge_cloud_organization_id:
+            raise ValueError(
+                "An organization id must be present when performing a migration"
+            )
+
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_access_token = ge_cloud_access_token
         self._ge_cloud_organization_id = ge_cloud_organization_id
+
+        self._session = create_session(access_token=ge_cloud_access_token)
 
     @classmethod
     def migrate(
@@ -248,38 +286,6 @@ class CloudMigrator:
         self._print_validation_result_error_summary(errors)
         self._print_migration_conclusion_message()
 
-    def _process_cloud_credential_overrides(
-        self,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> GeCloudConfig:
-        """Get cloud credentials from environment variables or parameters.
-
-        Check first for ge_cloud_base_url, ge_cloud_access_token and
-        ge_cloud_organization_id provided via params, if not then check
-        for the corresponding environment variable.
-
-        Args:
-            ge_cloud_base_url: Optional, you may provide this alternatively via
-                environment variable GE_CLOUD_BASE_URL
-            ge_cloud_access_token: Optional, you may provide this alternatively
-                via environment variable GE_CLOUD_ACCESS_TOKEN
-            ge_cloud_organization_id: Optional, you may provide this alternatively
-                via environment variable GE_CLOUD_ORGANIZATION_ID
-
-        Returns:
-            GeCloudConfig
-
-        Raises:
-            GeCloudError
-
-        """
-        # TODO: Use GECloudEnvironmentVariable enum for environment variables
-        # TODO: Merge with existing logic in Data Context - could be static method on CloudDataContext or
-        #  module level method in cloud_data_context.py Let's not duplicate this code.
-        pass
-
     def _warn_if_test_migrate(self) -> None:
         pass
 
@@ -299,9 +305,37 @@ class CloudMigrator:
         configuration_bundle: ConfigurationBundle,
         serializer: ConfigurationBundleJsonSerializer,
     ) -> AnyPayload:
-        # Serialize
-        # Use session to send to backend
-        pass
+        url = construct_url(
+            base_url=self._ge_cloud_base_url,
+            organization_id=self._ge_cloud_organization_id,
+            resource_name="migration",
+        )
+
+        serialized_bundle = serializer.serialize(configuration_bundle)
+        data = construct_json_payload(
+            resource_type="migration",
+            organization_id=self._ge_cloud_organization_id,
+            attributes_key="bundle",
+            attributes_value=serialized_bundle,
+        )
+
+        try:
+            response = self._session.post(url, json=data)
+            response.raise_for_status()
+            return response.json()
+
+        except requests.HTTPError as http_exc:
+            raise GeCloudError(
+                f"Unable to migrate config to Cloud: {get_user_friendly_error_message(http_exc)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise GeCloudError(
+                "Unable to migrate config to Cloud: This is likely a transient error. Please try again."
+            )
+        except Exception as e:
+            logger.warning(str(e))
+            raise GeCloudError(f"Something went wrong while migrating to Cloud: {e}")
 
     def _print_send_configuration_bundle_error(self, http_response: AnyPayload) -> None:
         pass
