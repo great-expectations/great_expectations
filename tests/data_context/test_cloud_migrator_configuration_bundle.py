@@ -1,31 +1,26 @@
 """These tests are meant to exercise ConfigurationBundle and related."""
-from typing import List, Optional, Dict, Union
+from typing import Dict, List, Optional, Union
 
 import pytest
-from great_expectations.datasource import LegacyDatasource, BaseDatasource
 
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariables,
-    EphemeralDataContextVariables,
-)
-
-from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
-    DataContextConfig,
-    CheckpointConfig,
-    DatasourceConfig,
-)
-
-from great_expectations.core import (
-    ExpectationSuite,
-    ExpectationSuiteValidationResult,
-)
+from great_expectations.core import ExpectationSuite, ExpectationSuiteValidationResult
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.cloud_migrator import (
     ConfigurationBundle,
     ConfigurationBundleJsonSerializer,
     ConfigurationBundleSchema,
 )
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariables,
+    EphemeralDataContextVariables,
+)
+from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
+    CheckpointConfig,
+    DataContextConfig,
+    DatasourceConfig,
+)
+from great_expectations.datasource import BaseDatasource, LegacyDatasource
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 
 

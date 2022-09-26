@@ -1,11 +1,10 @@
 """TODO: Add docstring"""
+import logging
 from dataclasses import dataclass
 from typing import List, Optional, cast
 
-from marshmallow import Schema, fields, post_dump
-import logging
-
 import requests
+from marshmallow import Schema, fields, post_dump
 
 from great_expectations.core import (
     ExpectationSuite,
@@ -13,27 +12,30 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
+from great_expectations.core.http import create_session
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext, BaseDataContext
-from great_expectations.data_context.data_context_variables import DataContextVariables
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    CheckpointConfigSchema,
-    DataContextConfigSchema,
-    GeCloudConfig, DatasourceConfigSchema,DatasourceConfig
-)
-from great_expectations.core.http import create_session
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
+from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     AnyPayload,
     GeCloudStoreBackend,
     get_user_friendly_error_message,
 )
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    CheckpointConfigSchema,
+    DataContextConfigSchema,
+    DatasourceConfig,
+    DatasourceConfigSchema,
+    GeCloudConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions.exceptions import GeCloudError
 from great_expectations.rule_based_profiler.config import (
     RuleBasedProfilerConfig,
     RuleBasedProfilerConfigSchema,
@@ -41,7 +43,6 @@ from great_expectations.rule_based_profiler.config import (
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.exceptions.exceptions import GeCloudError
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,6 @@ class ConfigurationBundle:
         self._context = context
 
         self._data_context_variables: DataContextVariables = context.variables
-
 
         self._datasources: List[DatasourceConfig] = self._get_all_datasources()
         self._expectation_suites: List[
@@ -86,7 +86,8 @@ class ConfigurationBundle:
         datasource_configs: List[DatasourceConfig] = [
             self._context._datasource_store.retrieve_by_name(
                 datasource_name=datasource_name
-            ) for datasource_name in datasource_names
+            )
+            for datasource_name in datasource_names
         ]
 
         return datasource_configs
