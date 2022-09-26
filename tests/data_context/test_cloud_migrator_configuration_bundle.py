@@ -1,4 +1,4 @@
-"""TODO: Add docstring"""
+"""These tests are meant to exercise ConfigurationBundle and related."""
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -223,8 +223,9 @@ def test_configuration_bundle_init(
     ]
 
 
+# TODO: Delete test_configuration_bundle_serialization_integration test
 @pytest.mark.integration
-def test_configuration_bundle_serialization(
+def test_configuration_bundle_serialization_integration(
     in_memory_runtime_context_with_configs_in_stores: DataContextWithSavedItems,
     serialized_configuration_bundle: dict,
 ):
@@ -251,6 +252,122 @@ def test_configuration_bundle_serialization(
     assert serialized_bundle == expected_serialized_bundle
 
 
+@pytest.mark.unit
+def test_configuration_bundle_created(
+    stub_base_data_context: StubBaseDataContext,
+    stub_serialized_configuration_bundle: dict,
+):
+    """What does this test and why?
+
+    Make sure the configuration bundle is created successfully from a data context.
+    """
+
+    context: BaseDataContext = stub_base_data_context
+
+    config_bundle = ConfigurationBundle(context)
+
+    assert config_bundle.is_usage_stats_enabled()
+    assert config_bundle._data_context_variables is not None
+    assert len(config_bundle._expectation_suites) == 1
+    assert len(config_bundle._checkpoints) == 1
+    assert len(config_bundle._profilers) == 1
+    assert len(config_bundle._validation_results) == 1
+
+
+@pytest.mark.unit
+def test_configuration_bundle_serializer():
+    """What does this test and why?
+
+    Make sure a configuration bundle is serialized correctly.
+    """
+    raise NotImplementedError
+
+
+@pytest.fixture
+def stub_serialized_configuration_bundle():
+    """Configuration bundle based on StubBaseDataContext."""
+    return {
+        "checkpoints": [
+            {
+                "class_name": "Checkpoint",
+                "config_version": None,
+                "module_name": "great_expectations.checkpoint",
+                "name": "my_checkpoint",
+            }
+        ],
+        "data_context_variables": {
+            "config_variables_file_path": None,
+            "config_version": 3.0,
+            "data_docs_sites": None,
+            "evaluation_parameter_store_name": None,
+            "expectations_store_name": None,
+            "include_rendered_content": {
+                "expectation_suite": False,
+                "expectation_validation_result": False,
+                "globally": False,
+            },
+            "notebooks": None,
+            "plugins_directory": None,
+            "stores": None,
+            "validations_store_name": None,
+        },
+        "expectation_suites": [
+            {
+                "data_asset_type": None,
+                "expectation_suite_name": "my_suite",
+                "expectations": [],
+                "ge_cloud_id": None,
+            }
+        ],
+        "profilers": [
+            {
+                "class_name": "RuleBasedProfiler",
+                "config_version": 1.0,
+                "module_name": "great_expectations.rule_based_profiler",
+                "name": "my_profiler",
+                "rules": {},
+                "variables": {},
+            }
+        ],
+        "validation_results": [
+            {
+                "evaluation_parameters": {},
+                "meta": {},
+                "results": [],
+                "statistics": {},
+                "success": True,
+            }
+        ],
+    }
+
+
+@pytest.mark.unit
+def test_configuration_bundle_serialization(
+    stub_base_data_context: StubBaseDataContext,
+    stub_serialized_configuration_bundle: dict,
+):
+    """What does this test and why?
+
+    Ensure configuration bundle is serialized correctly.
+    """
+
+    context: BaseDataContext = stub_base_data_context
+
+    config_bundle = ConfigurationBundle(context)
+
+    serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
+
+    serialized_bundle: dict = serializer.serialize(config_bundle)
+
+    expected_serialized_bundle = stub_serialized_configuration_bundle
+
+    # Remove meta before comparing since it contains the GX version
+    serialized_bundle["expectation_suites"][0].pop("meta", None)
+    expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
+
+    assert serialized_bundle == expected_serialized_bundle
+
+
 def test_is_usage_statistics_key_set_if_key_not_present():
     """What does this test and why?
 
@@ -263,13 +380,11 @@ def test_is_usage_statistics_key_set_if_key_not_present():
 
 @pytest.mark.unit
 def test_anonymous_usage_statistics_removed_during_serialization(
-    stub_base_data_context: StubBaseDataContext
+    stub_base_data_context: StubBaseDataContext,
 ):
     """What does this test and why?
     When serializing a ConfigurationBundle we need to remove the
     anonymous_usage_statistics key.
-    This is currently an integration test using a real Data Context, it can
-    be converted to a unit test.
     """
 
     context: StubBaseDataContext = stub_base_data_context
