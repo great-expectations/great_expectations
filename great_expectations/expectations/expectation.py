@@ -210,14 +210,14 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.failed")
-    def _prescriptive_failed(
+    def _atomic_prescriptive_failed(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
     ) -> RenderedAtomicContent:
         """
         Default rendering function that is utilized by GE Cloud Front-end if no other atomic renderers were successful
         """
-        template_str = "Rendering failed for $expectation_type(**$kwargs)."
+        template_str = "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs)."
 
         params_with_json_schema = {
             "expectation_type": {
@@ -668,6 +668,38 @@ class Expectation(metaclass=MetaExpectation):
             )
         else:
             return "--"
+
+    @classmethod
+    @renderer(renderer_type="atomic.diagnostic.failed")
+    def _atomic_diagnostic_failed(
+        cls,
+        configuration=None,
+    ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        template_str = "Rendering of Expectation Validation Result failed for $expectation_type(**$kwargs)."
+
+        params_with_json_schema = {
+            "expectation_type": {
+                "schema": {"type": "string"},
+                "value": configuration.expectation_type,
+            },
+            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+        }
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": template_str,
+                "params": params_with_json_schema,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.diagnostic.failed",
+            value=value_obj,
+            value_type="StringValueType",
+        )
+        return rendered
 
     @classmethod
     @renderer(renderer_type="atomic.diagnostic.observed_value")
