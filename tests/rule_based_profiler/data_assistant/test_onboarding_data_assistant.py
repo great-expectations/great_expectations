@@ -886,7 +886,6 @@ def test_onboarding_data_assistant_plot_metrics_stdout(
     with redirect_stdout(f):
         data_assistant_result.plot_metrics()
     stdout = f.getvalue()
-
     assert (
         f"""{metrics_calculated} Metrics calculated, {metrics_plots_implemented} Metric plots implemented
 Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
