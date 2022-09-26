@@ -19,7 +19,10 @@ from typing import (
     cast,
 )
 
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.core.serializer import DictConfigSerializer
+from great_expectations.data_context.data_context_variables import (
+    EphemeralDataContextVariables,
+)
 
 if TYPE_CHECKING:
     from great_expectations.validation_operators.validation_operators import (
@@ -67,6 +70,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations.data_context.data_context.bridge_file_data_context import (
     _BridgeFileDataContext,
 )
@@ -332,7 +338,7 @@ class BaseDataContext(AbstractDataContext, ConfigPeer):
                 context_root_dir=context_root_dir,  # type: ignore[arg-type]
                 runtime_environment=runtime_environment,
             )
-        else:
+        elif project_config:
             self._data_context = EphemeralDataContext(  # type: ignore[assignment]
                 project_config=project_config, runtime_environment=runtime_environment
             )
@@ -370,6 +376,38 @@ class BaseDataContext(AbstractDataContext, ConfigPeer):
     @property
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
+
+    def _init_variables(self) -> EphemeralDataContextVariables:
+        """
+
+        Returns:
+
+        """
+        variables = EphemeralDataContextVariables(
+            config=self._project_config,
+        )
+        return variables
+
+    def _init_datasource_store(self) -> None:
+        """
+
+        Returns:
+
+        """
+        from great_expectations.data_context.store.datasource_store import (
+            DatasourceStore,
+        )
+
+        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
+        # to the convention set by other internal Stores
+        store_backend: dict = {"class_name": "InMemoryStoreBackend"}
+
+        datasource_store = DatasourceStore(
+            store_name=store_name,
+            store_backend=store_backend,
+            serializer=DictConfigSerializer(schema=datasourceConfigSchema),
+        )
+        self._datasource_store = datasource_store
 
     def _synchronize_self_with_underlying_data_context(self) -> None:
         """
