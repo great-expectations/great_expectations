@@ -200,10 +200,11 @@ class CloudMigrator:
         ge_cloud_base_url = cloud_config.base_url
         ge_cloud_access_token = cloud_config.access_token
         ge_cloud_organization_id = cloud_config.organization_id
-        if ge_cloud_organization_id is None:
-            raise ValueError(
-                "An organization id must be present when performing a migration"
-            )
+
+        # Invariant due to `get_ge_cloud_config` raising an error if any config values are missing
+        assert (
+            ge_cloud_organization_id
+        ), "An organization id must be present when performing a migration"
 
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_access_token = ge_cloud_access_token
@@ -332,7 +333,7 @@ class CloudMigrator:
                 "Unable to migrate config to Cloud: This is likely a transient error. Please try again."
             )
         except Exception as e:
-            logger.debug(str(e))
+            logger.warning(str(e))
             raise GeCloudError(f"Something went wrong while migrating to Cloud: {e}")
 
     def _print_send_configuration_bundle_error(self, http_response: AnyPayload) -> None:
