@@ -170,7 +170,6 @@ def test__send_configuration_bundle_sends_valid_http_request(
     mock_context = mock.MagicMock()
     migrator = gx.CloudMigrator(
         context=mock_context,
-        test_migrate=False,
         ge_cloud_base_url=ge_cloud_base_url,
         ge_cloud_organization_id=ge_cloud_organization_id,
         ge_cloud_access_token=ge_cloud_access_token,
