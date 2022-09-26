@@ -1,4 +1,4 @@
-"""These tests are meant to exercise ConfigurationBundle and related."""
+"""These tests exercise ConfigurationBundle including Serialization."""
 from typing import Dict, List, Optional, Union
 
 import pytest
