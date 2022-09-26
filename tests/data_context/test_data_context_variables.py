@@ -154,7 +154,9 @@ def cloud_data_context(
 
     cloud_data_context = CloudDataContext(
         project_config=data_context_config,
-        ge_cloud_config=ge_cloud_config_e2e,
+        ge_cloud_base_url=ge_cloud_config_e2e.base_url,
+        ge_cloud_access_token=ge_cloud_config_e2e.access_token,
+        ge_cloud_organization_id=ge_cloud_config_e2e.organization_id,
         context_root_dir=str(context_root_dir),
     )
     return cloud_data_context
