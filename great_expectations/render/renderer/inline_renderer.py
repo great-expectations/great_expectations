@@ -176,7 +176,7 @@ class InlineRenderer(Renderer):
         new_rendered_content: List[RenderedAtomicContent],
         failed_renderer_name: str,
     ) -> List[RenderedAtomicContent]:
-        rendered_content_block_names: List[str] = [
+        new_rendered_content_block_names: List[str] = [
             rendered_content_block.name
             for rendered_content_block in new_rendered_content
         ]
@@ -188,9 +188,10 @@ class InlineRenderer(Renderer):
                 for rendered_content_block in existing_rendered_content
             ]
 
-        if not existing_rendered_content or (
-            failed_renderer_name in rendered_content_block_names
-            and failed_renderer_name not in existing_rendered_content_block_names
+        if (
+            (existing_rendered_content is None)
+            or (failed_renderer_name not in new_rendered_content_block_names)
+            or (failed_renderer_name in existing_rendered_content_block_names)
         ):
             return new_rendered_content
         else:
