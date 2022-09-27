@@ -144,7 +144,7 @@ class TestUsageStats:
             success=False,
         )
 
-    def test_no_event_sent_for_migrate_dry_run(
+    def test_no_event_sent_for_migrate_test_run(
         self, mock_successful_migration: Callable
     ):
         """No event should be sent for a successful test run."""
@@ -153,7 +153,7 @@ class TestUsageStats:
 
         mock_send_usage_message.assert_not_called()
 
-    def test_no_event_sent_for_migrate_dry_run_failure(
+    def test_no_event_sent_for_migrate_test_run_failure(
         self, mock_failed_migration: Callable
     ):
         """No event should be sent for a failed test run."""
