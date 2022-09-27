@@ -1,25 +1,17 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
-from typing import TYPE_CHECKING, Callable, Tuple, Type, Union
-from unittest.mock import patch
+from typing import TYPE_CHECKING, Callable
+from unittest import mock
 
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.core.serializer import (
-    AbstractConfigSerializer,
-    DictConfigSerializer,
-)
-from great_expectations.data_context import (
-    AbstractDataContext,
-    BaseDataContext,
-    CloudDataContext,
-)
+from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.datasource import BaseDatasource, Datasource, LegacyDatasource
+from great_expectations.datasource import BaseDatasource
 from great_expectations.datasource.datasource_serializer import (
     JsonDatasourceConfigSerializer,
 )
@@ -62,7 +54,6 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ):
     """A BaseDataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource
     with save_changes=True and not save when save_changes=False. When saving, it should use the id from the response
@@ -79,10 +70,14 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
-    with patch(
-        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
-    ) as mock_post, patch(
-        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    with mock.patch(
+        "requests.Session.post",
+        autospec=True,
+        side_effect=mocked_datasource_post_response,
+    ) as mock_post, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_datasource_get_response,
     ):
 
         # Call add_datasource with and without the name field included in the datasource config
@@ -122,6 +117,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
         # It should have been called with the datasource name in the config.
         if save_changes:
             mock_post.assert_called_with(
+                mock.ANY,  # requests.Session object
                 f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
                 json={
                     "data": {
@@ -132,7 +128,6 @@ def test_base_data_context_in_cloud_mode_add_datasource(
                         },
                     }
                 },
-                **shared_called_with_request_kwargs,
             )
         else:
             assert not mock_post.called
@@ -179,7 +174,6 @@ def test_data_context_in_cloud_mode_add_datasource(
     mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ):
     """A DataContext in cloud mode should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
     to create the datasource."""
@@ -195,10 +189,14 @@ def test_data_context_in_cloud_mode_add_datasource(
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
-    with patch(
-        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
-    ) as mock_post, patch(
-        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    with mock.patch(
+        "requests.Session.post",
+        autospec=True,
+        side_effect=mocked_datasource_post_response,
+    ) as mock_post, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_datasource_get_response,
     ):
 
         # Call add_datasource with and without the name field included in the datasource config
@@ -235,6 +233,7 @@ def test_data_context_in_cloud_mode_add_datasource(
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
         mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {
@@ -245,7 +244,6 @@ def test_data_context_in_cloud_mode_add_datasource(
                     },
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
         data_connector_name = tuple(stored_datasource.data_connectors.keys())[0]
@@ -286,7 +284,6 @@ def test_cloud_data_context_add_datasource(
     mocked_datasource_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ):
     """A CloudDataContext should save to the cloud backed Datasource store when calling add_datasource. When saving, it should use the id from the response
     to create the datasource."""
@@ -302,10 +299,14 @@ def test_cloud_data_context_add_datasource(
     datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
     datasource_config_with_name.name = datasource_name
 
-    with patch(
-        "requests.post", autospec=True, side_effect=mocked_datasource_post_response
-    ) as mock_post, patch(
-        "requests.get", autospec=True, side_effect=mocked_datasource_get_response
+    with mock.patch(
+        "requests.Session.post",
+        autospec=True,
+        side_effect=mocked_datasource_post_response,
+    ) as mock_post, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_datasource_get_response,
     ):
 
         # Call add_datasource with and without the name field included in the datasource config
@@ -345,6 +346,7 @@ def test_cloud_data_context_add_datasource(
         # This post should have been called without the id (which is retrieved from the response).
         # It should have been called with the datasource name in the config.
         mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources",
             json={
                 "data": {
@@ -355,7 +357,6 @@ def test_cloud_data_context_add_datasource(
                     },
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
         data_connector_name = tuple(stored_datasource.data_connectors.keys())[0]

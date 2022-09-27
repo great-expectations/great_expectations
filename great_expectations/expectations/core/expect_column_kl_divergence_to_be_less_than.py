@@ -812,7 +812,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         if len(weights) == 1:
             mark_bar_args["size"] = 20
 
-        chart = ""
+        chart = {}
         if partition_object.get("bins"):
             bins = partition_object["bins"]
             bins_x1 = [round(value, 1) for value in bins[:-1]]

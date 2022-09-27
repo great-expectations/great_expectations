@@ -508,15 +508,6 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              deployment_version=$(cat ./great_expectations/deployment_version)
-              tag=$(basename "$(Build.SourceBranch)")
-              if [[ "$deployment_version" != "$tag" ]]; then
-                printf "There is a discrepancy between the 'deployment_version' file (%s) and the provided tag (%s)" $deployment_version $tag
-                exit 1
-              fi
-            displayName: 'Check for valid tag'
-
-          - script: |
               pip install twine
               pip install wheel
               git config --global user.email "team@greatexpectations.io"

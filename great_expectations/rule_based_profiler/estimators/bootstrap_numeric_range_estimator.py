@@ -3,6 +3,7 @@ from typing import Dict, Optional
 
 import numpy as np
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NumericRangeEstimationResult,
@@ -20,6 +21,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import is_ndarray_datetime_dtype
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -53,6 +55,15 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> NumericRangeEstimationResult:
+        if is_ndarray_datetime_dtype(
+            data=metric_values,
+            parse_strings_as_datetimes=True,
+            fuzzy=False,
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f'Estimator "{self.__class__.__name__}" does not support DateTime/TimeStamp data types.'
+            )
+
         false_positive_rate: np.float64 = get_false_positive_rate_from_rule_state(
             false_positive_rate=self.configuration.false_positive_rate,
             domain=domain,
