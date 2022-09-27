@@ -913,6 +913,7 @@ cloud_migrate_schema = {
     "properties": {
         "organization_id": {"type": "string", "maxLength": 256},
     },
+    "required": ["organization_id"],
     "additionalProperties": False,
 }
 
