@@ -52,6 +52,8 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 
+import great_expectations.exceptions as ge_exceptions
+
 logger = logging.getLogger(__name__)
 
 
@@ -312,7 +314,7 @@ class CloudMigrator:
                     event_payload=event_payload,
                     success=False,
                 )
-            raise e
+            raise ge_exceptions.MigrationError("Migration failed. Please check the error message for more details.") from e
 
     @classmethod
     def migrate_validation_result(

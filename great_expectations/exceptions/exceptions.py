@@ -441,3 +441,8 @@ class DatabaseConnectionError(GreatExpectationsError):
     """Error connecting to a database including during an integration test."""
 
     pass
+
+
+class MigrationError(GreatExpectationsError):
+    """Error when using the migration tool."""
+    pass

@@ -8,6 +8,7 @@ import great_expectations as gx
 from great_expectations import CloudMigrator, DataContext
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
+import great_expectations.exceptions as ge_exceptions
 
 def test_cloud_migrator_test_migrate_true(empty_data_context: DataContext):
     """TODO: Test is a placeholder."""
@@ -96,12 +97,12 @@ def mock_failed_migration(ge_cloud_organization_id: str) -> Callable:
             CloudMigrator,
             "_migrate_to_cloud",
             return_value=None,
-            side_effect=Exception,
+            side_effect=ge_exceptions.MigrationError,
         ), mock.patch(
             "great_expectations.data_context.cloud_migrator.send_usage_message",
             autospec=True,
         ) as mock_send_usage_message:
-            with pytest.raises(Exception):
+            with pytest.raises(ge_exceptions.MigrationError):
                 CloudMigrator.migrate(
                     context=context,
                     test_migrate=test_migrate,
