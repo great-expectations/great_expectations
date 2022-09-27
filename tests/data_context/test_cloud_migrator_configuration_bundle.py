@@ -69,6 +69,8 @@ class DummyDatasource:
 class StubBaseDataContext:
     """Stub for testing ConfigurationBundle."""
 
+    DATA_CONTEXT_ID = "27517569-1500-4127-af68-b5bad960a492"
+
     def __init__(
         self,
         anonymous_usage_stats_enabled: bool = True,
@@ -90,6 +92,10 @@ class StubBaseDataContext:
     @property
     def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
         return self.variables.anonymous_usage_statistics
+
+    @property
+    def data_context_id(self) -> str:
+        return self.DATA_CONTEXT_ID
 
     @property
     def variables(self) -> DataContextVariables:
@@ -218,73 +224,13 @@ class TestConfigurationBundleCreate:
 
 
 @pytest.fixture
-def stub_serialized_configuration_bundle():
+def stub_serialized_configuration_bundle(serialized_configuration_bundle: dict) -> dict:
     """Configuration bundle based on StubBaseDataContext."""
-    return {
-        "checkpoints": [
-            {
-                "class_name": "Checkpoint",
-                "config_version": None,
-                "module_name": "great_expectations.checkpoint",
-                "name": "my_checkpoint",
-            }
-        ],
-        "data_context_variables": {
-            "config_variables_file_path": None,
-            "config_version": 3.0,
-            "data_docs_sites": None,
-            "evaluation_parameter_store_name": None,
-            "expectations_store_name": None,
-            "include_rendered_content": {
-                "expectation_suite": False,
-                "expectation_validation_result": False,
-                "globally": False,
-            },
-            "notebooks": None,
-            "plugins_directory": None,
-            "stores": None,
-            "validations_store_name": None,
-        },
-        "datasources": [
-            {
-                "class_name": "Datasource",
-                "data_connectors": {},
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "module_name": "great_expectations.datasource",
-                "name": "my_datasource",
-            }
-        ],
-        "expectation_suites": [
-            {
-                "data_asset_type": None,
-                "expectation_suite_name": "my_suite",
-                "expectations": [],
-                "ge_cloud_id": None,
-            }
-        ],
-        "profilers": [
-            {
-                "class_name": "RuleBasedProfiler",
-                "config_version": 1.0,
-                "module_name": "great_expectations.rule_based_profiler",
-                "name": "my_profiler",
-                "rules": {},
-                "variables": {},
-            }
-        ],
-        "validation_results": [
-            {
-                "evaluation_parameters": {},
-                "meta": {},
-                "results": [],
-                "statistics": {},
-                "success": True,
-            }
-        ],
-    }
+    assert "data_context_id" in serialized_configuration_bundle
+    serialized_configuration_bundle[
+        "data_context_id"
+    ] = StubBaseDataContext.DATA_CONTEXT_ID
+    return serialized_configuration_bundle
 
 
 class TestConfigurationBundleSerialization:
