@@ -987,12 +987,9 @@ class ExpectationSuite(SerializableDictDot):
                 for rendered_content_block in rendered_content
             ]
 
-            # If we don't have any exiting rendered_content we want to populate some, even if it renders the failure
-            # message string. If we do have some existing rendered_content, and all we were able to render was a single
-            # failure message, then leave the existing rendered_content as-is.
-            if expectation_configuration.rendered_content is None or not (
-                len(rendered_content) == 1
-                and "atomic.prescriptive.failed" in rendered_content_block_names
+            if (
+                expectation_configuration.rendered_content is None
+                or rendered_content_block_names != ["atomic.prescriptive.failed"]
             ):
                 expectation_configuration.rendered_content = rendered_content
 
