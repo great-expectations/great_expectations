@@ -38,6 +38,7 @@ from great_expectations.data_context.types.base import (
     CheckpointConfigSchema,
     DataContextConfigSchema,
     DatasourceConfig,
+    DatasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -59,7 +60,7 @@ class ConfigurationBundle:
 
         self._data_context_variables: DataContextVariables = context.variables
 
-        self._datasources: List[DatasourceConfig] = []
+        self._datasources: List[DatasourceConfig] = self._get_all_datasources()
         self._expectation_suites: List[
             ExpectationSuite
         ] = self._get_all_expectation_suites()
@@ -68,6 +69,23 @@ class ConfigurationBundle:
         self._validation_results: List[
             ExpectationSuiteValidationResult
         ] = self._get_all_validation_results()
+
+    def is_usage_stats_enabled(self) -> bool:
+        """Determine whether usage stats are enabled.
+
+        Also returns false if there are no usage stats settings provided.
+
+        Returns: Boolean of whether the usage statistics are enabled.
+
+        """
+        if self._data_context_variables.anonymous_usage_statistics:
+            return self._data_context_variables.anonymous_usage_statistics.enabled
+        else:
+            return False
+
+    @property
+    def data_context_variables(self) -> DataContextVariables:
+        return self._data_context_variables
 
     @property
     def datasources(self) -> List[DatasourceConfig]:
@@ -89,18 +107,20 @@ class ConfigurationBundle:
     def validation_results(self) -> List[ExpectationSuiteValidationResult]:
         return self._validation_results
 
-    def is_usage_stats_enabled(self) -> bool:
-        """Determine whether usage stats are enabled.
+    def _get_all_datasources(self) -> List[DatasourceConfig]:
 
-        Also returns false if there are no usage stats settings provided.
+        datasource_names: List[str] = list(self._context.datasources.keys())
 
-        Returns: Boolean of whether the usage statistics are enabled.
+        # Note: we are accessing the protected _datasource_store to not add a public property
+        # to all Data Contexts.
+        datasource_configs: List[DatasourceConfig] = [
+            self._context._datasource_store.retrieve_by_name(
+                datasource_name=datasource_name
+            )
+            for datasource_name in datasource_names
+        ]
 
-        """
-        if self._data_context_variables.anonymous_usage_statistics:
-            return self._data_context_variables.anonymous_usage_statistics.enabled
-        else:
-            return False
+        return datasource_configs
 
     def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
         return [
@@ -139,30 +159,28 @@ class ConfigurationBundle:
 class ConfigurationBundleSchema(Schema):
     """Marshmallow Schema for the Configuration Bundle."""
 
-    _data_context_variables = fields.Nested(
-        DataContextConfigSchema, allow_none=False, data_key="data_context_variables"
+    data_context_variables = fields.Nested(DataContextConfigSchema, allow_none=False)
+    datasources = fields.List(
+        fields.Nested(DatasourceConfigSchema, allow_none=True, required=True),
+        required=True,
     )
-    _expectation_suites = fields.List(
+    expectation_suites = fields.List(
         fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True),
         required=True,
-        data_key="expectation_suites",
     )
-    _checkpoints = fields.List(
+    checkpoints = fields.List(
         fields.Nested(CheckpointConfigSchema, allow_none=True, required=True),
         required=True,
-        data_key="checkpoints",
     )
-    _profilers = fields.List(
+    profilers = fields.List(
         fields.Nested(RuleBasedProfilerConfigSchema, allow_none=True, required=True),
         required=True,
-        data_key="profilers",
     )
-    _validation_results = fields.List(
+    validation_results = fields.List(
         fields.Nested(
             ExpectationSuiteValidationResultSchema, allow_none=True, required=True
         ),
         required=True,
-        data_key="validation_results",
     )
 
     @post_dump
