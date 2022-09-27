@@ -3090,41 +3090,8 @@ class ExpectSkyToBeColor(TableExpectation):
     args_keys = ("color",)
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.working")
-    def _prescriptive_renderer_working(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        template_str = "This is a working renderer for $expectation_type(**$kwargs)."
-
-        params_with_json_schema = {
-            "expectation_type": {
-                "schema": {"type": "string"},
-                "value": configuration.expectation_type,
-            },
-            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
-        }
-        value_obj = renderedAtomicValueSchema.load(
-            {
-                "template": template_str,
-                "params": params_with_json_schema,
-                "schema": {"type": "com.superconductive.rendered.string"},
-            }
-        )
-        rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.working",
-            value=value_obj,
-            value_type="StringValueType",
-        )
-        return rendered
-
-    @classmethod
-    @renderer(renderer_type="atomic.prescriptive.broken")
-    def _prescriptive_renderer_broken(
+    @renderer(renderer_type="atomic.prescriptive.custom_renderer")
+    def _prescriptive_renderer_custom(
         cls,
         configuration=None,
         result=None,
@@ -3188,15 +3155,12 @@ def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext
             ]
         )
 
-    # If we update the ExpectationSuite to add an Expectation that has two content block renderers, one of which is
+    # If we change the ExpectationSuite to use an Expectation that has two content block renderers, one of which is
     # broken, we should get the failure message for one of the content blocks.
     expectation_suite = ExpectationSuite(
         expectation_suite_name=expectation_suite_name,
         data_context=context,
         expectations=[
-            ExpectationConfiguration(
-                expectation_type="expect_table_row_count_to_equal", kwargs={"value": 0}
-            ),
             ExpectationConfiguration(
                 expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}
             ),
@@ -3207,18 +3171,7 @@ def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext
         expectation_suite_name=expectation_suite_name
     )
 
-    expected_rendered_content = [
-        RenderedAtomicContent(
-            name="atomic.prescriptive.summary",
-            value=renderedAtomicValueSchema.load(
-                {
-                    "schema": {"type": "com.superconductive.rendered.string"},
-                    "template": "Must have exactly $value rows.",
-                    "params": {"value": {"schema": {"type": "number"}, "value": 0}},
-                }
-            ),
-            value_type="StringValueType",
-        ),
+    expected_rendered_content: List[RenderedAtomicContent] = [
         RenderedAtomicContent(
             name="atomic.prescriptive.failed",
             value=renderedAtomicValueSchema.load(
@@ -3240,7 +3193,38 @@ def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext
             value_type="StringValueType",
         ),
         RenderedAtomicContent(
-            name="atomic.prescriptive.working",
+            name="atomic.prescriptive.summary",
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "$expectation_type(**$kwargs)",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+    ]
+
+    actual_rendered_content: List[RenderedAtomicContent] = []
+    for expectation_configuration in expectation_suite.expectations:
+        actual_rendered_content.extend(expectation_configuration.rendered_content)
+
+    assert actual_rendered_content == expected_rendered_content
+
+    # If we have a legacy ExpectationSuite with successful rendered_content blocks, but the new renderer is broken,
+    # we should not update the existing rendered_content.
+    legacy_rendered_content = [
+        RenderedAtomicContent(
+            name="atomic.prescriptive.custom_renderer",
             value=renderedAtomicValueSchema.load(
                 {
                     "schema": {"type": "com.superconductive.rendered.string"},
@@ -3281,8 +3265,10 @@ def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext
         ),
     ]
 
+    expectation_suite.expectations[0].rendered_content = legacy_rendered_content
+
     actual_rendered_content: List[RenderedAtomicContent] = []
     for expectation_configuration in expectation_suite.expectations:
         actual_rendered_content.extend(expectation_configuration.rendered_content)
 
-    assert actual_rendered_content == expected_rendered_content
+    assert actual_rendered_content == legacy_rendered_content
