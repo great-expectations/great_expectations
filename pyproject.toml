@@ -56,7 +56,6 @@ exclude = [
     'dataset/sqlalchemy_dataset\.py', # 16
     'datasource/batch_kwargs_generator', # 16
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
-    'datasource/data_connector/runtime_data_connector\.py',  # 15
     'execution_engine/execution_engine\.py',  # 7
     'execution_engine/pandas_execution_engine\.py',  # 9
     'execution_engine/sparkdf_execution_engine\.py',  # 8
