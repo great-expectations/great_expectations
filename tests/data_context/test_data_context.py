@@ -42,6 +42,8 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -3075,3 +3077,67 @@ def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
 
     res = context._check_for_usage_stats_sync(project_config=project_config)
     assert res is False
+
+
+class ExpectSkyToBeColor(TableExpectation):
+    metric_dependencies = ("table.color",)
+    success_keys = ("color",)
+    args_keys = ("color",)
+
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        return {
+            "success": True,
+            "result": {"observed_value": "blue"},
+        }
+
+
+@pytest.mark.integration
+def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext):
+    context: DataContext = empty_data_context
+
+    expectation_suite_name: str = "test_suite"
+
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name,
+        data_context=context,
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal", kwargs={"value": 0}
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}
+            ),
+        ],
+    )
+    context.save_expectation_suite(expectation_suite=expectation_suite)
+
+    # Without include_rendered_content set, all legacy rendered_content was None.
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert not any(
+        [
+            expectation_configuration.rendered_content
+            for expectation_configuration in expectation_suite.expectations
+        ]
+    )
+
+    # Once we set include_rendered_content, we get rendered_content on each ExpectationConfiguration in the
+    # ExpectationSuite.
+    context.variables.include_rendered_content.globally = True
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert all(
+        [
+            expectation_configuration.rendered_content
+            for expectation_configuration in expectation_suite.expectations
+        ]
+    )
+    context.save_expectation_suite(expectation_suite=expectation_suite)
