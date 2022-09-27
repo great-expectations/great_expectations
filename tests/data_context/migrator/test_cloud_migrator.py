@@ -10,7 +10,6 @@ from great_expectations import CloudMigrator, DataContext
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
 
-
 @pytest.mark.unit
 @pytest.mark.cloud
 def test__send_configuration_bundle_sends_valid_http_request(
