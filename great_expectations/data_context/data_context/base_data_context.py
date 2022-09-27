@@ -21,7 +21,7 @@ from typing import (
 
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context_variables import (
-    EphemeralDataContextVariables,
+    BaseDataContextVariables,
 )
 
 if TYPE_CHECKING:
@@ -377,21 +377,18 @@ class BaseDataContext(AbstractDataContext, ConfigPeer):
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
 
-    def _init_variables(self) -> EphemeralDataContextVariables:
+    def _init_variables(self) -> BaseDataContextVariables:
         """
-
-        Returns:
-
+        Returns BaseDataContextVariables, which inherits from EphemeralDataContextVariables
         """
-        variables = EphemeralDataContextVariables(
+        variables = BaseDataContextVariables(
             config=self._project_config,
         )
         return variables
 
     def _init_datasource_store(self) -> None:
         """
-
-        Returns:
+        Modeled off of EphemeralDataContext's `_init_datasource_store()` method
 
         """
         from great_expectations.data_context.store.datasource_store import (

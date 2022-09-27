@@ -303,6 +303,11 @@ class EphemeralDataContextVariables(DataContextVariables):
 
 
 @dataclass(repr=False)
+class BaseDataContextVariables(EphemeralDataContextVariables):
+    ...
+
+
+@dataclass(repr=False)
 class FileDataContextVariables(DataContextVariables):
     data_context: Optional["DataContext"] = None
 
