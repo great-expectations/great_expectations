@@ -3115,7 +3115,9 @@ class ExpectSkyToBeColor(TableExpectation):
 
 
 @pytest.mark.integration
-def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext):
+def test_unrendered_and_failed_prescriptive_renderer_behavior(
+    empty_data_context: DataContext,
+):
     context: DataContext = empty_data_context
 
     expectation_suite_name: str = "test_suite"
