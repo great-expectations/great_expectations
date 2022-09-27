@@ -67,7 +67,6 @@ exclude = [
     'datasource/data_connector/runtime_data_connector\.py',  # 15
     'datasource/data_connector/sorter/dictionary_sorter\.py', # 1
     'datasource/data_connector/sorter/sorter\.py',  # 1
-    'datasource/data_connector/util\.py',  # 4
     'execution_engine/execution_engine\.py',  # 7
     'execution_engine/pandas_execution_engine\.py',  # 9
     'execution_engine/sparkdf_execution_engine\.py',  # 8
