@@ -59,7 +59,6 @@ exclude = [
     'datasource/data_connector/configured_asset_file_path_data_connector\.py',  # 7
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 7
     'datasource/data_connector/file_path_data_connector\.py',  # 6
-    'datasource/data_connector/inferred_asset_sql_data_connector\.py',  # 4
     'datasource/data_connector/runtime_data_connector\.py',  # 15
     'execution_engine/execution_engine\.py',  # 7
     'execution_engine/pandas_execution_engine\.py',  # 9
