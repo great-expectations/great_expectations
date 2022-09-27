@@ -1,4 +1,5 @@
 """TODO: Add docstring"""
+
 from typing import List, cast
 
 from marshmallow import Schema, fields, post_dump
@@ -34,6 +35,7 @@ class ConfigurationBundle:
     def __init__(self, context: BaseDataContext) -> None:
 
         self._context = context
+        self._context_id = context.data_context_id
 
         self._data_context_variables: DataContextVariables = context.variables
 
@@ -46,6 +48,10 @@ class ConfigurationBundle:
         self._validation_results: List[
             ExpectationSuiteValidationResult
         ] = self._get_all_validation_results()
+
+    @property
+    def data_context_id(self) -> str:
+        return self._context_id
 
     def is_usage_stats_enabled(self) -> bool:
         """Determine whether usage stats are enabled.
@@ -136,6 +142,7 @@ class ConfigurationBundle:
 class ConfigurationBundleSchema(Schema):
     """Marshmallow Schema for the Configuration Bundle."""
 
+    data_context_id = fields.String(allow_none=False, required=True)
     data_context_variables = fields.Nested(DataContextConfigSchema, allow_none=False)
     datasources = fields.List(
         fields.Nested(DatasourceConfigSchema, allow_none=True, required=True),
