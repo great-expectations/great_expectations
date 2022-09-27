@@ -193,7 +193,6 @@
                 "column": "a"
             },
             "expected": 5.5,
-            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_median",
@@ -381,7 +380,6 @@
                 "column": "y"
             },
             "expected": [5],
-            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_modes",
@@ -390,7 +388,6 @@
                 "column": "b"
             },
             "expected": ["d"],
-            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_modes",
@@ -399,7 +396,6 @@
                 "column": "d"
             },
             "expected": ["a", "b", "c", "d", "e", "f", "g"],
-            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_modes",
@@ -408,7 +404,6 @@
                 "column": "c"
             },
             "expected": [2, 3],
-            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_stdev",
@@ -557,7 +552,7 @@
                 "n_bins": 2
             },
             "expected": [1.0, 5.0, 10.0],
-            "suppress_test_for": ["sqlite", "trino"]
+            "suppress_test_for": ["sqlite"]
         }
     ]
 }

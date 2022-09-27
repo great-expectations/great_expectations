@@ -69,7 +69,7 @@
       "title": "negative_test_with_nulls",
       "include_in_gallery": true,
       "exact_match_out" : false,
-      "suppress_test_for": ["trino", "mssql_v2_api"],
+      "suppress_test_for": ["mssql_v2_api"],
       "in": {
         "column_A": "x",
         "column_B": "z",

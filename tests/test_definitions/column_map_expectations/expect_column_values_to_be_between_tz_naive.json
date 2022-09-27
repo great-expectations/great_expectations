@@ -207,7 +207,6 @@
         "title" : "basic_negative_test",
         "include_in_gallery": true,
         "exact_match_out": false,
-        "suppress_test_for": ["trino"],
         "out": {
           "unexpected_list": [
             10
@@ -277,7 +276,6 @@
       {
         "title" : "negative_test_with_result_format__boolean_only",
         "exact_match_out": false,
-        "suppress_test_for": ["trino"],
         "out": {"success": false},
         "in": {
           "column": "x",
@@ -330,7 +328,6 @@
       {
         "title" : "3rd_positive_test_with_mostly",
         "exact_match_out": false,
-        "suppress_test_for": ["trino"],
         "out": {
           "unexpected_list": [
             10
@@ -564,7 +561,6 @@
       {
         "title": "test_strict_max_failure",
         "exact_match_out": false,
-        "suppress_test_for": ["trino"],
         "in": {
           "column": "x",
           "max_value": 10,

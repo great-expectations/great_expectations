@@ -226,7 +226,7 @@
         "dates": "TIMESTAMP"
       },
       "trino": {
-        "dates": "TIMESTAMP"
+        "dates": "TIMESTAMP(3)"
       }
     },
     "tests" : [

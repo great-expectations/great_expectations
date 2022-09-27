@@ -1111,10 +1111,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def get_column_median(self, column):
         # AWS Athena and presto have an special function that can be used to retrieve the median
-        if (
-            self.sql_engine_dialect.name.lower() == GESqlDialect.AWSATHENA
-            or self.sql_engine_dialect.name.lower() == GESqlDialect.TRINO
-        ):
+        if self.sql_engine_dialect.name.lower() == GESqlDialect.AWSATHENA:
             element_values = self.engine.execute(
                 f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
             )
@@ -2510,6 +2507,23 @@ WHERE
         ):  # TypeError can occur if the driver was not installed and so is None
             pass
 
+        try:
+            # Trino
+            if isinstance(
+                self.sql_engine_dialect, trino.sqlalchemy.dialect.TrinoDialect
+            ):
+                if positive:
+                    return sa.func.REGEXP_LIKE(sa.column(column), literal(regex))
+                else:
+                    return sa.not_(
+                        sa.func.REGEXP_LIKE(sa.column(column), literal(regex))
+                    )
+        except (
+            AttributeError,
+            TypeError,
+        ):  # TypeError can occur if the driver was not installed and so is None
+            pass
+
         return None
 
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -2673,6 +2687,14 @@ WHERE
         try:
             if isinstance(
                 self.sql_engine_dialect, pyathena.sqlalchemy_athena.AthenaDialect
+            ):
+                dialect_supported = True
+        except (AttributeError, TypeError):
+            pass
+
+        try:
+            if isinstance(
+                self.sql_engine_dialect, trino.sqlalchemy.dialect.TrinoDialect
             ):
                 dialect_supported = True
         except (AttributeError, TypeError):
