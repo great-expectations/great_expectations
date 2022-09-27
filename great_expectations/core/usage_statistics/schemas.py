@@ -1131,16 +1131,11 @@ anonymized_usage_statistics_record_schema = {
             },
         },
         {
-          "type": "object",
-          "properties": {
-              "event": {
-                  "enum": ["cloud_migrate"]
-              },
-              "event_payload": {
-                  "$ref": "#/definitions/cloud_migrate"
-
-              },
-          },
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["cloud_migrate"]},
+                "event_payload": {"$ref": "#/definitions/cloud_migrate"},
+            },
         },
         {
             "type": "object",

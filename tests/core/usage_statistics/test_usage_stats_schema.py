@@ -19,7 +19,8 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_run_validation_operator_payload_schema,
     anonymized_test_yaml_config_payload_schema,
     anonymized_usage_statistics_record_schema,
-    empty_payload_schema, cloud_migrate_schema,
+    cloud_migrate_schema,
+    empty_payload_schema,
 )
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_usage_statistics_messages import (
@@ -427,6 +428,7 @@ def test_cloud_migrate_event():
                 message["event_payload"],
                 cloud_migrate_schema,
             )
+
 
 def test_usage_stats_schema_in_codebase_is_up_to_date() -> None:
     path: str = file_relative_path(

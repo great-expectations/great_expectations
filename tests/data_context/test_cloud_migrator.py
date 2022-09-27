@@ -1,12 +1,12 @@
 """TODO: Add docstring"""
-from typing import Union, Callable
+from typing import Callable, Union
 from unittest import mock
 
 import pytest
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
 import great_expectations as gx
-from great_expectations import DataContext, CloudMigrator
+from great_expectations import CloudMigrator, DataContext
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
 
 def test_cloud_migrator_test_migrate_true(empty_data_context: DataContext):
@@ -61,21 +61,24 @@ def test__send_configuration_bundle_sends_valid_http_request(
 
 @pytest.fixture
 def mock_successful_migration(ge_cloud_organization_id: str) -> Callable:
-
     def _build_mock_migrate(
-        test_migrate: bool
+        test_migrate: bool,
     ) -> Union[mock.MagicMock, mock.AsyncMock]:
         context = mock.MagicMock()
 
         with mock.patch.object(
-                CloudMigrator,
-                "_migrate_to_cloud",
-                return_value=None,
+            CloudMigrator,
+            "_migrate_to_cloud",
+            return_value=None,
         ), mock.patch(
             "great_expectations.data_context.cloud_migrator.send_usage_message",
             autospec=True,
         ) as mock_send_usage_message:
-            CloudMigrator.migrate(context=context, test_migrate=test_migrate, ge_cloud_organization_id=ge_cloud_organization_id)
+            CloudMigrator.migrate(
+                context=context,
+                test_migrate=test_migrate,
+                ge_cloud_organization_id=ge_cloud_organization_id,
+            )
 
         return mock_send_usage_message
 
@@ -84,36 +87,38 @@ def mock_successful_migration(ge_cloud_organization_id: str) -> Callable:
 
 @pytest.fixture
 def mock_failed_migration(ge_cloud_organization_id: str) -> Callable:
-
     def _build_mock_migrate(
-        test_migrate: bool
+        test_migrate: bool,
     ) -> Union[mock.MagicMock, mock.AsyncMock]:
         context = mock.MagicMock()
 
         with mock.patch.object(
-                CloudMigrator,
-                "_migrate_to_cloud",
-                return_value=None,
-                side_effect=Exception,
+            CloudMigrator,
+            "_migrate_to_cloud",
+            return_value=None,
+            side_effect=Exception,
         ), mock.patch(
             "great_expectations.data_context.cloud_migrator.send_usage_message",
             autospec=True,
         ) as mock_send_usage_message:
             with pytest.raises(Exception):
-                CloudMigrator.migrate(context=context, test_migrate=test_migrate, ge_cloud_organization_id=ge_cloud_organization_id)
+                CloudMigrator.migrate(
+                    context=context,
+                    test_migrate=test_migrate,
+                    ge_cloud_organization_id=ge_cloud_organization_id,
+                )
 
         return mock_send_usage_message
 
     return _build_mock_migrate
 
 
-
-
-
 @pytest.mark.cloud
 @pytest.mark.unit
 class TestUsageStats:
-    def test_migrate_successful_event(self, ge_cloud_organization_id: str, mock_successful_migration: Callable):
+    def test_migrate_successful_event(
+        self, ge_cloud_organization_id: str, mock_successful_migration: Callable
+    ):
         """Test that send_usage_message is called with the right params."""
 
         mock_send_usage_message = mock_successful_migration(test_migrate=False)
@@ -125,7 +130,9 @@ class TestUsageStats:
             success=True,
         )
 
-    def test_migrate_failed_event(self, ge_cloud_organization_id: str, mock_failed_migration: Callable):
+    def test_migrate_failed_event(
+        self, ge_cloud_organization_id: str, mock_failed_migration: Callable
+    ):
         """Test that send_usage_message is called with the right params."""
 
         mock_send_usage_message = mock_failed_migration(test_migrate=False)
@@ -137,14 +144,18 @@ class TestUsageStats:
             success=False,
         )
 
-    def test_no_event_sent_for_migrate_dry_run(self, mock_successful_migration: Callable):
+    def test_no_event_sent_for_migrate_dry_run(
+        self, mock_successful_migration: Callable
+    ):
         """No event should be sent for a successful test run."""
 
         mock_send_usage_message = mock_successful_migration(test_migrate=True)
 
         mock_send_usage_message.assert_not_called()
 
-    def test_no_event_sent_for_migrate_dry_run_failure(self, mock_failed_migration: Callable):
+    def test_no_event_sent_for_migrate_dry_run_failure(
+        self, mock_failed_migration: Callable
+    ):
         """No event should be sent for a failed test run."""
 
         mock_send_usage_message = mock_failed_migration(test_migrate=True)

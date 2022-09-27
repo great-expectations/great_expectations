@@ -10,7 +10,9 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
 from great_expectations.data_context import BaseDataContext
-from tests.integration.usage_statistics.example_events.cloud_migrate_example_events import cloud_migrate
+from tests.integration.usage_statistics.example_events.cloud_migrate_example_events import (
+    cloud_migrate,
+)
 from tests.integration.usage_statistics.example_events.data_context_run_validation_operator import (
     data_context_run_validation_operator_events,
 )
@@ -2705,9 +2707,7 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
-    "cloud_migrate": [
-        cloud_migrate
-    ]
+    "cloud_migrate": [cloud_migrate],
 }
 
 test_messages = []

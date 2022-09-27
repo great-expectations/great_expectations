@@ -6,9 +6,7 @@ This file contains example events primarily for usage stats schema validation te
 
 cloud_migrate: dict = {
     "event": "cloud_migrate",
-    "event_payload": {
-        "organization_id": "some_organization_id_probably_uuid"
-    },
+    "event_payload": {"organization_id": "some_organization_id_probably_uuid"},
     "success": True,
     "version": "1.0.0",
     "event_time": "2022-09-26T14:22:53.921Z",
