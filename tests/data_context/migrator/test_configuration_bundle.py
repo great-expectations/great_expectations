@@ -5,14 +5,14 @@ import pytest
 
 from great_expectations.core import ExpectationSuite, ExpectationSuiteValidationResult
 from great_expectations.data_context import BaseDataContext
-from great_expectations.data_context.cloud_migrator import (
-    ConfigurationBundle,
-    ConfigurationBundleJsonSerializer,
-    ConfigurationBundleSchema,
-)
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,
     EphemeralDataContextVariables,
+)
+from great_expectations.data_context.migrator.configuration_bundle import (
+    ConfigurationBundle,
+    ConfigurationBundleJsonSerializer,
+    ConfigurationBundleSchema,
 )
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
