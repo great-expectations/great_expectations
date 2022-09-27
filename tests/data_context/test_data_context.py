@@ -44,7 +44,11 @@ from great_expectations.datasource import (
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.render.types import RenderedAtomicContent
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import (
+    RenderedAtomicContent,
+    renderedAtomicValueSchema,
+)
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
@@ -3084,6 +3088,51 @@ class ExpectSkyToBeColor(TableExpectation):
     success_keys = ("color",)
     args_keys = ("color",)
 
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive.working")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        template_str = "This is a working renderer for $expectation_type(**$kwargs)."
+
+        params_with_json_schema = {
+            "expectation_type": {
+                "schema": {"type": "string"},
+                "value": configuration.expectation_type,
+            },
+            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+        }
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": template_str,
+                "params": params_with_json_schema,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.working",
+            value=value_obj,
+            value_type="StringValueType",
+        )
+        return rendered
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive.broken")
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        raise ValueError("This renderer is broken!")
+
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -3110,9 +3159,6 @@ def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext
             ExpectationConfiguration(
                 expectation_type="expect_table_row_count_to_equal", kwargs={"value": 0}
             ),
-            ExpectationConfiguration(
-                expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}
-            ),
         ],
     )
     context.save_expectation_suite(expectation_suite=expectation_suite)
@@ -3128,8 +3174,7 @@ def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext
         ]
     )
 
-    # Once we set include_rendered_content, we get rendered_content on each ExpectationConfiguration in the
-    # ExpectationSuite.
+    # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.
     context.variables.include_rendered_content.globally = True
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -3139,5 +3184,16 @@ def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext
             expectation_configuration.rendered_content
             for expectation_configuration in expectation_suite.expectations
         ]
+    )
+
+    # If we update the ExpectationSuite to only include Expectations with broken renderers,
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name,
+        data_context=context,
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}
+            ),
+        ],
     )
     context.save_expectation_suite(expectation_suite=expectation_suite)
