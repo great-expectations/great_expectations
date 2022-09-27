@@ -1,35 +1,56 @@
 """TODO: Add docstring"""
+
+import logging
 from dataclasses import dataclass
 from typing import List, Optional, cast
 
+import requests
 from marshmallow import Schema, fields, post_dump
 
-from great_expectations.core import (
+from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
+)
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
+from great_expectations.core.http import create_session
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context import AbstractDataContext, BaseDataContext
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
+from great_expectations.data_context.data_context.base_data_context import (
+    BaseDataContext,
+)
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.data_context_variables import DataContextVariables
-from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    AnyPayload,
+    construct_json_payload,
+    construct_url,
+    get_user_friendly_error_message,
+)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointConfigSchema,
     DataContextConfigSchema,
-    GeCloudConfig,
+    DatasourceConfig,
+    DatasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.rule_based_profiler.config import (
+from great_expectations.exceptions.exceptions import GeCloudError
+from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     RuleBasedProfilerConfigSchema,
-)
-from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigurationBundle:
@@ -39,6 +60,7 @@ class ConfigurationBundle:
 
         self._data_context_variables: DataContextVariables = context.variables
 
+        self._datasources: List[DatasourceConfig] = self._get_all_datasources()
         self._expectation_suites: List[
             ExpectationSuite
         ] = self._get_all_expectation_suites()
@@ -60,6 +82,45 @@ class ConfigurationBundle:
             return self._data_context_variables.anonymous_usage_statistics.enabled
         else:
             return False
+
+    @property
+    def data_context_variables(self) -> DataContextVariables:
+        return self._data_context_variables
+
+    @property
+    def datasources(self) -> List[DatasourceConfig]:
+        return self._datasources
+
+    @property
+    def expectation_suites(self) -> List[ExpectationSuite]:
+        return self._expectation_suites
+
+    @property
+    def checkpoints(self) -> List[CheckpointConfig]:
+        return self._checkpoints
+
+    @property
+    def profilers(self) -> List[RuleBasedProfilerConfig]:
+        return self._profilers
+
+    @property
+    def validation_results(self) -> List[ExpectationSuiteValidationResult]:
+        return self._validation_results
+
+    def _get_all_datasources(self) -> List[DatasourceConfig]:
+
+        datasource_names: List[str] = list(self._context.datasources.keys())
+
+        # Note: we are accessing the protected _datasource_store to not add a public property
+        # to all Data Contexts.
+        datasource_configs: List[DatasourceConfig] = [
+            self._context._datasource_store.retrieve_by_name(
+                datasource_name=datasource_name
+            )
+            for datasource_name in datasource_names
+        ]
+
+        return datasource_configs
 
     def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
         return [
@@ -98,30 +159,28 @@ class ConfigurationBundle:
 class ConfigurationBundleSchema(Schema):
     """Marshmallow Schema for the Configuration Bundle."""
 
-    _data_context_variables = fields.Nested(
-        DataContextConfigSchema, allow_none=False, data_key="data_context_variables"
+    data_context_variables = fields.Nested(DataContextConfigSchema, allow_none=False)
+    datasources = fields.List(
+        fields.Nested(DatasourceConfigSchema, allow_none=True, required=True),
+        required=True,
     )
-    _expectation_suites = fields.List(
+    expectation_suites = fields.List(
         fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True),
         required=True,
-        data_key="expectation_suites",
     )
-    _checkpoints = fields.List(
+    checkpoints = fields.List(
         fields.Nested(CheckpointConfigSchema, allow_none=True, required=True),
         required=True,
-        data_key="checkpoints",
     )
-    _profilers = fields.List(
+    profilers = fields.List(
         fields.Nested(RuleBasedProfilerConfigSchema, allow_none=True, required=True),
         required=True,
-        data_key="profilers",
     )
-    _validation_results = fields.List(
+    validation_results = fields.List(
         fields.Nested(
             ExpectationSuiteValidationResultSchema, allow_none=True, required=True
         ),
         required=True,
-        data_key="validation_results",
     )
 
     @post_dump
@@ -171,9 +230,28 @@ class CloudMigrator:
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         self._context = context
+
+        cloud_config = CloudDataContext.get_ge_cloud_config(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+
+        ge_cloud_base_url = cloud_config.base_url
+        ge_cloud_access_token = cloud_config.access_token
+        ge_cloud_organization_id = cloud_config.organization_id
+
+        # Invariant due to `get_ge_cloud_config` raising an error if any config values are missing
+        if not ge_cloud_organization_id:
+            raise ValueError(
+                "An organization id must be present when performing a migration"
+            )
+
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_access_token = ge_cloud_access_token
         self._ge_cloud_organization_id = ge_cloud_organization_id
+
+        self._session = create_session(access_token=ge_cloud_access_token)
 
     @classmethod
     def migrate(
@@ -248,38 +326,6 @@ class CloudMigrator:
         self._print_validation_result_error_summary(errors)
         self._print_migration_conclusion_message()
 
-    def _process_cloud_credential_overrides(
-        self,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> GeCloudConfig:
-        """Get cloud credentials from environment variables or parameters.
-
-        Check first for ge_cloud_base_url, ge_cloud_access_token and
-        ge_cloud_organization_id provided via params, if not then check
-        for the corresponding environment variable.
-
-        Args:
-            ge_cloud_base_url: Optional, you may provide this alternatively via
-                environment variable GE_CLOUD_BASE_URL
-            ge_cloud_access_token: Optional, you may provide this alternatively
-                via environment variable GE_CLOUD_ACCESS_TOKEN
-            ge_cloud_organization_id: Optional, you may provide this alternatively
-                via environment variable GE_CLOUD_ORGANIZATION_ID
-
-        Returns:
-            GeCloudConfig
-
-        Raises:
-            GeCloudError
-
-        """
-        # TODO: Use GECloudEnvironmentVariable enum for environment variables
-        # TODO: Merge with existing logic in Data Context - could be static method on CloudDataContext or
-        #  module level method in cloud_data_context.py Let's not duplicate this code.
-        pass
-
     def _warn_if_test_migrate(self) -> None:
         pass
 
@@ -299,9 +345,37 @@ class CloudMigrator:
         configuration_bundle: ConfigurationBundle,
         serializer: ConfigurationBundleJsonSerializer,
     ) -> AnyPayload:
-        # Serialize
-        # Use session to send to backend
-        pass
+        url = construct_url(
+            base_url=self._ge_cloud_base_url,
+            organization_id=self._ge_cloud_organization_id,
+            resource_name="migration",
+        )
+
+        serialized_bundle = serializer.serialize(configuration_bundle)
+        data = construct_json_payload(
+            resource_type="migration",
+            organization_id=self._ge_cloud_organization_id,
+            attributes_key="bundle",
+            attributes_value=serialized_bundle,
+        )
+
+        try:
+            response = self._session.post(url, json=data)
+            response.raise_for_status()
+            return response.json()
+
+        except requests.HTTPError as http_exc:
+            raise GeCloudError(
+                f"Unable to migrate config to Cloud: {get_user_friendly_error_message(http_exc)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise GeCloudError(
+                "Unable to migrate config to Cloud: This is likely a transient error. Please try again."
+            )
+        except Exception as e:
+            logger.warning(str(e))
+            raise GeCloudError(f"Something went wrong while migrating to Cloud: {e}")
 
     def _print_send_configuration_bundle_error(self, http_response: AnyPayload) -> None:
         pass

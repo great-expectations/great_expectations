@@ -1,208 +1,240 @@
-"""TODO: Add docstring"""
-from dataclasses import dataclass
+"""These tests exercise ConfigurationBundle including Serialization."""
+from typing import Dict, List, Optional, Union
 
 import pytest
 
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.core import (
-    ExpectationSuite,
-    ExpectationSuiteValidationResult,
-    RunIdentifier,
-)
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core import ExpectationSuite, ExpectationSuiteValidationResult
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.cloud_migrator import (
     ConfigurationBundle,
     ConfigurationBundleJsonSerializer,
     ConfigurationBundleSchema,
 )
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariables,
+    EphemeralDataContextVariables,
 )
+from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
+    CheckpointConfig,
+    DataContextConfig,
+    DatasourceConfig,
+)
+from great_expectations.datasource import BaseDatasource, LegacyDatasource
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
-)
 
 
-@dataclass
-class DataContextWithSavedItems:
-    context: BaseDataContext
-    expectation_suite: ExpectationSuite
-    checkpoint: Checkpoint
-    profiler: RuleBasedProfiler
-    validation_result: ExpectationSuiteValidationResult
+class StubUsageStats:
+    @property
+    def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
+        return AnonymizedUsageStatisticsConfig(enabled=True)
+
+
+class StubCheckpointStore:
+    def get_checkpoint(self, name: str, ge_cloud_id: Optional[str]) -> CheckpointConfig:
+        return CheckpointConfig(name=name, class_name="Checkpoint")
+
+
+class StubValidationsStore:
+    def list_keys(self):
+        # Note: Key just has to return an iterable here
+        return ["some_key"]
+
+    def get(self, key):
+        # Note: Key is unused
+        return ExpectationSuiteValidationResult(
+            success=True,
+        )
+
+
+class StubDatasourceStore:
+    def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig:
+        datasource_config_dict: dict = {
+            "name": datasource_name,
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "class_name": "PandasExecutionEngine",
+            },
+            "data_connectors": {},
+        }
+        return DatasourceConfig(**datasource_config_dict)
+
+
+class DummyDatasource:
+    pass
+
+
+class StubBaseDataContext:
+    """Stub for testing ConfigurationBundle."""
+
+    def __init__(
+        self,
+        anonymous_usage_stats_enabled: bool = True,
+        anonymous_usage_stats_is_none: bool = False,
+    ):
+        """Set the anonymous usage statistics configuration.
+
+        Args:
+            anonymous_usage_stats_enabled: Set usage stats "enabled" flag in config.
+            anonymous_usage_stats_is_none: Set usage stats to None, overrides anonymous_usage_stats_enabled.
+        """
+        self._anonymous_usage_stats_enabled = anonymous_usage_stats_enabled
+        self._anonymous_usage_stats_is_none = anonymous_usage_stats_is_none
+
+    @property
+    def _data_context_variables(self) -> StubUsageStats:
+        return StubUsageStats()
+
+    @property
+    def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
+        return self.variables.anonymous_usage_statistics
+
+    @property
+    def variables(self) -> DataContextVariables:
+
+        # anonymous_usage_statistics set based on constructor parameters.
+        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig]
+        if self._anonymous_usage_stats_is_none:
+            anonymous_usage_statistics = None
+        else:
+            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
+                enabled=self._anonymous_usage_stats_enabled
+            )
+
+        config = DataContextConfig(
+            anonymous_usage_statistics=anonymous_usage_statistics
+        )
+        return EphemeralDataContextVariables(config=config)
+
+    @property
+    def _datasource_store(self):
+        return StubDatasourceStore()
+
+    @property
+    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
+        # Datasource is a dummy since we just want the DatasourceConfig from the store, not an
+        # actual initialized datasource.
+        return {"my_datasource": DummyDatasource()}
+
+    @property
+    def checkpoint_store(self) -> StubCheckpointStore:
+        return StubCheckpointStore()
+
+    @property
+    def validations_store(self) -> StubValidationsStore:
+        return StubValidationsStore()
+
+    def list_expectation_suite_names(self) -> List[str]:
+        return ["my_suite"]
+
+    def get_expectation_suite(self, name: str) -> ExpectationSuite:
+        return ExpectationSuite(expectation_suite_name=name)
+
+    def list_checkpoints(self) -> List[str]:
+        return ["my_checkpoint"]
+
+    def list_profilers(self) -> List[str]:
+        return ["my_profiler"]
+
+    def get_profiler(self, name: str) -> RuleBasedProfiler:
+        return RuleBasedProfiler(name, config_version=1.0, rules={})
 
 
 @pytest.fixture
-def in_memory_runtime_context_with_configs_in_stores(
-    in_memory_runtime_context: BaseDataContext, profiler_rules: dict
-) -> DataContextWithSavedItems:
-
-    context: BaseDataContext = in_memory_runtime_context
-
-    # Add items to the context:
-
-    # Add expectation suite
-    expectation_suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name="my_suite"
-    )
-    context.save_expectation_suite(expectation_suite)
-
-    # Add checkpoint
-    checkpoint: Checkpoint = context.add_checkpoint(
-        name="my_checkpoint", class_name="SimpleCheckpoint"
-    )
-
-    # Add profiler
-    profiler = context.add_profiler(
-        "my_profiler", config_version=1.0, rules=profiler_rules
-    )
-
-    # Add validation result
-    expectation_suite_validation_result = ExpectationSuiteValidationResult(
-        success=True,
-    )
-    context.validations_store.set(
-        key=ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier("my_suite"),
-            run_id=RunIdentifier(run_name="my_run", run_time=None),
-            batch_identifier="my_batch_identifier",
-        ),
-        value=expectation_suite_validation_result,
-    )
-
-    return DataContextWithSavedItems(
-        context=context,
-        expectation_suite=expectation_suite,
-        checkpoint=checkpoint,
-        profiler=profiler,
-        validation_result=expectation_suite_validation_result,
-    )
+def stub_base_data_context() -> StubBaseDataContext:
+    return StubBaseDataContext()
 
 
-def dict_equal(dict_1: dict, dict_2: dict) -> bool:
-    return convert_to_json_serializable(dict_1) == convert_to_json_serializable(dict_2)
+@pytest.fixture
+def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
+    return StubBaseDataContext(anonymous_usage_stats_enabled=False)
 
 
-def list_of_dicts_equal(list_1: list, list_2: list) -> bool:
-
-    if len(list_1) != len(list_2):
-        return False
-    for i in range(len(list_1)):
-        if not dict_equal(list_1[i], list_2[i]):
-            return False
-
-    return True
+@pytest.fixture
+def stub_base_data_context_no_anonymous_usage_stats() -> StubBaseDataContext:
+    return StubBaseDataContext(anonymous_usage_stats_is_none=True)
 
 
-@pytest.mark.integration
-def test_configuration_bundle_init(
-    in_memory_runtime_context_with_configs_in_stores: DataContextWithSavedItems,
-):
-    """What does this test and why?
+class TestConfigurationBundleCreate:
+    @pytest.mark.cloud
+    @pytest.mark.unit
+    def test_configuration_bundle_created(
+        self,
+        stub_base_data_context: StubBaseDataContext,
+    ):
+        """What does this test and why?
 
-    This test is an integration test using a real DataContext to prove out that
-    ConfigurationBundle successfully bundles. We can replace this test with
-    unit tests.
-    """
+        Make sure the configuration bundle is created successfully from a data context.
+        """
 
-    context: BaseDataContext = in_memory_runtime_context_with_configs_in_stores.context
+        context: BaseDataContext = stub_base_data_context
 
-    config_bundle = ConfigurationBundle(context)
+        config_bundle = ConfigurationBundle(context)
 
-    assert not config_bundle.is_usage_stats_enabled()
+        assert config_bundle.is_usage_stats_enabled()
+        assert config_bundle._data_context_variables is not None
+        assert len(config_bundle.expectation_suites) == 1
+        assert len(config_bundle.checkpoints) == 1
+        assert len(config_bundle.profilers) == 1
+        assert len(config_bundle.validation_results) == 1
+        assert len(config_bundle.datasources) == 1
 
-    # Spot check items in variables
-    assert (
-        config_bundle._data_context_variables.checkpoint_store_name
-        == "checkpoint_store"
-    )
-    assert config_bundle._data_context_variables.progress_bars is None
+    @pytest.mark.cloud
+    @pytest.mark.unit
+    def test_configuration_bundle_created_usage_stats_disabled(
+        self,
+        stub_base_data_context_anonymous_usage_stats_present_but_disabled: StubBaseDataContext,
+    ):
+        """What does this test and why?
 
-    assert config_bundle._expectation_suites == [
-        in_memory_runtime_context_with_configs_in_stores.expectation_suite
-    ]
+        Make sure the configuration bundle successfully parses the usage stats settings.
+        """
 
-    assert list_of_dicts_equal(
-        config_bundle._checkpoints,
-        [in_memory_runtime_context_with_configs_in_stores.checkpoint.config],
-    )
-
-    roundtripped_profiler_config = ruleBasedProfilerConfigSchema.load(
-        ruleBasedProfilerConfigSchema.dump(
-            in_memory_runtime_context_with_configs_in_stores.profiler.config
+        context: BaseDataContext = (
+            stub_base_data_context_anonymous_usage_stats_present_but_disabled
         )
-    )
-    assert list_of_dicts_equal(config_bundle._profilers, [roundtripped_profiler_config])
 
-    assert config_bundle._validation_results == [
-        in_memory_runtime_context_with_configs_in_stores.validation_result
-    ]
+        config_bundle = ConfigurationBundle(context)
+
+        assert not config_bundle.is_usage_stats_enabled()
+
+    def test_is_usage_statistics_key_set_if_key_not_present(
+        self, stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
+    ):
+        """What does this test and why?
+
+        The ConfigurationBundle should handle a context that has not set the config for
+         anonymous_usage_statistics.
+        """
+        context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
+
+        config_bundle = ConfigurationBundle(context)
+
+        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
+        # DataContextConfig
+        assert config_bundle.is_usage_stats_enabled()
 
 
-@pytest.mark.integration
-def test_configuration_bundle_serialization(
-    in_memory_runtime_context_with_configs_in_stores: DataContextWithSavedItems,
-):
-    """What does this test and why?
-
-    This test is an integration test using a real DataContext to prove out the
-    ConfigurationBundle serialization. We can replace this test with unit tests.
-    """
-
-    context: BaseDataContext = in_memory_runtime_context_with_configs_in_stores.context
-
-    config_bundle = ConfigurationBundle(context)
-
-    serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
-
-    serialized_bundle: dict = serializer.serialize(config_bundle)
-
-    expected_serialized_bundle = {
+@pytest.fixture
+def stub_serialized_configuration_bundle():
+    """Configuration bundle based on StubBaseDataContext."""
+    return {
         "checkpoints": [
             {
-                "action_list": [
-                    {
-                        "action": {"class_name": "StoreValidationResultAction"},
-                        "name": "store_validation_result",
-                    },
-                    {
-                        "action": {"class_name": "StoreEvaluationParametersAction"},
-                        "name": "store_evaluation_params",
-                    },
-                    {
-                        "action": {
-                            "class_name": "UpdateDataDocsAction",
-                            "site_names": [],
-                        },
-                        "name": "update_data_docs",
-                    },
-                ],
-                "batch_request": {},
                 "class_name": "Checkpoint",
-                "config_version": 1.0,
-                "evaluation_parameters": {},
-                "expectation_suite_ge_cloud_id": None,
-                "expectation_suite_name": None,
-                "ge_cloud_id": None,
+                "config_version": None,
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_checkpoint",
-                "profilers": [],
-                "run_name_template": None,
-                "runtime_configuration": {},
-                "template_name": None,
-                "validations": [],
             }
         ],
         "data_context_variables": {
-            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": None,
             "config_version": 3.0,
-            "data_docs_sites": {},
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "expectations_store_name": "expectations_store",
+            "data_docs_sites": None,
+            "evaluation_parameter_store_name": None,
+            "expectations_store_name": None,
             "include_rendered_content": {
                 "expectation_suite": False,
                 "expectation_validation_result": False,
@@ -210,37 +242,27 @@ def test_configuration_bundle_serialization(
             },
             "notebooks": None,
             "plugins_directory": None,
-            "profiler_store_name": "profiler_store",
-            "stores": {
-                "checkpoint_store": {
-                    "class_name": "CheckpointStore",
-                    "store_backend": {"class_name": "InMemoryStoreBackend"},
-                },
-                "evaluation_parameter_store": {
-                    "class_name": "EvaluationParameterStore"
-                },
-                "expectations_store": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {"class_name": "InMemoryStoreBackend"},
-                },
-                "profiler_store": {
-                    "class_name": "ProfilerStore",
-                    "store_backend": {"class_name": "InMemoryStoreBackend"},
-                },
-                "validations_store": {
-                    "class_name": "ValidationsStore",
-                    "store_backend": {"class_name": "InMemoryStoreBackend"},
-                },
-            },
-            "validations_store_name": "validations_store",
+            "stores": None,
+            "validations_store_name": None,
         },
+        "datasources": [
+            {
+                "class_name": "Datasource",
+                "data_connectors": {},
+                "execution_engine": {
+                    "class_name": "PandasExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "module_name": "great_expectations.datasource",
+                "name": "my_datasource",
+            }
+        ],
         "expectation_suites": [
             {
                 "data_asset_type": None,
                 "expectation_suite_name": "my_suite",
                 "expectations": [],
                 "ge_cloud_id": None,
-                "meta": {"great_expectations_version": "0.15.24+14.g6eff2678d.dirty"},
             }
         ],
         "profilers": [
@@ -249,44 +271,7 @@ def test_configuration_bundle_serialization(
                 "config_version": 1.0,
                 "module_name": "great_expectations.rule_based_profiler",
                 "name": "my_profiler",
-                "rules": {
-                    "rule_1": {
-                        "domain_builder": {
-                            "class_name": "TableDomainBuilder",
-                            "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                        },
-                        "expectation_configuration_builders": [
-                            {
-                                "class_name": "DefaultExpectationConfigurationBuilder",
-                                "column_A": "$domain.domain_kwargs.column_A",
-                                "column_B": "$domain.domain_kwargs.column_B",
-                                "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                                "meta": {
-                                    "profiler_details": {
-                                        "my_parameter_estimator": "$parameter.my_parameter.details",
-                                        "note": "Important "
-                                        "remarks "
-                                        "about "
-                                        "estimation "
-                                        "algorithm.",
-                                    }
-                                },
-                                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                                "my_arg": "$parameter.my_parameter.value[0]",
-                                "my_other_arg": "$parameter.my_parameter.value[1]",
-                            }
-                        ],
-                        "parameter_builders": [
-                            {
-                                "class_name": "MetricMultiBatchParameterBuilder",
-                                "metric_name": "my_metric",
-                                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                                "name": "my_parameter",
-                            }
-                        ],
-                        "variables": {},
-                    }
-                },
+                "rules": {},
                 "variables": {},
             }
         ],
@@ -301,47 +286,64 @@ def test_configuration_bundle_serialization(
         ],
     }
 
-    # Remove meta before comparing since it contains the GX version
-    serialized_bundle["expectation_suites"][0].pop("meta", None)
-    expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
 
-    assert serialized_bundle == expected_serialized_bundle
+class TestConfigurationBundleSerialization:
+    @pytest.mark.cloud
+    @pytest.mark.unit
+    def test_configuration_bundle_serialization(
+        self,
+        stub_base_data_context: StubBaseDataContext,
+        stub_serialized_configuration_bundle: dict,
+    ):
+        """What does this test and why?
 
+        Ensure configuration bundle is serialized correctly.
+        """
 
-def test_is_usage_statistics_key_set_if_key_not_present():
-    """What does this test and why?
+        context: BaseDataContext = stub_base_data_context
 
-    The ConfigurationBundle should handle a context that has not set the config for
-     anonymous_usage_statistics.
-    """
-    # TODO: Implementation
-    pass
+        config_bundle = ConfigurationBundle(context)
 
+        serializer = ConfigurationBundleJsonSerializer(
+            schema=ConfigurationBundleSchema()
+        )
 
-@pytest.mark.integration
-def test_anonymous_usage_statistics_removed_during_serialization(
-    in_memory_runtime_context_with_configs_in_stores: DataContextWithSavedItems,
-):
-    """What does this test and why?
+        serialized_bundle: dict = serializer.serialize(config_bundle)
 
-    When serializing a ConfigurationBundle we need to remove the
-    anonymous_usage_statistics key.
+        expected_serialized_bundle = stub_serialized_configuration_bundle
 
-    This is currently an integration test using a real Data Context, it can
-    be converted to a unit test.
-    """
+        # Remove meta before comparing since it contains the GX version
+        serialized_bundle["expectation_suites"][0].pop("meta", None)
+        expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
 
-    context: BaseDataContext = in_memory_runtime_context_with_configs_in_stores.context
+        assert serialized_bundle == expected_serialized_bundle
 
-    assert context.anonymous_usage_statistics is not None
+    @pytest.mark.cloud
+    @pytest.mark.unit
+    def test_anonymous_usage_statistics_removed_during_serialization(
+        self,
+        stub_base_data_context: StubBaseDataContext,
+    ):
+        """What does this test and why?
+        When serializing a ConfigurationBundle we need to remove the
+        anonymous_usage_statistics key.
+        """
 
-    config_bundle = ConfigurationBundle(context)
+        context: StubBaseDataContext = stub_base_data_context
 
-    serializer = ConfigurationBundleJsonSerializer(schema=ConfigurationBundleSchema())
+        assert context.anonymous_usage_statistics is not None
 
-    serialized_bundle: dict = serializer.serialize(config_bundle)
+        config_bundle = ConfigurationBundle(context)
 
-    assert (
-        serialized_bundle["data_context_variables"].get("anonymous_usage_statistics")
-        is None
-    )
+        serializer = ConfigurationBundleJsonSerializer(
+            schema=ConfigurationBundleSchema()
+        )
+
+        serialized_bundle: dict = serializer.serialize(config_bundle)
+
+        assert (
+            serialized_bundle["data_context_variables"].get(
+                "anonymous_usage_statistics"
+            )
+            is None
+        )
