@@ -249,20 +249,22 @@ class CloudMigrator:
                 ge_cloud_organization_id=ge_cloud_organization_id,
             )
             cloud_migrator._migrate_to_cloud(test_migrate)
-            send_usage_message(
-                data_context=context,
-                event=event,
-                event_payload=event_payload,
-                success=True,
-            )
+            if not test_migrate:  # Only send an event if this is not a test run.
+                send_usage_message(
+                    data_context=context,
+                    event=event,
+                    event_payload=event_payload,
+                    success=True,
+                )
         except Exception as e:
             # Note we send an event on any exception here
-            send_usage_message(
-                data_context=context,
-                event=event,
-                event_payload=event_payload,
-                success=False,
-            )
+            if not test_migrate:
+                send_usage_message(
+                    data_context=context,
+                    event=event,
+                    event_payload=event_payload,
+                    success=False,
+                )
             raise e
 
     @classmethod
