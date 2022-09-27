@@ -54,7 +54,6 @@ exclude = [
     'core/expectation_validation_result\.py', # 9
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
-    'datasource/batch_kwargs_generator', # 16
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
     'execution_engine/execution_engine\.py',  # 7
     'execution_engine/pandas_execution_engine\.py',  # 9
