@@ -4,12 +4,12 @@ from typing import Any, Dict, List
 
 import pytest
 import requests
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
     CLISuiteInteractiveFlagCombinations,
 )
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context import BaseDataContext
 from tests.integration.usage_statistics.example_events.cloud_migrate_example_events import (
     cloud_migrate,

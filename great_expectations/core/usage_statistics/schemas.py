@@ -4,12 +4,12 @@
 ###
 
 
-# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+
+# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.execution_environment import (
     InstallEnvironment,
 )
