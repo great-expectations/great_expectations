@@ -1,12 +1,45 @@
+from __future__ import annotations
+
 import json
 from copy import deepcopy
+from enum import Enum
 from string import Template as pTemplate
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from marshmallow import INCLUDE, Schema, fields, post_dump, post_load
 
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
+
+
+class AtomicRendererPrefix(Enum):
+    """Available atomic renderer prefixes"""
+
+    PRESCRIPTIVE = "atomic.prescriptive"
+    DIAGNOSTIC = "atomic.diagnostic"
+
+    def __eq__(self, other: Union[str, AtomicRendererPrefix]):
+        if isinstance(other, str):
+            return self.value.lower() == other.lower()
+        return self.value.lower() == other.value.lower()
+
+    def __hash__(self: AtomicRendererPrefix):
+        return hash(self.value)
+
+
+class FailedAtomicRendererName(Enum):
+    """Available failed atomic renderer names"""
+
+    PRESCRIPTIVE = ".".join([AtomicRendererPrefix.PRESCRIPTIVE.value, "failed"])
+    DIAGNOSTIC = ".".join([AtomicRendererPrefix.DIAGNOSTIC.value, "failed"])
+
+    def __eq__(self, other: Union[str, FailedAtomicRendererName]):
+        if isinstance(other, str):
+            return self.value.lower() == other.lower()
+        return self.value.lower() == other.value.lower()
+
+    def __hash__(self: FailedAtomicRendererName):
+        return hash(self.value)
 
 
 class RenderedContent:

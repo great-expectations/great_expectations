@@ -1,5 +1,4 @@
 import logging
-from collections import namedtuple
 from typing import Callable, List, Optional, Union
 
 from great_expectations.core import (
@@ -12,7 +11,11 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import RenderedAtomicContent
+from great_expectations.render.types import (
+    AtomicRendererPrefix,
+    FailedAtomicRendererName,
+    RenderedAtomicContent,
+)
 
 try:
     from typing import TypedDict  # type: ignore[attr-defined]
@@ -56,14 +59,13 @@ class InlineRenderer(Renderer):
             A list of RenderedAtomicContent objects for a given ExpectationConfiguration or ExpectationValidationResult.
         """
         expectation_type: str
-        atomic_renderer_prefix: str
-        legacy_renderer_prefix: str
+        renderer_prefix: AtomicRendererPrefix
         if isinstance(render_object, ExpectationConfiguration):
             expectation_type = render_object.expectation_type
-            renderer_prefix = "atomic.prescriptive"
+            renderer_prefix = AtomicRendererPrefix.PRESCRIPTIVE
         elif isinstance(render_object, ExpectationValidationResult):
             expectation_type = render_object.expectation_config.expectation_type
-            renderer_prefix = "atomic.diagnostic"
+            renderer_prefix = AtomicRendererPrefix.DIAGNOSTIC
         else:
             raise InvalidRenderedContentError(
                 f"InlineRenderer._get_atomic_rendered_content_for_object can only be used with an ExpectationConfiguration or ExpectationValidationResult, but {type(render_object)} was used."
@@ -71,7 +73,7 @@ class InlineRenderer(Renderer):
 
         renderer_names: List[str] = get_renderer_names_with_renderer_prefix(
             object_name=expectation_type,
-            renderer_prefix=renderer_prefix,
+            renderer_prefix=renderer_prefix.value,
         )
 
         rendered_content: List[
@@ -90,13 +92,14 @@ class InlineRenderer(Renderer):
         renderer_names: List[str],
         expectation_type: str,
     ) -> List[RenderedAtomicContent]:
-        failed_prescriptive_renderer_name: str = "atomic.prescriptive.failed"
-        failed_diagnostic_renderer_name: str = "atomic.diagnostic.failed"
         try_renderer_names: List[str] = [
             renderer_name
             for renderer_name in renderer_names
             if renderer_name
-            not in [failed_prescriptive_renderer_name, failed_diagnostic_renderer_name]
+            not in [
+                FailedAtomicRendererName.PRESCRIPTIVE,
+                FailedAtomicRendererName.DIAGNOSTIC,
+            ]
         ]
 
         renderer_rendered_content: Optional[RenderedAtomicContent]
@@ -113,14 +116,14 @@ class InlineRenderer(Renderer):
                 logger.info(
                     f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type}".'
                 )
-                failed_renderer_name: str
+                failed_renderer_name: FailedAtomicRendererName
                 if isinstance(render_object, ExpectationConfiguration):
-                    failed_renderer_name = failed_prescriptive_renderer_name
+                    failed_renderer_name = FailedAtomicRendererName.PRESCRIPTIVE
                     logger.info(
                         f'Renderer "{failed_renderer_name}" will be used to render prescriptive content for ExpectationConfiguration.'
                     )
                 else:
-                    failed_renderer_name = failed_diagnostic_renderer_name
+                    failed_renderer_name = FailedAtomicRendererName.DIAGNOSTIC
                     logger.info(
                         f'Renderer "{failed_renderer_name}" will be used to render diagnostic content for ExpectationValidationResult.'
                     )
@@ -139,7 +142,7 @@ class InlineRenderer(Renderer):
     @staticmethod
     def _get_renderer_atomic_rendered_content(
         render_object: Union[ExpectationConfiguration, ExpectationValidationResult],
-        renderer_name: str,
+        renderer_name: Union[str, FailedAtomicRendererName],
         expectation_type: str,
     ) -> Optional[RenderedAtomicContent]:
         renderer_rendered_content: Optional[RenderedAtomicContent] = None
