@@ -2,8 +2,8 @@ import logging
 import os
 import warnings
 from pathlib import Path
-from urllib.parse import urlparse, urlunparse
 from typing import Dict, Iterable
+from urllib.parse import urlparse, urlunparse
 
 try:
     import s3fs
