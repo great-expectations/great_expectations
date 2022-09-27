@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from typing import List, Optional, cast
 
 import requests
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from marshmallow import Schema, fields, post_dump
 
@@ -279,7 +281,7 @@ class CloudMigrator:
         Returns:
             None
         """
-        event = "cloud_migrate"
+        event = UsageStatsEvents.CLOUD_MIGRATE.value
         event_payload = {"organization_id": ge_cloud_organization_id}
         try:
             cloud_migrator: CloudMigrator = cls(
