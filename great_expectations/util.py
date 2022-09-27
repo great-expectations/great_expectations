@@ -39,6 +39,7 @@ from typing import (
     Optional,
     Set,
     Tuple,
+    TypeVar,
     Union,
     cast,
     overload,
@@ -1214,55 +1215,19 @@ def filter_properties_dict(
     return properties
 
 
+T = TypeVar("T", bound=Union[dict, list, tuple, set])
+
+
 @overload
 def deep_filter_properties_iterable(
-    properties: dict,
+    properties: T,
     keep_fields: Optional[Set[str]] = ...,
     delete_fields: Optional[Set[str]] = ...,
     clean_nulls: bool = ...,
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> dict:
-    ...
-
-
-@overload
-def deep_filter_properties_iterable(
-    properties: list,
-    keep_fields: Optional[Set[str]] = ...,
-    delete_fields: Optional[Set[str]] = ...,
-    clean_nulls: bool = ...,
-    clean_falsy: bool = ...,
-    keep_falsy_numerics: bool = ...,
-    inplace: bool = ...,
-) -> list:
-    ...
-
-
-@overload
-def deep_filter_properties_iterable(
-    properties: set,
-    keep_fields: Optional[Set[str]] = ...,
-    delete_fields: Optional[Set[str]] = ...,
-    clean_nulls: bool = ...,
-    clean_falsy: bool = ...,
-    keep_falsy_numerics: bool = ...,
-    inplace: bool = ...,
-) -> set:
-    ...
-
-
-@overload
-def deep_filter_properties_iterable(
-    properties: tuple,
-    keep_fields: Optional[Set[str]] = ...,
-    delete_fields: Optional[Set[str]] = ...,
-    clean_nulls: bool = ...,
-    clean_falsy: bool = ...,
-    keep_falsy_numerics: bool = ...,
-    inplace: bool = ...,
-) -> tuple:
+) -> T:
     ...
 
 
@@ -1280,14 +1245,14 @@ def deep_filter_properties_iterable(
 
 
 def deep_filter_properties_iterable(
-    properties: Union[dict, list, set, tuple, None] = None,
+    properties: Union[T, None] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
     clean_falsy: bool = False,
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
-) -> Optional[Union[dict, list, set, tuple]]:
+) -> Union[T, None]:
     if keep_fields is None:
         keep_fields = set()
 
