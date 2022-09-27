@@ -3091,7 +3091,7 @@ class ExpectSkyToBeColor(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.working")
-    def _prescriptive_renderer(
+    def _prescriptive_renderer_working(
         cls,
         configuration=None,
         result=None,
@@ -3124,7 +3124,7 @@ class ExpectSkyToBeColor(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="atomic.prescriptive.broken")
-    def _prescriptive_renderer(
+    def _prescriptive_renderer_broken(
         cls,
         configuration=None,
         result=None,
@@ -3220,6 +3220,26 @@ def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext
             value_type="StringValueType",
         ),
         RenderedAtomicContent(
+            name="atomic.prescriptive.failed",
+            value=renderedAtomicValueSchema.load(
+                {
+                    "template": "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs).",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                }
+            ),
+            value_type="StringValueType",
+        ),
+        RenderedAtomicContent(
             name="atomic.prescriptive.working",
             value=renderedAtomicValueSchema.load(
                 {
@@ -3235,23 +3255,6 @@ def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext
                             "value": {"color": "blue"},
                         },
                     },
-                }
-            ),
-            value_type="StringValueType",
-        ),
-        RenderedAtomicContent(
-            name="atomic.prescriptive.failed",
-            value=renderedAtomicValueSchema.load(
-                {
-                    "template": "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs).",
-                    "params": {
-                        "expectation_type": {
-                            "schema": {"type": "string"},
-                            "value": "",
-                        },
-                        "kwargs": {"schema": {"type": "string"}, "value": ""},
-                    },
-                    "schema": {"type": "com.superconductive.rendered.string"},
                 }
             ),
             value_type="StringValueType",
