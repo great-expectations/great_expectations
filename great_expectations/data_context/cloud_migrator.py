@@ -7,6 +7,7 @@ from typing import List, Optional, cast
 import requests
 from marshmallow import Schema, fields, post_dump
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
@@ -51,8 +52,6 @@ from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfigSchema,
     ruleBasedProfilerConfigSchema,
 )
-
-import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -314,7 +313,9 @@ class CloudMigrator:
                     event_payload=event_payload,
                     success=False,
                 )
-            raise ge_exceptions.MigrationError("Migration failed. Please check the error message for more details.") from e
+            raise ge_exceptions.MigrationError(
+                "Migration failed. Please check the error message for more details."
+            ) from e
 
     @classmethod
     def migrate_validation_result(

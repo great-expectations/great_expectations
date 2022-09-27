@@ -5,10 +5,10 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import CloudMigrator, DataContext
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
-import great_expectations.exceptions as ge_exceptions
 
 def test_cloud_migrator_test_migrate_true(empty_data_context: DataContext):
     """TODO: Test is a placeholder."""

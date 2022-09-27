@@ -445,4 +445,5 @@ class DatabaseConnectionError(GreatExpectationsError):
 
 class MigrationError(GreatExpectationsError):
     """Error when using the migration tool."""
+
     pass
