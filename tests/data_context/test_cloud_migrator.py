@@ -1,5 +1,5 @@
-"""TODO: Add docstring"""
-from typing import Callable, Union
+"""These tests ensure that CloudMigrator works as intended."""
+from typing import Callable
 from unittest import mock
 
 import pytest
@@ -64,7 +64,7 @@ def test__send_configuration_bundle_sends_valid_http_request(
 def mock_successful_migration(ge_cloud_organization_id: str) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
-    ) -> Union[mock.MagicMock, mock.AsyncMock]:
+    ) -> mock.MagicMock:
         context = mock.MagicMock()
 
         with mock.patch.object(
@@ -90,7 +90,7 @@ def mock_successful_migration(ge_cloud_organization_id: str) -> Callable:
 def mock_failed_migration(ge_cloud_organization_id: str) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
-    ) -> Union[mock.MagicMock, mock.AsyncMock]:
+    ) -> mock.MagicMock:
         context = mock.MagicMock()
 
         with mock.patch.object(
