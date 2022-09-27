@@ -62,11 +62,8 @@ exclude = [
     'datasource/data_connector/data_connector\.py',  # 4
     'datasource/data_connector/file_path_data_connector\.py',  # 6
     'datasource/data_connector/inferred_asset_azure_data_connector\.py',  # 2
-    'datasource/data_connector/inferred_asset_file_path_data_connector\.py',  # 1
     'datasource/data_connector/inferred_asset_sql_data_connector\.py',  # 4
     'datasource/data_connector/runtime_data_connector\.py',  # 15
-    'datasource/data_connector/sorter/dictionary_sorter\.py', # 1
-    'datasource/data_connector/sorter/sorter\.py',  # 1
     'execution_engine/execution_engine\.py',  # 7
     'execution_engine/pandas_execution_engine\.py',  # 9
     'execution_engine/sparkdf_execution_engine\.py',  # 8
