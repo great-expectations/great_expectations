@@ -54,7 +54,9 @@ def test__send_configuration_bundle_sends_valid_http_request(
 
 
 @pytest.fixture
-def mock_successful_migration(ge_cloud_base_url: str, ge_cloud_access_token: str, ge_cloud_organization_id: str) -> Callable:
+def mock_successful_migration(
+    ge_cloud_base_url: str, ge_cloud_access_token: str, ge_cloud_organization_id: str
+) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
     ) -> mock.MagicMock:
@@ -82,7 +84,9 @@ def mock_successful_migration(ge_cloud_base_url: str, ge_cloud_access_token: str
 
 
 @pytest.fixture
-def mock_failed_migration(ge_cloud_base_url: str, ge_cloud_access_token: str, ge_cloud_organization_id: str) -> Callable:
+def mock_failed_migration(
+    ge_cloud_base_url: str, ge_cloud_access_token: str, ge_cloud_organization_id: str
+) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
     ) -> mock.MagicMock:
