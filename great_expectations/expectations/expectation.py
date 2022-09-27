@@ -215,7 +215,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
     ) -> RenderedAtomicContent:
         """
-        Default rendering function that is utilized by GE Cloud Front-end if no other atomic renderers were successful
+        Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
         """
         template_str = "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs)."
 
