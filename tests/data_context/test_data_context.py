@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 from collections import OrderedDict
+from typing import List
 
 import pandas as pd
 import pytest
@@ -3089,7 +3090,7 @@ class ExpectSkyToBeColor(TableExpectation):
     args_keys = ("color",)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive.working")
+    @renderer(renderer_type="atomic.prescriptive.working")
     def _prescriptive_renderer(
         cls,
         configuration=None,
@@ -3122,7 +3123,7 @@ class ExpectSkyToBeColor(TableExpectation):
         return rendered
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive.broken")
+    @renderer(renderer_type="atomic.prescriptive.broken")
     def _prescriptive_renderer(
         cls,
         configuration=None,
@@ -3179,21 +3180,106 @@ def test_unrendered_and_failed_renderer_behavior(empty_data_context: DataContext
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    assert all(
-        [
-            expectation_configuration.rendered_content
-            for expectation_configuration in expectation_suite.expectations
-        ]
-    )
+    for expectation_configuration in expectation_suite.expectations:
+        assert all(
+            [
+                isinstance(rendered_content_block, RenderedAtomicContent)
+                for rendered_content_block in expectation_configuration.rendered_content
+            ]
+        )
 
-    # If we update the ExpectationSuite to only include Expectations with broken renderers,
+    # If we update the ExpectationSuite to add an Expectation that has two content block renderers, one of which is
+    # broken, we should get the failure message for one of the content blocks.
     expectation_suite = ExpectationSuite(
         expectation_suite_name=expectation_suite_name,
         data_context=context,
         expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal", kwargs={"value": 0}
+            ),
             ExpectationConfiguration(
                 expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}
             ),
         ],
     )
     context.save_expectation_suite(expectation_suite=expectation_suite)
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    expected_rendered_content = [
+        RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "Must have exactly $value rows.",
+                    "params": {"value": {"schema": {"type": "number"}, "value": 0}},
+                }
+            ),
+            value_type="StringValueType",
+        ),
+        RenderedAtomicContent(
+            name="atomic.prescriptive.working",
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "This is a working renderer for $expectation_type(**$kwargs).",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+        RenderedAtomicContent(
+            name="atomic.prescriptive.failed",
+            value=renderedAtomicValueSchema.load(
+                {
+                    "template": "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs).",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "",
+                        },
+                        "kwargs": {"schema": {"type": "string"}, "value": ""},
+                    },
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                }
+            ),
+            value_type="StringValueType",
+        ),
+        RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "$expectation_type(**$kwargs)",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+    ]
+
+    actual_rendered_content: List[RenderedAtomicContent] = []
+    for expectation_configuration in expectation_suite.expectations:
+        actual_rendered_content.extend(expectation_configuration.rendered_content)
+
+    assert actual_rendered_content == expected_rendered_content
