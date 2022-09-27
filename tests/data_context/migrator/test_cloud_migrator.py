@@ -5,7 +5,7 @@ import pytest
 
 import great_expectations as gx
 from great_expectations import DataContext
-from great_expectations.data_context.cloud_migrator import CloudMigrator
+from great_expectations.data_context.migrator.cloud_migrator import CloudMigrator
 
 
 @pytest.fixture

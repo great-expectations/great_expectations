@@ -6,6 +6,7 @@ from typing import List, Optional
 
 import requests
 
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.http import create_session
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
