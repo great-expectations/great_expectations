@@ -982,16 +982,12 @@ class ExpectationSuite(SerializableDictDot):
             rendered_content: List[
                 RenderedAtomicContent
             ] = inline_renderer.get_rendered_content()
-            rendered_content_block_names: List[str] = [
-                rendered_content_block.name
-                for rendered_content_block in rendered_content
-            ]
 
-            if (
-                expectation_configuration.rendered_content is None
-                or rendered_content_block_names != ["atomic.prescriptive.failed"]
-            ):
-                expectation_configuration.rendered_content = rendered_content
+            expectation_configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
+                existing_rendered_content=expectation_configuration.rendered_content,
+                new_rendered_content=rendered_content,
+                failed_renderer_name="atomic.prescriptive.failed",
+            )
 
 
 class ExpectationSuiteSchema(Schema):

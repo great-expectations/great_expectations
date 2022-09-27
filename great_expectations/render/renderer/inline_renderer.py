@@ -169,3 +169,29 @@ class InlineRenderer(Renderer):
         ] = self._render_object
 
         return self._get_atomic_rendered_content_for_object(render_object=render_object)
+
+    @staticmethod
+    def replace_or_keep_existing_rendered_content(
+        existing_rendered_content: Optional[List[RenderedAtomicContent]],
+        new_rendered_content: List[RenderedAtomicContent],
+        failed_renderer_name: str,
+    ) -> List[RenderedAtomicContent]:
+        rendered_content_block_names: List[str] = [
+            rendered_content_block.name
+            for rendered_content_block in new_rendered_content
+        ]
+
+        existing_rendered_content_block_names: List[str] = []
+        if existing_rendered_content is not None:
+            existing_rendered_content_block_names = [
+                rendered_content_block.name
+                for rendered_content_block in existing_rendered_content
+            ]
+
+        if not existing_rendered_content or (
+            failed_renderer_name in rendered_content_block_names
+            and failed_renderer_name not in existing_rendered_content_block_names
+        ):
+            return new_rendered_content
+        else:
+            return existing_rendered_content
