@@ -163,9 +163,9 @@ def stub_base_data_context_no_anonymous_usage_stats() -> StubBaseDataContext:
     return StubBaseDataContext(anonymous_usage_stats_is_none=True)
 
 
+@pytest.mark.cloud
+@pytest.mark.unit
 class TestConfigurationBundleCreate:
-    @pytest.mark.cloud
-    @pytest.mark.unit
     def test_configuration_bundle_created(
         self,
         stub_base_data_context: StubBaseDataContext,
@@ -187,8 +187,22 @@ class TestConfigurationBundleCreate:
         assert len(config_bundle.validation_results) == 1
         assert len(config_bundle.datasources) == 1
 
-    @pytest.mark.cloud
-    @pytest.mark.unit
+    def test_is_usage_statistics_key_set_if_key_not_present(
+        self, stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
+    ):
+        """What does this test and why?
+
+        The ConfigurationBundle should handle a context that has not set the config for
+         anonymous_usage_statistics.
+        """
+        context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
+
+        config_bundle = ConfigurationBundle(context)
+
+        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
+        # DataContextConfig
+        assert config_bundle.is_usage_stats_enabled()
+
     def test_configuration_bundle_created_usage_stats_disabled(
         self,
         stub_base_data_context_anonymous_usage_stats_present_but_disabled: StubBaseDataContext,
@@ -206,22 +220,6 @@ class TestConfigurationBundleCreate:
 
         assert not config_bundle.is_usage_stats_enabled()
 
-    def test_is_usage_statistics_key_set_if_key_not_present(
-        self, stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
-    ):
-        """What does this test and why?
-
-        The ConfigurationBundle should handle a context that has not set the config for
-         anonymous_usage_statistics.
-        """
-        context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
-
-        config_bundle = ConfigurationBundle(context)
-
-        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
-        # DataContextConfig
-        assert config_bundle.is_usage_stats_enabled()
-
 
 @pytest.fixture
 def stub_serialized_configuration_bundle(serialized_configuration_bundle: dict) -> dict:
@@ -233,9 +231,9 @@ def stub_serialized_configuration_bundle(serialized_configuration_bundle: dict) 
     return serialized_configuration_bundle
 
 
+@pytest.mark.cloud
+@pytest.mark.unit
 class TestConfigurationBundleSerialization:
-    @pytest.mark.cloud
-    @pytest.mark.unit
     def test_configuration_bundle_serialization(
         self,
         stub_base_data_context: StubBaseDataContext,
@@ -264,8 +262,6 @@ class TestConfigurationBundleSerialization:
 
         assert serialized_bundle == expected_serialized_bundle
 
-    @pytest.mark.cloud
-    @pytest.mark.unit
     def test_anonymous_usage_statistics_removed_during_serialization(
         self,
         stub_base_data_context: StubBaseDataContext,
