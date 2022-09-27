@@ -318,7 +318,7 @@ class CloudMigrator:
     ):
         raise NotImplementedError("This will be implemented soon!")
 
-    def _migrate_to_cloud(self, test_migrate: bool):
+    def _migrate_to_cloud(self, test_migrate: bool) -> None:
         """TODO: This is a rough outline of the steps to take during the migration, verify against the spec before release."""
         self._warn_if_test_migrate()
         configuration_bundle: ConfigurationBundle = ConfigurationBundle(
