@@ -6,7 +6,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import CloudMigrator, DataContext
+from great_expectations import CloudMigrator
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
 
@@ -54,7 +54,7 @@ def test__send_configuration_bundle_sends_valid_http_request(
 
 
 @pytest.fixture
-def mock_successful_migration(ge_cloud_organization_id: str) -> Callable:
+def mock_successful_migration(ge_cloud_base_url: str, ge_cloud_access_token: str, ge_cloud_organization_id: str) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
     ) -> mock.MagicMock:
@@ -71,6 +71,8 @@ def mock_successful_migration(ge_cloud_organization_id: str) -> Callable:
             CloudMigrator.migrate(
                 context=context,
                 test_migrate=test_migrate,
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_access_token=ge_cloud_access_token,
                 ge_cloud_organization_id=ge_cloud_organization_id,
             )
 
@@ -80,7 +82,7 @@ def mock_successful_migration(ge_cloud_organization_id: str) -> Callable:
 
 
 @pytest.fixture
-def mock_failed_migration(ge_cloud_organization_id: str) -> Callable:
+def mock_failed_migration(ge_cloud_base_url: str, ge_cloud_access_token: str, ge_cloud_organization_id: str) -> Callable:
     def _build_mock_migrate(
         test_migrate: bool,
     ) -> mock.MagicMock:
@@ -99,6 +101,8 @@ def mock_failed_migration(ge_cloud_organization_id: str) -> Callable:
                 CloudMigrator.migrate(
                     context=context,
                     test_migrate=test_migrate,
+                    ge_cloud_base_url=ge_cloud_base_url,
+                    ge_cloud_access_token=ge_cloud_access_token,
                     ge_cloud_organization_id=ge_cloud_organization_id,
                 )
 
