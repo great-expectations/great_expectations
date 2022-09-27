@@ -1,3 +1,5 @@
+// load .env file (used while development) for loading env variables
+require('dotenv').config();
 const fetch = require('node-fetch');
 const expecS3URL = "https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2.json";
 const algoliasearch = require("algoliasearch");
@@ -5,6 +7,42 @@ const client = algoliasearch(process.env.ALGOLIA_ACCOUNT, process.env.ALGOLIA_WR
 const expecAlgoliaIndex = process.env.ALGOLIA_EXPECTATION_INDEX;
 const index = client.initIndex(expecAlgoliaIndex);
 
+
+// Replica Index Names And Sorting Order Settings 
+const replicaIndexAndSettings = [
+    {
+        replica: `${process.env.ALGOLIA_EXPEC_REPLICA_ALPHA_ASC_INDEX}`, ranking: ['asc(description.snake_name)']
+    },
+    {
+        replica: `${process.env.ALGOLIA_EXPEC_REPLICA_ALPHA_DSC_INDEX}`, ranking: ['desc(description.snake_name)']
+    },
+    {
+        replica: `${process.env.ALGOLIA_EXPEC_REPLICA_COVERAGE_ASC_INDEX}`, ranking: ['asc(coverage_score)']
+    },
+    {
+        replica: `${process.env.ALGOLIA_EXPEC_REPLICA_COVERAGE_DSC_INDEX}`, ranking: ['desc(coverage_score)']
+    },
+    {
+        replica: `${process.env.ALGOLIA_EXPEC_REPLICA_CREATED_ASC_INDEX}`, ranking: ['asc(created_at)']
+    },
+    {
+        replica: `${process.env.ALGOLIA_EXPEC_REPLICA_CREATED_DSC_INDEX}`, ranking: ['desc(created_at)']
+    },
+    {
+        replica: `${process.env.ALGOLIA_EXPEC_REPLICA_UPDATED_ASC_INDEX}`, ranking: ['asc(updated_at)']
+    },
+    {
+        replica: `${process.env.ALGOLIA_EXPEC_REPLICA_UPDATED_DSC_INDEX}`, ranking: ['desc(updated_at)']
+    },
+]
+
+// Main Index setSettings 
+const attributesForFaceting =  ["searchable(library_metadata.tags)", "searchable(engineSupported)", "searchable(exp_type)"];
+const maxFacetHits=100;
+const searchableAttributes=["description.snake_name", "description.short_description"]
+const customRanking=['asc(description.snake_name)']
+
+//load data from S3
 loadFromS3(expecS3URL).then(response => {
     console.log("Length of expectation loaded from S3", Object.keys(response).length);
     if (Object.keys(response).length > 0) {
@@ -15,6 +53,7 @@ loadFromS3(expecS3URL).then(response => {
             return;
         }
         console.log("Formatted expectation sample: ", algDataset[0]);
+        // return;
         deleteIndex(algDataset);
     }
 }).catch((error) => {
@@ -37,6 +76,7 @@ async function loadFromS3(URL) {
     return await response.json();
 }
 
+// Format expectations and prepare JSON which will be sent to algolia
 function formatExpectation(ExpecData) {
     const ExpectationKeys = Object.keys(ExpecData);
     let dataset = [];
@@ -48,50 +88,73 @@ function formatExpectation(ExpecData) {
         data.execution_engines = ExpecData[key].execution_engines;
         data.maturity_checklist = ExpecData[key].maturity_checklist;
         data.backend_test_result_counts = ExpecData[key].backend_test_result_counts;
-        data.engineSupported = ExpecData[key].backend_test_result_counts.map((db) => db.backend);
+        data.engineSupported=ExpecData[key].backend_test_result_counts.map((db)=>db.backend);
+        data.coverage_score=ExpecData[key].coverage_score;
+        data.created_at=ExpecData[key].created_at;
+        data.updated_at=ExpecData[key].updated_at;
+        data.exp_type=ExpecData[key].exp_type;
         dataset.push(data);
     })
     return dataset;
 }
 
+// Upload data to algolia index
 function uploadToAlgolia(dataset) {
     index.saveObjects(dataset)
         .then(() => {
             console.log('Expectations data uploaded to algolia');
-            indexSetting(dataset);
+            mainIndexSetting(dataset);
         })
         .catch(err => console.log(err))
 }
 
-function indexSetting(dataset) {
+function mainIndexSetting(dataset) {
     index.setSettings({
-        attributesForFaceting: ["searchable(library_metadata.tags)", "searchable(engineSupported)"],
-        maxFacetHits: 100,
-        searchableAttributes: ["description.snake_name", "description.short_description"],
-        customRanking: [
-            'asc(description.snake_name)',
-        ]
+        attributesForFaceting:attributesForFaceting ,
+        maxFacetHits: maxFacetHits,
+        searchableAttributes:searchableAttributes,
+        customRanking: customRanking,
+        // Creating replica index 
+        replicas:replicaIndexAndSettings.map(replica=>replica.replica)
     })
-        .then(() => {
-            console.log('facets created.');
-            fetchAllAtrributes(dataset[0]);
-        }).catch((error) => {
-            console.log("Error in index settings", error);
-        });
+    .then(() => {
+        console.log('facets created.');
+        fetchAllAtrributes(dataset[0]);
+        // Creating replica index setsettings 
+        setReplicaSettings();
+    }).catch((error) => {
+        console.log("Error in index settings", error);
+    });
 }
 
 function fetchAllAtrributes(data) {
-    console.log("data is ", data);
+    console.log("data is ",data);
     let existingId = [data.description.snake_name];
     let attributes = Object.keys(data);
     console.log("Attributes are", attributes);
     index.getObjects(existingId, {
         attributesToRetrieve: attributes
     })
-        .then((results) => {
-            console.log('fetching all attributes ', results);
-            console.log("Successfully fetched sample record from algolia !");
-        }).catch((error) => {
-            console.log('getting error while fetching', error);
-        })
+    .then((results) => {
+        console.log('fetching all attributes ', results);
+        console.log("Successfully fetched sample record from algolia !");
+    }).catch((error) => {
+        console.log('getting error while fetching', error);
+    })
 };
+
+//Replica Index Settings
+function setReplicaSettings() {
+    replicaIndexAndSettings.map((repli) => {
+        const { replica, ranking } = repli;
+        client.initIndex(replica).setSettings({
+            attributesForFaceting: attributesForFaceting,
+            maxFacetHits: maxFacetHits,
+            searchableAttributes: searchableAttributes,
+            customRanking: ranking
+        })
+        .then(() => {
+            console.log(`Replica: ${replica} configured`)
+        })
+    })
+}
