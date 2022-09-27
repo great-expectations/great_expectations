@@ -142,7 +142,24 @@ class CloudDataContext(AbstractDataContext):
     ) -> GeCloudConfig:
         """
         Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
-        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
+        runtime, environment variables, or a global great_expectations.conf file (in order of precedence).
+
+        If provided as explicit arguments, ge_cloud_base_url, ge_cloud_access_token and
+        ge_cloud_organization_id will use runtime values instead of environment variables or conf files.
+
+        Args:
+            ge_cloud_base_url: Optional, you may provide this alternatively via
+                environment variable GE_CLOUD_BASE_URL or within a config file.
+            ge_cloud_access_token: Optional, you may provide this alternatively
+                via environment variable GE_CLOUD_ACCESS_TOKEN or within a config file.
+            ge_cloud_organization_id: Optional, you may provide this alternatively
+                via environment variable GE_CLOUD_ORGANIZATION_ID or within a config file.
+
+        Returns:
+            GeCloudConfig
+
+        Raises:
+            GeCloudError if a GE Cloud variable is missing
         """
         ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
             ge_cloud_base_url=ge_cloud_base_url,

@@ -1,47 +1,40 @@
 """TODO: Add docstring"""
-
+import logging
+from dataclasses import dataclass
 from typing import List, Optional
 
-from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.data_context import AbstractDataContext
-from great_expectations.data_context.store.ge_cloud_store_backend import AnyPayload
-from great_expectations.data_context.types.base import DatasourceConfig, GeCloudConfig
+import requests
+
+from great_expectations.core.http import create_session
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
+from great_expectations.data_context.data_context.base_data_context import (
+    BaseDataContext,
+)
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
+from great_expectations.data_context.migrator.configuration_bundle import (
+    ConfigurationBundle,
+    ConfigurationBundleJsonSerializer,
+    ConfigurationBundleSchema,
+)
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    AnyPayload,
+    construct_json_payload,
+    construct_url,
+    get_user_friendly_error_message,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions.exceptions import GeCloudError
+
+logger = logging.getLogger(__name__)
 
 
-class ConfigurationBundle:
-
-    # TODO: Can we leverage DataContextVariables here?
-
-    def __init__(self) -> None:
-        self._datasource_configs: List[DatasourceConfig] = []
-        self._validation_results: List[ExpectationSuiteValidationResult] = []
-
-    def build_configuration_bundle(self, context: AbstractDataContext):
-        self._datasource_configs = self._get_all_datasource_configs(context)
-        self._validation_results = self._get_all_validation_results(context)
-        # TODO: Add other methods to retrieve the rest of the configs
-
-    def _get_all_datasource_configs(
-        self,
-        context: AbstractDataContext,
-    ) -> List[DatasourceConfig]:
-        return [
-            DatasourceConfig(**datasource_config_dict)
-            for datasource_config_dict in context.list_datasources()
-        ]
-
-    def _get_all_validation_results(
-        self,
-        context: AbstractDataContext,
-    ) -> List[ExpectationSuiteValidationResult]:
-        pass
-
-    # TODO: Add other methods to retrieve the rest of the configs
-
-
+@dataclass
 class SendValidationResultsErrorDetails:
     # TODO: Implementation
     pass
@@ -50,26 +43,39 @@ class SendValidationResultsErrorDetails:
 class CloudMigrator:
     def __init__(
         self,
-        context: AbstractDataContext,
-        test_migrate: bool,
+        context: BaseDataContext,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         self._context = context
-        self._test_migrate = test_migrate
+
+        cloud_config = CloudDataContext.get_ge_cloud_config(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+
+        ge_cloud_base_url = cloud_config.base_url
+        ge_cloud_access_token = cloud_config.access_token
+        ge_cloud_organization_id = cloud_config.organization_id
+
+        # Invariant due to `get_ge_cloud_config` raising an error if any config values are missing
+        if not ge_cloud_organization_id:
+            raise ValueError(
+                "An organization id must be present when performing a migration"
+            )
+
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_access_token = ge_cloud_access_token
         self._ge_cloud_organization_id = ge_cloud_organization_id
 
-    @property
-    def test_migrate(self):
-        return self._test_migrate
+        self._session = create_session(access_token=ge_cloud_access_token)
 
     @classmethod
     def migrate(
         cls,
-        context: AbstractDataContext,
+        context: BaseDataContext,
         test_migrate: bool,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
@@ -95,12 +101,11 @@ class CloudMigrator:
         # This code will be uncommented when the migrator is implemented:
         # cloud_migrator: CloudMigrator = cls(
         #     context=context,
-        #     test_migrate=test_migrate,
         #     ge_cloud_base_url=ge_cloud_base_url,
         #     ge_cloud_access_token=ge_cloud_access_token,
         #     ge_cloud_organization_id=ge_cloud_organization_id,
         # )
-        # cloud_migrator._migrate_to_cloud()
+        # cloud_migrator._migrate_to_cloud(test_migrate)
 
     @classmethod
     def migrate_validation_result(
@@ -113,15 +118,22 @@ class CloudMigrator:
     ):
         raise NotImplementedError("This will be implemented soon!")
 
-    def _migrate_to_cloud(self):
+    def _migrate_to_cloud(self, test_migrate: bool):
         """TODO: This is a rough outline of the steps to take during the migration, verify against the spec before release."""
         self._warn_if_test_migrate()
-        self._warn_if_usage_stats_disabled()
-        configuration_bundle: ConfigurationBundle = self._build_configuration_bundle()
+        configuration_bundle: ConfigurationBundle = ConfigurationBundle(
+            context=self._context
+        )
+        self._warn_if_usage_stats_disabled(
+            configuration_bundle.is_usage_stats_enabled()
+        )
         self._print_configuration_bundle(configuration_bundle)
-        if not self.test_migrate:
+        if not test_migrate:
+            configuration_bundle_serializer = ConfigurationBundleJsonSerializer(
+                schema=ConfigurationBundleSchema()
+            )
             configuration_bundle_response: AnyPayload = self._send_configuration_bundle(
-                configuration_bundle
+                configuration_bundle, configuration_bundle_serializer
             )
             self._print_send_configuration_bundle_error(configuration_bundle_response)
             self._break_for_send_configuration_bundle_error(
@@ -129,46 +141,14 @@ class CloudMigrator:
             )
         errors: List[
             SendValidationResultsErrorDetails
-        ] = self._send_and_print_validation_results(self.test_migrate)
+        ] = self._send_and_print_validation_results(test_migrate)
         self._print_validation_result_error_summary(errors)
         self._print_migration_conclusion_message()
-
-    def _process_cloud_credential_overrides(
-        self,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> GeCloudConfig:
-        """Get cloud credentials from environment variables or parameters.
-
-        Check first for ge_cloud_base_url, ge_cloud_access_token and
-        ge_cloud_organization_id provided via params, if not then check
-        for the corresponding environment variable.
-
-        Args:
-            ge_cloud_base_url: Optional, you may provide this alternatively via
-                environment variable GE_CLOUD_BASE_URL
-            ge_cloud_access_token: Optional, you may provide this alternatively
-                via environment variable GE_CLOUD_ACCESS_TOKEN
-            ge_cloud_organization_id: Optional, you may provide this alternatively
-                via environment variable GE_CLOUD_ORGANIZATION_ID
-
-        Returns:
-            GeCloudConfig
-
-        Raises:
-            GeCloudError
-
-        """
-        # TODO: Use GECloudEnvironmentVariable enum for environment variables
-        # TODO: Merge with existing logic in Data Context - could be static method on CloudDataContext or
-        #  module level method in cloud_data_context.py Let's not duplicate this code.
-        pass
 
     def _warn_if_test_migrate(self) -> None:
         pass
 
-    def _warn_if_usage_stats_disabled(self) -> None:
+    def _warn_if_usage_stats_disabled(self, is_usage_stats_enabled: bool) -> None:
         pass
 
     def _build_configuration_bundle(self) -> ConfigurationBundle:
@@ -180,9 +160,41 @@ class CloudMigrator:
         pass
 
     def _send_configuration_bundle(
-        self, configuration_bundle: ConfigurationBundle
+        self,
+        configuration_bundle: ConfigurationBundle,
+        serializer: ConfigurationBundleJsonSerializer,
     ) -> AnyPayload:
-        pass
+        url = construct_url(
+            base_url=self._ge_cloud_base_url,
+            organization_id=self._ge_cloud_organization_id,
+            resource_name="migration",
+        )
+
+        serialized_bundle = serializer.serialize(configuration_bundle)
+        data = construct_json_payload(
+            resource_type="migration",
+            organization_id=self._ge_cloud_organization_id,
+            attributes_key="bundle",
+            attributes_value=serialized_bundle,
+        )
+
+        try:
+            response = self._session.post(url, json=data)
+            response.raise_for_status()
+            return response.json()
+
+        except requests.HTTPError as http_exc:
+            raise GeCloudError(
+                f"Unable to migrate config to Cloud: {get_user_friendly_error_message(http_exc)}"
+            )
+        except requests.Timeout as timeout_exc:
+            logger.exception(timeout_exc)
+            raise GeCloudError(
+                "Unable to migrate config to Cloud: This is likely a transient error. Please try again."
+            )
+        except Exception as e:
+            logger.warning(str(e))
+            raise GeCloudError(f"Something went wrong while migrating to Cloud: {e}")
 
     def _print_send_configuration_bundle_error(self, http_response: AnyPayload) -> None:
         pass
@@ -193,7 +205,7 @@ class CloudMigrator:
         pass
 
     def _send_and_print_validation_results(
-        self,
+        self, test_migrate: bool
     ) -> List[SendValidationResultsErrorDetails]:
         # TODO: Uses migrate_validation_result in a loop. Only sends if not self.test_migrate
         pass
