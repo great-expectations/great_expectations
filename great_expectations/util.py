@@ -1599,36 +1599,37 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
-@overload
-def get_context() -> "DataContext":
-    ...
-
-
-@overload
-def get_context(
-    ge_cloud_base_url: str,
-    ge_cloud_access_token: str,
-    ge_cloud_organization_id: str,
-    runtime_environment: Optional[dict] = None,
-    project_config: Optional[Any] = None,
-) -> "CloudDataContext":
-    ...
-
-
-@overload
-def get_context(
-    context_root_dir: str,
-    runtime_environment: Optional[dict] = None,
-) -> "FileDataContext":
-    ...
-
-
-@overload
-def get_context(
-    project_config: str,
-    runtime_environment: Optional[dict] = None,
-) -> "EphemeralDataContext":
-    ...
+#
+# @overload
+# def get_context() -> "DataContext":
+#     ...
+#
+#
+# @overload
+# def get_context(
+#     ge_cloud_base_url: str,
+#     ge_cloud_access_token: str,
+#     ge_cloud_organization_id: str,
+#     runtime_environment: Optional[dict] = None,
+#     project_config: Optional[Any] = None,
+# ) -> "CloudDataContext":
+#     ...
+#
+#
+# @overload
+# def get_context(
+#     context_root_dir: str,
+#     runtime_environment: Optional[dict] = None,
+# ) -> "FileDataContext":
+#     ...
+#
+#
+# @overload
+# def get_context(
+#     project_config: str,
+#     runtime_environment: Optional[dict] = None,
+# ) -> "EphemeralDataContext":
+#     ...
 
 
 def get_context(
