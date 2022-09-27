@@ -1,7 +1,7 @@
 """TODO: Add docstring"""
 import logging
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, cast
 
 import requests
 
@@ -174,12 +174,10 @@ class CloudMigrator:
         serialized_validation_results = serialized_bundle.pop("validation_results")
 
         if not test_migrate:
-            return
-
-        self._send_bundle_to_cloud_backend(serialized_bundle=serialized_bundle)
-        self._send_validation_results_to_cloud_backend(
-            serialized_validation_results=serialized_validation_results,
-        )
+            self._send_bundle_to_cloud_backend(serialized_bundle=serialized_bundle)
+            self._send_validation_results_to_cloud_backend(
+                serialized_validation_results=serialized_validation_results,
+            )
 
     def _send_bundle_to_cloud_backend(self, serialized_bundle: dict) -> None:
         self._post_to_cloud_backend(
