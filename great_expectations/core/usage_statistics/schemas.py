@@ -5,6 +5,8 @@
 
 
 # An anonymized string *must* be an md5 hash, so must have exactly 32 characters
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
@@ -1134,7 +1136,7 @@ anonymized_usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {"enum": ["cloud_migrate"]},
+                "event": {"enum": [UsageStatsEvents.CLOUD_MIGRATE.value]},
                 "event_payload": {"$ref": "#/definitions/cloud_migrate"},
             },
         },

@@ -82,7 +82,7 @@ def test_comprehensive_list_of_messages():
         "data_context.run_profiler_with_dynamic_arguments",
         "profiler.result.get_expectation_suite",
         "data_assistant.result.get_expectation_suite",
-        "cloud_migrate",
+        "cloud_migrator.migrate",
     }
     # Note: "cli.project.upgrade" has no base event, only .begin and .end events
     assert set(valid_message_list) == set(
@@ -416,7 +416,7 @@ def test_rule_based_profiler_run_message():
 
 def test_cloud_migrate_event():
     usage_stats_records_messages = [
-        "cloud_migrate",
+        UsageStatsEvents.CLOUD_MIGRATE.value,
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:

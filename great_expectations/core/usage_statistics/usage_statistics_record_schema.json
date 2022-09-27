@@ -5438,7 +5438,7 @@
       "properties": {
         "event": {
           "enum": [
-            "cloud_migrate"
+            "cloud_migrator.migrate"
           ]
         },
         "event_payload": {

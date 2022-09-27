@@ -4,6 +4,7 @@ from typing import Any, Dict, List
 
 import pytest
 import requests
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
@@ -2707,7 +2708,7 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
-    "cloud_migrate": [cloud_migrate],
+    UsageStatsEvents.CLOUD_MIGRATE.value: [cloud_migrate],
 }
 
 test_messages = []
