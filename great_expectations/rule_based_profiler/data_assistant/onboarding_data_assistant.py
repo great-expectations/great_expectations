@@ -43,6 +43,21 @@ from great_expectations.validator.validator import Validator
 class OnboardingDataAssistant(DataAssistant):
     """
     OnboardingDataAssistant provides dataset exploration and validation to help with Great Expectations "Onboarding".
+
+    OnboardingDataAssistant.run() Args:
+        - batch_request (BatchRequestBase or dict): The Batch Request to be passed to the Data Assistant.
+        - estimation (str): One of "exact" (default) or "flag_outliers" indicating the type of data you believe the
+            Batch Request to contain. Valid or trusted data should use "exact", while Expectations produced with data
+            that is suspected to have quality issues may benefit from "flag_outliers".
+        - include_column_names (list): A list containing the column names you wish to include.
+        - exclude_column_names (list): A list containing the column names you with to exclude.
+        - include_column_name_suffixes (list): A list containing the column name suffixes you with to include.
+        - cardinality_limit_mode (str): A string defined by the CardinalityLimitMode Enum, which limits the maximum
+            unique value count allowable in column distinct value count Metrics and Expectations.
+            Some examples: "very_few", "few", and "some"; corresponding to 10, 100, and 1,000 respectively.
+
+    OnboardingDataAssistant.run() Returns:
+        OnboardingDataAssistantResult
     """
 
     __alias__: str = "onboarding"
@@ -703,9 +718,9 @@ class OnboardingDataAssistant(DataAssistant):
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
             min_value=f"{column_min_values_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
             max_value=f"{column_max_values_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
-            mostly=f"{VARIABLES_KEY}mostly",
             strict_min=f"{VARIABLES_KEY}strict_min",
             strict_max=f"{VARIABLES_KEY}strict_max",
+            mostly=f"{VARIABLES_KEY}mostly",
             meta={
                 "profiler_details": {
                     "column_min_values_range_estimator": f"{column_min_values_range_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
@@ -721,12 +736,8 @@ class OnboardingDataAssistant(DataAssistant):
             "strict_min": False,
             "strict_max": False,
             "false_positive_rate": 0.05,
-            "estimator": "bootstrap",
-            "n_resamples": 9999,
-            "random_seed": None,
+            "estimator": "quantiles",
             "quantile_statistic_interpolation_method": "nearest",
-            "quantile_bias_correction": False,
-            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": None,
@@ -993,6 +1004,7 @@ class OnboardingDataAssistant(DataAssistant):
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
             value_set=f"{value_set_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+            condition=f"{value_set_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}parse_strings_as_datetimes != True",
             mostly=f"{VARIABLES_KEY}mostly",
             meta={
                 "profiler_details": f"{value_set_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",

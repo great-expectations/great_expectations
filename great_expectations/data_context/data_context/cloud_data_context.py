@@ -1,4 +1,5 @@
 import logging
+import os
 from enum import Enum
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Union, cast
 
@@ -48,10 +49,12 @@ class CloudDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: Union[DataContextConfig, Mapping],
-        context_root_dir: str,
-        ge_cloud_config: GeCloudConfig,
+        project_config: Optional[Union[DataContextConfig, Mapping]] = None,
+        context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         """
         CloudDataContext constructor
@@ -63,15 +66,39 @@ class CloudDataContext(AbstractDataContext):
             ge_cloud_config (GeCloudConfig): GeCloudConfig corresponding to current CloudDataContext
         """
         self._ge_cloud_mode = True  # property needed for backward compatibility
-        self._ge_cloud_config = ge_cloud_config
-        self._context_root_directory = context_root_dir
+
+        self._ge_cloud_config = self.get_ge_cloud_config(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+
+        self._context_root_directory = self.determine_context_root_directory(
+            context_root_dir
+        )
+
+        if project_config is None:
+            project_config = self.retrieve_data_context_config_from_ge_cloud(
+                ge_cloud_config=self._ge_cloud_config,
+            )
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
+
         self._variables = self._init_variables()
         super().__init__(
             runtime_environment=runtime_environment,
         )
+
+    @classmethod
+    def determine_context_root_directory(cls, context_root_dir: Optional[str]) -> str:
+        if context_root_dir is None:
+            context_root_dir = os.getcwd()
+            logger.info(
+                f'context_root_dir was not provided - defaulting to current working directory "'
+                f'{context_root_dir}".'
+            )
+        return os.path.abspath(os.path.expanduser(context_root_dir))
 
     @classmethod
     def retrieve_data_context_config_from_ge_cloud(
@@ -115,7 +142,24 @@ class CloudDataContext(AbstractDataContext):
     ) -> GeCloudConfig:
         """
         Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
-        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
+        runtime, environment variables, or a global great_expectations.conf file (in order of precedence).
+
+        If provided as explicit arguments, ge_cloud_base_url, ge_cloud_access_token and
+        ge_cloud_organization_id will use runtime values instead of environment variables or conf files.
+
+        Args:
+            ge_cloud_base_url: Optional, you may provide this alternatively via
+                environment variable GE_CLOUD_BASE_URL or within a config file.
+            ge_cloud_access_token: Optional, you may provide this alternatively
+                via environment variable GE_CLOUD_ACCESS_TOKEN or within a config file.
+            ge_cloud_organization_id: Optional, you may provide this alternatively
+                via environment variable GE_CLOUD_ORGANIZATION_ID or within a config file.
+
+        Returns:
+            GeCloudConfig
+
+        Raises:
+            GeCloudError if a GE Cloud variable is missing
         """
         ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
             ge_cloud_base_url=ge_cloud_base_url,
