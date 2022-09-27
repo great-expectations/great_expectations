@@ -1,7 +1,7 @@
 """TODO: Add docstring"""
 import logging
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import requests
 
@@ -22,6 +22,8 @@ from great_expectations.data_context.migrator.configuration_bundle import (
 )
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     AnyPayload,
+    GeCloudRESTResource,
+    GeCloudStoreBackend,
     construct_json_payload,
     construct_url,
     get_user_friendly_error_message,
@@ -128,30 +130,22 @@ class CloudMigrator:
             configuration_bundle.is_usage_stats_enabled()
         )
         self._print_configuration_bundle(configuration_bundle)
+        configuration_bundle_serializer = ConfigurationBundleJsonSerializer(
+            schema=ConfigurationBundleSchema()
+        )
         if not test_migrate:
-            configuration_bundle_serializer = ConfigurationBundleJsonSerializer(
-                schema=ConfigurationBundleSchema()
-            )
-            configuration_bundle_response: AnyPayload = self._send_configuration_bundle(
+            cloud_responses: List[AnyPayload] = self._send_configuration_bundle(
                 configuration_bundle, configuration_bundle_serializer
             )
-            self._print_send_configuration_bundle_error(configuration_bundle_response)
-            self._break_for_send_configuration_bundle_error(
-                configuration_bundle_response
-            )
-        errors: List[
-            SendValidationResultsErrorDetails
-        ] = self._send_and_print_validation_results(test_migrate)
-        self._print_validation_result_error_summary(errors)
+            self._print_send_configuration_bundle_error(cloud_responses)
+            self._break_for_send_configuration_bundle_error(cloud_responses)
+
         self._print_migration_conclusion_message()
 
     def _warn_if_test_migrate(self) -> None:
         pass
 
     def _warn_if_usage_stats_disabled(self, is_usage_stats_enabled: bool) -> None:
-        pass
-
-    def _build_configuration_bundle(self) -> ConfigurationBundle:
         pass
 
     def _print_configuration_bundle(
@@ -163,25 +157,18 @@ class CloudMigrator:
         self,
         configuration_bundle: ConfigurationBundle,
         serializer: ConfigurationBundleJsonSerializer,
-    ) -> AnyPayload:
-        url = construct_url(
-            base_url=self._ge_cloud_base_url,
-            organization_id=self._ge_cloud_organization_id,
-            resource_name="migration",
-        )
-
+    ) -> Tuple[AnyPayload, List[AnyPayload]]:
         serialized_bundle = serializer.serialize(configuration_bundle)
-        data = construct_json_payload(
-            resource_type="migration",
-            organization_id=self._ge_cloud_organization_id,
-            attributes_key="bundle",
-            attributes_value=serialized_bundle,
-        )
+        serialized_validation_results = serialized_bundle.pop("validation_results")
 
         try:
-            response = self._session.post(url, json=data)
-            response.raise_for_status()
-            return response.json()
+            bundle_response = self._send_bundle_to_cloud_backend(
+                serialized_bundle=serialized_bundle
+            )
+            validation_responses = self._send_validation_results_to_cloud_backend(
+                serialized_validation_results=serialized_validation_results
+            )
+            return bundle_response, validation_responses
 
         except requests.HTTPError as http_exc:
             raise GeCloudError(
@@ -195,6 +182,59 @@ class CloudMigrator:
         except Exception as e:
             logger.warning(str(e))
             raise GeCloudError(f"Something went wrong while migrating to Cloud: {e}")
+
+    def _send_bundle_to_cloud_backend(self, serialized_bundle: dict) -> AnyPayload:
+        return self._post_to_cloud_backend(
+            resource_name="migration",
+            resource_type="migration",
+            attributes_key="bundle",
+            attributes_value=serialized_bundle,
+        )
+
+    def _send_validation_results_to_cloud_backend(
+        self, serialized_validation_results: List[dict]
+    ) -> List[AnyPayload]:
+        resource_type = GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT
+        resource_name = GeCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[
+            resource_type
+        ]
+        attributes_key = GeCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
+
+        responses = []
+        for validation_result in serialized_validation_results:
+            response_json = self._post_to_cloud_backend(
+                resource_name=resource_name,
+                resource_type=resource_type,
+                attributes_key=attributes_key,
+                attributes_value=validation_result,
+            )
+            responses.append(response_json)
+
+        return responses
+
+    def _post_to_cloud_backend(
+        self,
+        resource_name: str,
+        resource_type: str,
+        attributes_key: str,
+        attributes_value: dict,
+    ) -> AnyPayload:
+        url = construct_url(
+            base_url=self._ge_cloud_base_url,
+            organization_id=self._ge_cloud_organization_id,
+            resource_name=resource_name,
+        )
+
+        data = construct_json_payload(
+            resource_type=resource_type,
+            organization_id=self._ge_cloud_organization_id,
+            attributes_key=attributes_key,
+            attributes_value=attributes_value,
+        )
+
+        response = self._session.post(url, json=data)
+        response.raise_for_status()
+        return response.json()
 
     def _print_send_configuration_bundle_error(self, http_response: AnyPayload) -> None:
         pass
@@ -215,5 +255,8 @@ class CloudMigrator:
     ) -> None:
         pass
 
-    def _print_migration_conclusion_message(self):
+    def _print_migration_introduction_message(self) -> None:
+        pass
+
+    def _print_migration_conclusion_message(self) -> None:
         pass

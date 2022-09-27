@@ -38,11 +38,11 @@ def test__send_configuration_bundle_sends_valid_http_request(
     )
 
     with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        migrator._send_configuration_bundle(
+        _, _ = migrator._send_configuration_bundle(
             configuration_bundle=configuration_bundle, serializer=serializer
         )
 
-    mock_post.assert_called_once_with(
+    mock_post.assert_called_with(
         mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/migration",
         json={
