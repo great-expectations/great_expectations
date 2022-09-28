@@ -1,6 +1,5 @@
 """TODO: Add docstring"""
 import logging
-from dataclasses import dataclass
 from typing import List, NamedTuple, Optional, cast
 
 import requests
@@ -22,7 +21,6 @@ from great_expectations.data_context.migrator.configuration_bundle import (
     ConfigurationBundleSchema,
 )
 from great_expectations.data_context.store.ge_cloud_store_backend import (
-    AnyPayload,
     ErrorPayload,
     GeCloudRESTResource,
     GeCloudStoreBackend,
@@ -31,12 +29,6 @@ from great_expectations.data_context.store.ge_cloud_store_backend import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class SendValidationResultsErrorDetails:
-    # TODO: Implementation
-    pass
 
 
 class MigrationResponse(NamedTuple):
@@ -135,14 +127,15 @@ class CloudMigrator:
                 "Migration failed. Please check the error message for more details."
             ) from e
 
-    def list_unsuccessful_validation_results(self) -> None:
-        pass
+    def list_unsuccessful_validation_results(self) -> List[dict]:
+        return self._unsuccessful_validations
 
     def retry_unsuccessful_validations(self) -> None:
-        pass
+        self._update_unsuccessful_validations(
+            serialized_validation_results=self._unsuccessful_validations
+        )
 
     def _migrate_to_cloud(self, test_migrate: bool) -> None:
-        """TODO: This is a rough outline of the steps to take during the migration, verify against the spec before release."""
         self._print_migration_introduction_message()
 
         configuration_bundle: ConfigurationBundle = ConfigurationBundle(
@@ -288,6 +281,13 @@ class CloudMigrator:
         if test_migrate:
             return
 
+        self._update_unsuccessful_validations(
+            serialized_validation_results=serialized_validation_results
+        )
+
+    def _update_unsuccessful_validations(
+        self, serialized_validation_results: List[dict]
+    ) -> None:
         # 20220928 - Chetan - We want to use the static lookup tables in GeCloudStoreBackend
         # to ensure the appropriate URL and payload shape. This logic should be moved to
         # a more central location.
@@ -297,6 +297,7 @@ class CloudMigrator:
         ]
         attributes_key = GeCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
+        unsuccessful_validations = []
         for validation_result in serialized_validation_results:
             response = self._post_to_cloud_backend(
                 resource_name=resource_name,
@@ -308,7 +309,9 @@ class CloudMigrator:
 
             # Only flip bool if not already flipped
             if not response.success:
-                self._unsuccessful_validations.append(validation_result)
+                unsuccessful_validations.append(validation_result)
+
+        self._unsuccessful_validations = unsuccessful_validations
 
     def _post_to_cloud_backend(
         self,
@@ -351,25 +354,6 @@ class CloudMigrator:
         return MigrationResponse(
             message=message, status_code=status_code, success=success
         )
-
-    def _print_send_configuration_bundle_error(self, http_response: AnyPayload) -> None:
-        pass
-
-    def _break_for_send_configuration_bundle_error(
-        self, http_response: AnyPayload
-    ) -> None:
-        pass
-
-    def _send_and_print_validation_results(
-        self, test_migrate: bool
-    ) -> List[SendValidationResultsErrorDetails]:
-        # TODO: Uses migrate_validation_result in a loop. Only sends if not self.test_migrate
-        pass
-
-    def _print_validation_result_error_summary(
-        self, errors: List[SendValidationResultsErrorDetails]
-    ) -> None:
-        pass
 
     def _print_migration_introduction_message(self) -> None:
         print(
