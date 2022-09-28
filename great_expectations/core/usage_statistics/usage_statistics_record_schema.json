@@ -5172,6 +5172,21 @@
         }
       },
       "additionalProperties": false
+    },
+    "cloud_migrate": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "cloud-migrate",
+      "type": "object",
+      "properties": {
+        "organization_id": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "organization_id"
+      ],
+      "additionalProperties": false
     }
   },
   "type": "object",
@@ -5415,6 +5430,19 @@
         },
         "event_payload": {
           "$ref": "#/definitions/anonymized_rule_based_profiler_run"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event": {
+          "enum": [
+            "cloud_migrator.migrate"
+          ]
+        },
+        "event_payload": {
+          "$ref": "#/definitions/cloud_migrate"
         }
       }
     },
