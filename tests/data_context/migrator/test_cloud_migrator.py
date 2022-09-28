@@ -17,12 +17,10 @@ from great_expectations.data_context.store.ge_cloud_store_backend import (
 @pytest.mark.cloud
 def test__send_configuration_bundle_sends_valid_http_request(
     serialized_configuration_bundle: dict,
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+    ge_cloud_access_token: str,
 ):
-    # These values aren't actual creds but resemble values used in production
-    ge_cloud_base_url = "https://app.test.greatexpectations.io"
-    ge_cloud_organization_id = "229616e2-1bbc-4849-8161-4be89b79bd36"
-    ge_cloud_access_token = "d7asdh2efads9afah2e0fadf8eh20da8"
-
     migrator = gx.CloudMigrator(
         context=mock.MagicMock(),
         ge_cloud_base_url=ge_cloud_base_url,
@@ -52,7 +50,11 @@ def test__send_configuration_bundle_sends_valid_http_request(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test__send_validation_results_sends_valid_http_request():
+def test__send_validation_results_sends_valid_http_request(
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+    ge_cloud_access_token: str,
+):
     # These values aren't actual creds but resemble values used in production
     ge_cloud_base_url = "https://app.test.greatexpectations.io"
     ge_cloud_organization_id = "229616e2-1bbc-4849-8161-4be89b79bd36"
