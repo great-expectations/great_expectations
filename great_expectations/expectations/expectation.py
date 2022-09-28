@@ -212,7 +212,7 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type="atomic.prescriptive.failed")
     def _atomic_prescriptive_failed(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
+        configuration: ExpectationConfiguration,
     ) -> RenderedAtomicContent:
         """
         Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
@@ -673,8 +673,8 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type="atomic.diagnostic.failed")
     def _atomic_diagnostic_failed(
         cls,
-        configuration=None,
-    ):
+        configuration: ExpectationConfiguration,
+    ) -> RenderedAtomicContent:
         """
         Rendering function that is utilized by GE Cloud Front-end
         """
