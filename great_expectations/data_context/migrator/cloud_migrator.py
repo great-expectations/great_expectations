@@ -223,7 +223,7 @@ class CloudMigrator:
     ) -> None:
         length = len(obj_collection)
 
-        summary = f"  Bundled {length} {obj_name}{'s' if length != 1 else ''}"
+        summary = f"  Bundled {length} {obj_name}(s)"
         if length:
             summary += ":"
         print(summary)
@@ -233,9 +233,7 @@ class CloudMigrator:
 
         if length > 10:
             extra = length - 10
-            print(
-                f"    ({extra} other {obj_name.lower()}{'s' if extra > 1 else ''} not displayed)"
-            )
+            print(f"    ({extra} other {obj_name.lower()}(s) not displayed)")
 
     def _serialize_configuration_bundle(
         self, configuration_bundle: ConfigurationBundle
@@ -270,7 +268,7 @@ class CloudMigrator:
                 "We have reverted your GX Cloud configuration to the state before the migration. "
                 "Please check your configuration before re-attempting the migration.\n\n"
                 "The server returned the following error:\n"
-                f"Status code {response.status_code}, Error: {response.message}"
+                f"  Code : {response.status_code}\n  Error: {response.message}"
             )
 
         return response.success
@@ -391,12 +389,7 @@ class CloudMigrator:
             return
 
         length = len(self._unsuccessful_validations)
-
-        summary: str
-        if length == 1:
-            summary = f"\nPlease note that there was {length} validation result that was not successfully migrated:"
-        else:
-            summary = f"\nPlease note that there were {length} validation results that were not successfully migrated:"
+        summary = f"\nPlease note that there were {length} validation result(s) that were not successfully migrated:"
 
         print(summary)
         for key in self._unsuccessful_validations:
