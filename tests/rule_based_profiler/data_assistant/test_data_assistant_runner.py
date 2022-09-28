@@ -42,7 +42,7 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_allowed(
 
 
 @pytest.mark.integration
-def test_onboarding_data_assistant_runner_top_level_kwargs_behavior(
+def test_onboarding_data_assistant_runner_top_level_kwargs_override(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
