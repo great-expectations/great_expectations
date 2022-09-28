@@ -5,31 +5,6 @@ import pytest
 def serialized_configuration_bundle() -> dict:
     return {
         "data_context_id": "877166bd-08f2-4d7b-b473-a2b97ab5e36f",
-        "datasources": [
-            {
-                "class_name": "Datasource",
-                "data_connectors": {
-                    "my_default_data_connector": {
-                        "assets": {
-                            "": {
-                                "base_directory": "data",
-                                "class_name": "Asset",
-                                "glob_directive": "*.csv",
-                                "group_names": ["batch_num", "total_batches"],
-                                "pattern": "csv_batch_(\\d.+)_of_(\\d.+)\\.csv",
-                            }
-                        },
-                        "base_directory": "data",
-                        "class_name": "ConfiguredAssetFilesystemDataConnector",
-                    }
-                },
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "name": "generic_csv_generator",
-            }
-        ],
         "checkpoints": [
             {
                 "class_name": "Checkpoint",
