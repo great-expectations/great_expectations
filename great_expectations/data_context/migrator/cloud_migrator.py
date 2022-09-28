@@ -1,7 +1,7 @@
 """TODO: Add docstring"""
 import logging
 from dataclasses import dataclass
-from typing import List, Optional, cast
+from typing import List, NamedTuple, Optional, cast
 
 import requests
 
@@ -38,6 +38,12 @@ logger = logging.getLogger(__name__)
 class SendValidationResultsErrorDetails:
     # TODO: Implementation
     pass
+
+
+class MigrationResponse(NamedTuple):
+    message: Optional[str]
+    status_code: int
+    success: bool
 
 
 class CloudMigrator:
@@ -125,36 +131,48 @@ class CloudMigrator:
         configuration_bundle: ConfigurationBundle = ConfigurationBundle(
             context=self._context
         )
-        self._warn_if_test_migrate()
-        self._warn_if_usage_stats_disabled(
-            is_usage_stats_enabled=configuration_bundle.is_usage_stats_enabled()
+        self._emit_warnings(
+            configuration_bundle=configuration_bundle, test_migrate=test_migrate
         )
-        self._warn_if_bundle_contains_datasources(
+        self._print_configuration_bundle_summary(
             configuration_bundle=configuration_bundle
         )
-        self._print_configuration_bundle(configuration_bundle=configuration_bundle)
 
         serialized_bundle = self._serialize_configuration_bundle(
             configuration_bundle=configuration_bundle
         )
-        self._send_configuration_bundle(
-            serialized_bundle=serialized_bundle, test_migrate=test_migrate
+        serialized_validation_results = self._prepare_validation_results(
+            serialized_bundle=serialized_bundle
         )
+
+        if not test_migrate:
+            self._send_configuration_bundle(serialized_bundle=serialized_bundle)
+            self._send_validation_results(
+                serialized_validation_results=serialized_validation_results,
+            )
 
         self._print_migration_conclusion_message()
 
-    def _warn_if_test_migrate(self) -> None:
-        pass
-
-    def _warn_if_usage_stats_disabled(self, is_usage_stats_enabled: bool) -> None:
-        pass
-
-    def _warn_if_bundle_contains_datasources(
-        self, configuration_bundle: ConfigurationBundle
+    def _emit_warnings(
+        self, configuration_bundle: ConfigurationBundle, test_migrate: bool
     ) -> None:
+        if test_migrate:
+            self._warn_about_test_migrate()
+        if not configuration_bundle.is_usage_stats_enabled():
+            self._warn_about_usage_stats_disabled()
+        if configuration_bundle.datasources:
+            self._warn_about_bundle_contains_datasources()
+
+    def _warn_about_test_migrate(self) -> None:
         pass
 
-    def _print_configuration_bundle(
+    def _warn_about_usage_stats_disabled(self) -> None:
+        pass
+
+    def _warn_about_bundle_contains_datasources(self) -> None:
+        pass
+
+    def _print_configuration_bundle_summary(
         self, configuration_bundle: ConfigurationBundle
     ) -> None:
         pass
@@ -168,41 +186,41 @@ class CloudMigrator:
         serialized_bundle = serializer.serialize(configuration_bundle)
         return serialized_bundle
 
-    def _send_configuration_bundle(
-        self, serialized_bundle: dict, test_migrate: bool
-    ) -> None:
-        serialized_validation_results = serialized_bundle.pop("validation_results")
-
-        if not test_migrate:
-            self._send_bundle_to_cloud_backend(serialized_bundle=serialized_bundle)
-            self._send_validation_results_to_cloud_backend(
-                serialized_validation_results=serialized_validation_results,
-            )
-
-    def _send_bundle_to_cloud_backend(self, serialized_bundle: dict) -> None:
-        self._post_to_cloud_backend(
+    def _send_configuration_bundle(self, serialized_bundle: dict) -> None:
+        print("Sending context configuration (step 2/4)")
+        response = self._post_to_cloud_backend(
             resource_name="migration",
             resource_type="migration",
             attributes_key="bundle",
             attributes_value=serialized_bundle,
         )
+        # TODO: Handle success/failure cases
 
-    def _send_validation_results_to_cloud_backend(
+    def _prepare_validation_results(self, serialized_bundle: dict) -> List[dict]:
+        print("Preparing validation results (step 3/4")
+        return serialized_bundle.pop("validation_results")
+
+    def _send_validation_results(
         self, serialized_validation_results: List[dict]
     ) -> None:
+        # 20220928 - Chetan - We want to use the static lookup tables in GeCloudStoreBackend
+        # to ensure the appropriate URL and payload shape. This logic should be moved to
+        # a more central location.
         resource_type = GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT
         resource_name = GeCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[
             resource_type
         ]
         attributes_key = GeCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
-        for validation_result in serialized_validation_results:
-            self._post_to_cloud_backend(
+        print("Sending validation results (step 4/4)")
+        for i, validation_result in enumerate(serialized_validation_results):
+            response = self._post_to_cloud_backend(
                 resource_name=resource_name,
                 resource_type=resource_type,
                 attributes_key=attributes_key,
                 attributes_value=validation_result,
             )
+            # TODO: Handle success/failure cases
 
     def _post_to_cloud_backend(
         self,
@@ -210,32 +228,40 @@ class CloudMigrator:
         resource_type: str,
         attributes_key: str,
         attributes_value: dict,
-    ) -> None:
+    ) -> MigrationResponse:
         url = construct_url(
             base_url=self._ge_cloud_base_url,
             organization_id=self._ge_cloud_organization_id,
             resource_name=resource_name,
         )
-
         data = construct_json_payload(
             resource_type=resource_type,
             organization_id=self._ge_cloud_organization_id,
             attributes_key=attributes_key,
             attributes_value=attributes_value,
         )
-
         response = self._session.post(url, json=data)
-        self._handle_cloud_response(response=response)
+        return self._parse_cloud_response(response=response)
 
-    def _handle_cloud_response(self, response: requests.Response) -> None:
-        # print to stdout
+    def _parse_cloud_response(self, response: requests.Response) -> MigrationResponse:
         success = response.ok
+        status_code = response.status_code
+
         response_json: AnyPayload
         try:
             response_json = response.json()
-        except:
+        except requests.exceptions.JSONDecodeError:
             response_json = cast(AnyPayload, {})
             success = False
+
+        # TODO: Handle success/failure cases and parse errors from Cloud responses
+        message = ""
+        if not success:
+            message = "Something went wrong!"
+
+        return MigrationResponse(
+            message=message, status_code=status_code, success=success
+        )
 
     def _print_send_configuration_bundle_error(self, http_response: AnyPayload) -> None:
         pass
