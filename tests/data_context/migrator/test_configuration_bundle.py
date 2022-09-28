@@ -41,9 +41,12 @@ class StubCheckpointStore:
 
 
 class StubValidationsStore:
+    def __init__(self, keys: Tuple[Optional[str]] = ("some_key", )):
+        self._keys = keys
+
     def list_keys(self):
         # Note: Key just has to return an iterable here
-        return ["some_key"]
+        return list(self._keys)
 
     def get(self, key):
         # Note: Key is unused
@@ -74,7 +77,7 @@ class DummyDatasource:
 class StubBaseDataContext:
     """Stub for testing ConfigurationBundle."""
 
-    DATA_CONTEXT_ID = "27517569-1500-4127-af68-b5bad960a492"
+    DATA_CONTEXT_ID = "877166bd-08f2-4d7b-b473-a2b97ab5e36f"
 
     def __init__(
         self,
@@ -82,6 +85,9 @@ class StubBaseDataContext:
             AnonymizedUsageStatisticsConfig
         ] = AnonymizedUsageStatisticsConfig(enabled=True),
         checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint", ),
+        expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
+        profiler_names: Tuple[Optional[str]] = ("my_profiler", ),
+        validation_results_keys: Tuple[Optional[str]] = ("some_key", ),
     ):
         """Set the configuration of the stub data context.
 
@@ -90,6 +96,9 @@ class StubBaseDataContext:
         """
         self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
         self._checkpoint_names = checkpoint_names
+        self._expectation_suite_names = expectation_suite_names
+        self._profiler_names = profiler_names
+        self._validation_results_keys = validation_results_keys
 
     @property
     def _data_context_variables(self) -> StubUsageStats:
@@ -129,10 +138,10 @@ class StubBaseDataContext:
 
     @property
     def validations_store(self) -> StubValidationsStore:
-        return StubValidationsStore()
+        return StubValidationsStore(keys=self._validation_results_keys)
 
     def list_expectation_suite_names(self) -> List[str]:
-        return ["my_suite"]
+        return list(self._expectation_suite_names)
 
     def get_expectation_suite(self, name: str) -> ExpectationSuite:
         return ExpectationSuite(expectation_suite_name=name)
@@ -141,7 +150,7 @@ class StubBaseDataContext:
         return list(self._checkpoint_names)
 
     def list_profilers(self) -> List[str]:
-        return ["my_profiler"]
+        return list(self._profiler_names)
 
     def get_profiler(self, name: str) -> RuleBasedProfiler:
         return RuleBasedProfiler(name, config_version=1.0, rules={})
@@ -268,16 +277,21 @@ class TestConfigurationBundleSerialization:
         assert serialized_bundle == expected_serialized_bundle
 
 
-    def test_configuration_bundle_serialization_no_checkpoints(
+    def test_configuration_bundle_serialization_empty_fields(
         self,
-        stub_serialized_configuration_bundle: dict,
+        empty_serialized_configuration_bundle: dict,
     ):
         """What does this test and why?
 
         Ensure configuration bundle is serialized correctly.
         """
 
-        context = StubBaseDataContext(checkpoint_names=tuple())
+        context = StubBaseDataContext(
+            checkpoint_names=tuple(),
+            expectation_suite_names=tuple(),
+            profiler_names=tuple(),
+            validation_results_keys=tuple(),
+        )
 
         config_bundle = ConfigurationBundle(context)
 
@@ -287,28 +301,8 @@ class TestConfigurationBundleSerialization:
 
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
-        expected_serialized_bundle = stub_serialized_configuration_bundle
+        assert serialized_bundle == empty_serialized_configuration_bundle
 
-        # We expect no checkpoints
-        expected_serialized_bundle["checkpoints"] = []
-
-        # Remove meta before comparing since it contains the GX version
-        serialized_bundle["expectation_suites"][0].pop("meta", None)
-        expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
-
-        assert serialized_bundle == expected_serialized_bundle
-
-    def test_configuration_bundle_serialization_no_datasources(self):
-        pass
-
-    def test_configuration_bundle_serialization_no_expectation_suites(self):
-        pass
-
-    def test_configuration_bundle_serialization_no_profilers(self):
-        pass
-
-    def test_configuration_bundle_serialization_no_validation_results(self):
-        pass
 
     def test_anonymous_usage_statistics_removed_during_serialization(
         self,

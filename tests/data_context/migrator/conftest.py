@@ -69,3 +69,42 @@ def serialized_configuration_bundle() -> dict:
             }
         ],
     }
+
+
+@pytest.fixture
+def empty_serialized_configuration_bundle() -> dict:
+    return {
+        "data_context_id": "877166bd-08f2-4d7b-b473-a2b97ab5e36f",
+        "checkpoints": [],
+        "data_context_variables": {
+            "config_variables_file_path": None,
+            "config_version": 3.0,
+            "data_docs_sites": None,
+            "evaluation_parameter_store_name": None,
+            "expectations_store_name": None,
+            "include_rendered_content": {
+                "expectation_suite": False,
+                "expectation_validation_result": False,
+                "globally": False,
+            },
+            "notebooks": None,
+            "plugins_directory": None,
+            "stores": None,
+            "validations_store_name": None,
+        },
+        "datasources": [
+            {
+                "class_name": "Datasource",
+                "data_connectors": {},
+                "execution_engine": {
+                    "class_name": "PandasExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "module_name": "great_expectations.datasource",
+                "name": "my_datasource",
+            }
+        ],
+        "expectation_suites": [],
+        "profilers": [],
+        "validation_results": [],
+    }
