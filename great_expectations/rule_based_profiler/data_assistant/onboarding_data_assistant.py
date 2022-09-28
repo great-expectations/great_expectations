@@ -51,7 +51,8 @@ class OnboardingDataAssistant(DataAssistant):
             that is suspected to have quality issues may benefit from "flag_outliers".
         - include_column_names (list): A list containing the column names you wish to include.
         - exclude_column_names (list): A list containing the column names you with to exclude.
-        - include_column_name_suffixes (list): A list containing the column name suffixes you with to include.
+        - include_column_name_suffixes (list): A list containing the column name suffixes you wish to include.
+        - exclude_column_name_suffixes (list): A list containing the column name suffixes you wish to exclude.
         - cardinality_limit_mode (str): A string defined by the CardinalityLimitMode Enum, which limits the maximum
             unique value count allowable in column distinct value count Metrics and Expectations.
             Some examples: "very_few", "few", and "some"; corresponding to 10, 100, and 1,000 respectively.
