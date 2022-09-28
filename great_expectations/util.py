@@ -51,7 +51,6 @@ from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.exceptions import (
-    DataContextError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
