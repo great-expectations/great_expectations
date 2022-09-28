@@ -25,6 +25,7 @@ from great_expectations.data_context.migrator.configuration_bundle import (
 )
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     AnyPayload,
+    ErrorPayload,
     GeCloudRESTResource,
     GeCloudStoreBackend,
     construct_json_payload,
@@ -44,7 +45,7 @@ class SendValidationResultsErrorDetails:
 
 
 class MigrationResponse(NamedTuple):
-    message: Optional[str]
+    message: str
     status_code: int
     success: bool
 
@@ -272,19 +273,18 @@ class CloudMigrator:
         success = response.ok
         status_code = response.status_code
 
-        response_json: AnyPayload
-        try:
-            response_json = response.json()
-        except requests.exceptions.JSONDecodeError:
-            response_json = cast(AnyPayload, {})
-            success = False
-
-        print(response_json)
-
         # TODO: Handle success/failure cases and parse errors from Cloud responses
         message = ""
         if not success:
-            message = "Something went wrong!"
+            try:
+                response_json = cast(ErrorPayload, response.json())
+                errors = response_json.get("errors", [])
+                for error in errors:
+                    detail = error.get("detail")
+                    if detail:
+                        message += f"{detail}\n"
+            except requests.exceptions.JSONDecodeError:
+                message = "Something went wrong!"
 
         return MigrationResponse(
             message=message, status_code=status_code, success=success
