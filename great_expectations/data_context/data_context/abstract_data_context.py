@@ -480,7 +480,7 @@ class AbstractDataContext(ABC):
         """
 
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
-        datasource_config = DatasourceConfig(**datasource_config_dict)
+        datasource_config = datasourceConfigSchema.load(datasource_config_dict)
         datasource_name: str = datasource.name
 
         updated_datasource_config_from_store: DatasourceConfig = self._datasource_store.set(  # type: ignore[attr-defined]
