@@ -367,9 +367,11 @@ class CloudMigrator:
         )
 
     def _print_unsuccessful_validation_message(self) -> None:
-        length = len(self._unsuccessful_validations)
-        summary = f"\nPlease note that there were {length} validation result(s) that were not successfully migrated:"
-        print(summary)
+        print(
+            f"\nPlease note that there were {len(self._unsuccessful_validations)} "
+            "validation result(s) that were not successfully migrated:"
+        )
+
         for key in self._unsuccessful_validations:
             print(f"  {key}")
 
