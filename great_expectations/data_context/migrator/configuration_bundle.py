@@ -1,6 +1,6 @@
 """TODO: Add docstring"""
 
-from typing import List, cast
+from typing import Dict, List, cast
 
 from marshmallow import Schema, fields, post_dump
 
@@ -45,8 +45,10 @@ class ConfigurationBundle:
         ] = self._get_all_expectation_suites()
         self._checkpoints: List[CheckpointConfig] = self._get_all_checkpoints()
         self._profilers: List[RuleBasedProfilerConfig] = self._get_all_profilers()
-        self._validation_results: List[
-            ExpectationSuiteValidationResult
+
+        # Treated slightly differently as we require the keys downstream when printing migration status.
+        self._validation_results: Dict[
+            str, ExpectationSuiteValidationResult
         ] = self._get_all_validation_results()
 
     @property
@@ -87,7 +89,7 @@ class ConfigurationBundle:
         return self._profilers
 
     @property
-    def validation_results(self) -> List[ExpectationSuiteValidationResult]:
+    def validation_results(self) -> Dict[str, ExpectationSuiteValidationResult]:
         return self._validation_results
 
     def _get_all_datasources(self) -> List[DatasourceConfig]:
@@ -130,14 +132,15 @@ class ConfigurationBundle:
 
     def _get_all_validation_results(
         self,
-    ) -> List[ExpectationSuiteValidationResult]:
-        return [
-            cast(
+    ) -> Dict[str, ExpectationSuiteValidationResult]:
+        validation_results = {
+            str(key): cast(
                 ExpectationSuiteValidationResult,
                 self._context.validations_store.get(key),
             )
             for key in self._context.validations_store.list_keys()
-        ]
+        }
+        return validation_results
 
 
 class ConfigurationBundleSchema(Schema):
@@ -161,8 +164,12 @@ class ConfigurationBundleSchema(Schema):
         fields.Nested(RuleBasedProfilerConfigSchema, allow_none=True, required=True),
         required=True,
     )
-    validation_results = fields.List(
-        fields.Nested(
+    validation_results = fields.Dict(
+        keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        values=fields.Nested(
             ExpectationSuiteValidationResultSchema, allow_none=True, required=True
         ),
         required=True,

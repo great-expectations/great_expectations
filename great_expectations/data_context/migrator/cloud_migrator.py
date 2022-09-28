@@ -1,6 +1,6 @@
 """TODO: Add docstring"""
 import logging
-from typing import List, NamedTuple, Optional, cast
+from typing import Dict, List, NamedTuple, Optional, cast
 
 import requests
 
@@ -69,7 +69,7 @@ class CloudMigrator:
 
         self._session = create_session(access_token=ge_cloud_access_token)
 
-        self._unsuccessful_validations = []
+        self._unsuccessful_validations = {}
 
     @classmethod
     def migrate(
@@ -127,11 +127,11 @@ class CloudMigrator:
                 "Migration failed. Please check the error message for more details."
             ) from e
 
-    def list_unsuccessful_validation_results(self) -> List[dict]:
-        return self._unsuccessful_validations
+    def list_unsuccessful_validation_results(self) -> List[str]:
+        return list(self._unsuccessful_validations.keys())
 
     def retry_unsuccessful_validations(self) -> None:
-        self._update_unsuccessful_validations(
+        self._process_validation_results(
             serialized_validation_results=self._unsuccessful_validations
         )
 
@@ -205,7 +205,10 @@ class CloudMigrator:
         self, configuration_bundle: ConfigurationBundle
     ) -> None:
         to_print = (
-            ("Datasource", configuration_bundle.datasources),
+            (
+                "Datasource",
+                configuration_bundle.datasources,
+            ),  # This needs to print the whole config, not just the summary
             ("Checkpoint", configuration_bundle.checkpoints),
             ("Expectation Suite", configuration_bundle.expectation_suites),
             ("Profiler", configuration_bundle.profilers),
@@ -244,7 +247,7 @@ class CloudMigrator:
         serialized_bundle = serializer.serialize(configuration_bundle)
         return serialized_bundle
 
-    def _prepare_validation_results(self, serialized_bundle: dict) -> List[dict]:
+    def _prepare_validation_results(self, serialized_bundle: dict) -> Dict[str, dict]:
         print("[Step 2/4: Preparing validation results]")
         return serialized_bundle.pop("validation_results")
 
@@ -270,23 +273,25 @@ class CloudMigrator:
                 "The server returned the following error:\n"
                 "Status code <Insert status code from backend>, Error: <Insert error from backend>"
             )
+            print(response.message)
+
         return response.success
 
     def _send_validation_results(
         self,
-        serialized_validation_results: List[dict],
+        serialized_validation_results: Dict[str, dict],
         test_migrate: bool,
     ) -> None:
         print("[Step 4/4: Sending validation results]")
         if test_migrate:
             return
 
-        self._update_unsuccessful_validations(
+        self._process_validation_results(
             serialized_validation_results=serialized_validation_results
         )
 
-    def _update_unsuccessful_validations(
-        self, serialized_validation_results: List[dict]
+    def _process_validation_results(
+        self, serialized_validation_results: Dict[str, dict]
     ) -> None:
         # 20220928 - Chetan - We want to use the static lookup tables in GeCloudStoreBackend
         # to ensure the appropriate URL and payload shape. This logic should be moved to
@@ -297,19 +302,25 @@ class CloudMigrator:
         ]
         attributes_key = GeCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
-        unsuccessful_validations = []
-        for validation_result in serialized_validation_results:
+        unsuccessful_validations = {}
+
+        count = 1
+        for key, validation_result in serialized_validation_results.items():
             response = self._post_to_cloud_backend(
                 resource_name=resource_name,
                 resource_type=resource_type,
                 attributes_key=attributes_key,
                 attributes_value=validation_result,
             )
-            print("  foo")
 
-            # Only flip bool if not already flipped
-            if not response.success:
-                unsuccessful_validations.append(validation_result)
+            progress = f"({count}/{len(serialized_validation_results)})"
+            count += 1
+
+            if response.success:
+                print(f"  Sent validation result {progress}")
+            else:
+                print(f"  Error sending validation result {key} {progress}")
+                unsuccessful_validations[key] = validation_result
 
         self._unsuccessful_validations = unsuccessful_validations
 
@@ -339,6 +350,8 @@ class CloudMigrator:
         status_code = response.status_code
 
         # TODO: Handle success/failure cases and parse errors from Cloud responses
+
+        # Use `get_user_friendly_error_message` instead of custom error parsing
         message = ""
         if not success:
             try:
@@ -388,8 +401,8 @@ class CloudMigrator:
             summary = f"\nPlease note that there were {length} validation results that were not successfully migrated:"
 
         print(summary)
-        for validation in self._unsuccessful_validations:
-            print(f"  {'foo'}")
+        for key in self._unsuccessful_validations:
+            print(f"  {key}")
 
         print(
             "To retry uploading these validation results, you can use the following "
