@@ -96,12 +96,13 @@ class ConfigurationBundle:
 
         # Note: we are accessing the protected _datasource_store to not add a public property
         # to all Data Contexts.
-        datasource_configs: List[DatasourceConfig] = [
-            self._context._datasource_store.retrieve_by_name(
+        datasource_configs: List[DatasourceConfig] = []
+        for datasource_name in datasource_names:
+            datasource_config = self._context._datasource_store.retrieve_by_name(
                 datasource_name=datasource_name
             )
-            for datasource_name in datasource_names
-        ]
+            datasource_config.name = datasource_name
+            datasource_configs.append(datasource_config)
 
         return datasource_configs
 

@@ -30,7 +30,7 @@ def test__send_configuration_bundle_sends_valid_http_request(
 
     with mock.patch("requests.Session.post", autospec=True) as mock_post:
         migrator._send_configuration_bundle(
-            serialized_bundle=serialized_configuration_bundle,
+            serialized_bundle=serialized_configuration_bundle, test_migrate=False
         )
 
     mock_post.assert_called_once_with(
@@ -55,11 +55,6 @@ def test__send_validation_results_sends_valid_http_request(
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
 ):
-    # These values aren't actual creds but resemble values used in production
-    ge_cloud_base_url = "https://app.test.greatexpectations.io"
-    ge_cloud_organization_id = "229616e2-1bbc-4849-8161-4be89b79bd36"
-    ge_cloud_access_token = "d7asdh2efads9afah2e0fadf8eh20da8"
-
     migrator = gx.CloudMigrator(
         context=mock.MagicMock(),
         ge_cloud_base_url=ge_cloud_base_url,
@@ -80,7 +75,7 @@ def test__send_validation_results_sends_valid_http_request(
 
     with mock.patch("requests.Session.post", autospec=True) as mock_post:
         migrator._send_validation_results(
-            serialized_validation_results=validation_results
+            serialized_validation_results=validation_results, test_migrate=False
         )
 
     mock_post.assert_called_with(
