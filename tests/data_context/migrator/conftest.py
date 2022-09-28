@@ -74,7 +74,7 @@ def serialized_configuration_bundle() -> dict:
 @pytest.fixture
 def empty_serialized_configuration_bundle() -> dict:
     return {
-        "data_context_id": "877166bd-08f2-4d7b-b473-a2b97ab5e36f",
+        "data_context_id": "27517569-1500-4127-af68-b5bad960a492",
         "checkpoints": [],
         "data_context_variables": {
             "config_variables_file_path": None,

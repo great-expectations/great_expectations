@@ -1,5 +1,5 @@
 """These tests exercise ConfigurationBundle including Serialization."""
-from typing import Dict, List, Optional, Union, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import pytest
 
@@ -41,7 +41,7 @@ class StubCheckpointStore:
 
 
 class StubValidationsStore:
-    def __init__(self, keys: Tuple[Optional[str]] = ("some_key", )):
+    def __init__(self, keys: Tuple[Optional[str]] = ("some_key",)):
         self._keys = keys
 
     def list_keys(self):
@@ -77,18 +77,18 @@ class DummyDatasource:
 class StubBaseDataContext:
     """Stub for testing ConfigurationBundle."""
 
-    DATA_CONTEXT_ID = "877166bd-08f2-4d7b-b473-a2b97ab5e36f"
+    DATA_CONTEXT_ID = "27517569-1500-4127-af68-b5bad960a492"
 
     def __init__(
         self,
         anonymized_usage_statistics_config: Optional[
             AnonymizedUsageStatisticsConfig
         ] = AnonymizedUsageStatisticsConfig(enabled=True),
-        checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint", ),
+        checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint",),
         expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
-        profiler_names: Tuple[Optional[str]] = ("my_profiler", ),
-        validation_results_keys: Tuple[Optional[str]] = ("some_key", ),
-        datasource_names: Tuple[Optional[str]] = ("my_datasource", ),
+        profiler_names: Tuple[Optional[str]] = ("my_profiler",),
+        validation_results_keys: Tuple[Optional[str]] = ("some_key",),
+        datasource_names: Tuple[Optional[str]] = ("my_datasource",),
     ):
         """Set the configuration of the stub data context.
 
@@ -132,7 +132,10 @@ class StubBaseDataContext:
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         # Datasource is a dummy since we just want the DatasourceConfig from the store, not an
         # actual initialized datasource.
-        return {datasource_name: DummyDatasource() for datasource_name in self._datasource_names}
+        return {
+            datasource_name: DummyDatasource()
+            for datasource_name in self._datasource_names
+        }
 
     @property
     def checkpoint_store(self) -> StubCheckpointStore:
@@ -278,7 +281,6 @@ class TestConfigurationBundleSerialization:
 
         assert serialized_bundle == expected_serialized_bundle
 
-
     def test_configuration_bundle_serialization_empty_fields(
         self,
         empty_serialized_configuration_bundle: dict,
@@ -305,7 +307,6 @@ class TestConfigurationBundleSerialization:
         serialized_bundle: dict = serializer.serialize(config_bundle)
 
         assert serialized_bundle == empty_serialized_configuration_bundle
-
 
     def test_anonymous_usage_statistics_removed_during_serialization(
         self,
