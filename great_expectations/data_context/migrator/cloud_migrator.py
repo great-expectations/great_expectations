@@ -5,7 +5,10 @@ from typing import List, NamedTuple, Optional, cast
 
 import requests
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.http import create_session
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -103,15 +106,35 @@ class CloudMigrator:
         Returns:
             None
         """
-        raise NotImplementedError("This will be implemented soon!")
-        # This code will be uncommented when the migrator is implemented:
-        # cloud_migrator: CloudMigrator = cls(
-        #     context=context,
-        #     ge_cloud_base_url=ge_cloud_base_url,
-        #     ge_cloud_access_token=ge_cloud_access_token,
-        #     ge_cloud_organization_id=ge_cloud_organization_id,
-        # )
-        # cloud_migrator._migrate_to_cloud(test_migrate)
+        event = UsageStatsEvents.CLOUD_MIGRATE.value
+        event_payload = {"organization_id": ge_cloud_organization_id}
+        try:
+            cloud_migrator: CloudMigrator = cls(
+                context=context,
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_access_token=ge_cloud_access_token,
+                ge_cloud_organization_id=ge_cloud_organization_id,
+            )
+            cloud_migrator._migrate_to_cloud(test_migrate)
+            if not test_migrate:  # Only send an event if this is not a test run.
+                send_usage_message(
+                    data_context=context,
+                    event=event,
+                    event_payload=event_payload,
+                    success=True,
+                )
+        except Exception as e:
+            # Note we send an event on any exception here
+            if not test_migrate:
+                send_usage_message(
+                    data_context=context,
+                    event=event,
+                    event_payload=event_payload,
+                    success=False,
+                )
+            raise ge_exceptions.MigrationError(
+                "Migration failed. Please check the error message for more details."
+            ) from e
 
     @classmethod
     def migrate_validation_result(
@@ -124,7 +147,7 @@ class CloudMigrator:
     ):
         raise NotImplementedError("This will be implemented soon!")
 
-    def _migrate_to_cloud(self, test_migrate: bool):
+    def _migrate_to_cloud(self, test_migrate: bool) -> None:
         """TODO: This is a rough outline of the steps to take during the migration, verify against the spec before release."""
         self._print_migration_introduction_message()
 
