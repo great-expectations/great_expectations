@@ -89,7 +89,7 @@ context.add_datasource(**yaml.load(datasource_yaml))
 available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
-assert len(available_data_asset_names) == 2
+assert len(available_data_asset_names) == 3
 # Here is a BatchRequest referring to an un-partitioned inferred data_asset.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
