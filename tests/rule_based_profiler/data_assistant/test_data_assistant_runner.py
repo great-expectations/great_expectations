@@ -92,11 +92,11 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_explicit_none(
         batch_request=batch_request,
         exclude_column_name_suffixes=None,
     )
-    columns_used = {
+    categorical_columns_used = {
         domain["domain_kwargs"]["column"]
         for domain in data_assistant_result.metrics_by_domain.keys()
         if domain["domain_type"] == MetricDomainTypes.COLUMN
         and domain["rule_name"] == "categorical_columns_rule"
     }
 
-    assert "user_id" not in columns_used
+    assert "user_id" not in categorical_columns_used
