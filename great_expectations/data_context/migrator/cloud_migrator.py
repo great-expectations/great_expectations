@@ -127,13 +127,12 @@ class CloudMigrator:
                 "Migration failed. Please check the error message for more details."
             ) from e
 
-    def list_unsuccessful_validation_results(self) -> List[str]:
-        return list(self._unsuccessful_validations.keys())
-
     def retry_unsuccessful_validations(self) -> None:
         self._process_validation_results(
             serialized_validation_results=self._unsuccessful_validations
         )
+        if self._unsuccessful_validations:
+            self._print_unsuccessful_validation_message()
 
     def _migrate_to_cloud(self, test_migrate: bool) -> None:
         self._print_migration_introduction_message()
@@ -158,7 +157,7 @@ class CloudMigrator:
         if not self._send_configuration_bundle(
             serialized_bundle=serialized_bundle, test_migrate=test_migrate
         ):
-            return
+            return  # Exit early as validation results cannot be sent if the main payload fails
 
         self._send_validation_results(
             serialized_validation_results=serialized_validation_results,
@@ -315,7 +314,7 @@ class CloudMigrator:
             if response.success:
                 print(f"  Sent validation result {progress}")
             else:
-                print(f"  Error sending validation result {key} {progress}")
+                print(f"  Error sending validation result '{key}' {progress}")
                 unsuccessful_validations[key] = validation_result
 
         self._unsuccessful_validations = unsuccessful_validations
@@ -364,6 +363,19 @@ class CloudMigrator:
             message=message, status_code=status_code, success=success
         )
 
+    def _print_unsuccessful_validation_message(self) -> None:
+        length = len(self._unsuccessful_validations)
+        summary = f"\nPlease note that there were {length} validation result(s) that were not successfully migrated:"
+        print(summary)
+        for key in self._unsuccessful_validations:
+            print(f"  {key}")
+
+        print(
+            "\nTo retry uploading these validation results, you can use the following "
+            "code snippet:\n"
+            "  `migrator.retry_unsuccessful_validations()`"
+        )
+
     def _print_migration_introduction_message(self) -> None:
         print(
             "Thank you for using Great Expectations!\n\n"
@@ -385,18 +397,5 @@ class CloudMigrator:
             "become out of sync. "
         )
 
-        if not self._unsuccessful_validations:
-            return
-
-        length = len(self._unsuccessful_validations)
-        summary = f"\nPlease note that there were {length} validation result(s) that were not successfully migrated:"
-
-        print(summary)
-        for key in self._unsuccessful_validations:
-            print(f"  {key}")
-
-        print(
-            "To retry uploading these validation results, you can use the following "
-            "code snippet:\n"
-            "<Insert code snippet from below example>"
-        )
+        if self._unsuccessful_validations:
+            self._print_unsuccessful_validation_message()
