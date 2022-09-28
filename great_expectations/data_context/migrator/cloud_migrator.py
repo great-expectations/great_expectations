@@ -223,20 +223,19 @@ class CloudMigrator:
     ) -> None:
         length = len(obj_collection)
 
-        summary = f"  Bundled {length} {obj_name}"
-        if length == 0:
-            summary += "s"
-        elif length == 1:
+        summary = f"  Bundled {length} {obj_name}{'s' if length != 1 else ''}"
+        if length:
             summary += ":"
-        else:
-            summary += "s:"
-
         print(summary)
+
         for obj in obj_collection[:10]:
             print(f"    {obj.name}")
 
         if length > 10:
-            print(f"    ({length-10} other {obj_name.lower()} not displayed)")
+            extra = length - 10
+            print(
+                f"    ({extra} other {obj_name.lower()}{'s' if extra > 1 else ''} not displayed)"
+            )
 
     def _serialize_configuration_bundle(
         self, configuration_bundle: ConfigurationBundle
@@ -271,9 +270,8 @@ class CloudMigrator:
                 "We have reverted your GX Cloud configuration to the state before the migration. "
                 "Please check your configuration before re-attempting the migration.\n\n"
                 "The server returned the following error:\n"
-                "Status code <Insert status code from backend>, Error: <Insert error from backend>"
+                f"Status code {response.status_code}, Error: {response.message}"
             )
-            print(response.message)
 
         return response.success
 
@@ -304,8 +302,9 @@ class CloudMigrator:
 
         unsuccessful_validations = {}
 
-        count = 1
-        for key, validation_result in serialized_validation_results.items():
+        for i, (key, validation_result) in enumerate(
+            serialized_validation_results.items()
+        ):
             response = self._post_to_cloud_backend(
                 resource_name=resource_name,
                 resource_type=resource_type,
@@ -313,8 +312,7 @@ class CloudMigrator:
                 attributes_value=validation_result,
             )
 
-            progress = f"({count}/{len(serialized_validation_results)})"
-            count += 1
+            progress = f"({i+1}/{len(serialized_validation_results)})"
 
             if response.success:
                 print(f"  Sent validation result {progress}")
