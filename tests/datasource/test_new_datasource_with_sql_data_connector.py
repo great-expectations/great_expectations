@@ -87,10 +87,12 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
                     my_first_data_asset:
                         table_name: table_1
                     my_second_data_asset:
+                        include_schema_name: True
                         schema_name: main
                         table_name: table_2
                     table_1: {{}}
                     table_2:
+                        include_schema_name: True
                         schema_name: main
     """
 
@@ -159,7 +161,7 @@ data_connectors:
                 "example_data_asset_names": ["table_partitioned_by_date_column__A"],
                 "data_assets": {
                     "table_partitioned_by_date_column__A": {
-                        "batch_definition_count": 5,
+                        "batch_definition_count": 9,
                         "example_data_references": [
                             {"date": "2020-00"},
                             {"date": "2020-01"},
@@ -241,7 +243,7 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
                 "example_data_asset_names": ["table_partitioned_by_date_column__A"],
                 "data_assets": {
                     "table_partitioned_by_date_column__A": {
-                        "batch_definition_count": 5,
+                        "batch_definition_count": 9,
                         "example_data_references": [
                             {"date": "2020-00"},
                             {"date": "2020-01"},
@@ -332,7 +334,7 @@ data_connectors:
                         ],
                     },
                     "prefix__table_partitioned_by_date_column__A__xiffus": {
-                        "batch_definition_count": 5,
+                        "batch_definition_count": 9,
                         "example_data_references": [
                             {"date": "2020-00"},
                             {"date": "2020-01"},
@@ -420,7 +422,7 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
                         ],
                     },
                     "prefix__table_partitioned_by_date_column__A__xiffus": {
-                        "batch_definition_count": 5,
+                        "batch_definition_count": 9,
                         "example_data_references": [
                             {"date": "2020-00"},
                             {"date": "2020-01"},
@@ -682,11 +684,6 @@ tables:
             "table_partitioned_by_date_column__A",
         ],
     }
-
-    # can't use get_available_data_asset_names_and_types here because it's only implemented
-    # on InferredAssetSqlDataConnector, not ConfiguredAssetSqlDataConnector
-    with pytest.raises(NotImplementedError):
-        datasource_manually_configured.get_available_data_asset_names_and_types()
 
     # Here we should test getting another batch
 

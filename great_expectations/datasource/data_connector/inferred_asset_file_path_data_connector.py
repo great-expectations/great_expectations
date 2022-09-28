@@ -68,7 +68,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         for data_reference in self._get_data_reference_list():
             mapped_batch_definition_list: List[
                 BatchDefinition
-            ] = self._map_data_reference_to_batch_definition_list(
+            ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
                 data_reference=data_reference, data_asset_name=None
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list

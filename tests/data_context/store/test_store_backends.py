@@ -1356,247 +1356,6 @@ def test_TupleS3StoreBackend_list_over_1000_keys():
     assert len(keys) == num_keys_to_add + 1
 
 
-@pytest.mark.cloud
-@pytest.mark.unit
-def test_GeCloudStoreBackend(
-    shared_called_with_request_kwargs: dict, ge_cloud_access_token: str
-):
-    """
-    What does this test test and why?
-
-    Since GeCloudStoreBackend relies on GE Cloud, we mock requests.post, requests.get, and
-    requests.patch and assert that the right calls are made for set, get, list, and remove_key.
-
-    Note that although ge_cloud_access_token is provided (and is a valid UUID), no external
-    requests are actually made as part of this test. The actual value of the token does not
-    matter here but we leverage an existing fixture to mimic the contents of requests made
-    in production. The same logic applies to all UUIDs in this test.
-    """
-    ge_cloud_base_url = "https://app.greatexpectations.io/"
-    ge_cloud_credentials = {
-        "access_token": ge_cloud_access_token,
-        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-    }
-    ge_cloud_resource_type = GeCloudRESTResource.CHECKPOINT
-    my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
-        name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
-        config_version=1,
-    )
-    my_simple_checkpoint_config_serialized = (
-        my_simple_checkpoint_config.get_schema_class()().dump(
-            my_simple_checkpoint_config
-        )
-    )
-
-    # test .set
-    with patch("requests.post", autospec=True) as mock_post:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=ge_cloud_resource_type,
-        )
-        my_store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
-        mock_post.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "attributes": {
-                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-                        "checkpoint_config": OrderedDict(
-                            [
-                                ("name", "my_minimal_simple_checkpoint"),
-                                ("config_version", 1.0),
-                                ("template_name", None),
-                                ("module_name", "great_expectations.checkpoint"),
-                                ("class_name", "SimpleCheckpoint"),
-                                ("run_name_template", None),
-                                ("expectation_suite_name", None),
-                                ("batch_request", {}),
-                                ("action_list", []),
-                                ("evaluation_parameters", {}),
-                                ("runtime_configuration", {}),
-                                ("validations", []),
-                                ("profilers", []),
-                                ("ge_cloud_id", None),
-                                ("expectation_suite_ge_cloud_id", None),
-                            ]
-                        ),
-                    },
-                }
-            },
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .get
-    with patch("requests.get", autospec=True) as mock_get:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=ge_cloud_resource_type,
-        )
-        my_store_backend.get(
-            (
-                "checkpoint",
-                "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            )
-        )
-        mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
-            "-4bdd-8a42-3c35cce574c6",
-            params=None,
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .list_keys
-    with patch("requests.get", autospec=True) as mock_get:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=ge_cloud_resource_type,
-        )
-        my_store_backend.list_keys()
-        mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .remove_key
-    with patch("requests.delete", autospec=True) as mock_delete:
-        mock_response = mock_delete.return_value
-        mock_response.status_code = 200
-
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=ge_cloud_resource_type,
-        )
-        my_store_backend.remove_key(
-            (
-                "checkpoint",
-                "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            )
-        )
-        mock_delete.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
-            "-4bdd"
-            "-8a42-3c35cce574c6",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                    "attributes": {"deleted": True},
-                }
-            },
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .set
-    with patch("requests.post", autospec=True) as mock_post:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
-        )
-        my_store_backend.set(("rendered_data_doc", ""), OrderedDict())
-        mock_post.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
-            json={
-                "data": {
-                    "type": "rendered_data_doc",
-                    "attributes": {
-                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-                        "rendered_data_doc": OrderedDict(),
-                    },
-                }
-            },
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .get
-    with patch("requests.get", autospec=True) as mock_get:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
-        )
-        my_store_backend.get(
-            (
-                "rendered_data_doc",
-                "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            )
-        )
-        mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
-            "-4bdd-8a42-3c35cce574c6",
-            params=None,
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .list_keys
-    with patch("requests.get", autospec=True) as mock_get:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
-        )
-        my_store_backend.list_keys()
-        mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .remove_key
-    with patch("requests.delete", autospec=True) as mock_delete:
-        mock_response = mock_delete.return_value
-        mock_response.status_code = 200
-
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
-        )
-        my_store_backend.remove_key(
-            (
-                "rendered_data_doc",
-                "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            )
-        )
-        mock_delete.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
-            "-4bdd"
-            "-8a42-3c35cce574c6",
-            json={
-                "data": {
-                    "type": "rendered_data_doc",
-                    "id": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                    "attributes": {"deleted": True},
-                }
-            },
-            **shared_called_with_request_kwargs,
-        )
-
-
-@pytest.mark.unit
-@pytest.mark.cloud
-def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() -> None:
-    ge_cloud_base_url = "https://app.greatexpectations.io/"
-    ge_cloud_credentials = {
-        "access_token": "1234",
-        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-    }
-    ge_cloud_resource_type = "checkpoint"  # Instead of using enum
-
-    my_store_backend = GeCloudStoreBackend(
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_credentials=ge_cloud_credentials,
-        ge_cloud_resource_type=ge_cloud_resource_type,
-    )
-
-    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
-
-
 @pytest.mark.integration
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
@@ -1774,3 +1533,47 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
     datasources: dict = config_commented_map_from_yaml["datasources"]
     assert len(datasources) == 1
     assert datasources["my_datasource"] == datasource_config
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_move_overwrites_key() -> None:
+    store_backend = InMemoryStoreBackend()
+
+    key_1 = ("my_key_1",)
+    key_2 = ("my_key_2",)
+
+    store_backend.set(key_1, 123)
+    assert store_backend.has_key(key_1)
+    assert not store_backend.has_key(key_2)
+
+    store_backend.move(key_1, key_2)
+    assert not store_backend.has_key(key_1)
+    assert store_backend.has_key(key_2)
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_move_nonexistent_key_raises_error() -> None:
+    store_backend = InMemoryStoreBackend()
+
+    with pytest.raises(KeyError):
+        store_backend.move(("my_fake_key_1",), ("my_fake_key_2",))
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_config_and_defaults() -> None:
+    store_backend = InMemoryStoreBackend()
+    assert store_backend.config == {
+        "class_name": "InMemoryStoreBackend",
+        "fixed_length_key": False,
+        "module_name": "great_expectations.data_context.store.in_memory_store_backend",
+        "suppress_store_backend_id": False,
+    }
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_build_Key() -> None:
+    store_backend = InMemoryStoreBackend()
+    name = "my_backend_key"
+    assert store_backend.build_key(name=name) == DataContextVariableKey(
+        resource_name=name
+    )

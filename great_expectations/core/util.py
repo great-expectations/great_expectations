@@ -26,6 +26,11 @@ from great_expectations.types.base import SerializableDotDict
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from great_expectations.util import convert_decimal_to_float
 
+try:
+    from pyspark.sql.types import StructType
+except ImportError:
+    StructType = None  # type: ignore
+
 logger = logging.getLogger(__name__)
 
 
@@ -277,6 +282,11 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
 
     if isinstance(data, RunIdentifier):
         return data.to_json_dict()
+
+    # PySpark schema serialization
+    if StructType is not None:
+        if isinstance(data, StructType):
+            return dict(data.jsonValue())
 
     else:
         raise TypeError(

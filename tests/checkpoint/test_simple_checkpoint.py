@@ -13,7 +13,8 @@ from great_expectations.checkpoint.checkpoint import (
     LegacyCheckpoint,
     SimpleCheckpoint,
 )
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core import ExpectationValidationResult
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -74,19 +75,6 @@ def context_with_data_source_and_empty_suite(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    datasources = context.list_datasources()
-    assert datasources[0]["class_name"] == "Datasource"
-    assert "my_special_data_connector" in datasources[0]["data_connectors"].keys()
-    context.create_expectation_suite("one", overwrite_existing=True)
-    assert context.list_expectation_suite_names() == ["one"]
-    return context
-
-
-@pytest.fixture
-def context_with_data_source_and_empty_suite_with_templates(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     datasources = context.list_datasources()
     assert datasources[0]["class_name"] == "Datasource"
     assert "my_special_data_connector" in datasources[0]["data_connectors"].keys()
@@ -3529,3 +3517,75 @@ def test_simple_checkpoint_result_validations_include_rendered_content(
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
+
+
+@pytest.mark.integration
+def test_running_spark_simplecheckpoint(
+    context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
+):
+    context = context_with_single_csv_spark_and_suite
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2020",
+        batch_spec_passthrough={
+            "reader_options": {
+                "header": True,
+            }
+        },
+    )
+    checkpoint_config: dict = {
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "class_name": "SimpleCheckpoint",
+        "validations": [
+            {
+                "batch_request": single_batch_batch_request,
+                "expectation_suite_name": "my_expectation_suite",
+            }
+        ],
+    }
+    context.add_checkpoint(**checkpoint_config)
+    results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+    assert results.success is True
+
+
+@pytest.mark.integration
+def test_run_spark_checkpoint_with_schema(
+    context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
+):
+    context = context_with_single_csv_spark_and_suite
+    single_batch_batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="configured_data_connector_multi_batch_asset",
+        data_asset_name="yellow_tripdata_2020",
+        batch_spec_passthrough={
+            "reader_options": {
+                "header": True,
+                "schema": spark_df_taxi_data_schema,
+            }
+        },
+    )
+    checkpoint_config: dict = {
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "class_name": "SimpleCheckpoint",
+        "validations": [
+            {
+                "batch_request": single_batch_batch_request,
+                "expectation_suite_name": "my_expectation_suite",
+            }
+        ],
+        "action_list": [
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+    }
+    context.add_checkpoint(**checkpoint_config)
+    results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+
+    assert results.success is True
