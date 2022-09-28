@@ -51,6 +51,7 @@ from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.exceptions import (
+    DataContextError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -59,6 +60,12 @@ from great_expectations.expectations.registry import _registered_expectations
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
+
+    from great_expectations.data_context.data_context import (
+        BaseDataContext,
+        CloudDataContext,
+        DataContext,
+    )
 
 try:
     from typing import TypeGuard  # type: ignore[attr-defined]
@@ -1656,10 +1663,57 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
-def get_context():
-    from great_expectations.data_context.data_context import DataContext
+def get_context(
+    project_config: Optional[dict] = None,
+    context_root_dir: Optional[str] = None,
+    runtime_environment: Optional[dict] = None,
+    ge_cloud_base_url: Optional[str] = None,
+    ge_cloud_access_token: Optional[str] = None,
+    ge_cloud_organization_id: Optional[str] = None,
+) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
+    """
+    TODO: this will eventually return FileDataContext and EphemeralDataContext
+    Args:
+        project_config ():
+        context_root_dir ():
+        runtime_environment ():
+        ge_cloud_base_url ():
+        ge_cloud_access_token ():
+        ge_cloud_organization_id ():
 
-    return DataContext()
+    Returns:
+
+    """
+    from great_expectations.data_context.data_context import (
+        BaseDataContext,
+        CloudDataContext,
+        DataContext,
+    )
+
+    if CloudDataContext.is_ge_cloud_config_available(
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_access_token=ge_cloud_access_token,
+        ge_cloud_organization_id=ge_cloud_organization_id,
+    ):
+        return CloudDataContext(
+            project_config=project_config,
+            runtime_environment=runtime_environment,
+            context_root_dir=context_root_dir,
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+    elif project_config is not None:
+        return BaseDataContext(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+        )
+    else:
+        return DataContext(
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+        )
 
 
 def is_sane_slack_webhook(url: str) -> bool:
