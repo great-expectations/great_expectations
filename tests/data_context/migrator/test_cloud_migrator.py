@@ -8,6 +8,9 @@ import great_expectations as gx
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import CloudMigrator
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 
 
 @pytest.mark.unit
@@ -20,25 +23,19 @@ def test__send_configuration_bundle_sends_valid_http_request(
     ge_cloud_organization_id = "229616e2-1bbc-4849-8161-4be89b79bd36"
     ge_cloud_access_token = "d7asdh2efads9afah2e0fadf8eh20da8"
 
-    # Mock any external dependencies so we're only testing HTTP request logic
-    mock_context = mock.MagicMock()
-    configuration_bundle = mock.MagicMock()
-    serializer = mock.MagicMock()
-    serializer.serialize.return_value = serialized_configuration_bundle
-
     migrator = gx.CloudMigrator(
-        context=mock_context,
+        context=mock.MagicMock(),
         ge_cloud_base_url=ge_cloud_base_url,
         ge_cloud_organization_id=ge_cloud_organization_id,
         ge_cloud_access_token=ge_cloud_access_token,
     )
 
     with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        _, _ = migrator._send_configuration_bundle(
-            configuration_bundle=configuration_bundle, serializer=serializer
+        migrator._send_configuration_bundle(
+            serialized_bundle=serialized_configuration_bundle,
         )
 
-    mock_post.assert_called_with(
+    mock_post.assert_called_once_with(
         mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/migration",
         json={
@@ -51,6 +48,53 @@ def test__send_configuration_bundle_sends_valid_http_request(
             }
         },
     )
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test__send_validation_results_sends_valid_http_request():
+    # These values aren't actual creds but resemble values used in production
+    ge_cloud_base_url = "https://app.test.greatexpectations.io"
+    ge_cloud_organization_id = "229616e2-1bbc-4849-8161-4be89b79bd36"
+    ge_cloud_access_token = "d7asdh2efads9afah2e0fadf8eh20da8"
+
+    migrator = gx.CloudMigrator(
+        context=mock.MagicMock(),
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_organization_id=ge_cloud_organization_id,
+        ge_cloud_access_token=ge_cloud_access_token,
+    )
+
+    validation_results = [
+        {
+            "evaluation_parameters": {},
+            "meta": {},
+            "results": [],
+            "statistics": {},
+            "success": True,
+        }
+        for _ in range(5)
+    ]
+
+    with mock.patch("requests.Session.post", autospec=True) as mock_post:
+        migrator._send_validation_results(
+            serialized_validation_results=validation_results
+        )
+
+    mock_post.assert_called_with(
+        mock.ANY,  # requests.Session object
+        f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/expectation-validation-results",
+        json={
+            "data": {
+                "type": GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT,
+                "attributes": {
+                    "organization_id": ge_cloud_organization_id,
+                    "result": validation_results[0],
+                },
+            }
+        },
+    )
+    assert mock_post.call_count == 5
 
 
 @pytest.fixture
