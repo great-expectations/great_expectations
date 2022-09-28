@@ -1,5 +1,5 @@
 """These tests exercise ConfigurationBundle including Serialization."""
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple
 
 import pytest
 
@@ -80,14 +80,16 @@ class StubBaseDataContext:
         self,
         anonymized_usage_statistics_config: Optional[
             AnonymizedUsageStatisticsConfig
-        ] = None,
+        ] = AnonymizedUsageStatisticsConfig(enabled=True),
+        checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint", ),
     ):
-        """Set the anonymous usage statistics configuration.
+        """Set the configuration of the stub data context.
 
         Args:
             anonymized_usage_statistics_config: Config to use for anonymous usage statistics
         """
         self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
+        self._checkpoint_names = checkpoint_names
 
     @property
     def _data_context_variables(self) -> StubUsageStats:
@@ -136,7 +138,7 @@ class StubBaseDataContext:
         return ExpectationSuite(expectation_suite_name=name)
 
     def list_checkpoints(self) -> List[str]:
-        return ["my_checkpoint"]
+        return list(self._checkpoint_names)
 
     def list_profilers(self) -> List[str]:
         return ["my_profiler"]
@@ -237,7 +239,7 @@ def stub_serialized_configuration_bundle(serialized_configuration_bundle: dict) 
 @pytest.mark.cloud
 @pytest.mark.unit
 class TestConfigurationBundleSerialization:
-    def test_configuration_bundle_serialization(
+    def test_configuration_bundle_serialization_all_fields(
         self,
         stub_base_data_context: StubBaseDataContext,
         stub_serialized_configuration_bundle: dict,
@@ -264,6 +266,49 @@ class TestConfigurationBundleSerialization:
         expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
 
         assert serialized_bundle == expected_serialized_bundle
+
+
+    def test_configuration_bundle_serialization_no_checkpoints(
+        self,
+        stub_serialized_configuration_bundle: dict,
+    ):
+        """What does this test and why?
+
+        Ensure configuration bundle is serialized correctly.
+        """
+
+        context = StubBaseDataContext(checkpoint_names=tuple())
+
+        config_bundle = ConfigurationBundle(context)
+
+        serializer = ConfigurationBundleJsonSerializer(
+            schema=ConfigurationBundleSchema()
+        )
+
+        serialized_bundle: dict = serializer.serialize(config_bundle)
+
+        expected_serialized_bundle = stub_serialized_configuration_bundle
+
+        # We expect no checkpoints
+        expected_serialized_bundle["checkpoints"] = []
+
+        # Remove meta before comparing since it contains the GX version
+        serialized_bundle["expectation_suites"][0].pop("meta", None)
+        expected_serialized_bundle["expectation_suites"][0].pop("meta", None)
+
+        assert serialized_bundle == expected_serialized_bundle
+
+    def test_configuration_bundle_serialization_no_datasources(self):
+        pass
+
+    def test_configuration_bundle_serialization_no_expectation_suites(self):
+        pass
+
+    def test_configuration_bundle_serialization_no_profilers(self):
+        pass
+
+    def test_configuration_bundle_serialization_no_validation_results(self):
+        pass
 
     def test_anonymous_usage_statistics_removed_during_serialization(
         self,
