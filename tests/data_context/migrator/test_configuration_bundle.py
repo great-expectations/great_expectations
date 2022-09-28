@@ -88,6 +88,7 @@ class StubBaseDataContext:
         expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
         profiler_names: Tuple[Optional[str]] = ("my_profiler", ),
         validation_results_keys: Tuple[Optional[str]] = ("some_key", ),
+        datasource_names: Tuple[Optional[str]] = ("my_datasource", ),
     ):
         """Set the configuration of the stub data context.
 
@@ -99,6 +100,7 @@ class StubBaseDataContext:
         self._expectation_suite_names = expectation_suite_names
         self._profiler_names = profiler_names
         self._validation_results_keys = validation_results_keys
+        self._datasource_names = datasource_names
 
     @property
     def _data_context_variables(self) -> StubUsageStats:
@@ -130,7 +132,7 @@ class StubBaseDataContext:
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         # Datasource is a dummy since we just want the DatasourceConfig from the store, not an
         # actual initialized datasource.
-        return {"my_datasource": DummyDatasource()}
+        return {datasource_name: DummyDatasource() for datasource_name in self._datasource_names}
 
     @property
     def checkpoint_store(self) -> StubCheckpointStore:
@@ -291,6 +293,7 @@ class TestConfigurationBundleSerialization:
             expectation_suite_names=tuple(),
             profiler_names=tuple(),
             validation_results_keys=tuple(),
+            datasource_names=tuple(),
         )
 
         config_bundle = ConfigurationBundle(context)

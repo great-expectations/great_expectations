@@ -92,18 +92,7 @@ def empty_serialized_configuration_bundle() -> dict:
             "stores": None,
             "validations_store_name": None,
         },
-        "datasources": [
-            {
-                "class_name": "Datasource",
-                "data_connectors": {},
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "module_name": "great_expectations.datasource",
-                "name": "my_datasource",
-            }
-        ],
+        "datasources": [],
         "expectation_suites": [],
         "profilers": [],
         "validation_results": [],
