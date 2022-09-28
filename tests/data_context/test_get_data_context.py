@@ -126,7 +126,7 @@ def test_config_returns_base_context_overrides_yml(tmp_path: pathlib.Path):
     },
     clear=True,
 )
-def test_return_cloud(
+def test_cloud_config_in_env_returns_cloud_context(
     mock_request,
     request_headers,
 ):
@@ -149,7 +149,7 @@ def test_return_cloud(
     },
     clear=True,
 )
-def test_return_cloud(
+def test_most_cloud_config_in_param_base_url_in_env_returns_cloud_context(
     mock_request,
     request_headers,
 ):
@@ -167,7 +167,7 @@ def test_return_cloud(
 
 @pytest.mark.cloud
 @mock.patch("requests.get")
-def test_return_cloud_all_sent_as_parameters(
+def test_all_cloud_config_in_param_returns_cloud_context(
     mock_request,
     request_headers,
 ):
@@ -187,7 +187,7 @@ def test_return_cloud_all_sent_as_parameters(
 
 @pytest.mark.cloud
 @mock.patch("requests.get")
-def test_config_override_default_cloud_yml(
+def test_all_cloud_config_in_param_returns_cloud_context_and_in_memory_config_overrides(
     mock_request,
     request_headers,
 ):
