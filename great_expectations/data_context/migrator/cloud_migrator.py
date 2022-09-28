@@ -217,6 +217,7 @@ class CloudMigrator:
             attributes_key="bundle",
             attributes_value=serialized_bundle,
         )
+        print(response)
         # TODO: Handle success/failure cases
 
     def _prepare_validation_results(self, serialized_bundle: dict) -> List[dict]:
@@ -243,6 +244,7 @@ class CloudMigrator:
                 attributes_key=attributes_key,
                 attributes_value=validation_result,
             )
+            print(response)
             # TODO: Handle success/failure cases
 
     def _post_to_cloud_backend(
@@ -276,6 +278,8 @@ class CloudMigrator:
         except requests.exceptions.JSONDecodeError:
             response_json = cast(AnyPayload, {})
             success = False
+
+        print(response_json)
 
         # TODO: Handle success/failure cases and parse errors from Cloud responses
         message = ""
