@@ -18,12 +18,12 @@ class AtomicRendererPrefix(Enum):
     PRESCRIPTIVE = "atomic.prescriptive"
     DIAGNOSTIC = "atomic.diagnostic"
 
-    def __eq__(self, other: Union[str, AtomicRendererPrefix]):
+    def __eq__(self, other: Union[str, AtomicRendererPrefix]) -> bool:
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
 
-    def __hash__(self: AtomicRendererPrefix):
+    def __hash__(self: AtomicRendererPrefix) -> int:
         return hash(self.value)
 
 
@@ -33,12 +33,12 @@ class FailedAtomicRendererName(Enum):
     PRESCRIPTIVE = ".".join([AtomicRendererPrefix.PRESCRIPTIVE.value, "failed"])
     DIAGNOSTIC = ".".join([AtomicRendererPrefix.DIAGNOSTIC.value, "failed"])
 
-    def __eq__(self, other: Union[str, FailedAtomicRendererName]):
+    def __eq__(self, other: Union[str, FailedAtomicRendererName]) -> bool:
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
 
-    def __hash__(self: FailedAtomicRendererName):
+    def __hash__(self: FailedAtomicRendererName) -> int:
         return hash(self.value)
 
 
