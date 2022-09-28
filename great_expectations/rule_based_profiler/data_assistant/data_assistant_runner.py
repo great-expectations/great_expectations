@@ -304,8 +304,8 @@ class DataAssistantRunner:
                     )
                     domain_type_attribute_name_to_parameter_map[key] = parameter
                 elif parameter.default != property_value and property_value is not None:
-                    # For now, prevent customization if default values conflict unless the default values are None.
-                    # In the future, enable at "Rule" level.
+                    # For now, prevent customization if default values conflict unless the default DomainBuilder value
+                    # is None. In the future, enable at "Rule" level.
                     domain_type_attribute_name_to_parameter_map.pop(key)
                     conflicting_domain_type_attribute_names.append(key)
 
