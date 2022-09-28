@@ -25,9 +25,11 @@ from great_expectations.rule_based_profiler import RuleBasedProfiler
 
 
 class StubUsageStats:
-
-    def __init__(self, anonymized_usage_statistics_config: AnonymizedUsageStatisticsConfig):
+    def __init__(
+        self, anonymized_usage_statistics_config: AnonymizedUsageStatisticsConfig
+    ):
         self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
+
     @property
     def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
         return self._anonymized_usage_statistics_config
@@ -76,7 +78,9 @@ class StubBaseDataContext:
 
     def __init__(
         self,
-        anonymized_usage_statistics_config: Optional[AnonymizedUsageStatisticsConfig] = None,
+        anonymized_usage_statistics_config: Optional[
+            AnonymizedUsageStatisticsConfig
+        ] = None,
     ):
         """Set the anonymous usage statistics configuration.
 
@@ -87,7 +91,9 @@ class StubBaseDataContext:
 
     @property
     def _data_context_variables(self) -> StubUsageStats:
-        return StubUsageStats(anonymized_usage_statistics_config=self._anonymized_usage_statistics_config)
+        return StubUsageStats(
+            anonymized_usage_statistics_config=self._anonymized_usage_statistics_config
+        )
 
     @property
     def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
@@ -141,12 +147,18 @@ class StubBaseDataContext:
 
 @pytest.fixture
 def stub_base_data_context() -> StubBaseDataContext:
-    return StubBaseDataContext(anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(enabled=True))
+    return StubBaseDataContext(
+        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(enabled=True)
+    )
 
 
 @pytest.fixture
 def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
-    return StubBaseDataContext(anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(enabled=False))
+    return StubBaseDataContext(
+        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(
+            enabled=False
+        )
+    )
 
 
 @pytest.fixture
@@ -191,7 +203,7 @@ class TestConfigurationBundleCreate:
         config_bundle = ConfigurationBundle(context)
 
         # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
-        # DataContextConfig
+        # DataContextConfig and enabled by default.
         assert config_bundle.is_usage_stats_enabled()
 
     def test_configuration_bundle_created_usage_stats_disabled(
