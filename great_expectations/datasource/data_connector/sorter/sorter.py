@@ -14,7 +14,7 @@ class Sorter:
         if orderby is None or orderby == "asc":
             reverse: bool = False
         elif orderby == "desc":
-            reverse: bool = True
+            reverse = True
         else:
             raise ge_exceptions.SorterError(
                 f'Illegal sort order "{orderby}" for attribute "{name}".'
