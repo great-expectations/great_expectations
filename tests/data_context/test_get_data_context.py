@@ -1,4 +1,3 @@
-import os
 import pathlib
 from unittest import mock
 
@@ -8,7 +7,7 @@ import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.exceptions import ConfigNotFoundError, DataContextError
+from great_expectations.exceptions import ConfigNotFoundError
 from tests.test_utils import working_directory
 
 
