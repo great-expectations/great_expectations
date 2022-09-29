@@ -122,7 +122,8 @@ function sanitizeText(text) {
     lines = text.split("\n")
     // TODO: This logic here should probably be cleaned up with regex? Let's also remove the resulting whitespace
     lines = lines.filter(l => !(l.includes("<snippet") || l.includes("snippet>")))
-    return lines.join("\n")
+    text = lines.join("\n")
+    return text.trim()
 }
 
 
