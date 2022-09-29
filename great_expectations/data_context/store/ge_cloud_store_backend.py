@@ -134,6 +134,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GeCloudRESTResource.DATA_CONTEXT: "data_context_config",
         GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
         GeCloudRESTResource.EXPECTATION_SUITE: "suite",
+        GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "result",
         GeCloudRESTResource.PROFILER: "profiler",
         GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
         # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
