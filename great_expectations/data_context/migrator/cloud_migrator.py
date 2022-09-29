@@ -196,7 +196,7 @@ class CloudMigrator:
     def _warn_about_bundle_contains_datasources(self) -> None:
         logger.warning(
             "Since your existing context includes one or more datasources, "
-            "please note that if your credentials are included in the datasource config "
+            "please note that if your credentials are included in the datasource config, "
             "they will be sent to the GX Cloud backend. We recommend storing your credentials "
             "locally in config_variables.yml or in environment variables referenced "
             "from your configuration rather than directly in your configuration. Please see "
@@ -231,7 +231,7 @@ class CloudMigrator:
         print(summary)
 
         for obj in obj_collection[:10]:
-            print(f"    {obj.name}")
+            print(f"    {obj['name']}")
 
         if length > 10:
             extra = length - 10
