@@ -114,7 +114,7 @@ function parseFile(file) {
  * @param {string} text - The text to be sanitized.
  * @returns {string} The sanitized string.
  */
-function sanitizeText(text: string) {
+function sanitizeText(text) {
   text = text.trim()
   if (text.endsWith("#")) {
     text = text.substring(0, text.length - 1)
@@ -122,7 +122,6 @@ function sanitizeText(text: string) {
   return (
     text
       .split("\n")
-      // TODO: This logic here should probably be cleaned up with regex? Let's also remove the resulting whitespace
       .filter((l) => !(l.includes("<snippet") || l.includes("snippet>")))
       .join("\n")
       .trim()
