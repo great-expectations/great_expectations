@@ -214,7 +214,7 @@ class CloudMigrator:
             ("Profiler", configuration_bundle.profilers),
         )
 
-        print("[Step 1/4: Bundling context configuration]")
+        print("[Step 1/4]: Bundling context configuration")
         for name, collection in to_print:
             self._print_object_summary(obj_name=name, obj_collection=collection)
 
@@ -245,13 +245,13 @@ class CloudMigrator:
         return serialized_bundle
 
     def _prepare_validation_results(self, serialized_bundle: dict) -> Dict[str, dict]:
-        print("[Step 2/4: Preparing validation results]")
+        print("[Step 2/4]: Preparing validation results")
         return serialized_bundle.pop("validation_results")
 
     def _send_configuration_bundle(
         self, serialized_bundle: dict, test_migrate: bool
     ) -> bool:
-        print("[Step 3/4: Sending context configuration]")
+        print("[Step 3/4]: Sending context configuration")
         if test_migrate:
             return True
 
@@ -278,7 +278,7 @@ class CloudMigrator:
         serialized_validation_results: Dict[str, dict],
         test_migrate: bool,
     ) -> None:
-        print("[Step 4/4: Sending validation results]")
+        print("[Step 4/4]: Sending validation results]")
         if test_migrate:
             return
 
