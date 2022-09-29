@@ -3137,7 +3137,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     )
 
     # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.
-    context.variables.include_rendered_content.globally = True
+    context.variables.include_rendered_content.expectation_suite = True
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
