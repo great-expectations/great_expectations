@@ -372,7 +372,7 @@ class CloudMigrator:
         print(
             "Thank you for using Great Expectations!\n\n"
             "We will now begin the migration process to GX Cloud. First we will bundle "
-            "your existing context configuration and send it to the cloud backend. Then "
+            "your existing context configuration and send it to the Cloud backend. Then "
             "we will send each of your validation results.\n"
         )
 

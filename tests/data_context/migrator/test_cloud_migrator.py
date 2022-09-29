@@ -311,7 +311,7 @@ def test__migrate_to_cloud_happy_path_prints_to_stdout(
     expected_statements = [
         "Thank you for using Great Expectations!",
         "We will now begin the migration process to GX Cloud.",
-        "First we will bundle your existing context configuration and send it to the cloud backend.",
+        "First we will bundle your existing context configuration and send it to the Cloud backend.",
         "Then we will send each of your validation results.",
         "[Step 1/4]: Bundling context configuration",
         "Bundled 1 Datasource(s):",
@@ -351,7 +351,7 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     expected_statements = [
         "Thank you for using Great Expectations!",
         "We will now begin the migration process to GX Cloud.",
-        "First we will bundle your existing context configuration and send it to the cloud backend.",
+        "First we will bundle your existing context configuration and send it to the Cloud backend.",
         "Then we will send each of your validation results.",
         "[Step 1/4]: Bundling context configuration",
         "Bundled 1 Datasource(s):",
@@ -398,7 +398,7 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
     expected_statements = [
         "Thank you for using Great Expectations!",
         "We will now begin the migration process to GX Cloud.",
-        "First we will bundle your existing context configuration and send it to the cloud backend.",
+        "First we will bundle your existing context configuration and send it to the Cloud backend.",
         "Then we will send each of your validation results.",
         "[Step 1/4]: Bundling context configuration",
         "Bundled 1 Datasource(s):",
