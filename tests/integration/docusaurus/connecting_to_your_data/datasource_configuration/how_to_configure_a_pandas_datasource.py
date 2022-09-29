@@ -100,6 +100,13 @@ def get_full_pandas_inferred_datasource_single_batch():
                     "pattern": "(.*)\\.csv",
                     "group_names": ["data_asset_name"],
                 },
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
             }
         },
     }
@@ -124,6 +131,13 @@ def get_full_pandas_inferred_datasource_multi_batch():
                 "default_regex": {
                     "pattern": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv",
                     "group_names": ["data_asset_name", "month"],
+                },
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
                 },
             }
         },
@@ -152,6 +166,13 @@ def get_full_pandas_configured_datasource_single_batch():
                         "group_names": ["month"],
                     }
                 },
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
             }
         },
     }
@@ -179,6 +200,13 @@ def get_full_pandas_configured_datasource_multi_batch():
                         "group_names": ["month"],
                     }
                 },
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
             }
         },
     }
@@ -199,6 +227,13 @@ def get_full_pandas_runtime_datasource():
         "data_connectors": {
             "name_of_my_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
                 "batch_identifiers": ["batch_timestamp"],
             }
         },
