@@ -1,5 +1,5 @@
 """These tests exercise ConfigurationBundle including Serialization."""
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import pytest
 
@@ -25,9 +25,14 @@ from great_expectations.rule_based_profiler import RuleBasedProfiler
 
 
 class StubUsageStats:
+    def __init__(
+        self, anonymized_usage_statistics_config: AnonymizedUsageStatisticsConfig
+    ):
+        self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
+
     @property
     def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
-        return AnonymizedUsageStatisticsConfig(enabled=True)
+        return self._anonymized_usage_statistics_config
 
 
 class StubCheckpointStore:
@@ -36,9 +41,12 @@ class StubCheckpointStore:
 
 
 class StubValidationsStore:
+    def __init__(self, keys: Tuple[Optional[str]] = ("some_key",)):
+        self._keys = keys
+
     def list_keys(self):
         # Note: Key just has to return an iterable here
-        return ["some_key"]
+        return list(self._keys)
 
     def get(self, key):
         # Note: Key is unused
@@ -73,21 +81,32 @@ class StubBaseDataContext:
 
     def __init__(
         self,
-        anonymous_usage_stats_enabled: bool = True,
-        anonymous_usage_stats_is_none: bool = False,
+        anonymized_usage_statistics_config: Optional[
+            AnonymizedUsageStatisticsConfig
+        ] = AnonymizedUsageStatisticsConfig(enabled=True),
+        checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint",),
+        expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
+        profiler_names: Tuple[Optional[str]] = ("my_profiler",),
+        validation_results_keys: Tuple[Optional[str]] = ("some_key",),
+        datasource_names: Tuple[Optional[str]] = ("my_datasource",),
     ):
-        """Set the anonymous usage statistics configuration.
+        """Set the configuration of the stub data context.
 
         Args:
-            anonymous_usage_stats_enabled: Set usage stats "enabled" flag in config.
-            anonymous_usage_stats_is_none: Set usage stats to None, overrides anonymous_usage_stats_enabled.
+            anonymized_usage_statistics_config: Config to use for anonymous usage statistics
         """
-        self._anonymous_usage_stats_enabled = anonymous_usage_stats_enabled
-        self._anonymous_usage_stats_is_none = anonymous_usage_stats_is_none
+        self._anonymized_usage_statistics_config = anonymized_usage_statistics_config
+        self._checkpoint_names = checkpoint_names
+        self._expectation_suite_names = expectation_suite_names
+        self._profiler_names = profiler_names
+        self._validation_results_keys = validation_results_keys
+        self._datasource_names = datasource_names
 
     @property
     def _data_context_variables(self) -> StubUsageStats:
-        return StubUsageStats()
+        return StubUsageStats(
+            anonymized_usage_statistics_config=self._anonymized_usage_statistics_config
+        )
 
     @property
     def anonymous_usage_statistics(self) -> AnonymizedUsageStatisticsConfig:
@@ -100,17 +119,8 @@ class StubBaseDataContext:
     @property
     def variables(self) -> DataContextVariables:
 
-        # anonymous_usage_statistics set based on constructor parameters.
-        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig]
-        if self._anonymous_usage_stats_is_none:
-            anonymous_usage_statistics = None
-        else:
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-                enabled=self._anonymous_usage_stats_enabled
-            )
-
         config = DataContextConfig(
-            anonymous_usage_statistics=anonymous_usage_statistics
+            anonymous_usage_statistics=self._anonymized_usage_statistics_config
         )
         return EphemeralDataContextVariables(config=config)
 
@@ -122,7 +132,10 @@ class StubBaseDataContext:
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         # Datasource is a dummy since we just want the DatasourceConfig from the store, not an
         # actual initialized datasource.
-        return {"my_datasource": DummyDatasource()}
+        return {
+            datasource_name: DummyDatasource()
+            for datasource_name in self._datasource_names
+        }
 
     @property
     def checkpoint_store(self) -> StubCheckpointStore:
@@ -130,19 +143,19 @@ class StubBaseDataContext:
 
     @property
     def validations_store(self) -> StubValidationsStore:
-        return StubValidationsStore()
+        return StubValidationsStore(keys=self._validation_results_keys)
 
     def list_expectation_suite_names(self) -> List[str]:
-        return ["my_suite"]
+        return list(self._expectation_suite_names)
 
     def get_expectation_suite(self, name: str) -> ExpectationSuite:
         return ExpectationSuite(expectation_suite_name=name)
 
     def list_checkpoints(self) -> List[str]:
-        return ["my_checkpoint"]
+        return list(self._checkpoint_names)
 
     def list_profilers(self) -> List[str]:
-        return ["my_profiler"]
+        return list(self._profiler_names)
 
     def get_profiler(self, name: str) -> RuleBasedProfiler:
         return RuleBasedProfiler(name, config_version=1.0, rules={})
@@ -150,22 +163,28 @@ class StubBaseDataContext:
 
 @pytest.fixture
 def stub_base_data_context() -> StubBaseDataContext:
-    return StubBaseDataContext()
+    return StubBaseDataContext(
+        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(enabled=True)
+    )
 
 
 @pytest.fixture
 def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
-    return StubBaseDataContext(anonymous_usage_stats_enabled=False)
+    return StubBaseDataContext(
+        anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(
+            enabled=False
+        )
+    )
 
 
 @pytest.fixture
 def stub_base_data_context_no_anonymous_usage_stats() -> StubBaseDataContext:
-    return StubBaseDataContext(anonymous_usage_stats_is_none=True)
+    return StubBaseDataContext(anonymized_usage_statistics_config=None)
 
 
+@pytest.mark.cloud
+@pytest.mark.unit
 class TestConfigurationBundleCreate:
-    @pytest.mark.cloud
-    @pytest.mark.unit
     def test_configuration_bundle_created(
         self,
         stub_base_data_context: StubBaseDataContext,
@@ -187,8 +206,22 @@ class TestConfigurationBundleCreate:
         assert len(config_bundle.validation_results) == 1
         assert len(config_bundle.datasources) == 1
 
-    @pytest.mark.cloud
-    @pytest.mark.unit
+    def test_is_usage_statistics_key_set_if_key_not_present(
+        self, stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
+    ):
+        """What does this test and why?
+
+        The ConfigurationBundle should handle a context that has not set the config for
+         anonymous_usage_statistics.
+        """
+        context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
+
+        config_bundle = ConfigurationBundle(context)
+
+        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
+        # DataContextConfig and enabled by default.
+        assert config_bundle.is_usage_stats_enabled()
+
     def test_configuration_bundle_created_usage_stats_disabled(
         self,
         stub_base_data_context_anonymous_usage_stats_present_but_disabled: StubBaseDataContext,
@@ -206,22 +239,6 @@ class TestConfigurationBundleCreate:
 
         assert not config_bundle.is_usage_stats_enabled()
 
-    def test_is_usage_statistics_key_set_if_key_not_present(
-        self, stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
-    ):
-        """What does this test and why?
-
-        The ConfigurationBundle should handle a context that has not set the config for
-         anonymous_usage_statistics.
-        """
-        context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
-
-        config_bundle = ConfigurationBundle(context)
-
-        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
-        # DataContextConfig
-        assert config_bundle.is_usage_stats_enabled()
-
 
 @pytest.fixture
 def stub_serialized_configuration_bundle(serialized_configuration_bundle: dict) -> dict:
@@ -233,10 +250,10 @@ def stub_serialized_configuration_bundle(serialized_configuration_bundle: dict) 
     return serialized_configuration_bundle
 
 
+@pytest.mark.cloud
+@pytest.mark.unit
 class TestConfigurationBundleSerialization:
-    @pytest.mark.cloud
-    @pytest.mark.unit
-    def test_configuration_bundle_serialization(
+    def test_configuration_bundle_serialization_all_fields(
         self,
         stub_base_data_context: StubBaseDataContext,
         stub_serialized_configuration_bundle: dict,
@@ -264,8 +281,33 @@ class TestConfigurationBundleSerialization:
 
         assert serialized_bundle == expected_serialized_bundle
 
-    @pytest.mark.cloud
-    @pytest.mark.unit
+    def test_configuration_bundle_serialization_empty_fields(
+        self,
+        empty_serialized_configuration_bundle: dict,
+    ):
+        """What does this test and why?
+
+        Ensure configuration bundle is serialized correctly.
+        """
+
+        context = StubBaseDataContext(
+            checkpoint_names=tuple(),
+            expectation_suite_names=tuple(),
+            profiler_names=tuple(),
+            validation_results_keys=tuple(),
+            datasource_names=tuple(),
+        )
+
+        config_bundle = ConfigurationBundle(context)
+
+        serializer = ConfigurationBundleJsonSerializer(
+            schema=ConfigurationBundleSchema()
+        )
+
+        serialized_bundle: dict = serializer.serialize(config_bundle)
+
+        assert serialized_bundle == empty_serialized_configuration_bundle
+
     def test_anonymous_usage_statistics_removed_during_serialization(
         self,
         stub_base_data_context: StubBaseDataContext,
