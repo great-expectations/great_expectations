@@ -1,17 +1,32 @@
-"""TODO: Add docstring"""
+"""
+The CloudMigrator is reponsible for collecting elements of user's project config,
+bundling them, and sending that bundle to the GX Cloud backend.
+
+Upon successful migration, a user's config will be saved in Cloud and subsequent uses of
+GX should be done through the Cloud UI.
+
+Please see ConfigurationBundle for more information on the bundle's contents.
+
+Usage:
+```
+# Test migration before actually going through the process
+# Once tested, the boolean flag is to be flipped
+migrator = gx.CloudMigrator.migrate(context=context, test_migrate=True)
+
+# If any validations failed during the `migrate` call
+migrator.retry_unsuccessful_validations()
+```
+"""
 import logging
-from dataclasses import dataclass
-from typing import List, NamedTuple, Optional, cast
+from typing import Dict, List, NamedTuple, Optional
 
 import requests
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.http import create_session
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
-)
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -24,24 +39,14 @@ from great_expectations.data_context.migrator.configuration_bundle import (
     ConfigurationBundleSchema,
 )
 from great_expectations.data_context.store.ge_cloud_store_backend import (
-    AnyPayload,
-    ErrorPayload,
     GeCloudRESTResource,
     GeCloudStoreBackend,
     construct_json_payload,
     construct_url,
-)
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,
+    get_user_friendly_error_message,
 )
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class SendValidationResultsErrorDetails:
-    # TODO: Implementation
-    pass
 
 
 class MigrationResponse(NamedTuple):
@@ -82,6 +87,8 @@ class CloudMigrator:
 
         self._session = create_session(access_token=ge_cloud_access_token)
 
+        self._unsuccessful_validations: Dict[str, dict] = {}
+
     @classmethod
     def migrate(
         cls,
@@ -90,7 +97,7 @@ class CloudMigrator:
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
-    ) -> None:
+    ) -> "CloudMigrator":
         """Migrate your Data Context to GX Cloud.
 
         Args:
@@ -105,7 +112,7 @@ class CloudMigrator:
                 via environment variable GE_CLOUD_ORGANIZATION_ID
 
         Returns:
-            None
+            CloudMigrator instance
         """
         event = UsageStatsEvents.CLOUD_MIGRATE.value
         event_payload = {"organization_id": ge_cloud_organization_id}
@@ -124,6 +131,7 @@ class CloudMigrator:
                     event_payload=event_payload,
                     success=True,
                 )
+            return cloud_migrator
         except Exception as e:
             # Note we send an event on any exception here
             if not test_migrate:
@@ -137,19 +145,17 @@ class CloudMigrator:
                 "Migration failed. Please check the error message for more details."
             ) from e
 
-    @classmethod
-    def migrate_validation_result(
-        cls,
-        context: AbstractDataContext,
-        validation_result_suite_identifier: ValidationResultIdentifier,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ):
-        raise NotImplementedError("This will be implemented soon!")
+    def retry_unsuccessful_validations(self) -> None:
+        validations = self._unsuccessful_validations
+        if not validations:
+            print("No unsuccessful validations found!")
+            return
+
+        self._process_validation_results(serialized_validation_results=validations)
+        if validations:
+            self._print_unsuccessful_validation_message()
 
     def _migrate_to_cloud(self, test_migrate: bool) -> None:
-        """TODO: This is a rough outline of the steps to take during the migration, verify against the spec before release."""
         self._print_migration_introduction_message()
 
         configuration_bundle: ConfigurationBundle = ConfigurationBundle(
@@ -169,11 +175,15 @@ class CloudMigrator:
             serialized_bundle=serialized_bundle
         )
 
-        if not test_migrate:
-            self._send_configuration_bundle(serialized_bundle=serialized_bundle)
-            self._send_validation_results(
-                serialized_validation_results=serialized_validation_results,
-            )
+        if not self._send_configuration_bundle(
+            serialized_bundle=serialized_bundle, test_migrate=test_migrate
+        ):
+            return  # Exit early as validation results cannot be sent if the main payload fails
+
+        self._send_validation_results(
+            serialized_validation_results=serialized_validation_results,
+            test_migrate=test_migrate,
+        )
 
         self._print_migration_conclusion_message()
 
@@ -188,18 +198,61 @@ class CloudMigrator:
             self._warn_about_bundle_contains_datasources()
 
     def _warn_about_test_migrate(self) -> None:
-        pass
+        logger.warning(
+            "This is a test run! Please pass `test_migrate=False` to begin the "
+            "actual migration (e.g. `CloudMigrator.migrate(context=context, test_migrate=False)`).\n"
+        )
 
     def _warn_about_usage_stats_disabled(self) -> None:
-        pass
+        logger.warning(
+            "We noticed that you had disabled usage statistics tracking. "
+            "Please note that by migrating your context to GX Cloud your new Cloud Data Context "
+            "will emit usage statistics. These statistics help us understand how we can improve "
+            "the product and we hope you don't mind!\n"
+        )
 
     def _warn_about_bundle_contains_datasources(self) -> None:
-        pass
+        logger.warning(
+            "Since your existing context includes one or more datasources, "
+            "please note that if your credentials are included in the datasource config, "
+            "they will be sent to the GX Cloud backend. We recommend storing your credentials "
+            "locally in config_variables.yml or in environment variables referenced "
+            "from your configuration rather than directly in your configuration. Please see "
+            "our documentation for more details.\n"
+        )
 
     def _print_configuration_bundle_summary(
         self, configuration_bundle: ConfigurationBundle
     ) -> None:
-        pass
+        # NOTE(cdkini): Datasources should be verbose, not just summary!
+        to_print = (
+            ("Datasource", configuration_bundle.datasources),
+            ("Checkpoint", configuration_bundle.checkpoints),
+            ("Expectation Suite", configuration_bundle.expectation_suites),
+            ("Profiler", configuration_bundle.profilers),
+        )
+
+        print("[Step 1/4]: Bundling context configuration")
+        for name, collection in to_print:
+            # ExpectationSuite is not AbstractConfig but contains required `name`
+            self._print_object_summary(obj_name=name, obj_collection=collection)  # type: ignore[arg-type]
+
+    def _print_object_summary(
+        self, obj_name: str, obj_collection: List[AbstractConfig]
+    ) -> None:
+        length = len(obj_collection)
+
+        summary = f"  Bundled {length} {obj_name}(s)"
+        if length:
+            summary += ":"
+        print(summary)
+
+        for obj in obj_collection[:10]:
+            print(f"    {obj['name']}")
+
+        if length > 10:
+            extra = length - 10
+            print(f"    ({extra} other {obj_name.lower()}(s) not displayed)")
 
     def _serialize_configuration_bundle(
         self, configuration_bundle: ConfigurationBundle
@@ -210,23 +263,50 @@ class CloudMigrator:
         serialized_bundle = serializer.serialize(configuration_bundle)
         return serialized_bundle
 
-    def _send_configuration_bundle(self, serialized_bundle: dict) -> None:
-        print("Sending context configuration (step 2/4)")
+    def _prepare_validation_results(self, serialized_bundle: dict) -> Dict[str, dict]:
+        print("[Step 2/4]: Preparing validation results")
+        return serialized_bundle.pop("validation_results")
+
+    def _send_configuration_bundle(
+        self, serialized_bundle: dict, test_migrate: bool
+    ) -> bool:
+        print("[Step 3/4]: Sending context configuration")
+        if test_migrate:
+            return True
+
         response = self._post_to_cloud_backend(
             resource_name="migration",
             resource_type="migration",
             attributes_key="bundle",
             attributes_value=serialized_bundle,
         )
-        print(response)
-        # TODO: Handle success/failure cases
 
-    def _prepare_validation_results(self, serialized_bundle: dict) -> List[dict]:
-        print("Preparing validation results (step 3/4")
-        return serialized_bundle.pop("validation_results")
+        if not response.success:
+            print(
+                "\nThere was an error sending your configuration to GX Cloud!\n"
+                "We have reverted your GX Cloud configuration to the state before the migration. "
+                "Please check your configuration before re-attempting the migration.\n\n"
+                "The server returned the following error:\n"
+                f"  Code : {response.status_code}\n  Error: {response.message}"
+            )
+
+        return response.success
 
     def _send_validation_results(
-        self, serialized_validation_results: List[dict]
+        self,
+        serialized_validation_results: Dict[str, dict],
+        test_migrate: bool,
+    ) -> None:
+        print("[Step 4/4]: Sending validation results]")
+        if test_migrate:
+            return
+
+        self._process_validation_results(
+            serialized_validation_results=serialized_validation_results
+        )
+
+    def _process_validation_results(
+        self, serialized_validation_results: Dict[str, dict]
     ) -> None:
         # 20220928 - Chetan - We want to use the static lookup tables in GeCloudStoreBackend
         # to ensure the appropriate URL and payload shape. This logic should be moved to
@@ -237,16 +317,27 @@ class CloudMigrator:
         ]
         attributes_key = GeCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
-        print("Sending validation results (step 4/4)")
-        for i, validation_result in enumerate(serialized_validation_results):
+        unsuccessful_validations = {}
+
+        for i, (key, validation_result) in enumerate(
+            serialized_validation_results.items()
+        ):
             response = self._post_to_cloud_backend(
                 resource_name=resource_name,
                 resource_type=resource_type,
                 attributes_key=attributes_key,
                 attributes_value=validation_result,
             )
-            print(response)
-            # TODO: Handle success/failure cases
+
+            progress = f"({i+1}/{len(serialized_validation_results)})"
+
+            if response.success:
+                print(f"  Sent validation result {progress}")
+            else:
+                print(f"  Error sending validation result '{key}' {progress}")
+                unsuccessful_validations[key] = validation_result
+
+        self._unsuccessful_validations = unsuccessful_validations
 
     def _post_to_cloud_backend(
         self,
@@ -267,50 +358,55 @@ class CloudMigrator:
             attributes_value=attributes_value,
         )
         response = self._session.post(url, json=data)
-        return self._parse_cloud_response(response=response)
 
-    def _parse_cloud_response(self, response: requests.Response) -> MigrationResponse:
-        success = response.ok
-        status_code = response.status_code
-
-        # TODO: Handle success/failure cases and parse errors from Cloud responses
         message = ""
-        if not success:
-            try:
-                response_json = cast(ErrorPayload, response.json())
-                errors = response_json.get("errors", [])
-                for error in errors:
-                    detail = error.get("detail")
-                    if detail:
-                        message += f"{detail}\n"
-            except requests.exceptions.JSONDecodeError:
-                message = "Something went wrong!"
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as http_err:
+            message = get_user_friendly_error_message(http_err, log_level=logging.INFO)
+
+        status_code = response.status_code
+        success = response.ok
 
         return MigrationResponse(
             message=message, status_code=status_code, success=success
         )
 
-    def _print_send_configuration_bundle_error(self, http_response: AnyPayload) -> None:
-        pass
+    def _print_unsuccessful_validation_message(self) -> None:
+        print(
+            f"\nPlease note that there were {len(self._unsuccessful_validations)} "
+            "validation result(s) that were not successfully migrated:"
+        )
 
-    def _break_for_send_configuration_bundle_error(
-        self, http_response: AnyPayload
-    ) -> None:
-        pass
+        for key in self._unsuccessful_validations:
+            print(f"  {key}")
 
-    def _send_and_print_validation_results(
-        self, test_migrate: bool
-    ) -> List[SendValidationResultsErrorDetails]:
-        # TODO: Uses migrate_validation_result in a loop. Only sends if not self.test_migrate
-        pass
-
-    def _print_validation_result_error_summary(
-        self, errors: List[SendValidationResultsErrorDetails]
-    ) -> None:
-        pass
+        print(
+            "\nTo retry uploading these validation results, you can use the following "
+            "code snippet:\n"
+            "  `migrator.retry_unsuccessful_validations()`"
+        )
 
     def _print_migration_introduction_message(self) -> None:
-        pass
+        print(
+            "Thank you for using Great Expectations!\n\n"
+            "We will now begin the migration process to GX Cloud. First we will bundle "
+            "your existing context configuration and send it to the Cloud backend. Then "
+            "we will send each of your validation results.\n"
+        )
 
     def _print_migration_conclusion_message(self) -> None:
-        pass
+        if self._unsuccessful_validations:
+            print("\nPartial Success!")
+        else:
+            print("\nSuccess!")
+
+        print(
+            "Now that you have migrated your Data Context to GX Cloud, you should use your "
+            "Cloud Data Context from now on to interact with Great Expectations. "
+            "If you continue to use your existing Data Context your configurations could "
+            "become out of sync. "
+        )
+
+        if self._unsuccessful_validations:
+            self._print_unsuccessful_validation_message()
