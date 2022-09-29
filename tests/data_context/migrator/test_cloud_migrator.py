@@ -21,7 +21,7 @@ def migrator_factory(
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
 ) -> Callable:
-    def _create_migrator(context: Any):
+    def _create_migrator(context: Any) -> CloudMigrator:
         return gx.CloudMigrator(
             context=context,
             ge_cloud_base_url=ge_cloud_base_url,

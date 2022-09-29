@@ -1,6 +1,6 @@
 """TODO: Add docstring"""
 import logging
-from typing import Dict, List, NamedTuple, Optional, cast
+from typing import Dict, List, NamedTuple, Optional
 
 import requests
 
@@ -21,11 +21,11 @@ from great_expectations.data_context.migrator.configuration_bundle import (
     ConfigurationBundleSchema,
 )
 from great_expectations.data_context.store.ge_cloud_store_backend import (
-    ErrorPayload,
     GeCloudRESTResource,
     GeCloudStoreBackend,
     construct_json_payload,
     construct_url,
+    get_user_friendly_error_message,
 )
 
 logger = logging.getLogger(__name__)
@@ -206,11 +206,9 @@ class CloudMigrator:
     def _print_configuration_bundle_summary(
         self, configuration_bundle: ConfigurationBundle
     ) -> None:
+        # NOTE(cdkini): Datasources should be verbose, not just summary!
         to_print = (
-            (
-                "Datasource",
-                configuration_bundle.datasources,
-            ),  # This needs to print the whole config, not just the summary
+            ("Datasource", configuration_bundle.datasources),
             ("Checkpoint", configuration_bundle.checkpoints),
             ("Expectation Suite", configuration_bundle.expectation_suites),
             ("Profiler", configuration_bundle.profilers),
@@ -341,26 +339,15 @@ class CloudMigrator:
             attributes_value=attributes_value,
         )
         response = self._session.post(url, json=data)
-        return self._parse_cloud_response(response=response)
 
-    def _parse_cloud_response(self, response: requests.Response) -> MigrationResponse:
-        success = response.ok
-        status_code = response.status_code
-
-        # TODO: Handle success/failure cases and parse errors from Cloud responses
-
-        # Use `get_user_friendly_error_message` instead of custom error parsing
         message = ""
-        if not success:
-            try:
-                response_json = cast(ErrorPayload, response.json())
-                errors = response_json.get("errors", [])
-                for error in errors:
-                    detail = error.get("detail")
-                    if detail:
-                        message += f"{detail}\n"
-            except requests.exceptions.JSONDecodeError:
-                message = "Something went wrong!"
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as http_err:
+            message = get_user_friendly_error_message(http_err)
+
+        status_code = response.status_code
+        success = response.ok
 
         return MigrationResponse(
             message=message, status_code=status_code, success=success
