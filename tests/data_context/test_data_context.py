@@ -3,7 +3,7 @@ import json
 import os
 import shutil
 from collections import OrderedDict
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 import pytest
@@ -43,7 +43,6 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
@@ -3093,21 +3092,14 @@ class ExpectSkyToBeColor(TableExpectation):
     @renderer(renderer_type="atomic.prescriptive.custom_renderer")
     def _prescriptive_renderer_custom(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
+        **kwargs: dict,
+    ) -> None:
         raise ValueError("This renderer is broken!")
 
     def _validate(
         self,
-        configuration: ExpectationConfiguration,
-        metrics: dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
+        **kwargs: dict,
+    ) -> dict[str, Union[bool, dict]]:
         return {
             "success": True,
             "result": {"observed_value": "blue"},
