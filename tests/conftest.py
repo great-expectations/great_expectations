@@ -6853,7 +6853,7 @@ def quentin_columnar_table_multi_batch_data_context(
     of each batch being equal to the original number per log file (10,000 rows).
     """
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
