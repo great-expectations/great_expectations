@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import pytest
 
@@ -68,6 +68,7 @@ class StubBaseDataContext:
         self,
         anonymous_usage_stats_enabled: bool = True,
         anonymous_usage_stats_is_none: bool = False,
+        include_datasources: bool = True,
     ):
         """Set the anonymous usage statistics configuration.
 
@@ -77,6 +78,7 @@ class StubBaseDataContext:
         """
         self._anonymous_usage_stats_enabled = anonymous_usage_stats_enabled
         self._anonymous_usage_stats_is_none = anonymous_usage_stats_is_none
+        self._include_datasources = include_datasources
 
     @property
     def _data_context_variables(self) -> StubUsageStats:
@@ -115,7 +117,10 @@ class StubBaseDataContext:
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         # Datasource is a dummy since we just want the DatasourceConfig from the store, not an
         # actual initialized datasource.
-        return {"my_datasource": DummyDatasource()}
+        if self._include_datasources:
+            return {"my_datasource": DummyDatasource()}
+        else:
+            return {}
 
     @property
     def checkpoint_store(self) -> StubCheckpointStore:
@@ -142,18 +147,40 @@ class StubBaseDataContext:
 
 
 @pytest.fixture
-def stub_base_data_context() -> StubBaseDataContext:
-    return StubBaseDataContext()
+def stub_base_data_context_factory() -> Callable:
+    def _create_stub_base_data_context(
+        anonymous_usage_stats_enabled: bool = True,
+        anonymous_usage_stats_is_none: bool = False,
+        include_datasources: bool = True,
+    ) -> StubBaseDataContext:
+        return StubBaseDataContext(
+            anonymous_usage_stats_enabled=anonymous_usage_stats_enabled,
+            anonymous_usage_stats_is_none=anonymous_usage_stats_is_none,
+            include_datasources=include_datasources,
+        )
+
+    return _create_stub_base_data_context
 
 
 @pytest.fixture
-def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
-    return StubBaseDataContext(anonymous_usage_stats_enabled=False)
+def stub_base_data_context(
+    stub_base_data_context_factory: Callable,
+) -> StubBaseDataContext:
+    return stub_base_data_context_factory()
 
 
 @pytest.fixture
-def stub_base_data_context_no_anonymous_usage_stats() -> StubBaseDataContext:
-    return StubBaseDataContext(anonymous_usage_stats_is_none=True)
+def stub_base_data_context_anonymous_usage_stats_present_but_disabled(
+    stub_base_data_context_factory: Callable,
+) -> StubBaseDataContext:
+    return stub_base_data_context_factory(anonymous_usage_stats_enabled=False)
+
+
+@pytest.fixture
+def stub_base_data_context_no_anonymous_usage_stats(
+    stub_base_data_context_factory: Callable,
+) -> StubBaseDataContext:
+    return stub_base_data_context_factory(anonymous_usage_stats_is_none=True)
 
 
 @pytest.fixture
