@@ -10,9 +10,9 @@ from great_expectations.data_context.migrator.configuration_bundle import (
 from tests.data_context.migrator.conftest import StubBaseDataContext
 
 
+@pytest.mark.cloud
+@pytest.mark.unit
 class TestConfigurationBundleCreate:
-    @pytest.mark.cloud
-    @pytest.mark.unit
     def test_configuration_bundle_created(
         self,
         stub_base_data_context: StubBaseDataContext,
@@ -34,8 +34,22 @@ class TestConfigurationBundleCreate:
         assert len(config_bundle.validation_results) == 1
         assert len(config_bundle.datasources) == 1
 
-    @pytest.mark.cloud
-    @pytest.mark.unit
+    def test_is_usage_statistics_key_set_if_key_not_present(
+        self, stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
+    ):
+        """What does this test and why?
+
+        The ConfigurationBundle should handle a context that has not set the config for
+         anonymous_usage_statistics.
+        """
+        context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
+
+        config_bundle = ConfigurationBundle(context)
+
+        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
+        # DataContextConfig and enabled by default.
+        assert config_bundle.is_usage_stats_enabled()
+
     def test_configuration_bundle_created_usage_stats_disabled(
         self,
         stub_base_data_context_anonymous_usage_stats_present_but_disabled: StubBaseDataContext,
@@ -53,27 +67,21 @@ class TestConfigurationBundleCreate:
 
         assert not config_bundle.is_usage_stats_enabled()
 
-    def test_is_usage_statistics_key_set_if_key_not_present(
-        self, stub_base_data_context_no_anonymous_usage_stats: StubBaseDataContext
-    ):
-        """What does this test and why?
 
-        The ConfigurationBundle should handle a context that has not set the config for
-         anonymous_usage_statistics.
-        """
-        context: BaseDataContext = stub_base_data_context_no_anonymous_usage_stats
-
-        config_bundle = ConfigurationBundle(context)
-
-        # If not supplied, an AnonymizedUsageStatisticsConfig is created in a
-        # DataContextConfig
-        assert config_bundle.is_usage_stats_enabled()
+@pytest.fixture
+def stub_serialized_configuration_bundle(serialized_configuration_bundle: dict) -> dict:
+    """Configuration bundle based on StubBaseDataContext."""
+    assert "data_context_id" in serialized_configuration_bundle
+    serialized_configuration_bundle[
+        "data_context_id"
+    ] = StubBaseDataContext.DATA_CONTEXT_ID
+    return serialized_configuration_bundle
 
 
+@pytest.mark.cloud
+@pytest.mark.unit
 class TestConfigurationBundleSerialization:
-    @pytest.mark.cloud
-    @pytest.mark.unit
-    def test_configuration_bundle_serialization(
+    def test_configuration_bundle_serialization_all_fields(
         self,
         stub_base_data_context: StubBaseDataContext,
         stub_serialized_configuration_bundle: dict,
@@ -101,8 +109,33 @@ class TestConfigurationBundleSerialization:
 
         assert serialized_bundle == expected_serialized_bundle
 
-    @pytest.mark.cloud
-    @pytest.mark.unit
+    def test_configuration_bundle_serialization_empty_fields(
+        self,
+        empty_serialized_configuration_bundle: dict,
+    ):
+        """What does this test and why?
+
+        Ensure configuration bundle is serialized correctly.
+        """
+
+        context = StubBaseDataContext(
+            checkpoint_names=tuple(),
+            expectation_suite_names=tuple(),
+            profiler_names=tuple(),
+            validation_results_keys=tuple(),
+            datasource_names=tuple(),
+        )
+
+        config_bundle = ConfigurationBundle(context)
+
+        serializer = ConfigurationBundleJsonSerializer(
+            schema=ConfigurationBundleSchema()
+        )
+
+        serialized_bundle: dict = serializer.serialize(config_bundle)
+
+        assert serialized_bundle == empty_serialized_configuration_bundle
+
     def test_anonymous_usage_statistics_removed_during_serialization(
         self,
         stub_base_data_context: StubBaseDataContext,

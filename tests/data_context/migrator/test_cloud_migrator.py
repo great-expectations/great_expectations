@@ -12,6 +12,7 @@ from great_expectations.data_context.migrator.cloud_migrator import MigrationRes
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
+from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from tests.data_context.migrator.conftest import StubBaseDataContext
 
 
@@ -250,16 +251,20 @@ class TestUsageStats:
 @pytest.mark.parametrize("include_datasources", [True, False])
 @pytest.mark.parametrize("enable_usage_stats", [True, False])
 def test__migrate_to_cloud_outputs_warnings(
-    stub_base_data_context_factory: Callable,
     migrator_factory: Callable,
     test_migrate: bool,
     include_datasources: bool,
     enable_usage_stats: bool,
     caplog,
 ):
-    context = stub_base_data_context_factory(
-        anonymous_usage_stats_enabled=enable_usage_stats,
-        include_datasources=include_datasources,
+    anonymized_usage_statistics_config = AnonymizedUsageStatisticsConfig(
+        enabled=enable_usage_stats
+    )
+    datasource_names = ("my_datasource",) if include_datasources else tuple()
+
+    context = StubBaseDataContext(
+        anonymized_usage_statistics_config=anonymized_usage_statistics_config,
+        datasource_names=datasource_names,
     )
 
     migrator = migrator_factory(context=context)
