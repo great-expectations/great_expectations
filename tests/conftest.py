@@ -311,7 +311,7 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(autouse=True)
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
-    monkeypatch.setenv("GE_USAGE_STATS", "False")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
 
 
 @pytest.fixture(scope="module")
@@ -6428,7 +6428,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     monkeypatch,
 ) -> DataContext:
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))

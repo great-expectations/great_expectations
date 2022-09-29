@@ -31,7 +31,7 @@ from great_expectations.validator.validator import Validator
 
 class StatisticsDataAssistant(DataAssistant):
     """
-    OnboardingDataAssistant provides dataset exploration and validation to help with Great Expectations "Onboarding".
+    StatisticsDataAssistant provides metrics for dataset exploration purposes.
     """
 
     __alias__: str = "statistics"
