@@ -20,7 +20,7 @@ assert context
 
 # First configure a new Datasource and add to DataContext
 
-# <snippet name="getting_started_datasource_yaml">
+# <snippet>
 datasource_yaml = f"""
 name: getting_started_datasource
 class_name: Datasource
