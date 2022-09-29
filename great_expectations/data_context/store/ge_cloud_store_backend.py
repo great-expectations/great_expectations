@@ -2,7 +2,7 @@ import json
 import logging
 from abc import ABCMeta
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
