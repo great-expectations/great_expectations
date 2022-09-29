@@ -1,4 +1,22 @@
-"""TODO: Add docstring"""
+"""
+The CloudMigrator is reponsible for collecting elements of user's project config,
+bundling them, and sending that bundle to the GX Cloud backend.
+
+Upon successful migration, a user's config will be saved in Cloud and subsequent uses of
+GX should be done through the Cloud UI.
+
+Please see ConfigurationBundle for more information on the bundle's contents.
+
+Usage:
+```
+# Test migration before actually going through the process
+# Once tested, the boolean flag is to be flipped
+migrator = gx.CloudMigrator.migrate(context=context, test_migrate=True)
+
+# If any validations failed during the `migrate` call
+migrator.retry_unsuccessful_validations()
+```
+"""
 import logging
 from typing import Dict, List, NamedTuple, Optional
 
@@ -69,7 +87,7 @@ class CloudMigrator:
 
         self._session = create_session(access_token=ge_cloud_access_token)
 
-        self._unsuccessful_validations = {}
+        self._unsuccessful_validations: Dict[str, dict] = {}
 
     @classmethod
     def migrate(
@@ -216,7 +234,8 @@ class CloudMigrator:
 
         print("[Step 1/4]: Bundling context configuration")
         for name, collection in to_print:
-            self._print_object_summary(obj_name=name, obj_collection=collection)
+            # ExpectationSuite is not AbstractConfig but contains required `name`
+            self._print_object_summary(obj_name=name, obj_collection=collection)  # type: ignore[arg-type]
 
     def _print_object_summary(
         self, obj_name: str, obj_collection: List[AbstractConfig]
