@@ -12,11 +12,25 @@ from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
 
-class AtomicRendererType(Enum):
-    """Available atomic renderer prefixes"""
+class RendererPrefix(Enum):
+    """Available renderer types"""
 
-    PRESCRIPTIVE = "atomic.prescriptive"
-    DIAGNOSTIC = "atomic.diagnostic"
+    LEGACY = "renderer"
+    ATOMIC = "atomic"
+
+
+class LegacyRendererType(Enum):
+    """Available legacy renderer types"""
+
+    PRESCRIPTIVE = ".".join([RendererPrefix.LEGACY.value, "prescriptive"])
+    DIAGNOSTIC = ".".join([RendererPrefix.LEGACY.value, "diagnostic"])
+
+
+class AtomicRendererType(Enum):
+    """Available atomic renderer types"""
+
+    PRESCRIPTIVE = ".".join([RendererPrefix.ATOMIC.value, "prescriptive"])
+    DIAGNOSTIC = ".".join([RendererPrefix.ATOMIC.value, "diagnostic"])
 
     def __eq__(self, other: Union[str, AtomicRendererType]) -> bool:
         if isinstance(other, str):
