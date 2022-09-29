@@ -2,7 +2,7 @@ import json
 import logging
 from abc import ABCMeta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
@@ -83,13 +83,13 @@ def construct_json_payload(
 
 
 def get_user_friendly_error_message(
-    http_exc: requests.exceptions.HTTPError,
+    http_exc: requests.exceptions.HTTPError, log_level: int = logging.WARNING
 ) -> str:
     # TODO: define a GeCloud service/client for this & other related behavior
     support_message = []
     response: requests.Response = http_exc.response
 
-    logger.info(f"{http_exc.__class__.__name__}:{http_exc} - {response}")
+    logger.log(log_level, f"{http_exc.__class__.__name__}:{http_exc} - {response}")
 
     request_id = response.headers.get("request-id", "")
     if request_id:

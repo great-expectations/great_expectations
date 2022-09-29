@@ -363,7 +363,7 @@ class CloudMigrator:
         try:
             response.raise_for_status()
         except requests.HTTPError as http_err:
-            message = get_user_friendly_error_message(http_err)
+            message = get_user_friendly_error_message(http_err, log_level=logging.INFO)
 
         status_code = response.status_code
         success = response.ok

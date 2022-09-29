@@ -110,18 +110,16 @@ def mock_failed_migration(
     return _build_mock_migrate
 
 
-@pytest.fixture
-def assert_stdout_is_accurate_and_properly_ordered() -> Callable:
-    def _assert(stdout: str, statements: List[str]) -> None:
-        last_position = -1
-        for statement in statements:
-            position = stdout.find(statement)
-            assert position != -1, f"Could not find '{statement}' in stdout"
-            assert (
-                position > last_position
-            ), f"Statement '{statement}' occurred in the wrong order"
-
-    return _assert
+def assert_stdout_is_accurate_and_properly_ordered(
+    stdout: str, statements: List[str]
+) -> None:
+    last_position = -1
+    for statement in statements:
+        position = stdout.find(statement)
+        assert position != -1, f"Could not find '{statement}' in stdout"
+        assert (
+            position > last_position
+        ), f"Statement '{statement}' occurred in the wrong order"
 
 
 @pytest.mark.unit
@@ -304,7 +302,6 @@ def test__migrate_to_cloud_outputs_warnings(
 def test__migrate_to_cloud_happy_path_prints_to_stdout(
     test_migrate: bool,
     migrator_with_stub_base_data_context: CloudMigrator,
-    assert_stdout_is_accurate_and_properly_ordered: Callable,
     capsys,
 ):
     migrator = migrator_with_stub_base_data_context
@@ -331,14 +328,15 @@ def test__migrate_to_cloud_happy_path_prints_to_stdout(
         "If you continue to use your existing Data Context your configurations could become out of sync.",
     ]
 
-    assert_stdout_is_accurate_and_properly_ordered(stdout, expected_statements)
+    assert_stdout_is_accurate_and_properly_ordered(
+        stdout=stdout, statements=expected_statements
+    )
 
 
 @pytest.mark.unit
 @pytest.mark.cloud
 def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     migrator_with_stub_base_data_context: CloudMigrator,
-    assert_stdout_is_accurate_and_properly_ordered: Callable,
     capsys,
 ):
     migrator = migrator_with_stub_base_data_context
@@ -372,14 +370,15 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
         "Error: Bad request!",
     ]
 
-    assert_stdout_is_accurate_and_properly_ordered(stdout, expected_statements)
+    assert_stdout_is_accurate_and_properly_ordered(
+        stdout=stdout, statements=expected_statements
+    )
 
 
 @pytest.mark.unit
 @pytest.mark.cloud
 def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
     migrator_with_stub_base_data_context: CloudMigrator,
-    assert_stdout_is_accurate_and_properly_ordered: Callable,
     capsys,
 ):
     migrator = migrator_with_stub_base_data_context
@@ -413,7 +412,7 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
         "[Step 2/4]: Preparing validation results",
         "[Step 3/4]: Sending context configuration",
         "[Step 4/4]: Sending validation results",
-        "Error sending validation result",
+        "Error sending validation result 'some_key' (1/1)",
         "Partial Success!",
         "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",
         "If you continue to use your existing Data Context your configurations could become out of sync.",
@@ -422,4 +421,6 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
         "migrator.retry_unsuccessful_validations()",
     ]
 
-    assert_stdout_is_accurate_and_properly_ordered(stdout, expected_statements)
+    assert_stdout_is_accurate_and_properly_ordered(
+        stdout=stdout, statements=expected_statements
+    )
