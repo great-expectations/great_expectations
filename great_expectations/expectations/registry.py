@@ -5,7 +5,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
-from great_expectations.render.types import AtomicRendererPrefix
 
 logger = logging.getLogger(__name__)
 

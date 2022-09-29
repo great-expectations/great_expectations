@@ -12,7 +12,7 @@ from great_expectations.expectations.registry import (
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
-    AtomicRendererPrefix,
+    AtomicRendererType,
     FailedAtomicRendererName,
     RenderedAtomicContent,
 )
@@ -59,13 +59,13 @@ class InlineRenderer(Renderer):
             A list of RenderedAtomicContent objects for a given ExpectationConfiguration or ExpectationValidationResult.
         """
         expectation_type: str
-        renderer_prefix: AtomicRendererPrefix
+        renderer_prefix: AtomicRendererType
         if isinstance(render_object, ExpectationConfiguration):
             expectation_type = render_object.expectation_type
-            renderer_prefix = AtomicRendererPrefix.PRESCRIPTIVE
+            renderer_prefix = AtomicRendererType.PRESCRIPTIVE
         elif isinstance(render_object, ExpectationValidationResult):
             expectation_type = render_object.expectation_config.expectation_type
-            renderer_prefix = AtomicRendererPrefix.DIAGNOSTIC
+            renderer_prefix = AtomicRendererType.DIAGNOSTIC
         else:
             raise InvalidRenderedContentError(
                 f"InlineRenderer._get_atomic_rendered_content_for_object can only be used with an ExpectationConfiguration or ExpectationValidationResult, but {type(render_object)} was used."
