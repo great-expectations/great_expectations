@@ -1,3 +1,4 @@
+from typing import List, Tuple
 from unittest import mock
 
 import pytest
@@ -15,6 +16,7 @@ from great_expectations.cli.datasource import (
     SparkYamlHelper,
     SQLCredentialYamlHelper,
     check_if_datasource_name_exists,
+    sanitize_credentials,
 )
 from great_expectations.datasource.types import DatasourceTypes
 
@@ -791,3 +793,96 @@ def test_check_if_datasource_name_exists(
         )
         is False
     )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "config,expected_calls",
+    [
+        pytest.param(
+            {
+                "name": "my_datasource",
+                "execution_engine": {},
+                "data_connectors": {
+                    "default_inferred_data_connector_name": {
+                        "introspection_directives": {"schema_name": "YOUR_SCHEMA"},
+                    },
+                    "default_configured_data_connector_name": {
+                        "assets": {
+                            "table_name": {
+                                "schema_name": "YOUR_SCHEMA",
+                            }
+                        },
+                    },
+                },
+            },
+            [],
+            id="no credentials key",
+        ),
+        pytest.param(
+            {
+                "name": "my_datasource",
+                "execution_engine": {
+                    "credentials": {"password": "my_credentials"},
+                },
+                "data_connectors": {
+                    "default_inferred_data_connector_name": {
+                        "introspection_directives": {"schema_name": "YOUR_SCHEMA"},
+                    },
+                    "default_configured_data_connector_name": {
+                        "assets": {
+                            "table_name": {
+                                "schema_name": "YOUR_SCHEMA",
+                            }
+                        },
+                    },
+                },
+            },
+            [("my_datasource", {"password": "my_credentials"})],
+            id="one credentials key",
+        ),
+        pytest.param(
+            {
+                "name": "my_datasource",
+                "credentials": {"password": "my_credentials"},
+                "execution_engine": {
+                    "credentials": {"password": "my_other_credentials"},
+                },
+                "data_connectors": {
+                    "default_inferred_data_connector_name": {
+                        "introspection_directives": {"schema_name": "YOUR_SCHEMA"},
+                    },
+                    "default_configured_data_connector_name": {
+                        "assets": {
+                            "table_name": {
+                                "schema_name": "YOUR_SCHEMA",
+                            }
+                        },
+                    },
+                },
+            },
+            [
+                ("my_datasource_1", {"password": "my_credentials"}),
+                ("my_datasource_2", {"password": "my_other_credentials"}),
+            ],
+            id="two credentials key",
+        ),
+    ],
+)
+def test_sanitize_credentials(
+    config: dict, expected_calls: List[Tuple[str, dict]]
+) -> None:
+    context = mock.MagicMock()
+    mock_save_config_variable = context.save_config_variable
+
+    sanitize_credentials(context=context, config=config, base_name=config["name"])
+
+    assert mock_save_config_variable.call_count == len(expected_calls)
+
+    for expected, actual in zip(
+        expected_calls, mock_save_config_variable.call_args_list
+    ):
+        expected_name, expected_val = expected
+        actual_name, actual_val = actual[0]
+        assert expected_name == actual_name
+        assert expected_val == actual_val

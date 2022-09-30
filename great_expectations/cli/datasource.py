@@ -845,11 +845,46 @@ def sanitize_yaml_and_save_datasource(
             f'**WARNING** A Datasource named "{datasource_name}" already exists in this Data Context. The Datasource has *not* been saved. Please use a different name or set overwrite_existing=True if you want to overwrite!'
         )
         return
-    if "credentials" in config.keys():
-        credentials = config["credentials"]
-        config["credentials"] = "${" + datasource_name + "}"
-        context.save_config_variable(datasource_name, credentials)
-    context.add_datasource(name=datasource_name, **config)
+
+    sanitize_credentials(context=context, config=config, base_name=datasource_name)
+
+
+def sanitize_credentials(context: DataContext, config: dict, base_name: str) -> None:
+    credentials_count = 0
+    stack = [config]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, dict):
+            for key, val in node.items():
+                if key == "credentials":
+                    credentials_count += 1
+                else:
+                    stack.append(val)
+        elif isinstance(node, list):
+            for val in node:
+                stack.append(val)
+
+    if credentials_count == 0:
+        return
+
+    num = 1
+    stack = [config]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, dict):
+            for key, val in node.items():
+                if key == "credentials":
+                    name = base_name
+                    if credentials_count > 1:
+                        name += f"_{num}"
+                        num += 1
+                    node[key] = "${" + name + "}"
+                    context.save_config_variable(name, val)
+                else:
+                    stack.append(val)
+        elif isinstance(node, list):
+            for val in node:
+                stack.append(val)
 
 
 # TODO it might be nice to hint that remote urls can be entered here!
