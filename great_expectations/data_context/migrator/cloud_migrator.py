@@ -146,15 +146,15 @@ class CloudMigrator:
             ) from e
 
     def retry_unsuccessful_validations(self) -> None:
-        validations = self._unsuccessful_validations
-        if not validations:
+        if not self._unsuccessful_validations:
             print("No unsuccessful validations found!")
             return
 
         self._process_validation_results(
-            serialized_validation_results=validations, test_migrate=False
+            serialized_validation_results=self._unsuccessful_validations,
+            test_migrate=False,
         )
-        if validations:
+        if self._unsuccessful_validations:
             self._print_unsuccessful_validation_message()
 
     def _migrate_to_cloud(self, test_migrate: bool) -> None:
