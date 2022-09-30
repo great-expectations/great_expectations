@@ -740,7 +740,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     monkeypatch,
 ):
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
