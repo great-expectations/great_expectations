@@ -83,13 +83,13 @@ def construct_json_payload(
 
 
 def get_user_friendly_error_message(
-    http_exc: requests.exceptions.HTTPError,
+    http_exc: requests.exceptions.HTTPError, log_level: int = logging.WARNING
 ) -> str:
     # TODO: define a GeCloud service/client for this & other related behavior
     support_message = []
     response: requests.Response = http_exc.response
 
-    logger.warning(f"{http_exc.__class__.__name__}:{http_exc} - {response}")
+    logger.log(log_level, f"{http_exc.__class__.__name__}:{http_exc} - {response}")
 
     request_id = response.headers.get("request-id", "")
     if request_id:
