@@ -1,6 +1,6 @@
 import math
 import os
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, Optional, cast
 
 import numpy as np
 import pytest
@@ -15,6 +15,7 @@ from contrib.experimental.great_expectations_experimental.rule_based_profiler.da
     StatisticsDataAssistantResult,
 )
 from contrib.experimental.great_expectations_experimental.tests.test_utils import (
+    CONNECTION_STRING,
     load_data_into_postgres_database,
 )
 from great_expectations import DataContext
@@ -237,7 +238,7 @@ def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None
 
     1. Setting up Datasource to load 2019 taxi data and 2020 taxi data
     2. Configuring BatchRequest to load 2019 data as multiple batches
-    3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains non-empty relevant fields
+    3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains relevant fields
     4. Configuring BatchRequest to load 2020 January data
     """
     data_context: ge.DataContext = empty_data_context
@@ -312,9 +313,8 @@ def test_sql_happy_path_statistics_data_assistant(
     1. Loading tables into postgres Docker container by calling helper method load_data_into_postgres_database()
     2. Setting up Datasource to load 2019 taxi data and 2020 taxi data
     3. Configuring BatchRequest to load 2019 data as multiple batches
-    4. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains non-empty relevant fields
+    4. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains relevant fields
     5. Configuring BatchRequest to load 2020 January data
-    6. Configuring and running Checkpoint using BatchRequest for 2020-01, and 'taxi_data_2019_suite'.
     """
     if "postgresql" not in test_backends:
         pytest.skip("testing data assistant in sql requires postgres backend")
@@ -375,16 +375,15 @@ def test_sql_happy_path_statistics_data_assistant(
 @pytest.mark.integration
 @pytest.mark.slow  # 149 seconds
 def test_spark_happy_path_statistics_data_assistant(
-    empty_data_context, spark_session, spark_df_taxi_data_schema
+    empty_data_context, spark_df_taxi_data_schema
 ) -> None:
     """
     The intent of this test is to ensure that our "happy path", exercised by notebooks is in working order.
 
     1. Setting up Datasource to load 2019 taxi data and 2020 taxi data
     2. Configuring BatchRequest to load 2019 data as multiple batches
-    3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains non-empty relevant fields
+    3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains relevant fields
     4. Configuring BatchRequest to load 2020 January data
-    5. Configuring and running Checkpoint using BatchRequest for 2020-01, and 'taxi_data_2019_suite'.
     """
     from pyspark.sql.types import StructType
 
