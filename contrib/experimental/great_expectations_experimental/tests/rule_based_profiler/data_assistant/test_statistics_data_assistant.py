@@ -139,6 +139,14 @@ def test_statistics_data_assistant_result_batch_id_to_batch_identifier_display_n
 def test_statistics_data_assistant_result_normalized_metrics_vector_output(
     bobby_statistics_data_assistant_result: StatisticsDataAssistantResult,
 ):
+    """
+    This test is a template for compposing a vector of all metrics, computed as part of the run of the effective
+    underlying Rule-Based Profiler and normalizing it (so that the magnitute of this vector is unity).  This operation
+    can be applied to adjacent runs (e.g., corresponding to dataset being sub-sampled with different sampling fractions)
+    and normalized metrics vectors compared (e.g., using square root of mean squared error as difference measure).  Then
+    if the error is below a threshold (e.g., 0.1%), then the smaller dataset exhibits the same statistical properties as
+    larger dataset, but working with smaller datasets is more efficient (data exploration, Expectation authoring, etc.).
+    """
     domain: Domain
     metrics: Dict[str, ParameterNode]
     parameter_name: str

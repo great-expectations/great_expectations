@@ -7,6 +7,10 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 
 
 class StatisticsDataAssistantResult(DataAssistantResult):
+    """
+    Note (9/30/2022): Plotting functionality is experimental.
+    """
+
     @property
     def metric_expectation_map(self) -> Dict[Union[str, Tuple[str]], str]:
         """

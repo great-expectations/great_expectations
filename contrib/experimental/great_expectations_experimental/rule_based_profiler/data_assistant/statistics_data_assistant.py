@@ -32,6 +32,10 @@ from great_expectations.validator.validator import Validator
 class StatisticsDataAssistant(DataAssistant):
     """
     StatisticsDataAssistant provides metrics for dataset exploration purposes.
+
+    Fundamentally, StatisticsDataAssistant is "OnboardingDataAssistant minus Expectations -- only Metrics", the intended
+    usecase being obtaining description of data via metrics as well as comparing metrics between sub-sampeled datasets
+    to determine the smallest dataset, whose statistics represent the overall data distribution sufficiantly adequately.
     """
 
     __alias__: str = "statistics"
