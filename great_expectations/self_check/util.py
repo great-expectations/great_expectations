@@ -71,6 +71,7 @@ from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Connection
+
     from great_expectations.data_context import DataContext
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -1411,7 +1412,7 @@ def build_sa_validator_with_data(
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional["DataContext"] = None,
 ):
     _debug = lambda x: x
     if debug_logger:
@@ -1603,7 +1604,7 @@ def build_spark_validator_with_data(
     df: Union[pd.DataFrame, SparkDataFrame],
     spark: SparkSession,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional["DataContext"] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -2204,7 +2205,7 @@ def generate_expectation_tests(
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional["DataContext"] = None,
 ):
     """Determine tests to run
 
