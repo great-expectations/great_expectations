@@ -959,7 +959,7 @@ def deterministic_asset_dataconnector_context(
     monkeypatch,
 ):
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -1396,7 +1396,7 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
 @pytest.fixture
 def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -1419,7 +1419,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -1442,7 +1442,7 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
