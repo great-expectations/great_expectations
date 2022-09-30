@@ -45,6 +45,7 @@ from tests.conftest import (
     no_usage_stats,
     sa,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+    spark_df_taxi_data_schema,
     spark_session,
 )
 
