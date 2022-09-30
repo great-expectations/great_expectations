@@ -1415,7 +1415,7 @@ def build_sa_validator_with_data(
 ):
     _debug = lambda x: x
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")
+        _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr]
 
     dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
@@ -2221,8 +2221,8 @@ def generate_expectation_tests(
     _debug = lambda x: x
     _error = lambda x: x
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")
-        _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")
+        _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]
+        _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]
 
     parametrized_tests = []
 
@@ -2527,7 +2527,7 @@ def should_we_generate_this_test(
 
     _debug = lambda x: x
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")
+        _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr]
 
     # backend will only ever be pandas, spark, or a specific SQL dialect, but sometimes
     # suppress_test_for or only_for may include "sqlalchemy"
