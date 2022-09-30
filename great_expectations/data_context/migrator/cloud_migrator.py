@@ -185,7 +185,7 @@ class CloudMigrator:
             test_migrate=test_migrate,
         )
 
-        self._print_migration_conclusion_message()
+        self._print_migration_conclusion_message(test_migrate=test_migrate)
 
     def _emit_warnings(
         self, configuration_bundle: ConfigurationBundle, test_migrate: bool
@@ -395,9 +395,15 @@ class CloudMigrator:
             "we will send each of your validation results.\n"
         )
 
-    def _print_migration_conclusion_message(self) -> None:
+    def _print_migration_conclusion_message(self, test_migrate: bool) -> None:
+        if test_migrate:
+            print(
+                "\nTest run completed! Please set `test_migrate=False` to perform an actual migration."
+            )
+            return
+
         if self._unsuccessful_validations:
-            print("\nPartial Success!")
+            print("\nPartial success!")
         else:
             print("\nSuccess!")
 
