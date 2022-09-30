@@ -143,7 +143,9 @@ def cloud_data_context(
 
     cloud_data_context = CloudDataContext(
         project_config=data_context_config,
-        ge_cloud_config=ge_cloud_config_e2e,
+        ge_cloud_base_url=ge_cloud_config_e2e.base_url,
+        ge_cloud_access_token=ge_cloud_config_e2e.access_token,
+        ge_cloud_organization_id=ge_cloud_config_e2e.organization_id,
         context_root_dir=str(context_root_dir),
     )
     return cloud_data_context
@@ -426,7 +428,6 @@ def test_data_context_variables_save_config(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
-    shared_called_with_request_kwargs: dict,
     # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -454,7 +455,7 @@ def test_data_context_variables_save_config(
         assert mock_save.call_count == 1
 
     # CloudDataContextVariables
-    with mock.patch("requests.put", autospec=True) as mock_put:
+    with mock.patch("requests.Session.put", autospec=True) as mock_put:
         type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
 
         cloud_data_context_variables.save_config()
@@ -473,6 +474,7 @@ def test_data_context_variables_save_config(
 
         assert mock_put.call_count == 1
         mock_put.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
             json={
                 "data": {
@@ -483,7 +485,6 @@ def test_data_context_variables_save_config(
                     },
                 }
             },
-            **shared_called_with_request_kwargs,
         )
 
 

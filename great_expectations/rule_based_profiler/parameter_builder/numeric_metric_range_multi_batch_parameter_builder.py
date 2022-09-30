@@ -1,6 +1,7 @@
 import copy
 import datetime
 import itertools
+import logging
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
@@ -31,6 +32,7 @@ from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_e
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     build_numeric_range_estimation_result,
+    datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
     integer_semantic_domain_type,
 )
@@ -55,6 +57,9 @@ from great_expectations.util import (
     is_ndarray_decimal_dtype,
     is_numeric,
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 MAX_DECIMALS: int = 9
 
@@ -433,6 +438,9 @@ detected.
 """
             )
 
+        if estimator == "exact":
+            return ExactNumericRangeEstimator()
+
         if estimator == "quantiles":
             return QuantilesNumericRangeEstimator(
                 configuration=Attributes(
@@ -444,8 +452,20 @@ detected.
                 )
             )
 
-        if estimator == "exact":
-            return ExactNumericRangeEstimator()
+        # Since complex numerical calculations do not support DateTime/TimeStamp data types, use "quantiles" estimator.
+        if datetime_semantic_domain_type(domain=domain):
+            logger.info(
+                f'Estimator "{estimator}" does not support DateTime/TimeStamp data types (downgrading to "quantiles").'
+            )
+            return QuantilesNumericRangeEstimator(
+                configuration=Attributes(
+                    {
+                        "false_positive_rate": self.false_positive_rate,
+                        "round_decimals": round_decimals,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                    }
+                )
+            )
 
         if estimator == "bootstrap":
             return BootstrapNumericRangeEstimator(
@@ -534,7 +554,10 @@ detected.
             2,
             NUM_HISTOGRAM_BINS + 1,
         )
-        datetime_detected: bool = self._is_metric_values_ndarray_datetime_dtype(
+
+        datetime_detected: bool = datetime_semantic_domain_type(
+            domain=domain
+        ) or self._is_metric_values_ndarray_datetime_dtype(
             metric_values=metric_values,
             metric_value_vector_indices=metric_value_vector_indices,
         )
@@ -659,7 +682,9 @@ detected.
         for metric_value_idx in metric_value_vector_indices:
             metric_value_vector = metric_values[metric_value_idx]
             if not is_ndarray_datetime_dtype(
-                data=metric_value_vector, parse_strings_as_datetimes=True
+                data=metric_value_vector,
+                parse_strings_as_datetimes=True,
+                fuzzy=False,
             ):
                 return False
 

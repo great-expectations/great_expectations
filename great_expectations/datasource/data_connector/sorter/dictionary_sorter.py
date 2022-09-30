@@ -78,4 +78,4 @@ class DictionarySorter(Sorter):
 
     @property
     def key_reference_list(self) -> List[Any]:
-        return self._key_reference_list
+        return self._key_reference_list  # type: ignore[return-value]

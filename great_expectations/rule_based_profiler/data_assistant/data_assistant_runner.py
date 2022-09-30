@@ -193,6 +193,8 @@ class DataAssistantRunner:
         func_sig = Signature(
             parameters=parameters, return_annotation=DataAssistantResult
         )
+        # override the runner docstring with the docstring defined in the implemented DataAssistant child-class
+        run.__doc__ = self._data_assistant_cls.__doc__
         gen_func: Callable = create_function(func_signature=func_sig, func_impl=run)
 
         return gen_func
@@ -301,8 +303,9 @@ class DataAssistantRunner:
                         annotation=accessor_method_return_type,
                     )
                     domain_type_attribute_name_to_parameter_map[key] = parameter
-                elif parameter.default != property_value:
-                    # For now, prevent customization if default values conflict.  In the future, enable at "Rule" level.
+                elif parameter.default != property_value and property_value is not None:
+                    # For now, prevent customization if default values conflict unless the default DomainBuilder value
+                    # is None. In the future, enable at "Rule" level.
                     domain_type_attribute_name_to_parameter_map.pop(key)
                     conflicting_domain_type_attribute_names.append(key)
 
