@@ -44,6 +44,11 @@ from great_expectations.validator.validator import Validator
 class GrowthNumericDataAssistant(DataAssistant):
     """
     GrowthNumericDataAssistant provides dataset exploration and validation of growing amounts of numeric columns data.
+
+    Fundamentally, GrowthNumericDataAssistant is a "thematic blend of VolumeDataAssistant with several Rule definitions
+    from OnboardingDataAssistant concerned with measuring dataset growth and characterizing numeric-valued columns", the
+    goal being a demonstration of how to develop DataAssistant implementations for application-specific custom purposes
+    by combining core computational building blocks following a straightforward procedure in a cookie-cutter fashion.
     """
 
     __alias__: str = "growth_numeric"
