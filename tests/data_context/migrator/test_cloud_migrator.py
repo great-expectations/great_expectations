@@ -301,7 +301,6 @@ def test__migrate_to_cloud_outputs_warnings(
 @pytest.mark.parametrize(
     "test_migrate,expected_statements",
     [
-        pytest.param(True, []),
         pytest.param(
             True,
             [
