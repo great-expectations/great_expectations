@@ -71,6 +71,7 @@ from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Connection
+    from great_expectations.data_context import DataContext
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -99,14 +100,14 @@ try:
     from pyspark.sql import SparkSession
     from pyspark.sql.types import StructType
 except ImportError:
-    SparkDataFrame = type(None)  # type: ignore
-    SparkSession = None  # type: ignore
-    StructType = None  # type: ignore
+    SparkDataFrame = type(None)
+    SparkSession = None
+    StructType = None
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
 except ImportError:
-    spark_DataFrame = type(None)  # type: ignore
+    spark_DataFrame = type(None)
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -178,7 +179,7 @@ except ImportError:
         )
         try:
             getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple = {}  # type: ignore[var-annotated]
+            bigquery_types_tuple: Dict = {}  # type: ignore[no-redef]
             BIGQUERY_TYPES = {
                 "INTEGER": sqla_bigquery.INTEGER,
                 "NUMERIC": sqla_bigquery.NUMERIC,
@@ -436,7 +437,7 @@ try:
 except ImportError:
     pyathena = None
     athenatypes = None
-    athenaDialect = None  # type: ignore
+    athenaDialect = None
     ATHENA_TYPES = {}
 
 # # Others from great_expectations/dataset/sqlalchemy_dataset.py
@@ -1208,7 +1209,7 @@ def get_test_validator_with_data(
     sqlite_db_path=None,
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional["DataContext"] = None,
 ):
     """Utility to create datasets for json-formatted tests."""
 
@@ -1318,7 +1319,7 @@ def get_test_validator_with_data(
                     type_ = schema[col]
                     if type_ in ["IntegerType", "LongType"]:
                         # Ints cannot be None...but None can be valid in Spark (as Null)
-                        vals = []  # type: ignore
+                        vals: list = []
                         for val in data[col]:
                             if val is None:
                                 vals.append(val)
@@ -1329,9 +1330,9 @@ def get_test_validator_with_data(
                         vals = []
                         for val in data[col]:
                             if val is None:
-                                vals.append(val)  # type: ignore
+                                vals.append(val)
                             else:
-                                vals.append(float(val))  # type: ignore
+                                vals.append(float(val))
                         data[col] = vals
                     elif type_ in ["DateType", "TimestampType"]:
                         vals = []
@@ -1339,7 +1340,7 @@ def get_test_validator_with_data(
                             if val is None:
                                 vals.append(val)
                             else:
-                                vals.append(parse(val))  # type: ignore
+                                vals.append(parse(val))
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
@@ -1388,7 +1389,7 @@ def get_test_validator_with_data(
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional["DataContext"] = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
@@ -1702,7 +1703,7 @@ def build_spark_engine(
         )
 
     if batch_id is None:
-        batch_id = cast(BatchDefinition, batch_definition).id  # type: ignore
+        batch_id = cast(BatchDefinition, batch_definition).id
 
     if isinstance(df, pd.DataFrame):
         if schema is None:
@@ -3159,7 +3160,7 @@ def _create_athena_engine(db_name_env_var: str = "ATHENA_DB_NAME") -> Engine:
     Copied get_awsathena_connection_url and get_awsathena_db_name funcs from
     tests/test_utils.py
     """
-    ATHENA_DB_NAME: str = os.getenv(db_name_env_var)
+    ATHENA_DB_NAME: Optional[str] = os.getenv(db_name_env_var)
     ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
     if not ATHENA_DB_NAME:
         raise ValueError(
