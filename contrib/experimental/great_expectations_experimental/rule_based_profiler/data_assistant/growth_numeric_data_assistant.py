@@ -1,5 +1,8 @@
 from typing import Any, Dict, List, Optional
 
+from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
+    GrowthNumericDataAssistantResult,
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
@@ -7,7 +10,6 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant import
 )
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
-    OnboardingDataAssistantResult,
 )
 from great_expectations.rule_based_profiler.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
@@ -104,7 +106,7 @@ class GrowthNumericDataAssistant(DataAssistant):
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
-        return OnboardingDataAssistantResult(
+        return GrowthNumericDataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,
@@ -677,7 +679,6 @@ class GrowthNumericDataAssistant(DataAssistant):
             },
             "round_decimals": None,
         }
-        parameter_builders: List[ParameterBuilder] = []
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
             expect_column_unique_value_count_to_be_between_expectation_configuration_builder,
             expect_column_proportion_of_unique_values_to_be_between_expectation_configuration_builder,
@@ -686,7 +687,7 @@ class GrowthNumericDataAssistant(DataAssistant):
             name="categorical_columns_rule",
             variables=variables,
             domain_builder=categorical_column_type_domain_builder,
-            parameter_builders=parameter_builders,
+            parameter_builders=None,
             expectation_configuration_builders=expectation_configuration_builders,
         )
 

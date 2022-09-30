@@ -427,7 +427,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
                     domain_type=rule.domain_builder.domain_type,
                     rule_name=rule.name,
                 )
-            ] = rule.parameter_builders
+            ] = (
+                rule.parameter_builders or []
+            )
 
     def run(
         self,
