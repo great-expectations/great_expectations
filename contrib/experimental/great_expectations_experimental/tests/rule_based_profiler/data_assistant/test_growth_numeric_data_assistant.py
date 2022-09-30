@@ -28,6 +28,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from tests.conftest import (
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch_probabilistic_data_context,
+    no_usage_stats,
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 )
@@ -35,6 +36,7 @@ from tests.conftest import (
 
 @pytest.fixture
 def bobby_growth_numeric_data_assistant_result_usage_stats_enabled(
+    no_usage_stats,
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> GrowthNumericDataAssistantResult:
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context

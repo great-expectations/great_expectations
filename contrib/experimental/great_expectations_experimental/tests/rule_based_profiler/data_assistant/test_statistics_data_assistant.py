@@ -31,6 +31,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 # noinspection PyUnresolvedReferences
 from tests.conftest import (
     bobby_columnar_table_multi_batch_deterministic_data_context,
+    no_usage_stats,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 )
 
@@ -38,6 +39,7 @@ from tests.conftest import (
 @pytest.fixture()
 def bobby_statistics_data_assistant_result(
     monkeypatch,
+    no_usage_stats,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
 ) -> StatisticsDataAssistantResult:
