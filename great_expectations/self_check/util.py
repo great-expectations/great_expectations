@@ -14,7 +14,6 @@ from functools import wraps
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
-    Any,
     Dict,
     Iterable,
     List,
