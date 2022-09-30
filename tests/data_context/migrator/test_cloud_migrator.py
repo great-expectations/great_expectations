@@ -298,9 +298,52 @@ def test__migrate_to_cloud_outputs_warnings(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-@pytest.mark.parametrize("test_migrate", [True, False])
+@pytest.mark.parametrize(
+    "test_migrate,expected_statements",
+    [
+        pytest.param(
+            True,
+            [
+                "Thank you for using Great Expectations!",
+                "We will now begin the migration process to GX Cloud.",
+                "First we will bundle your existing context configuration and send it to the Cloud backend.",
+                "Then we will send each of your validation results.",
+                "[Step 1/4]: Bundling context configuration",
+                "Bundled 1 Datasource(s):",
+                "Bundled 1 Checkpoint(s):",
+                "Bundled 1 Expectation Suite(s):",
+                "Bundled 1 Profiler(s):",
+                "[Step 2/4]: Preparing validation results",
+                "[Step 3/4]: Sending context configuration",
+                "[Step 4/4]: Sending validation results",
+                "Test run completed!",
+            ],
+        ),
+        pytest.param(
+            False,
+            [
+                "Thank you for using Great Expectations!",
+                "We will now begin the migration process to GX Cloud.",
+                "First we will bundle your existing context configuration and send it to the Cloud backend.",
+                "Then we will send each of your validation results.",
+                "[Step 1/4]: Bundling context configuration",
+                "Bundled 1 Datasource(s):",
+                "Bundled 1 Checkpoint(s):",
+                "Bundled 1 Expectation Suite(s):",
+                "Bundled 1 Profiler(s):",
+                "[Step 2/4]: Preparing validation results",
+                "[Step 3/4]: Sending context configuration",
+                "[Step 4/4]: Sending validation results",
+                "Success!",
+                "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",
+                "If you continue to use your existing Data Context your configurations could become out of sync.",
+            ],
+        ),
+    ],
+)
 def test__migrate_to_cloud_happy_path_prints_to_stdout(
     test_migrate: bool,
+    expected_statements: List[str],
     migrator_with_stub_base_data_context: CloudMigrator,
     capsys,
 ):
@@ -310,24 +353,6 @@ def test__migrate_to_cloud_happy_path_prints_to_stdout(
         migrator._migrate_to_cloud(test_migrate=test_migrate)
 
     stdout, _ = capsys.readouterr()
-    expected_statements = [
-        "Thank you for using Great Expectations!",
-        "We will now begin the migration process to GX Cloud.",
-        "First we will bundle your existing context configuration and send it to the Cloud backend.",
-        "Then we will send each of your validation results.",
-        "[Step 1/4]: Bundling context configuration",
-        "Bundled 1 Datasource(s):",
-        "Bundled 1 Checkpoint(s):",
-        "Bundled 1 Expectation Suite(s):",
-        "Bundled 1 Profiler(s):",
-        "[Step 2/4]: Preparing validation results",
-        "[Step 3/4]: Sending context configuration",
-        "[Step 4/4]: Sending validation results",
-        "Success!",
-        "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",
-        "If you continue to use your existing Data Context your configurations could become out of sync.",
-    ]
-
     assert_stdout_is_accurate_and_properly_ordered(
         stdout=stdout, statements=expected_statements
     )
@@ -413,7 +438,7 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
         "[Step 3/4]: Sending context configuration",
         "[Step 4/4]: Sending validation results",
         "Error sending validation result 'some_key' (1/1)",
-        "Partial Success!",
+        "Partial success!",
         "Now that you have migrated your Data Context to GX Cloud, you should use your Cloud Data Context from now on to interact with Great Expectations.",
         "If you continue to use your existing Data Context your configurations could become out of sync.",
         "Please note that there were 1 validation result(s) that were not successfully migrated",
