@@ -21,52 +21,53 @@ Named snippets are defined with the following syntax:
     # </snippet>
 ```
 */
-const visit = require('unist-util-visit');
-const constructSnippetMap = require("./snippet")
+const visit = require('unist-util-visit')
+const constructSnippetMap = require('./snippet')
 
-function codeImport() {
+function codeImport () {
+  // Instantiated within the import so it can be hot-reloaded
+  const snippetMap = constructSnippetMap('.')
+  console.log(snippetMap)
 
-    // Instantiated within the import so it can be hot-reloaded
-    const snippetMap = constructSnippetMap(".")
+  return function transformer (tree, file) {
+    const codes = []
+    const promises = []
 
-    return function transformer(tree, file) {
-        const codes = [];
-        const promises = [];
+    // Walk the AST of the markdown file and filter for code snippets
+    visit(tree, 'code', (node, index, parent) => {
+      codes.push([node, index, parent])
+    })
 
-        // Walk the AST of the markdown file and filter for code snippets
-        visit(tree, 'code', (node, index, parent) => {
-            codes.push([node, index, parent]);
-        });
+    for (const [node] of codes) {
+      const nameMeta = (node.meta || '')
+        .split(' ')
+        .find(meta => meta.startsWith('name='))
 
-        for (const [node] of codes) {
-            const nameMeta = (node.meta || '')
-                .split(' ')
-                .find(meta => meta.startsWith('name='));
+      if (!nameMeta) {
+        continue
+      }
 
-            if (!nameMeta) {
-                continue;
-            }
+      const res = /^name=(?<snippetName>.+?)$/.exec(
+        nameMeta
+      )
 
-            const res = /^name=(?<snippetName>.+?)$/.exec(
-                nameMeta
-            );
+      let name = res.groups.snippetName
+      if (!name) {
+        throw new Error(`Unable to parse named reference ${nameMeta}`)
+      }
 
-            let name = res.groups.snippetName
-            if (!name) {
-                throw new Error(`Unable to parse named reference ${nameMeta}`);
-            }
+      // Remove any surrounding quotes
+      name = name.replaceAll("'", '').replaceAll('"', '')
+      if (!(name in snippetMap)) {
+        throw new Error(`Could not find any snippet named ${name}`)
+      }
+      node.value = snippetMap[name].contents
+    }
 
-            name = eval(name) // Remove any surrounding quotes
-            if (!(name in snippetMap)) {
-                throw new Error(`Could not find any snippet named ${name}`)
-            }
-            node.value = snippetMap[name].contents
-        }
-
-        if (promises.length) {
-            return Promise.all(promises);
-        }
-    };
+    if (promises.length) {
+      return Promise.all(promises)
+    }
+  }
 }
 
-module.exports = codeImport;
+module.exports = codeImport

@@ -20,7 +20,6 @@ function constructSnippetMap(dir) {
         snippetMap[name] = snippet
     }
 
-    console.log(snippetMap)
     return snippetMap
 }
 
