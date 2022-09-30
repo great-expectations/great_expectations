@@ -151,7 +151,9 @@ class CloudMigrator:
             print("No unsuccessful validations found!")
             return
 
-        self._process_validation_results(serialized_validation_results=validations)
+        self._process_validation_results(
+            serialized_validation_results=validations, test_migrate=False
+        )
         if validations:
             self._print_unsuccessful_validation_message()
 
@@ -297,16 +299,14 @@ class CloudMigrator:
         serialized_validation_results: Dict[str, dict],
         test_migrate: bool,
     ) -> None:
-        print("[Step 4/4]: Sending validation results]")
-        if test_migrate:
-            return
-
+        print("[Step 4/4]: Sending validation results")
         self._process_validation_results(
-            serialized_validation_results=serialized_validation_results
+            serialized_validation_results=serialized_validation_results,
+            test_migrate=test_migrate,
         )
 
     def _process_validation_results(
-        self, serialized_validation_results: Dict[str, dict]
+        self, serialized_validation_results: Dict[str, dict], test_migrate: bool
     ) -> None:
         # 20220928 - Chetan - We want to use the static lookup tables in GeCloudStoreBackend
         # to ensure the appropriate URL and payload shape. This logic should be moved to
@@ -322,16 +322,21 @@ class CloudMigrator:
         for i, (key, validation_result) in enumerate(
             serialized_validation_results.items()
         ):
-            response = self._post_to_cloud_backend(
-                resource_name=resource_name,
-                resource_type=resource_type,
-                attributes_key=attributes_key,
-                attributes_value=validation_result,
-            )
+            success: bool
+            if test_migrate:
+                success = True
+            else:
+                response = self._post_to_cloud_backend(
+                    resource_name=resource_name,
+                    resource_type=resource_type,
+                    attributes_key=attributes_key,
+                    attributes_value=validation_result,
+                )
+                success = response.success
 
             progress = f"({i+1}/{len(serialized_validation_results)})"
 
-            if response.success:
+            if success:
                 print(f"  Sent validation result {progress}")
             else:
                 print(f"  Error sending validation result '{key}' {progress}")
