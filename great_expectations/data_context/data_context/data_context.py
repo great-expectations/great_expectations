@@ -244,7 +244,8 @@ class DataContext(BaseDataContext):
             context_root_dir=context_root_dir,
         )
 
-        project_config = self._load_project_config()
+        temp_project_config = self._load_project_config()
+        project_config = temp_project_config
 
         super().__init__(
             project_config=project_config,
