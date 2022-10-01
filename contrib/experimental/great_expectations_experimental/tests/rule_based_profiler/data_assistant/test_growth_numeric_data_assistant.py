@@ -40,8 +40,10 @@ from tests.conftest import (
     empty_data_context,
     no_usage_stats,
     quentin_columnar_table_multi_batch_data_context,
+    sa,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
     spark_df_taxi_data_schema,
+    spark_session,
 )
 
 
