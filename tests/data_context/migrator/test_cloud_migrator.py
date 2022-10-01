@@ -1,4 +1,5 @@
 """These tests ensure that CloudMigrator works as intended."""
+import logging
 from typing import Any, Callable, List
 from unittest import mock
 
@@ -267,6 +268,7 @@ def test__migrate_to_cloud_outputs_warnings(
 
     migrator = migrator_factory(context=context)
 
+    caplog.set_level(logging.INFO)
     with mock.patch("requests.Session.post", autospec=True):
         migrator._migrate_to_cloud(test_migrate=test_migrate)
 
