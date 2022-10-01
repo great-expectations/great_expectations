@@ -1319,7 +1319,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
                     type_ = schema[col]
                     if type_ in ["IntegerType", "LongType"]:
                         # Ints cannot be None...but None can be valid in Spark (as Null)
-                        vals: list = []
+                        vals: List[Union[str, int, float, None]] = []
                         for val in data[col]:
                             if val is None:
                                 vals.append(val)
@@ -1340,7 +1340,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
                             if val is None:
                                 vals.append(val)
                             else:
-                                vals.append(parse(val))
+                                vals.append(parse(val))  # type: ignore[arg-type]
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
