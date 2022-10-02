@@ -480,7 +480,10 @@ class AbstractDataContext(ABC):
         """
 
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
-        datasource_config = DatasourceConfig(**datasource_config_dict)
+        # Manually need to add in class name to the config since it is not part of the runtime obj
+        datasource_config_dict["class_name"] = datasource.__class__.__name__
+
+        datasource_config = datasourceConfigSchema.load(datasource_config_dict)
         datasource_name: str = datasource.name
 
         updated_datasource_config_from_store: DatasourceConfig = self._datasource_store.set(  # type: ignore[attr-defined]

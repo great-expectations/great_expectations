@@ -963,16 +963,6 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        value_set_multi_batch_parameter_builder_for_validations: ParameterBuilder = (
-            ValueSetMultiBatchParameterBuilder(
-                name="value_set_estimator",
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs=None,
-                evaluation_parameter_builder_configs=None,
-                data_context=None,
-            )
-        )
-
         evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         evaluation_parameter_builder_configs = [
@@ -995,6 +985,15 @@ class OnboardingDataAssistant(DataAssistant):
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
+        value_set_multi_batch_parameter_builder_for_validations: ParameterBuilder = (
+            ValueSetMultiBatchParameterBuilder(
+                name="value_set_estimator",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                evaluation_parameter_builder_configs=None,
+                data_context=None,
+            )
+        )
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **value_set_multi_batch_parameter_builder_for_validations.to_json_dict(),
