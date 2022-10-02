@@ -165,7 +165,7 @@ class CloudMigrator:
         configuration_bundle: ConfigurationBundle = ConfigurationBundle(
             context=self._context
         )
-        self._emit_warnings(
+        self._emit_log_stmts(
             configuration_bundle=configuration_bundle, test_migrate=test_migrate
         )
         self._print_configuration_bundle_summary(
@@ -191,32 +191,32 @@ class CloudMigrator:
 
         self._print_migration_conclusion_message(test_migrate=test_migrate)
 
-    def _emit_warnings(
+    def _emit_log_stmts(
         self, configuration_bundle: ConfigurationBundle, test_migrate: bool
     ) -> None:
         if test_migrate:
-            self._warn_about_test_migrate()
+            self._log_about_test_migrate()
         if not configuration_bundle.is_usage_stats_enabled():
-            self._warn_about_usage_stats_disabled()
+            self._log_about_usage_stats_disabled()
         if configuration_bundle.datasources:
-            self._warn_about_bundle_contains_datasources()
+            self._log_about_bundle_contains_datasources()
 
-    def _warn_about_test_migrate(self) -> None:
-        logger.warning(
+    def _log_about_test_migrate(self) -> None:
+        logger.info(
             "This is a test run! Please pass `test_migrate=False` to begin the "
             "actual migration (e.g. `CloudMigrator.migrate(context=context, test_migrate=False)`).\n"
         )
 
-    def _warn_about_usage_stats_disabled(self) -> None:
-        logger.warning(
+    def _log_about_usage_stats_disabled(self) -> None:
+        logger.info(
             "We noticed that you had disabled usage statistics tracking. "
             "Please note that by migrating your context to GX Cloud your new Cloud Data Context "
             "will emit usage statistics. These statistics help us understand how we can improve "
             "the product and we hope you don't mind!\n"
         )
 
-    def _warn_about_bundle_contains_datasources(self) -> None:
-        logger.warning(
+    def _log_about_bundle_contains_datasources(self) -> None:
+        logger.info(
             "Since your existing context includes one or more datasources, "
             "please note that if your credentials are included in the datasource config, "
             "they will be sent to the GX Cloud backend. We recommend storing your credentials "
