@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import json
 import logging
@@ -480,7 +482,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     def get_failed_validation_results(
         self,
-    ) -> "ExpectationSuiteValidationResult":  # noqa: F821
+    ) -> ExpectationSuiteValidationResult:
         validation_results = [result for result in self.results if not result.success]
 
         successful_expectations = sum(exp.success for exp in validation_results)

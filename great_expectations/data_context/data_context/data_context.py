@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import shutil
@@ -84,7 +86,7 @@ class DataContext(BaseDataContext):
         project_root_dir: Optional[str] = None,
         usage_statistics_enabled: bool = True,
         runtime_environment: Optional[dict] = None,
-    ) -> "DataContext":
+    ) -> DataContext:
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import json
 import logging
@@ -1003,7 +1005,7 @@ class ExpectationConfiguration(SerializableDictDot):
         if len(substituted_parameters) > 0:
             self.meta["substituted_parameters"] = substituted_parameters
 
-    def get_raw_configuration(self) -> "ExpectationConfiguration":
+    def get_raw_configuration(self) -> ExpectationConfiguration:
         # return configuration without substituted evaluation parameters
         raw_config = deepcopy(self)
         if raw_config._raw_kwargs is not None:
@@ -1012,7 +1014,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
         return raw_config
 
-    def patch(self, op: str, path: str, value: Any) -> "ExpectationConfiguration":
+    def patch(self, op: str, path: str, value: Any) -> ExpectationConfiguration:
         """
 
         Args:
