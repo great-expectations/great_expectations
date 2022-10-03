@@ -12,48 +12,49 @@ from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
 
-class RendererPrefix(Enum):
+class RendererPrefix(Enum, str):
     """Available renderer types"""
 
     LEGACY = "renderer"
     ATOMIC = "atomic"
 
 
-class LegacyRendererType(Enum):
+class LegacyRendererType(Enum, str):
     """Available legacy renderer types"""
 
-    PRESCRIPTIVE = ".".join([RendererPrefix.LEGACY.value, "prescriptive"])
-    DIAGNOSTIC = ".".join([RendererPrefix.LEGACY.value, "diagnostic"])
+    PRESCRIPTIVE = ".".join([RendererPrefix.LEGACY, "prescriptive"])
+    DIAGNOSTIC = ".".join([RendererPrefix.LEGACY, "diagnostic"])
 
 
-class AtomicRendererType(Enum):
+class AtomicRendererType(Enum, str):
     """Available atomic renderer types"""
 
-    PRESCRIPTIVE = ".".join([RendererPrefix.ATOMIC.value, "prescriptive"])
-    DIAGNOSTIC = ".".join([RendererPrefix.ATOMIC.value, "diagnostic"])
-
-    def __eq__(self, other: Union[str, AtomicRendererType]) -> bool:
-        if isinstance(other, str):
-            return self.value.lower() == other.lower()
-        return self.value.lower() == other.value.lower()
-
-    def __hash__(self: AtomicRendererType) -> int:
-        return hash(self.value)
+    PRESCRIPTIVE = ".".join([RendererPrefix.ATOMIC, "prescriptive"])
+    DIAGNOSTIC = ".".join([RendererPrefix.ATOMIC, "diagnostic"])
 
 
-class FailedAtomicRendererName(Enum):
-    """Available failed atomic renderer names"""
+class LegacyDiagnosticRendererName(Enum, str):
+    """Available legacy diagnostic renderer names"""
 
-    PRESCRIPTIVE = ".".join([AtomicRendererType.PRESCRIPTIVE.value, "failed"])
-    DIAGNOSTIC = ".".join([AtomicRendererType.DIAGNOSTIC.value, "failed"])
+    SUMMARY = ".".join([LegacyRendererType.DIAGNOSTIC, "summary"])
 
-    def __eq__(self, other: Union[str, FailedAtomicRendererName]) -> bool:
-        if isinstance(other, str):
-            return self.value.lower() == other.lower()
-        return self.value.lower() == other.value.lower()
 
-    def __hash__(self: FailedAtomicRendererName) -> int:
-        return hash(self.value)
+class LegacyPrescriptiveRendererName(Enum, str):
+    """Available legacy prescriptive renderer names"""
+
+    SUMMARY = ".".join([LegacyRendererType.PRESCRIPTIVE, "summary"])
+
+
+class AtomicDiagnosticRendererName(Enum, str):
+    """Available atomic diagnostic renderer names"""
+
+    FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
+
+
+class AtomicPrescriptiveRendererName(Enum, str):
+    """Available atomic prescriptive renderer names"""
+
+    FAILED = ".".join([AtomicRendererType.PRESCRIPTIVE, "failed"])
 
 
 class RenderedContent:
