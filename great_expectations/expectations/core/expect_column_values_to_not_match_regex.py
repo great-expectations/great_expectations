@@ -7,7 +7,11 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.types import (
+    LegacyDescriptiveRendererName,
+    LegacyRendererType,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -255,7 +259,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -323,7 +327,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
 
     @classmethod
     @renderer(
-        renderer_type="renderer.descriptive.column_properties_table.regex_count_row"
+        renderer_type=LegacyDescriptiveRendererName.COLUMN_PROPERTIES_TABLE_REGEX_COUNT_ROW
     )
     def _descriptive_column_properties_table_regex_count_row_renderer(
         cls,

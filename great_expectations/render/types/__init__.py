@@ -24,6 +24,7 @@ class LegacyRendererType(str, Enum):
 
     PRESCRIPTIVE = ".".join([RendererPrefix.LEGACY, "prescriptive"])
     DIAGNOSTIC = ".".join([RendererPrefix.LEGACY, "diagnostic"])
+    DESCRIPTIVE = ".".join([RendererPrefix.LEGACY, "descriptive"])
 
 
 class AtomicRendererType(str, Enum):
@@ -50,6 +51,18 @@ class LegacyDiagnosticRendererName(str, Enum):
         [LegacyRendererType.DIAGNOSTIC, "unexpected_statement"]
     )
     UNEXPECTED_TABLE = ".".join([LegacyRendererType.DIAGNOSTIC, "unexpected_table"])
+
+
+class LegacyDescriptiveRendererName(str, Enum):
+    """Available legacy descriptive renderer names"""
+
+    COLUMN_PROPERTIES_TABLE_REGEX_COUNT_ROW = ".".join(
+        [LegacyRendererType.DESCRIPTIVE, "column_properties_table", "regex_count_row"]
+    )
+    STATS_TABLE_MEAN_ROW = ".".join(
+        [LegacyRendererType.DESCRIPTIVE, "stats_table", "mean_row"]
+    )
+    QUANTILE_TABLE = ".".join([LegacyRendererType.DESCRIPTIVE, "quantile_table"])
 
 
 class AtomicPrescriptiveRendererName(str, Enum):
