@@ -3,7 +3,7 @@ import json
 import os
 import shutil
 from collections import OrderedDict
-from typing import List, Union
+from typing import Dict, List, Union
 
 import pandas as pd
 import pytest
@@ -3099,7 +3099,7 @@ class ExpectSkyToBeColor(TableExpectation):
     def _validate(
         self,
         **kwargs: dict,
-    ) -> dict[str, Union[bool, dict]]:
+    ) -> Dict[str, Union[bool, dict]]:
         return {
             "success": True,
             "result": {"observed_value": "blue"},

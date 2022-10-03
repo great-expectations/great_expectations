@@ -29,16 +29,17 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_allowed(
             cardinality_limit_mode="very_few",
         )
     except Exception as exc:
-        assert (False, f"context.assistants.onboarding.run raise an exception '{exc}'")
+        raise AssertionError(
+            f"context.assistants.onboarding.run raise an exception '{exc}'"
+        )
 
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(
+        TypeError,
+        match=r"run() got an unexpected keyword argument 'non_existent_parameter'",
+    ):
         context.assistants.onboarding.run(
             batch_request=batch_request, non_existent_parameter="break_this"
         )
-    assert (
-        e.value.args[0]
-        == "run() got an unexpected keyword argument 'non_existent_parameter'"
-    )
 
 
 @pytest.mark.integration
