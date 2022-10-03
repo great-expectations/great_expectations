@@ -15,6 +15,7 @@ from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
+    LegacyRendererType,
     RenderedAtomicContent,
     RenderedContentBlockContainer,
     RenderedGraphContent,
@@ -1150,7 +1151,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,

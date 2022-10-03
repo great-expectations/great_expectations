@@ -1,6 +1,7 @@
 from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import LegacyRendererType
 
 
 class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(TableExpectation):
@@ -30,7 +31,7 @@ class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(TableExpectation):
     )
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,

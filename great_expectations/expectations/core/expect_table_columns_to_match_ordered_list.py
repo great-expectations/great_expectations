@@ -12,7 +12,10 @@ from great_expectations.expectations.util import (
     render_evaluation_parameter_string,
 )
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.types import (
+    LegacyRendererType,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.util import substitute_none_for_missing
 
 
@@ -157,7 +160,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
