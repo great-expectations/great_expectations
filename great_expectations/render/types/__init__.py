@@ -12,34 +12,34 @@ from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
 
-class RendererPrefix(Enum, str):
+class RendererPrefix(str, Enum):
     """Available renderer types"""
 
     LEGACY = "renderer"
     ATOMIC = "atomic"
 
 
-class LegacyRendererType(Enum, str):
+class LegacyRendererType(str, Enum):
     """Available legacy renderer types"""
 
     PRESCRIPTIVE = ".".join([RendererPrefix.LEGACY, "prescriptive"])
     DIAGNOSTIC = ".".join([RendererPrefix.LEGACY, "diagnostic"])
 
 
-class AtomicRendererType(Enum, str):
+class AtomicRendererType(str, Enum):
     """Available atomic renderer types"""
 
     PRESCRIPTIVE = ".".join([RendererPrefix.ATOMIC, "prescriptive"])
     DIAGNOSTIC = ".".join([RendererPrefix.ATOMIC, "diagnostic"])
 
 
-class LegacyPrescriptiveRendererName(Enum, str):
+class LegacyPrescriptiveRendererName(str, Enum):
     """Available legacy prescriptive renderer names"""
 
     SUMMARY = ".".join([LegacyRendererType.PRESCRIPTIVE, "summary"])
 
 
-class LegacyDiagnosticRendererName(Enum, str):
+class LegacyDiagnosticRendererName(str, Enum):
     """Available legacy diagnostic renderer names"""
 
     META_PROPERTIES = ".".join([LegacyRendererType.DIAGNOSTIC, "meta_properties"])
@@ -52,14 +52,14 @@ class LegacyDiagnosticRendererName(Enum, str):
     UNEXPECTED_TABLE = ".".join([LegacyRendererType.DIAGNOSTIC, "unexpected_table"])
 
 
-class AtomicPrescriptiveRendererName(Enum, str):
+class AtomicPrescriptiveRendererName(str, Enum):
     """Available atomic prescriptive renderer names"""
 
     FAILED = ".".join([AtomicRendererType.PRESCRIPTIVE, "failed"])
     SUMMARY = ".".join([AtomicRendererType.PRESCRIPTIVE, "summary"])
 
 
-class AtomicDiagnosticRendererName(Enum, str):
+class AtomicDiagnosticRendererName(str, Enum):
     """Available atomic diagnostic renderer names"""
 
     FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
@@ -673,7 +673,9 @@ class RenderedAtomicValueSchema(Schema):
 class RenderedAtomicContent(RenderedContent):
     def __init__(
         self,
-        name: Optional[str] = None,
+        name: Optional[
+            Union[str, AtomicDiagnosticRendererName, AtomicPrescriptiveRendererName]
+        ] = None,
         value: Optional[RenderedAtomicValue] = None,
         value_type: Optional[str] = None,
     ) -> None:
@@ -700,9 +702,12 @@ class RenderedAtomicContentSchema(Schema):
     class Meta:
         unknown: INCLUDE
 
-    name = fields.String(required=False, allow_none=True)
+    name = fields.Method("get_name", required=False, allow_none=True)
     value = fields.Nested(RenderedAtomicValueSchema(), required=True, allow_none=False)
     value_type = fields.String(required=True, allow_none=False)
+
+    def get_name(self, obj):
+        return obj.name.value
 
     @post_load
     def make_rendered_atomic_content(self, data, **kwargs):

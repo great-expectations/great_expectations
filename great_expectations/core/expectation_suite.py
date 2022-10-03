@@ -43,7 +43,10 @@ from great_expectations.exceptions import (
     DataContextError,
     InvalidExpectationConfigurationError,
 )
-from great_expectations.render.types import RenderedAtomicContent
+from great_expectations.render.types import (
+    AtomicPrescriptiveRendererName,
+    RenderedAtomicContent,
+)
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -990,7 +993,7 @@ class ExpectationSuite(SerializableDictDot):
             expectation_configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
                 existing_rendered_content=expectation_configuration.rendered_content,
                 new_rendered_content=rendered_content,
-                failed_renderer_name="atomic.prescriptive.failed",
+                failed_renderer_name=AtomicPrescriptiveRendererName.FAILED,
             )
 
 

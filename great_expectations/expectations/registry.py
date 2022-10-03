@@ -5,6 +5,11 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
+from great_expectations.render.types import (
+    AtomicDiagnosticRendererName,
+    AtomicPrescriptiveRendererName,
+    AtomicRendererType,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -78,8 +83,8 @@ def get_renderer_names(object_name: str) -> List[str]:
 
 def get_renderer_names_with_renderer_prefix(
     object_name: str,
-    renderer_prefix: str,
-) -> List[str]:
+    renderer_prefix: AtomicRendererType,
+) -> List[Union[str, AtomicDiagnosticRendererName, AtomicPrescriptiveRendererName]]:
     """Gets renderer names, with a given prefix, for a given Expectation or Metric.
 
     Args:
