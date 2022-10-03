@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import uuid
 import warnings
 from contextlib import contextmanager
@@ -985,3 +986,18 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
         logger.info(f"Could not find the following target strings: {strings}")
 
     return success
+
+
+@contextmanager
+def working_directory(directory: Union[str, Path]):
+    """
+    Resets working directory to cwd() after changing to 'directory' passed in as parameter.
+    Reference:
+    https://stackoverflow.com/questions/431684/equivalent-of-shell-cd-command-to-change-the-working-directory/431747#431747
+    """
+    owd = os.getcwd()
+    try:
+        os.chdir(directory)
+        yield directory
+    finally:
+        os.chdir(owd)
