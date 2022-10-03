@@ -33,28 +33,37 @@ class AtomicRendererType(Enum, str):
     DIAGNOSTIC = ".".join([RendererPrefix.ATOMIC, "diagnostic"])
 
 
-class LegacyDiagnosticRendererName(Enum, str):
-    """Available legacy diagnostic renderer names"""
-
-    SUMMARY = ".".join([LegacyRendererType.DIAGNOSTIC, "summary"])
-
-
 class LegacyPrescriptiveRendererName(Enum, str):
     """Available legacy prescriptive renderer names"""
 
     SUMMARY = ".".join([LegacyRendererType.PRESCRIPTIVE, "summary"])
 
 
-class AtomicDiagnosticRendererName(Enum, str):
-    """Available atomic diagnostic renderer names"""
+class LegacyDiagnosticRendererName(Enum, str):
+    """Available legacy diagnostic renderer names"""
 
-    FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
+    META_PROPERTIES = ".".join([LegacyRendererType.DIAGNOSTIC, "meta_properties"])
+    OBSERVED_VALUE = ".".join([LegacyRendererType.DIAGNOSTIC, "observed_value"])
+    STATUS_ICON = ".".join([LegacyRendererType.DIAGNOSTIC, "status_icon"])
+    SUMMARY = ".".join([LegacyRendererType.DIAGNOSTIC, "summary"])
+    UNEXPECTED_STATEMENT = ".".join(
+        [LegacyRendererType.DIAGNOSTIC, "unexpected_statement"]
+    )
+    UNEXPECTED_TABLE = ".".join([LegacyRendererType.DIAGNOSTIC, "unexpected_table"])
 
 
 class AtomicPrescriptiveRendererName(Enum, str):
     """Available atomic prescriptive renderer names"""
 
     FAILED = ".".join([AtomicRendererType.PRESCRIPTIVE, "failed"])
+    SUMMARY = ".".join([AtomicRendererType.PRESCRIPTIVE, "summary"])
+
+
+class AtomicDiagnosticRendererName(Enum, str):
+    """Available atomic diagnostic renderer names"""
+
+    FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
+    OBSERVED_VALUE = ".".join([AtomicRendererType.DIAGNOSTIC, "observed_value"])
 
 
 class RenderedContent:
