@@ -1,3 +1,5 @@
+import re
+
 import pandas as pd
 import pytest
 
@@ -35,7 +37,9 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_allowed(
 
     with pytest.raises(
         TypeError,
-        match=r"run() got an unexpected keyword argument 'non_existent_parameter'",
+        match=re.escape(
+            "run() got an unexpected keyword argument 'non_existent_parameter'"
+        ),
     ):
         context.assistants.onboarding.run(
             batch_request=batch_request, non_existent_parameter="break_this"
