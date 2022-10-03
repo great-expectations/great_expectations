@@ -56,13 +56,50 @@ class LegacyDiagnosticRendererName(str, Enum):
 class LegacyDescriptiveRendererName(str, Enum):
     """Available legacy descriptive renderer names"""
 
+    COLUMN_PROPERTIES_TABLE_DISTINCT_COUNT_ROW = ".".join(
+        [
+            LegacyRendererType.DESCRIPTIVE,
+            "column_properties_table",
+            "distinct_count_row",
+        ]
+    )
+    COLUMN_PROPERTIES_TABLE_DISTINCT_PERCENT_ROW = ".".join(
+        [
+            LegacyRendererType.DESCRIPTIVE,
+            "column_properties_table",
+            "distinct_percent_row",
+        ]
+    )
+    COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW = ".".join(
+        [LegacyRendererType.DESCRIPTIVE, "column_properties_table", "missing_count_row"]
+    )
+    COLUMN_PROPERTIES_TABLE_MISSING_PERCENT_ROW = ".".join(
+        [
+            LegacyRendererType.DESCRIPTIVE,
+            "column_properties_table",
+            "missing_percent_row",
+        ]
+    )
     COLUMN_PROPERTIES_TABLE_REGEX_COUNT_ROW = ".".join(
         [LegacyRendererType.DESCRIPTIVE, "column_properties_table", "regex_count_row"]
+    )
+    EXAMPLE_VALUES_BLOCK = ".".join(
+        [LegacyRendererType.DESCRIPTIVE, "example_values_block"]
+    )
+    HISTOGRAM = ".".join([LegacyRendererType.DESCRIPTIVE, "histogram"])
+    QUANTILE_TABLE = ".".join([LegacyRendererType.DESCRIPTIVE, "quantile_table"])
+    STATS_TABLE_MAX_ROW = ".".join(
+        [LegacyRendererType.DESCRIPTIVE, "stats_table", "max_row"]
     )
     STATS_TABLE_MEAN_ROW = ".".join(
         [LegacyRendererType.DESCRIPTIVE, "stats_table", "mean_row"]
     )
-    QUANTILE_TABLE = ".".join([LegacyRendererType.DESCRIPTIVE, "quantile_table"])
+    STATS_TABLE_MIN_ROW = ".".join(
+        [LegacyRendererType.DESCRIPTIVE, "stats_table", "min_row"]
+    )
+    VALUE_COUNTS_BAR_CHART = ".".join(
+        [LegacyRendererType.DESCRIPTIVE, "value_counts_bar_chart"]
+    )
 
 
 class AtomicPrescriptiveRendererName(str, Enum):

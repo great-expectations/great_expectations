@@ -1,7 +1,10 @@
 from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import LegacyRendererType
+from great_expectations.render.types import (
+    LegacyDiagnosticRendererName,
+    LegacyRendererType,
+)
 
 
 class ExpectColumnChiSquareTestPValueToBeGreaterThan(TableExpectation):
@@ -43,7 +46,7 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(TableExpectation):
         pass
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererName.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,

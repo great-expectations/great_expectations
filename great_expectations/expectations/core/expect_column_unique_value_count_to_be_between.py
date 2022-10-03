@@ -6,6 +6,7 @@ from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
+    LegacyDescriptiveRendererName,
     LegacyRendererType,
     RenderedStringTemplateContent,
 )
@@ -387,7 +388,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
 
     @classmethod
     @renderer(
-        renderer_type="renderer.descriptive.column_properties_table.distinct_count_row"
+        renderer_type=LegacyDescriptiveRendererName.COLUMN_PROPERTIES_TABLE_DISTINCT_COUNT_ROW
     )
     def _descriptive_column_properties_table_distinct_count_row_renderer(
         cls,

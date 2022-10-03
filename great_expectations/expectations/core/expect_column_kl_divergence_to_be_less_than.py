@@ -15,6 +15,10 @@ from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
+    AtomicDiagnosticRendererName,
+    AtomicPrescriptiveRendererName,
+    LegacyDescriptiveRendererName,
+    LegacyDiagnosticRendererName,
     LegacyRendererType,
     RenderedAtomicContent,
     RenderedContentBlockContainer,
@@ -1087,7 +1091,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.summary")
+    @renderer(renderer_type=AtomicPrescriptiveRendererName.SUMMARY)
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
@@ -1267,7 +1271,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    @renderer(renderer_type=AtomicDiagnosticRendererName.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
         configuration=None,
@@ -1340,7 +1344,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererName.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,
@@ -1384,7 +1388,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.histogram")
+    @renderer(renderer_type=LegacyDescriptiveRendererName.HISTOGRAM)
     def _descriptive_histogram_renderer(
         cls,
         configuration=None,

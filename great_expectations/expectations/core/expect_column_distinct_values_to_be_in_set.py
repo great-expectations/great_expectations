@@ -16,6 +16,7 @@ from great_expectations.expectations.util import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
+    LegacyDescriptiveRendererName,
     LegacyRendererType,
     RenderedGraphContent,
     RenderedStringTemplateContent,
@@ -279,7 +280,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.value_counts_bar_chart")
+    @renderer(renderer_type=LegacyDescriptiveRendererName.VALUE_COUNTS_BAR_CHART)
     def _descriptive_value_counts_bar_chart_renderer(
         cls,
         configuration=None,

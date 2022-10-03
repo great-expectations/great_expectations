@@ -4,7 +4,10 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import LegacyRendererType
+from great_expectations.render.types import (
+    LegacyDiagnosticRendererName,
+    LegacyRendererType,
+)
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
@@ -92,7 +95,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         pass
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererName.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,
