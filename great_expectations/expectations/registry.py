@@ -81,15 +81,15 @@ def get_renderer_names(object_name: str) -> List[str]:
     return list(_registered_renderers.get(object_name, {}).keys())
 
 
-def get_renderer_names_with_renderer_prefix(
+def get_renderer_names_with_renderer_type(
     object_name: str,
-    renderer_prefix: AtomicRendererType,
+    renderer_type: AtomicRendererType,
 ) -> List[Union[str, AtomicDiagnosticRendererName, AtomicPrescriptiveRendererName]]:
-    """Gets renderer names, with a given prefix, for a given Expectation or Metric.
+    """Gets renderer names of a given type, for a given Expectation or Metric.
 
     Args:
         object_name: The name of an Expectation or Metric for which to get renderer names.
-        renderer_prefix: The prefix of the renderers for which to return.
+        renderer_type: The type of the renderers for which to return.
 
     Returns:
         A list of renderer names for the given prefix and Expectation or Metric.
@@ -97,7 +97,7 @@ def get_renderer_names_with_renderer_prefix(
     return [
         renderer_name
         for renderer_name in get_renderer_names(object_name=object_name)
-        if renderer_name.startswith(renderer_prefix)
+        if renderer_name.startswith(renderer_type)
     ]
 
 
