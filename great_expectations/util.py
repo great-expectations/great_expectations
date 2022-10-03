@@ -60,6 +60,13 @@ if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
 
+    from great_expectations.data_context.data_context import (
+        BaseDataContext,
+        CloudDataContext,
+        DataContext,
+    )
+    from great_expectations.data_context.types.base import DataContextConfig
+
 try:
     from typing import TypeGuard  # type: ignore[attr-defined]
 except ImportError:
@@ -1503,12 +1510,15 @@ def isclose(
         operand_a = operand_a.total_seconds()  # type: ignore[assignment]
         operand_b = operand_b.total_seconds()  # type: ignore[assignment]
 
-    return np.isclose(
-        a=np.float64(operand_a),  # type: ignore[arg-type]
-        b=np.float64(operand_b),  # type: ignore[arg-type]
-        rtol=rtol,
-        atol=atol,
-        equal_nan=equal_nan,
+    return cast(
+        bool,
+        np.isclose(
+            a=np.float64(operand_a),  # type: ignore[arg-type]
+            b=np.float64(operand_b),  # type: ignore[arg-type]
+            rtol=rtol,
+            atol=atol,
+            equal_nan=equal_nan,
+        ),
     )
 
 
@@ -1656,10 +1666,90 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
-def get_context():
-    from great_expectations.data_context.data_context import DataContext
+def get_context(
+    project_config: Optional[Union["DataContextConfig", dict]] = None,
+    context_root_dir: Optional[str] = None,
+    runtime_environment: Optional[dict] = None,
+    ge_cloud_base_url: Optional[str] = None,
+    ge_cloud_access_token: Optional[str] = None,
+    ge_cloud_organization_id: Optional[str] = None,
+    ge_cloud_mode: bool = False,
+) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
+    """
+    Method to return the appropriate DataContext depending on parameters and environment.
 
-    return DataContext()
+    Usage:
+        import great_expectations as gx
+        my_context = gx.get_context([parameters])
+
+    1. If gx.get_context() is run in a filesystem where `great_expectations init` has been run, then it will return a
+        DataContext
+
+    2. If gx.get_context() is passed in a `context_root_dir` (which contains great_expectations.yml) then it will return
+         a DataContext
+
+    3. If gx.get_context() is passed in an in-memory `project_config` then it will return BaseDataContext.
+        `context_root_dir` can also be passed in, but the configurations from the in-memory config will override the
+        configurations in the `great_expectations.yml` file.
+
+
+    4. If GX is being run in the cloud, and the information needed for ge_cloud_config (ie ge_cloud_base_url,
+        ge_cloud_access_token, ge_cloud_organization_id) are passed in as parameters to get_context(), configured as
+        environment variables, or in a .conf file, then get_context() will return a CloudDataContext.
+
+    TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
+
+    Args:
+        project_config (dict or DataContextConfig): In-memory configuration for DataContext.
+        context_root_dir (str): Path to directory that contains great_expectations.yml file
+        runtime_environment (dict): A dictionary of values can be passed to a DataContext when it is instantiated.
+            These values will override both values from the config variables file and
+            from environment variables.
+
+        The following parameters are relevant when running ge_cloud
+        ge_cloud_base_url (str): url for ge_cloud endpoint.
+        ge_cloud_access_token (str): access_token for ge_cloud account.
+        ge_cloud_organization_id (str): org_id for ge_cloud account.
+        ge_cloud_mode (bool): bool flag to specify whether to run GE in cloud mode (default is False).
+
+    Returns:
+        DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
+        parameters
+
+    """
+    from great_expectations.data_context.data_context import (
+        BaseDataContext,
+        CloudDataContext,
+        DataContext,
+    )
+
+    if (
+        CloudDataContext.is_ge_cloud_config_available(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+        or ge_cloud_mode
+    ):
+        return CloudDataContext(
+            project_config=project_config,
+            runtime_environment=runtime_environment,
+            context_root_dir=context_root_dir,
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+    elif project_config is not None:
+        return BaseDataContext(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+        )
+    else:
+        return DataContext(
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+        )
 
 
 def is_sane_slack_webhook(url: str) -> bool:
@@ -1816,14 +1906,14 @@ def numpy_quantile(
     """
     quantile: np.ndarray
     if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(  # type: ignore[call-arg]
+        quantile = np.quantile(  # type: ignore[call-arg,call-overload]
             a=a,
             q=q,
             axis=axis,
             method=method,
         )
     else:
-        quantile = np.quantile(
+        quantile = np.quantile(  # type: ignore[call-overload]
             a=a,
             q=q,
             axis=axis,
