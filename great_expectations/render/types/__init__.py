@@ -692,7 +692,7 @@ class RenderedAtomicContent(RenderedContent):
     def to_json_dict(self) -> dict:
         """Returns RenderedAtomicContent as a json dictionary."""
         d = super().to_json_dict()
-        d["name"] = self.name
+        d["name"] = str(self.name)
         d["value"] = self.value.to_json_dict()
         d["value_type"] = self.value_type
         return d
@@ -702,12 +702,9 @@ class RenderedAtomicContentSchema(Schema):
     class Meta:
         unknown: INCLUDE
 
-    name = fields.Method("get_name", required=False, allow_none=True)
+    name = fields.String(required=False, allow_none=True)
     value = fields.Nested(RenderedAtomicValueSchema(), required=True, allow_none=False)
     value_type = fields.String(required=True, allow_none=False)
-
-    def get_name(self, obj):
-        return obj.name.value
 
     @post_load
     def make_rendered_atomic_content(self, data, **kwargs):
