@@ -4,6 +4,30 @@
 Changelog
 #########
 
+0.15.26
+-----------------
+* [FEATURE] Enable sending of `ConfigurationBundle` payload in HTTP request to Cloud backend (#6083)
+* [FEATURE] Send user validation results to Cloud backend during migration (#6102)
+* [BUGFIX] Fix bigquery crash when using "in" with a boolean column (#6071)
+* [BUGFIX] Fix serialization error when rendering kl_divergence (#6084) (thanks @roblim)
+* [BUGFIX] Enable top-level parameters in Data Assistants accessed via dispatcher (#6077)
+* [BUGFIX] Patch issue around `DataContext.save_datasource` not sending `class_name` in result payload (#6108)
+* [DOCS] DOC-377 add missing dictionary in configured asset datasource portion of Pandas and Spark configuration guides (#6081)
+* [DOCS] DOC-376 finalize definition for Data Assistants in technical terms (#6080)
+* [DOCS] Update `docs-integration` test due to new `whole_table` splitter behavior (#6103)
+* [DOCS] How to create a Custom Multicolumn Map Expectation (#6101)
+* [MAINTENANCE] Patch broken Cloud E2E test (#6079)
+* [MAINTENANCE] Bundle data context config and other artifacts for migration (#6068)
+* [MAINTENANCE] Add datasources to ConfigurationBundle (#6092)
+* [MAINTENANCE] Remove unused config files from root of GX repo (#6090)
+* [MAINTENANCE] Add `data_context_id` property to `ConfigurationBundle` (#6094)
+* [MAINTENANCE] Move all Cloud migrator logic to separate directory (#6100)
+* [MAINTENANCE] Update aloglia scripts for new fields and replica indices (#6049) (thanks @winrp17)
+* [MAINTENANCE] initial Datasource typings (#6099)
+* [MAINTENANCE] Data context migrate to cloud event (#6095)
+* [MAINTENANCE] Bundling tests with empty context configs (#6107)
+* [MAINTENANCE] Fixing a typo (#6113)
+
 0.15.25
 -----------------
 * [FEATURE] Since value set in expectation kwargs is list of strings, do not emit expect_column_values_to_be_in_set for datetime valued columns (#6046)

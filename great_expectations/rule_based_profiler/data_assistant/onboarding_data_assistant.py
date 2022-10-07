@@ -51,7 +51,8 @@ class OnboardingDataAssistant(DataAssistant):
             that is suspected to have quality issues may benefit from "flag_outliers".
         - include_column_names (list): A list containing the column names you wish to include.
         - exclude_column_names (list): A list containing the column names you with to exclude.
-        - include_column_name_suffixes (list): A list containing the column name suffixes you with to include.
+        - include_column_name_suffixes (list): A list containing the column name suffixes you wish to include.
+        - exclude_column_name_suffixes (list): A list containing the column name suffixes you wish to exclude.
         - cardinality_limit_mode (str): A string defined by the CardinalityLimitMode Enum, which limits the maximum
             unique value count allowable in column distinct value count Metrics and Expectations.
             Some examples: "very_few", "few", and "some"; corresponding to 10, 100, and 1,000 respectively.
@@ -962,16 +963,6 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        value_set_multi_batch_parameter_builder_for_validations: ParameterBuilder = (
-            ValueSetMultiBatchParameterBuilder(
-                name="value_set_estimator",
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs=None,
-                evaluation_parameter_builder_configs=None,
-                data_context=None,
-            )
-        )
-
         evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         evaluation_parameter_builder_configs = [
@@ -994,6 +985,15 @@ class OnboardingDataAssistant(DataAssistant):
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
+        value_set_multi_batch_parameter_builder_for_validations: ParameterBuilder = (
+            ValueSetMultiBatchParameterBuilder(
+                name="value_set_estimator",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                evaluation_parameter_builder_configs=None,
+                data_context=None,
+            )
+        )
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **value_set_multi_batch_parameter_builder_for_validations.to_json_dict(),
