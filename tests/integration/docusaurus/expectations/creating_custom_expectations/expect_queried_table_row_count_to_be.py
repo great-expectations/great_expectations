@@ -159,7 +159,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
 if __name__ == "__main__":
     # <snippet>
     ExpectQueriedTableRowCountToBe().print_diagnostic_checklist()
-    # </snippet
+    # </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 

@@ -12,6 +12,7 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 
 # <snippet>
 class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
+    # </snippet>
     """Values in this column should only contain vowels"""
 
     regex_camel_name = "Vowel"

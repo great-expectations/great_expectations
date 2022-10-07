@@ -42,13 +42,13 @@ For this guide we will use a `connection_string` like this:
 
 ```
 bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>
-```   
+```
 
 ### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L2-L5
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L2-L7
 ```
 
 Load your DataContext into memory using the `get_context()` method.
@@ -106,7 +106,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 :::note
 
-In order to support tables that are created as the result of queries in BigQuery, Great Expectations previously asked users to define a named permanent table to be used as a "temporary" table that could later be deleted, or set to expire by the database. This is no longer the case, and Great Expectations will automatically set tables that are created as the result of queries to expire after 1 day. 
+In order to support tables that are created as the result of queries in BigQuery, Great Expectations previously asked users to define a named permanent table to be used as a "temporary" table that could later be deleted, or set to expire by the database. This is no longer the case, and Great Expectations will automatically set tables that are created as the result of queries to expire after 1 day.
 
 :::
 

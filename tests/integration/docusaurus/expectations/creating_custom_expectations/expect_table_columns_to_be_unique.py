@@ -92,6 +92,7 @@ class TableColumnsUnique(TableMetricProvider):
 # </snippet>
 # <snippet>
 class ExpectTableColumnsToBeUnique(TableExpectation):
+    # </snippet>
     """Expect table to contain columns with unique contents."""
 
     # These examples will be shown in the public gallery.

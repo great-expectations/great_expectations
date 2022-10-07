@@ -18,7 +18,7 @@ A Checkpoint is the primary means for validating data in a production deployment
 
 ### Features and promises
 
-Checkpoints provide a convenient abstraction for bundling the <TechnicalTag relative="../" tag="validation" text="Validation" /> of a <TechnicalTag relative="../" tag="batch" text="Batch (or Batches)" /> of data against an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> (or several), as well as the <TechnicalTag relative="../" tag="action" text="Actions" /> that should be taken after the validation. 
+Checkpoints provide a convenient abstraction for bundling the <TechnicalTag relative="../" tag="validation" text="Validation" /> of a <TechnicalTag relative="../" tag="batch" text="Batch (or Batches)" /> of data against an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> (or several), as well as the <TechnicalTag relative="../" tag="action" text="Actions" /> that should be taken after the validation.
 
 Like Expectation Suites and <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, Checkpoints are managed using a <TechnicalTag relative="../" tag="data_context" text="Data Context" />, and have their own Store which is used to persist their configurations to YAML files. These configurations can be committed to version control and shared with your team.
 
@@ -169,7 +169,7 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 
 **Results**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L239-L254
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L239-L253
 ```
 
 ```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L258-L268

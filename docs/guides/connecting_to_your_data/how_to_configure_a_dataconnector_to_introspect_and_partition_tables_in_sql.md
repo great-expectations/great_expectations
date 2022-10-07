@@ -41,7 +41,7 @@ To learn more about <TechnicalTag tag="datasource" text="Datasources" />, <Techn
 
 Import Great Expectations.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L4
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L4-L5
 ```
 
 ### 2. Obtain DataContext

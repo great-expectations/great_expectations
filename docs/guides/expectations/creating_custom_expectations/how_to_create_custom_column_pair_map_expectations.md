@@ -153,7 +153,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
 
-If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet. 
+If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet.
 However, you should see that the tests you've written are now being caught and reported in your checklist:
 
 ```
@@ -176,18 +176,18 @@ see our guide on [how to create example cases for a Custom Expectation](../featu
 
 ### 6. Implement your Metric and connect it to your Expectation
 
-This is the stage where you implement the actual business logic for your Expectation.   
+This is the stage where you implement the actual business logic for your Expectation.
 
-To do so, you'll need to implement a function within a Metric, and link it to your Expectation.  
-By the time your Expectation is complete, your Metric will have functions for all three <TechnicalTag tag="execution_engine" text="Execution Engines" /> (Pandas, Spark, & SQLAlchemy) supported by Great Expectations. For now, we're only going to define one.  
-  
-:::note  
-Metrics answer questions about your data posed by your Expectation, <br/> and allow your Expectation to judge whether your data meets ***your*** expectations.  
+To do so, you'll need to implement a function within a Metric, and link it to your Expectation.
+By the time your Expectation is complete, your Metric will have functions for all three <TechnicalTag tag="execution_engine" text="Execution Engines" /> (Pandas, Spark, & SQLAlchemy) supported by Great Expectations. For now, we're only going to define one.
+
+:::note
+Metrics answer questions about your data posed by your Expectation, <br/> and allow your Expectation to judge whether your data meets ***your*** expectations.
 :::
 
 Your Metric function will have the `@column_pair_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether the difference between the values in two columns equals 3 using the `PandasExecutionEngine`.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L39-L41
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L39-L42
 ```
 
 This is all that you need to define for now. The `ColumnMapMetricProvider` and `ColumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
@@ -238,7 +238,7 @@ For example, replace:
 ```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L26
 ```
 
-with 
+with
 
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L26
 ```
@@ -258,7 +258,7 @@ Completeness checklist for ExpectColumnPairValuesToHaveADifferenceOfThree:
 
 ### 7. Linting
 
-Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`. 
+Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`.
 
 If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
@@ -286,10 +286,10 @@ Completeness checklist for ExpectColumnPairValuesToHaveADifferenceOfThree:
   ✔ Passes all linting checks
 ...
 ```
-<div style={{"text-align":"center"}}>  
-<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>  
-Congratulations!<br/>&#127881; You've just built your first Custom ColumnPairMapExpectation! &#127881;  
-</b></p>  
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've just built your first Custom ColumnPairMapExpectation! &#127881;
+</b></p>
 </div>
 
 :::note
