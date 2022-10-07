@@ -19,10 +19,10 @@ import operator
 from functools import reduce
 from typing import List, Tuple
 
+# Import the necessary modules for the examples, and initialize a Data Context.
+# <snippet name="gx_imports_test">
 from ruamel import yaml
 
-# Import the necessary modules for the examples, and initialize a Data Context.
-# <snippet name="filesystem_datasource_configuration_gx_imports">
 import great_expectations as gx
 
 data_context: gx.DataContext = gx.get_context()
