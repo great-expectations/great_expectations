@@ -21,11 +21,9 @@ from typing import List, Tuple
 
 from ruamel import yaml
 
-# <snippet>
-import great_expectations as gx
-
 # Import the necessary modules for the examples, and initialize a Data Context.
-
+# <snippet name="filesystem_datasource_configuration_gx_imports">
+import great_expectations as gx
 
 data_context: gx.DataContext = gx.get_context()
 # </snippet>
