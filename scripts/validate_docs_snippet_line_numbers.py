@@ -5,6 +5,7 @@ import re
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
+# This should be reduced as snippets are added/fixed
 VIOLATION_THRESHOLD = 523
 
 r = re.compile(r"```\w+ file=(.+)")
@@ -64,6 +65,8 @@ def _collect_references(file: str) -> List[Reference]:
 
 
 def _parse_reference(match: re.Match, file: str, line: int) -> Reference:
+    # Chetan - 20221007 - This parsing logic could probably be cleaned up with a regex
+    # and pathlib/os but since this is not prod code, I'll leave cleanup as a nice-to-have
     raw_path = match.groups()[0].strip()
     parts = raw_path.split("#")
 
@@ -143,7 +146,7 @@ def _determine_result(ref: Reference) -> Result:
     )
 
 
-def aggregate_results(results: List[Result]) -> None:
+def evaluate_results(results: List[Result]) -> None:
     summary = {}
 
     for res in results:
@@ -160,10 +163,18 @@ def aggregate_results(results: List[Result]) -> None:
         print(f"* {key}: {len(val)}")
 
     violations = len(results) - len(summary[Status.COMPLETE.name])
-
     assert (
         violations <= VIOLATION_THRESHOLD
-    ), f"Expected {VIOLATION_THRESHOLD} or fewer violations, got {violations}"
+    ), f"Expected {VIOLATION_THRESHOLD} or fewer snippet violations, got {violations}"
+
+    # There should only be COMPLETE (valid snippets) or MISSING_BOTH (snippets that haven't recieved surrounding tags yet)
+    # The presence of MISSING_OPENING or MISSING_CLOSING signifies a misaligned line number reference
+    assert (
+        summary.get(Status.MISSING_OPENING.name, 0) == 0
+    ), "Found a snippet without an opening snippet tag"
+    assert (
+        summary.get(Status.MISSING_CLOSING.name, 0) == 0
+    ), "Found a snippet without an closing snippet tag"
 
 
 def main() -> None:
@@ -171,7 +182,7 @@ def main() -> None:
     refs = collect_references(files)
     results = determine_results(refs)
 
-    aggregate_results(results)
+    evaluate_results(results)
 
 
 if __name__ == "__main__":
