@@ -19,6 +19,27 @@ class RendererPrefix(str, Enum):
     ATOMIC = "atomic"
 
 
+class AtomicRendererType(str, Enum):
+    """Available atomic renderer types"""
+
+    PRESCRIPTIVE = ".".join([RendererPrefix.ATOMIC, "prescriptive"])
+    DIAGNOSTIC = ".".join([RendererPrefix.ATOMIC, "diagnostic"])
+
+
+class AtomicPrescriptiveRendererType(str, Enum):
+    """Available atomic prescriptive renderer names"""
+
+    FAILED = ".".join([AtomicRendererType.PRESCRIPTIVE, "failed"])
+    SUMMARY = ".".join([AtomicRendererType.PRESCRIPTIVE, "summary"])
+
+
+class AtomicDiagnosticRendererType(str, Enum):
+    """Available atomic diagnostic renderer names"""
+
+    FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
+    OBSERVED_VALUE = ".".join([AtomicRendererType.DIAGNOSTIC, "observed_value"])
+
+
 class LegacyRendererType(str, Enum):
     """Available legacy renderer types"""
 
@@ -27,20 +48,13 @@ class LegacyRendererType(str, Enum):
     DESCRIPTIVE = ".".join([RendererPrefix.LEGACY, "descriptive"])
 
 
-class AtomicRendererType(str, Enum):
-    """Available atomic renderer types"""
-
-    PRESCRIPTIVE = ".".join([RendererPrefix.ATOMIC, "prescriptive"])
-    DIAGNOSTIC = ".".join([RendererPrefix.ATOMIC, "diagnostic"])
-
-
-class LegacyPrescriptiveRendererName(str, Enum):
+class LegacyPrescriptiveRendererType(str, Enum):
     """Available legacy prescriptive renderer names"""
 
     SUMMARY = ".".join([LegacyRendererType.PRESCRIPTIVE, "summary"])
 
 
-class LegacyDiagnosticRendererName(str, Enum):
+class LegacyDiagnosticRendererType(str, Enum):
     """Available legacy diagnostic renderer names"""
 
     META_PROPERTIES = ".".join([LegacyRendererType.DIAGNOSTIC, "meta_properties"])
@@ -53,7 +67,7 @@ class LegacyDiagnosticRendererName(str, Enum):
     UNEXPECTED_TABLE = ".".join([LegacyRendererType.DIAGNOSTIC, "unexpected_table"])
 
 
-class LegacyDescriptiveRendererName(str, Enum):
+class LegacyDescriptiveRendererType(str, Enum):
     """Available legacy descriptive renderer names"""
 
     COLUMN_PROPERTIES_TABLE_DISTINCT_COUNT_ROW = ".".join(
@@ -100,20 +114,6 @@ class LegacyDescriptiveRendererName(str, Enum):
     VALUE_COUNTS_BAR_CHART = ".".join(
         [LegacyRendererType.DESCRIPTIVE, "value_counts_bar_chart"]
     )
-
-
-class AtomicPrescriptiveRendererName(str, Enum):
-    """Available atomic prescriptive renderer names"""
-
-    FAILED = ".".join([AtomicRendererType.PRESCRIPTIVE, "failed"])
-    SUMMARY = ".".join([AtomicRendererType.PRESCRIPTIVE, "summary"])
-
-
-class AtomicDiagnosticRendererName(str, Enum):
-    """Available atomic diagnostic renderer names"""
-
-    FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
-    OBSERVED_VALUE = ".".join([AtomicRendererType.DIAGNOSTIC, "observed_value"])
 
 
 class RenderedContent:
@@ -724,7 +724,7 @@ class RenderedAtomicContent(RenderedContent):
     def __init__(
         self,
         name: Optional[
-            Union[str, AtomicDiagnosticRendererName, AtomicPrescriptiveRendererName]
+            Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ] = None,
         value: Optional[RenderedAtomicValue] = None,
         value_type: Optional[str] = None,

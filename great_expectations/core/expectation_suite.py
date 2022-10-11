@@ -44,7 +44,7 @@ from great_expectations.exceptions import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.render.types import (
-    AtomicPrescriptiveRendererName,
+    AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
 )
 from great_expectations.types import SerializableDictDot
@@ -993,7 +993,7 @@ class ExpectationSuite(SerializableDictDot):
             expectation_configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
                 existing_rendered_content=expectation_configuration.rendered_content,
                 new_rendered_content=rendered_content,
-                failed_renderer_name=AtomicPrescriptiveRendererName.FAILED,
+                failed_renderer_name=AtomicPrescriptiveRendererType.FAILED,
             )
 
 

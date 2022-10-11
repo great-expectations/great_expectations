@@ -7,7 +7,7 @@ from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    LegacyDiagnosticRendererName,
+    LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedStringTemplateContent,
 )
@@ -128,7 +128,7 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererName.OBSERVED_VALUE)
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,

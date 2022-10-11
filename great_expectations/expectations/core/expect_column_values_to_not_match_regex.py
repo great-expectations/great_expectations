@@ -8,7 +8,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    LegacyDescriptiveRendererName,
+    LegacyDescriptiveRendererType,
     LegacyRendererType,
     RenderedStringTemplateContent,
 )
@@ -327,7 +327,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
 
     @classmethod
     @renderer(
-        renderer_type=LegacyDescriptiveRendererName.COLUMN_PROPERTIES_TABLE_REGEX_COUNT_ROW
+        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_REGEX_COUNT_ROW
     )
     def _descriptive_column_properties_table_regex_count_row_renderer(
         cls,

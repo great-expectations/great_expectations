@@ -7,7 +7,7 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    LegacyDescriptiveRendererName,
+    LegacyDescriptiveRendererType,
     LegacyRendererType,
     RenderedBulletListContent,
     RenderedStringTemplateContent,
@@ -358,7 +358,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type=LegacyDescriptiveRendererName.EXAMPLE_VALUES_BLOCK)
+    @renderer(renderer_type=LegacyDescriptiveRendererType.EXAMPLE_VALUES_BLOCK)
     def _descriptive_example_values_block_renderer(
         cls,
         configuration=None,

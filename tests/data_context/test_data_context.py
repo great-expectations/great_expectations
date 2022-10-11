@@ -46,7 +46,7 @@ from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    AtomicPrescriptiveRendererName,
+    AtomicPrescriptiveRendererType,
     AtomicRendererType,
     RenderedAtomicContent,
     renderedAtomicValueSchema,
@@ -3092,7 +3092,9 @@ class ExpectSkyToBeColor(TableExpectation):
 
     @classmethod
     @renderer(
-        renderer_type=".".join([AtomicRendererType.PRESCRIPTIVE, "custom_renderer"])
+        renderer_type=".".join(
+            [AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]
+        )
     )
     def _prescriptive_renderer_custom(
         cls,
@@ -3171,7 +3173,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
 
     expected_rendered_content: List[RenderedAtomicContent] = [
         RenderedAtomicContent(
-            name=AtomicPrescriptiveRendererName.FAILED,
+            name=AtomicPrescriptiveRendererType.FAILED,
             value=renderedAtomicValueSchema.load(
                 {
                     "template": "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs).",
@@ -3191,7 +3193,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             value_type="StringValueType",
         ),
         RenderedAtomicContent(
-            name=AtomicPrescriptiveRendererName.SUMMARY,
+            name=AtomicPrescriptiveRendererType.SUMMARY,
             value=renderedAtomicValueSchema.load(
                 {
                     "schema": {"type": "com.superconductive.rendered.string"},
@@ -3242,7 +3244,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             value_type="StringValueType",
         ),
         RenderedAtomicContent(
-            name=AtomicPrescriptiveRendererName.SUMMARY,
+            name=AtomicPrescriptiveRendererType.SUMMARY,
             value=renderedAtomicValueSchema.load(
                 {
                     "schema": {"type": "com.superconductive.rendered.string"},

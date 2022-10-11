@@ -9,10 +9,10 @@ from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    AtomicDiagnosticRendererName,
-    AtomicPrescriptiveRendererName,
-    LegacyDescriptiveRendererName,
-    LegacyDiagnosticRendererName,
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+    LegacyDescriptiveRendererType,
+    LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
     RenderedStringTemplateContent,
@@ -388,7 +388,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type=AtomicPrescriptiveRendererName.SUMMARY)
+    @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
@@ -425,7 +425,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             }
         )
         rendered = RenderedAtomicContent(
-            name=AtomicPrescriptiveRendererName.SUMMARY,
+            name=AtomicPrescriptiveRendererType.SUMMARY,
             value=value_obj,
             value_type="TableType",
         )
@@ -516,7 +516,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         return [expectation_string_obj, quantile_range_table]
 
     @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererName.OBSERVED_VALUE)
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,
@@ -610,7 +610,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         return template_string, params_with_json_schema, table_header_row, table_rows
 
     @classmethod
-    @renderer(renderer_type=AtomicDiagnosticRendererName.OBSERVED_VALUE)
+    @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
         configuration=None,
@@ -649,13 +649,13 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 }
             )
             return RenderedAtomicContent(
-                name=AtomicDiagnosticRendererName.OBSERVED_VALUE,
+                name=AtomicDiagnosticRendererType.OBSERVED_VALUE,
                 value=value_obj,
                 value_type="TableType",
             )
 
     @classmethod
-    @renderer(renderer_type=LegacyDescriptiveRendererName.QUANTILE_TABLE)
+    @renderer(renderer_type=LegacyDescriptiveRendererType.QUANTILE_TABLE)
     def _descriptive_quantile_table_renderer(
         cls,
         configuration=None,

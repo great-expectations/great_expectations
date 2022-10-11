@@ -6,8 +6,8 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
 from great_expectations.render.types import (
-    AtomicDiagnosticRendererName,
-    AtomicPrescriptiveRendererName,
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
     AtomicRendererType,
 )
 
@@ -84,7 +84,7 @@ def get_renderer_names(object_name: str) -> List[str]:
 def get_renderer_names_with_renderer_type(
     object_name: str,
     renderer_type: AtomicRendererType,
-) -> List[Union[str, AtomicDiagnosticRendererName, AtomicPrescriptiveRendererName]]:
+) -> List[Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]]:
     """Gets renderer names of a given type, for a given Expectation or Metric.
 
     Args:

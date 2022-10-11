@@ -6,7 +6,7 @@ from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    LegacyDescriptiveRendererName,
+    LegacyDescriptiveRendererType,
     LegacyRendererType,
     RenderedStringTemplateContent,
 )
@@ -417,7 +417,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type=LegacyDescriptiveRendererName.STATS_TABLE_MEAN_ROW)
+    @renderer(renderer_type=LegacyDescriptiveRendererType.STATS_TABLE_MEAN_ROW)
     def _descriptive_stats_table_mean_row_renderer(
         cls,
         configuration=None,

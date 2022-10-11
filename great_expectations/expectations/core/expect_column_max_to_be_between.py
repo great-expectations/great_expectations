@@ -4,7 +4,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.types import (
-    LegacyDescriptiveRendererName,
+    LegacyDescriptiveRendererType,
     LegacyRendererType,
     RenderedStringTemplateContent,
 )
@@ -379,7 +379,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type=LegacyDescriptiveRendererName.STATS_TABLE_MAX_ROW)
+    @renderer(renderer_type=LegacyDescriptiveRendererType.STATS_TABLE_MAX_ROW)
     def _descriptive_stats_table_max_row_renderer(
         cls,
         configuration=None,

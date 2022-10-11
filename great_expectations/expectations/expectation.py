@@ -69,10 +69,10 @@ from great_expectations.expectations.util import (
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    AtomicDiagnosticRendererName,
-    AtomicPrescriptiveRendererName,
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
     CollapseContent,
-    LegacyDiagnosticRendererName,
+    LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
     RenderedContentBlockContainer,
@@ -213,7 +213,7 @@ class Expectation(metaclass=MetaExpectation):
         raise NotImplementedError
 
     @classmethod
-    @renderer(renderer_type=AtomicPrescriptiveRendererName.FAILED)
+    @renderer(renderer_type=AtomicPrescriptiveRendererType.FAILED)
     def _atomic_prescriptive_failed(
         cls,
         configuration: ExpectationConfiguration,
@@ -239,7 +239,7 @@ class Expectation(metaclass=MetaExpectation):
             }
         )
         rendered = RenderedAtomicContent(
-            name=AtomicPrescriptiveRendererName.FAILED,
+            name=AtomicPrescriptiveRendererType.FAILED,
             value=value_obj,
             value_type="StringValueType",
         )
@@ -275,7 +275,7 @@ class Expectation(metaclass=MetaExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type=AtomicPrescriptiveRendererName.SUMMARY)
+    @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
@@ -303,7 +303,7 @@ class Expectation(metaclass=MetaExpectation):
             }
         )
         rendered = RenderedAtomicContent(
-            name=AtomicPrescriptiveRendererName.SUMMARY,
+            name=AtomicPrescriptiveRendererType.SUMMARY,
             value=value_obj,
             value_type="StringValueType",
         )
@@ -343,7 +343,7 @@ class Expectation(metaclass=MetaExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererName.META_PROPERTIES)
+    @renderer(renderer_type=LegacyDiagnosticRendererType.META_PROPERTIES)
     def _diagnostic_meta_properties_renderer(cls, result=None, **kwargs):
         """
             Render function used to add custom meta to Data Docs
@@ -397,7 +397,7 @@ class Expectation(metaclass=MetaExpectation):
         return custom_property_values
 
     @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererName.STATUS_ICON)
+    @renderer(renderer_type=LegacyDiagnosticRendererType.STATUS_ICON)
     def _diagnostic_status_icon_renderer(
         cls,
         configuration=None,
@@ -477,7 +477,7 @@ class Expectation(metaclass=MetaExpectation):
             )
 
     @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererName.UNEXPECTED_STATEMENT)
+    @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT)
     def _diagnostic_unexpected_statement_renderer(
         cls,
         configuration=None,
@@ -578,7 +578,7 @@ class Expectation(metaclass=MetaExpectation):
             ]
 
     @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererName.UNEXPECTED_TABLE)
+    @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE)
     def _diagnostic_unexpected_table_renderer(
         cls,
         configuration=None,
@@ -675,7 +675,7 @@ class Expectation(metaclass=MetaExpectation):
             return "--"
 
     @classmethod
-    @renderer(renderer_type=AtomicDiagnosticRendererName.FAILED)
+    @renderer(renderer_type=AtomicDiagnosticRendererType.FAILED)
     def _atomic_diagnostic_failed(
         cls,
         configuration: ExpectationConfiguration,
@@ -701,14 +701,14 @@ class Expectation(metaclass=MetaExpectation):
             }
         )
         rendered = RenderedAtomicContent(
-            name=AtomicDiagnosticRendererName.FAILED,
+            name=AtomicDiagnosticRendererType.FAILED,
             value=value_obj,
             value_type="StringValueType",
         )
         return rendered
 
     @classmethod
-    @renderer(renderer_type=AtomicDiagnosticRendererName.OBSERVED_VALUE)
+    @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
         configuration=None,
@@ -729,14 +729,14 @@ class Expectation(metaclass=MetaExpectation):
             }
         )
         rendered = RenderedAtomicContent(
-            name=AtomicDiagnosticRendererName.OBSERVED_VALUE,
+            name=AtomicDiagnosticRendererType.OBSERVED_VALUE,
             value=value_obj,
             value_type="StringValueType",
         )
         return rendered
 
     @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererName.OBSERVED_VALUE)
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,

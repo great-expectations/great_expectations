@@ -15,10 +15,10 @@ from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    AtomicDiagnosticRendererName,
-    AtomicPrescriptiveRendererName,
-    LegacyDescriptiveRendererName,
-    LegacyDiagnosticRendererName,
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+    LegacyDescriptiveRendererType,
+    LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
     RenderedContentBlockContainer,
@@ -1091,7 +1091,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type=AtomicPrescriptiveRendererName.SUMMARY)
+    @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
@@ -1271,7 +1271,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type=AtomicDiagnosticRendererName.OBSERVED_VALUE)
+    @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
         configuration=None,
@@ -1344,7 +1344,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type=LegacyDiagnosticRendererName.OBSERVED_VALUE)
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,
@@ -1388,7 +1388,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type=LegacyDescriptiveRendererName.HISTOGRAM)
+    @renderer(renderer_type=LegacyDescriptiveRendererType.HISTOGRAM)
     def _descriptive_histogram_renderer(
         cls,
         configuration=None,
