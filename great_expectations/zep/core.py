@@ -1,10 +1,7 @@
 import dataclasses as dc
 import functools
-import re
-from typing import Optional, Union
 
 import pandas as pd
-
 from typing_extensions import Protocol
 
 

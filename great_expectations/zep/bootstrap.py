@@ -1,8 +1,9 @@
 """
 POC for dynamically bootstrapping context.sources/Datasource with all it's registered methods.
 """
-from great_expectations.zep.core import PandasDatasource, SQLDatasource
 from typing import Callable, List
+
+from great_expectations.zep.core import PandasDatasource, SQLDatasource
 
 
 def dir_public(o) -> List[str]:
