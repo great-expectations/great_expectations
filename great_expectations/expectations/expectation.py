@@ -10,6 +10,7 @@ import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter, defaultdict
 from copy import deepcopy
+from enum import Enum
 from inspect import isabstract
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
@@ -1556,14 +1557,14 @@ class Expectation(metaclass=MetaExpectation):
         expectation_type: str,
         test_diagnostics: List[ExpectationTestDiagnostics],
         registered_renderers: List[str],
-        standard_renderers: List[str] = [
-            "renderer.answer",
-            "renderer.diagnostic.unexpected_statement",
-            "renderer.diagnostic.observed_value",
-            "renderer.diagnostic.status_icon",
-            "renderer.diagnostic.unexpected_table",
-            "renderer.prescriptive",
-            "renderer.question",
+        standard_renderers: List[Enum] = [
+            LegacyRendererType.ANSWER,
+            LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
+            LegacyDiagnosticRendererType.OBSERVED_VALUE,
+            LegacyDiagnosticRendererType.STATUS_ICON,
+            LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+            LegacyRendererType.PRESCRIPTIVE,
+            LegacyRendererType.QUESTION,
         ],
     ) -> List[ExpectationRendererDiagnostics]:
         """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExpectationTestDiagnostics."""
