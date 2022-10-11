@@ -158,6 +158,7 @@ class ExecutionEngine(ABC):
 
         if batch_spec_defaults is None:
             batch_spec_defaults = {}
+
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
