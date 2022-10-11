@@ -42,11 +42,13 @@ def create_source(config=None) -> Datasource:
         f"No registered `create_source()` handler for {type(config)} - {config}"
     )
 
+
 @create_source.register(Pandas)
 def create_pandas(type_: Pandas) -> PandasDatasource:
     source = PandasDatasource()
     print(f"creating {source.__class__.__name__} ...")
     return source
+
 
 @create_source.register(type(pd.DataFrame))
 def create_pandas2(type_: pd.DataFrame) -> PandasDatasource:
