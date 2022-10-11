@@ -177,6 +177,7 @@ try:
 except ImportError:
     verticasqlalchemy = None
 
+
 class SqlAlchemyBatchReference:
     def __init__(self, engine, table_name=None, schema=None, query=None) -> None:
         self._engine = engine
@@ -1509,7 +1510,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 custom_sql=custom_sql,
             )
         elif engine_dialect == "vertica":
-            full_table_name = f'{schema_name}.{table_name}' if schema_name is not None else f'{table_name}'
+            full_table_name = (
+                f"{schema_name}.{table_name}"
+                if schema_name is not None
+                else f"{table_name}"
+            )
             stmt = f"CREATE TEMPORARY TABLE {full_table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}"
         else:
             stmt = f'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'
