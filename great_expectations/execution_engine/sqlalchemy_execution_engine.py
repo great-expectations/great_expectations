@@ -945,7 +945,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 queries[domain_id]["select"].append(
                     metric_fn.label(
                         metric_to_resolve.metric_name.join(
-                            random.choices(string.ascii_lowercase, k=2)
+                            random.choices(string.ascii_lowercase, k=4)
                         )
                     )
                 )
