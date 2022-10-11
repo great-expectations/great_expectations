@@ -17,8 +17,10 @@ logger = logging.getLogger(__name__)
 
 try:
     import pyspark
+    from pyspark.sql import DataFrame as SparkDataFrame
 except ImportError:
     pyspark = None
+    SparkDataFrame = None
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
@@ -518,7 +520,7 @@ class BatchData:
 class Batch(SerializableDictDot):
     def __init__(
         self,
-        data: BatchData,
+        data: Union[BatchData, pd.DataFrame, SparkDataFrame],
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         batch_definition: BatchDefinition = None,
         batch_spec: BatchSpec = None,
