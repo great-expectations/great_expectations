@@ -229,7 +229,7 @@ class ExecutionEngine(ABC):
             self._active_batch_data_id = batch_id
         else:
             raise ge_exceptions.ExecutionEngineError(
-                f"Unable to set active_batch_data_id to {batch_id}. The may data may not be loaded."
+                f"Unable to set active_batch_data_id to {batch_id}.  The data may not be loaded."
             )
 
     @property
