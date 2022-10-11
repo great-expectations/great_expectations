@@ -32,12 +32,18 @@ class AtomicPrescriptiveRendererType(str, Enum):
     FAILED = ".".join([AtomicRendererType.PRESCRIPTIVE, "failed"])
     SUMMARY = ".".join([AtomicRendererType.PRESCRIPTIVE, "summary"])
 
+    def __str__(self):
+        return self.value
+
 
 class AtomicDiagnosticRendererType(str, Enum):
     """Available atomic diagnostic renderer names"""
 
     FAILED = ".".join([AtomicRendererType.DIAGNOSTIC, "failed"])
     OBSERVED_VALUE = ".".join([AtomicRendererType.DIAGNOSTIC, "observed_value"])
+
+    def __str__(self):
+        return self.value
 
 
 class LegacyRendererType(str, Enum):
@@ -731,7 +737,7 @@ class RenderedAtomicContent(RenderedContent):
         value: Optional[RenderedAtomicValue] = None,
         value_type: Optional[str] = None,
     ) -> None:
-        self.name = name
+        self.name = str(name)
         self.value = value
         self.value_type = value_type
 
