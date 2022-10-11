@@ -1,13 +1,12 @@
 import importlib
 import pkgutil
 import pathlib
-from typing import List, Dict
+from typing import List, Dict, Any
 from types import ModuleType
 from great_expectations.zep.core import PandasDatasource
 
 
 def add_pandas(name: str) -> PandasDatasource:
-    # add to self
     return PandasDatasource()
 
 
@@ -16,6 +15,17 @@ def _public_globals() -> List[str]:
 
 
 print(f"Before loading plugins: {_public_globals()}\n")
+
+
+def _get_module_names(mdl: ModuleType) -> Dict[str, Any]:
+    # is there an __all__?  if so respect it``
+    if "__all__" in mdl.__dict__:
+        names = mdl.__dict__["__all__"]
+    else:
+        # otherwise we import all names that don't begin with _
+        names = [x for x in mdl.__dict__ if not x.startswith("_")]
+    return {k: getattr(mdl, k) for k in names}
+
 
 # POC: register additional methods from plugins etc.
 # With this method we don't need a complicated import hook we just look for plugins and load the wanted methods into this module's namespace
@@ -31,11 +41,15 @@ def _load_plugins() -> Dict[str, ModuleType]:
         ]
     }
 
-    # https://stackoverflow.com/questions/43059267/how-to-do-from-module-import-using-importlib
+    # https://stackoverflow.com/a/43059528/6304433
+    # update the current module's global namespace
+    for mdl in imported_plugins.values():
+        # TODO: maybe don't overwrite existing names
+        globals().update(_get_module_names(mdl))
     return imported_plugins
 
 
-print(_load_plugins())
+_load_plugins()
 
 
 print(f"After loading plugins: {_public_globals()}\n")
