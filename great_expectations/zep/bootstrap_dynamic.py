@@ -4,14 +4,16 @@ POC for dynamically bootstrapping context.sources/Datasource with all it's regis
 from great_expectations.zep.core import PandasDatasource, SQLDatasource
 from typing import Callable, List
 
+
 def dir_public(o) -> List[str]:
     return [x for x in dir(o) if not x.startswith("_")]
 
-class Datasources:
 
+class Datasources:
     def add_pandas(self, name: str) -> PandasDatasource:
         # add to self
         return PandasDatasource()
+
 
 class DataContext:
     _context = None
@@ -29,6 +31,7 @@ class DataContext:
     @property
     def sources(self) -> Datasources:
         return self._sources
+
 
 def bootstrap_sources():
     print(f"Before: {dir_public(Datasources)}")
@@ -49,6 +52,7 @@ def bootstrap_sources():
 def get_context() -> DataContext:
     context = DataContext.get_context()
     return context
+
 
 bootstrap_sources()
 
