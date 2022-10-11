@@ -209,25 +209,35 @@ class Expectation(metaclass=MetaExpectation):
         raise NotImplementedError
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.kwargs")
-    def _prescriptive_kwargs(
+    @renderer(renderer_type="atomic.prescriptive.failed")
+    def _atomic_prescriptive_failed(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
+        configuration: ExpectationConfiguration,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
-        Default rendering function that is utilized by GE Cloud Front-end if no other atomic renderers apply
+        Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
         """
+        template_str = "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs)."
+
+        params_with_json_schema = {
+            "expectation_type": {
+                "schema": {"type": "string"},
+                "value": configuration.expectation_type,
+            },
+            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+        }
         value_obj = renderedAtomicValueSchema.load(
-            {"schema": {"type": "UnknownType"}, "kwargs": configuration.kwargs}
+            {
+                "template": template_str,
+                "params": params_with_json_schema,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
         )
         rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.kwargs",
+            name="atomic.prescriptive.failed",
             value=value_obj,
-            value_type="UnknownType",
+            value_type="StringValueType",
         )
         return rendered
 
@@ -659,6 +669,39 @@ class Expectation(metaclass=MetaExpectation):
             )
         else:
             return "--"
+
+    @classmethod
+    @renderer(renderer_type="atomic.diagnostic.failed")
+    def _atomic_diagnostic_failed(
+        cls,
+        configuration: ExpectationConfiguration,
+        **kwargs: dict,
+    ) -> RenderedAtomicContent:
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        template_str = "Rendering of Expectation Validation Result failed for $expectation_type(**$kwargs)."
+
+        params_with_json_schema = {
+            "expectation_type": {
+                "schema": {"type": "string"},
+                "value": configuration.expectation_type,
+            },
+            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+        }
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": template_str,
+                "params": params_with_json_schema,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.diagnostic.failed",
+            value=value_obj,
+            value_type="StringValueType",
+        )
+        return rendered
 
     @classmethod
     @renderer(renderer_type="atomic.diagnostic.observed_value")
