@@ -238,7 +238,7 @@ class ExpectationValidationResult(SerializableDictDot):
             inline_renderer.replace_or_keep_existing_rendered_content(
                 existing_rendered_content=self.rendered_content,
                 new_rendered_content=rendered_content,
-                failed_renderer_name=AtomicDiagnosticRendererType.FAILED,
+                failed_renderer_type=AtomicDiagnosticRendererType.FAILED,
             )
         )
 

@@ -69,26 +69,26 @@ def register_renderer(
         return
 
 
-def get_renderer_names(object_name: str) -> List[str]:
+def get_renderer_names(expectation_or_metric_type: str) -> List[str]:
     """Gets renderer names for a given Expectation or Metric.
 
     Args:
-        object_name: The name of an Expectation or Metric for which to get renderer names.
+        expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
 
     Returns:
         A list of renderer names for the Expectation or Metric.
     """
-    return list(_registered_renderers.get(object_name, {}).keys())
+    return list(_registered_renderers.get(expectation_or_metric_type, {}).keys())
 
 
 def get_renderer_names_with_renderer_type(
-    object_name: str,
+    expectation_or_metric_type: str,
     renderer_type: AtomicRendererType,
 ) -> List[Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]]:
     """Gets renderer names of a given type, for a given Expectation or Metric.
 
     Args:
-        object_name: The name of an Expectation or Metric for which to get renderer names.
+        expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
         renderer_type: The type of the renderers for which to return.
 
     Returns:
@@ -96,7 +96,9 @@ def get_renderer_names_with_renderer_type(
     """
     return [
         renderer_name
-        for renderer_name in get_renderer_names(object_name=object_name)
+        for renderer_name in get_renderer_names(
+            expectation_or_metric_type=expectation_or_metric_type
+        )
         if renderer_name.startswith(renderer_type)
     ]
 

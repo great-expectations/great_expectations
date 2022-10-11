@@ -993,7 +993,7 @@ class ExpectationSuite(SerializableDictDot):
             expectation_configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
                 existing_rendered_content=expectation_configuration.rendered_content,
                 new_rendered_content=rendered_content,
-                failed_renderer_name=AtomicPrescriptiveRendererType.FAILED,
+                failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
             )
 
 

@@ -75,7 +75,7 @@ class InlineRenderer(Renderer):
         renderer_names: List[
             Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ] = get_renderer_names_with_renderer_type(
-            object_name=expectation_type,
+            expectation_or_metric_type=expectation_type,
             renderer_type=renderer_type,
         )
 
@@ -123,22 +123,22 @@ class InlineRenderer(Renderer):
                 logger.info(
                     f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type}".'
                 )
-                failed_renderer_name: str
+                failed_renderer_type: str
                 if isinstance(render_object, ExpectationConfiguration):
-                    failed_renderer_name = AtomicPrescriptiveRendererType.FAILED
+                    failed_renderer_type = AtomicPrescriptiveRendererType.FAILED
                     logger.info(
-                        f'Renderer "{failed_renderer_name}" will be used to render prescriptive content for ExpectationConfiguration.'
+                        f'Renderer "{failed_renderer_type}" will be used to render prescriptive content for ExpectationConfiguration.'
                     )
                 else:
-                    failed_renderer_name = AtomicDiagnosticRendererType.FAILED
+                    failed_renderer_type = AtomicDiagnosticRendererType.FAILED
                     logger.info(
-                        f'Renderer "{failed_renderer_name}" will be used to render diagnostic content for ExpectationValidationResult.'
+                        f'Renderer "{failed_renderer_type}" will be used to render diagnostic content for ExpectationValidationResult.'
                     )
 
                 renderer_rendered_content = (
                     InlineRenderer._get_renderer_atomic_rendered_content(
                         render_object=render_object,
-                        renderer_name=failed_renderer_name,
+                        renderer_name=failed_renderer_type,
                         expectation_type=expectation_type,
                     )
                 )
@@ -186,7 +186,7 @@ class InlineRenderer(Renderer):
     def replace_or_keep_existing_rendered_content(
         existing_rendered_content: Optional[List[RenderedAtomicContent]],
         new_rendered_content: List[RenderedAtomicContent],
-        failed_renderer_name: Union[
+        failed_renderer_type: Union[
             AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType
         ],
     ) -> List[RenderedAtomicContent]:
@@ -208,8 +208,8 @@ class InlineRenderer(Renderer):
 
         if (
             (existing_rendered_content is None)
-            or (failed_renderer_name not in new_rendered_content_block_names)
-            or (failed_renderer_name in existing_rendered_content_block_names)
+            or (failed_renderer_type not in new_rendered_content_block_names)
+            or (failed_renderer_type in existing_rendered_content_block_names)
         ):
             return new_rendered_content
         else:
