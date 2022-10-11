@@ -744,7 +744,7 @@ class RenderedAtomicContent(RenderedContent):
     def to_json_dict(self) -> dict:
         """Returns RenderedAtomicContent as a json dictionary."""
         d = super().to_json_dict()
-        d["name"] = str(self.name)
+        d["name"] = self.name
         d["value"] = self.value.to_json_dict()
         d["value_type"] = self.value_type
         return d
