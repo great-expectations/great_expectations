@@ -15,6 +15,7 @@ from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     CollapseContent,
+    LegacyDiagnosticRendererType,
     RenderedComponentContent,
     RenderedDocumentContent,
     RenderedHeaderContent,
@@ -319,7 +320,7 @@ class ValidationResultsPageRenderer(Renderer):
                 "dimension": "properties.dimension",
                 "severity": "properties.severity"
             },
-            "format": "renderer.diagnostic.meta_properties"
+            "format": LegacyDiagnosticRendererType.META_PROPERTIES
         }
         expectation level
         {
@@ -346,7 +347,8 @@ class ValidationResultsPageRenderer(Renderer):
             suite_meta is not None
             and "notes" in suite_meta
             and "format" in suite_meta["notes"]
-            and suite_meta["notes"]["format"] == "renderer.diagnostic.meta_properties"
+            and suite_meta["notes"]["format"]
+            == LegacyDiagnosticRendererType.META_PROPERTIES
         ):
             return suite_meta["notes"]["content"]
         else:

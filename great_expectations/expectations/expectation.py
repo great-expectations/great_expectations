@@ -256,8 +256,8 @@ class Expectation(metaclass=MetaExpectation):
         **kwargs,
     ):
         """
-        Template function that contains the logic that is shared by atomic.prescriptive.summary (GE Cloud) and
-        renderer.prescriptive (OSS GE)
+        Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
+        LegacyRendererType.PRESCRIPTIVE
         """
         if runtime_configuration is None:
             runtime_configuration = {}
