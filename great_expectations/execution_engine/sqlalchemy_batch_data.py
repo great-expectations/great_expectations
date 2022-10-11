@@ -1,6 +1,6 @@
 import logging
 
-from great_expectations.execution_engine.execution_engine import BatchData
+from great_expectations.core.batch import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.util import generate_temporary_table_name
 

@@ -3,6 +3,8 @@ import json
 import logging
 from typing import Any, Callable, Dict, Optional, Set, Union
 
+import pandas as pd
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
@@ -494,6 +496,20 @@ class BatchMarkers(BatchKwargs):
         return self.get("ge_load_time")
 
 
+class BatchData:
+    def __init__(self, execution_engine) -> None:
+        self._execution_engine = execution_engine
+
+    @property
+    def execution_engine(self):
+        return self._execution_engine
+
+    # noinspection PyMethodMayBeStatic
+    def head(self, *args, **kwargs):
+        # CONFLICT ON PURPOSE. REMOVE.
+        return pd.DataFrame({})
+
+
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
@@ -502,7 +518,7 @@ class BatchMarkers(BatchKwargs):
 class Batch(SerializableDictDot):
     def __init__(
         self,
-        data,
+        data: BatchData,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         batch_definition: BatchDefinition = None,
         batch_spec: BatchSpec = None,

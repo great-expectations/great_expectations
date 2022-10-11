@@ -5,10 +5,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-import pandas as pd
-
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchMarkers, BatchSpec
+from great_expectations.core.batch import BatchData, BatchMarkers, BatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.execution_engine.bundled_metric_configuration import (
@@ -34,19 +32,6 @@ class NoOpDict:
 
     def update(self, value):
         return None
-
-
-class BatchData:
-    def __init__(self, execution_engine) -> None:
-        self._execution_engine = execution_engine
-
-    @property
-    def execution_engine(self):
-        return self._execution_engine
-
-    def head(self, *args, **kwargs):
-        # CONFLICT ON PURPOSE. REMOVE.
-        return pd.DataFrame({})
 
 
 class MetricFunctionTypes(Enum):
