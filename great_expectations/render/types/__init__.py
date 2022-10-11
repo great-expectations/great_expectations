@@ -43,9 +43,11 @@ class AtomicDiagnosticRendererType(str, Enum):
 class LegacyRendererType(str, Enum):
     """Available legacy renderer types"""
 
-    PRESCRIPTIVE = ".".join([RendererPrefix.LEGACY, "prescriptive"])
-    DIAGNOSTIC = ".".join([RendererPrefix.LEGACY, "diagnostic"])
+    ANSWER = ".".join([RendererPrefix.LEGACY, "answer"])
     DESCRIPTIVE = ".".join([RendererPrefix.LEGACY, "descriptive"])
+    DIAGNOSTIC = ".".join([RendererPrefix.LEGACY, "diagnostic"])
+    PRESCRIPTIVE = ".".join([RendererPrefix.LEGACY, "prescriptive"])
+    QUESTION = ".".join([RendererPrefix.LEGACY, "question"])
 
 
 class LegacyPrescriptiveRendererType(str, Enum):
