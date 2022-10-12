@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any, List, Union
 
 
-class GESqlDialect(str, Enum):
+class GESqlDialect(Enum):
     """Contains sql dialects that have some level of support in Great Expectations.
     Also contains an unsupported attribute if the dialect is not in the list.
     """
