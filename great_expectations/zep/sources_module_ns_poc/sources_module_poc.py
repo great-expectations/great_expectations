@@ -53,3 +53,12 @@ _load_plugins()
 
 
 print(f"After loading plugins: {_public_globals()}\n")
+
+print(dir())
+
+
+def __dir__() -> List[str]:
+    return [k for k in globals().keys()]
+
+
+print(dir())
