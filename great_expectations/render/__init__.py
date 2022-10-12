@@ -183,7 +183,7 @@ class RenderedAtomicValueGraph(DictDot):
     def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def to_json_dict(self) -> dict:
+    def to_json_dict(self) -> Optional[dict]:
         """Returns RenderedAtomicValueGraph as a json dictionary."""
         return self.graph
 
@@ -235,10 +235,8 @@ class RenderedAtomicValueSchema(Schema):
 class RenderedAtomicContent(RenderedContent):
     def __init__(
         self,
-        name: Optional[
-            Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
-        ] = None,
-        value: Optional[RenderedAtomicValue] = None,
+        name: Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType],
+        value: RenderedAtomicValue,
         value_type: Optional[str] = None,
     ) -> None:
         # str conversion is performed to ensure Enum value is what is serialized
