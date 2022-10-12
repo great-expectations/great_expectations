@@ -285,6 +285,11 @@ def tests(
 PYTHON_VERSION_DEFAULT: float = 3.8
 
 
+@invoke.task
+def pandas_example(ctx):
+    cmds = ["docker run -it pandas_filesystem bash"]
+    ctx.run(" ".join(cmds), echo=True, pty=True)
+
 @invoke.task(
     help={
         "name": "Docker image name.",
