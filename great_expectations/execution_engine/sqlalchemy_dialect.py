@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, List, Union
+from typing import Any, List
 
 
 class GESqlDialect(str, Enum):
