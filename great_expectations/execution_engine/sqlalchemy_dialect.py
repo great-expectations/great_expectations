@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, List
+from typing import Any, List, Union
 
 
 class GESqlDialect(str, Enum):
@@ -23,6 +23,17 @@ class GESqlDialect(str, Enum):
     TERADATASQL = "teradatasql"
     TRINO = "trino"
     OTHER = "other"
+
+    def __eq__(self, other: Union[str, GESqlDialect]):
+        if isinstance(other, str):
+            return self.value.lower() == other.lower()
+        # Comparison against byte string, e.g. `b"hive"` should be treated as unicode
+        elif isinstance(other, bytes):
+            return self.value.lower() == other.lower().decode("utf-8")
+        return self.value.lower() == other.value.lower()
+
+    def __hash__(self: GESqlDialect):
+        return hash(self.value)
 
     @classmethod
     def _missing_(cls, value: Any) -> None:
