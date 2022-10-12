@@ -234,7 +234,7 @@ def pytest_generate_tests(metafunc):
                                         SqlAlchemyBatchData,
                                     )
                                     and isinstance(
-                                        validator_with_data.batch_cache.execution_engine.batch_data_cache.active_batch_data,
+                                        validator_with_data.batch_cache.execution_engine.batch_data_cache.active_batch_data.sql_engine_dialect,
                                         sqliteDialect,
                                     )
                                 )
