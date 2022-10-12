@@ -1723,14 +1723,14 @@ def get_context(
         DataContext,
     )
 
-    if (
-        CloudDataContext.is_ge_cloud_config_available(
+    if ge_cloud_mode:
+        config_available = CloudDataContext.is_ge_cloud_config_available(
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
-        or ge_cloud_mode
-    ):
+        if not config_available:
+            raise Exception("GE Cloud Mode enabled, but no configuration found.")
         return CloudDataContext(
             project_config=project_config,
             runtime_environment=runtime_environment,
@@ -1739,17 +1739,17 @@ def get_context(
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
+
     elif project_config is not None:
         return BaseDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
-    else:
-        return DataContext(
-            context_root_dir=context_root_dir,
-            runtime_environment=runtime_environment,
-        )
+    return DataContext(
+        context_root_dir=context_root_dir,
+        runtime_environment=runtime_environment,
+    )
 
 
 def is_sane_slack_webhook(url: str) -> bool:
