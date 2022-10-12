@@ -24,7 +24,7 @@ datasources:
             - data_asset_name
           pattern: (.*)
         module_name: great_expectations.datasource.data_connector
-        base_directory: ../../data
+        base_directory: ../data
       default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
         module_name: great_expectations.datasource.data_connector
