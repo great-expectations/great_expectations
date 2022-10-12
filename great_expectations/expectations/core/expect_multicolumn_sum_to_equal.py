@@ -3,11 +3,8 @@ from typing import Optional
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    LegacyDiagnosticRendererType,
-    LegacyRendererType,
-)
 
 
 class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):

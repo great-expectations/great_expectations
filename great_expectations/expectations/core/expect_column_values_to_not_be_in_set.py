@@ -13,11 +13,9 @@ from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
+from great_expectations.render import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    LegacyRendererType,
-    RenderedStringTemplateContent,
-)
+from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,

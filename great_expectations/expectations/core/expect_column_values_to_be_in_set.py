@@ -5,10 +5,9 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
 )
+from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    LegacyDescriptiveRendererType,
-    LegacyRendererType,
     RenderedBulletListContent,
     RenderedStringTemplateContent,
     ValueListContent,

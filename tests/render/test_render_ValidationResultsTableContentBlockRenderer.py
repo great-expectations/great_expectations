@@ -7,11 +7,11 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import get_renderer_impl
+from great_expectations.render import LegacyDiagnosticRendererType
 from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 from great_expectations.render.types import (
-    LegacyDiagnosticRendererType,
     RenderedComponentContent,
     RenderedStringTemplateContent,
 )

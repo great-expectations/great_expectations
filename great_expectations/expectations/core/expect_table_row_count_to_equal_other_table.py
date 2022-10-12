@@ -5,12 +5,9 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    LegacyDiagnosticRendererType,
-    LegacyRendererType,
-    RenderedStringTemplateContent,
-)
+from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 

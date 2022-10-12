@@ -7,11 +7,9 @@ from great_expectations.expectations.expectation import (
     TableExpectation,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    LegacyRendererType,
-    RenderedStringTemplateContent,
-)
+from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import substitute_none_for_missing
 
 

@@ -4,11 +4,9 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    LegacyRendererType,
-    RenderedStringTemplateContent,
-)
+from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,

@@ -13,18 +13,20 @@ from great_expectations.execution_engine.util import (
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
     LegacyDescriptiveRendererType,
     LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
+    renderedAtomicValueSchema,
+)
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import (
     RenderedContentBlockContainer,
     RenderedGraphContent,
     RenderedStringTemplateContent,
-    renderedAtomicValueSchema,
 )
 from great_expectations.render.util import (
     num_to_str,

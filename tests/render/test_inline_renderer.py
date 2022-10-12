@@ -9,13 +9,13 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.data_context import DataContext
-from great_expectations.render.exceptions import InvalidRenderedContentError
-from great_expectations.render.renderer.inline_renderer import InlineRenderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
 )
+from great_expectations.render.exceptions import InvalidRenderedContentError
+from great_expectations.render.renderer.inline_renderer import InlineRenderer
 from great_expectations.validator.validator import Validator
 
 

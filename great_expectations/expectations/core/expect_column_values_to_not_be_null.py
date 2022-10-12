@@ -8,13 +8,13 @@ from great_expectations.expectations.expectation import (
     _format_map_output,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyDiagnosticRendererType,
     LegacyRendererType,
-    RenderedStringTemplateContent,
 )
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,

@@ -44,13 +44,13 @@ from great_expectations.datasource import (
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     AtomicRendererType,
     RenderedAtomicContent,
     renderedAtomicValueSchema,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,

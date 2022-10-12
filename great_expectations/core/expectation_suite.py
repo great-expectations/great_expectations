@@ -43,7 +43,7 @@ from great_expectations.exceptions import (
     DataContextError,
     InvalidExpectationConfigurationError,
 )
-from great_expectations.render.types import (
+from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
 )
