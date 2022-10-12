@@ -14,8 +14,12 @@ def test_dialect_instantiation_with_byte_string():
 
 
 @pytest.mark.unit
-def test_string_and_byte_string_equivalence():
+def test_string_equivalence():
     assert GESqlDialect.HIVE == "hive"
+
+
+@pytest.mark.unit
+def test_byte_string_equivalence():
     assert GESqlDialect.HIVE == b"hive"
 
 
