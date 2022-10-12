@@ -188,9 +188,6 @@ Notes:
     def load_batch_data(
         self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]
     ) -> None:
-        print(
-            f"\n[ALEX_TEST] [PANDAS_EXECUTION_ENGINE.load_batch_data()] BATCH_DATA:\n{batch_data} ; TYPE: {str(type(batch_data))}"
-        )
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
         elif not isinstance(batch_data, PandasBatchData):

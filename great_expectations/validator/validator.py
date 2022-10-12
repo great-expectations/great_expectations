@@ -1444,7 +1444,9 @@ aborting graph resolution.
     @property
     def active_batch_id(self) -> Optional[str]:
         """Getter for active batch id"""
-        active_engine_batch_id = self._execution_engine.active_batch_data_id
+        active_engine_batch_id = (
+            self._execution_engine.batch_data_cache.active_batch_data_id
+        )
         if active_engine_batch_id != self._active_batch_id:
             logger.debug(
                 "This validator has a different active batch id than its Execution Engine."
@@ -2124,7 +2126,7 @@ set as active.
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
         if domain_kwargs is None:
             domain_kwargs = {
-                "batch_id": self._execution_engine.active_batch_data_id,
+                "batch_id": self._execution_engine.batch_data_cache.active_batch_data_id,
             }
 
         columns: List[str] = self.get_metric(
@@ -2144,7 +2146,7 @@ set as active.
     ) -> pd.DataFrame:
         if domain_kwargs is None:
             domain_kwargs = {
-                "batch_id": self._execution_engine.active_batch_data_id,
+                "batch_id": self._execution_engine.batch_data_cache.active_batch_data_id,
             }
 
         data: Any = self.get_metric(

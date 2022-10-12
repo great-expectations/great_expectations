@@ -8,7 +8,12 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchData, BatchMarkers, BatchSpec
+from great_expectations.core.batch import (
+    BatchData,
+    BatchMarkers,
+    BatchSpec,
+    SparkDataFrame,
+)
 from great_expectations.core.batch_data_cache import BatchDataCache
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
@@ -24,16 +29,6 @@ from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pyspark
-    from pyspark.sql import DataFrame as SparkDataFrame
-except ImportError:
-    pyspark = None
-    SparkDataFrame = None
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
 
 
 class NoOpDict:
@@ -187,6 +182,13 @@ class ExecutionEngine(ABC):
             if key in self.recognized_batch_spec_defaults
         }
 
+        self._batch_data_cache = BatchDataCache()
+
+        if batch_data_dict is None:
+            batch_data_dict = {}
+
+        self._load_batch_data_from_dict(batch_data_dict=batch_data_dict)
+
         # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values, and
         # set the instance "_config" variable equal to the resulting dictionary.
         self._config = {
@@ -199,8 +201,6 @@ class ExecutionEngine(ABC):
             "class_name": self.__class__.__name__,
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
-
-        self._batch_data_cache = BatchDataCache(batch_data_dict=batch_data_dict)
 
     def configure_validator(self, validator) -> None:
         """Optionally configure the validator as appropriate for the execution engine."""
@@ -219,12 +219,20 @@ class ExecutionEngine(ABC):
         """Getter for batch_data_cache"""
         return self._batch_data_cache
 
+    def _load_batch_data_from_dict(
+        self, batch_data_dict: Dict[str, Union[BatchData, pd.DataFrame, SparkDataFrame]]
+    ) -> None:
+        """
+        Loads all data in batch_data_dict using cache_batch_data
+        """
+        batch_id: str
+        batch_data: Union[BatchData, pd.DataFrame, SparkDataFrame]
+        for batch_id, batch_data in batch_data_dict.items():
+            self.load_batch_data(batch_id=batch_id, batch_data=batch_data)
+
     def load_batch_data(
         self, batch_id: str, batch_data: Union[BatchData, pd.DataFrame, SparkDataFrame]
     ) -> None:
-        print(
-            f"\n[ALEX_TEST] [EXECUTION_ENGINE.load_batch_data()] BATCH_DATA:\n{batch_data} ; TYPE: {str(type(batch_data))}"
-        )
         self._batch_data_cache.load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data(

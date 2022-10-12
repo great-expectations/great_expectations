@@ -213,7 +213,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         return cast(SparkDFBatchData, self.batch_data_cache.active_batch_data).dataframe
 
-    def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
+    def load_batch_data(
+        self, batch_id: str, batch_data: Union[SparkDFBatchData, DataFrame]
+    ) -> None:
         if isinstance(batch_data, DataFrame):
             batch_data = SparkDFBatchData(self, batch_data)
         elif not isinstance(batch_data, SparkDFBatchData):
