@@ -24,7 +24,7 @@ class GESqlDialect(Enum):
     TRINO = "trino"
     OTHER = "other"
 
-    def __eq__(self, other: Union[str, GESqlDialect]):
+    def __eq__(self, other: Union[str, bytes, GESqlDialect]):
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         # Comparison against byte string, e.g. `b"hive"` should be treated as unicode
