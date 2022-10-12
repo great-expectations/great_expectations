@@ -233,7 +233,7 @@ class ExecutionEngine(ABC):
     def load_batch_data(
         self, batch_id: str, batch_data: Union[BatchData, pd.DataFrame, SparkDataFrame]
     ) -> None:
-        self._batch_data_cache.load_batch_data(batch_id=batch_id, batch_data=batch_data)
+        self._batch_data_cache.save_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data(
         self,

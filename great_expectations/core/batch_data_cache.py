@@ -54,7 +54,7 @@ class BatchDataCache:
     def batch_data_ids(self) -> List[str]:
         return list(self.batch_data_dict.keys())
 
-    def load_batch_data(self, batch_id: str, batch_data: BatchData) -> None:
+    def save_batch_data(self, batch_id: str, batch_data: BatchData) -> None:
         """
         Adds the specified batch_data to the cache
         """

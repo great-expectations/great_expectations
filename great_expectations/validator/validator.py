@@ -1422,7 +1422,7 @@ aborting graph resolution.
 
     @property
     def loaded_batch_ids(self) -> List[str]:
-        return self._execution_engine.loaded_batch_data_ids
+        return self._execution_engine.batch_data_cache.batch_data_ids
 
     @property
     def active_batch(self) -> Optional[Batch]:

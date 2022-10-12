@@ -95,7 +95,7 @@ class BatchCache:
             except AssertionError as e:
                 logger.warning(str(e))
 
-            self._batch_data_cache.load_batch_data(
+            self._batch_data_cache.save_batch_data(
                 batch_id=batch.id, batch_data=batch.data
             )
             self._batch_list[batch.id] = batch
