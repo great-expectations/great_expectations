@@ -15,7 +15,7 @@ class DataContext:
 
     @property
     def sources(self):
-        from great_expectations.zep import sources_module_poc
+        from great_expectations.zep.sources_module_ns_poc import sources_module_poc
 
         return sources_module_poc
 
