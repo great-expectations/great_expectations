@@ -1956,7 +1956,7 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
         batch_list=my_batch_list,
         create_expectation_suite_with_name="A_expectation_suite",
     )
-    assert len(my_validator.batches) == 2
+    assert len(my_validator.batch_cache.batch_list) == 2
 
 
 def test_get_batch_multiple_datasources_do_not_scan_all(

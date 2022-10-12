@@ -198,7 +198,7 @@ def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_b
                     data_connector_query=IDDict(batch_filter_parameters={}),
                 ),
                 expectation_suite_name="my_expectations",
-            ).batches
+            ).batch_cache.batch_list
         )
         == 34
     )
@@ -213,7 +213,7 @@ def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_b
                     data_asset_name="table_partitioned_by_date_column__A",
                 ),
                 expectation_suite_name="my_expectations",
-            ).batches
+            ).batch_cache.batch_list
         )
         == 34
     )

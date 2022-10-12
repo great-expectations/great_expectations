@@ -102,7 +102,7 @@ checkpoint_config = {
     ]
 }
 checkpoint = SimpleCheckpoint(
-    f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}",
+    f"{validator.batch_cache.active_batch_definition.data_asset_name}_{expectation_suite_name}",
     context,
     **checkpoint_config
 )

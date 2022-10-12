@@ -25,8 +25,8 @@ jan_batch_request: BatchRequest = BatchRequest(
 validator: Validator = context.get_validator(
     batch_request=jan_batch_request, expectation_suite=suite
 )
-assert validator.active_batch_definition.batch_identifiers["month"] == "01"
-assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
+assert validator.batch_cache.active_batch_definition.batch_identifiers["month"] == "01"
+assert validator.batch_cache.active_batch_definition.batch_identifiers["year"] == "2019"
 
 # Create a Batch from February 2019 data, then load it to the instantiated Validator
 feb_batch_request: BatchRequest = BatchRequest(
@@ -38,9 +38,9 @@ feb_batch_request: BatchRequest = BatchRequest(
 
 feb_batch_list: List[Batch] = context.get_batch_list(batch_request=feb_batch_request)
 
-validator.load_batch_list(batch_list=feb_batch_list)
-assert validator.active_batch_definition.batch_identifiers["month"] == "02"
-assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
+validator.batch_cache.load_batch_list(batch_list=feb_batch_list)
+assert validator.batch_cache.active_batch_definition.batch_identifiers["month"] == "02"
+assert validator.batch_cache.active_batch_definition.batch_identifiers["year"] == "2019"
 
 # Create a Batch from March data, then load it to the instantiated Validator
 march_batch_request: BatchRequest = BatchRequest(
@@ -54,14 +54,14 @@ march_batch_list: List[Batch] = context.get_batch_list(
     batch_request=march_batch_request
 )
 
-validator.load_batch_list(batch_list=march_batch_list)
-assert validator.active_batch_definition.batch_identifiers["month"] == "03"
-assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
+validator.batch_cache.load_batch_list(batch_list=march_batch_list)
+assert validator.batch_cache.active_batch_definition.batch_identifiers["month"] == "03"
+assert validator.batch_cache.active_batch_definition.batch_identifiers["year"] == "2019"
 
 
 # Get the list of all batches contained by the Validator for use in the BatchFileter
 total_batch_definition_list: list = [
-    v.batch_definition for k, v in validator.batches.items()
+    v.batch_definition for k, v in validator.batch_cache.batch_list.items()
 ]
 
 # Filter to all batch_definitions prior to March

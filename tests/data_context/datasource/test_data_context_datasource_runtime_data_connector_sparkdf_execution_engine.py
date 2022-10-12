@@ -493,7 +493,7 @@ def test_batch_data_get_validator_successful_specification_sparkdf_engine_named_
     )
     assert isinstance(my_validator, Validator)
     assert (
-        my_validator.active_batch.batch_definition.batch_identifiers
+        my_validator.batch_cache.active_batch.batch_definition.batch_identifiers
         == batch_identifiers
     )
 
@@ -810,6 +810,6 @@ def test_file_path_get_validator_successful_specification_sparkdf_engine_named_a
     )
     assert isinstance(my_validator, Validator)
     assert (
-        my_validator.active_batch.batch_definition.batch_identifiers
+        my_validator.batch_cache.active_batch.batch_definition.batch_identifiers
         == batch_identifiers
     )

@@ -6,7 +6,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import OrderedDict, defaultdict, namedtuple
+from collections import defaultdict, namedtuple
 from collections.abc import Hashable
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
@@ -15,7 +15,8 @@ from marshmallow import ValidationError
 from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import Batch, BatchDefinition, BatchMarkers
+from great_expectations.core.batch import Batch
+from great_expectations.core.batch_cache import BatchCache
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -25,7 +26,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
@@ -141,25 +141,15 @@ class Validator:
             batches: The batches for which to validate.
             include_rendered_content: Whether or not to include rendered_content in the ExpectationValidationResult.
         """
+        self._batch_cache = BatchCache(
+            execution_engine=execution_engine, batch_list=batches
+        )
 
         self._data_context = data_context
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
 
         self._show_progress_bars = self._determine_progress_bars()
-
-        if batches is None:
-            batches = []
-
-        self._batches = {}
-        self._active_batch_id = None
-        self.load_batch_list(batches)
-
-        if len(batches) > 1:
-            logger.debug(
-                f"{len(batches)} batches will be added to this Validator. The batch_identifiers for the active "
-                f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
-            )
 
         self.interactive_evaluation = interactive_evaluation
         self._initialize_expectations(
@@ -221,6 +211,10 @@ class Validator:
                     enable = progress_bars["metric_calculations"]
 
         return enable
+
+    @property
+    def batch_cache(self) -> BatchCache:
+        return self._batch_cache
 
     @property
     def show_progress_bars(self) -> bool:
@@ -432,7 +426,7 @@ class Validator:
             profiler_result: RuleBasedProfilerResult = profiler.run(
                 variables=None,
                 rules=None,
-                batch_list=list(self.batches.values()),
+                batch_list=list(self._batch_cache.batch_list.values()),
                 batch_request=None,
                 recompute_existing_parameter_values=False,
                 reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
@@ -1021,7 +1015,9 @@ class Validator:
                 raise InvalidExpectationConfigurationError(str(e))
 
             evaluated_config = copy.deepcopy(configuration)
-            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
+            evaluated_config.kwargs.update(
+                {"batch_id": self._batch_cache.active_batch_id}
+            )
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: dict = (
@@ -1397,92 +1393,6 @@ aborting graph resolution.
             remove_multiple_matches=remove_multiple_matches,
             ge_cloud_id=ge_cloud_id,
         )
-
-    def load_batch_list(self, batch_list: List[Batch]) -> None:
-        for batch in batch_list:
-            try:
-                assert isinstance(
-                    batch, Batch
-                ), "batches provided to Validator must be Great Expectations Batch objects"
-            except AssertionError as e:
-                logger.warning(str(e))
-            self._execution_engine.load_batch_data(batch.id, batch.data)
-            self._batches[batch.id] = batch
-            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
-            # execution_engine. The final active_batch_id will be that of the final batch loaded.
-            self.active_batch_id = batch.id
-
-    @property
-    def batches(self) -> Dict[str, Batch]:
-        """Getter for batches"""
-        if not isinstance(self._batches, OrderedDict):
-            self._batches = OrderedDict(self._batches)
-
-        return self._batches
-
-    @property
-    def loaded_batch_ids(self) -> List[str]:
-        return self._execution_engine.batch_data_cache.batch_data_ids
-
-    @property
-    def active_batch(self) -> Optional[Batch]:
-        """Getter for active batch"""
-        active_batch_id: Optional[str] = self.active_batch_id
-        batch: Optional[Batch] = (
-            self.batches.get(active_batch_id) if active_batch_id else None
-        )
-        return batch
-
-    @property
-    def active_batch_spec(self) -> Optional[BatchSpec]:
-        """Getter for active batch's batch_spec"""
-        if not self.active_batch:
-            return None
-        else:
-            return self.active_batch.batch_spec
-
-    @property
-    def active_batch_id(self) -> Optional[str]:
-        """Getter for active batch id"""
-        active_engine_batch_id = (
-            self._execution_engine.batch_data_cache.active_batch_data_id
-        )
-        if active_engine_batch_id != self._active_batch_id:
-            logger.debug(
-                "This validator has a different active batch id than its Execution Engine."
-            )
-        return self._active_batch_id
-
-    @active_batch_id.setter
-    def active_batch_id(self, batch_id: str) -> None:
-        assert set(self.batches.keys()).issubset(set(self.loaded_batch_ids))
-        available_batch_ids: Set[str] = set(self.batches.keys()).union(
-            set(self.loaded_batch_ids)
-        )
-        if batch_id not in available_batch_ids:
-            raise ValueError(
-                f"""batch_id {batch_id} not found in loaded batches.  Batches must first be loaded before they can be \
-set as active.
-"""
-            )
-        else:
-            self._active_batch_id = batch_id
-
-    @property
-    def active_batch_markers(self) -> Optional[BatchMarkers]:
-        """Getter for active batch's batch markers"""
-        if not self.active_batch:
-            return None
-        else:
-            return self.active_batch.batch_markers
-
-    @property
-    def active_batch_definition(self) -> Optional[BatchDefinition]:
-        """Getter for the active batch's batch definition"""
-        if not self.active_batch:
-            return None
-        else:
-            return self.active_batch.batch_definition
 
     def discard_failing_expectations(self) -> None:
         """Removes any expectations from the validator where the validation has failed"""
@@ -1988,9 +1898,9 @@ set as active.
                     "great_expectations_version": ge_version,
                     "expectation_suite_name": expectation_suite_name,
                     "run_id": run_id,
-                    "batch_spec": self.active_batch_spec,
-                    "batch_markers": self.active_batch_markers,
-                    "active_batch_definition": self.active_batch_definition,
+                    "batch_spec": self._batch_cache.active_batch_spec,
+                    "batch_markers": self._batch_cache.active_batch_markers,
+                    "active_batch_definition": self._batch_cache.active_batch_definition,
                     "validation_time": validation_time,
                     "checkpoint_name": checkpoint_name,
                 },
@@ -2065,7 +1975,7 @@ set as active.
         if batch_markers is None:
             batch_markers = self.active_batch_markers
         if batch_definition is None:
-            batch_definition = self.active_batch_definition
+            batch_definition = self._batch_cache.active_batch_definition
         self._expectation_suite.add_citation(
             comment,
             batch_spec=batch_spec,

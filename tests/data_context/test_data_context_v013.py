@@ -642,7 +642,7 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
         expectation_suite=my_expectation_suite,
     )
 
-    assert len(validator.batches) == 1
+    assert len(validator.batch_cache.batch_list) == 1
 
 
 @pytest.mark.filterwarnings(
@@ -748,7 +748,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
         expectation_suite=my_expectation_suite,
     )
 
-    assert len(validator.batches) == 1
+    assert len(validator.batch_cache.batch_list) == 1
 
     # using path with no extension
     data_asset_path_no_extension = os.path.join(
@@ -787,4 +787,4 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
         expectation_suite=my_expectation_suite,
     )
 
-    assert len(validator.batches) == 1
+    assert len(validator.batch_cache.batch_list) == 1

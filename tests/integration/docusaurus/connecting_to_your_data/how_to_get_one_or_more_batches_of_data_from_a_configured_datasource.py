@@ -49,7 +49,7 @@ context.create_expectation_suite(
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
-assert len(validator.batches) == 36
+assert len(validator.batch_cache.batch_list) == 36
 
 # Here is an example data_connector_query filtering based on an index which can be
 # any valid python slice. The example here is retrieving the latest batch using -1:
@@ -66,7 +66,7 @@ last_index_batch_request = BatchRequest(
 validator = context.get_validator(
     batch_request=last_index_batch_request, expectation_suite_name="test_suite"
 )
-assert len(validator.batches) == 1
+assert len(validator.batch_cache.batch_list) == 1
 
 # This BatchRequest adds a query to retrieve only the twelve batches from 2020
 data_connector_query_2020 = {
@@ -82,7 +82,7 @@ batch_request_2020 = BatchRequest(
 validator = context.get_validator(
     batch_request=batch_request_2020, expectation_suite_name="test_suite"
 )
-assert len(validator.batches) == 12
+assert len(validator.batch_cache.batch_list) == 12
 
 # This BatchRequest adds a query and limit to retrieve only the first 5 batches from 2020.
 # Note that the limit is applied after the data_connector_query filtering. This behavior is
@@ -103,7 +103,7 @@ batch_request_2020 = BatchRequest(
 validator = context.get_validator(
     batch_request=batch_request_2020, expectation_suite_name="test_suite"
 )
-assert len(validator.batches) == 5
+assert len(validator.batch_cache.batch_list) == 5
 
 # Here is an example data_connector_query filtering based on parameters from group_names
 # previously defined in a regex pattern in your Data Connector:
@@ -123,7 +123,7 @@ batch_request_202001 = BatchRequest(
 validator = context.get_validator(
     batch_request=batch_request_202001, expectation_suite_name="test_suite"
 )
-assert len(validator.batches) == 1
+assert len(validator.batch_cache.batch_list) == 1
 
 # List all Batches retrieved by the Batch Request
 batch_list = context.get_batch_list(batch_request=batch_request)
@@ -135,33 +135,34 @@ context.create_expectation_suite(
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
-print(validator.batches)
+print(validator.batch_cache.batch_list)
 # View the first few lines of the loaded Batches
 print(validator.head())
 
 
 # NOTE: The following assertions are only for testing and can be ignored by users.
-assert len(validator.batches) == 36
+assert len(validator.batch_cache.batch_list) == 36
 
 row_count = validator.get_metric(
     MetricConfiguration(
-        "table.row_count", metric_domain_kwargs={"batch_id": validator.active_batch_id}
+        "table.row_count",
+        metric_domain_kwargs={"batch_id": validator.batch_cache.active_batch_id},
     )
 )
 assert row_count == 10000
 
 assert (
-    validator.active_batch.batch_definition.batch_identifiers["name"]
+    validator.batch_cache.active_batch.batch_definition.batch_identifiers["name"]
     == "yellow_tripdata_sample"
 )
 assert (
-    validator.active_batch.batch_definition.batch_identifiers[
+    validator.batch_cache.active_batch.batch_definition.batch_identifiers[
         "group_name_from_your_data_connector_eg_year"
     ]
     == "2020"
 )
 assert (
-    validator.active_batch.batch_definition.batch_identifiers[
+    validator.batch_cache.active_batch.batch_definition.batch_identifiers[
         "group_name_from_your_data_connector_eg_month"
     ]
     == "12"

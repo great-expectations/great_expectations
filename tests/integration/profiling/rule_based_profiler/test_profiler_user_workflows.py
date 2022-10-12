@@ -79,7 +79,7 @@ def alice_validator(alice_columnar_table_single_batch_context) -> Validator:
         persist=False,
     )
 
-    assert len(validator.batches) == 1
+    assert len(validator.batch_cache.batch_list) == 1
     return validator
 
 
@@ -105,7 +105,7 @@ def bobby_validator(
         persist=False,
     )
 
-    assert len(validator.batches) == 3
+    assert len(validator.batch_cache.batch_list) == 3
     return validator
 
 
@@ -136,7 +136,7 @@ def bobster_validator(
         persist=False,
     )
 
-    assert len(validator.batches) == 36
+    assert len(validator.batch_cache.batch_list) == 36
     return validator
 
 
@@ -164,7 +164,7 @@ def quentin_validator(
         persist=False,
     )
 
-    assert len(validator.batches) == 36
+    assert len(validator.batch_cache.batch_list) == 36
     return validator
 
 
@@ -593,7 +593,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     metric_configuration_arguments: Dict[str, Any] = {
         "metric_name": "table.row_count",
         "metric_domain_kwargs": {
-            "batch_id": validator_latest.active_batch_id,
+            "batch_id": validator_latest.batch_cache.active_batch_id,
         },
         "metric_value_kwargs": None,
         "metric_dependencies": None,
@@ -1186,7 +1186,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             component_name="profiler",
             persist=False,
         )
-        assert len(validator.batches) == 1
+        assert len(validator.batch_cache.batch_list) == 1
 
         custom_profiler_config = RuleBasedProfilerConfig(
             name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
@@ -1438,7 +1438,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             component_name="profiler",
             persist=False,
         )
-        assert len(validator.batches) == 1
+        assert len(validator.batch_cache.batch_list) == 1
 
         custom_profiler_config = RuleBasedProfilerConfig(
             name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.

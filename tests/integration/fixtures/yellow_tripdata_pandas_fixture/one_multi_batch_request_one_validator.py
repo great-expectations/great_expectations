@@ -25,11 +25,14 @@ validator_multi_batch = context.get_validator(
 )
 
 # The active batch should be December, as this should be the last one loaded. Confirming here.
-assert validator_multi_batch.active_batch_definition.batch_identifiers["month"] == "12"
+assert (
+    validator_multi_batch.batch_cache.active_batch_definition.batch_identifiers["month"]
+    == "12"
+)
 
 # Get the list of all batches contained by the Validator for use in the BatchFilter
 total_batch_definition_list: list = [
-    v.batch_definition for k, v in validator_multi_batch.batches.items()
+    v.batch_definition for k, v in validator_multi_batch.batch_cache.batch_list.items()
 ]
 
 # Filter to all batch_definitions prior to December

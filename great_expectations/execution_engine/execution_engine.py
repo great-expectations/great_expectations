@@ -187,7 +187,7 @@ class ExecutionEngine(ABC):
         if batch_data_dict is None:
             batch_data_dict = {}
 
-        self._load_batch_data_from_dict(batch_data_dict=batch_data_dict)
+        self.load_batch_data_from_dict(batch_data_dict=batch_data_dict)
 
         # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values, and
         # set the instance "_config" variable equal to the resulting dictionary.
@@ -219,7 +219,7 @@ class ExecutionEngine(ABC):
         """Getter for batch_data_cache"""
         return self._batch_data_cache
 
-    def _load_batch_data_from_dict(
+    def load_batch_data_from_dict(
         self, batch_data_dict: Dict[str, Union[BatchData, pd.DataFrame, SparkDataFrame]]
     ) -> None:
         """
