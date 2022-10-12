@@ -89,7 +89,7 @@ def get_renderer_names_with_renderer_type(
 
     Args:
         expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
-        renderer_type: The type of the renderers for which to return.
+        renderer_type: The type of the renderers for which to return names.
 
     Returns:
         A list of renderer names for the given prefix and Expectation or Metric.

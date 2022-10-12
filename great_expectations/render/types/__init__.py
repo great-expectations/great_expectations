@@ -13,7 +13,7 @@ from great_expectations.types import DictDot
 
 
 class RendererPrefix(str, Enum):
-    """Available renderer types"""
+    """Available renderer prefixes"""
 
     LEGACY = "renderer"
     ATOMIC = "atomic"
@@ -737,6 +737,7 @@ class RenderedAtomicContent(RenderedContent):
         value: Optional[RenderedAtomicValue] = None,
         value_type: Optional[str] = None,
     ) -> None:
+        # str conversion is performed to ensure Enum value is what is serialized
         self.name = str(name)
         self.value = value
         self.value_type = value_type

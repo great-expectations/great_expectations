@@ -3224,7 +3224,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     # we should not update the existing rendered_content.
     legacy_rendered_content = [
         RenderedAtomicContent(
-            name=".".join([AtomicRendererType.PRESCRIPTIVE, "custom_renderer"]),
+            name=".".join([AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]),
             value=renderedAtomicValueSchema.load(
                 {
                     "schema": {"type": "com.superconductive.rendered.string"},
