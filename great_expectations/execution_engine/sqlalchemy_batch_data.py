@@ -85,7 +85,7 @@ class SqlAlchemyBatchData(BatchData):
 
 
         """
-        super().__init__(execution_engine)
+        super().__init__(execution_engine=execution_engine)
         engine = execution_engine.engine
         self._engine = engine
         self._record_set_name = record_set_name or "great_expectations_sub_selection"

@@ -4,7 +4,7 @@ import logging
 import uuid
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
 
 from dateutil.parser import parse
 
@@ -206,22 +206,21 @@ class SparkDFExecutionEngine(ExecutionEngine):
     @property
     def dataframe(self):
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
-        if not self.active_batch_data:
+        if not self.batch_data_cache.active_batch_data:
             raise ValueError(
                 "Batch has not been loaded - please run load_batch() to load a batch."
             )
 
-        return self.active_batch_data.dataframe
+        return cast(SparkDFBatchData, self.batch_data_cache.active_batch_data).dataframe
 
     def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
         if isinstance(batch_data, DataFrame):
             batch_data = SparkDFBatchData(self, batch_data)
-        elif isinstance(batch_data, SparkDFBatchData):
-            pass
-        else:
+        elif not isinstance(batch_data, SparkDFBatchData):
             raise GreatExpectationsError(
                 "SparkDFExecutionEngine requires batch data that is either a DataFrame or a SparkDFBatchData object"
             )
+
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data_and_markers(
@@ -250,8 +249,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
             batch_data = batch_spec.batch_data
             if isinstance(batch_data, str):
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""SparkDFExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
-Please check your config."""
+                    f"""SparkDFExecutionEngine has been passed a string type batch_data, "{batch_data}", which is \
+illegal.  Please check your config."""
                 )
             batch_spec.batch_data = "SparkDataFrame"
 
@@ -310,6 +309,7 @@ Please check your config."""
                                 schema: your_schema.jsonValue()
                                 """
                 )
+            # noinspection PyUnresolvedReferences
             try:
                 if schema:
                     reader: DataFrameReader = self.spark.read.schema(schema).options(
@@ -369,7 +369,8 @@ Please check your config."""
     # TODO: <Alex>Similar to Abe's note in PandasExecutionEngine: Any reason this shouldn't be a private method?</Alex>
     @staticmethod
     def guess_reader_method_from_path(path):
-        """Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
+        """
+        Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
         file extensions are used, returns ExecutionEngineError stating that it is unable to determine the current path.
 
         Args:
@@ -443,15 +444,19 @@ Please check your config."""
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.active_batch_data:
-                data = self.active_batch_data.dataframe
+            if self.batch_data_cache.active_batch_data:
+                data = cast(
+                    SparkDFBatchData, self.batch_data_cache.active_batch_data
+                ).dataframe
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.loaded_batch_data_dict:
-                data = self.loaded_batch_data_dict[batch_id].dataframe
+            if batch_id in self.batch_data_cache.batch_data_dict:
+                data = cast(
+                    SparkDFBatchData, self.batch_data_cache.batch_data_dict[batch_id]
+                ).dataframe
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
@@ -512,7 +517,8 @@ Please check your config."""
                     # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use \
+"neither" moving forward.
 """,
                         DeprecationWarning,
                     )
@@ -721,7 +727,8 @@ Please check your config."""
             res = df.agg(*aggregate_cols).collect()
 
             logger.debug(
-                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"
+                f"""SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id \
+{IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"""
             )
 
             assert (

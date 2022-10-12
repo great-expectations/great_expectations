@@ -5,7 +5,7 @@ import pickle
 import warnings
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Iterable, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast
 
 import pandas as pd
 
@@ -59,6 +59,7 @@ try:
 except ImportError:
     storage = None
     service_account = None
+    GoogleAPIError = None
     DefaultCredentialsError = None
     logger.debug(
         "Unable to load GCS connection object; install optional google dependency for support"
@@ -184,15 +185,19 @@ Notes:
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
 
-    def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
+    def load_batch_data(
+        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]
+    ) -> None:
+        print(
+            f"\n[ALEX_TEST] [PANDAS_EXECUTION_ENGINE.load_batch_data()] BATCH_DATA:\n{batch_data} ; TYPE: {str(type(batch_data))}"
+        )
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
-        elif isinstance(batch_data, PandasBatchData):
-            pass
-        else:
+        elif not isinstance(batch_data, PandasBatchData):
             raise ge_exceptions.GreatExpectationsError(
                 "PandasExecutionEngine requires batch data that is either a DataFrame or a PandasBatchData object"
             )
+
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data_and_markers(
@@ -213,9 +218,11 @@ Notes:
             batch_data = batch_spec.batch_data
             if isinstance(batch_data, str):
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
-Please check your config."""
+                    f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is \
+illegal.  Please check your config.
+"""
                 )
+
             if isinstance(batch_spec.batch_data, pd.DataFrame):
                 df = batch_spec.batch_data
             elif isinstance(batch_spec.batch_data, PandasBatchData):
@@ -224,6 +231,7 @@ Please check your config."""
                 raise ValueError(
                     "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object."
                 )
+
             batch_spec.batch_data = "PandasDataFrame"
 
         elif isinstance(batch_spec, S3BatchSpec):
@@ -248,7 +256,8 @@ Please check your config."""
                 s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             except (ParamValidationError, ClientError) as error:
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 \
+Bucket: {error}"""
                 )
             logger.debug(
                 f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}"
@@ -305,7 +314,8 @@ Please check your config."""
                 )
             except GoogleAPIError as error:
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine encountered the following error while trying to read data from GCS Bucket: {error}"""
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from GCS \
+Bucket: {error}"""
                 )
             reader_fn = self._get_reader_fn(reader_method, gcs_url.blob)
             buf = BytesIO(gcs_blob.download_as_bytes())
@@ -321,7 +331,8 @@ Please check your config."""
 
         else:
             raise ge_exceptions.BatchSpecError(
-                f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, not {batch_spec.__class__.__name__}"
+                f"""batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, \
+not {batch_spec.__class__.__name__}"""
             )
 
         df = self._apply_splitting_and_sampling_methods(batch_spec, df)
@@ -356,12 +367,12 @@ Please check your config."""
         ValueError Exception
         """
         # Changed to is None because was breaking prior
-        if self.active_batch_data is None:
+        if self.batch_data_cache.active_batch_data is None:
             raise ValueError(
                 "Batch has not been loaded - please run load_batch_data() to load a batch."
             )
 
-        return self.active_batch_data.dataframe
+        return cast(PandasBatchData, self.batch_data_cache.active_batch_data).dataframe
 
     # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
@@ -437,6 +448,12 @@ Please check your config."""
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
+    def resolve_metric_bundle(
+        self, metric_fn_bundle
+    ) -> Dict[Tuple[str, str, str], Any]:
+        """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
+        pass  # This method is NO-OP for PandasExecutionEngine (no bundling for direct execution computational backend).
+
     def get_domain_records(
         self,
         domain_kwargs: dict,
@@ -460,15 +477,19 @@ Please check your config."""
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.active_batch_data_id is not None:
-                data = self.active_batch_data.dataframe
+            if self.batch_data_cache.active_batch_data_id is not None:
+                data = cast(
+                    PandasBatchData, self.batch_data_cache.active_batch_data
+                ).dataframe
             else:
                 raise ge_exceptions.ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.loaded_batch_data_dict:
-                data = self.loaded_batch_data_dict[batch_id].dataframe
+            if batch_id in self.batch_data_cache.batch_data_dict:
+                data = cast(
+                    PandasBatchData, self.batch_data_cache.batch_data_dict[batch_id]
+                ).dataframe
             else:
                 raise ge_exceptions.ValidationError(
                     f"Unable to find batch with batch_id {batch_id}"
@@ -525,7 +546,8 @@ Please check your config."""
                     # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" instead.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  \
+Please use "neither" instead.
 """,
                         DeprecationWarning,
                     )
