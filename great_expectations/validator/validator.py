@@ -213,6 +213,11 @@ class Validator:
         return enable
 
     @property
+    def execution_engine(self) -> ExecutionEngine:
+        """Returns the execution engine being used by the validator at the given time"""
+        return self._execution_engine
+
+    @property
     def batch_cache(self) -> BatchCache:
         return self._batch_cache
 
@@ -764,11 +769,6 @@ class Validator:
                 parameter_builder=evaluation_parameter_builder,
                 metric_value_kwargs=metric_value_kwargs,
             )
-
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        """Returns the execution engine being used by the validator at the given time"""
-        return self._execution_engine
 
     def list_available_expectation_types(self) -> List[str]:
         """Returns a list of all expectations available to the validator"""
