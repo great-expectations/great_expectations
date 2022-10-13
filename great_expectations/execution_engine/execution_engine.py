@@ -5,10 +5,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-import pandas as pd
-
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchMarkers, BatchSpec
+from great_expectations.core.batch import BatchData, BatchMarkers, BatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.execution_engine.bundled_metric_configuration import (
@@ -25,6 +23,16 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
+
+
 class NoOpDict:
     def __getitem__(self, item):
         return None
@@ -32,21 +40,9 @@ class NoOpDict:
     def __setitem__(self, key, value):
         return None
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def update(self, value):
         return None
-
-
-class BatchData:
-    def __init__(self, execution_engine) -> None:
-        self._execution_engine = execution_engine
-
-    @property
-    def execution_engine(self):
-        return self._execution_engine
-
-    def head(self, *args, **kwargs):
-        # CONFLICT ON PURPOSE. REMOVE.
-        return pd.DataFrame({})
 
 
 class MetricFunctionTypes(Enum):
@@ -173,10 +169,13 @@ class ExecutionEngine(ABC):
 
         if batch_spec_defaults is None:
             batch_spec_defaults = {}
+
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
-                f"Unrecognized batch_spec_default(s): {str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}"
+                f"""Unrecognized batch_spec_default(s): \
+{str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}
+"""
             )
 
         self._batch_spec_defaults = {
@@ -229,7 +228,7 @@ class ExecutionEngine(ABC):
             self._active_batch_data_id = batch_id
         else:
             raise ge_exceptions.ExecutionEngineError(
-                f"Unable to set active_batch_data_id to {batch_id}. The may data may not be loaded."
+                f"Unable to set active_batch_data_id to {batch_id}.  The data may not be loaded."
             )
 
     @property
