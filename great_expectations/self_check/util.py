@@ -2498,7 +2498,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     "allow_cross_type_comparisons" in test["input"]
                     and validator_with_data
                     and isinstance(
-                        validator_with_data.batch_cache.execution_engine.batch_data_cache.active_batch_data,
+                        validator_with_data.active_batch.data,
                         SqlAlchemyBatchData,
                     )
                 ):
@@ -2764,7 +2764,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
             check_json_test_result(
                 test=test,
                 result=result,
-                data_asset=validator.batch_cache.execution_engine.batch_data_cache.active_batch_data,
+                data_asset=validator.active_batch.data,
             )
         except Exception as e:
             if raise_exception:

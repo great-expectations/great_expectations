@@ -540,7 +540,7 @@ def test_all_table_columns_populates(taxi_validator_pandas):
 
 
 def test_profiler_works_with_batch_object(cardinality_validator):
-    profiler = UserConfigurableProfiler(cardinality_validator.batch_cache.active_batch)
+    profiler = UserConfigurableProfiler(cardinality_validator.active_batch)
     assert profiler.primary_or_compound_key == []
     assert profiler.ignored_columns == []
     assert profiler.value_set_threshold == "MANY"

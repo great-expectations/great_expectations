@@ -217,6 +217,16 @@ class Validator:
         return self._batch_cache
 
     @property
+    def batches(self) -> Dict[str, Batch]:
+        """Convenience property that returns ordered dictionary of "Batch" objects in use (with batch_id as key)."""
+        return self._batch_cache.batches
+
+    @property
+    def active_batch(self) -> Batch:
+        """Convenience property that returns most recent ("active") "Batch" objects in use."""
+        return self._batch_cache.active_batch
+
+    @property
     def show_progress_bars(self) -> bool:
         return self._show_progress_bars
 

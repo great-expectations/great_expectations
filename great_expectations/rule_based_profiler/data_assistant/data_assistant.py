@@ -405,7 +405,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             self._batches = None
         else:
             self._data_context = self._validator.data_context
-            self._batches = self._validator.batch_cache.batch_list
+            self._batches = self._validator.batches
 
         variables: Optional[Dict[str, Any]] = self.get_variables() or {}
         self._profiler = RuleBasedProfiler(

@@ -320,7 +320,7 @@ validator = context.get_validator(
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
-assert validator.batch_cache.active_batch_definition.batch_identifiers == {
+assert validator.active_batch_definition.batch_identifiers == {
     "year": "2019",
     "month": "02",
 }

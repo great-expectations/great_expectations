@@ -454,6 +454,6 @@ def test_get_validator_successful_specification_sqlalchemy_engine_named_asset(
     )
     assert isinstance(my_validator, Validator)
     assert (
-        my_validator.batch_cache.active_batch.batch_definition.batch_identifiers
+        my_validator.active_batch.batch_definition.batch_identifiers
         == batch_identifiers
     )

@@ -342,7 +342,7 @@ class ActionListValidationOperator(ValidationOperator):
                 batch = self._build_batch_from_item(item)
 
                 if isinstance(batch, Validator):
-                    batch_identifier = batch.batch_cache.active_batch_id
+                    batch_identifier = batch.active_batch.id
                 elif hasattr(batch, "active_batch_id"):
                     batch_identifier = batch.active_batch_id
                 else:
@@ -450,7 +450,7 @@ class ActionListValidationOperator(ValidationOperator):
             logger.debug(f"Processing validation action with name {action['name']}")
 
             if isinstance(batch, Validator):
-                batch_identifier = batch.batch_cache.active_batch_id
+                batch_identifier = batch.active_batch.id
             elif hasattr(batch, "active_batch_id"):
                 batch_identifier = batch.active_batch_id
             else:

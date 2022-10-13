@@ -836,16 +836,16 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
 def test_validator_can_instantiate_with_a_multi_batch_request(
     multi_batch_taxi_validator,
 ):
-    assert len(multi_batch_taxi_validator.batch_cache.batch_list) == 3
+    assert len(multi_batch_taxi_validator.batches) == 3
     assert (
-        multi_batch_taxi_validator.batch_cache.active_batch.batch_definition.batch_identifiers[
+        multi_batch_taxi_validator.active_batch.batch_definition.batch_identifiers[
             "month"
         ]
         == "03"
     )
 
     validator_batch_identifiers_for_all_batches: List[str] = [
-        i for i in multi_batch_taxi_validator.batch_cache.batch_list
+        i for i in multi_batch_taxi_validator.batches
     ]
     assert validator_batch_identifiers_for_all_batches == [
         "0327cfb13205ec8512e1c28e438ab43b",
@@ -879,8 +879,7 @@ def test_validator_batch_filter(
     multi_batch_taxi_validator,
 ):
     total_batch_definition_list: List[BatchDefinition] = [
-        v.batch_definition
-        for k, v in multi_batch_taxi_validator.batch_cache.batch_list.items()
+        v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
     ]
 
     jan_batch_filter: BatchFilter = build_batch_filter(
@@ -970,8 +969,7 @@ def test_custom_filter_function(
     multi_batch_taxi_validator,
 ):
     total_batch_definition_list: List[BatchDefinition] = [
-        v.batch_definition
-        for k, v in multi_batch_taxi_validator.batch_cache.batch_list.items()
+        v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
     ]
     assert len(total_batch_definition_list) == 3
 
@@ -1037,10 +1035,10 @@ def test_validator_load_additional_batch_to_validator(
         batch_request=jan_batch_request, expectation_suite=suite
     )
 
-    assert len(validator.batch_cache.batch_list) == 1
-    assert validator.batch_cache.active_batch_id == "0327cfb13205ec8512e1c28e438ab43b"
+    assert len(validator.batches) == 1
+    assert validator.active_batch.id == "0327cfb13205ec8512e1c28e438ab43b"
 
-    first_batch_markers: BatchMarkers = validator.batch_cache.active_batch_markers
+    first_batch_markers: BatchMarkers = validator.active_batch.batch_markers
     assert (
         first_batch_markers["pandas_data_fingerprint"]
         == "c4f929e6d4fab001fedc9e075bf4b612"
@@ -1056,14 +1054,14 @@ def test_validator_load_additional_batch_to_validator(
     new_batch = context.get_batch_list(batch_request=feb_batch_request)
     validator.batch_cache.load_batch_list(batch_list=new_batch)
 
-    updated_batch_markers: BatchMarkers = validator.batch_cache.active_batch_markers
+    updated_batch_markers: BatchMarkers = validator.active_batch.batch_markers
     assert (
         updated_batch_markers["pandas_data_fingerprint"]
         == "88b447d903f05fb594b87b13de399e45"
     )
 
-    assert len(validator.batch_cache.batch_list) == 2
-    assert validator.batch_cache.active_batch_id == "0808e185a52825d22356de2fe00a8f5f"
+    assert len(validator.batches) == 2
+    assert validator.active_batch.id == "0808e185a52825d22356de2fe00a8f5f"
     assert first_batch_markers != updated_batch_markers
 
 
@@ -1106,12 +1104,12 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     )
 
     assert (
-        validator_one_batch_request_two_batches.batch_cache.batch_list.keys()
-        == validator_two_batch_requests_two_batches.batch_cache.batch_list.keys()
+        validator_one_batch_request_two_batches.batches.keys()
+        == validator_two_batch_requests_two_batches.batches.keys()
     )
     assert (
-        validator_one_batch_request_two_batches.batch_cache.active_batch_id
-        == validator_two_batch_requests_two_batches.batch_cache.active_batch_id
+        validator_one_batch_request_two_batches.active_batch.id
+        == validator_two_batch_requests_two_batches.active_batch.id
     )
 
     with pytest.raises(ValueError) as ve:

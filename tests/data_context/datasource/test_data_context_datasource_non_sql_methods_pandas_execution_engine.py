@@ -84,8 +84,8 @@ def test_get_validator(context_with_single_titanic_csv):
         batch_request=batch_request, expectation_suite_name="temp_suite"
     )
     assert isinstance(my_validator, Validator)
-    assert len(my_validator.batch_cache.batch_list) == 1
-    assert my_validator.batch_cache.active_batch.data.dataframe.shape == (1313, 7)
+    assert len(my_validator.batches) == 1
+    assert my_validator.active_batch.data.dataframe.shape == (1313, 7)
 
 
 def test_get_validator_bad_batch_request(context_with_single_titanic_csv):
