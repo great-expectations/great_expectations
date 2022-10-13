@@ -84,7 +84,6 @@ exclude = [
     'render/renderer/content_block/exception_list_content_block\.py',  # 4
     'render/renderer/content_block/validation_results_table_content_block\.py',  # 2
     'render/renderer/datasource_new_notebook_renderer\.py',  #  4
-    'render/renderer/inline_renderer\.py',  # 3
     'render/renderer/notebook_renderer\.py',  # 2
     'render/renderer/page_renderer\.py',  # 10
     'render/renderer/profiling_results_overview_section_renderer\.py',  # 2
@@ -94,7 +93,6 @@ exclude = [
     'render/renderer/suite_scaffold_notebook_renderer\.py',  # 7
     'render/renderer/v3/suite_edit_notebook_renderer\.py',  # 11
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
-    'render/types',  # 4
     'render/util\.py',  # 2
     'render/view',  # 11
     'rule_based_profiler/attributed_resolved_metrics\.py',  # 4

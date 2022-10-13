@@ -29,10 +29,7 @@ from great_expectations.exceptions import (
     ParserError,
 )
 from great_expectations.expectations.registry import get_expectation_impl
-from great_expectations.render.types import (
-    RenderedAtomicContent,
-    RenderedAtomicContentSchema,
-)
+from great_expectations.render import RenderedAtomicContent, RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
