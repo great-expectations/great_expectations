@@ -1492,7 +1492,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = 'CREATE VOLATILE TABLE "{table_name}" AS ({custom_sql}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.sql_engine_dialect.name.lower() in (GESqlDialect.HIVE, b"hive"):
+        elif self.sql_engine_dialect.name.lower() == GESqlDialect.HIVE:
             stmt = "CREATE TEMPORARY TABLE {schema_name}.{table_name} AS {custom_sql}".format(
                 schema_name=schema_name if schema_name is not None else "default",
                 table_name=table_name,
