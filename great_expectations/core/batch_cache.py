@@ -2,8 +2,6 @@ import logging
 from collections import OrderedDict
 from typing import Dict, List, Optional, Union
 
-import pandas as pd
-
 from great_expectations.core.batch import (
     Batch,
     BatchData,
@@ -16,6 +14,15 @@ from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
+
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
 
 
 class BatchCache:
@@ -34,7 +41,7 @@ class BatchCache:
         if batch_list is None:
             batch_list = []
 
-        self._batch_list = {}
+        self._batches = {}
 
         self.load_batch_list(batch_list=batch_list)
         if len(batch_list) > 1:
@@ -48,12 +55,12 @@ class BatchCache:
         return self._execution_engine
 
     @property
-    def batch_list(self) -> Dict[str, Batch]:
-        """Getter for batch_list"""
-        if not isinstance(self._batch_list, OrderedDict):
-            self._batch_list = OrderedDict(self._batch_list)
+    def batches(self) -> Dict[str, Batch]:
+        """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""
+        if not isinstance(self._batches, OrderedDict):
+            self._batches = OrderedDict(self._batches)
 
-        return self._batch_list
+        return self._batches
 
     @property
     def loaded_batch_ids(self) -> List[str]:
@@ -69,7 +76,7 @@ class BatchCache:
         """Getter for active batch"""
         active_batch_id: Optional[str] = self.active_batch_id
         batch: Optional[Batch] = (
-            self.batch_list.get(active_batch_id) if active_batch_id else None
+            None if active_batch_id is None else self.batches.get(active_batch_id)
         )
         return batch
 
@@ -109,7 +116,7 @@ class BatchCache:
             except AssertionError as e:
                 logger.warning(str(e))
 
-            self._batch_list[batch.id] = batch
+            self._batches[batch.id] = batch
             batch_data_dict[batch.id] = batch.data
 
         self._execution_engine.load_batch_data_from_dict(

@@ -81,7 +81,7 @@ validator: Validator = context.get_validator(
 assert validator
 
 # What is the name of the temp_table that was created as part of `get_validator`?
-temp_table_name: str = validator.batch_cache.active_batch.data.selectable.description
+temp_table_name: str = validator.active_batch.data.selectable.description
 client: bigquery.Client = bigquery.Client()
 project: str = client.project
 dataset_ref: bigquery.DatasetReference = bigquery.DatasetReference(

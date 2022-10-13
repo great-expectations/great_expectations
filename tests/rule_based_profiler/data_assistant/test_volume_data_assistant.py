@@ -1455,7 +1455,7 @@ def quentin_explicit_instantiation_result_actual_time(
         component_name="volume_data_assistant",
         persist=False,
     )
-    assert len(validator.batch_cache.batch_list) == 36
+    assert len(validator.batches) == 36
 
     data_assistant_name: str = "test_volume_data_assistant"
 
@@ -1492,7 +1492,7 @@ def quentin_explicit_instantiation_result_frozen_time(
         component_name="volume_data_assistant",
         persist=False,
     )
-    assert len(validator.batch_cache.batch_list) == 36
+    assert len(validator.batches) == 36
 
     data_assistant_name: str = "test_volume_data_assistant"
 
@@ -2117,9 +2117,7 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
     ] = data_assistant_result.metrics_by_domain
 
     batch: Batch
-    expected_batch_ids: List[str] = [
-        batch.id for batch in validator.batch_cache.batch_list.values()
-    ]
+    expected_batch_ids: List[str] = [batch.id for batch in validator.batches.values()]
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     fully_qualified_parameter_name: str

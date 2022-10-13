@@ -35,7 +35,7 @@ class BatchAnonymizer(BaseAnonymizer):
             datasource_name = batch_kwargs.get("datasource")
         if isinstance(batch, Validator):
             expectation_suite_name = batch.expectation_suite_name
-            datasource_name = batch.batch_cache.active_batch_definition.datasource_name
+            datasource_name = batch.active_batch.batch_definition.datasource_name
 
         anonymized_info_dict = {}
 

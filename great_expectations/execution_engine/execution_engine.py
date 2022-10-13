@@ -5,8 +5,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-import pandas as pd
-
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchData,
@@ -29,6 +27,16 @@ from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
+
+
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
 
 
 class NoOpDict:

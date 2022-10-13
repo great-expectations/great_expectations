@@ -121,7 +121,7 @@ validator = context.get_validator(
 )
 
 print(validator.head())
-print(validator.batch_cache.active_batch.data.dataframe.count())  # should be 30,000
+print(validator.active_batch.data.dataframe.count())  # should be 30,000
 
 # assert that the 3 files in `data/` (each 10k lines) are read in as a single dataframe
-assert validator.batch_cache.active_batch.data.dataframe.count() == 30000
+assert validator.active_batch.data.dataframe.count() == 30000
