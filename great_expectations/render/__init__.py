@@ -129,11 +129,11 @@ class RenderedAtomicValue(DictDot):
     def __init__(
         self,
         schema: Optional[dict] = None,
-        header: Optional["RenderedAtomicValue"] = None,
+        header: Optional[RenderedAtomicValue] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        header_row: Optional[List["RenderedAtomicValue"]] = None,
-        table: Optional[List[List["RenderedAtomicValue"]]] = None,
+        header_row: Optional[List[RenderedAtomicValue]] = None,
+        table: Optional[List[List[RenderedAtomicValue]]] = None,
         graph: Optional[dict] = None,
     ) -> None:
         self.schema: Optional[dict] = schema
