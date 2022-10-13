@@ -5,7 +5,7 @@ import pickle
 import warnings
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Iterable, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -59,6 +59,7 @@ try:
 except ImportError:
     storage = None
     service_account = None
+    GoogleAPIError = None
     DefaultCredentialsError = None
     logger.debug(
         "Unable to load GCS connection object; install optional google dependency for support"
@@ -436,6 +437,12 @@ Please check your config."""
             raise ge_exceptions.ExecutionEngineError(
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
+
+    def resolve_metric_bundle(
+        self, metric_fn_bundle
+    ) -> Dict[Tuple[str, str, str], Any]:
+        """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
+        pass  # This method is NO-OP for PandasExecutionEngine (no bundling for direct execution computational backend).
 
     def get_domain_records(
         self,
