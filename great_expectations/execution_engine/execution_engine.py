@@ -23,6 +23,16 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
+
+
 class NoOpDict:
     def __getitem__(self, item):
         return None
@@ -30,6 +40,7 @@ class NoOpDict:
     def __setitem__(self, key, value):
         return None
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def update(self, value):
         return None
 
@@ -162,7 +173,9 @@ class ExecutionEngine(ABC):
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
-                f"Unrecognized batch_spec_default(s): {str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}"
+                f"""Unrecognized batch_spec_default(s): \
+{str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}
+"""
             )
 
         self._batch_spec_defaults = {
