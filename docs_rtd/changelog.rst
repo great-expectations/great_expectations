@@ -4,6 +4,24 @@
 Changelog
 #########
 
+0.15.27
+-----------------
+* [FEATURE] Add logging/warnings to GX Cloud migration process (#6106)
+* [FEATURE] Introduction of updated `gx.get_context()` method that returns correct DataContext-type (#6104)
+* [FEATURE] Contribute StatisticsDataAssistant and GrowthNumericDataAssistant (both experimental)  (#6115)
+* [BUGFIX] add OBJECT_TYPE_NAMES to the JsonSchemaProfiler - issue #6109 (#6110) (thanks @OphelieC)
+* [BUGFIX] Fix example `Set-Based Column Map Expectation` template import (#6134)
+* [BUGFIX] Regression due to `GESqlDialect` `Enum` for Hive (#6149)
+* [DOCS] Support for named snippets in documentation (#6087)
+* [MAINTENANCE] Clean up `test_migrate=True` Cloud migrator output (#6119)
+* [MAINTENANCE] Creation of Hackathon Packages (#4587)
+* [MAINTENANCE] Rename GCP Integration Pipeline (#6121)
+* [MAINTENANCE] Change log levels used in `CloudMigrator` (#6125)
+* [MAINTENANCE] Bump version of `sqlalchemy-redshift` from `0.7.7` to `0.8.8` (#6082)
+* [MAINTENANCE] self_check linting & initial type-checking (#6126)
+* [MAINTENANCE] Update per Clickhouse multiple same aliases Bug (#6128) (thanks @adammrozik)
+* [MAINTENANCE] Only update existing `rendered_content` if rendering does not fail with new `InlineRenderer` failure message (#6091)
+
 0.15.26
 -----------------
 * [FEATURE] Enable sending of `ConfigurationBundle` payload in HTTP request to Cloud backend (#6083)
