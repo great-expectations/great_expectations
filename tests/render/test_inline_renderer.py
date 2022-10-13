@@ -9,9 +9,13 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.data_context import DataContext
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+    RenderedAtomicContent,
+)
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.inline_renderer import InlineRenderer
-from great_expectations.render.types import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
 
@@ -38,7 +42,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             [
                 {
                     "value_type": "StringValueType",
-                    "name": "atomic.prescriptive.summary",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
                         "header": None,
                         "template": "Must have exactly $value rows.",
@@ -51,7 +55,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ],
             [
                 {
-                    "name": "atomic.diagnostic.observed_value",
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
                         "header": None,
                         "params": {},
@@ -70,7 +74,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ),
             [
                 {
-                    "name": "atomic.prescriptive.summary",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
                         "header": None,
                         "params": {
@@ -110,7 +114,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ],
             [
                 {
-                    "name": "atomic.diagnostic.observed_value",
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
                         "header": None,
                         "params": {},
@@ -139,7 +143,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ),
             [
                 {
-                    "name": "atomic.prescriptive.summary",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
                         "header": {
                             "schema": {"type": "StringValueType"},
@@ -195,7 +199,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ],
             [
                 {
-                    "name": "atomic.diagnostic.observed_value",
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
                         "header": None,
                         "header_row": [
@@ -230,7 +234,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ),
             [
                 {
-                    "name": "atomic.prescriptive.summary",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
                         "header": None,
                         "params": {
@@ -269,7 +273,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ],
             [
                 {
-                    "name": "atomic.diagnostic.observed_value",
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
                         "header": None,
                         "params": {},
@@ -294,7 +298,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ),
             [
                 {
-                    "name": "atomic.prescriptive.summary",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
                         "graph": {
                             "autosize": "fit",
@@ -354,7 +358,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ],
             [
                 {
-                    "name": "atomic.diagnostic.observed_value",
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
                     "value": {
                         "graph": {
                             "autosize": "fit",
