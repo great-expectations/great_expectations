@@ -1559,7 +1559,9 @@ class Expectation(metaclass=MetaExpectation):
         expectation_type: str,
         test_diagnostics: List[ExpectationTestDiagnostics],
         registered_renderers: List[str],
-        standard_renderers: List[Enum] = [
+        standard_renderers: List[
+            Union[LegacyRendererType, LegacyDiagnosticRendererType]
+        ] = [
             LegacyRendererType.ANSWER,
             LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
             LegacyDiagnosticRendererType.OBSERVED_VALUE,
