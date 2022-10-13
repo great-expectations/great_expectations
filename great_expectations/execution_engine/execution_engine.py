@@ -31,6 +31,16 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
+
+
 class NoOpDict:
     def __getitem__(self, item):
         return None
