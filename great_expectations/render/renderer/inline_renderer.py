@@ -65,7 +65,7 @@ class InlineRenderer(Renderer):
             expectation_type = render_object.expectation_type
             renderer_type = AtomicRendererType.PRESCRIPTIVE
         elif isinstance(render_object, ExpectationValidationResult):
-            expectation_type = render_object.expectation_config.expectation_type
+            expectation_type = render_object.expectation_config.expectation_type  # type: ignore[union-attr]
             renderer_type = AtomicRendererType.DIAGNOSTIC
         else:
             raise InvalidRenderedContentError(
@@ -98,7 +98,7 @@ class InlineRenderer(Renderer):
         expectation_type: str,
     ) -> List[RenderedAtomicContent]:
         try_renderer_names: List[
-            str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType
+            Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ] = [
             renderer_name
             for renderer_name in renderer_names
@@ -109,7 +109,7 @@ class InlineRenderer(Renderer):
             ]
         ]
 
-        renderer_rendered_content: Optional[RenderedAtomicContent]
+        renderer_rendered_content: RenderedAtomicContent
         rendered_content: List[RenderedAtomicContent] = []
         for renderer_name in try_renderer_names:
             try:
@@ -153,8 +153,8 @@ class InlineRenderer(Renderer):
             str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType
         ],
         expectation_type: str,
-    ) -> Optional[RenderedAtomicContent]:
-        renderer_rendered_content: Optional[RenderedAtomicContent] = None
+    ) -> RenderedAtomicContent:
+        renderer_rendered_content: RenderedAtomicContent
         renderer_tuple: Optional[tuple] = get_renderer_impl(
             object_name=expectation_type, renderer_type=renderer_name
         )
@@ -191,14 +191,14 @@ class InlineRenderer(Renderer):
         ],
     ) -> List[RenderedAtomicContent]:
         new_rendered_content_block_names: List[
-            str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType
+            Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ] = [
             rendered_content_block.name
             for rendered_content_block in new_rendered_content
         ]
 
         existing_rendered_content_block_names: List[
-            str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType
+            Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]
         ] = []
         if existing_rendered_content is not None:
             existing_rendered_content_block_names = [
