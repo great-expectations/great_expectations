@@ -5,8 +5,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-import pandas as pd
-
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchData,
