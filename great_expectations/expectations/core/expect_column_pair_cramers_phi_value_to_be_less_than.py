@@ -1,5 +1,6 @@
 from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     RenderedStringTemplateContent,
@@ -75,7 +76,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -113,7 +114,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         return [rendered_string_template_content]
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,
