@@ -29,7 +29,8 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.render.types import (
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
     RenderedAtomicContent,
     RenderedAtomicContentSchema,
 )
@@ -237,7 +238,7 @@ class ExpectationValidationResult(SerializableDictDot):
             inline_renderer.replace_or_keep_existing_rendered_content(
                 existing_rendered_content=self.rendered_content,
                 new_rendered_content=rendered_content,
-                failed_renderer_name="atomic.diagnostic.failed",
+                failed_renderer_type=AtomicDiagnosticRendererType.FAILED,
             )
         )
 
