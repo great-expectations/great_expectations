@@ -1209,7 +1209,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
     sqlite_db_path=None,
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional["DataContext"] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ):
     """Utility to create datasets for json-formatted tests."""
 
@@ -1389,7 +1389,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional["DataContext"] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
