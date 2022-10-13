@@ -1,32 +1,47 @@
 import logging
 from collections import OrderedDict
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
-from great_expectations.core.batch import Batch, BatchDefinition, BatchMarkers
-from great_expectations.core.batch_data_cache import BatchDataCache
+from great_expectations.core.batch import (
+    Batch,
+    BatchData,
+    BatchDefinition,
+    BatchMarkers,
+    SparkDataFrame,
+)
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
+
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
 
 
 class BatchCache:
     def __init__(
         self,
-        batch_data_cache: BatchDataCache,
+        execution_engine: ExecutionEngine,
         batch_list: Optional[List[Batch]] = None,
     ) -> None:
         """
         Args:
-            batch_data_cache: Cache of BatchData objects ("batch_data" is property of "Batch") loaded.
+            execution_engine: The ExecutionEngine to be used to access cache of loaded BatchData objects.
             batch_list: List of Batch objects available from external source (default is None).
         """
-        self._batch_data_cache = batch_data_cache
+        self._execution_engine = execution_engine
 
         if batch_list is None:
             batch_list = []
 
-        self._batch_list = {}
+        self._batches = {}
 
         self.load_batch_list(batch_list=batch_list)
         if len(batch_list) > 1:
@@ -36,28 +51,32 @@ class BatchCache:
             )
 
     @property
-    def batch_list(self) -> Dict[str, Batch]:
-        """Getter for batch_list"""
-        if not isinstance(self._batch_list, OrderedDict):
-            self._batch_list = OrderedDict(self._batch_list)
+    def execution_engine(self) -> ExecutionEngine:
+        return self._execution_engine
 
-        return self._batch_list
+    @property
+    def batches(self) -> Dict[str, Batch]:
+        """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""
+        if not isinstance(self._batches, OrderedDict):
+            self._batches = OrderedDict(self._batches)
+
+        return self._batches
 
     @property
     def loaded_batch_ids(self) -> List[str]:
-        return self._batch_data_cache.batch_data_ids
+        return self._execution_engine.batch_data_cache.batch_data_ids
 
     @property
     def active_batch_id(self) -> Optional[str]:
         """Getter for active batch id"""
-        return self._batch_data_cache.active_batch_data_id
+        return self._execution_engine.batch_data_cache.active_batch_data_id
 
     @property
     def active_batch(self) -> Optional[Batch]:
         """Getter for active batch"""
         active_batch_id: Optional[str] = self.active_batch_id
         batch: Optional[Batch] = (
-            self.batch_list.get(active_batch_id) if active_batch_id else None
+            None if active_batch_id is None else self.batches.get(active_batch_id)
         )
         return batch
 
@@ -86,6 +105,8 @@ class BatchCache:
             return self.active_batch.batch_definition
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
+        batch_data_dict: Dict[str, Union[BatchData, pd.DataFrame, SparkDataFrame]] = {}
+
         batch: Batch
         for batch in batch_list:
             try:
@@ -95,7 +116,9 @@ class BatchCache:
             except AssertionError as e:
                 logger.warning(str(e))
 
-            self._batch_data_cache.save_batch_data(
-                batch_id=batch.id, batch_data=batch.data
-            )
-            self._batch_list[batch.id] = batch
+            self._batches[batch.id] = batch
+            batch_data_dict[batch.id] = batch.data
+
+        self._execution_engine.load_batch_data_from_dict(
+            batch_data_dict=batch_data_dict
+        )
