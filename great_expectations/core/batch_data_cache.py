@@ -58,5 +58,14 @@ class BatchDataCache:
         """
         Adds the specified batch_data to the cache
         """
+        print(
+            f"\n[ALEX_TEST] [BATCH_DATA_CACHE.SAVE_BATCH_DATA] BATCH_ID-0:\n{batch_id} ; TYPE: {str(type(batch_id))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [BATCH_DATA_CACHE.SAVE_BATCH_DATA] BATCH_DATA:\n{batch_data} ; TYPE: {str(type(batch_data))}"
+        )
         self._batch_data_dict[batch_id] = batch_data
         self._active_batch_data_id = batch_id
+        print(
+            f"\n[ALEX_TEST] [BATCH_DATA_CACHE.SAVE_BATCH_DATA] BATCH_ID-1:\n{batch_id} ; TYPE: {str(type(batch_id))}"
+        )
