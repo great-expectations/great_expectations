@@ -1698,6 +1698,15 @@ def get_context(
         ge_cloud_access_token, ge_cloud_organization_id) are passed in as parameters to get_context(), configured as
         environment variables, or in a .conf file, then get_context() will return a CloudDataContext.
 
+
+    +-----------------------+---------------------+---------------+
+    |  get_context params   |    Env Not Config'd |  Env Config'd |
+    +-----------------------+---------------------+---------------+
+    | ()                    | Local               | Cloud         |
+    | (ge_cloud_mode=True)  | Exception!          | Cloud         |
+    | (ge_cloud_mode=False) | Local               | Local         |
+    +-----------------------+---------------------+---------------+
+    
     TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
 
     Args:
