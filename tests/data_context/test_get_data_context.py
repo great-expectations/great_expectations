@@ -10,9 +10,28 @@ from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import ConfigNotFoundError
 from tests.test_utils import working_directory
 
+GE_CLOUD_PARAMS_ALL = {
+    "ge_cloud_base_url": "http://hello.com",
+    "ge_cloud_organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
+    "ge_cloud_access_token": "i_am_a_token",
+}
+GE_CLOUD_PARAMS_REQUIRED = {
+    "ge_cloud_organization_id": "bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
+    "ge_cloud_access_token": "i_am_a_token",
+}
+
+
+@pytest.fixture()
+def set_up_cloud_envs(monkeypatch):
+    monkeypatch.setenv("GE_CLOUD_BASE_URL", "http://hello.com")
+    monkeypatch.setenv(
+        "GE_CLOUD_ORGANIZATION_ID", "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
+    )
+    monkeypatch.setenv("GE_CLOUD_ACCESS_TOKEN", "i_am_a_token")
+
 
 @pytest.mark.unit
-def test_config_returns_base_context():
+def test_base_context():
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
@@ -32,7 +51,7 @@ def test_config_returns_base_context():
 
 
 @pytest.mark.unit
-def test_empty_call_returns_data_context(tmp_path: pathlib.Path):
+def test_data_context(tmp_path: pathlib.Path):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path_str = str(project_path)
@@ -42,7 +61,7 @@ def test_empty_call_returns_data_context(tmp_path: pathlib.Path):
 
 
 @pytest.mark.unit
-def test_context_root_dir_returns_data_context(
+def test_data_context_root_dir_returns_data_context(
     tmp_path: pathlib.Path,
 ):
     project_path = tmp_path / "empty_data_context"
@@ -54,13 +73,13 @@ def test_context_root_dir_returns_data_context(
 
 
 @pytest.mark.unit
-def test_context_invalid_root_dir_gives_error():
+def test_invalid_root_dir_gives_error():
     with pytest.raises(ConfigNotFoundError):
         gx.get_context(context_root_dir="i/dont/exist")
 
 
 @pytest.mark.unit
-def test_config_returns_base_context_invalid_root_dir():
+def test_base_context_invalid_root_dir():
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
@@ -83,7 +102,7 @@ def test_config_returns_base_context_invalid_root_dir():
 
 
 @pytest.mark.unit
-def test_config_returns_base_context_overrides_yml(tmp_path: pathlib.Path):
+def test_base_context__with_overridden_yml(tmp_path: pathlib.Path):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path_str = str(project_path)
@@ -114,16 +133,12 @@ def test_config_returns_base_context_overrides_yml(tmp_path: pathlib.Path):
     assert isinstance(context, BaseDataContext)
     assert context.expectations_store_name == "new_expectations_store"
 
-@pytest.mark.parametrize("ge_cloud_mode",[True, None])
+
+@pytest.mark.parametrize("ge_cloud_mode", [True, None])
 @pytest.mark.cloud
-def test_cloud_config_in_env_returns_cloud_context(
-    monkeypatch, empty_ge_cloud_data_context_config, ge_cloud_mode
+def test_cloud_context_env(
+    set_up_cloud_envs, empty_ge_cloud_data_context_config, ge_cloud_mode
 ):
-    monkeypatch.setenv("GE_CLOUD_BASE_URL", "http://hello.com")
-    monkeypatch.setenv(
-        "GE_CLOUD_ORGANIZATION_ID", "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
-    )
-    monkeypatch.setenv("GE_CLOUD_ACCESS_TOKEN", "i_am_a_token")
     with mock.patch.object(
         CloudDataContext,
         "retrieve_data_context_config_from_ge_cloud",
@@ -134,6 +149,17 @@ def test_cloud_config_in_env_returns_cloud_context(
             CloudDataContext,
         )
 
+
+@pytest.mark.cloud
+def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_str = str(project_path)
+    gx.data_context.DataContext.create(project_path_str)
+    with working_directory(project_path_str):
+        assert isinstance(gx.get_context(ge_cloud_mode=False), DataContext)
+
+
 @pytest.mark.cloud
 def test_cloud_missing_env_throws_exception(
     monkeypatch, empty_ge_cloud_data_context_config
@@ -142,46 +168,22 @@ def test_cloud_missing_env_throws_exception(
         gx.get_context(ge_cloud_mode=True),
 
 
+@pytest.mark.parametrize("params", [GE_CLOUD_PARAMS_REQUIRED, GE_CLOUD_PARAMS_ALL])
 @pytest.mark.cloud
-def test_only_required_cloud_config_in_param_base_url_in_env_returns_cloud_context(
-    monkeypatch, empty_ge_cloud_data_context_config
-):
-    monkeypatch.setenv("GE_CLOUD_BASE_URL", "http://hello.com")
+def test_cloud_context_params(monkeypatch, empty_ge_cloud_data_context_config, params):
     with mock.patch.object(
         CloudDataContext,
         "retrieve_data_context_config_from_ge_cloud",
         return_value=empty_ge_cloud_data_context_config,
     ):
         assert isinstance(
-            gx.get_context(
-                ge_cloud_organization_id="bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
-                ge_cloud_access_token="i_am_a_token",
-            ),
+            gx.get_context(**params),
             CloudDataContext,
         )
 
 
 @pytest.mark.cloud
-def test_all_cloud_config_in_param_returns_cloud_context(
-    monkeypatch, empty_ge_cloud_data_context_config
-):
-    with mock.patch.object(
-        CloudDataContext,
-        "retrieve_data_context_config_from_ge_cloud",
-        return_value=empty_ge_cloud_data_context_config,
-    ):
-        assert isinstance(
-            gx.get_context(
-                ge_cloud_base_url="http://hello.com",
-                ge_cloud_organization_id="bd20fead-2c31-4392-bcd1-f1e87ad5a79c",
-                ge_cloud_access_token="i_am_a_token",
-            ),
-            CloudDataContext,
-        )
-
-
-@pytest.mark.cloud
-def test_all_cloud_config_in_param_returns_cloud_context_and_in_memory_config_overrides(
+def test_cloud_context_with_in_memory_config_overrides(
     monkeypatch, empty_ge_cloud_data_context_config
 ):
     with mock.patch.object(
