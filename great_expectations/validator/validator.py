@@ -436,7 +436,7 @@ class Validator:
             profiler_result: RuleBasedProfilerResult = profiler.run(
                 variables=None,
                 rules=None,
-                batch_list=list(self._batch_cache.batch_list.values()),
+                batch_list=list(self._batch_cache.batches.values()),
                 batch_request=None,
                 recompute_existing_parameter_values=False,
                 reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
