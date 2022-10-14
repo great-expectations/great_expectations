@@ -49,58 +49,6 @@ def test_base_context():
     )
     assert isinstance(gx.get_context(project_config=config), BaseDataContext)
 
-
-@pytest.mark.unit
-def test_data_context(tmp_path: pathlib.Path):
-    project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
-    project_path_str = str(project_path)
-    gx.data_context.DataContext.create(project_path_str)
-    with working_directory(project_path_str):
-        assert isinstance(gx.get_context(), DataContext)
-
-
-@pytest.mark.unit
-def test_data_context_root_dir_returns_data_context(
-    tmp_path: pathlib.Path,
-):
-    project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
-    project_path_str = str(project_path)
-    gx.data_context.DataContext.create(project_path_str)
-    context_path = project_path / "great_expectations"
-    assert isinstance(gx.get_context(context_root_dir=str(context_path)), DataContext)
-
-
-@pytest.mark.unit
-def test_invalid_root_dir_gives_error():
-    with pytest.raises(ConfigNotFoundError):
-        gx.get_context(context_root_dir="i/dont/exist")
-
-
-@pytest.mark.unit
-def test_base_context_invalid_root_dir():
-    config: DataContextConfig = DataContextConfig(
-        config_version=3.0,
-        plugins_directory=None,
-        evaluation_parameter_store_name="evaluation_parameter_store",
-        expectations_store_name="expectations_store",
-        datasources={},
-        stores={
-            "expectations_store": {"class_name": "ExpectationsStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
-        },
-        validations_store_name="validation_result_store",
-        data_docs_sites={},
-        validation_operators={},
-    )
-    assert isinstance(
-        gx.get_context(project_config=config, context_root_dir="i/dont/exist"),
-        BaseDataContext,
-    )
-
-
 @pytest.mark.unit
 def test_base_context__with_overridden_yml(tmp_path: pathlib.Path):
     project_path = tmp_path / "empty_data_context"
@@ -132,6 +80,55 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path):
     context = gx.get_context(project_config=config, context_root_dir=context_path)
     assert isinstance(context, BaseDataContext)
     assert context.expectations_store_name == "new_expectations_store"
+    
+@pytest.mark.unit
+def test_data_context(tmp_path: pathlib.Path):
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_str = str(project_path)
+    gx.data_context.DataContext.create(project_path_str)
+    with working_directory(project_path_str):
+        assert isinstance(gx.get_context(), DataContext)
+
+
+@pytest.mark.unit
+def test_data_context_root_dir_returns_data_context(
+    tmp_path: pathlib.Path,
+):
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_str = str(project_path)
+    gx.data_context.DataContext.create(project_path_str)
+    context_path = project_path / "great_expectations"
+    assert isinstance(gx.get_context(context_root_dir=str(context_path)), DataContext)
+
+
+
+
+@pytest.mark.unit
+def test_base_context_invalid_root_dir():
+    config: DataContextConfig = DataContextConfig(
+        config_version=3.0,
+        plugins_directory=None,
+        evaluation_parameter_store_name="evaluation_parameter_store",
+        expectations_store_name="expectations_store",
+        datasources={},
+        stores={
+            "expectations_store": {"class_name": "ExpectationsStore"},
+            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "validation_result_store": {"class_name": "ValidationsStore"},
+        },
+        validations_store_name="validation_result_store",
+        data_docs_sites={},
+        validation_operators={},
+    )
+    assert isinstance(
+        gx.get_context(project_config=config, context_root_dir="i/dont/exist"),
+        BaseDataContext,
+    )
+
+
+
 
 
 @pytest.mark.parametrize("ge_cloud_mode", [True, None])
@@ -224,3 +221,9 @@ def test_cloud_context_with_in_memory_config_overrides(
         )
         assert isinstance(context, CloudDataContext)
         assert context.expectations_store_name == "new_expectations_store"
+
+
+@pytest.mark.unit
+def test_invalid_root_dir_gives_error():
+    with pytest.raises(ConfigNotFoundError):
+        gx.get_context(context_root_dir="i/dont/exist")
