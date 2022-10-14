@@ -5,8 +5,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-import pandas as pd
-
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchData,
@@ -14,7 +12,7 @@ from great_expectations.core.batch import (
     BatchSpec,
     SparkDataFrame,
 )
-from great_expectations.core.batch_data_cache import BatchDataCache
+from great_expectations.core.batch_cache import BatchCache
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.execution_engine.bundled_metric_configuration import (
@@ -192,7 +190,7 @@ class ExecutionEngine(ABC):
             if key in self.recognized_batch_spec_defaults
         }
 
-        self._batch_data_cache = BatchDataCache()
+        self._batch_cache = BatchCache(execution_engine=self)
 
         if batch_data_dict is None:
             batch_data_dict = {}
@@ -225,9 +223,9 @@ class ExecutionEngine(ABC):
         return None
 
     @property
-    def batch_data_cache(self) -> BatchDataCache:
-        """Getter for batch_data_cache"""
-        return self._batch_data_cache
+    def batch_cache(self) -> BatchCache:
+        """Getter for batch_cache"""
+        return self._batch_cache
 
     def _load_batch_data_from_dict(
         self, batch_data_dict: Dict[str, Union[BatchData, pd.DataFrame, SparkDataFrame]]
@@ -243,7 +241,7 @@ class ExecutionEngine(ABC):
     def load_batch_data(
         self, batch_id: str, batch_data: Union[BatchData, pd.DataFrame, SparkDataFrame]
     ) -> None:
-        self._batch_data_cache.save_batch_data(batch_id=batch_id, batch_data=batch_data)
+        self._batch_cache.save_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data(
         self,
