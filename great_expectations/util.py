@@ -51,9 +51,9 @@ from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.exceptions import (
+    GeCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
-    GeCloudConfigurationError
 )
 from great_expectations.expectations.registry import _registered_expectations
 
