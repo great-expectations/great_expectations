@@ -49,6 +49,7 @@ def test_base_context():
     )
     assert isinstance(gx.get_context(project_config=config), BaseDataContext)
 
+
 @pytest.mark.unit
 def test_base_context__with_overridden_yml(tmp_path: pathlib.Path):
     project_path = tmp_path / "empty_data_context"
@@ -80,7 +81,8 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path):
     context = gx.get_context(project_config=config, context_root_dir=context_path)
     assert isinstance(context, BaseDataContext)
     assert context.expectations_store_name == "new_expectations_store"
-    
+
+
 @pytest.mark.unit
 def test_data_context(tmp_path: pathlib.Path):
     project_path = tmp_path / "empty_data_context"
@@ -101,8 +103,6 @@ def test_data_context_root_dir_returns_data_context(
     gx.data_context.DataContext.create(project_path_str)
     context_path = project_path / "great_expectations"
     assert isinstance(gx.get_context(context_root_dir=str(context_path)), DataContext)
-
-
 
 
 @pytest.mark.unit
@@ -126,9 +126,6 @@ def test_base_context_invalid_root_dir():
         gx.get_context(project_config=config, context_root_dir="i/dont/exist"),
         BaseDataContext,
     )
-
-
-
 
 
 @pytest.mark.parametrize("ge_cloud_mode", [True, None])
