@@ -1706,7 +1706,7 @@ def get_context(
     | (ge_cloud_mode=True)  | Exception!          | Cloud         |
     | (ge_cloud_mode=False) | Local               | Local         |
     +-----------------------+---------------------+---------------+
-    
+
     TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
 
     Args:
@@ -1743,17 +1743,19 @@ def get_context(
 
     # If config available and not explicitly disabled
     if config_available and ge_cloud_mode != False:
-            return CloudDataContext(
-                project_config=project_config,
-                runtime_environment=runtime_environment,
-                context_root_dir=context_root_dir,
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
-            )
+        return CloudDataContext(
+            project_config=project_config,
+            runtime_environment=runtime_environment,
+            context_root_dir=context_root_dir,
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
 
     if ge_cloud_mode and not config_available:
-        raise GeCloudConfigurationError("GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN")
+        raise GeCloudConfigurationError(
+            "GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
+        )
 
     # Second, check for which type of local
 
