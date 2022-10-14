@@ -20,6 +20,8 @@ RUN git clone --filter=tree:0 --branch ${BRANCH} https://github.com/great-expect
 WORKDIR /great_expectations
 
 FROM build_${SOURCE} AS dev
+# used to filter usage stats coming from CI and dev environments
+ENV GE_DATA_CONTEXT_ID="00000000-0000-0000-0000-00000000e009"
 RUN pip install --no-cache-dir --requirement requirements-dev.txt --constraint constraints-dev.txt
 RUN pip install .
 CMD [ "python", "--version"]
@@ -29,6 +31,3 @@ RUN pip install --no-cache-dir --requirement requirements-dev-test.txt --constra
 
 FROM dev as dev-tools
 RUN pip install --no-cache-dir --requirement requirements-dev-tools.txt --constraint constraints-dev.txt
-
-# used to filter usage stats coming from CI and dev environments
-ENV GE_DATA_CONTEXT_ID="00000000-0000-0000-0000-00000000e009"
