@@ -799,7 +799,7 @@ class Validator:
         metric_configuration: MetricConfiguration
         for metric_configuration in metric_configurations:
             provider_cls, _ = get_metric_provider(
-                metric_configuration.metric_name, self.execution_engine
+                metric_configuration.metric_name, self._execution_engine
             )
 
             self._get_default_domain_kwargs(
@@ -1422,7 +1422,7 @@ aborting graph resolution.
 
     @property
     def loaded_batch_ids(self) -> List[str]:
-        return self.execution_engine.loaded_batch_data_ids
+        return self._execution_engine.loaded_batch_data_ids
 
     @property
     def active_batch(self) -> Optional[Batch]:
@@ -2124,7 +2124,7 @@ set as active.
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
         if domain_kwargs is None:
             domain_kwargs = {
-                "batch_id": self.execution_engine.active_batch_data_id,
+                "batch_id": self._execution_engine.active_batch_data_id,
             }
 
         columns: List[str] = self.get_metric(
@@ -2144,7 +2144,7 @@ set as active.
     ) -> pd.DataFrame:
         if domain_kwargs is None:
             domain_kwargs = {
-                "batch_id": self.execution_engine.active_batch_data_id,
+                "batch_id": self._execution_engine.active_batch_data_id,
             }
 
         data: Any = self.get_metric(
@@ -2160,10 +2160,10 @@ set as active.
 
         df: pd.DataFrame
         if isinstance(
-            self.execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
+            self._execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
         ):
             df = pd.DataFrame(data=data)
-        elif isinstance(self.execution_engine, SparkDFExecutionEngine):
+        elif isinstance(self._execution_engine, SparkDFExecutionEngine):
             rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
             df = pd.DataFrame(data=rows)
         else:
@@ -2282,7 +2282,7 @@ set as active.
             )
 
         self._expectation_suite.execution_engine_type = type(
-            self.execution_engine
+            self._execution_engine
         ).__name__
 
     def _get_runtime_configuration(

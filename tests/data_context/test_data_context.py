@@ -44,11 +44,13 @@ from great_expectations.datasource import (
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
+    AtomicPrescriptiveRendererType,
+    AtomicRendererType,
     RenderedAtomicContent,
     renderedAtomicValueSchema,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
@@ -3089,7 +3091,11 @@ class ExpectSkyToBeColor(TableExpectation):
     args_keys = ("color",)
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.custom_renderer")
+    @renderer(
+        renderer_type=".".join(
+            [AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]
+        )
+    )
     def _prescriptive_renderer_custom(
         cls,
         **kwargs: dict,
@@ -3167,7 +3173,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
 
     expected_rendered_content: List[RenderedAtomicContent] = [
         RenderedAtomicContent(
-            name="atomic.prescriptive.failed",
+            name=AtomicPrescriptiveRendererType.FAILED,
             value=renderedAtomicValueSchema.load(
                 {
                     "template": "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs).",
@@ -3187,7 +3193,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             value_type="StringValueType",
         ),
         RenderedAtomicContent(
-            name="atomic.prescriptive.summary",
+            name=AtomicPrescriptiveRendererType.SUMMARY,
             value=renderedAtomicValueSchema.load(
                 {
                     "schema": {"type": "com.superconductive.rendered.string"},
@@ -3218,7 +3224,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     # we should not update the existing rendered_content.
     legacy_rendered_content = [
         RenderedAtomicContent(
-            name="atomic.prescriptive.custom_renderer",
+            name=".".join([AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]),
             value=renderedAtomicValueSchema.load(
                 {
                     "schema": {"type": "com.superconductive.rendered.string"},
@@ -3238,7 +3244,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             value_type="StringValueType",
         ),
         RenderedAtomicContent(
-            name="atomic.prescriptive.summary",
+            name=AtomicPrescriptiveRendererType.SUMMARY,
             value=renderedAtomicValueSchema.load(
                 {
                     "schema": {"type": "com.superconductive.rendered.string"},
