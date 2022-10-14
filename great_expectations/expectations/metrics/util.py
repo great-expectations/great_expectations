@@ -570,7 +570,7 @@ def column_reflection_fallback(
         if isinstance(selectable, TextClause):
             query: TextClause = selectable
         else:
-            query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
+            query: Select = sa.select([sa.text("*")]).select_from(sa.text(selectable)).limit(1)
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys
