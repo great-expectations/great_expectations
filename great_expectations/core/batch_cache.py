@@ -119,6 +119,6 @@ class BatchCache:
             self._batches[batch.id] = batch
             batch_data_dict[batch.id] = batch.data
 
-        self._execution_engine.load_batch_data_from_dict(
+        self._execution_engine._load_batch_data_from_dict(
             batch_data_dict=batch_data_dict
         )

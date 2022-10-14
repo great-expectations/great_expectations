@@ -15,7 +15,13 @@ from marshmallow import ValidationError
 from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import Batch, BatchDefinition, BatchMarkers
+from great_expectations.core.batch import (
+    Batch,
+    BatchData,
+    BatchDefinition,
+    BatchMarkers,
+    SparkDataFrame,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -1399,17 +1405,22 @@ aborting graph resolution.
         )
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
+        batch_data_dict: Dict[str, Union[BatchData, pd.DataFrame, SparkDataFrame]] = {}
+
+        batch: Batch
         for batch in batch_list:
             try:
                 assert isinstance(
                     batch, Batch
-                ), "batches provided to Validator must be Great Expectations Batch objects"
+                ), "Batch objects provided to BatchCache must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
                 logger.warning(str(e))
-            self._execution_engine.load_batch_data(batch.id, batch.data)
+
             self._batches[batch.id] = batch
-            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
-            # execution_engine. The final active_batch_id will be that of the final batch loaded.
+            batch_data_dict[batch.id] = batch.data
+            self._execution_engine.load_batch_data(
+                batch_id=batch.id, batch_data=batch.data
+            )
             self.active_batch_id = batch.id
 
     @property
@@ -1429,7 +1440,7 @@ aborting graph resolution.
         """Getter for active batch"""
         active_batch_id: Optional[str] = self.active_batch_id
         batch: Optional[Batch] = (
-            self.batches.get(active_batch_id) if active_batch_id else None
+            None if active_batch_id is None else self.batches.get(active_batch_id)
         )
         return batch
 
