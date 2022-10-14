@@ -1742,7 +1742,7 @@ def get_context(
     )
 
     # If config available and not explicitly disabled
-    if config_available and ge_cloud_mode != False:
+    if config_available and ge_cloud_mode is not False:
         return CloudDataContext(
             project_config=project_config,
             runtime_environment=runtime_environment,
