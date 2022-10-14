@@ -28,7 +28,7 @@ class _SourceFactories:
     def add_factory(cls, name: str, fn: SourceFactoryFn) -> None:
         """Add/Register a datasource factory function."""
         print(f"2. Adding {name} factory")
-        prexisting = cls.__sources.pop(name, None)
+        prexisting = cls.__sources.get(name, None)
         if not prexisting:
             cls.__sources[name] = fn
         else:
