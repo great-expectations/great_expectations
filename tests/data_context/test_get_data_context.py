@@ -114,10 +114,10 @@ def test_config_returns_base_context_overrides_yml(tmp_path: pathlib.Path):
     assert isinstance(context, BaseDataContext)
     assert context.expectations_store_name == "new_expectations_store"
 
-
+@pytest.mark.parametrize("ge_cloud_mode",[True, None])
 @pytest.mark.cloud
 def test_cloud_config_in_env_returns_cloud_context(
-    monkeypatch, empty_ge_cloud_data_context_config
+    monkeypatch, empty_ge_cloud_data_context_config, ge_cloud_mode
 ):
     monkeypatch.setenv("GE_CLOUD_BASE_URL", "http://hello.com")
     monkeypatch.setenv(
@@ -130,13 +130,20 @@ def test_cloud_config_in_env_returns_cloud_context(
         return_value=empty_ge_cloud_data_context_config,
     ):
         assert isinstance(
-            gx.get_context(),
+            gx.get_context(ge_cloud_mode=ge_cloud_mode),
             CloudDataContext,
         )
 
+@pytest.mark.cloud
+def test_cloud_missing_env_throws_exception(
+    monkeypatch, empty_ge_cloud_data_context_config
+):
+    with pytest.raises(Exception):
+        gx.get_context(ge_cloud_mode=True),
+
 
 @pytest.mark.cloud
-def test_most_cloud_config_in_param_base_url_in_env_returns_cloud_context(
+def test_only_required_cloud_config_in_param_base_url_in_env_returns_cloud_context(
     monkeypatch, empty_ge_cloud_data_context_config
 ):
     monkeypatch.setenv("GE_CLOUD_BASE_URL", "http://hello.com")

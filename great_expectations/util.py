@@ -53,6 +53,7 @@ from pkg_resources import Distribution
 from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
+    GeCloudConfigurationError
 )
 from great_expectations.expectations.registry import _registered_expectations
 
@@ -1673,7 +1674,7 @@ def get_context(
     ge_cloud_base_url: Optional[str] = None,
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
-    ge_cloud_mode: bool = False,
+    ge_cloud_mode: bool = None,
 ) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
     """
     Method to return the appropriate DataContext depending on parameters and environment.
@@ -1723,29 +1724,37 @@ def get_context(
         DataContext,
     )
 
-    if ge_cloud_mode:
-        config_available = CloudDataContext.is_ge_cloud_config_available(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-        )
-        if not config_available:
-            raise Exception("GE Cloud Mode enabled, but no configuration found.")
-        return CloudDataContext(
-            project_config=project_config,
-            runtime_environment=runtime_environment,
-            context_root_dir=context_root_dir,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-        )
+    # First, check for ge_cloud conditions
 
-    elif project_config is not None:
+    config_available = CloudDataContext.is_ge_cloud_config_available(
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_access_token=ge_cloud_access_token,
+        ge_cloud_organization_id=ge_cloud_organization_id,
+    )
+
+    # If config available and not explicitly disabled
+    if config_available and ge_cloud_mode != False:
+            return CloudDataContext(
+                project_config=project_config,
+                runtime_environment=runtime_environment,
+                context_root_dir=context_root_dir,
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_access_token=ge_cloud_access_token,
+                ge_cloud_organization_id=ge_cloud_organization_id,
+            )
+
+    if ge_cloud_mode and not config_available:
+        raise GeCloudConfigurationError("GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN")
+
+    # Second, check for which type of local
+
+    if project_config is not None:
         return BaseDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
+
     return DataContext(
         context_root_dir=context_root_dir,
         runtime_environment=runtime_environment,

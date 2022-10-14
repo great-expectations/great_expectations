@@ -434,6 +434,11 @@ class GeCloudError(GreatExpectationsError):
     Generic error used to provide additional context around Cloud-specific issues.
     """
 
+class GeCloudConfigurationError(GreatExpectationsError):
+    """
+    Error finding and verifying the required configuration values when preparing to connect to GX Cloud
+    """
+
 
 class DatabaseConnectionError(GreatExpectationsError):
     """Error connecting to a database including during an integration test."""
