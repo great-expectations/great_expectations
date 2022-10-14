@@ -1711,7 +1711,7 @@ def get_context(
         ge_cloud_base_url (str): url for ge_cloud endpoint.
         ge_cloud_access_token (str): access_token for ge_cloud account.
         ge_cloud_organization_id (str): org_id for ge_cloud account.
-        ge_cloud_mode (bool): bool flag to specify whether to run GE in cloud mode (default is False).
+        ge_cloud_mode (bool): bool flag to specify whether to run GE in cloud mode (default is None).
 
     Returns:
         DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
