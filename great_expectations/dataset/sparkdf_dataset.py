@@ -200,6 +200,7 @@ class MetaSparkDFDataset(Dataset):
                 except KeyError:
                     pass
 
+            self.spark_df = self.spark_df.drop(eval_col)
             col_df.unpersist()
 
             return return_obj
