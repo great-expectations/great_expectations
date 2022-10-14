@@ -3,9 +3,9 @@ POC for dynamically bootstrapping context.sources/Datasource with all it's regis
 """
 from __future__ import annotations
 
-from typing import Callable, List
+from typing import Callable, Dict, List
 
-from great_expectations.zep.core import Datasource, PandasDatasource
+from great_expectations.zep.core import Datasource
 
 
 def _camel_to_snake(s: str) -> str:
@@ -16,13 +16,9 @@ def _camel_to_snake(s: str) -> str:
 SourceFactoryFn = Callable[..., Datasource]
 
 
-def _add_pandas(name: str) -> PandasDatasource:
-    return PandasDatasource()
-
-
 class _SourceFactories:
 
-    __sources = {"add_pandas": _add_pandas}
+    __sources: Dict[str, Callable] = {}
 
     @classmethod
     def add_factory(cls, name: str, fn: SourceFactoryFn) -> None:
@@ -63,8 +59,12 @@ class MetaDatasouce(type):
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
 
 
-class PostgresDatasource(metaclass=MetaDatasouce):
+class PandasDatasource(metaclass=MetaDatasouce):
     pass
+
+
+# class PostgresDatasource(metaclass=MetaDatasouce):
+#     pass
 
 
 class DataContext:
@@ -95,4 +95,4 @@ def get_context() -> DataContext:
 if __name__ == "__main__":
     context = get_context()
     context.sources.add_pandas("taxi")
-    context.sources.add_postgres("taxi_pg")
+    # context.sources.add_postgres("taxi_pg")
