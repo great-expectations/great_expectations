@@ -30,7 +30,7 @@ class _SourceFactories:
         print(f"2. Adding {name} factory")
         prexisting = cls.__sources.get(name, None)
         if not prexisting:
-            cls.__sources[name] = fn
+            cls.__sources[name] = fn  # type: ignore[assignment]
         else:
             raise ValueError(f"{name} already exists")
 
