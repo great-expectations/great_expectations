@@ -566,8 +566,14 @@ class Batch(SerializableDictDot):
         self._batch_kwargs = batch_kwargs or BatchKwargs()
 
     @property
-    def data(self):
+    def data(self) -> Union[BatchData, pd.DataFrame, SparkDataFrame]:
+        """Getter for Batch data"""
         return self._data
+
+    @data.setter
+    def data(self, value: Union[BatchData, pd.DataFrame, SparkDataFrame]) -> None:
+        """Setter for Batch data"""
+        self._data = value
 
     @property
     def batch_request(self):

@@ -141,10 +141,9 @@ class Validator:
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
 
-        self._metric_computation_handler = MetricComputationHandler(
-            execution_engine=execution_engine,
-            show_progress_bars=self._determine_progress_bars(),
-        )
+        self._show_progress_bars = self._determine_progress_bars()
+
+        self.load_batch_list(batch_list=batches)
 
         self.interactive_evaluation = interactive_evaluation
         self._initialize_expectations(
@@ -1173,6 +1172,44 @@ class Validator:
             remove_multiple_matches=remove_multiple_matches,
             ge_cloud_id=ge_cloud_id,
         )
+
+    def load_batch_list(self, batch_list: List[Batch]) -> None:
+        self._execution_engine.batch_cache.load_batch_list(batch_list=batch_list)
+
+    @property
+    def batches(self) -> Dict[str, Batch]:
+        """Getter for dictionary of Batch objects (convenience property)"""
+        return self._execution_engine.batch_cache.batches
+
+    @property
+    def loaded_batch_ids(self) -> List[str]:
+        """Getter for IDs of loaded Batch objects (convenience property)"""
+        return self._execution_engine.batch_cache.loaded_batch_ids
+
+    @property
+    def active_batch(self) -> Optional[Batch]:
+        """Getter for active Batch (convenience property)"""
+        return self._execution_engine.batch_cache.active_batch
+
+    @property
+    def active_batch_spec(self) -> Optional[BatchSpec]:
+        """Getter for batch_spec of active Batch (convenience property)"""
+        return self._execution_engine.batch_cache.active_batch_spec
+
+    @property
+    def active_batch_id(self) -> Optional[str]:
+        """Getter for batch_id of active Batch (convenience property)"""
+        return self._execution_engine.batch_cache.active_batch_id
+
+    @property
+    def active_batch_markers(self) -> Optional[BatchMarkers]:
+        """Getter for batch_markers of active Batch (convenience property)"""
+        return self._execution_engine.batch_cache.active_batch_markers
+
+    @property
+    def active_batch_definition(self) -> Optional[BatchDefinition]:
+        """Getter for batch_definition of active Batch (convenience property)"""
+        return self._execution_engine.batch_cache.active_batch_definition
 
     def discard_failing_expectations(self) -> None:
         """Removes any expectations from the validator where the validation has failed"""

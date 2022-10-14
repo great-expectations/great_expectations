@@ -1,42 +1,34 @@
 import logging
 from collections import OrderedDict
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchData,
     BatchDefinition,
     BatchMarkers,
-    SparkDataFrame,
 )
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 
 class BatchCache:
     def __init__(
         self,
-        execution_engine: ExecutionEngine,
+        execution_engine: "ExecutionEngine",  # noqa: F821
         batch_list: Optional[List[Batch]] = None,
     ) -> None:
         """
         Args:
-            execution_engine: The ExecutionEngine to be used to access cache of loaded BatchData objects.
+            execution_engine: The ExecutionEngine to be used to access cache of loaded Batch objects.
             batch_list: List of Batch objects available from external source (default is None).
         """
         self._execution_engine = execution_engine
+
+        self._active_batch_id = None
 
         if batch_list is None:
             batch_list = []
@@ -51,7 +43,7 @@ class BatchCache:
             )
 
     @property
-    def execution_engine(self) -> ExecutionEngine:
+    def execution_engine(self) -> "ExecutionEngine":  # noqa: F821
         return self._execution_engine
 
     @property
@@ -64,12 +56,30 @@ class BatchCache:
 
     @property
     def loaded_batch_ids(self) -> List[str]:
-        return self._execution_engine.batch_data_cache.batch_data_ids
+        return list(self.batches.keys())
 
     @property
     def active_batch_id(self) -> Optional[str]:
-        """Getter for active batch id"""
-        return self._execution_engine.batch_data_cache.active_batch_data_id
+        """The batch id for the default batch data.
+
+        When a specific Batch objec is unavailable, then the data associated with the active_batch_id will be used.
+        """
+        if self._active_batch_id is not None:
+            return self._active_batch_id
+
+        if len(self.batches) == 1:
+            return list(self.batches.keys())[0]
+
+        return None
+
+    @active_batch_id.setter
+    def active_batch_id(self, batch_id: str) -> None:
+        if batch_id in self.batches.keys():
+            self._active_batch_id = batch_id
+        else:
+            raise ge_exceptions.InvalidBatchIdError(
+                f"Unable to set active_batch_data_id to {batch_id}.  The data may not be loaded."
+            )
 
     @property
     def active_batch(self) -> Optional[Batch]:
@@ -105,7 +115,8 @@ class BatchCache:
             return self.active_batch.batch_definition
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
-        batch_data_dict: Dict[str, Union[BatchData, pd.DataFrame, SparkDataFrame]] = {}
+        if batch_list is None:
+            batch_list = []
 
         batch: Batch
         for batch in batch_list:
@@ -117,8 +128,15 @@ class BatchCache:
                 logger.warning(str(e))
 
             self._batches[batch.id] = batch
-            batch_data_dict[batch.id] = batch.data
+            self._execution_engine.load_batch_data(
+                batch_id=batch.id, batch_data=batch.data
+            )
 
-        self._execution_engine.load_batch_data_from_dict(
-            batch_data_dict=batch_data_dict
-        )
+    def save_batch_data(self, batch_id: str, batch_data: BatchData) -> None:
+        """
+        Updates the data for the specified Batch in the cache
+        """
+        if batch_id not in self._batches:
+            self._batches[batch_id] = Batch(data=batch_data)
+
+        self._batches[batch_id].data = batch_data
