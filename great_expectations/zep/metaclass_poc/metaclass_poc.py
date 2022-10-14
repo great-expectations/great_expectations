@@ -57,7 +57,7 @@ class MetaDatasouce(type):
             )  # should this return `super().__new__()` instead?
 
         sources = _SourceFactories()
-        factory_name = f"add_{_camel_to_snake(cls_name)}"
+        factory_name = f"add_{_camel_to_snake(cls_name)}".removesuffix("_datasource")
         sources.add_factory(factory_name, _datasource_factory)
 
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
@@ -95,4 +95,4 @@ def get_context() -> DataContext:
 if __name__ == "__main__":
     context = get_context()
     context.sources.add_pandas("taxi")
-    context.sources.add_postgres_datasource("taxi_pg")
+    context.sources.add_postgres("taxi_pg")
