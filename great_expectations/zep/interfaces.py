@@ -1,4 +1,6 @@
-from typing import List, Protocol, Union
+from typing import List, Union
+
+from typing_extensions import Protocol
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine import ExecutionEngine
