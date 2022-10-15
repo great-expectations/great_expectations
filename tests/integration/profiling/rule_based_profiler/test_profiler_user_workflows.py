@@ -1186,6 +1186,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             component_name="profiler",
             persist=False,
         )
+        assert len(validator.batches) == 1
 
         custom_profiler_config = RuleBasedProfilerConfig(
             name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
@@ -1234,19 +1235,19 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         assert result.success
         assert result.expectation_config["kwargs"] == {
             "column": "fare_amount",
-            "min_value": -52.0,
+            "min_value": -21.0,
             "strict_min": False,
             "mostly": 1.0,
             "result_format": "SUMMARY",
             "include_config": True,
             "auto": True,
             "profiler_config": custom_profiler_config.to_json_dict(),
-            "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+            "batch_id": "0808e185a52825d22356de2fe00a8f5f",
         }
 
         result = validator.expect_column_values_to_be_between(
             column=column_name,
-            min_value=-52.0,
+            min_value=-21.0,
             mostly=1.0,
             result_format="SUMMARY",
             include_config=True,
@@ -1255,12 +1256,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         assert result.success
         assert result.expectation_config["kwargs"] == {
             "column": "fare_amount",
-            "min_value": -52.0,
+            "min_value": -21.0,
             "mostly": 1.0,
             "result_format": "SUMMARY",
             "include_config": True,
             "auto": False,
-            "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+            "batch_id": "0808e185a52825d22356de2fe00a8f5f",
         }
 
 
@@ -1437,6 +1438,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             component_name="profiler",
             persist=False,
         )
+        assert len(validator.batches) == 1
 
         custom_profiler_config = RuleBasedProfilerConfig(
             name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
@@ -1494,19 +1496,19 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         assert result.success
         assert result.expectation_config["kwargs"] == {
             "column": "fare_amount",
-            "min_value": -52.0,
+            "min_value": -21.0,
             "strict_min": False,
             "mostly": 1.0,
             "result_format": "SUMMARY",
             "include_config": True,
             "auto": True,
             "profiler_config": custom_profiler_config.to_json_dict(),
-            "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+            "batch_id": "0808e185a52825d22356de2fe00a8f5f",
         }
 
         result = validator.expect_column_values_to_be_between(
             column=column_name,
-            min_value=-52.0,
+            min_value=-21.0,
             mostly=1.0,
             result_format="SUMMARY",
             include_config=True,
@@ -1515,12 +1517,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         assert result.success
         assert result.expectation_config["kwargs"] == {
             "column": "fare_amount",
-            "min_value": -52.0,
+            "min_value": -21.0,
             "mostly": 1.0,
             "result_format": "SUMMARY",
             "include_config": True,
             "auto": False,
-            "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+            "batch_id": "0808e185a52825d22356de2fe00a8f5f",
         }
     finally:
         expectation_impl.default_kwarg_values[
