@@ -114,6 +114,10 @@ class BatchCache:
         else:
             return self.active_batch.batch_definition
 
+    def reset(self) -> None:
+        """Clears Batch cache"""
+        self._batches = {}
+
     def load_batch_list(self, batch_list: List[Batch]) -> None:
         if batch_list is None:
             batch_list = []
@@ -138,5 +142,7 @@ class BatchCache:
         """
         if batch_id not in self._batches:
             self._batches[batch_id] = Batch(data=batch_data)
+        else:
+            self._batches[batch_id].data = batch_data
 
-        self._batches[batch_id].data = batch_data
+        self.active_batch_id = batch_id

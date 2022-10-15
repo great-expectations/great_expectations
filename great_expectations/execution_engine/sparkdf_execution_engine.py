@@ -460,7 +460,7 @@ illegal.  Please check your config."""
         else:
             if batch_id in self.batch_cache.batches:
                 data = cast(
-                    SparkDFBatchData, self.batch_cache.batches[batch_id]
+                    SparkDFBatchData, self.batch_cache.batches[batch_id].data
                 ).dataframe
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")

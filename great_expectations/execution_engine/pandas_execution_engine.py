@@ -488,7 +488,7 @@ not {batch_spec.__class__.__name__}"""
         else:
             if batch_id in self.batch_cache.batches:
                 data = cast(
-                    PandasBatchData, self.batch_cache.batches[batch_id]
+                    PandasBatchData, self.batch_cache.batches[batch_id].data
                 ).dataframe
             else:
                 raise ge_exceptions.ValidationError(

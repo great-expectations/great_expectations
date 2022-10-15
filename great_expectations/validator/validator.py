@@ -143,7 +143,9 @@ class Validator:
         """
 
         self._data_context = data_context
+
         self._execution_engine = execution_engine
+
         self._expose_dataframe_methods = False
 
         self._show_progress_bars = self._determine_progress_bars()
