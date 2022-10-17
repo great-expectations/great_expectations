@@ -29,6 +29,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
@@ -135,10 +136,6 @@ class Validator:
             batches: The batches for which to validate.
             include_rendered_content: Whether or not to include rendered_content in the ExpectationValidationResult.
         """
-        self._batch_cache = BatchCache(
-            execution_engine=execution_engine, batch_list=batches
-        )
-
         self._data_context = data_context
 
         execution_engine.batch_manager.reset_batch_cache()
@@ -181,21 +178,6 @@ class Validator:
         return self._metrics_calculator
 
     @property
-    def batch_cache(self) -> BatchCache:
-        """Returns the "BatchCache" object being used by the Validator to store "Batch" objects in use."""
-        return self._batch_cache
-
-    @property
-    def batches(self) -> Dict[str, Batch]:
-        """Convenience property that returns ordered dictionary of "Batch" objects in use (with batch_id as key)."""
-        return self._batch_cache.batches
-
-    @property
-    def active_batch(self) -> Batch:
-        """Convenience property that returns most recent ("active") "Batch" objects in use."""
-        return self._batch_cache.active_batch
-
-    @property
     def data_context(self) -> Optional["DataContext"]:  # noqa: F821
         """Reference to DataContext object handle."""
         return self._data_context
@@ -210,11 +192,84 @@ class Validator:
         """The "expose_dataframe_methods" setter property."""
         self._expose_dataframe_methods = value
 
+    @property
+    def loaded_batch_ids(self) -> List[str]:
+        """Getter for IDs of loaded Batch objects (convenience property)"""
+        return self._execution_engine.batch_manager.loaded_batch_ids
+
+    @property
+    def active_batch_data(self) -> Optional[BatchData]:
+        """Getter for BatchData object from the currently-active Batch object (convenience property)."""
+        return self._execution_engine.batch_manager.active_batch_data
+
+    @property
+    def batch_cache(self) -> Dict[str, Batch]:
+        """Getter for dictionary of Batch objects (convenience property)"""
+        return self._execution_engine.batch_manager.batch_cache
+
+    @property
+    def batches(self) -> Dict[str, Batch]:
+        """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
+        return self.batch_cache
+
+    @property
+    def active_batch_id(self) -> Optional[str]:
+        """Getter for batch_id of active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch_id
+
+    @property
+    def active_batch(self) -> Optional[Batch]:
+        """Getter for active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch
+
+    @property
+    def active_batch_spec(self) -> Optional[BatchSpec]:
+        """Getter for batch_spec of active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch_spec
+
+    @property
+    def active_batch_markers(self) -> Optional[BatchMarkers]:
+        """Getter for batch_markers of active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch_markers
+
+    @property
+    def active_batch_definition(self) -> Optional[BatchDefinition]:
+        """Getter for batch_definition of active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch_definition
+
+    @property
+    def expectation_suite(self) -> ExpectationSuite:
+        return self._expectation_suite
+
+    @expectation_suite.setter
+    def expectation_suite(self, value: ExpectationSuite) -> None:
+        self._initialize_expectations(
+            expectation_suite=value,
+            expectation_suite_name=value.expectation_suite_name,
+        )
+
+    @property
+    def expectation_suite_name(self) -> str:
+        """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
+        return self._expectation_suite.expectation_suite_name
+
+    @expectation_suite_name.setter
+    def expectation_suite_name(self, expectation_suite_name: str) -> None:
+        """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
+        self._expectation_suite.expectation_suite_name = expectation_suite_name
+
+    def load_batch_list(self, batch_list: List[Batch]) -> None:
+        self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
+
     def get_metric(
         self,
         metric: MetricConfiguration,
     ) -> Any:
-        """Convenience method that returns the value of the requested metric."""
+        """
+        Convenience method that returns the value of the requested metric.
+
+        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+        """
         return self._metrics_calculator.get_metric(metric=metric)
 
     def get_metrics(
@@ -223,6 +278,8 @@ class Validator:
     ) -> Dict[str, Any]:
         """
         Convenience method that resolves requested metrics (specified as dictionary, keyed by MetricConfiguration ID).
+
+        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
 
         Args:
             metrics: Dictionary of desired metrics to be resolved; metric_name is key and MetricConfiguration is value.
@@ -239,6 +296,8 @@ class Validator:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
+        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
 
@@ -252,6 +311,8 @@ class Validator:
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
         """
         Convenience method to obtain Batch columns.
+
+        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
         """
         return self._metrics_calculator.columns(domain_kwargs=domain_kwargs)
 
@@ -263,6 +324,8 @@ class Validator:
     ) -> pd.DataFrame:
         """
         Convenience method to obtain Batch first few rows.
+
+        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
         """
         return self._metrics_calculator.head(
             n_rows=n_rows, domain_kwargs=domain_kwargs, fetch_all=fetch_all
@@ -499,7 +562,7 @@ class Validator:
             profiler_result: RuleBasedProfilerResult = profiler.run(
                 variables=None,
                 rules=None,
-                batch_list=list(self._batch_cache.batches.values()),
+                batch_list=list(self.batch_cache.values()),
                 batch_request=None,
                 recompute_existing_parameter_values=False,
                 reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
@@ -974,9 +1037,7 @@ class Validator:
                 raise InvalidExpectationConfigurationError(str(e))
 
             evaluated_config = copy.deepcopy(configuration)
-            evaluated_config.kwargs.update(
-                {"batch_id": self._batch_cache.active_batch_id}
-            )
+            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: dict = (
@@ -1177,54 +1238,6 @@ class Validator:
             remove_multiple_matches=remove_multiple_matches,
             ge_cloud_id=ge_cloud_id,
         )
-
-    def load_batch_list(self, batch_list: List[Batch]) -> None:
-        self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
-
-    @property
-    def loaded_batch_ids(self) -> List[str]:
-        """Getter for IDs of loaded Batch objects (convenience property)"""
-        return self._execution_engine.batch_manager.loaded_batch_ids
-
-    @property
-    def active_batch_data(self) -> Optional[BatchData]:
-        """Getter for BatchData object from the currently-active Batch object (convenience property)."""
-        return self._execution_engine.batch_manager.active_batch_data
-
-    @property
-    def batche_cache(self) -> Dict[str, Batch]:
-        """Getter for dictionary of Batch objects (convenience property)"""
-        return self._execution_engine.batch_manager.batch_cache
-
-    @property
-    def batches(self) -> Dict[str, Batch]:
-        """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
-        return self.batche_cache
-
-    @property
-    def active_batch_id(self) -> Optional[str]:
-        """Getter for batch_id of active Batch (convenience property)"""
-        return self._execution_engine.batch_manager.active_batch_id
-
-    @property
-    def active_batch(self) -> Optional[Batch]:
-        """Getter for active Batch (convenience property)"""
-        return self._execution_engine.batch_manager.active_batch
-
-    @property
-    def active_batch_spec(self) -> Optional[BatchSpec]:
-        """Getter for batch_spec of active Batch (convenience property)"""
-        return self._execution_engine.batch_manager.active_batch_spec
-
-    @property
-    def active_batch_markers(self) -> Optional[BatchMarkers]:
-        """Getter for batch_markers of active Batch (convenience property)"""
-        return self._execution_engine.batch_manager.active_batch_markers
-
-    @property
-    def active_batch_definition(self) -> Optional[BatchDefinition]:
-        """Getter for batch_definition of active Batch (convenience property)"""
-        return self._execution_engine.batch_manager.active_batch_definition
 
     def discard_failing_expectations(self) -> None:
         """Removes any expectations from the validator where the validation has failed"""
@@ -1730,9 +1743,9 @@ class Validator:
                     "great_expectations_version": ge_version,
                     "expectation_suite_name": expectation_suite_name,
                     "run_id": run_id,
-                    "batch_spec": self._batch_cache.active_batch_spec,
-                    "batch_markers": self._batch_cache.active_batch_markers,
-                    "active_batch_definition": self._batch_cache.active_batch_definition,
+                    "batch_spec": self.active_batch_spec,
+                    "batch_markers": self.active_batch_markers,
+                    "active_batch_definition": self.active_batch_definition,
                     "validation_time": validation_time,
                     "checkpoint_name": checkpoint_name,
                 },
@@ -1807,7 +1820,7 @@ class Validator:
         if batch_markers is None:
             batch_markers = self.active_batch_markers
         if batch_definition is None:
-            batch_definition = self._batch_cache.active_batch_definition
+            batch_definition = self.active_batch_definition
         self._expectation_suite.add_citation(
             comment,
             batch_spec=batch_spec,
@@ -1815,27 +1828,6 @@ class Validator:
             batch_definition=batch_definition,
             citation_date=citation_date,
         )
-
-    @property
-    def expectation_suite(self) -> ExpectationSuite:
-        return self._expectation_suite
-
-    @expectation_suite.setter
-    def expectation_suite(self, value: ExpectationSuite) -> None:
-        self._initialize_expectations(
-            expectation_suite=value,
-            expectation_suite_name=value.expectation_suite_name,
-        )
-
-    @property
-    def expectation_suite_name(self) -> str:
-        """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
-        return self._expectation_suite.expectation_suite_name
-
-    @expectation_suite_name.setter
-    def expectation_suite_name(self, expectation_suite_name: str) -> None:
-        """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
-        self._expectation_suite.expectation_suite_name = expectation_suite_name
 
     def test_expectation_function(
         self, function: Callable, *args, **kwargs
@@ -1865,58 +1857,6 @@ class Validator:
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
 
-    def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
-        if domain_kwargs is None:
-            domain_kwargs = {
-                "batch_id": self._execution_engine.batch_manager.active_batch_id,
-            }
-
-        columns: List[str] = self.get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs=domain_kwargs,
-            )
-        )
-
-        return columns
-
-    def head(
-        self,
-        n_rows: int = 5,
-        domain_kwargs: Optional[Dict[str, Any]] = None,
-        fetch_all: bool = False,
-    ) -> pd.DataFrame:
-        if domain_kwargs is None:
-            domain_kwargs = {
-                "batch_id": self._execution_engine.batch_manager.active_batch_id,
-            }
-
-        data: Any = self.get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.head",
-                metric_domain_kwargs=domain_kwargs,
-                metric_value_kwargs={
-                    "n_rows": n_rows,
-                    "fetch_all": fetch_all,
-                },
-            )
-        )
-
-        df: pd.DataFrame
-        if isinstance(
-            self._execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
-        ):
-            df = pd.DataFrame(data=data)
-        elif isinstance(self._execution_engine, SparkDFExecutionEngine):
-            rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
-            df = pd.DataFrame(data=rows)
-        else:
-            raise GreatExpectationsError(
-                "Unsupported or unknown ExecutionEngine type encountered in Validator class."
-            )
-
-        return df.reset_index(drop=True, inplace=False)
-
     @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
@@ -1941,21 +1881,6 @@ class Validator:
                         unmet_dependency.add(edge.left)
 
         return maybe_ready - unmet_dependency, unmet_dependency
-
-    @staticmethod
-    def _resolve_metrics(
-        execution_engine: ExecutionEngine,
-        metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict[Tuple[str, str, str], Any] = None,
-        runtime_configuration: dict = None,
-    ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
-        """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
-        resolved"""
-        return execution_engine.resolve_metrics(
-            metrics_to_resolve=metrics_to_resolve,
-            metrics=metrics,
-            runtime_configuration=runtime_configuration,
-        )
 
     def _initialize_expectations(
         self,

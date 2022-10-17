@@ -145,8 +145,7 @@ assert len(validator.batches) == 36
 
 row_count = validator.get_metric(
     MetricConfiguration(
-        "table.row_count",
-        metric_domain_kwargs={"batch_id": validator.active_batch.id},
+        "table.row_count", metric_domain_kwargs={"batch_id": validator.active_batch_id}
     )
 )
 assert row_count == 10000

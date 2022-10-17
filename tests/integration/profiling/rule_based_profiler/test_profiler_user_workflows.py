@@ -593,7 +593,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     metric_configuration_arguments: Dict[str, Any] = {
         "metric_name": "table.row_count",
         "metric_domain_kwargs": {
-            "batch_id": validator_latest.active_batch.id,
+            "batch_id": validator_latest.active_batch_id,
         },
         "metric_value_kwargs": None,
         "metric_dependencies": None,

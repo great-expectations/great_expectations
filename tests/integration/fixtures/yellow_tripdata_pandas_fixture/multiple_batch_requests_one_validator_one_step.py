@@ -40,8 +40,8 @@ validator: Validator = context.get_validator(
     batch_request_list=[jan_batch_request, feb_batch_request, march_batch_request],
     expectation_suite=suite,
 )
-assert validator.active_batch.batch_definition.batch_identifiers["month"] == "03"
-assert validator.active_batch.batch_definition.batch_identifiers["year"] == "2019"
+assert validator.active_batch_definition.batch_identifiers["month"] == "03"
+assert validator.active_batch_definition.batch_identifiers["year"] == "2019"
 
 # Get the list of all batches contained by the Validator for use in the BatchFileter
 total_batch_definition_list: List = [

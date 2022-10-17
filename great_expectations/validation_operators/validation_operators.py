@@ -24,7 +24,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
-from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -341,9 +340,7 @@ class ActionListValidationOperator(ValidationOperator):
             for item in assets_to_validate:
                 batch = self._build_batch_from_item(item)
 
-                if isinstance(batch, Validator):
-                    batch_identifier = batch.active_batch.id
-                elif hasattr(batch, "active_batch_id"):
+                if hasattr(batch, "active_batch_id"):
                     batch_identifier = batch.active_batch_id
                 else:
                     batch_identifier = batch.batch_id
@@ -449,9 +446,7 @@ class ActionListValidationOperator(ValidationOperator):
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
             logger.debug(f"Processing validation action with name {action['name']}")
 
-            if isinstance(batch, Validator):
-                batch_identifier = batch.active_batch.id
-            elif hasattr(batch, "active_batch_id"):
+            if hasattr(batch, "active_batch_id"):
                 batch_identifier = batch.active_batch_id
             else:
                 batch_identifier = batch.batch_id
