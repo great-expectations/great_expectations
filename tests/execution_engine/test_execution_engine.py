@@ -4,9 +4,8 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchMarkers
+from great_expectations.core.batch import BatchData, BatchMarkers
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.execution_engine.execution_engine import BatchData
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,

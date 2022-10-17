@@ -4,6 +4,80 @@
 Changelog
 #########
 
+0.15.27
+-----------------
+* [FEATURE] Add logging/warnings to GX Cloud migration process (#6106)
+* [FEATURE] Introduction of updated `gx.get_context()` method that returns correct DataContext-type (#6104)
+* [FEATURE] Contribute StatisticsDataAssistant and GrowthNumericDataAssistant (both experimental)  (#6115)
+* [BUGFIX] add OBJECT_TYPE_NAMES to the JsonSchemaProfiler - issue #6109 (#6110) (thanks @OphelieC)
+* [BUGFIX] Fix example `Set-Based Column Map Expectation` template import (#6134)
+* [BUGFIX] Regression due to `GESqlDialect` `Enum` for Hive (#6149)
+* [DOCS] Support for named snippets in documentation (#6087)
+* [MAINTENANCE] Clean up `test_migrate=True` Cloud migrator output (#6119)
+* [MAINTENANCE] Creation of Hackathon Packages (#4587)
+* [MAINTENANCE] Rename GCP Integration Pipeline (#6121)
+* [MAINTENANCE] Change log levels used in `CloudMigrator` (#6125)
+* [MAINTENANCE] Bump version of `sqlalchemy-redshift` from `0.7.7` to `0.8.8` (#6082)
+* [MAINTENANCE] self_check linting & initial type-checking (#6126)
+* [MAINTENANCE] Update per Clickhouse multiple same aliases Bug (#6128) (thanks @adammrozik)
+* [MAINTENANCE] Only update existing `rendered_content` if rendering does not fail with new `InlineRenderer` failure message (#6091)
+
+0.15.26
+-----------------
+* [FEATURE] Enable sending of `ConfigurationBundle` payload in HTTP request to Cloud backend (#6083)
+* [FEATURE] Send user validation results to Cloud backend during migration (#6102)
+* [BUGFIX] Fix bigquery crash when using "in" with a boolean column (#6071)
+* [BUGFIX] Fix serialization error when rendering kl_divergence (#6084) (thanks @roblim)
+* [BUGFIX] Enable top-level parameters in Data Assistants accessed via dispatcher (#6077)
+* [BUGFIX] Patch issue around `DataContext.save_datasource` not sending `class_name` in result payload (#6108)
+* [DOCS] DOC-377 add missing dictionary in configured asset datasource portion of Pandas and Spark configuration guides (#6081)
+* [DOCS] DOC-376 finalize definition for Data Assistants in technical terms (#6080)
+* [DOCS] Update `docs-integration` test due to new `whole_table` splitter behavior (#6103)
+* [DOCS] How to create a Custom Multicolumn Map Expectation (#6101)
+* [MAINTENANCE] Patch broken Cloud E2E test (#6079)
+* [MAINTENANCE] Bundle data context config and other artifacts for migration (#6068)
+* [MAINTENANCE] Add datasources to ConfigurationBundle (#6092)
+* [MAINTENANCE] Remove unused config files from root of GX repo (#6090)
+* [MAINTENANCE] Add `data_context_id` property to `ConfigurationBundle` (#6094)
+* [MAINTENANCE] Move all Cloud migrator logic to separate directory (#6100)
+* [MAINTENANCE] Update aloglia scripts for new fields and replica indices (#6049) (thanks @winrp17)
+* [MAINTENANCE] initial Datasource typings (#6099)
+* [MAINTENANCE] Data context migrate to cloud event (#6095)
+* [MAINTENANCE] Bundling tests with empty context configs (#6107)
+* [MAINTENANCE] Fixing a typo (#6113)
+
+0.15.25
+-----------------
+* [FEATURE] Since value set in expectation kwargs is list of strings, do not emit expect_column_values_to_be_in_set for datetime valued columns (#6046)
+* [FEATURE] add failed expectations list to slack message (#5812) (thanks @itaise)
+* [FEATURE] Enable only ExactNumericRangeEstimator and QuantilesNumericRangeEstimator in "datetime_columns_rule" of OnboardingDataAssistant (#6063)
+* [BUGFIX] numpy typing behind `if TYPE_CHECKING` (#6076)
+* [DOCS] Update "How to create an Expectation Suite with the Onboarding Data Assistant" (#6050)
+* [DOCS] How to get one or more Batches of data from a configured Datasource (#6043)
+* [DOCS] DOC-298 Data Assistant technical term page (#6057)
+* [DOCS] Update OnboardingDataAssistant documentation (#6059)
+* [MAINTENANCE] Clean up of DataAssistant tests that depend on Jupyter notebooks (#6039)
+* [MAINTENANCE] AbstractDataContext.datasource_save() test simplifications (#6052)
+* [MAINTENANCE] Rough architecture for cloud migration tool (#6054)
+* [MAINTENANCE] Include git commit info when building docker image. (#6060)
+* [MAINTENANCE] Allow `CloudDataContext` to retrieve and initialize its own project config (#6006)
+* [MAINTENANCE] Removing Jupyter notebook-based tests for DataAssistants (#6062)
+* [MAINTENANCE] pinned dremio, fixed linting (#6067)
+* [MAINTENANCE] usage-stats, & utils.py typing (#5925)
+* [MAINTENANCE] Refactor external HTTP request logic into a `Session` factory function (#6007)
+* [MAINTENANCE] Remove tag validity stage from release pipeline (#6069)
+* [MAINTENANCE] Remove unused test fixtures from test suite (#6058)
+* [MAINTENANCE] Remove outdated release files (#6074)
+
+0.15.24
+-----------------
+* [FEATURE] context.save_datasource (#6009)
+* [BUGFIX] Standardize `ConfiguredAssetSqlDataConnector` config in `datasource new` CLI workflow (#6044)
+* [DOCS] DOC-371 update the getting started tutorial for data assistants (#6024)
+* [DOCS] DOCS-369 sql data connector configuration guide (#6002)
+* [MAINTENANCE] Remove outdated entry from release schedule JSON (#6032)
+* [MAINTENANCE] Clean up Spark schema tests to have proper names (#6033)
+
 0.15.23
 -----------------
 * [FEATURE] do not require expectation_suite_name in DataAssistantResult.show_expectations_by...() methods (#5976)

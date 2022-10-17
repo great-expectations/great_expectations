@@ -2351,6 +2351,15 @@ def ge_cloud_access_token() -> str:
 
 
 @pytest.fixture
+def request_headers(ge_cloud_access_token: str) -> Dict[str, str]:
+    return {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+        "Gx-Version": ge.__version__,
+    }
+
+
+@pytest.fixture
 def ge_cloud_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token):
     return GeCloudConfig(
         base_url=ge_cloud_base_url,
@@ -2514,7 +2523,9 @@ def empty_cloud_data_context(
     cloud_data_context: CloudDataContext = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_config=ge_cloud_config,
+        ge_cloud_base_url=ge_cloud_config.base_url,
+        ge_cloud_access_token=ge_cloud_config.access_token,
+        ge_cloud_organization_id=ge_cloud_config.organization_id,
     )
     return cloud_data_context
 
@@ -6329,6 +6340,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.raw.my_pickup_location_id_value_set": {
                 "value": [1, 2, 4],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "VendorID"},
@@ -6341,6 +6353,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.my_pickup_location_id_value_set": {
                 "value": [1, 2, 4],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "VendorID"},
@@ -6371,6 +6384,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.raw.my_pickup_location_id_value_set": {
                 "value": [0, 1, 2, 3, 4, 5, 6],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "passenger_count"},
@@ -6383,6 +6397,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.my_pickup_location_id_value_set": {
                 "value": [0, 1, 2, 3, 4, 5, 6],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "passenger_count"},
