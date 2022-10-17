@@ -1409,14 +1409,14 @@ aborting graph resolution.
         return self._execution_engine.batch_manager.active_batch_data
 
     @property
-    def batche_cache(self) -> Dict[str, Batch]:
+    def batch_cache(self) -> Dict[str, Batch]:
         """Getter for dictionary of Batch objects (convenience property)"""
         return self._execution_engine.batch_manager.batch_cache
 
     @property
     def batches(self) -> Dict[str, Batch]:
         """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
-        return self.batche_cache
+        return self.batch_cache
 
     @property
     def active_batch_id(self) -> Optional[str]:
