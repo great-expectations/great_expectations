@@ -2,7 +2,6 @@ import logging
 from collections import OrderedDict
 from typing import Dict, List, Optional
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchData,
@@ -15,7 +14,7 @@ logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
-class BatchCache:
+class BatchManager:
     def __init__(
         self,
         execution_engine: "ExecutionEngine",  # noqa: F821
@@ -29,11 +28,13 @@ class BatchCache:
         self._execution_engine = execution_engine
 
         self._active_batch_id = None
+        self._active_batch_data_id = None
 
         if batch_list is None:
             batch_list = []
 
-        self._batches = {}
+        self._batch_cache = {}
+        self._batch_data_cache = {}
 
         self.load_batch_list(batch_list=batch_list)
         if len(batch_list) > 1:
@@ -47,46 +48,62 @@ class BatchCache:
         return self._execution_engine
 
     @property
-    def batches(self) -> Dict[str, Batch]:
-        """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""
-        if not isinstance(self._batches, OrderedDict):
-            self._batches = OrderedDict(self._batches)
-
-        return self._batches
+    def batch_data_cache(self) -> Dict[str, BatchData]:
+        """Dictionary of loaded BatchData objects."""
+        return self._batch_data_cache
 
     @property
     def loaded_batch_ids(self) -> List[str]:
-        return list(self.batches.keys())
+        """IDs of loaded BatchData objects."""
+        return list(self._batch_data_cache.keys())
 
     @property
-    def active_batch_id(self) -> Optional[str]:
+    def active_batch_data_id(self) -> Optional[str]:
         """The batch id for the default batch data.
 
-        When a specific Batch objec is unavailable, then the data associated with the active_batch_id will be used.
+        When a specific Batch objec is unavailable, then the data associated with the active_batch_data_id will be used.
         """
-        if self._active_batch_id is not None:
-            return self._active_batch_id
+        if self._active_batch_data_id is not None:
+            return self._active_batch_data_id
 
-        if len(self.batches) == 1:
-            return list(self.batches.keys())[0]
+        if len(self._batch_data_cache) == 1:
+            return list(self._batch_data_cache.keys())[0]
 
         return None
 
-    @active_batch_id.setter
-    def active_batch_id(self, batch_id: str) -> None:
-        if batch_id in self.batches.keys():
-            self._active_batch_id = batch_id
-        else:
-            raise ge_exceptions.InvalidBatchIdError(
-                f"Unable to set active_batch_data_id to {batch_id}.  The data may not be loaded."
+    @property
+    def active_batch_data(self) -> Optional[BatchData]:
+        """The BatchData object from the currently-active Batch object."""
+        if self.active_batch_data_id is None:
+            return None
+
+        return self._batch_data_cache.get(self.active_batch_data_id)
+
+    @property
+    def batch_cache(self) -> Dict[str, Batch]:
+        """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""
+        if not isinstance(self._batch_cache, OrderedDict):
+            self._batch_cache = OrderedDict(self._batch_cache)
+
+        return self._batch_cache
+
+    @property
+    def active_batch_id(self) -> Optional[str]:
+        """Getter for active Batch ID"""
+        active_batch_data_id: str = self._active_batch_data_id
+        if active_batch_data_id != self._active_batch_id:
+            logger.warning(
+                "ID of active Batch and ID of active loaded BatchData differ."
             )
+
+        return self._active_batch_id
 
     @property
     def active_batch(self) -> Optional[Batch]:
-        """Getter for active batch"""
+        """Getter for active Batch"""
         active_batch_id: Optional[str] = self.active_batch_id
         batch: Optional[Batch] = (
-            None if active_batch_id is None else self.batches.get(active_batch_id)
+            None if active_batch_id is None else self.batch_cache.get(active_batch_id)
         )
         return batch
 
@@ -114,9 +131,10 @@ class BatchCache:
         else:
             return self.active_batch.batch_definition
 
-    def reset(self) -> None:
+    def reset_batch_cache(self) -> None:
         """Clears Batch cache"""
-        self._batches = {}
+        self._batch_cache = {}
+        self._active_batch_id = None
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
         if batch_list is None:
@@ -127,22 +145,22 @@ class BatchCache:
             try:
                 assert isinstance(
                     batch, Batch
-                ), "Batch objects provided to BatchCache must be formal Great Expectations Batch typed objects."
+                ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
                 logger.warning(str(e))
 
-            self._batches[batch.id] = batch
             self._execution_engine.load_batch_data(
                 batch_id=batch.id, batch_data=batch.data
             )
+
+            self._batch_cache[batch.id] = batch
+            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_data_id
+            # that has been loaded.  Hence, the final active_batch_id will be that of the final BatchData loaded.
+            self._active_batch_id = batch.id
 
     def save_batch_data(self, batch_id: str, batch_data: BatchData) -> None:
         """
         Updates the data for the specified Batch in the cache
         """
-        if batch_id not in self._batches:
-            self._batches[batch_id] = Batch(data=batch_data)
-        else:
-            self._batches[batch_id].data = batch_data
-
-        self.active_batch_id = batch_id
+        self._batch_data_cache[batch_id] = batch_data
+        self._active_batch_data_id = batch_id
