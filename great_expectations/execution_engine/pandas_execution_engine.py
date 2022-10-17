@@ -215,8 +215,7 @@ Notes:
             batch_data = batch_spec.batch_data
             if isinstance(batch_data, str):
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is \
-illegal.  Please check your config.
+                    f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.  Please check your config.
 """
                 )
 
@@ -253,8 +252,7 @@ illegal.  Please check your config.
                 s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             except (ParamValidationError, ClientError) as error:
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 \
-Bucket: {error}"""
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
                 )
             logger.debug(
                 f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}"
@@ -359,7 +357,7 @@ not {batch_spec.__class__.__name__}"""
         return batch_data
 
     @property
-    def dataframe(self):
+    def dataframe(self) -> pd.DataFrame:
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
         ValueError Exception
         """

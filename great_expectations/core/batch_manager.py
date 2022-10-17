@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import logging
 from collections import OrderedDict
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core.batch import (
     Batch,
@@ -10,6 +12,9 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.id_dict import BatchSpec
 
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
+
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
@@ -17,7 +22,7 @@ logging.captureWarnings(True)
 class BatchManager:
     def __init__(
         self,
-        execution_engine: "ExecutionEngine",  # noqa: F821
+        execution_engine: ExecutionEngine,
         batch_list: Optional[List[Batch]] = None,
     ) -> None:
         """
@@ -33,19 +38,15 @@ class BatchManager:
         if batch_list is None:
             batch_list = []
 
-        self._batch_cache = {}
+        self._batch_cache = OrderedDict()
         self._batch_data_cache = {}
 
         self.load_batch_list(batch_list=batch_list)
         if len(batch_list) > 1:
-            logger.debug(
+            logger.info(
                 f"{len(batch_list)} batches will be added to this Validator.  The batch_identifiers for the active "
                 f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
             )
-
-    @property
-    def execution_engine(self) -> "ExecutionEngine":  # noqa: F821
-        return self._execution_engine
 
     @property
     def batch_data_cache(self) -> Dict[str, BatchData]:
@@ -61,7 +62,7 @@ class BatchManager:
     def active_batch_data_id(self) -> Optional[str]:
         """The batch id for the default batch data.
 
-        When a specific Batch objec is unavailable, then the data associated with the active_batch_data_id will be used.
+        When a specific Batch is unavailable, then the data associated with the active_batch_data_id will be used.
         """
         if self._active_batch_data_id is not None:
             return self._active_batch_data_id
@@ -82,9 +83,6 @@ class BatchManager:
     @property
     def batch_cache(self) -> Dict[str, Batch]:
         """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""
-        if not isinstance(self._batch_cache, OrderedDict):
-            self._batch_cache = OrderedDict(self._batch_cache)
-
         return self._batch_cache
 
     @property
@@ -112,28 +110,28 @@ class BatchManager:
         """Getter for active batch's batch_spec"""
         if not self.active_batch:
             return None
-        else:
-            return self.active_batch.batch_spec
+
+        return self.active_batch.batch_spec
 
     @property
     def active_batch_markers(self) -> Optional[BatchMarkers]:
         """Getter for active batch's batch markers"""
         if not self.active_batch:
             return None
-        else:
-            return self.active_batch.batch_markers
+
+        return self.active_batch.batch_markers
 
     @property
     def active_batch_definition(self) -> Optional[BatchDefinition]:
         """Getter for the active batch's batch definition"""
         if not self.active_batch:
             return None
-        else:
-            return self.active_batch.batch_definition
+
+        return self.active_batch.batch_definition
 
     def reset_batch_cache(self) -> None:
         """Clears Batch cache"""
-        self._batch_cache = {}
+        self._batch_cache = OrderedDict()
         self._active_batch_id = None
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
@@ -147,7 +145,7 @@ class BatchManager:
                     batch, Batch
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
-                logger.warning(str(e))
+                logger.error(str(e))
 
             self._execution_engine.load_batch_data(
                 batch_id=batch.id, batch_data=batch.data

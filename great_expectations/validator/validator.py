@@ -147,6 +147,11 @@ class Validator:
 
         self._show_progress_bars = self._determine_progress_bars()
 
+        self._metrics_calculator = MetricsCalculator(
+            execution_engine=execution_engine,
+            show_progress_bars=self._determine_progress_bars(),
+        )
+
         self.interactive_evaluation = interactive_evaluation
         self._initialize_expectations(
             expectation_suite=expectation_suite,

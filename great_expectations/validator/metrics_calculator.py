@@ -61,7 +61,7 @@ class MetricsCalculator:
         """
         if domain_kwargs is None:
             domain_kwargs = {
-                "batch_id": self._execution_engine.batch_data_cache.active_batch_data_id,
+                "batch_id": self._execution_engine.batch_manager.active_batch_data_id,
             }
 
         columns: List[str] = self.get_metric(
@@ -84,7 +84,7 @@ class MetricsCalculator:
         """
         if domain_kwargs is None:
             domain_kwargs = {
-                "batch_id": self._execution_engine.batch_data_cache.active_batch_data_id,
+                "batch_id": self._execution_engine.batch_manager.active_batch_data_id,
             }
 
         data: Any = self.get_metric(

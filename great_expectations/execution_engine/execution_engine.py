@@ -8,9 +8,9 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchData,
+    BatchDataType,
     BatchMarkers,
     BatchSpec,
-    SparkDataFrame,
 )
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -228,19 +228,17 @@ class ExecutionEngine(ABC):
         return self._batch_manager
 
     def _load_batch_data_from_dict(
-        self, batch_data_dict: Dict[str, Union[BatchData, pd.DataFrame, SparkDataFrame]]
+        self, batch_data_dict: Dict[str, BatchDataType]
     ) -> None:
         """
         Loads all data in batch_data_dict using cache_batch_data
         """
         batch_id: str
-        batch_data: Union[BatchData, pd.DataFrame, SparkDataFrame]
+        batch_data: BatchDataType
         for batch_id, batch_data in batch_data_dict.items():
             self.load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
-    def load_batch_data(
-        self, batch_id: str, batch_data: Union[BatchData, pd.DataFrame, SparkDataFrame]
-    ) -> None:
+    def load_batch_data(self, batch_id: str, batch_data: BatchDataType) -> None:
         self._batch_manager.save_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data(
@@ -442,7 +440,7 @@ class ExecutionEngine(ABC):
         Args:
             domain_kwargs: the domain kwargs to use as the base and to which to add the condition
             column_name: if provided, use this name to add the condition; otherwise, will use "column" key from
-            table_domain_kwargs filter_null: if true, add a filter for null values
+                table_domain_kwargs
             filter_null: if true, add a filter for null values
             filter_nan: if true, add a filter for nan values
         """
@@ -593,8 +591,7 @@ class ExecutionEngine(ABC):
                     map(lambda element: f'"{element}"', unexpected_keys)
                 )
                 logger.warning(
-                    f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type \
-"{domain_type.value}"."""
+                    f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}"."""
                 )
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
