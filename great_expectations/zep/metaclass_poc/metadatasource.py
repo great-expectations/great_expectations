@@ -5,15 +5,14 @@ from __future__ import annotations
 
 from typing import Callable, Dict, List
 
-from great_expectations.zep.core import Datasource
+from great_expectations.zep.interfaces import Datasource
+
+SourceFactoryFn = Callable[..., Datasource]
 
 
 def _camel_to_snake(s: str) -> str:
     # https://stackoverflow.com/a/44969381/6304433
     return "".join(["_" + c.lower() if c.isupper() else c for c in s]).lstrip("_")
-
-
-SourceFactoryFn = Callable[..., Datasource]
 
 
 class _SourceFactories:
@@ -71,6 +70,7 @@ class PandasDatasource(metaclass=MetaDatasouce):
         return f"{self.__class__.__name__}(name='{self.name}')"
 
     def add_csv(self, sep=","):
+        """I'm a docstring!!"""
         return self
 
 
