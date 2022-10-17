@@ -145,7 +145,7 @@ class BatchManager:
                     batch, Batch
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
-                logger.warning(str(e))
+                logger.error(str(e))
 
             self._execution_engine.load_batch_data(
                 batch_id=batch.id, batch_data=batch.data
