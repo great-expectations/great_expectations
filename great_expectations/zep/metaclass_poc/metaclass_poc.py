@@ -64,7 +64,14 @@ class MetaDatasouce(type):
 
 
 class PandasDatasource(metaclass=MetaDatasouce):
-    pass
+    def __init__(self, name: str):
+        self.name = name
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(name='{self.name}')"
+
+    def add_csv(self, sep=","):
+        return self
 
 
 # class PostgresDatasource(metaclass=MetaDatasouce):
@@ -98,5 +105,5 @@ def get_context() -> DataContext:
 
 if __name__ == "__main__":
     context = get_context()
-    context.sources.add_pandas("taxi")
+    context.sources.add_pandas("taxi").add_csv()
     # context.sources.add_postgres("taxi_pg")
