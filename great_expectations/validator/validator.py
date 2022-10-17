@@ -14,8 +14,12 @@ from dateutil.parser import parse
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import Batch
-from great_expectations.core.batch_cache import BatchCache
+from great_expectations.core.batch import (
+    Batch,
+    BatchData,
+    BatchDefinition,
+    BatchMarkers,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -138,12 +142,15 @@ class Validator:
         )
 
         self._data_context = data_context
+
+        execution_engine.batch_manager.reset_batch_cache()
         self._execution_engine = execution_engine
+
+        self.load_batch_list(batch_list=batches)
+
         self._expose_dataframe_methods = False
 
         self._show_progress_bars = self._determine_progress_bars()
-
-        self.load_batch_list(batch_list=batches)
 
         self.interactive_evaluation = interactive_evaluation
         self._initialize_expectations(
@@ -1174,42 +1181,52 @@ class Validator:
         )
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
-        self._execution_engine.batch_cache.load_batch_list(batch_list=batch_list)
-
-    @property
-    def batches(self) -> Dict[str, Batch]:
-        """Getter for dictionary of Batch objects (convenience property)"""
-        return self._execution_engine.batch_cache.batches
+        self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
 
     @property
     def loaded_batch_ids(self) -> List[str]:
         """Getter for IDs of loaded Batch objects (convenience property)"""
-        return self._execution_engine.batch_cache.loaded_batch_ids
+        return self._execution_engine.batch_manager.loaded_batch_ids
 
     @property
-    def active_batch(self) -> Optional[Batch]:
-        """Getter for active Batch (convenience property)"""
-        return self._execution_engine.batch_cache.active_batch
+    def active_batch_data(self) -> Optional[BatchData]:
+        """Getter for BatchData object from the currently-active Batch object (convenience property)."""
+        return self._execution_engine.batch_manager.active_batch_data
 
     @property
-    def active_batch_spec(self) -> Optional[BatchSpec]:
-        """Getter for batch_spec of active Batch (convenience property)"""
-        return self._execution_engine.batch_cache.active_batch_spec
+    def batche_cache(self) -> Dict[str, Batch]:
+        """Getter for dictionary of Batch objects (convenience property)"""
+        return self._execution_engine.batch_manager.batch_cache
+
+    @property
+    def batches(self) -> Dict[str, Batch]:
+        """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
+        return self.batche_cache
 
     @property
     def active_batch_id(self) -> Optional[str]:
         """Getter for batch_id of active Batch (convenience property)"""
-        return self._execution_engine.batch_cache.active_batch_id
+        return self._execution_engine.batch_manager.active_batch_id
+
+    @property
+    def active_batch(self) -> Optional[Batch]:
+        """Getter for active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch
+
+    @property
+    def active_batch_spec(self) -> Optional[BatchSpec]:
+        """Getter for batch_spec of active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch_spec
 
     @property
     def active_batch_markers(self) -> Optional[BatchMarkers]:
         """Getter for batch_markers of active Batch (convenience property)"""
-        return self._execution_engine.batch_cache.active_batch_markers
+        return self._execution_engine.batch_manager.active_batch_markers
 
     @property
     def active_batch_definition(self) -> Optional[BatchDefinition]:
         """Getter for batch_definition of active Batch (convenience property)"""
-        return self._execution_engine.batch_cache.active_batch_definition
+        return self._execution_engine.batch_manager.active_batch_definition
 
     def discard_failing_expectations(self) -> None:
         """Removes any expectations from the validator where the validation has failed"""
@@ -1849,6 +1866,98 @@ class Validator:
 
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
+
+    def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
+        if domain_kwargs is None:
+            domain_kwargs = {
+                "batch_id": self._execution_engine.batch_manager.active_batch_id,
+            }
+
+        columns: List[str] = self.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.columns",
+                metric_domain_kwargs=domain_kwargs,
+            )
+        )
+
+        return columns
+
+    def head(
+        self,
+        n_rows: int = 5,
+        domain_kwargs: Optional[Dict[str, Any]] = None,
+        fetch_all: bool = False,
+    ) -> pd.DataFrame:
+        if domain_kwargs is None:
+            domain_kwargs = {
+                "batch_id": self._execution_engine.batch_manager.active_batch_id,
+            }
+
+        data: Any = self.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.head",
+                metric_domain_kwargs=domain_kwargs,
+                metric_value_kwargs={
+                    "n_rows": n_rows,
+                    "fetch_all": fetch_all,
+                },
+            )
+        )
+
+        df: pd.DataFrame
+        if isinstance(
+            self._execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
+        ):
+            df = pd.DataFrame(data=data)
+        elif isinstance(self._execution_engine, SparkDFExecutionEngine):
+            rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
+            df = pd.DataFrame(data=rows)
+        else:
+            raise GreatExpectationsError(
+                "Unsupported or unknown ExecutionEngine type encountered in Validator class."
+            )
+
+        return df.reset_index(drop=True, inplace=False)
+
+    @staticmethod
+    def _parse_validation_graph(
+        validation_graph: ValidationGraph,
+        metrics: Dict[Tuple[str, str, str], Any],
+    ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
+        """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
+        validation graph (a graph structure of metric ids) edges"""
+        unmet_dependency_ids = set()
+        unmet_dependency = set()
+        maybe_ready_ids = set()
+        maybe_ready = set()
+
+        for edge in validation_graph.edges:
+            if edge.left.id not in metrics:
+                if edge.right is None or edge.right.id in metrics:
+                    if edge.left.id not in maybe_ready_ids:
+                        maybe_ready_ids.add(edge.left.id)
+                        maybe_ready.add(edge.left)
+                else:
+                    if edge.left.id not in unmet_dependency_ids:
+                        unmet_dependency_ids.add(edge.left.id)
+                        unmet_dependency.add(edge.left)
+
+        return maybe_ready - unmet_dependency, unmet_dependency
+
+    @staticmethod
+    def _resolve_metrics(
+        execution_engine: ExecutionEngine,
+        metrics_to_resolve: Iterable[MetricConfiguration],
+        metrics: Dict[Tuple[str, str, str], Any] = None,
+        runtime_configuration: dict = None,
+    ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
+        """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
+        resolved"""
+        return execution_engine.resolve_metrics(
+            metrics_to_resolve=metrics_to_resolve,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+        )
 
     def _initialize_expectations(
         self,

@@ -364,15 +364,12 @@ not {batch_spec.__class__.__name__}"""
         ValueError Exception
         """
         # Changed to is None because was breaking prior
-        if (
-            self.batch_cache.active_batch is None
-            or self.batch_cache.active_batch.data is None
-        ):
+        if self.batch_manager.active_batch_data is None:
             raise ValueError(
                 "Batch has not been loaded - please run load_batch_data() to load a batch."
             )
 
-        return cast(PandasBatchData, self.batch_cache.active_batch.data).dataframe
+        return cast(PandasBatchData, self.batch_manager.active_batch_data).dataframe
 
     # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
@@ -477,18 +474,18 @@ not {batch_spec.__class__.__name__}"""
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.batch_cache.active_batch_id is not None:
+            if self.batch_manager.active_batch_data_id is not None:
                 data = cast(
-                    PandasBatchData, self.batch_cache.active_batch.data
+                    PandasBatchData, self.batch_manager.active_batch_data
                 ).dataframe
             else:
                 raise ge_exceptions.ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.batch_cache.batches:
+            if batch_id in self.batch_manager.batch_data_cache:
                 data = cast(
-                    PandasBatchData, self.batch_cache.batches[batch_id]
+                    PandasBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
             else:
                 raise ge_exceptions.ValidationError(

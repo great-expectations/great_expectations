@@ -206,15 +206,12 @@ class SparkDFExecutionEngine(ExecutionEngine):
     @property
     def dataframe(self):
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
-        if (
-            self.batch_cache.active_batch is None
-            or self.batch_cache.active_batch.data is None
-        ):
+        if self.batch_manager.active_batch_data is None:
             raise ValueError(
                 "Batch has not been loaded - please run load_batch() to load a batch."
             )
 
-        return cast(SparkDFBatchData, self.batch_cache.active_batch.data).dataframe
+        return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
     def load_batch_data(
         self, batch_id: str, batch_data: Union[SparkDFBatchData, DataFrame]
@@ -449,18 +446,18 @@ illegal.  Please check your config."""
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.batch_cache.active_batch.data:
+            if self.batch_manager.active_batch_data:
                 data = cast(
-                    SparkDFBatchData, self.batch_cache.active_batch.data
+                    SparkDFBatchData, self.batch_manager.active_batch_data
                 ).dataframe
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.batch_cache.batches:
+            if batch_id in self.batch_manager.batch_data_cache:
                 data = cast(
-                    SparkDFBatchData, self.batch_cache.batches[batch_id]
+                    SparkDFBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")

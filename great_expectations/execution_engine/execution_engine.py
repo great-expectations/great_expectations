@@ -12,7 +12,7 @@ from great_expectations.core.batch import (
     BatchSpec,
     SparkDataFrame,
 )
-from great_expectations.core.batch_cache import BatchCache
+from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.execution_engine.bundled_metric_configuration import (
@@ -190,7 +190,7 @@ class ExecutionEngine(ABC):
             if key in self.recognized_batch_spec_defaults
         }
 
-        self._batch_cache = BatchCache(execution_engine=self)
+        self._batch_manager = BatchManager(execution_engine=self)
 
         if batch_data_dict is None:
             batch_data_dict = {}
@@ -223,9 +223,9 @@ class ExecutionEngine(ABC):
         return None
 
     @property
-    def batch_cache(self) -> BatchCache:
-        """Getter for batch_cache"""
-        return self._batch_cache
+    def batch_manager(self) -> BatchManager:
+        """Getter for batch_manager"""
+        return self._batch_manager
 
     def load_batch_data_from_dict(
         self, batch_data_dict: Dict[str, Union[BatchData, pd.DataFrame, SparkDataFrame]]
@@ -241,7 +241,7 @@ class ExecutionEngine(ABC):
     def load_batch_data(
         self, batch_id: str, batch_data: Union[BatchData, pd.DataFrame, SparkDataFrame]
     ) -> None:
-        self._batch_cache.save_batch_data(batch_id=batch_id, batch_data=batch_data)
+        self._batch_manager.save_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data(
         self,
