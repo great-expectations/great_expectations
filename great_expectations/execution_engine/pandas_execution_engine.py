@@ -215,8 +215,7 @@ Notes:
             batch_data = batch_spec.batch_data
             if isinstance(batch_data, str):
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is \
-illegal.  Please check your config.
+                    f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.  Please check your config.
 """
                 )
 
