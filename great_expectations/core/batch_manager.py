@@ -20,7 +20,7 @@ logging.captureWarnings(True)
 class BatchManager:
     def __init__(
         self,
-        execution_engine: ExecutionEngine,
+        execution_engine: "ExecutionEngine",
         batch_list: Optional[List[Batch]] = None,
     ) -> None:
         """
@@ -47,7 +47,7 @@ class BatchManager:
             )
 
     @property
-    def execution_engine(self) -> ExecutionEngine:
+    def execution_engine(self) -> "ExecutionEngine":
         return self._execution_engine
 
     @property
