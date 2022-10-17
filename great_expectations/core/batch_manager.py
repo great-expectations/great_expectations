@@ -30,23 +30,18 @@ class BatchManager:
             execution_engine: The ExecutionEngine to be used to access cache of loaded Batch objects.
             batch_list: List of Batch objects available from external source (default is None).
         """
-        self._execution_engine = execution_engine
+        self._execution_engine: ExecutionEngine = execution_engine
 
-        self._active_batch_id = None
-        self._active_batch_data_id = None
+        self._active_batch_id: Optional[str] = None
+        self._active_batch_data_id: Optional[str] = None
 
         if batch_list is None:
             batch_list = []
 
-        self._batch_cache = OrderedDict()
-        self._batch_data_cache = {}
+        self._batch_cache: Dict[str, Batch] = OrderedDict()
+        self._batch_data_cache: Dict[str, BatchData] = {}
 
         self.load_batch_list(batch_list=batch_list)
-        if len(batch_list) > 1:
-            logger.info(
-                f"{len(batch_list)} batches will be added to this Validator.  The batch_identifiers for the active "
-                f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
-            )
 
     @property
     def batch_data_cache(self) -> Dict[str, BatchData]:
@@ -134,7 +129,7 @@ class BatchManager:
         self._batch_cache = OrderedDict()
         self._active_batch_id = None
 
-    def load_batch_list(self, batch_list: List[Batch]) -> None:
+    def load_batch_list(self, batch_list: Optional[List[Batch]]) -> None:
         if batch_list is None:
             batch_list = []
 
