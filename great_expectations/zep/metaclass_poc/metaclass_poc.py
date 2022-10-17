@@ -40,9 +40,10 @@ class _SourceFactories:
         except KeyError:
             raise AttributeError(name)
 
-    def __dir__(self) -> List[str]:
-        # TODO: update to work for standard methods too
-        return [k for k in self.__sources.keys()]
+    # def __dir__(self) -> List[str]:
+    #     # TODO: update to work for standard methods too
+    #     # TODO: doesn't seem to work for jupyter-autocompletions
+    #     return [k for k in self.__sources.keys()]
 
 
 class MetaDatasouce(type):
