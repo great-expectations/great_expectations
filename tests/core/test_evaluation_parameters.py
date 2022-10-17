@@ -338,8 +338,7 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
         expectation_suite_name=expectation_suite_name,
     )
     column_names = [
-        f'"{column_name}"'
-        for column_name in validator.metric_computation_handler.columns()
+        f'"{column_name}"' for column_name in validator.metrics_calculator.columns()
     ]
     print(f"Columns: {', '.join(column_names)}.")
 

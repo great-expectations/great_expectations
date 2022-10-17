@@ -32,14 +32,14 @@ except ImportError:
 MAX_METRIC_COMPUTATION_RETRIES: int = 3
 
 
-class MetricComputationHandler:
+class MetricsCalculator:
     def __init__(
         self,
         execution_engine: ExecutionEngine,
         show_progress_bars: bool = False,
     ) -> None:
         """
-        MetricComputationHandler accepts and processes metric computation requests.
+        MetricsCalculator accepts and processes metrics calculation requests.
 
         Args:
             execution_engine: ExecutionEngine to perform metrics computation.

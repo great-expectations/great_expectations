@@ -246,12 +246,12 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 #
                 validator = Validator(execution_engine=execution_engine)
                 graph = ValidationGraph()
-                validator.metric_computation_handler.build_metric_dependency_graph(
+                validator.metrics_calculator.build_metric_dependency_graph(
                     graph=graph,
                     metric_configuration=partition_metric_configuration,
                 )
                 resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
-                validator.metric_computation_handler.resolve_validation_graph(
+                validator.metrics_calculator.resolve_validation_graph(
                     graph=graph, metrics=resolved_metrics
                 )
                 bins = resolved_metrics[partition_metric_configuration.id]

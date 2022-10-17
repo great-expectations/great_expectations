@@ -35,10 +35,10 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.metric_computation_handler import (
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metrics_calculator import (
     MAX_METRIC_COMPUTATION_RETRIES,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
@@ -160,7 +160,7 @@ def test_parse_validation_graph():
         for metric_configuration in validation_dependencies["metrics"].values():
             Validator(
                 execution_engine=engine
-            ).metric_computation_handler.build_metric_dependency_graph(
+            ).metrics_calculator.build_metric_dependency_graph(
                 graph=graph,
                 metric_configuration=metric_configuration,
             )
@@ -196,7 +196,7 @@ def test_parse_validation_graph_with_bad_metrics_args():
         )
 
         for metric_configuration in validation_dependencies["metrics"].values():
-            validator.metric_computation_handler.build_metric_dependency_graph(
+            validator.metrics_calculator.build_metric_dependency_graph(
                 graph=graph,
                 metric_configuration=metric_configuration,
             )
@@ -238,7 +238,7 @@ def test_populate_dependencies():
         for metric_configuration in validation_dependencies["metrics"].values():
             Validator(
                 execution_engine=engine
-            ).metric_computation_handler.build_metric_dependency_graph(
+            ).metrics_calculator.build_metric_dependency_graph(
                 graph=graph,
                 metric_configuration=metric_configuration,
             )
@@ -278,7 +278,7 @@ def test_populate_dependencies_with_incorrect_metric_name():
         try:
             Validator(
                 execution_engine=engine
-            ).metric_computation_handler.build_metric_dependency_graph(
+            ).metrics_calculator.build_metric_dependency_graph(
                 graph=graph,
                 metric_configuration=MetricConfiguration(
                     "column_values.not_a_metric", IDDict()
@@ -379,7 +379,7 @@ def test_graph_validate_with_exception(basic_datasource):
     )
 
     validator = Validator(execution_engine=PandasExecutionEngine(), batches=[batch])
-    validator.metric_computation_handler.build_metric_dependency_graph = mock_error
+    validator.metrics_calculator.build_metric_dependency_graph = mock_error
 
     result = validator.graph_validate(configurations=[expectation_configuration])
 
@@ -476,7 +476,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
     graph = ValidationGraph()
 
     for metric_configuration in validation_dependencies.values():
-        validator.metric_computation_handler.build_metric_dependency_graph(
+        validator.metrics_calculator.build_metric_dependency_graph(
             graph=graph,
             metric_configuration=metric_configuration,
             runtime_configuration=runtime_configuration,
@@ -486,7 +486,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
     aborted_metrics_info: Dict[
         Tuple[str, str, str],
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-    ] = validator.metric_computation_handler.resolve_validation_graph(
+    ] = validator.metrics_calculator.resolve_validation_graph(
         graph=graph,
         metrics=metrics,
         runtime_configuration=runtime_configuration,
@@ -1146,7 +1146,7 @@ def test_validate_expectation(multi_batch_taxi_validator):
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 @mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
-@mock.patch("great_expectations.validator.metric_computation_handler.tqdm")
+@mock.patch("great_expectations.validator.metrics_calculator.tqdm")
 @pytest.mark.unit
 def test_validator_progress_bar_config_enabled(
     mock_tqdm, mock_validation_graph, mock_data_context
@@ -1161,7 +1161,7 @@ def test_validator_progress_bar_config_enabled(
         {},
         {},
     )
-    validator.metric_computation_handler.resolve_validation_graph(
+    validator.metrics_calculator.resolve_validation_graph(
         graph=mock_validation_graph, metrics={}
     )
 
@@ -1172,7 +1172,7 @@ def test_validator_progress_bar_config_enabled(
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 @mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
-@mock.patch("great_expectations.validator.metric_computation_handler.tqdm")
+@mock.patch("great_expectations.validator.metrics_calculator.tqdm")
 @pytest.mark.unit
 def test_validator_progress_bar_config_disabled(
     mock_tqdm, mock_validation_graph, mock_data_context
@@ -1188,7 +1188,7 @@ def test_validator_progress_bar_config_disabled(
         {},
         {},
     )
-    validator.metric_computation_handler.resolve_validation_graph(
+    validator.metrics_calculator.resolve_validation_graph(
         graph=mock_validation_graph, metrics={}, show_progress_bars=False
     )
 
@@ -1331,9 +1331,9 @@ def test_show_progress_bars_property_and_setter(
 ) -> None:
     validator = validator_with_mock_execution_engine
 
-    assert validator.metric_computation_handler.show_progress_bars is True
-    validator.metric_computation_handler.show_progress_bars = False
-    assert validator.metric_computation_handler.show_progress_bars is False
+    assert validator.metrics_calculator.show_progress_bars is True
+    validator.metrics_calculator.show_progress_bars = False
+    assert validator.metrics_calculator.show_progress_bars is False
 
 
 @pytest.mark.unit

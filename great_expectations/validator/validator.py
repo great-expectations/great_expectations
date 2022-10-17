@@ -66,10 +66,8 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.metric_computation_handler import (
-    MetricComputationHandler,
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
     MetricEdge,
@@ -178,9 +176,9 @@ class Validator:
         return self._execution_engine
 
     @property
-    def metric_computation_handler(self) -> MetricComputationHandler:
-        """Returns the "MetricComputationHandler" object being used by the Validator to handle metrics computations."""
-        return self._metric_computation_handler
+    def metrics_calculator(self) -> MetricsCalculator:
+        """Returns the "MetricsCalculator" object being used by the Validator to handle metrics computations."""
+        return self._metrics_calculator
 
     @property
     def batch_cache(self) -> BatchCache:
@@ -217,7 +215,7 @@ class Validator:
         metric: MetricConfiguration,
     ) -> Any:
         """Convenience method that returns the value of the requested metric."""
-        return self._metric_computation_handler.get_metric(metric=metric)
+        return self._metrics_calculator.get_metric(metric=metric)
 
     def get_metrics(
         self,
@@ -232,7 +230,7 @@ class Validator:
         Returns:
             Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
         """
-        return self._metric_computation_handler.get_metrics(metrics=metrics)
+        return self._metrics_calculator.get_metrics(metrics=metrics)
 
     def compute_metrics(
         self,
@@ -247,7 +245,7 @@ class Validator:
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
-        return self._metric_computation_handler.compute_metrics(
+        return self._metrics_calculator.compute_metrics(
             metric_configurations=metric_configurations
         )
 
@@ -255,7 +253,7 @@ class Validator:
         """
         Convenience method to obtain Batch columns.
         """
-        return self._metric_computation_handler.columns(domain_kwargs=domain_kwargs)
+        return self._metrics_calculator.columns(domain_kwargs=domain_kwargs)
 
     def head(
         self,
@@ -266,7 +264,7 @@ class Validator:
         """
         Convenience method to obtain Batch first few rows.
         """
-        return self._metric_computation_handler.head(
+        return self._metrics_calculator.head(
             n_rows=n_rows, domain_kwargs=domain_kwargs, fetch_all=fetch_all
         )
 
@@ -993,7 +991,7 @@ class Validator:
                 )
                 for metric_configuration in validation_dependencies.values():
                     graph = ValidationGraph()
-                    self._metric_computation_handler.build_metric_dependency_graph(
+                    self._metrics_calculator.build_metric_dependency_graph(
                         graph=graph,
                         metric_configuration=metric_configuration,
                         runtime_configuration=runtime_configuration,
@@ -1050,7 +1048,7 @@ class Validator:
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ] = self._metric_computation_handler.resolve_validation_graph(
+        ] = self._metrics_calculator.resolve_validation_graph(
             graph=validation_graph,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
