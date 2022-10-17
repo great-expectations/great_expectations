@@ -130,9 +130,6 @@ class BatchManager:
         self._active_batch_id = None
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
-        if batch_list is None:
-            batch_list = []
-
         batch: Batch
         for batch in batch_list:
             try:
