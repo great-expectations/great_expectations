@@ -50,11 +50,11 @@ class MetaDatasouce(type):
     def __new__(meta_cls, cls_name, bases, cls_dict) -> MetaDatasouce:
         print(f"1. Hello {meta_cls.__name__} __new__() -> {cls_name}")
 
+        cls = type(cls_name, bases, cls_dict)
+
         def _datasource_factory(name: str) -> Datasource:
             print(f"5. Adding `{name}` {cls_name}")
-            return type(
-                cls_name, bases, cls_dict
-            )  # should this return `super().__new__()` instead?
+            return cls(name)
 
         sources = _SourceFactories()
         factory_name = f"add_{_camel_to_snake(cls_name)}".removesuffix("_datasource")
