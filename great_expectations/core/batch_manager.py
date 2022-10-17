@@ -1,6 +1,6 @@
 import logging
 from collections import OrderedDict
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core.batch import (
     Batch,
@@ -10,6 +10,9 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.id_dict import BatchSpec
 
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
+
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
@@ -17,7 +20,7 @@ logging.captureWarnings(True)
 class BatchManager:
     def __init__(
         self,
-        execution_engine: "ExecutionEngine",  # noqa: F821
+        execution_engine: ExecutionEngine,
         batch_list: Optional[List[Batch]] = None,
     ) -> None:
         """
@@ -38,13 +41,13 @@ class BatchManager:
 
         self.load_batch_list(batch_list=batch_list)
         if len(batch_list) > 1:
-            logger.debug(
+            logger.info(
                 f"{len(batch_list)} batches will be added to this Validator.  The batch_identifiers for the active "
                 f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
             )
 
     @property
-    def execution_engine(self) -> "ExecutionEngine":  # noqa: F821
+    def execution_engine(self) -> ExecutionEngine:
         return self._execution_engine
 
     @property
@@ -112,8 +115,8 @@ class BatchManager:
         """Getter for active batch's batch_spec"""
         if not self.active_batch:
             return None
-        else:
-            return self.active_batch.batch_spec
+
+        return self.active_batch.batch_spec
 
     @property
     def active_batch_markers(self) -> Optional[BatchMarkers]:
