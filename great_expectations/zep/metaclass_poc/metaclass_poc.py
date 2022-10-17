@@ -35,7 +35,10 @@ class _SourceFactories:
         return list(self.__sources.keys())
 
     def __getattr__(self, name):
-        return self.__sources[name]
+        try:
+            return self.__sources[name]
+        except KeyError:
+            raise AttributeError(name)
 
     def __dir__(self) -> List[str]:
         # TODO: update to work for standard methods too
