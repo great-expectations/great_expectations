@@ -252,8 +252,7 @@ Notes:
                 s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             except (ParamValidationError, ClientError) as error:
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 \
-Bucket: {error}"""
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
                 )
             logger.debug(
                 f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}"
