@@ -359,7 +359,7 @@ not {batch_spec.__class__.__name__}"""
         return batch_data
 
     @property
-    def dataframe(self):
+    def dataframe(self) -> pd.DataFrame:
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
         ValueError Exception
         """

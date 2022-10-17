@@ -204,7 +204,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self._data_sampler = SparkDataSampler()
 
     @property
-    def dataframe(self):
+    def dataframe(self) -> DataFrame:
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
         if self.batch_manager.active_batch_data is None:
             raise ValueError(

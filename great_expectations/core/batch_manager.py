@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from collections import OrderedDict
 from typing import TYPE_CHECKING, Dict, List, Optional
@@ -20,7 +22,7 @@ logging.captureWarnings(True)
 class BatchManager:
     def __init__(
         self,
-        execution_engine: "ExecutionEngine",
+        execution_engine: ExecutionEngine,
         batch_list: Optional[List[Batch]] = None,
     ) -> None:
         """
@@ -36,7 +38,7 @@ class BatchManager:
         if batch_list is None:
             batch_list = []
 
-        self._batch_cache = {}
+        self._batch_cache = OrderedDict()
         self._batch_data_cache = {}
 
         self.load_batch_list(batch_list=batch_list)
@@ -45,10 +47,6 @@ class BatchManager:
                 f"{len(batch_list)} batches will be added to this Validator.  The batch_identifiers for the active "
                 f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
             )
-
-    @property
-    def execution_engine(self) -> "ExecutionEngine":
-        return self._execution_engine
 
     @property
     def batch_data_cache(self) -> Dict[str, BatchData]:
@@ -64,7 +62,7 @@ class BatchManager:
     def active_batch_data_id(self) -> Optional[str]:
         """The batch id for the default batch data.
 
-        When a specific Batch objec is unavailable, then the data associated with the active_batch_data_id will be used.
+        When a specific Batch is unavailable, then the data associated with the active_batch_data_id will be used.
         """
         if self._active_batch_data_id is not None:
             return self._active_batch_data_id
@@ -85,9 +83,6 @@ class BatchManager:
     @property
     def batch_cache(self) -> Dict[str, Batch]:
         """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""
-        if not isinstance(self._batch_cache, OrderedDict):
-            self._batch_cache = OrderedDict(self._batch_cache)
-
         return self._batch_cache
 
     @property
@@ -123,20 +118,20 @@ class BatchManager:
         """Getter for active batch's batch markers"""
         if not self.active_batch:
             return None
-        else:
-            return self.active_batch.batch_markers
+
+        return self.active_batch.batch_markers
 
     @property
     def active_batch_definition(self) -> Optional[BatchDefinition]:
         """Getter for the active batch's batch definition"""
         if not self.active_batch:
             return None
-        else:
-            return self.active_batch.batch_definition
+
+        return self.active_batch.batch_definition
 
     def reset_batch_cache(self) -> None:
         """Clears Batch cache"""
-        self._batch_cache = {}
+        self._batch_cache = OrderedDict()
         self._active_batch_id = None
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
