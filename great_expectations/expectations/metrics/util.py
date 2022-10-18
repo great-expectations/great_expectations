@@ -6,8 +6,8 @@ import numpy as np
 from dateutil.parser import parse
 from packaging import version
 
-from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
 
 
