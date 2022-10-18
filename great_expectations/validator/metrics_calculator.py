@@ -326,9 +326,7 @@ class MetricsCalculator:
                     for failed_metric in err.failed_metrics:
                         if failed_metric.id in failed_metric_info:
                             failed_metric_info[failed_metric.id]["num_failures"] += 1  # type: ignore
-                            failed_metric_info[failed_metric.id]["exception_info"].add(
-                                exception_info
-                            )
+                            failed_metric_info[failed_metric.id]["exception_info"].add(exception_info)  # type: ignore
                         else:
                             failed_metric_info[failed_metric.id] = {}
                             failed_metric_info[failed_metric.id][
