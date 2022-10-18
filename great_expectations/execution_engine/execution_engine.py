@@ -6,7 +6,13 @@ from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchData, BatchMarkers, BatchSpec
+from great_expectations.core.batch import (
+    BatchData,
+    BatchDataType,
+    BatchMarkers,
+    BatchSpec,
+)
+from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.execution_engine.bundled_metric_configuration import (
@@ -184,11 +190,12 @@ class ExecutionEngine(ABC):
             if key in self.recognized_batch_spec_defaults
         }
 
-        self._batch_data_dict = {}
+        self._batch_manager = BatchManager(execution_engine=self)
+
         if batch_data_dict is None:
             batch_data_dict = {}
-        self._active_batch_data_id = None
-        self._load_batch_data_from_dict(batch_data_dict)
+
+        self._load_batch_data_from_dict(batch_data_dict=batch_data_dict)
 
         # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values, and
         # set the instance "_config" variable equal to the resulting dictionary.
@@ -208,53 +215,31 @@ class ExecutionEngine(ABC):
         pass
 
     @property
-    def active_batch_data_id(self):
-        """The batch id for the default batch data.
-
-        When an execution engine is asked to process a compute domain that does
-        not include a specific batch_id, then the data associated with the
-        active_batch_data_id will be used as the default.
-        """
-        if self._active_batch_data_id is not None:
-            return self._active_batch_data_id
-        elif len(self.loaded_batch_data_dict) == 1:
-            return list(self.loaded_batch_data_dict.keys())[0]
-        else:
-            return None
-
-    @active_batch_data_id.setter
-    def active_batch_data_id(self, batch_id) -> None:
-        if batch_id in self.loaded_batch_data_dict.keys():
-            self._active_batch_data_id = batch_id
-        else:
-            raise ge_exceptions.ExecutionEngineError(
-                f"Unable to set active_batch_data_id to {batch_id}.  The data may not be loaded."
-            )
-
-    @property
-    def active_batch_data(self):
-        """The data from the currently-active batch."""
-        if self.active_batch_data_id is None:
-            return None
-
-        return self.loaded_batch_data_dict.get(self.active_batch_data_id)
-
-    @property
-    def loaded_batch_data_dict(self):
-        """The current dictionary of batches."""
-        return self._batch_data_dict
-
-    @property
-    def loaded_batch_data_ids(self):
-        return list(self.loaded_batch_data_dict.keys())
-
-    @property
     def config(self) -> dict:
         return self._config
 
     @property
     def dialect(self):
         return None
+
+    @property
+    def batch_manager(self) -> BatchManager:
+        """Getter for batch_manager"""
+        return self._batch_manager
+
+    def _load_batch_data_from_dict(
+        self, batch_data_dict: Dict[str, BatchDataType]
+    ) -> None:
+        """
+        Loads all data in batch_data_dict using cache_batch_data
+        """
+        batch_id: str
+        batch_data: BatchDataType
+        for batch_id, batch_data in batch_data_dict.items():
+            self.load_batch_data(batch_id=batch_id, batch_data=batch_data)
+
+    def load_batch_data(self, batch_id: str, batch_data: BatchDataType) -> None:
+        self._batch_manager.save_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data(
         self,
@@ -275,20 +260,6 @@ class ExecutionEngine(ABC):
     @abstractmethod
     def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
         raise NotImplementedError
-
-    def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
-        """
-        Loads the specified batch_data into the execution engine
-        """
-        self._batch_data_dict[batch_id] = batch_data
-        self._active_batch_data_id = batch_id
-
-    def _load_batch_data_from_dict(self, batch_data_dict) -> None:
-        """
-        Loads all data in batch_data_dict into load_batch_data
-        """
-        for batch_id, batch_data in batch_data_dict.items():
-            self.load_batch_data(batch_id, batch_data)
 
     def resolve_metrics(
         self,
@@ -453,8 +424,8 @@ class ExecutionEngine(ABC):
             3. a dictionary describing the access instructions for data elements included in the compute domain
                 (e.g. specific column name).
 
-            In general, the union of the compute_domain_kwargs and accessor_domain_kwargs will be the same as the domain_kwargs
-            provided to this method.
+            In general, the union of the compute_domain_kwargs and accessor_domain_kwargs will be the same as the
+            domain_kwargs provided to this method.
         """
 
         raise NotImplementedError
@@ -468,7 +439,8 @@ class ExecutionEngine(ABC):
 
         Args:
             domain_kwargs: the domain kwargs to use as the base and to which to add the condition
-            column_name: if provided, use this name to add the condition; otherwise, will use "column" key from table_domain_kwargs
+            column_name: if provided, use this name to add the condition; otherwise, will use "column" key from
+                table_domain_kwargs
             filter_null: if true, add a filter for null values
             filter_nan: if true, add a filter for nan values
         """
@@ -619,7 +591,7 @@ class ExecutionEngine(ABC):
                     map(lambda element: f'"{element}"', unexpected_keys)
                 )
                 logger.warning(
-                    f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
+                    f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}"."""
                 )
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)

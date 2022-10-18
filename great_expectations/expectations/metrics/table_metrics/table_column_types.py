@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import GreatExpectationsError
@@ -56,14 +56,17 @@ class ColumnTypes(TableMetricProvider):
     ):
         batch_id = metric_domain_kwargs.get("batch_id")
         if batch_id is None:
-            if execution_engine.active_batch_data_id is not None:
-                batch_id = execution_engine.active_batch_data_id
+            if execution_engine.batch_manager.active_batch_data_id is not None:
+                batch_id = execution_engine.batch_manager.active_batch_data_id
             else:
                 raise GreatExpectationsError(
                     "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the "
                     "execution engine"
                 )
-        batch_data = execution_engine.loaded_batch_data_dict.get(batch_id)
+        batch_data = cast(
+            SqlAlchemyBatchData,
+            execution_engine.batch_manager.batch_data_cache.get(batch_id),
+        )
         if batch_data is None:
             raise GreatExpectationsError(
                 "the requested batch is not available; please load the batch into the execution engine."
