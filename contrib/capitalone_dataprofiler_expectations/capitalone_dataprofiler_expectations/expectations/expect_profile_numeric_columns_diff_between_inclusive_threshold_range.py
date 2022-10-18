@@ -121,6 +121,7 @@ class DataProfilerProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
             runtime_configuration=runtime_configuration,
         )
 
+        # TODO: <Alex>ALEX: Is the "if" statement needed?  The metric.metric_name value in this module is unique.</Alex>
         if (
             metric.metric_name
             == "data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range"

@@ -120,24 +120,17 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 metric_value_kwargs=None,
             )
 
-        @staticmethod
-        def get_table_columns_metric_multi_batch_parameter_builder() -> ParameterBuilder:
+        def get_table_columns_metric_multi_batch_parameter_builder(
+            self,
+        ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
             metric_name: str = "table.columns"
-            name: str = sanitize_parameter_name(name=metric_name)
-            return MetricMultiBatchParameterBuilder(
-                name=name,
+            return self.build_metric_multi_batch_parameter_builder(
                 metric_name=metric_name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
-                single_batch_mode=False,
-                enforce_numeric_metric=False,
-                replace_nan_with_zero=False,
-                reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
-                data_context=None,
             )
 
         def get_column_distinct_values_count_metric_multi_batch_parameter_builder(
@@ -276,13 +269,38 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
 
         @staticmethod
+        def build_metric_multi_batch_parameter_builder(
+            metric_name: str,
+            metric_domain_kwargs: Optional[
+                Union[str, dict]
+            ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs: Optional[Union[str, dict]] = None,
+        ) -> ParameterBuilder:
+            """
+            This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
+            """
+            name: str = sanitize_parameter_name(name=metric_name)
+            return MetricMultiBatchParameterBuilder(
+                name=name,
+                metric_name=metric_name,
+                metric_domain_kwargs=metric_domain_kwargs,
+                metric_value_kwargs=metric_value_kwargs,
+                single_batch_mode=False,
+                enforce_numeric_metric=False,
+                replace_nan_with_zero=False,
+                reduce_scalar_metric=True,
+                evaluation_parameter_builder_configs=None,
+                data_context=None,
+            )
+
+        @staticmethod
         def build_numeric_metric_multi_batch_parameter_builder(
             metric_name: str,
             metric_domain_kwargs: Optional[
                 Union[str, dict]
             ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
-        ) -> MetricMultiBatchParameterBuilder:
+        ) -> ParameterBuilder:
             """
             This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """
@@ -307,9 +325,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             evaluation_parameter_builder_configs: Optional[
                 List[ParameterBuilderConfig]
             ] = None,
-        ) -> NumericMetricRangeMultiBatchParameterBuilder:
+        ) -> ParameterBuilder:
             """
-            This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
+            This method instantiates "NumericMetricRangeMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """
             metric_multi_batch_parameter_builder_name: Optional[str] = None
             if metric_name is None:
@@ -345,7 +363,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_regex_pattern_string_parameter_builder(
             name: str,
-        ) -> RegexPatternStringParameterBuilder:
+        ) -> ParameterBuilder:
             """
             This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
             """
@@ -363,7 +381,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_histogram_single_batch_parameter_builder(
             name: str,
-        ) -> HistogramSingleBatchParameterBuilder:
+        ) -> ParameterBuilder:
             """
             This method instantiates "HistogramSingleBatchParameterBuilder" class with specific arguments for given purpose.
             """
