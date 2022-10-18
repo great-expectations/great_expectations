@@ -157,7 +157,7 @@ class Validator:
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
-        self._default_expectation_args: dict = copy.deepcopy(
+        self._default_expectation_args: Dict[str, Union[bool, str]] = copy.deepcopy(
             Validator.DEFAULT_RUNTIME_CONFIGURATION
         )
 
