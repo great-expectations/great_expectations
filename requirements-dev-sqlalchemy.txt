@@ -11,3 +11,4 @@
 --requirement requirements-dev-teradata.txt
 --requirement requirements-dev-trino.txt
 --requirement requirements-dev-hive.txt
+--requirement requirements-dev-vertica.txt
