@@ -304,7 +304,7 @@ class MetricsCalculator:
                     metric.id in failed_metric_info
                     and failed_metric_info[metric.id]["num_failures"]
                     >= MAX_METRIC_COMPUTATION_RETRIES
-                ):  # type: ignore
+                ):  # type: ignore[arg-type]
                     aborted_metrics_info[metric.id] = failed_metric_info[metric.id]
                 else:
                     computable_metrics.add(metric)
