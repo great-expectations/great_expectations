@@ -44,8 +44,8 @@ class MetricsCalculator:
         Args:
             execution_engine: ExecutionEngine to perform metrics computation.
         """
-        self._execution_engine = execution_engine
-        self._show_progress_bars = show_progress_bars
+        self._execution_engine: ExecutionEngine = execution_engine
+        self._show_progress_bars: bool = show_progress_bars
 
     @property
     def show_progress_bars(self) -> bool:
