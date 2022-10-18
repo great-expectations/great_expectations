@@ -1,0 +1,3 @@
+from contrib.capitalone_dataprofiler_expectations.rule_based_profiler.parameter_builder.data_profiler_profiler_report_parameter_builder import (
+    DataProfilerProfileReportParameterBuilder,
+)

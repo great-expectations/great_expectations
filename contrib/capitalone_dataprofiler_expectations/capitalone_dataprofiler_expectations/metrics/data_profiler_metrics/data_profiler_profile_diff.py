@@ -26,7 +26,6 @@ class DataProfilerProfileDiff(DataProfilerProfileMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        first_profile = None
         try:
             first_profile_path = metric_value_kwargs["profile_path"]
             first_profile = dp.Profiler.load(first_profile_path)
