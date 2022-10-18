@@ -103,7 +103,6 @@ class MetricsCalculator:
             )
         )
 
-        df: pd.DataFrame
         if isinstance(
             self._execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
         ):
