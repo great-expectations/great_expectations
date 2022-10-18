@@ -15,7 +15,7 @@ from great_expectations.validator.validator import Validator
 @pytest.fixture
 def integer_and_datetime_sample_dataset() -> dict:
     week_idx: int
-    data: dict = {
+    return {
         "a": [
             0,
             1,
@@ -36,7 +36,6 @@ def integer_and_datetime_sample_dataset() -> dict:
             for week_idx in range(12)
         ],
     }
-    return data
 
 
 # noinspection PyUnusedLocal
@@ -74,9 +73,9 @@ def test_column_partition_metric(
 
     metrics_calculator: MetricsCalculator = validator_with_data.metrics_calculator
 
-    seconds_in_week: int = 604800
+    seconds_in_week = 604800
 
-    n_bins: int = 10
+    n_bins = 10
 
     increment: Union[float, datetime.timedelta]
     idx: int
