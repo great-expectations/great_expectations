@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.validator.exception_info import ExceptionInfo
@@ -40,6 +40,30 @@ class ValidationGraph:
         if edge.id not in self._edge_ids:
             self._edges.append(edge)
             self._edge_ids.add(edge.id)
+
+    def parse(
+        self,
+        metrics: Dict[Tuple[str, str, str], Any],
+    ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
+        """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
+        validation graph (a graph structure of metric ids) edges"""
+        unmet_dependency_ids = set()
+        unmet_dependency = set()
+        maybe_ready_ids = set()
+        maybe_ready = set()
+
+        for edge in self.edges:
+            if edge.left.id not in metrics:
+                if edge.right is None or edge.right.id in metrics:
+                    if edge.left.id not in maybe_ready_ids:
+                        maybe_ready_ids.add(edge.left.id)
+                        maybe_ready.add(edge.left)
+                else:
+                    if edge.left.id not in unmet_dependency_ids:
+                        unmet_dependency_ids.add(edge.left.id)
+                        unmet_dependency.add(edge.left)
+
+        return maybe_ready - unmet_dependency, unmet_dependency
 
     @property
     def edges(self):
