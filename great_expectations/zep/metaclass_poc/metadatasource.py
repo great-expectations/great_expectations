@@ -17,21 +17,21 @@ def _camel_to_snake(s: str) -> str:
 
 class _SourceFactories:
 
-    __sources: Dict[str, Callable] = {}
+    __source_factories: Dict[str, Callable] = {}
 
     @classmethod
-    def add_factory(cls, name: str, fn: SourceFactoryFn) -> None:
+    def register_factory(cls, name: str, fn: SourceFactoryFn) -> None:
         """Add/Register a datasource factory function."""
         print(f"2. Adding {name} factory")
-        prexisting = cls.__sources.get(name, None)
+        prexisting = cls.__source_factories.get(name, None)
         if not prexisting:
-            cls.__sources[name] = fn  # type: ignore[assignment]
+            cls.__source_factories[name] = fn  # type: ignore[assignment]
         else:
             raise ValueError(f"{name} already exists")
 
     @property
     def factories(self) -> List[str]:
-        return list(self.__sources.keys())
+        return list(self.__source_factories.keys())
 
     def __getattr__(self, name):
         try:
@@ -57,7 +57,7 @@ class MetaDatasouce(type):
 
         sources = _SourceFactories()
         factory_name = f"add_{_camel_to_snake(cls_name)}".removesuffix("_datasource")
-        sources.add_factory(factory_name, _datasource_factory)
+        sources.register_factory(factory_name, _datasource_factory)
 
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
 
@@ -82,7 +82,7 @@ class DataContext:
     _context = None
 
     @classmethod
-    def get_context(cls) -> DataContext:
+    def get_context(cls) -> "DataContext":
         if not cls._context:
             cls._context = DataContext()
 
