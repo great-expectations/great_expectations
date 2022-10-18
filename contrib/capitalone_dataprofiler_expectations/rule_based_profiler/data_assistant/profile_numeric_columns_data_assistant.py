@@ -88,7 +88,7 @@ class ProfileNumericColumnsDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_multi_batch_parameter_builder(
+        data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
             metric_name="data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
