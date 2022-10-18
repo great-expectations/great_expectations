@@ -8,6 +8,7 @@ from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.self_check.util import get_test_validator_with_data
 from great_expectations.util import isclose
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validator import Validator
 
 
@@ -38,6 +39,7 @@ def integer_and_datetime_sample_dataset() -> dict:
     return data
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.parametrize(
     "backend,",
     [
@@ -70,6 +72,8 @@ def test_column_partition_metric(
         data=integer_and_datetime_sample_dataset,
     )
 
+    metrics_calculator: MetricsCalculator = validator_with_data.metrics_calculator
+
     seconds_in_week: int = 604800
 
     n_bins: int = 10
@@ -88,9 +92,7 @@ def test_column_partition_metric(
         },
         metric_dependencies=None,
     )
-    results = validator_with_data.compute_metrics(
-        metric_configurations=[desired_metric]
-    )
+    results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 
     increment = float(n_bins + 1) / n_bins
     assert all(
@@ -110,9 +112,7 @@ def test_column_partition_metric(
         },
         metric_dependencies=None,
     )
-    results = validator_with_data.compute_metrics(
-        metric_configurations=[desired_metric]
-    )
+    results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 
     increment = datetime.timedelta(
         seconds=(seconds_in_week * float(n_bins + 1) / n_bins)
