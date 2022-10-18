@@ -91,9 +91,8 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
                         schema_name: main
                         table_name: table_2
                     table_1: {{}}
-                    table_2:
+                    main.table_2:
                         include_schema_name: True
-                        schema_name: main
     """
 
     try:
@@ -1304,7 +1303,7 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
 
-    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_2" (explicitly).
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "main.table_2" (explicitly).
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",

@@ -12,7 +12,6 @@ from great_expectations.datasource.data_connector import (
     ConfiguredAssetSqlDataConnector,
     InferredAssetSqlDataConnector,
 )
-from great_expectations.datasource.data_connector.sorter import DictionarySorter
 from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
 
 try:
