@@ -33,7 +33,7 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
     ExpectColumnValueZScoresToBeLessThan,
 )
 from great_expectations.expectations.registry import get_expectation_impl
-from great_expectations.render.types import RenderedAtomicContent
+from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
@@ -1014,36 +1014,6 @@ def test_adding_expectation_to_validator_not_send_usage_message(
     )
     assert mock_emit.call_count == 0
     assert mock_emit.call_args_list == []
-
-
-@pytest.mark.slow  # 2.53s
-@pytest.mark.integration
-def test_validator_set_active_batch(
-    multi_batch_taxi_validator,
-):
-    jan_min_date = "2019-01-01"
-    mar_min_date = "2019-03-01"
-    assert (
-        multi_batch_taxi_validator.active_batch_id == "90bb41c1fbd7c71c05dbc8695320af71"
-    )
-    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
-        assert multi_batch_taxi_validator.expect_column_values_to_be_between(
-            "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
-        ).success
-
-    multi_batch_taxi_validator.active_batch_id = "0327cfb13205ec8512e1c28e438ab43b"
-
-    assert (
-        multi_batch_taxi_validator.active_batch_id == "0327cfb13205ec8512e1c28e438ab43b"
-    )
-    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
-        assert not multi_batch_taxi_validator.expect_column_values_to_be_between(
-            "pickup_datetime", min_value=mar_min_date, parse_strings_as_datetimes=True
-        ).success
-    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
-        assert multi_batch_taxi_validator.expect_column_values_to_be_between(
-            "pickup_datetime", min_value=jan_min_date, parse_strings_as_datetimes=True
-        ).success
 
 
 @pytest.mark.integration

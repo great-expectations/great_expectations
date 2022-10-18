@@ -8,6 +8,11 @@ from great_expectations.expectations.expectation import (
     _format_map_output,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    LegacyDiagnosticRendererType,
+    LegacyRendererType,
+)
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -159,7 +164,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -219,7 +224,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,
@@ -244,7 +249,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
     @classmethod
     @renderer(
-        renderer_type="renderer.descriptive.column_properties_table.missing_count_row"
+        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW
     )
     def _descriptive_column_properties_table_missing_count_row_renderer(
         cls,
@@ -273,7 +278,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
     @classmethod
     @renderer(
-        renderer_type="renderer.descriptive.column_properties_table.missing_percent_row"
+        renderer_type=LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_PERCENT_ROW
     )
     def _descriptive_column_properties_table_missing_percent_row_renderer(
         cls,

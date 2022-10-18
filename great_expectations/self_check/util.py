@@ -1209,7 +1209,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
     sqlite_db_path=None,
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional["DataContext"] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ):
     """Utility to create datasets for json-formatted tests."""
 
@@ -1389,7 +1389,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional["DataContext"] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
@@ -2498,7 +2498,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     "allow_cross_type_comparisons" in test["input"]
                     and validator_with_data
                     and isinstance(
-                        validator_with_data.execution_engine.active_batch_data,
+                        validator_with_data.execution_engine.batch_manager.active_batch_data,
                         SqlAlchemyBatchData,
                     )
                 ):
@@ -2764,7 +2764,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
             check_json_test_result(
                 test=test,
                 result=result,
-                data_asset=validator.execution_engine.active_batch_data,
+                data_asset=validator.execution_engine.batch_manager.active_batch_data,
             )
         except Exception as e:
             if raise_exception:

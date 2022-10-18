@@ -31,7 +31,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.render.types import RenderedAtomicContent
+from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
