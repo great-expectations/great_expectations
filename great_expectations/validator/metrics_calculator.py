@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import logging
 import traceback
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from tqdm.auto import tqdm
 
@@ -27,6 +29,9 @@ except ImportError:
     logger.debug(
         "Unable to load pandas; install optional pandas dependency for support."
     )
+
+if TYPE_CHECKING:
+    from great_expectations.expectations.metrics.metric_provider import MetricProvider
 
 
 MAX_METRIC_COMPUTATION_RETRIES: int = 3
@@ -375,7 +380,7 @@ class MetricsCalculator:
 
     @staticmethod
     def _get_default_domain_kwargs(
-        metric_provider_cls: "MetricProvider",  # noqa: F821
+        metric_provider_cls: MetricProvider,
         metric_configuration: MetricConfiguration,
     ) -> None:
         for key in metric_provider_cls.domain_keys:
@@ -389,7 +394,7 @@ class MetricsCalculator:
 
     @staticmethod
     def _get_default_value_kwargs(
-        metric_provider_cls: "MetricProvider",  # noqa: F821
+        metric_provider_cls: MetricProvider,
         metric_configuration: MetricConfiguration,
     ) -> None:
         key: str

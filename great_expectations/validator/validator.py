@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import inspect
@@ -8,7 +10,7 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse
 from marshmallow import ValidationError
@@ -87,6 +89,9 @@ except ImportError:
         "Unable to load pandas; install optional pandas dependency for support."
     )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context import DataContext
+
 ValidationStatistics = namedtuple(
     "ValidationStatistics",
     [
@@ -114,7 +119,7 @@ class Validator:
         interactive_evaluation: bool = True,
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional[DataContext] = None,
         batches: Optional[List[Batch]] = None,
         include_rendered_content: Optional[bool] = None,
         **kwargs,
@@ -134,7 +139,7 @@ class Validator:
             batches: The batches for which to validate.
             include_rendered_content: Whether or not to include rendered_content in the ExpectationValidationResult.
         """
-        self._data_context: Optional["DataContext"] = data_context  # noqa: F821
+        self._data_context: Optional[DataContext] = data_context
 
         self._metrics_calculator: MetricsCalculator = MetricsCalculator(
             execution_engine=execution_engine,
@@ -178,7 +183,7 @@ class Validator:
         return self._metrics_calculator
 
     @property
-    def data_context(self) -> Optional["DataContext"]:  # noqa: F821
+    def data_context(self) -> Optional[DataContext]:
         """Reference to DataContext object handle."""
         return self._data_context
 
