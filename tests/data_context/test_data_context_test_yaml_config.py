@@ -10,7 +10,9 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
-from great_expectations.data_context.data_context import BaseDataContext
+from great_expectations.data_context.config_validator.yaml_config_validator import (
+    YamlConfigValidator,
+)
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
@@ -1448,23 +1450,23 @@ def test_test_yaml_config_supported_types_have_self_check():
     # Each major category of test_yaml_config supported types has its own origin module_name
     supported_types = [
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES,
+            YamlConfigValidator.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES,
             "great_expectations.data_context.store",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES,
+            YamlConfigValidator.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES,
             "great_expectations.datasource",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES,
+            YamlConfigValidator.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES,
             "great_expectations.datasource.data_connector",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES,
+            YamlConfigValidator.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES,
             "great_expectations.checkpoint",
         ),
         (
-            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES,
+            YamlConfigValidator.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES,
             "great_expectations.rule_based_profiler",
         ),
     ]
@@ -1472,7 +1474,7 @@ def test_test_yaml_config_supported_types_have_self_check():
     # Quick sanity check to ensure that we are testing ALL supported types herein
     all_types = list(itertools.chain.from_iterable(t[0] for t in supported_types))
     assert sorted(all_types) == sorted(
-        BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+        YamlConfigValidator.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
     )
 
     # Use class_name and module_name to get the class type and introspect to confirm adherence to self_check requirement
