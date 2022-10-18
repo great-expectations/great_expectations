@@ -148,7 +148,7 @@ class RenderedAtomicValue(DictDot):
         self.table: Optional[List[List[RenderedAtomicValue]]] = table
 
         # GraphType
-        self.graph: Optional[RenderedAtomicValueGraph] = RenderedAtomicValueGraph(
+        self.graph = RenderedAtomicValueGraph(
             graph=graph
         )
 
