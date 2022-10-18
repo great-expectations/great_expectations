@@ -300,11 +300,7 @@ class MetricsCalculator:
             computable_metrics = set()
 
             for metric in ready_metrics:
-                if (
-                    metric.id in failed_metric_info
-                    and failed_metric_info[metric.id]["num_failures"]
-                    >= MAX_METRIC_COMPUTATION_RETRIES
-                ):  # type: ignore[arg-type]
+                if metric.id in failed_metric_info and failed_metric_info[metric.id]["num_failures"] >= MAX_METRIC_COMPUTATION_RETRIES:  # type: ignore
                     aborted_metrics_info[metric.id] = failed_metric_info[metric.id]
                 else:
                     computable_metrics.add(metric)
@@ -329,7 +325,7 @@ class MetricsCalculator:
                     )
                     for failed_metric in err.failed_metrics:
                         if failed_metric.id in failed_metric_info:
-                            failed_metric_info[failed_metric.id]["num_failures"] += 1
+                            failed_metric_info[failed_metric.id]["num_failures"] += 1  # type: ignore
                             failed_metric_info[failed_metric.id]["exception_info"].add(
                                 exception_info
                             )
@@ -338,7 +334,7 @@ class MetricsCalculator:
                             failed_metric_info[failed_metric.id][
                                 "metric_configuration"
                             ] = failed_metric
-                            failed_metric_info[failed_metric.id]["num_failures"] = 1
+                            failed_metric_info[failed_metric.id]["num_failures"] = 1  # type: ignore
                             failed_metric_info[failed_metric.id]["exception_info"] = {
                                 exception_info
                             }
@@ -347,9 +343,7 @@ class MetricsCalculator:
             except Exception as e:
                 if catch_exceptions:
                     logger.error(
-                        f"""Caught exception {str(e)} while trying to resolve a set of {len(ready_metrics)} metrics; \
-    aborting graph resolution.
-    """
+                        f"""Caught exception {str(e)} while trying to resolve a set of {len(ready_metrics)} metrics; aborting graph resolution."""
                     )
                     done = True
                 else:
@@ -360,7 +354,7 @@ class MetricsCalculator:
             ):
                 done = True
 
-        progress_bar.close()
+        progress_bar.close()  # type: ignore
 
         return aborted_metrics_info
 
