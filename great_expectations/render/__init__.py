@@ -227,7 +227,7 @@ class RenderedAtomicValueSchema(Schema):
         for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
                 data.pop(key)
-            elif key == "graph" and key in data and data[key]["graph"] is None:
+            elif key == "graph" and key in data and data.get(key, {}).get("graph") is None:
                 data.pop(key)
         return data
 
