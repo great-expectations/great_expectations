@@ -51,9 +51,9 @@ class MetaDatasouce(type):
 
         cls = type(cls_name, bases, cls_dict)
 
-        def _datasource_factory(name: str) -> Datasource:
-            print(f"5. Adding `{name}` {cls_name}")
-            return cls(name)
+        def _datasource_factory(*args, **kwargs) -> Datasource:
+            print(f"5. Adding `{args[0] if args else ''}` {cls_name}")
+            return cls(*args, **kwargs)
 
         sources = _SourceFactories()
         factory_name = f"add_{_camel_to_snake(cls_name)}".removesuffix("_datasource")
@@ -69,7 +69,7 @@ class PandasDatasource(metaclass=MetaDatasouce):
     def __repr__(self):
         return f"{self.__class__.__name__}(name='{self.name}')"
 
-    def add_csv(self, sep=","):
+    def add_csv(self, foo="foo", bar="bar", sep=","):
         """I'm a docstring!!"""
         return self
 
@@ -82,7 +82,7 @@ class DataContext:
     _context = None
 
     @classmethod
-    def get_context(cls) -> "DataContext":
+    def get_context(cls) -> DataContext:
         if not cls._context:
             cls._context = DataContext()
 
@@ -105,5 +105,5 @@ def get_context() -> DataContext:
 
 if __name__ == "__main__":
     context = get_context()
-    context.sources.add_pandas("taxi").add_csv()
-    # context.sources.add_postgres("taxi_pg")
+    context.sources.add_pandas("taxi")
+    # context.sources.add_postgres()
