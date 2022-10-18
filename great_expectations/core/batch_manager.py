@@ -55,9 +55,15 @@ class BatchManager:
 
     @property
     def active_batch_data_id(self) -> Optional[str]:
-        """The batch id for the default batch data.
+        """
+        The Batch ID for the default "BatchData" object.
 
         When a specific Batch is unavailable, then the data associated with the active_batch_data_id will be used.
+
+        This is a "safety valve" provision.  If self.__active_batch_data_id is unavailable (e.g., did not get set for
+        some reason), then if there is exactly and unambiguously one loaded "BatchData" object, then it will play the
+        role of the "active_batch_data_id", which is needed to compute a metric (by the particular ExecutionEngine).
+        However, if there is more than one, then "active_batch_data_id" becomes ambiguous, and thus "None" is returned.
         """
         if self._active_batch_data_id is not None:
             return self._active_batch_data_id
@@ -82,8 +88,16 @@ class BatchManager:
 
     @property
     def active_batch_id(self) -> Optional[str]:
-        """Getter for active Batch ID"""
-        active_batch_data_id: str = self._active_batch_data_id
+        """
+        Getter for active Batch ID.
+
+        Indeed, "active_batch_data_id" and "active_batch_id" can be different.  The former refers to the most recently
+        loaded "BatchData" object, while the latter refers to the most recently requested "Batch" object.  In applicable
+        situations, no new "BatchData" objects have been loaded; however, a new "Validator" object was instantiated with
+        the list of "Batch" objects, each of whose BatchData has already been loaded (and cached).  Since BatchData IDs
+        are from the same name space as Batch IDs, this helps avoid unnecessary loading of data from different backends.
+        """
+        active_batch_data_id: Optional[str] = self._active_batch_data_id
         if active_batch_data_id != self._active_batch_id:
             logger.warning(
                 "ID of active Batch and ID of active loaded BatchData differ."
