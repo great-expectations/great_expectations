@@ -10,7 +10,9 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.config_validator.yaml_config_validator import (
+    YamlConfigValidator,
+)
 from tests.integration.usage_statistics.example_events.cloud_migrate_example_events import (
     cloud_migrate,
 )
@@ -1352,7 +1354,7 @@ valid_usage_statistics_messages = {
                 },
                 "ge_version": "0.13.20.manual_testing",
             }
-            for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+            for class_name in YamlConfigValidator.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
         ]
         + [
             {
@@ -1365,7 +1367,7 @@ valid_usage_statistics_messages = {
                 },
                 "ge_version": "0.13.20.manual_testing",
             }
-            for class_name in BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+            for class_name in YamlConfigValidator.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
         ]
         # Diagnostic Message Types
         + [
