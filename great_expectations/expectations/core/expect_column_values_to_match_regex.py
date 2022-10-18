@@ -6,6 +6,7 @@ from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -182,7 +183,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    @renderer(renderer_type="renderer.question")
+    @renderer(renderer_type=LegacyRendererType.QUESTION)
     def _question_renderer(
         cls, configuration, result=None, language=None, runtime_configuration=None
     ):
@@ -193,7 +194,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'
 
     @classmethod
-    @renderer(renderer_type="renderer.answer")
+    @renderer(renderer_type=LegacyRendererType.ANSWER)
     def _answer_renderer(
         cls, configuration=None, result=None, language=None, runtime_configuration=None
     ):
@@ -273,7 +274,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,

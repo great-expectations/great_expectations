@@ -277,10 +277,8 @@ class DataContext(BaseDataContext):
 
     def _init_context_root_directory(self, context_root_dir: Optional[str]) -> str:
         if self.ge_cloud_mode and context_root_dir is None:
-            context_root_dir = os.getcwd()
-            logger.info(
-                f'context_root_dir was not provided - defaulting to current working directory "'
-                f'{context_root_dir}".'
+            context_root_dir = CloudDataContext.determine_context_root_directory(
+                context_root_dir
             )
         else:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir

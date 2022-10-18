@@ -235,7 +235,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         name: Optional[str] = None,
         credentials: Optional[dict] = None,
         data_context: Optional[Any] = None,
-        engine=None,
+        engine: "Optional[sa.engine]" = None,
         connection_string: Optional[str] = None,
         url: Optional[str] = None,
         batch_data_dict: Optional[dict] = None,
@@ -945,7 +945,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 queries[domain_id]["select"].append(
                     metric_fn.label(
                         metric_to_resolve.metric_name.join(
-                            random.choices(string.ascii_lowercase, k=2)
+                            random.choices(string.ascii_lowercase, k=4)
                         )
                     )
                 )

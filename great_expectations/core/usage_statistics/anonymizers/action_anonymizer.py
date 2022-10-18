@@ -1,12 +1,17 @@
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+
+if TYPE_CHECKING:
+    from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
+        Anonymizer,
+    )
 
 
 class ActionAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        aggregate_anonymizer: "Anonymizer",
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)
