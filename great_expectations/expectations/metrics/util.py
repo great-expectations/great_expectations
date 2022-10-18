@@ -572,6 +572,7 @@ def column_reflection_fallback(
             query: TextClause = selectable
         else:
             if dialect.name.lower() == GESqlDialect.REDSHIFT:
+                # Redshift needs temp tables to be declared as text
                 query: Select = (
                     sa.select([sa.text("*")]).select_from(sa.text(selectable)).limit(1)
                 )
