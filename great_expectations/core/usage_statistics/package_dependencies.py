@@ -116,6 +116,7 @@ class GEDependencies:
             "sqlalchemy-redshift",
             "teradatasqlalchemy",
             "xlrd",
+            "sqlalchemy-vertica-python",
         ]
     )
 
