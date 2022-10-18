@@ -60,7 +60,7 @@ class BatchManager:
 
         When a specific Batch is unavailable, then the data associated with the active_batch_data_id will be used.
 
-        This is a "safety valve" provision.  If self.__active_batch_data_id is unavailable (e.g., did not get set for
+        This is a "safety valve" provision.  If self._active_batch_data_id is unavailable (e.g., did not get set for
         some reason), then if there is exactly and unambiguously one loaded "BatchData" object, then it will play the
         role of the "active_batch_data_id", which is needed to compute a metric (by the particular ExecutionEngine).
         However, if there is more than one, then "active_batch_data_id" becomes ambiguous, and thus "None" is returned.
