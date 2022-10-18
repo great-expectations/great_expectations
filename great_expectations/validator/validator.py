@@ -6,7 +6,7 @@ import json
 import logging
 import traceback
 import warnings
-from collections import OrderedDict, defaultdict, namedtuple
+from collections import defaultdict, namedtuple
 from collections.abc import Hashable
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
@@ -15,7 +15,12 @@ from marshmallow import ValidationError
 from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import Batch, BatchDefinition, BatchMarkers
+from great_expectations.core.batch import (
+    Batch,
+    BatchData,
+    BatchDefinition,
+    BatchMarkers,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -143,23 +148,15 @@ class Validator:
         """
 
         self._data_context = data_context
+
+        execution_engine.batch_manager.reset_batch_cache()
         self._execution_engine = execution_engine
+
+        self.load_batch_list(batch_list=batches)
+
         self._expose_dataframe_methods = False
 
         self._show_progress_bars = self._determine_progress_bars()
-
-        if batches is None:
-            batches = []
-
-        self._batches = {}
-        self._active_batch_id = None
-        self.load_batch_list(batches)
-
-        if len(batches) > 1:
-            logger.debug(
-                f"{len(batches)} batches will be added to this Validator. The batch_identifiers for the active "
-                f"batch are {self.active_batch.batch_definition['batch_identifiers'].items()}"
-            )
 
         self.interactive_evaluation = interactive_evaluation
         self._initialize_expectations(
@@ -1399,88 +1396,52 @@ aborting graph resolution.
         )
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
-        for batch in batch_list:
-            try:
-                assert isinstance(
-                    batch, Batch
-                ), "batches provided to Validator must be Great Expectations Batch objects"
-            except AssertionError as e:
-                logger.warning(str(e))
-            self._execution_engine.load_batch_data(batch.id, batch.data)
-            self._batches[batch.id] = batch
-            # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
-            # execution_engine. The final active_batch_id will be that of the final batch loaded.
-            self.active_batch_id = batch.id
-
-    @property
-    def batches(self) -> Dict[str, Batch]:
-        """Getter for batches"""
-        if not isinstance(self._batches, OrderedDict):
-            self._batches = OrderedDict(self._batches)
-
-        return self._batches
+        self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
 
     @property
     def loaded_batch_ids(self) -> List[str]:
-        return self._execution_engine.loaded_batch_data_ids
+        """Getter for IDs of loaded Batch objects (convenience property)"""
+        return self._execution_engine.batch_manager.loaded_batch_ids
 
     @property
-    def active_batch(self) -> Optional[Batch]:
-        """Getter for active batch"""
-        active_batch_id: Optional[str] = self.active_batch_id
-        batch: Optional[Batch] = (
-            self.batches.get(active_batch_id) if active_batch_id else None
-        )
-        return batch
+    def active_batch_data(self) -> Optional[BatchData]:
+        """Getter for BatchData object from the currently-active Batch object (convenience property)."""
+        return self._execution_engine.batch_manager.active_batch_data
 
     @property
-    def active_batch_spec(self) -> Optional[BatchSpec]:
-        """Getter for active batch's batch_spec"""
-        if not self.active_batch:
-            return None
-        else:
-            return self.active_batch.batch_spec
+    def batch_cache(self) -> Dict[str, Batch]:
+        """Getter for dictionary of Batch objects (convenience property)"""
+        return self._execution_engine.batch_manager.batch_cache
+
+    @property
+    def batches(self) -> Dict[str, Batch]:
+        """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
+        return self.batch_cache
 
     @property
     def active_batch_id(self) -> Optional[str]:
-        """Getter for active batch id"""
-        active_engine_batch_id = self._execution_engine.active_batch_data_id
-        if active_engine_batch_id != self._active_batch_id:
-            logger.debug(
-                "This validator has a different active batch id than its Execution Engine."
-            )
-        return self._active_batch_id
+        """Getter for batch_id of active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch_id
 
-    @active_batch_id.setter
-    def active_batch_id(self, batch_id: str) -> None:
-        assert set(self.batches.keys()).issubset(set(self.loaded_batch_ids))
-        available_batch_ids: Set[str] = set(self.batches.keys()).union(
-            set(self.loaded_batch_ids)
-        )
-        if batch_id not in available_batch_ids:
-            raise ValueError(
-                f"""batch_id {batch_id} not found in loaded batches.  Batches must first be loaded before they can be \
-set as active.
-"""
-            )
-        else:
-            self._active_batch_id = batch_id
+    @property
+    def active_batch(self) -> Optional[Batch]:
+        """Getter for active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch
+
+    @property
+    def active_batch_spec(self) -> Optional[BatchSpec]:
+        """Getter for batch_spec of active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch_spec
 
     @property
     def active_batch_markers(self) -> Optional[BatchMarkers]:
-        """Getter for active batch's batch markers"""
-        if not self.active_batch:
-            return None
-        else:
-            return self.active_batch.batch_markers
+        """Getter for batch_markers of active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch_markers
 
     @property
     def active_batch_definition(self) -> Optional[BatchDefinition]:
-        """Getter for the active batch's batch definition"""
-        if not self.active_batch:
-            return None
-        else:
-            return self.active_batch.batch_definition
+        """Getter for batch_definition of active Batch (convenience property)"""
+        return self._execution_engine.batch_manager.active_batch_definition
 
     def discard_failing_expectations(self) -> None:
         """Removes any expectations from the validator where the validation has failed"""
@@ -2124,7 +2085,7 @@ set as active.
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
         if domain_kwargs is None:
             domain_kwargs = {
-                "batch_id": self._execution_engine.active_batch_data_id,
+                "batch_id": self._execution_engine.batch_manager.active_batch_id,
             }
 
         columns: List[str] = self.get_metric(
@@ -2144,7 +2105,7 @@ set as active.
     ) -> pd.DataFrame:
         if domain_kwargs is None:
             domain_kwargs = {
-                "batch_id": self._execution_engine.active_batch_data_id,
+                "batch_id": self._execution_engine.batch_manager.active_batch_id,
             }
 
         data: Any = self.get_metric(
