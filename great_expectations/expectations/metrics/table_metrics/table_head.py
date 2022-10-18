@@ -2,12 +2,13 @@ from typing import Any, Dict
 
 import pandas as pd
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
@@ -52,7 +53,10 @@ class TableHead(TableMetricProvider):
         )
         df = None
         table_name = getattr(selectable, "name", None)
-        if table_name is None:
+        if (
+            isinstance(table_name, sa.sql.elements._anonymous_label)
+            or table_name is None
+        ):
             # if a custom query was passed
             try:
                 if metric_value_kwargs["fetch_all"]:
@@ -116,7 +120,7 @@ class TableHead(TableMetricProvider):
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
                 )
-            elif execution_engine.engine.dialect.name.lower() == "mssql":
+            elif execution_engine.engine.dialect.name.lower() == GESqlDialect.MSSQL:
                 # limit doesn't compile properly for mssql
                 sql = str(
                     stmt.compile(

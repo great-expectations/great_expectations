@@ -4,16 +4,17 @@ import json
 import logging
 import os
 import re
+import time
 import traceback
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
-from collections import Counter
+from collections import Counter, defaultdict
 from copy import deepcopy
+from enum import Enum
 from inspect import isabstract
-from numbers import Number
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import numpy as np
+import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
@@ -46,6 +47,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
@@ -54,7 +56,6 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
 )
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
@@ -67,16 +68,22 @@ from great_expectations.expectations.util import (
     render_evaluation_parameter_string,
     valid_tokens_and_types,
 )
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+    LegacyDiagnosticRendererType,
+    LegacyRendererType,
+    RenderedAtomicContent,
+    renderedAtomicValueSchema,
+)
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     CollapseContent,
-    RenderedAtomicContent,
     RenderedContentBlockContainer,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
     ValueListContent,
-    renderedAtomicValueSchema,
 )
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
@@ -179,6 +186,7 @@ class Expectation(metaclass=MetaExpectation):
     ) -> None:
         if configuration is not None:
             self.validate_configuration(configuration)
+
         self._configuration = configuration
 
     @classmethod
@@ -208,25 +216,35 @@ class Expectation(metaclass=MetaExpectation):
         raise NotImplementedError
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.kwargs")
-    def _prescriptive_kwargs(
+    @renderer(renderer_type=AtomicPrescriptiveRendererType.FAILED)
+    def _atomic_prescriptive_failed(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        language: Optional[str] = None,
-        runtime_configuration: Optional[dict] = None,
+        configuration: ExpectationConfiguration,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
-        Default rendering function that is utilized by GE Cloud Front-end if no other atomic renderers apply
+        Default rendering function that is utilized by GE Cloud Front-end if an implemented atomic renderer fails
         """
+        template_str = "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs)."
+
+        params_with_json_schema = {
+            "expectation_type": {
+                "schema": {"type": "string"},
+                "value": configuration.expectation_type,
+            },
+            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+        }
         value_obj = renderedAtomicValueSchema.load(
-            {"schema": {"type": "UnknownType"}, "kwargs": configuration.kwargs}
+            {
+                "template": template_str,
+                "params": params_with_json_schema,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
         )
         rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.kwargs",
+            name=AtomicPrescriptiveRendererType.FAILED,
             value=value_obj,
-            value_type="UnknownType",
+            value_type="StringValueType",
         )
         return rendered
 
@@ -240,8 +258,8 @@ class Expectation(metaclass=MetaExpectation):
         **kwargs,
     ):
         """
-        Template function that contains the logic that is shared by atomic.prescriptive.summary (GE Cloud) and
-        renderer.prescriptive (OSS GE)
+        Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
+        LegacyRendererType.PRESCRIPTIVE
         """
         if runtime_configuration is None:
             runtime_configuration = {}
@@ -260,7 +278,7 @@ class Expectation(metaclass=MetaExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.summary")
+    @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
@@ -288,14 +306,14 @@ class Expectation(metaclass=MetaExpectation):
             }
         )
         rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.summary",
+            name=AtomicPrescriptiveRendererType.SUMMARY,
             value=value_obj,
             value_type="StringValueType",
         )
         return rendered
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     def _prescriptive_renderer(
         cls,
         configuration=None,
@@ -328,7 +346,7 @@ class Expectation(metaclass=MetaExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.meta_properties")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.META_PROPERTIES)
     def _diagnostic_meta_properties_renderer(cls, result=None, **kwargs):
         """
             Render function used to add custom meta to Data Docs
@@ -382,7 +400,7 @@ class Expectation(metaclass=MetaExpectation):
         return custom_property_values
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.status_icon")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.STATUS_ICON)
     def _diagnostic_status_icon_renderer(
         cls,
         configuration=None,
@@ -462,7 +480,7 @@ class Expectation(metaclass=MetaExpectation):
             )
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.unexpected_statement")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT)
     def _diagnostic_unexpected_statement_renderer(
         cls,
         configuration=None,
@@ -563,7 +581,7 @@ class Expectation(metaclass=MetaExpectation):
             ]
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.unexpected_table")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE)
     def _diagnostic_unexpected_table_renderer(
         cls,
         configuration=None,
@@ -660,7 +678,40 @@ class Expectation(metaclass=MetaExpectation):
             return "--"
 
     @classmethod
-    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    @renderer(renderer_type=AtomicDiagnosticRendererType.FAILED)
+    def _atomic_diagnostic_failed(
+        cls,
+        configuration: ExpectationConfiguration,
+        **kwargs: dict,
+    ) -> RenderedAtomicContent:
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        template_str = "Rendering of Expectation Validation Result failed for $expectation_type(**$kwargs)."
+
+        params_with_json_schema = {
+            "expectation_type": {
+                "schema": {"type": "string"},
+                "value": configuration.expectation_type,
+            },
+            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+        }
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": template_str,
+                "params": params_with_json_schema,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name=AtomicDiagnosticRendererType.FAILED,
+            value=value_obj,
+            value_type="StringValueType",
+        )
+        return rendered
+
+    @classmethod
+    @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
         configuration=None,
@@ -681,14 +732,14 @@ class Expectation(metaclass=MetaExpectation):
             }
         )
         rendered = RenderedAtomicContent(
-            name="atomic.diagnostic.observed_value",
+            name=AtomicDiagnosticRendererType.OBSERVED_VALUE,
             value=value_obj,
             value_type="StringValueType",
         )
         return rendered
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,
@@ -802,7 +853,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def get_success_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
-    ):
+    ) -> Dict[str, Any]:
         if not configuration:
             configuration = self.configuration
 
@@ -948,6 +999,11 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
+        ignore_suppress: bool = False,
+        ignore_only_for: bool = False,
+        debug_logger: Optional[logging.Logger] = None,
+        only_consider_these_backends: Optional[List[str]] = None,
+        context: Optional["DataContext"] = None,  # noqa: F821
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -969,6 +1025,12 @@ class Expectation(metaclass=MetaExpectation):
         incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
         that do not exist). These errors are added under "errors" key in the report.
         """
+
+        _debug = lambda x: x
+        _error = lambda x: x
+        if debug_logger:
+            _debug = lambda x: debug_logger.debug(f"(run_diagnostics) {x}")
+            _error = lambda x: debug_logger.error(f"(run_diagnostics) {x}")
 
         errors: List[ExpectationErrorDiagnostics] = []
 
@@ -995,6 +1057,11 @@ class Expectation(metaclass=MetaExpectation):
         _expectation_config: ExpectationConfiguration = (
             self._get_expectation_configuration_from_examples(examples)
         )
+        if not _expectation_config:
+            _error(
+                f"Was NOT able to get Expectation configuration for {self.expectation_type}. "
+                "Is there at least one sample test where 'success' is True?"
+            )
         metric_diagnostics_list: List[
             ExpectationMetricDiagnostics
         ] = self._get_metric_diagnostics_list(
@@ -1008,11 +1075,17 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
 
+        _debug("Getting test results")
         test_results: List[ExpectationTestDiagnostics] = self._get_test_results(
             expectation_type=description_diagnostics.snake_name,
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
+            ignore_suppress=ignore_suppress,
+            ignore_only_for=ignore_only_for,
+            debug_logger=debug_logger,
+            only_consider_these_backends=only_consider_these_backends,
+            context=context,
         )
 
         backend_test_result_counts: List[
@@ -1036,6 +1109,24 @@ class Expectation(metaclass=MetaExpectation):
                 backend_test_result_counts=backend_test_result_counts,
                 execution_engines=introspected_execution_engines,
             )
+        )
+
+        # Set a coverage_score
+        _total_passed = 0
+        _total_failed = 0
+        _num_backends = 0
+        _num_engines = sum([x for x in introspected_execution_engines.values() if x])
+        for result in backend_test_result_counts:
+            _num_backends += 1
+            _total_passed += result.num_passed
+            _total_failed += result.num_failed
+        coverage_score = (
+            _num_backends + _num_engines + _total_passed - (1.5 * _total_failed)
+        )
+        _debug(
+            f"coverage_score: {coverage_score} for {self.expectation_type} ... "
+            f"engines: {_num_engines}, backends: {_num_backends}, "
+            f"passing tests: {_total_passed}, failing tests:{_total_failed}"
         )
 
         # Set final maturity level based on status of all checks
@@ -1070,6 +1161,7 @@ class Expectation(metaclass=MetaExpectation):
             backend_test_result_counts=backend_test_result_counts,
             maturity_checklist=maturity_checklist,
             errors=errors,
+            coverage_score=coverage_score,
         )
 
     def print_diagnostic_checklist(
@@ -1139,14 +1231,27 @@ class Expectation(metaclass=MetaExpectation):
             #   - https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/column_map_expectations/expect_column_values_to_be_unique.json#L174
             #   - https://github.com/great-expectations/great_expectations/pull/4073
             top_level_only_for = example.get("only_for")
+            top_level_suppress_test_for = example.get("suppress_test_for")
             for test in example["tests"]:
                 if (
                     test.get("include_in_gallery") == True
                     or return_only_gallery_examples == False
                 ):
                     copied_test = deepcopy(test)
-                    if top_level_only_for and "only_for" not in copied_test:
-                        copied_test["only_for"] = top_level_only_for
+                    if top_level_only_for:
+                        if "only_for" not in copied_test:
+                            copied_test["only_for"] = top_level_only_for
+                        else:
+                            copied_test["only_for"].extend(top_level_only_for)
+                    if top_level_suppress_test_for:
+                        if "suppress_test_for" not in copied_test:
+                            copied_test[
+                                "suppress_test_for"
+                            ] = top_level_suppress_test_for
+                        else:
+                            copied_test["suppress_test_for"].extend(
+                                top_level_suppress_test_for
+                            )
                     included_test_cases.append(
                         ExpectationLegacyTestCaseAdapter(**copied_test)
                     )
@@ -1158,6 +1263,7 @@ class Expectation(metaclass=MetaExpectation):
                 copied_example["tests"] = included_test_cases
                 copied_example.pop("_notes", None)
                 copied_example.pop("only_for", None)
+                copied_example.pop("suppress_test_for", None)
                 if "test_backends" in copied_example:
                     copied_example["test_backends"] = [
                         TestBackend(**tb) for tb in copied_example["test_backends"]
@@ -1205,6 +1311,17 @@ class Expectation(metaclass=MetaExpectation):
                 if tests:
                     for test in tests:
                         if test.output.get("success"):
+                            return ExpectationConfiguration(
+                                expectation_type=self.expectation_type,
+                                kwargs=test.input,
+                            )
+
+            # There is no sample test where `success` is True, or there are no tests
+            for example in examples:
+                tests = example.tests
+                if tests:
+                    for test in tests:
+                        if test.input:
                             return ExpectationConfiguration(
                                 expectation_type=self.expectation_type,
                                 kwargs=test.input,
@@ -1269,8 +1386,21 @@ class Expectation(metaclass=MetaExpectation):
         test_data_cases: List[ExpectationTestDataCases],
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
         raise_exceptions_for_backends: bool = False,
+        ignore_suppress: bool = False,
+        ignore_only_for: bool = False,
+        debug_logger: Optional[logging.Logger] = None,
+        only_consider_these_backends: Optional[List[str]] = None,
+        context: Optional["DataContext"] = None,  # noqa: F821
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
+
+        _debug = lambda x: x
+        _error = lambda x: x
+        if debug_logger:
+            _debug = lambda x: debug_logger.debug(f"(_get_test_results) {x}")
+            _error = lambda x: debug_logger.error(f"(_get_test_results) {x}")
+        _debug("Starting")
+
         test_results = []
 
         exp_tests = generate_expectation_tests(
@@ -1278,22 +1408,60 @@ class Expectation(metaclass=MetaExpectation):
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
+            ignore_suppress=ignore_suppress,
+            ignore_only_for=ignore_only_for,
+            debug_logger=debug_logger,
+            only_consider_these_backends=only_consider_these_backends,
+            context=context,
         )
 
+        backend_test_times = defaultdict(list)
         for exp_test in exp_tests:
+            if exp_test["test"] is None:
+                _debug(
+                    f"validator_with_data failure for {exp_test['backend']}--{expectation_type}"
+                )
+
+                error_diagnostics = ExpectationErrorDiagnostics(
+                    error_msg=exp_test["error"],
+                    stack_trace="",
+                    test_title="all",
+                    test_backend=exp_test["backend"],
+                )
+
+                test_results.append(
+                    ExpectationTestDiagnostics(
+                        test_title="all",
+                        backend=exp_test["backend"],
+                        test_passed=False,
+                        include_in_gallery=False,
+                        validation_result=None,
+                        error_diagnostics=error_diagnostics,
+                    )
+                )
+                continue
+
+            exp_combined_test_name = f"{exp_test['backend']}--{exp_test['test']['title']}--{expectation_type}"
+            _debug(f"Starting {exp_combined_test_name}")
+            _start = time.time()
             validation_result, error_message, stack_trace = evaluate_json_test_cfe(
                 validator=exp_test["validator_with_data"],
                 expectation_type=exp_test["expectation_type"],
                 test=exp_test["test"],
                 raise_exception=False,
             )
-            print(f"\n({exp_test['backend']}, {exp_test['test']['title']})")
+            _end = time.time()
+            _duration = _end - _start
+            backend_test_times[exp_test["backend"]].append(_duration)
+            _debug(
+                f"Took {_duration} seconds to evaluate_json_test_cfe for {exp_combined_test_name}"
+            )
             if error_message is None:
-                print(f"  PASSED")
+                _debug(f"PASSED {exp_combined_test_name}")
                 test_passed = True
                 error_diagnostics = None
             else:
-                print(f"  ERROR: {repr(error_message)}")
+                _error(f"{repr(error_message)} for {exp_combined_test_name}")
                 print(f"{stack_trace[0]}")
                 error_diagnostics = ExpectationErrorDiagnostics(
                     error_msg=error_message,
@@ -1319,6 +1487,11 @@ class Expectation(metaclass=MetaExpectation):
                     validation_result=validation_result,
                     error_diagnostics=error_diagnostics,
                 )
+            )
+
+        for backend_name, test_times in sorted(backend_test_times.items()):
+            _debug(
+                f"Took {sum(test_times)} seconds to run {len(test_times)} tests {backend_name}--{expectation_type}"
             )
 
         return test_results
@@ -1386,14 +1559,16 @@ class Expectation(metaclass=MetaExpectation):
         expectation_type: str,
         test_diagnostics: List[ExpectationTestDiagnostics],
         registered_renderers: List[str],
-        standard_renderers: List[str] = [
-            "renderer.answer",
-            "renderer.diagnostic.unexpected_statement",
-            "renderer.diagnostic.observed_value",
-            "renderer.diagnostic.status_icon",
-            "renderer.diagnostic.unexpected_table",
-            "renderer.prescriptive",
-            "renderer.question",
+        standard_renderers: List[
+            Union[LegacyRendererType, LegacyDiagnosticRendererType]
+        ] = [
+            LegacyRendererType.ANSWER,
+            LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
+            LegacyDiagnosticRendererType.OBSERVED_VALUE,
+            LegacyDiagnosticRendererType.STATUS_ICON,
+            LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+            LegacyRendererType.PRESCRIPTIVE,
+            LegacyRendererType.QUESTION,
         ],
     ) -> List[ExpectationRendererDiagnostics]:
         """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExpectationTestDiagnostics."""
@@ -1473,6 +1648,8 @@ class Expectation(metaclass=MetaExpectation):
         execution_engines = {}
         for provider in execution_engine_names:
             all_true = True
+            if not metric_diagnostics_list:
+                all_true = False
             for metric_diagnostics in metric_diagnostics_list:
                 try:
                     has_provider = (
@@ -1481,6 +1658,7 @@ class Expectation(metaclass=MetaExpectation):
                     )
                     if not has_provider:
                         all_true = False
+                        break
                 except KeyError:
                     # https://github.com/great-expectations/great_expectations/blob/abd8f68a162eaf9c33839d2c412d8ba84f5d725b/great_expectations/expectations/core/expect_table_row_count_to_equal_other_table.py#L174-L181
                     # expect_table_row_count_to_equal_other_table does tricky things and replaces
@@ -1685,11 +1863,6 @@ class TableExpectation(Expectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-        if min_val is not None and max_val is not None and min_val > max_val:
-            raise InvalidExpectationConfigurationError(
-                "Minimum Threshold cannot be larger than Maximum Threshold"
-            )
-
         return True
 
     def _validate_metric_value_between(
@@ -1700,20 +1873,28 @@ class TableExpectation(Expectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        metric_value = metrics.get(metric_name)
+        metric_value: Optional[Any] = metrics.get(metric_name)
 
         if metric_value is None:
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        min_value = self.get_success_kwargs(configuration).get("min_value")
-        strict_min = self.get_success_kwargs(configuration).get("strict_min")
-        max_value = self.get_success_kwargs(configuration).get("max_value")
-        strict_max = self.get_success_kwargs(configuration).get("strict_max")
-
-        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
-            "parse_strings_as_datetimes"
+        min_value: Optional[Any] = self.get_success_kwargs(configuration).get(
+            "min_value"
         )
+        strict_min: Optional[bool] = self.get_success_kwargs(configuration).get(
+            "strict_min"
+        )
+        max_value: Optional[Any] = self.get_success_kwargs(configuration).get(
+            "max_value"
+        )
+        strict_max: Optional[bool] = self.get_success_kwargs(configuration).get(
+            "strict_max"
+        )
+
+        parse_strings_as_datetimes: Optional[bool] = self.get_success_kwargs(
+            configuration
+        ).get("parse_strings_as_datetimes")
 
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
@@ -1737,18 +1918,34 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 except TypeError:
                     pass
 
-        if not isinstance(metric_value, datetime.datetime) and np.isnan(metric_value):
+        if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
+
+        if isinstance(metric_value, datetime.datetime):
+            if isinstance(min_value, str):
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    raise ValueError(
+                        f"""Could not parse "min_value" of {min_value} (of type "{str(type(min_value))}) into datetime \
+representation."""
+                    )
+
+            if isinstance(max_value, str):
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    raise ValueError(
+                        f"""Could not parse "max_value" of {max_value} (of type "{str(type(max_value))}) into datetime \
+representation."""
+                    )
 
         # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
                 above_min = metric_value > min_value
             else:
-                above_min = (
-                    self._isclose(operand_a=metric_value, operand_b=min_value)
-                    or metric_value >= min_value
-                )
+                above_min = metric_value >= min_value
         else:
             above_min = True
 
@@ -1756,35 +1953,13 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             if strict_max:
                 below_max = metric_value < max_value
             else:
-                below_max = (
-                    self._isclose(operand_a=metric_value, operand_b=min_value)
-                    or metric_value <= max_value
-                )
+                below_max = metric_value <= max_value
         else:
             below_max = True
 
         success = above_min and below_max
 
         return {"success": success, "result": {"observed_value": metric_value}}
-
-    @staticmethod
-    def _isclose(
-        operand_a: Union[datetime.datetime, Number],
-        operand_b: Union[datetime.datetime, Number],
-    ) -> bool:
-        """
-        Checks whether or not two numbers (or timestamps) are approximately close to one another.
-        """
-        operand_a_as_number: np.float64
-        operand_b_as_number: np.float64
-        if isinstance(operand_a, datetime.datetime):
-            operand_a_as_number = np.float64(int(operand_a.strftime("%Y%m%d%H%M%S")))
-            operand_b_as_number = np.float64(int(operand_b.strftime("%Y%m%d%H%M%S")))
-        else:
-            operand_a_as_number = np.float64(operand_a)
-            operand_b_as_number = np.float64(operand_b)
-
-        return np.isclose(operand_a_as_number, operand_b_as_number)
 
 
 class QueryExpectation(TableExpectation, ABC):
@@ -1926,12 +2101,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             assert (
                 "column" in configuration.kwargs
             ), "'column' parameter is required for column map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+            _validate_mostly_config(configuration)
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -2070,9 +2240,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         )
         include_unexpected_rows = result_format.get("include_unexpected_rows")
 
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
         total_count = metrics.get("table.row_count")
         null_count = metrics.get("column_values.nonnull.unexpected_count")
         unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
@@ -2092,8 +2259,13 @@ class ColumnMapExpectation(TableExpectation, ABC):
             # Vacuously true
             success = True
         elif nonnull_count > 0:
-            success_ratio = float(nonnull_count - unexpected_count) / nonnull_count
-            success = success_ratio >= mostly
+            success = _mostly_success(
+                nonnull_count,
+                unexpected_count,
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
+            )
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
@@ -2132,9 +2304,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -2143,12 +2313,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             assert (
                 "column_B" in configuration.kwargs
             ), "'column_B' parameter is required for column pair map expectations"
-            if "mostly" in configuration.kwargs:
-                mostly = configuration.kwargs["mostly"]
-                assert isinstance(
-                    mostly, (int, float)
-                ), "'mostly' parameter must be an integer or float"
-                assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+            _validate_mostly_config(configuration)
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -2272,9 +2437,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
-        mostly = self.get_success_kwargs().get(
-            "mostly", self.default_kwarg_values.get("mostly")
-        )
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
         unexpected_values = metrics.get(f"{self.map_metric}.unexpected_values")
@@ -2290,10 +2452,13 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             # Vacuously true
             success = True
         else:
-            success_ratio = (
-                float(filtered_row_count - unexpected_count) / filtered_row_count
+            success = _mostly_success(
+                filtered_row_count,
+                unexpected_count,
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
             )
-            success = success_ratio >= mostly
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
@@ -2317,11 +2482,12 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "ignore_row_if",
     )
     domain_type = MetricDomainTypes.MULTICOLUMN
-    success_keys = tuple()
+    success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "ignore_row_if": "all_value_are_missing",
+        "mostly": 1,
+        "ignore_row_if": "all_values_are_missing",
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
@@ -2331,14 +2497,13 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
                 "column_list" in configuration.kwargs
             ), "'column_list' parameter is required for multicolumn map expectations"
+            _validate_mostly_config(configuration)
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -2477,7 +2642,13 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             # Vacuously true
             success = True
         else:
-            success = unexpected_count == 0
+            success = _mostly_success(
+                filtered_row_count,
+                unexpected_count,
+                self.get_success_kwargs().get(
+                    "mostly", self.default_kwarg_values.get("mostly")
+                ),
+            )
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
@@ -2621,3 +2792,34 @@ def _format_map_output(
         return return_obj
 
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")
+
+
+def _validate_mostly_config(configuration: Optional[ExpectationConfiguration]) -> None:
+    """
+    Validates "mostly" in ExpectationConfiguration is a number if it exists.
+
+    Args:
+        configuration: The ExpectationConfiguration to be validated
+
+    Raises:
+        AssertionError: An error is mostly exists in the configuration but is not between 0 and 1.
+    """
+    if "mostly" in configuration.kwargs:
+        mostly = configuration.kwargs["mostly"]
+        assert isinstance(
+            mostly, (int, float)
+        ), "'mostly' parameter must be an integer or float"
+        assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
+
+
+def _mostly_success(
+    rows_considered_cnt: int,
+    unexpected_cnt: int,
+    mostly: float,
+) -> bool:
+    rows_considered_cnt_as_float: float = float(rows_considered_cnt)
+    unexpected_cnt_as_float: float = float(unexpected_cnt)
+    success_ratio: float = (
+        rows_considered_cnt_as_float - unexpected_cnt_as_float
+    ) / rows_considered_cnt_as_float
+    return success_ratio >= mostly

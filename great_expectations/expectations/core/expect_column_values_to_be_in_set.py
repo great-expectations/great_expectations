@@ -5,6 +5,7 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
 )
+from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     RenderedBulletListContent,
@@ -20,7 +21,7 @@ from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
@@ -144,7 +145,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         value_set_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_in_set",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
@@ -279,7 +280,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -356,7 +357,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.example_values_block")
+    @renderer(renderer_type=LegacyDescriptiveRendererType.EXAMPLE_VALUES_BLOCK)
     def _descriptive_example_values_block_renderer(
         cls,
         configuration=None,

@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
@@ -13,7 +14,7 @@ from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
@@ -115,7 +116,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
-    max_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    max_range_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="max_range_estimator",
@@ -127,10 +128,12 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
         false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
         estimator=f"{VARIABLES_KEY}estimator",
         n_resamples=f"{VARIABLES_KEY}n_resamples",
         random_seed=f"{VARIABLES_KEY}random_seed",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
+        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
         include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
@@ -139,7 +142,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         max_range_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_max_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
@@ -148,11 +151,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                 "variables": {
                     "strict_min": False,
                     "strict_max": False,
-                    "false_positive_rate": 0.05,
-                    "quantile_statistic_interpolation_method": "auto",
-                    "estimator": "bootstrap",
-                    "n_resamples": 9999,
-                    "random_seed": None,
+                    "estimator": "exact",
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": None,
@@ -304,7 +303,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -377,7 +376,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.stats_table.max_row")
+    @renderer(renderer_type=LegacyDescriptiveRendererType.STATS_TABLE_MAX_ROW)
     def _descriptive_stats_table_max_row_renderer(
         cls,
         configuration=None,

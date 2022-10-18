@@ -2,6 +2,84 @@
   "expectation_type" : "expect_compound_columns_to_be_unique",
   "datasets" : [{
     "data" : {
+      "a" : [1, 2, 3, 4],
+      "b" : [1, 2, 3, 1],
+      "c" : [1, 2, 3, 1]
+    },
+    "schemas": {
+      "spark": {
+        "a": "IntegerType",
+        "b": "IntegerType",
+        "c": "IntegerType"
+      }
+    },
+    "tests": [
+      {
+        "title": "mostly_default_successful_expectation",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column_list": ["a", "b"]
+        },
+        "out": {
+          "unexpected_list": [],
+          "success": true
+        }
+      },
+      {
+        "title": "mostly_default_fails_expectation",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column_list": ["b", "c"]
+        },
+        "out": {
+          "unexpected_list": [ {"b": 1.0, "c": 1.0 }, {"b": 1.0, "c": 1.0 } ],
+          "success": false
+        }
+      },
+      {
+        "title": "mostly_set_successful_expectation",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column_list": ["b", "c"],
+          "mostly": 0.4
+        },
+        "out": {
+          "unexpected_list": [ {"b": 1.0, "c": 1.0 }, {"b": 1.0, "c": 1.0 } ],
+          "success": true
+        }
+      },
+      {
+        "title": "mostly_set_fails_expectation",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column_list": ["b", "c"],
+          "mostly": 0.9
+        },
+        "out": {
+          "unexpected_list": [ {"b": 1.0, "c": 1.0 }, {"b": 1.0, "c": 1.0 } ],
+          "success": false
+        }
+      },
+      {
+        "title": "mostly_set_incorrectly",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column_list": ["a", "b"],
+          "mostly": 1.1,
+          "catch_exceptions": true
+        },
+        "out": {
+          "traceback_substring": "between 0 and 1"
+        }
+      }
+    ]
+  }, {
+    "data" : {
       "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
       "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       "y" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],

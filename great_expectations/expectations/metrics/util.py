@@ -6,6 +6,7 @@ import numpy as np
 from dateutil.parser import parse
 from packaging import version
 
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
 
@@ -131,7 +132,9 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
     try:
         # redshift
         # noinspection PyUnresolvedReferences
-        if issubclass(dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+        if hasattr(dialect, "RedshiftDialect") or issubclass(
+            dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+        ):
             if positive:
                 return BinaryExpression(column, literal(regex), custom_op("~"))
             else:
@@ -568,7 +571,15 @@ def column_reflection_fallback(
         if isinstance(selectable, TextClause):
             query: TextClause = selectable
         else:
-            query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
+            if dialect.name.lower() == GESqlDialect.REDSHIFT:
+                # Redshift needs temp tables to be declared as text
+                query: Select = (
+                    sa.select([sa.text("*")]).select_from(sa.text(selectable)).limit(1)
+                )
+            else:
+                query: Select = (
+                    sa.select([sa.text("*")]).select_from(selectable).limit(1)
+                )
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys
@@ -609,6 +620,12 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
             dialect_supported = True
 
     try:
+        if hasattr(dialect, "RedshiftDialect"):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+    try:
         # noinspection PyUnresolvedReferences
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             dialect_supported = True
@@ -618,6 +635,12 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     try:
         # noinspection PyUnresolvedReferences
         if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+    try:
+        if hasattr(dialect, "SnowflakeDialect"):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass

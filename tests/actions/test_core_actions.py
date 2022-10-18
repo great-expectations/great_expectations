@@ -41,8 +41,11 @@ class MockTeamsResponse:
 class MockSlackResponse:
     def __init__(self, status_code):
         self.status_code = status_code
-        self.text = "test_text"
+        self.text = "ok"
         self.content = json.dumps({"ok": "True"})
+
+    def json(self):
+        return {"ok": "True"}
 
 
 class MockCloudResponse:
@@ -633,7 +636,7 @@ def test_cloud_notification_action(
     )
     expected_ge_cloud_url = urljoin(
         cloud_action.data_context.ge_cloud_config.base_url,
-        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
+        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/checkpoints/"
         f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
     )
     expected_headers = {
@@ -667,7 +670,7 @@ def test_cloud_notification_action_bad_response(
     )
     expected_ge_cloud_url = urljoin(
         cloud_action.data_context.ge_cloud_config.base_url,
-        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
+        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/checkpoints/"
         f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
     )
     expected_headers = {

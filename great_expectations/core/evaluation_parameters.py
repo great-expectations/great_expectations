@@ -72,7 +72,7 @@ class EvaluationParameterParser:
     }
 
     def __init__(self) -> None:
-        self.exprStack = []
+        self.exprStack: list = []
         self._parser = None
 
     def push_first(self, toks) -> None:
@@ -304,7 +304,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):
     return dependencies
 
 
-def parse_evaluation_parameter(
+def parse_evaluation_parameter(  # noqa: C901 - complexity 21
     parameter_expression: str,
     evaluation_parameters: Optional[Dict[str, Any]] = None,
     data_context: Optional[Any] = None,  # Cannot type 'DataContext' due to import cycle
@@ -346,7 +346,7 @@ def parse_evaluation_parameter(
         try:
             res = ge_urn.parseString(L[0])
             if res["urn_type"] == "stores":
-                store = data_context.stores.get(res["store_name"])
+                store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
                 return store.get_query_result(
                     res["metric_name"], res.get("metric_kwargs", {})
                 )
@@ -384,7 +384,7 @@ def parse_evaluation_parameter(
                 try:
                     res = ge_urn.parseString(ob)
                     if res["urn_type"] == "stores":
-                        store = data_context.stores.get(res["store_name"])
+                        store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
                         expr.exprStack[i] = str(
                             store.get_query_result(
                                 res["metric_name"], res.get("metric_kwargs", {})
@@ -422,11 +422,11 @@ def parse_evaluation_parameter(
 
 
 def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
-    deduplicated = {}
+    deduplicated: dict = {}
     for suite_name, required_metrics in dependencies.items():
         deduplicated[suite_name] = []
         metrics = set()
-        metric_kwargs = {}
+        metric_kwargs: dict = {}
         for metric in required_metrics:
             if isinstance(metric, str):
                 metrics.add(metric)

@@ -1,2 +1,2 @@
 feather-format>=0.4.1
-pyarrow<3.1.0
+pyarrow

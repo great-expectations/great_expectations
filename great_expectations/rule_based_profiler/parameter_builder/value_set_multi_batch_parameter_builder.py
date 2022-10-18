@@ -3,24 +3,30 @@ from typing import Any, Collection, Dict, List, Optional, Set, Union
 
 import numpy as np
 
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
+    datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricValues,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    AttributedResolvedMetrics,
-    Domain,
-    MetricValues,
     ParameterContainer,
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import is_ndarray_datetime_dtype
 
 
 class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
@@ -46,6 +52,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         str
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "metric_name",
+        "single_batch_mode",
         "enforce_numeric_metric",
         "replace_nan_with_zero",
         "reduce_scalar_metric",
@@ -120,15 +127,28 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
                 FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
             ]
         )
+        details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
+
+        unique_values: Set[Any] = _get_unique_values_from_nested_collection_of_sets(
+            collection=metric_values
+        )
+
+        unique_values_as_array: np.ndarray = np.asarray(unique_values)
+        if unique_values_as_array.ndim == 0:
+            unique_values_as_array = np.asarray([unique_values])
+
+        details["parse_strings_as_datetimes"] = datetime_semantic_domain_type(
+            domain=domain
+        ) or is_ndarray_datetime_dtype(
+            data=unique_values_as_array,
+            parse_strings_as_datetimes=False,
+            fuzzy=False,
+        )
 
         return Attributes(
             {
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: _get_unique_values_from_nested_collection_of_sets(
-                    collection=metric_values
-                ),
-                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ],
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: unique_values,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
             }
         )
 
@@ -154,7 +174,7 @@ def _get_unique_values_from_nested_collection_of_sets(
         flattened = set().union(*flattened)
 
     """
-    In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to
+    In multi-batch data analysis, values can be empty and missing, resulting in "None" added to set.  However, due to
     reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
     """

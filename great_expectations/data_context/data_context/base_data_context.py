@@ -5,6 +5,24 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.validation_operators.validation_operators import (
+        ValidationOperator,
+    )
+
 from typing import Any, Callable, Dict, List, Mapping, Optional, Union, cast
 
 from dateutil.parser import parse
@@ -15,30 +33,26 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     YamlConfigValidator,
 )
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-    DataAssistantDispatcher,
-)
 
 try:
-    from typing import Literal
+    from typing import Literal  # type: ignore[attr-defined]
 except ImportError:
     # Fallback for python < 3.8
-    from typing_extensions import Literal
+    from typing_extensions import Literal  # type: ignore[misc]
+
+from marshmallow import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.batch import (
-    Batch,
-    BatchDefinition,
-    BatchRequestBase,
-    IDDict,
-    get_batch_request_from_acceptable_arguments,
-)
+from great_expectations.core.batch import Batch, BatchRequestBase, IDDict
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -71,7 +85,10 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import (
+    GeCloudIdAwareRef,
+    GeCloudResourceRef,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -85,7 +102,6 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import (
@@ -279,22 +295,31 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             context_root_dir = os.path.abspath(context_root_dir)
         self._context_root_directory = context_root_dir
         # initialize runtime_environment as empty dict if None
-        runtime_environment: dict = runtime_environment or {}
+        runtime_environment = runtime_environment or {}
         if self._ge_cloud_mode:
+            ge_cloud_base_url: Optional[str] = None
+            ge_cloud_access_token: Optional[str] = None
+            ge_cloud_organization_id: Optional[str] = None
+            if ge_cloud_config:
+                ge_cloud_base_url = ge_cloud_config.base_url
+                ge_cloud_access_token = ge_cloud_config.access_token
+                ge_cloud_organization_id = ge_cloud_config.organization_id
             self._data_context = CloudDataContext(
                 project_config=project_config,
                 runtime_environment=runtime_environment,
-                context_root_dir=context_root_dir,
-                ge_cloud_config=ge_cloud_config,
+                context_root_dir=context_root_dir,  # type: ignore[arg-type]
+                ge_cloud_base_url=ge_cloud_base_url,
+                ge_cloud_access_token=ge_cloud_access_token,
+                ge_cloud_organization_id=ge_cloud_organization_id,
             )
         elif self._context_root_directory:
-            self._data_context = FileDataContext(
+            self._data_context = FileDataContext(  # type: ignore[assignment]
                 project_config=project_config,
-                context_root_dir=context_root_dir,
+                context_root_dir=context_root_dir,  # type: ignore[arg-type]
                 runtime_environment=runtime_environment,
             )
         else:
-            self._data_context = EphemeralDataContext(
+            self._data_context = EphemeralDataContext(  # type: ignore[assignment]
                 project_config=project_config, runtime_environment=runtime_environment
             )
 
@@ -302,14 +327,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
         # necessary properties / overrides
         self._synchronize_self_with_underlying_data_context()
+
+        self._variables = self._data_context.variables  # type: ignore[assignment,union-attr]
+
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
         # plugins are built.
-        self.validation_operators = {}
+        self.validation_operators: Dict = {}
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         if (
-            "validation_operators" in self.get_config().commented_map
+            "validation_operators" in self.get_config().commented_map  # type: ignore[union-attr]
             and self.config.validation_operators
         ):
             for (
@@ -320,9 +348,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_name,
                     validation_operator_config,
                 )
-        # NOTE: <DataContextRefactor>  This will be migrated to AbstractDataContext, along with associated methods
-        # and properties.
-        self._assistants = DataAssistantDispatcher(data_context=self)
 
         self._yaml_config_validator = YamlConfigValidator(
             data_context=self,
@@ -347,29 +372,34 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         # NOTE: <DataContextRefactor> This remains a rather clunky way of ensuring that all necessary parameters and
         # values from self._data_context are persisted to self.
-        self._project_config = self._data_context._project_config
-        self.runtime_environment = self._data_context.runtime_environment or {}
-        self._config_variables = self._data_context.config_variables
-        self._in_memory_instance_id = self._data_context._in_memory_instance_id
-        self._stores = self._data_context._stores
-        self._datasource_store = self._data_context._datasource_store
-        self._data_context_id = self._data_context._data_context_id
-        self._usage_statistics_handler = self._data_context._usage_statistics_handler
-        self._cached_datasources = self._data_context._cached_datasources
+        self._project_config = self._data_context._project_config  # type: ignore[union-attr]
+        self.runtime_environment = self._data_context.runtime_environment or {}  # type: ignore[union-attr]
+        self._config_variables = self._data_context.config_variables  # type: ignore[union-attr]
+        self._in_memory_instance_id = self._data_context._in_memory_instance_id  # type: ignore[union-attr]
+        self._stores = self._data_context._stores  # type: ignore[union-attr]
+        self._datasource_store = self._data_context._datasource_store  # type: ignore[union-attr]
+        self._data_context_id = self._data_context._data_context_id  # type: ignore[union-attr]
+        self._usage_statistics_handler = self._data_context._usage_statistics_handler  # type: ignore[union-attr]
+        self._cached_datasources = self._data_context._cached_datasources  # type: ignore[union-attr]
         self._evaluation_parameter_dependencies_compiled = (
-            self._data_context._evaluation_parameter_dependencies_compiled
+            self._data_context._evaluation_parameter_dependencies_compiled  # type: ignore[union-attr]
         )
         self._evaluation_parameter_dependencies = (
-            self._data_context._evaluation_parameter_dependencies
+            self._data_context._evaluation_parameter_dependencies  # type: ignore[union-attr]
         )
+        self._assistants = self._data_context._assistants  # type: ignore[union-attr]
 
     def _save_project_config(self) -> None:
         """Save the current project to disk."""
         logger.debug("Starting DataContext._save_project_config")
 
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)  # type: ignore[arg-type]
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                self.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
 
     def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
@@ -382,7 +412,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             store (Store)
         """
 
-        self.config["stores"][store_name] = store_config
+        self.config.stores[store_name] = store_config  # type: ignore[index]
         return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
@@ -398,12 +428,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             validation_operator (ValidationOperator)
         """
 
-        self.config["validation_operators"][
+        self.config.validation_operators[
             validation_operator_name
         ] = validation_operator_config
-        config = self.project_config_with_variables_substituted.validation_operators[
-            validation_operator_name
-        ]
+        config = self.variables.validation_operators[validation_operator_name]  # type: ignore[index]
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
             config=config,
@@ -432,9 +460,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
-        return list(
-            self.project_config_with_variables_substituted.data_docs_sites.keys()
-        )
+        return list(self.variables.data_docs_sites.keys())  # type: ignore[union-attr]
 
     def get_docs_sites_urls(
         self,
@@ -463,13 +489,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        unfiltered_sites = (
-            self.project_config_with_variables_substituted.data_docs_sites
-        )
+        unfiltered_sites = self.variables.data_docs_sites
 
         # Filter out sites that are not in site_names
         sites = (
-            {k: v for k, v in unfiltered_sites.items() if k in site_names}
+            {k: v for k, v in unfiltered_sites.items() if k in site_names}  # type: ignore[union-attr]
             if site_names
             else unfiltered_sites
         )
@@ -622,16 +646,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             skip_if_substitution_variable=skip_if_substitution_variable,
         )
         config_variables[config_variable_name] = value
-        config_variables_filepath = cast(
-            DataContextConfig, self.get_config()
-        ).config_variables_file_path
+        # Required to call _variables instead of variables property because we don't want to trigger substitutions
+        config = self._variables.config
+        config_variables_filepath = config.config_variables_file_path
         if not config_variables_filepath:
             raise ge_exceptions.InvalidConfigError(
                 "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
             )
 
         config_variables_filepath = os.path.join(
-            self.root_directory, config_variables_filepath
+            self.root_directory, config_variables_filepath  # type: ignore[arg-type]
         )
 
         os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
@@ -647,7 +671,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(
+    def delete_datasource(  # type: ignore[override]
         self, datasource_name: str, save_changes: bool = False
     ) -> None:
         """Delete a data source
@@ -658,7 +682,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        super().delete_datasource(datasource_name)
+        super().delete_datasource(datasource_name, save_changes=save_changes)
         self._synchronize_self_with_underlying_data_context()
 
     def get_available_data_asset_names(
@@ -821,12 +845,12 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
-        datasource = self.get_datasource(batch_kwargs.get("datasource"))
-        batch = datasource.get_batch(
+        datasource = self.get_datasource(batch_kwargs.get("datasource"))  # type: ignore[union-attr,arg-type]
+        batch = datasource.get_batch(  # type: ignore[union-attr]
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
         if data_asset_type is None:
-            data_asset_type = datasource.config.get("data_asset_type")
+            data_asset_type = datasource.config.get("data_asset_type")  # type: ignore[union-attr]
 
         validator = BridgeValidator(
             batch=batch,
@@ -1043,7 +1067,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         else:
             datasource_name = arg1
         try:
-            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(
+            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(  # type: ignore[assignment]
                 datasource_name=datasource_name
             )
             if issubclass(type(datasource), BaseDatasource):
@@ -1057,7 +1081,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 datasource_name = batch_kwargs.get("datasource")
                 if datasource_name is not None:
                     try:
-                        datasource: Union[
+                        datasource: Union[  # type: ignore[no-redef]
                             LegacyDatasource, BaseDatasource
                         ] = self.get_datasource(datasource_name=datasource_name)
                         if isinstance(datasource, LegacyDatasource):
@@ -1143,7 +1167,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
-        *,
         batch_request: Optional[BatchRequestBase] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[dict] = None,
@@ -1204,8 +1227,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         This method attempts to return any number of batches, including an empty list.
         """
-
-        batch_request = get_batch_request_from_acceptable_arguments(
+        return super().get_batch_list(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -1227,164 +1249,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             batch_spec_passthrough=batch_spec_passthrough,
             **kwargs,
         )
-        datasource_name = batch_request.datasource_name
-        if datasource_name in self.datasources:
-            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
-        else:
-            raise ge_exceptions.DatasourceError(
-                datasource_name,
-                "The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
-            )
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
-
-    def get_validator(
-        self,
-        datasource_name: Optional[str] = None,
-        data_connector_name: Optional[str] = None,
-        data_asset_name: Optional[str] = None,
-        batch: Optional[Batch] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        batch_request_list: Optional[List[BatchRequestBase]] = None,
-        batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[IDDict, dict]] = None,
-        batch_identifiers: Optional[dict] = None,
-        limit: Optional[int] = None,
-        index: Optional[Union[int, list, tuple, slice, str]] = None,
-        custom_filter_function: Optional[Callable] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        query: Optional[str] = None,
-        path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        expectation_suite_name: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        create_expectation_suite_with_name: Optional[str] = None,
-        include_rendered_content: bool = False,
-        **kwargs: dict,
-    ) -> Validator:
-        """
-        This method applies only to the new (V3) Datasource schema.
-        """
-
-        if (
-            sum(
-                bool(x)
-                for x in [
-                    expectation_suite is not None,
-                    expectation_suite_name is not None,
-                    create_expectation_suite_with_name is not None,
-                    expectation_suite_ge_cloud_id is not None,
-                ]
-            )
-            > 1
-        ):
-            raise ValueError(
-                f"No more than one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name can be specified"
-            )
-
-        if expectation_suite_ge_cloud_id is not None:
-            expectation_suite = self.get_expectation_suite(
-                ge_cloud_id=expectation_suite_ge_cloud_id
-            )
-        if expectation_suite_name is not None:
-            expectation_suite = self.get_expectation_suite(expectation_suite_name)
-        if create_expectation_suite_with_name is not None:
-            expectation_suite = self.create_expectation_suite(
-                expectation_suite_name=create_expectation_suite_with_name
-            )
-
-        if (
-            sum(
-                bool(x)
-                for x in [
-                    batch is not None,
-                    batch_list is not None,
-                    batch_request is not None,
-                    batch_request_list is not None,
-                ]
-            )
-            > 1
-        ):
-            raise ValueError(
-                "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"
-            )
-
-        if batch_list:
-            pass
-
-        elif batch:
-            batch_list: List = [batch]
-
-        else:
-            batch_list: List = []
-            if not batch_request_list:
-                batch_request_list = [batch_request]
-
-            for batch_request in batch_request_list:
-                batch_list.extend(
-                    self.get_batch_list(
-                        datasource_name=datasource_name,
-                        data_connector_name=data_connector_name,
-                        data_asset_name=data_asset_name,
-                        batch_request=batch_request,
-                        batch_data=batch_data,
-                        data_connector_query=data_connector_query,
-                        batch_identifiers=batch_identifiers,
-                        limit=limit,
-                        index=index,
-                        custom_filter_function=custom_filter_function,
-                        sampling_method=sampling_method,
-                        sampling_kwargs=sampling_kwargs,
-                        splitter_method=splitter_method,
-                        splitter_kwargs=splitter_kwargs,
-                        runtime_parameters=runtime_parameters,
-                        query=query,
-                        path=path,
-                        batch_filter_parameters=batch_filter_parameters,
-                        batch_spec_passthrough=batch_spec_passthrough,
-                        **kwargs,
-                    )
-                )
-
-        return self.get_validator_using_batch_list(
-            expectation_suite=expectation_suite,
-            batch_list=batch_list,
-            include_rendered_content=include_rendered_content,
-        )
-
-    def get_validator_using_batch_list(
-        self,
-        expectation_suite: ExpectationSuite,
-        batch_list: List[Batch],
-        include_rendered_content: bool = False,
-        **kwargs: dict,
-    ) -> Validator:
-        if len(batch_list) == 0:
-            raise ge_exceptions.InvalidBatchRequestError(
-                """Validator could not be created because BatchRequest returned an empty batch_list.
-                Please check your parameters and try again."""
-            )
-        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
-        # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        batch_definition: BatchDefinition = batch_list[-1].batch_definition
-        execution_engine: ExecutionEngine = self.datasources[
-            batch_definition.datasource_name
-        ].execution_engine
-        validator: Validator = Validator(
-            execution_engine=execution_engine,
-            interactive_evaluation=True,
-            expectation_suite=expectation_suite,
-            data_context=self,
-            batches=batch_list,
-            include_rendered_content=include_rendered_content,
-        )
-        return validator
 
     def list_validation_operator_names(self):
         if not self.validation_operators:
@@ -1420,7 +1284,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             Datasource that was added
 
         """
-        new_datasource = super().add_datasource(name, initialize, **kwargs)
+        new_datasource = super().add_datasource(
+            name=name, initialize=initialize, save_changes=save_changes, **kwargs
+        )
         self._synchronize_self_with_underlying_data_context()
         return new_datasource
 
@@ -1437,16 +1303,15 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             save_changes: do I save changes to disk?
         """
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
-        datasource_config: DatasourceConfig = DatasourceConfig(**datasource_config_dict)
+        datasource_config = DatasourceConfig(**datasource_config_dict)
         datasource_name: str = datasource.name
 
         if save_changes:
             self._datasource_store.update_by_name(
                 datasource_name=datasource_name, datasource_config=datasource_config
             )
-        else:
-            self.config.datasources[datasource_name] = datasource_config
-            self._cached_datasources[datasource_name] = datasource_config
+        self.config.datasources[datasource_name] = datasource_config  # type: ignore[assignment,index]
+        self._cached_datasources[datasource_name] = datasource_config
 
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
@@ -1470,9 +1335,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         return generator
 
-    def set_config(self, project_config: DataContextConfig) -> None:
-        self._project_config = project_config
-
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
 
@@ -1480,139 +1342,69 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         for (
             name,
             value,
-        ) in (
-            self.project_config_with_variables_substituted.validation_operators.items()
-        ):
+        ) in self.variables.validation_operators.items():
             value["name"] = name
             validation_operators.append(value)
         return validation_operators
-
-    def send_usage_message(
-        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
-    ) -> None:
-        """helper method to send a usage method using DataContext. Used when sending usage events from
-            classes like ExpectationSuite.
-            event
-        Args:
-            event (str): str representation of event
-            event_payload (dict): optional event payload
-            success (bool): optional success param
-        Returns:
-            None
-        """
-        send_usage_message(self, event, event_payload, success)
 
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> ExpectationSuite:
-        """Build a new expectation suite and save it into the data_context expectation store.
-
-        Args:
-            expectation_suite_name: The name of the expectation_suite to create
-            overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
-                already exists.
-
-        Returns:
-            A new (empty) expectation suite.
         """
-        if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
-
-        expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
+        See `AbstractDataContext.create_expectation_suite` for more information.
+        """
+        suite = self._data_context.create_expectation_suite(  # type: ignore[union-attr]
+            expectation_suite_name,
+            overwrite_existing=overwrite_existing,
+            **kwargs,
         )
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
-            )
-            if self.expectations_store.has_key(key) and not overwrite_existing:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite with GE Cloud ID {} already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True.".format(
-                        ge_cloud_id
-                    )
-                )
-        else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
-            )
-            if self.expectations_store.has_key(key) and not overwrite_existing:
-                raise ge_exceptions.DataContextError(
-                    "expectation_suite with name {} already exists. If you would like to overwrite this "
-                    "expectation_suite, set overwrite_existing=True.".format(
-                        expectation_suite_name
-                    )
-                )
-
-        self.expectations_store.set(key, expectation_suite, **kwargs)
-        return expectation_suite
-
-    def delete_expectation_suite(
-        self,
-        expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ):
-        """Delete specified expectation suite from data_context expectation store.
-
-        Args:
-            expectation_suite_name: The name of the expectation_suite to create
-
-        Returns:
-            True for Success and False for Failure.
-        """
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
-                expectation_suite_name
-            )
-        if not self.expectations_store.has_key(key):
-            raise ge_exceptions.DataContextError(
-                "expectation_suite with name {} does not exist."
-            )
-        else:
-            self.expectations_store.remove_key(key)
-            return True
+        self._synchronize_self_with_underlying_data_context()
+        return suite
 
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
+        include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
-        """Get an Expectation Suite by name or GE Cloud ID
+        """
         Args:
-            expectation_suite_name (str): the name for the Expectation Suite
-            ge_cloud_id (str): the GE Cloud ID for the Expectation Suite
+            expectation_suite_name (str): The name of the Expectation Suite
+            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+                ExpectationConfiguration.
+            ge_cloud_id (str): The GE Cloud ID for the Expectation Suite.
 
         Returns:
-            expectation_suite
+            An existing ExpectationSuite
         """
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
-                expectation_suite_name=expectation_suite_name
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_suite_include_rendered_content()
             )
 
-        if self.expectations_store.has_key(key):
-            expectations_schema_dict: dict = cast(
-                dict, self.expectations_store.get(key)
-            )
-            # create the ExpectationSuite from constructor
-            return ExpectationSuite(**expectations_schema_dict, data_context=self)
+        res = self._data_context.get_expectation_suite(  # type: ignore[union-attr]
+            expectation_suite_name=expectation_suite_name,
+            include_rendered_content=include_rendered_content,
+            ge_cloud_id=ge_cloud_id,
+        )
+        return res
 
-        else:
-            raise ge_exceptions.DataContextError(
-                f"expectation_suite {expectation_suite_name} not found"
-            )
+    def delete_expectation_suite(  # type: ignore[override]
+        self,
+        expectation_suite_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> bool:
+        """
+        See `AbstractDataContext.delete_expectation_suite` for more information.
+        """
+        res = self._data_context.delete_expectation_suite(  # type: ignore[union-attr]
+            expectation_suite_name=expectation_suite_name, ge_cloud_id=ge_cloud_id
+        )
+        self._synchronize_self_with_underlying_data_context()
+        return res
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
@@ -1623,34 +1415,34 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        ge_cloud_id: Optional[str] = None,
-        **kwargs,
-    ):
+        include_rendered_content: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> None:
         """Save the provided expectation suite into the DataContext.
 
         Args:
-            expectation_suite: the suite to save
-            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
-                be read from the suite
+            expectation_suite: The suite to save.
+            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
+                from the suite.
+            overwrite_existing: Whether to overwrite the suite if it already exists.
+            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
 
         Returns:
             None
         """
-        if ge_cloud_id:
-            super().save_expectation_suite(
-                expectation_suite,
-                expectation_suite_name,
-                overwrite_existing,
-                ge_cloud_id,
-                **kwargs,
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
             )
-        else:
-            super().save_expectation_suite(
-                expectation_suite,
-                expectation_suite_name,
-                overwrite_existing,
-                **kwargs,
-            )
+        )
+
+        self._data_context.save_expectation_suite(  # type: ignore[union-attr]
+            expectation_suite,
+            expectation_suite_name,
+            overwrite_existing,
+            include_rendered_content,
+            **kwargs,
+        )
         self._synchronize_self_with_underlying_data_context()
 
     def store_validation_result_metrics(
@@ -1659,13 +1451,10 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._store_metrics(requested_metrics, validation_results, target_store_name)
 
     @property
-    def assistants(self) -> DataAssistantDispatcher:
-        return self._assistants
-
-    @property
     def root_directory(self) -> Optional[str]:
         if hasattr(self._data_context, "_context_root_directory"):
-            return self._data_context._context_root_directory
+            return self._data_context._context_root_directory  # type: ignore[union-attr]
+        return None
 
     def get_validation_result(
         self,
@@ -1674,6 +1463,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         batch_identifier=None,
         validations_store_name=None,
         failed_only=False,
+        include_rendered_content=None,
     ):
         """Get validation results from a configured store.
 
@@ -1682,6 +1472,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
             validations_store_name: the name of the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
+            include_rendered_content: whether to re-populate the validation_result rendered_content
 
         Returns:
             validation_result
@@ -1720,6 +1511,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             if batch_identifier is None:
                 batch_identifier = filtered_key_list[-1].batch_identifier
 
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_validation_result_include_rendered_content()
+            )
+
         key = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
@@ -1729,11 +1525,18 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         results_dict = selected_store.get(key)
 
-        return (
+        validation_result = (
             results_dict.get_failed_validation_results()
             if failed_only
             else results_dict
         )
+
+        if include_rendered_content:
+            for expectation_validation_result in validation_result.results:
+                expectation_validation_result.render()
+                expectation_validation_result.expectation_config.render()
+
+        return validation_result
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,
@@ -1777,7 +1580,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         index_page_locator_infos = {}
 
-        sites = self.project_config_with_variables_substituted.data_docs_sites
+        sites = self.variables.data_docs_sites
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -1834,7 +1637,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             site_name (str): Optional, the name of the site to clean. If not
             specified, all sites will be cleaned.
         """
-        data_docs_sites = self.project_config_with_variables_substituted.data_docs_sites
+        data_docs_sites = self.variables.data_docs_sites
         if not data_docs_sites:
             raise ge_exceptions.DataContextError(
                 "No data docs sites were found on this DataContext, therefore no sites will be cleaned.",
@@ -1854,7 +1657,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return all(cleaned)
 
     def _clean_data_docs_site(self, site_name: str) -> bool:
-        sites = self.project_config_with_variables_substituted.data_docs_sites
+        sites = self.variables.data_docs_sites
         if not sites:
             return False
         site_config = sites.get(site_name)
@@ -1872,7 +1675,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         site_builder.clean_site()
         return True
 
-    def profile_datasource(
+    def profile_datasource(  # noqa: C901 - complexity 25
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -1914,6 +1717,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # We don't need the datasource object, but this line serves to check if the datasource by the name passed as
         # an arg exists and raise an error if it does not.
         datasource = self.get_datasource(datasource_name)
+        assert datasource
 
         if not dry_run:
             logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
@@ -2093,7 +1897,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         profiling_results["success"] = True
         return profiling_results
 
-    def profile_data_asset(
+    def profile_data_asset(  # noqa: C901 - complexity 16
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -2182,7 +1986,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
         profiling_results = {"success": False, "results": []}
 
-        total_columns, total_expectations, total_rows, skipped_data_assets = 0, 0, 0, 0
+        total_columns, total_expectations, total_rows = 0, 0, 0
         total_start_time = datetime.datetime.now()
 
         name = data_asset_name
@@ -2280,7 +2084,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiling_results["success"] = True
         return profiling_results
 
-    def list_checkpoints(self) -> List[str]:
+    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=self.ge_cloud_mode)
 
     def add_checkpoint(
@@ -2308,11 +2112,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
+        default_validation_id: Optional[str] = None,
     ) -> Checkpoint:
-
-        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
-            data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,
+        """
+        See parent 'AbstractDataContext.add_checkpoint()' for more information
+        """
+        checkpoint = self._data_context.add_checkpoint(  # type: ignore[union-attr]
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -2326,19 +2131,22 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            # Next two fields are for LegacyCheckpoint configuration
             validation_operator_name=validation_operator_name,
             batches=batches,
-            # the following four arguments are used by SimpleCheckpoint
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            default_validation_id=default_validation_id,
         )
+        # <TODO> Remove this after BaseDataContext refactor is complete.
+        # currently this can cause problems if the Checkpoint is instantiated with
+        # EphemeralDataContext, which does not (yet) have full functionality.
+        checkpoint._data_context = self
 
-        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
+        self._synchronize_self_with_underlying_data_context()
         return checkpoint
 
     def get_checkpoint(
@@ -2442,8 +2250,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config_version: float,
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
-        ge_cloud_id: Optional[str] = None,
-    ):
+    ) -> RuleBasedProfiler:
         config_data = {
             "name": name,
             "config_version": config_version,
@@ -2457,25 +2264,40 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiler_config.pop("class_name")
         profiler_config.pop("module_name")
 
-        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
+        config = RuleBasedProfilerConfig(**profiler_config)
 
-        return RuleBasedProfiler.add_profiler(
+        profiler = RuleBasedProfiler.add_profiler(
             config=config,
             data_context=self,
             profiler_store=self.profiler_store,
-            ge_cloud_id=ge_cloud_id,
         )
+        return profiler
 
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> None:
-        key: Union[
-            GeCloudIdentifier, ConfigurationIdentifier
-        ] = self.profiler_store.determine_key(name=name, ge_cloud_id=ge_cloud_id)
-        self.profiler_store.set(key=key, value=profiler.config)
+    ) -> RuleBasedProfiler:
+        name = profiler.name
+        ge_cloud_id = profiler.ge_cloud_id
+
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if self.ge_cloud_mode:
+            key = GeCloudIdentifier(
+                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+            )
+        else:
+            key = ConfigurationIdentifier(configuration_key=name)
+
+        response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
+        if isinstance(response, GeCloudResourceRef):
+            ge_cloud_id = response.ge_cloud_id
+
+        # If an id is present, we want to prioritize that as our key for object retrieval
+        if ge_cloud_id:
+            name = None  # type: ignore[assignment]
+
+        profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
+        return profiler
 
     def get_profiler(
         self,
@@ -2585,14 +2407,26 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ge_cloud_id=ge_cloud_id,
         )
 
-    def test_yaml_config(
+    def list_expectation_suites(self) -> Optional[List[str]]:
+        """
+        See parent 'AbstractDataContext.list_expectation_suites()` for more information.
+        """
+        return self._data_context.list_expectation_suites()  # type: ignore[union-attr]
+
+    def list_expectation_suite_names(self) -> List[str]:
+        """
+        See parent 'AbstractDataContext.list_expectation_suite_names()` for more information.
+        """
+        return self._data_context.list_expectation_suite_names()  # type: ignore[union-attr]
+
+    def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,
         name: Optional[str] = None,
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: Union[
+        return_mode: Union[  # type: ignore[name-defined]
             Literal["instantiated_class"], Literal["report_object"]
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
@@ -2641,3 +2475,27 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return_mode=return_mode,
             shorten_tracebacks=shorten_tracebacks,
         )
+
+    def _instantiate_datasource_from_config_and_update_project_config(
+        self,
+        config: DatasourceConfig,
+        initialize: bool = True,
+        save_changes: bool = False,
+    ) -> Optional[Datasource]:
+        """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
+
+        Args:
+            config: Config for the datasource.
+            initialize: Whether to initialize the datasource or return None.
+            save_changes: Whether to save the datasource config to the configured Datasource store.
+
+        Returns:
+            If initialize=True return an instantiated Datasource object, else None.
+        """
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr,arg-type]
+            config=config,
+            initialize=initialize,
+            save_changes=save_changes,
+        )
+        self._synchronize_self_with_underlying_data_context()
+        return datasource

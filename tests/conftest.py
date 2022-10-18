@@ -1,11 +1,15 @@
+import copy
 import datetime
 import locale
 import logging
 import os
+import pathlib
 import random
 import shutil
 import warnings
+from dataclasses import dataclass
 from typing import Dict, List, Optional
+from unittest import mock
 
 import numpy as np
 import pandas as pd
@@ -20,16 +24,21 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context import BaseDataContext, CloudDataContext
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
+    DatasourceConfig,
     GeCloudConfig,
     InMemoryStoreBackendDefaults,
 )
@@ -48,20 +57,19 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
-    ParameterNode,
-    SemanticDomainTypes,
-)
+from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -100,6 +108,10 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers",
         "aws_integration: runs aws integration test that may be very slow and requires credentials",
+    )
+    config.addinivalue_line(
+        "markers",
+        "cloud: runs GX Cloud tests that may be slow and requires credentials",
     )
 
 
@@ -157,6 +169,21 @@ def pytest_addoption(parser):
         help="If set, execute tests against trino",
     )
     parser.addoption(
+        "--redshift",
+        action="store_true",
+        help="If set, execute tests against redshift",
+    )
+    parser.addoption(
+        "--athena",
+        action="store_true",
+        help="If set, execute tests against athena",
+    )
+    parser.addoption(
+        "--snowflake",
+        action="store_true",
+        help="If set, execute tests against snowflake",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests for usage_statistics",
@@ -165,6 +192,12 @@ def pytest_addoption(parser):
         "--docs-tests",
         action="store_true",
         help="If set, run integration tests for docs",
+    )
+    parser.addoption(
+        "--azure", action="store_true", help="If set, execute tests again Azure"
+    )
+    parser.addoption(
+        "--cloud", action="store_true", help="If set, execute tests again GX Cloud"
     )
     parser.addoption(
         "--performance-tests",
@@ -211,6 +244,10 @@ def build_test_backends_list_cfe(metafunc):
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
     include_aws: bool = metafunc.config.getoption("--aws")
     include_trino: bool = metafunc.config.getoption("--trino")
+    include_azure: bool = metafunc.config.getoption("--azure")
+    include_redshift: bool = metafunc.config.getoption("--redshift")
+    include_athena: bool = metafunc.config.getoption("--athena")
+    include_snowflake: bool = metafunc.config.getoption("--snowflake")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -221,6 +258,10 @@ def build_test_backends_list_cfe(metafunc):
         include_bigquery=include_bigquery,
         include_aws=include_aws,
         include_trino=include_trino,
+        include_azure=include_azure,
+        include_redshift=include_redshift,
+        include_athena=include_athena,
+        include_snowflake=include_snowflake,
     )
     return test_backend_names
 
@@ -234,21 +275,37 @@ def pytest_generate_tests(metafunc):
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption("--aws-integration"):
-        # --aws-integration given in cli: do not skip aws-integration tests
-        return
-    if config.getoption("--docs-tests"):
-        # --docs-tests given in cli: do not skip documentation integration tests
-        return
-    skip_aws_integration = pytest.mark.skip(
-        reason="need --aws-integration option to run"
+    @dataclass
+    class Category:
+        mark: str
+        flag: str
+        reason: str
+
+    categories = (
+        Category(
+            mark="aws_integration",
+            flag="--aws-integration",
+            reason="need --aws-integration option to run",
+        ),
+        Category(
+            mark="docs",
+            flag="--docs-tests",
+            reason="need --docs-tests option to run",
+        ),
+        Category(mark="cloud", flag="--cloud", reason="need --cloud option to run"),
     )
-    skip_docs_integration = pytest.mark.skip(reason="need --docs-tests option to run")
-    for item in items:
-        if "aws_integration" in item.keywords:
-            item.add_marker(skip_aws_integration)
-        if "docs" in item.keywords:
-            item.add_marker(skip_docs_integration)
+
+    for category in categories:
+        # If flag is provided, exit early so we don't add `pytest.mark.skip`
+        if config.getoption(category.flag):
+            continue
+
+        # For each test collected, check if they use a mark that matches our flag name.
+        # If so, add a `pytest.mark.skip` dynamically.
+        for item in items:
+            if category.mark in item.keywords:
+                marker = pytest.mark.skip(reason=category.reason)
+                item.add_marker(marker)
 
 
 @pytest.fixture(autouse=True)
@@ -262,7 +319,17 @@ def sa(test_backends):
     if not any(
         [
             dbms in test_backends
-            for dbms in ["postgresql", "sqlite", "mysql", "mssql", "bigquery", "trino"]
+            for dbms in [
+                "postgresql",
+                "sqlite",
+                "mysql",
+                "mssql",
+                "bigquery",
+                "trino",
+                "redshift",
+                "athena",
+                "snowflake",
+            ]
         ]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
@@ -302,10 +369,52 @@ def basic_spark_df_execution_engine(spark_session):
 
     conf: List[tuple] = spark_session.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
-    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
+    execution_engine = SparkDFExecutionEngine(
         spark_config=spark_config,
     )
     return execution_engine
+
+
+@pytest.fixture
+def spark_df_taxi_data_schema(spark_session):
+    """
+    Fixture used by tests for providing schema to SparkDFExecutionEngine.
+    The schema returned by this fixture corresponds to taxi_tripdata
+    """
+
+    # will not import unless we have a spark_session already passed in as fixture
+    from pyspark.sql.types import (
+        DoubleType,
+        IntegerType,
+        StringType,
+        StructField,
+        StructType,
+        TimestampType,
+    )
+
+    schema = StructType(
+        [
+            StructField("vendor_id", IntegerType(), True, None),
+            StructField("pickup_datetime", TimestampType(), True, None),
+            StructField("dropoff_datetime", TimestampType(), True, None),
+            StructField("passenger_count", IntegerType(), True, None),
+            StructField("trip_distance", DoubleType(), True, None),
+            StructField("rate_code_id", IntegerType(), True, None),
+            StructField("store_and_fwd_flag", StringType(), True, None),
+            StructField("pickup_location_id", IntegerType(), True, None),
+            StructField("dropoff_location_id", IntegerType(), True, None),
+            StructField("payment_type", IntegerType(), True, None),
+            StructField("fare_amount", DoubleType(), True, None),
+            StructField("extra", DoubleType(), True, None),
+            StructField("mta_tax", DoubleType(), True, None),
+            StructField("tip_amount", DoubleType(), True, None),
+            StructField("tolls_amount", DoubleType(), True, None),
+            StructField("improvement_surcharge", DoubleType(), True, None),
+            StructField("total_amount", DoubleType(), True, None),
+            StructField("congestion_surcharge", DoubleType(), True, None),
+        ]
+    )
+    return schema
 
 
 @pytest.mark.order(index=3)
@@ -580,33 +689,6 @@ def pandas_dataset():
 
 
 @pytest.fixture
-def sqlalchemy_dataset(test_backends):
-    """Provide dataset fixtures that have special values and/or are otherwise useful outside
-    the standard json testing framework"""
-    if "postgresql" in test_backends:
-        backend = "postgresql"
-    elif "sqlite" in test_backends:
-        backend = "sqlite"
-    else:
-        return
-
-    data = {
-        "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10 / 2.2, np.inf],
-        "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
-        "naturals": [1, 2, 3, 4, 5, 6, 7],
-    }
-    schemas = {
-        "postgresql": {
-            "infinities": "DOUBLE_PRECISION",
-            "nulls": "DOUBLE_PRECISION",
-            "naturals": "DOUBLE_PRECISION",
-        },
-        "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
-    }
-    return get_dataset(backend, data, schemas=schemas, profiler=None)
-
-
-@pytest.fixture
 def sqlitedb_engine(test_backend):
     if test_backend == "sqlite":
         try:
@@ -698,7 +780,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     datasource_config: str = f"""
@@ -800,9 +882,8 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 
 
 @pytest.fixture
-def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
     sa,
-    spark_session,
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
     tmp_path_factory,
     test_backends,
@@ -856,6 +937,19 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
             "my_sqlite_db_datasource", **yaml.load(datasource_config)
         )
 
+    return context
+
+
+@pytest.fixture
+def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
+    sa,
+    spark_session,
+    titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    tmp_path_factory,
+    test_backends,
+    monkeypatch,
+):
+    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     return context
 
 
@@ -933,7 +1027,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # add simple template config
-    simple_checkpoint_template_config: CheckpointConfig = CheckpointConfig(
+    simple_checkpoint_template_config = CheckpointConfig(
         name="my_simple_template_checkpoint",
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template-$VAR",
@@ -981,7 +1075,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # add nested template configs
-    nested_checkpoint_template_config_1: CheckpointConfig = CheckpointConfig(
+    nested_checkpoint_template_config_1 = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template-$VAR",
@@ -1039,7 +1133,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=nested_checkpoint_template_config_1,
     )
 
-    nested_checkpoint_template_config_2: CheckpointConfig = CheckpointConfig(
+    nested_checkpoint_template_config_2 = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
         config_version=1,
         template_name="my_nested_checkpoint_template_1",
@@ -1089,7 +1183,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=nested_checkpoint_template_config_2,
     )
 
-    nested_checkpoint_template_config_3: CheckpointConfig = CheckpointConfig(
+    nested_checkpoint_template_config_3 = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
         config_version=1,
         template_name="my_nested_checkpoint_template_2",
@@ -1142,12 +1236,12 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # add minimal SimpleCheckpoint
-    simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
+    simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
         config_version=1,
     )
-    simple_checkpoint_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
+    simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
     )
     context.checkpoint_store.set(
@@ -1156,7 +1250,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # add SimpleCheckpoint with slack webhook
-    simple_checkpoint_with_slack_webhook_config: CheckpointConfig = CheckpointConfig(
+    simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
         class_name="SimpleCheckpoint",
         config_version=1,
@@ -1173,14 +1267,14 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # add SimpleCheckpoint with slack webhook and notify_with
-    simple_checkpoint_with_slack_webhook_and_notify_with_all_config: CheckpointConfig = CheckpointConfig(
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
         class_name="SimpleCheckpoint",
         config_version=1,
         slack_webhook="https://hooks.slack.com/foo/bar",
         notify_with="all",
     )
-    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
     )
     context.checkpoint_store.set(
@@ -1189,7 +1283,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
     )
 
     # add SimpleCheckpoint with site_names
-    simple_checkpoint_with_site_names_config: CheckpointConfig = CheckpointConfig(
+    simple_checkpoint_with_site_names_config = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
         class_name="SimpleCheckpoint",
         config_version=1,
@@ -1495,10 +1589,10 @@ def site_builder_data_context_with_html_store_titanic_random(
     context.profile_datasource("random")
     context.profile_datasource(context.list_datasources()[0]["name"])
 
-    context._project_config.anonymous_usage_statistics = {
-        "enabled": True,
-        "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c",
-    }
+    context.variables.anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
+        enabled=True,
+        data_context_id="f43d4897-385f-4366-82b0-1a8eda2bf79c",
+    )
 
     return context
 
@@ -1566,10 +1660,10 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
     context.profile_datasource("random")
     context.profile_datasource(context.list_datasources()[0]["name"])
 
-    context._project_config.anonymous_usage_statistics = {
-        "enabled": True,
-        "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c",
-    }
+    context.variables.anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
+        enabled=True,
+        data_context_id="f43d4897-385f-4366-82b0-1a8eda2bf79c",
+    )
 
     return context
 
@@ -2257,6 +2351,15 @@ def ge_cloud_access_token() -> str:
 
 
 @pytest.fixture
+def request_headers(ge_cloud_access_token: str) -> Dict[str, str]:
+    return {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+        "Gx-Version": ge.__version__,
+    }
+
+
+@pytest.fixture
 def ge_cloud_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token):
     return GeCloudConfig(
         base_url=ge_cloud_base_url,
@@ -2290,7 +2393,7 @@ stores:
     store_backend:
       class_name: GeCloudStoreBackend
       ge_cloud_base_url: {ge_cloud_base_url}
-      ge_cloud_resource_type: suite_validation_result
+      ge_cloud_resource_type: validation_result
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
         organization_id: {ge_cloud_organization_id}
@@ -2301,7 +2404,18 @@ stores:
     store_backend:
       class_name: GeCloudStoreBackend
       ge_cloud_base_url: {ge_cloud_base_url}
-      ge_cloud_resource_type: contract
+      ge_cloud_resource_type: checkpoint
+      ge_cloud_credentials:
+        access_token: {ge_cloud_access_token}
+        organization_id: {ge_cloud_organization_id}
+      suppress_store_backend_id: True
+
+  default_profiler_store:
+    class_name: ProfilerStore
+    store_backend:
+      class_name: GeCloudStoreBackend
+      ge_cloud_base_url: {ge_cloud_base_url}
+      ge_cloud_resource_type: profiler
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
         organization_id: {ge_cloud_organization_id}
@@ -2311,15 +2425,42 @@ evaluation_parameter_store_name: default_evaluation_parameter_store
 expectations_store_name: default_expectations_store
 validations_store_name: default_validations_store
 checkpoint_store_name: default_checkpoint_store
+profiler_store_name: default_profiler_store
+
+include_rendered_content:
+    globally: True
 """
     data_context_config_dict = yaml.load(config_yaml_str)
     return DataContextConfig(**data_context_config_dict)
 
 
-@pytest.fixture(scope="function")
-def empty_cloud_data_context(
-    tmp_path, empty_ge_cloud_data_context_config, ge_cloud_config
-) -> DataContext:
+@pytest.fixture
+def ge_cloud_config_e2e() -> GeCloudConfig:
+    """
+    Uses live credentials stored in the Great Expectations Cloud backend.
+    """
+    base_url = os.environ["GE_CLOUD_BASE_URL"]
+    organization_id = os.environ["GE_CLOUD_ORGANIZATION_ID"]
+    access_token = os.environ["GE_CLOUD_ACCESS_TOKEN"]
+    ge_cloud_config = GeCloudConfig(
+        base_url=base_url,
+        organization_id=organization_id,
+        access_token=access_token,
+    )
+    return ge_cloud_config
+
+
+@pytest.fixture
+@mock.patch(
+    "great_expectations.data_context.store.DatasourceStore.list_keys",
+    return_value=[],
+)
+def empty_base_data_context_in_cloud_mode(
+    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    tmp_path: pathlib.Path,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_config: GeCloudConfig,
+) -> BaseDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -2335,10 +2476,98 @@ def empty_cloud_data_context(
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
-    context = empty_cloud_data_context
+def empty_data_context_in_cloud_mode(
+    tmp_path: pathlib.Path,
+    ge_cloud_config: GeCloudConfig,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+):
+    """This fixture is a DataContext in cloud mode that mocks calls to the cloud backend during setup so that it can be instantiated in tests."""
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_name: str = str(project_path)
+
+    def mocked_config(*args, **kwargs) -> DataContextConfig:
+        return empty_ge_cloud_data_context_config
+
+    def mocked_get_ge_cloud_config(*args, **kwargs) -> GeCloudConfig:
+        return ge_cloud_config
+
+    with mock.patch(
+        "great_expectations.data_context.DataContext._save_project_config"
+    ), mock.patch(
+        "great_expectations.data_context.data_context.CloudDataContext.retrieve_data_context_config_from_ge_cloud",
+        autospec=True,
+        side_effect=mocked_config,
+    ), mock.patch(
+        "great_expectations.data_context.data_context.CloudDataContext.get_ge_cloud_config",
+        autospec=True,
+        side_effect=mocked_get_ge_cloud_config,
+    ):
+        context = DataContext(
+            ge_cloud_mode=True,
+            context_root_dir=project_path_name,
+        )
+        return context
+
+
+@pytest.fixture
+def empty_cloud_data_context(
+    tmp_path: pathlib.Path,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_config: GeCloudConfig,
+) -> CloudDataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path_name: str = str(project_path)
+
+    cloud_data_context: CloudDataContext = CloudDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path_name,
+        ge_cloud_base_url=ge_cloud_config.base_url,
+        ge_cloud_access_token=ge_cloud_config.access_token,
+        ge_cloud_organization_id=ge_cloud_config.organization_id,
+    )
+    return cloud_data_context
+
+
+@pytest.fixture
+@mock.patch(
+    "great_expectations.data_context.store.DatasourceStore.list_keys",
+    return_value=[],
+)
+def empty_base_data_context_in_cloud_mode_custom_base_url(
+    mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
+    tmp_path: pathlib.Path,
+    empty_ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_config: GeCloudConfig,
+) -> BaseDataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+
+    custom_base_url: str = "https://some_url.org"
+    custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
+    custom_ge_cloud_config.base_url = custom_base_url
+
+    context = ge.data_context.BaseDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        ge_cloud_mode=True,
+        ge_cloud_config=custom_ge_cloud_config,
+    )
+    assert context.list_datasources() == []
+    assert context.ge_cloud_config.base_url != ge_cloud_config.base_url
+    assert context.ge_cloud_config.base_url == custom_base_url
+    return context
+
+
+@pytest.fixture
+def cloud_data_context_with_datasource_pandas_engine(
+    empty_cloud_data_context: CloudDataContext, db_file
+):
+    context: CloudDataContext = empty_cloud_data_context
     config = yaml.load(
-        """
+        f"""
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine
@@ -2349,51 +2578,68 @@ def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
                 - default_identifier_name
         """,
     )
-    context.add_datasource(
-        "my_datasource",
-        **config,
-    )
+    with mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+    ), mock.patch(
+        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+    ):
+        context.add_datasource(
+            "my_datasource",
+            **config,
+        )
     return context
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_sqlalchemy_engine(
-    empty_cloud_data_context, db_file
-):
-    context = empty_cloud_data_context
-    config = yaml.load(
-        f"""
-    class_name: Datasource
-    execution_engine:
-        class_name: SqlAlchemyExecutionEngine
-        connection_string: sqlite:///{db_file}
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        """,
-    )
-    context.add_datasource(
-        "my_datasource",
-        **config,
-    )
-    return context
-
-
-@pytest.fixture(scope="function")
 def profiler_name() -> str:
     return "my_first_profiler"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def profiler_store_name() -> str:
     return "profiler_store"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
+def profiler_rules() -> dict:
+    rules = {
+        "rule_1": {
+            "variables": {},
+            "domain_builder": {
+                "class_name": "TableDomainBuilder",
+            },
+            "parameter_builders": [
+                {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "name": "my_parameter",
+                    "metric_name": "my_metric",
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_arg": "$parameter.my_parameter.value[0]",
+                    "my_other_arg": "$parameter.my_parameter.value[1]",
+                    "meta": {
+                        "profiler_details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    return rules
+
+
+@pytest.fixture
 def profiler_config_with_placeholder_args(
     profiler_name: str,
+    profiler_rules: dict,
 ) -> RuleBasedProfilerConfig:
     """
     This fixture does not correspond to a practical profiler with rules, whose constituent components perform meaningful
@@ -2405,37 +2651,7 @@ def profiler_config_with_placeholder_args(
         variables={
             "false_positive_threshold": 1.0e-2,
         },
-        rules={
-            "rule_1": {
-                "variables": {},
-                "domain_builder": {
-                    "class_name": "TableDomainBuilder",
-                },
-                "parameter_builders": [
-                    {
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "name": "my_parameter",
-                        "metric_name": "my_metric",
-                    },
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                        "column_A": "$domain.domain_kwargs.column_A",
-                        "column_B": "$domain.domain_kwargs.column_B",
-                        "my_arg": "$parameter.my_parameter.value[0]",
-                        "my_other_arg": "$parameter.my_parameter.value[1]",
-                        "meta": {
-                            "profiler_details": {
-                                "my_parameter_estimator": "$parameter.my_parameter.details",
-                                "note": "Important remarks about estimation algorithm.",
-                            },
-                        },
-                    },
-                ],
-            },
-        },
+        rules=profiler_rules,
     )
 
 
@@ -2455,8 +2671,8 @@ def ge_cloud_profiler_id() -> str:
 
 
 @pytest.fixture
-def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
-    return GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_profiler_id)
+def ge_cloud_profiler_key() -> GeCloudIdentifier:
+    return GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER)
 
 
 @pytest.fixture
@@ -2474,9 +2690,7 @@ def populated_profiler_store(
     deserialized_config.pop("module_name")
     deserialized_config.pop("class_name")
 
-    profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        **deserialized_config
-    )
+    profiler_config = RuleBasedProfilerConfig(**deserialized_config)
 
     profiler_store = empty_profiler_store
     profiler_store.set(key=profiler_key, value=profiler_config)
@@ -2749,7 +2963,7 @@ def alice_columnar_table_single_batch(empty_data_context):
     )
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
-    expected_expectation_suite: ExpectationSuite = ExpectationSuite(
+    expected_expectation_suite = ExpectationSuite(
         expectation_suite_name=expectation_suite_name, data_context=empty_data_context
     )
     expectation_configuration: ExpectationConfiguration
@@ -2775,7 +2989,7 @@ def alice_columnar_table_single_batch(empty_data_context):
             "my_rule_for_user_ids": {
                 "variables": {},
                 "domain_builder": {
-                    "column_name_suffixes": ["_id"],
+                    "column_name_suffixes": ["_id", "_ID"],
                     "class_name": "MyCustomSemanticTypeColumnDomainBuilder",
                     "module_name": "tests.test_fixtures.rule_based_profiler.plugins.my_custom_semantic_type_column_domain_builder",
                     "semantic_types": ["user_id"],
@@ -3115,7 +3329,7 @@ def alice_columnar_table_single_batch(empty_data_context):
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
 
     expected_expectation_suite.add_citation(
-        comment="Suite created by Rule-Based Profiler with the configuration included.",
+        comment="Created by Rule-Based Profiler with the configuration included.",
         profiler_config=expected_effective_profiler_config,
     )
 
@@ -3237,7 +3451,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
            alerts for when things change
         3. have a place to add his domain knowledge of the data (that can also be validated against new data)
         4. if all goes well, generalize some of the Profiler to use on his other tables
-    Bobby uses a crude, highly inaccurate deterministic parametric estimator -- for illustrative purposes.
+    Bobby uses a deterministic nonparametric estimator.
     Bobby configures his Profiler using the YAML configurations and data file locations captured in this fixture.
     """
     verbose_profiler_config_file_path: str = file_relative_path(
@@ -3253,7 +3467,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    my_row_count_range_rule_expectation_configurations_oneshot_estimator: List[
+    my_row_count_range_rule_expectation_configurations_quantiles_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -3275,7 +3489,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_ranges_rule_expectation_configurations_oneshot_estimator: List[
+    my_column_ranges_rule_expectation_configurations_quantiles_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -3988,7 +4202,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_timestamps_rule_expectation_configurations_oneshot_estimator: List[
+    my_column_timestamps_rule_expectation_configurations_quantiles_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -4041,7 +4255,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_regex_rule_expectation_configurations_oneshot_estimator: List[
+    my_column_regex_rule_expectation_configurations_quantiles_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -4158,33 +4372,33 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
-        my_row_count_range_rule_expectation_configurations_oneshot_estimator
+        my_row_count_range_rule_expectation_configurations_quantiles_estimator
     )
     expectation_configurations.extend(
-        my_column_ranges_rule_expectation_configurations_oneshot_estimator
+        my_column_ranges_rule_expectation_configurations_quantiles_estimator
     )
     expectation_configurations.extend(
-        my_column_timestamps_rule_expectation_configurations_oneshot_estimator
+        my_column_timestamps_rule_expectation_configurations_quantiles_estimator
     )
 
     expectation_configurations.extend(
-        my_column_regex_rule_expectation_configurations_oneshot_estimator
+        my_column_regex_rule_expectation_configurations_quantiles_estimator
     )
     expectation_configurations.extend(
         my_rule_for_very_few_cardinality_expectation_configurations
     )
-    expectation_suite_name_oneshot_estimator: str = (
-        "bobby_columnar_table_multi_batch_oneshot_estimator"
+    expectation_suite_name_quantiles_estimator: str = (
+        "bobby_columnar_table_multi_batch_quantiles_estimator"
     )
-    expected_expectation_suite_oneshot_estimator: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name_oneshot_estimator,
+    expected_expectation_suite_quantiles_estimator: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name_quantiles_estimator,
         data_context=empty_data_context,
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
-        expected_expectation_suite_oneshot_estimator._add_expectation(
+        expected_expectation_suite_quantiles_estimator._add_expectation(
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
@@ -4192,7 +4406,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         "name": "bobby user workflow",
         "config_version": 1.0,
         "variables": {
-            "estimator": "oneshot",
+            "estimator": "quantiles",
             "false_positive_rate": 0.01,
             "mostly": 1.0,
         },
@@ -4221,6 +4435,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "include_estimator_samples_histogram_in_details": False,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
+                        "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
                         "evaluation_parameter_builder_configs": None,
@@ -4273,8 +4488,9 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "include_estimator_samples_histogram_in_details": False,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
+                        "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
-                        "round_decimals": 2,
+                        "round_decimals": None,
                         "evaluation_parameter_builder_configs": None,
                     },
                     {
@@ -4294,8 +4510,9 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "include_estimator_samples_histogram_in_details": False,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "quantile_statistic_interpolation_method": "auto",
+                        "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
-                        "round_decimals": 2,
+                        "round_decimals": None,
                         "evaluation_parameter_builder_configs": None,
                     },
                 ],
@@ -4464,12 +4681,12 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
     }
 
-    expected_expectation_suite_oneshot_estimator.add_citation(
-        comment="Suite created by Rule-Based Profiler with the configuration included.",
+    expected_expectation_suite_quantiles_estimator.add_citation(
+        comment="Created by Rule-Based Profiler with the configuration included.",
         profiler_config=expected_effective_profiler_config,
     )
 
-    expected_fixture_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
+    expected_fixture_fully_qualified_parameter_names_by_domain_quantiles_estimator: Dict[
         Domain, List[str]
     ] = {
         Domain(
@@ -4882,7 +5099,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ],
     }
 
-    expected_parameter_values_for_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
+    expected_parameter_values_for_fully_qualified_parameter_names_by_domain_quantiles_estimator: Dict[
         Domain, Dict[str, ParameterNode]
     ] = {
         Domain(
@@ -4892,7 +5109,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -4934,7 +5151,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5000,7 +5217,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5066,7 +5283,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5132,7 +5349,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5198,7 +5415,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5264,7 +5481,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5330,7 +5547,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5396,7 +5613,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5462,7 +5679,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5528,7 +5745,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5594,7 +5811,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5660,7 +5877,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5726,7 +5943,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5792,7 +6009,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5858,7 +6075,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5924,7 +6141,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5956,7 +6173,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -5988,7 +6205,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6020,7 +6237,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6052,7 +6269,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6084,7 +6301,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
@@ -6116,13 +6333,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
             "$parameter.raw.my_pickup_location_id_value_set": {
                 "value": [1, 2, 4],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "VendorID"},
@@ -6135,6 +6353,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.my_pickup_location_id_value_set": {
                 "value": [1, 2, 4],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "VendorID"},
@@ -6158,13 +6377,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ): {
             "$variables": {
-                "estimator": "oneshot",
+                "estimator": "quantiles",
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
             "$parameter.raw.my_pickup_location_id_value_set": {
                 "value": [0, 1, 2, 3, 4, 5, 6],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "passenger_count"},
@@ -6177,6 +6397,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "$parameter.my_pickup_location_id_value_set": {
                 "value": [0, 1, 2, 3, 4, 5, 6],
                 "details": {
+                    "parse_strings_as_datetimes": False,
                     "metric_configuration": {
                         "metric_name": "column.distinct_values",
                         "domain_kwargs": {"column": "passenger_count"},
@@ -6191,11 +6412,11 @@ def bobby_columnar_table_multi_batch(empty_data_context):
 
     return {
         "profiler_config": verbose_profiler_config,
-        "test_configuration_oneshot_estimator": {
-            "expectation_suite_name": expectation_suite_name_oneshot_estimator,
-            "expected_expectation_suite": expected_expectation_suite_oneshot_estimator,
-            "expected_fixture_fully_qualified_parameter_names_by_domain": expected_fixture_fully_qualified_parameter_names_by_domain_oneshot_estimator,
-            "expected_parameter_values_for_fully_qualified_parameter_names_by_domain": expected_parameter_values_for_fully_qualified_parameter_names_by_domain_oneshot_estimator,
+        "test_configuration_quantiles_estimator": {
+            "expectation_suite_name": expectation_suite_name_quantiles_estimator,
+            "expected_expectation_suite": expected_expectation_suite_quantiles_estimator,
+            "expected_fixture_fully_qualified_parameter_names_by_domain": expected_fixture_fully_qualified_parameter_names_by_domain_quantiles_estimator,
+            "expected_parameter_values_for_fully_qualified_parameter_names_by_domain": expected_parameter_values_for_fully_qualified_parameter_names_by_domain_quantiles_estimator,
         },
     }
 
@@ -6277,7 +6498,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
         ),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
@@ -6354,7 +6575,7 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
         ),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
@@ -6515,7 +6736,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
             path_or_buf=os.path.join(context_path, "..", "data", file_name), index=False
         )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
@@ -6674,7 +6895,7 @@ def quentin_columnar_table_multi_batch_data_context(
             os.path.join(context_path, "..", "data", file_name),
         )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
@@ -6913,4 +7134,32 @@ def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builde
     )
     logger.info(
         "Set the random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
+    )
+
+
+@pytest.fixture
+def datasource_config_with_names() -> DatasourceConfig:
+    return DatasourceConfig(
+        name="my_datasource",
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        data_connectors={
+            "tripdata_monthly_configured": {
+                "name": "tripdata_monthly_configured",
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "base_directory": "/path/to/trip_data",
+                "assets": {
+                    "yellow": {
+                        "class_name": "Asset",
+                        "module_name": "great_expectations.datasource.data_connector.asset",
+                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                        "group_names": ["year", "month"],
+                    }
+                },
+            }
+        },
     )

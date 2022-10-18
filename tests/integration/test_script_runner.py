@@ -20,6 +20,7 @@ logger.setLevel(logging.DEBUG)
 
 class BackendDependencies(enum.Enum):
     AWS = "AWS"
+    AZURE = "AZURE"
     BIGQUERY = "BIGQUERY"
     GCS = "GCS"
     MYSQL = "MYSQL"
@@ -84,8 +85,8 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
     ),
     IntegrationTestFixture(
-        name="how_to_get_a_batch_of_data_from_a_configured_datasource",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py",
+        name="how_to_get_one_or_more_batches_of_data_from_a_configured_datasource",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
@@ -309,8 +310,40 @@ local_tests = [
         name="expect_column_values_to_only_contain_vowels",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py",
     ),
+    IntegrationTestFixture(
+        name="expect_queried_column_value_frequency_to_meet_threshold",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTestFixture(
+        name="expect_queried_table_row_count_to_be",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTestFixture(
+        name="expect_multicolumn_values_to_be_multiples_of_three",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py",
+        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    ),
+    IntegrationTestFixture(
+        name="how_to_use_great_expectations_in_aws_glue",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTestFixture(
+        name="how_to_use_great_expectations_in_aws_glue_yaml",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns_great_expectations.yaml",
+    ),
+    IntegrationTestFixture(
+        name="how_to_use_great_expectations_in_aws_emr_serverless",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTestFixture(
+        name="how_to_use_great_expectations_in_aws_emr_serverless_yaml",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns_great_expectations.yaml",
+    ),
 ]
-
 
 dockerized_db_tests = [
     IntegrationTestFixture(
@@ -800,7 +833,6 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
 ]
-
 
 # CLOUD
 cloud_snowflake_tests = [
@@ -1301,42 +1333,50 @@ cloud_azure_tests = [
         name="azure_pandas_configured_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.AZURE,
     ),
     IntegrationTestFixture(
         name="azure_pandas_configured_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.AZURE,
     ),
     IntegrationTestFixture(
         name="azure_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.AZURE,
     ),
     IntegrationTestFixture(
         name="azure_pandas_inferred_and_runtime_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.AZURE,
     ),
     # TODO: <Alex>ALEX -- uncomment next four (4) tests once Spark in Azure Pipelines is enabled.</Alex>
     # IntegrationTestFixture(
     #     name = "azure_spark_configured_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
+    #     extra_backend_dependencies = BackendDependencies.AZURE
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_configured_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
+    #     extra_backend_dependencies = BackendDependencies.AZURE
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_inferred_and_runtime_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
+    #     extra_backend_dependencies = BackendDependencies.AZURE
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_inferred_and_runtime_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
+    #     extra_backend_dependencies = BackendDependencies.AZURE
     # ),
 ]
 
@@ -1764,6 +1804,7 @@ def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
 @pytest.mark.integration
 @pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
+@pytest.mark.slow  # 79.77s
 def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments):
     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
     _execute_integration_test(test_configuration, tmp_path)
@@ -1830,6 +1871,15 @@ def _execute_integration_test(
         )
         script_path = os.path.join(tmp_path, "test_script.py")
         shutil.copyfile(script_source, script_path)
+        logger.debug(
+            f"(_execute_integration_test) script_source -> {script_source} :: copied to {script_path}"
+        )
+        if not script_source.endswith(".py"):
+            logger.error(f"{script_source} is not a python script!")
+            with open(script_path) as fp:
+                text = fp.read()
+            print(f"contents of script_path:\n\n{text}\n\n")
+            return
 
         util_script = integration_test_fixture.util_script
         if util_script:
@@ -1845,7 +1895,13 @@ def _execute_integration_test(
         loader.exec_module(test_script_module)
     except Exception as e:
         logger.error(str(e))
-        raise
+        if "JavaPackage" in str(e) and "aws_glue" in user_flow_script:
+            logger.debug("This is something aws_glue related, so just going to return")
+            # Should try to copy aws-glue-libs jar files to Spark jar during pipeline setup
+            #   - see https://stackoverflow.com/a/67371827
+            return
+        else:
+            raise
     finally:
         os.chdir(workdir)
 
@@ -1883,3 +1939,5 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
         pytest.skip("Skipping spark tests")
     elif dependencies == BackendDependencies.SNOWFLAKE and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping snowflake tests")
+    elif dependencies == BackendDependencies.AZURE and not pytest_args.azure:
+        pytest.skip("Skipping Azure tests")

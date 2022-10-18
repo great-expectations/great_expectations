@@ -44,12 +44,18 @@ def test_expectation_self_check():
             "docstring": "",
         },
         "execution_engines": {
-            "PandasExecutionEngine": True,
-            "SqlAlchemyExecutionEngine": True,
-            "SparkDFExecutionEngine": True,
+            "PandasExecutionEngine": False,
+            "SqlAlchemyExecutionEngine": False,
+            "SparkDFExecutionEngine": False,
         },
         "gallery_examples": [],
         "renderers": [
+            {
+                "is_standard": False,
+                "is_supported": True,
+                "name": "atomic.diagnostic.failed",
+                "samples": [],
+            },
             {
                 "name": "atomic.diagnostic.observed_value",
                 "is_supported": True,
@@ -57,7 +63,7 @@ def test_expectation_self_check():
                 "samples": [],
             },
             {
-                "name": "atomic.prescriptive.kwargs",
+                "name": "atomic.prescriptive.failed",
                 "is_supported": True,
                 "is_standard": False,
                 "samples": [],
@@ -121,6 +127,7 @@ def test_expectation_self_check():
         "tests": [],
         "backend_test_result_counts": [],
         "errors": [],
+        "coverage_score": 0.0,
         "maturity_checklist": {
             "beta": [
                 {

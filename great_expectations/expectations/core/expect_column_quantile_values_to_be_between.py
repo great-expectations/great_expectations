@@ -7,12 +7,19 @@ from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+    LegacyDescriptiveRendererType,
+    LegacyDiagnosticRendererType,
+    LegacyRendererType,
+    RenderedAtomicContent,
+    renderedAtomicValueSchema,
+)
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
-    RenderedAtomicContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
-    renderedAtomicValueSchema,
 )
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
@@ -22,7 +29,7 @@ from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
@@ -30,6 +37,7 @@ from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
     VARIABLES_KEY,
 )
+from great_expectations.util import isclose
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
@@ -147,7 +155,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
-    quantile_value_ranges_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    quantile_value_ranges_estimator_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="quantile_value_ranges_estimator",
@@ -162,10 +170,12 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
         false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
         estimator=f"{VARIABLES_KEY}estimator",
         n_resamples=f"{VARIABLES_KEY}n_resamples",
         random_seed=f"{VARIABLES_KEY}random_seed",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
+        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
         include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
         truncate_values=f"{VARIABLES_KEY}truncate_values",
         round_decimals=f"{VARIABLES_KEY}round_decimals",
@@ -174,7 +184,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         quantile_value_ranges_estimator_parameter_builder_config,
     ]
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={},
@@ -187,17 +197,13 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                         0.75,
                     ],
                     "allow_relative_error": "linear",
-                    "false_positive_rate": 0.05,
-                    "quantile_statistic_interpolation_method": "auto",
-                    "estimator": "bootstrap",
-                    "n_resamples": 9999,
-                    "random_seed": None,
+                    "estimator": "exact",
                     "include_estimator_samples_histogram_in_details": False,
                     "truncate_values": {
                         "lower_bound": None,
                         "upper_bound": None,
                     },
-                    "round_decimals": 1,
+                    "round_decimals": None,
                 },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
@@ -384,7 +390,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         )
 
     @classmethod
-    @renderer(renderer_type="atomic.prescriptive.summary")
+    @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
     @render_evaluation_parameter_string
     def _prescriptive_summary(
         cls,
@@ -421,12 +427,14 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             }
         )
         rendered = RenderedAtomicContent(
-            name="atomic.prescriptive.summary", value=value_obj, value_type="TableType"
+            name=AtomicPrescriptiveRendererType.SUMMARY,
+            value=value_obj,
+            value_type="TableType",
         )
         return rendered
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -510,7 +518,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         return [expectation_string_obj, quantile_range_table]
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,
@@ -604,7 +612,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         return template_string, params_with_json_schema, table_header_row, table_rows
 
     @classmethod
-    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
         configuration=None,
@@ -643,13 +651,13 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 }
             )
             return RenderedAtomicContent(
-                name="atomic.diagnostic.observed_value",
+                name=AtomicDiagnosticRendererType.OBSERVED_VALUE,
                 value=value_obj,
                 value_type="TableType",
             )
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.quantile_table")
+    @renderer(renderer_type=LegacyDescriptiveRendererType.QUANTILE_TABLE)
     def _descriptive_quantile_table_renderer(
         cls,
         configuration=None,
@@ -741,7 +749,17 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             for (lower_bound, upper_bound) in quantile_value_ranges
         ]
         success_details = [
-            range_[0] <= quantile_vals[idx] <= range_[1]
+            isclose(
+                operand_a=quantile_vals[idx],
+                operand_b=range_[0],
+                rtol=1.0e-4,
+            )
+            or isclose(
+                operand_a=quantile_vals[idx],
+                operand_b=range_[1],
+                rtol=1.0e-4,
+            )
+            or range_[0] <= quantile_vals[idx] <= range_[1]
             for idx, range_ in enumerate(comparison_quantile_ranges)
         ]
 

@@ -2,7 +2,6 @@ import logging
 from abc import ABC
 from typing import Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -20,6 +19,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     column_condition_partial,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -93,7 +93,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
     # question, descriptive, prescriptive, diagnostic
     @classmethod
-    @renderer(renderer_type="renderer.question")
+    @renderer(renderer_type=LegacyRendererType.QUESTION)
     def _question_renderer(
         cls, configuration, result=None, language=None, runtime_configuration=None
     ):
@@ -114,7 +114,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 return f'Are at least {mostly * 100}% of values in column "{column}" in the set {str(set_)}?'
 
     @classmethod
-    @renderer(renderer_type="renderer.answer")
+    @renderer(renderer_type=LegacyRendererType.ANSWER)
     def _answer_renderer(
         cls, configuration=None, result=None, language=None, runtime_configuration=None
     ):

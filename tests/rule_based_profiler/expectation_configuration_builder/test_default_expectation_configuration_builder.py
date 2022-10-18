@@ -4,23 +4,25 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     build_parameter_container_for_variables,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.20s
 def test_meta_not_dict_exception(
     alice_columnar_table_single_batch_context,
 ):
@@ -43,8 +45,8 @@ def test_meta_not_dict_exception(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -85,6 +87,8 @@ def test_meta_not_dict_exception(
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.24s
 def test_condition_not_string_exception(
     alice_columnar_table_single_batch_context,
 ):
@@ -107,8 +111,8 @@ def test_condition_not_string_exception(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -148,6 +152,8 @@ def test_condition_not_string_exception(
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.31s
 def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_separate(
     alice_columnar_table_single_batch_context,
 ):
@@ -170,8 +176,8 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -213,6 +219,8 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.34s
 def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_included(
     alice_columnar_table_single_batch_context,
 ):
@@ -226,8 +234,8 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -273,6 +281,8 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.33s
 def test_default_expectation_configuration_builder_alice_single_term_parameter_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -295,8 +305,8 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -321,7 +331,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     condition: str = "$parameter.my_min_user_id.value[0]>0"
     max_user_id: int = 999999999999
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value.value[0],
@@ -338,6 +348,8 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.25s
 def test_default_expectation_configuration_builder_alice_single_term_parameter_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -360,8 +372,8 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -386,7 +398,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     condition: str = "$parameter.my_min_user_id.value[0]<0"
     max_user_id: int = 999999999999
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value.value[0],
@@ -403,6 +415,8 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     assert expectation_configuration is None
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.23s
 def test_default_expectation_configuration_builder_alice_single_term_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -428,8 +442,8 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -454,7 +468,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     condition: str = "$variables.max_user_id>0"
     max_value: str = "$variables.max_user_id"
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value.value[0],
@@ -472,6 +486,8 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_single_term_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -497,8 +513,8 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -523,7 +539,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     condition: str = "$variables.max_user_id<0"
     max_value: str = "$variables.max_user_id"
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value.value[0],
@@ -541,6 +557,8 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     assert expectation_configuration is None
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -566,8 +584,8 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -592,7 +610,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     condition: str = "$variables.max_user_id>0 & $parameter.my_min_user_id.value[0]>0"
     max_value: str = "$variables.max_user_id"
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value,
@@ -610,6 +628,8 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.18s
 def test_default_expectation_configuration_builder_alice_two_term_and_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -635,8 +655,8 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -661,7 +681,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     condition: str = "$variables.max_user_id<0 & $parameter.my_min_user_id.value[0]<0"
     max_value: str = "$variables.max_user_id"
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value,
@@ -679,6 +699,8 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     assert expectation_configuration is None
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -704,8 +726,8 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -730,7 +752,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     condition: str = "$variables.max_user_id>0 | $parameter.my_min_user_id.value[0]<0"
     max_value: str = "$variables.max_user_id"
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value,
@@ -748,6 +770,8 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_two_term_or_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -773,8 +797,8 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -799,7 +823,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     condition: str = "$variables.max_user_id<0 | $parameter.my_min_user_id.value[0]<0"
     max_value: str = "$variables.max_user_id"
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value,
@@ -817,6 +841,8 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     assert expectation_configuration is None
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -842,8 +868,8 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999, "answer": 42}
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -868,7 +894,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     condition: str = "$variables.max_user_id>0 & $variables.answer==42 | $parameter.my_min_user_id.value[0]<0"
     max_value: str = "$variables.max_user_id"
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value,
@@ -886,6 +912,8 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.20s
 def test_default_expectation_configuration_builder_alice_more_than_two_term_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -911,8 +939,8 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999, "answer": 42}
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -937,7 +965,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     condition: str = "$variables.max_user_id<0 | $variables.answer!=42 | $parameter.my_min_user_id.value[0]<0"
     max_value: str = "$variables.max_user_id"
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value,
@@ -955,6 +983,8 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     assert expectation_configuration is None
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_true(
     alice_columnar_table_single_batch_context,
 ):
@@ -980,8 +1010,8 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999, "answer": 42}
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -1006,7 +1036,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     condition: str = "($variables.max_user_id>0 & $variables.answer==42) | $parameter.my_min_user_id.value[0]<0"
     max_value: str = "$variables.max_user_id"
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value,
@@ -1024,6 +1054,8 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     assert expectation_configuration.kwargs["min_value"] == 397433
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.21s
 def test_default_expectation_configuration_builder_alice_parentheses_parameter_variable_condition_false(
     alice_columnar_table_single_batch_context,
 ):
@@ -1049,8 +1081,8 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999, "answer": 42}
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
@@ -1075,7 +1107,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     condition: str = "($variables.max_user_id<0 | $variables.answer!=42) | $parameter.my_min_user_id.value[0]<0"
     max_value: str = "$variables.max_user_id"
 
-    default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
         min_value=parameter_value,

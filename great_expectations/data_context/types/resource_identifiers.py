@@ -1,15 +1,20 @@
 import logging
 import warnings
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 from uuid import UUID
 
 from dateutil.parser import parse
+from marshmallow import Schema, fields, post_load
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
-from great_expectations.marshmallow__shade import Schema, fields, post_load
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.store.ge_cloud_store_backend import (
+        GeCloudRESTResource,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -196,11 +201,17 @@ class ValidationResultIdentifier(DataContextKey):
 
 
 class GeCloudIdentifier(DataContextKey):
-    def __init__(self, resource_type: str, ge_cloud_id: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        resource_type: "GeCloudRESTResource",
+        ge_cloud_id: Optional[str] = None,
+        resource_name: Optional[str] = None,
+    ) -> None:
         super().__init__()
 
         self._resource_type = resource_type
-        self._ge_cloud_id = ge_cloud_id if ge_cloud_id is not None else ""
+        self._ge_cloud_id = ge_cloud_id or ""
+        self._resource_name = resource_name or ""
 
     @property
     def resource_type(self):
@@ -218,14 +229,23 @@ class GeCloudIdentifier(DataContextKey):
     def ge_cloud_id(self, value) -> None:
         self._ge_cloud_id = value
 
+    @property
+    def resource_name(self) -> str:
+        return self._resource_name
+
     def to_tuple(self):
-        return (self.resource_type, self.ge_cloud_id)
+        return (self.resource_type, self.ge_cloud_id, self.resource_name)
 
     def to_fixed_length_tuple(self):
         return self.to_tuple()
 
     @classmethod
     def from_tuple(cls, tuple_):
+        # Only add resource name if it exists in the tuple_
+        if len(tuple_) == 3:
+            return cls(
+                resource_type=tuple_[0], ge_cloud_id=tuple_[1], resource_name=tuple_[2]
+            )
         return cls(resource_type=tuple_[0], ge_cloud_id=tuple_[1])
 
     @classmethod
@@ -233,7 +253,10 @@ class GeCloudIdentifier(DataContextKey):
         return cls.from_tuple(tuple_)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        if self.resource_name:
+            repr += f"::{self.resource_name}"
+        return repr
 
 
 class ValidationResultIdentifierSchema(Schema):
@@ -275,13 +298,13 @@ class SiteSectionIdentifier(DataContextKey):
                 )
         elif site_section_name == "expectations":
             if isinstance(resource_identifier, ExpectationSuiteIdentifier):
-                self._resource_identifier = resource_identifier
+                self._resource_identifier = resource_identifier  # type: ignore[assignment]
             elif isinstance(resource_identifier, (tuple, list)):
-                self._resource_identifier = ExpectationSuiteIdentifier(
+                self._resource_identifier = ExpectationSuiteIdentifier(  # type: ignore[assignment]
                     *resource_identifier
                 )
             else:
-                self._resource_identifier = ExpectationSuiteIdentifier(
+                self._resource_identifier = ExpectationSuiteIdentifier(  # type: ignore[assignment]
                     **resource_identifier
                 )
         else:

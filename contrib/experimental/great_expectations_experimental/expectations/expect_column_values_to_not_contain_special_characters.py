@@ -79,7 +79,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             },
             "tests": [
                 {
-                    "title": "positive_test_with_no_special_character",
+                    "title": "negative_test_with_no_special_character",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "mostly_no_special_character", "mostly": 1},

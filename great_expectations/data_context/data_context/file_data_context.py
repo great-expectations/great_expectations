@@ -1,6 +1,5 @@
 import logging
-import os
-from typing import Any, Dict, Mapping, Optional, Union
+from typing import Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -8,11 +7,18 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.data_context_variables import (
+    DataContextVariableSchema,
     FileDataContextVariables,
 )
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    datasourceConfigSchema,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+)
+from great_expectations.datasource.datasource_serializer import (
+    YAMLReadyDictDatasourceConfigSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -47,37 +53,70 @@ class FileDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
+        self._variables: FileDataContextVariables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
+
+    def _init_datasource_store(self) -> None:
+        from great_expectations.data_context.store.datasource_store import (
+            DatasourceStore,
+        )
+
+        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
+        # to the convention set by other internal Stores
+        store_backend: dict = {
+            "class_name": "InlineStoreBackend",
+            "resource_type": DataContextVariableSchema.DATASOURCES,
+        }
+        runtime_environment: dict = {
+            "root_directory": self.root_directory,
+            "data_context": self,
+            # By passing this value in our runtime_environment,
+            # we ensure that the same exact context (memory address and all) is supplied to the Store backend
+        }
+
+        datasource_store = DatasourceStore(
+            store_name=store_name,
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+            serializer=YAMLReadyDictDatasourceConfigSerializer(
+                schema=datasourceConfigSchema
+            ),
+        )
+        self._datasource_store = datasource_store
 
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        **kwargs: Dict[str, Any],
-    ):
+        include_rendered_content: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> None:
         """Save the provided expectation suite into the DataContext.
 
         Args:
-            expectation_suite: the suite to save
-            expectation_suite_name: the name of this expectation suite. If no name is provided the name will \
-                be read from the suite
-
-            overwrite_existing: bool setting whether to overwrite existing ExpectationSuite
+            expectation_suite: The suite to save.
+            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
+                from the suite.
+            overwrite_existing: Whether to overwrite the suite if it already exists.
+            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
 
         Returns:
             None
         """
         if expectation_suite_name is None:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite.expectation_suite_name
             )
         else:
             expectation_suite.expectation_suite_name = expectation_suite_name
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
-        if self.expectations_store.has_key(key) and not overwrite_existing:
+        if (
+            self.expectations_store.has_key(key)  # noqa: W601
+            and not overwrite_existing
+        ):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
@@ -85,7 +124,14 @@ class FileDataContext(AbstractDataContext):
                 )
             )
         self._evaluation_parameter_dependencies_compiled = False
-        return self.expectations_store.set(key, expectation_suite, **kwargs)
+        include_rendered_content = (
+            self._determine_if_expectation_suite_include_rendered_content(
+                include_rendered_content=include_rendered_content
+            )
+        )
+        if include_rendered_content:
+            expectation_suite.render()
+        return self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[arg-type]
 
     @property
     def root_directory(self) -> Optional[str]:
@@ -98,15 +144,8 @@ class FileDataContext(AbstractDataContext):
         return self._context_root_directory
 
     def _init_variables(self) -> FileDataContextVariables:
-        raise NotImplementedError
-
-    def _save_project_config(self) -> None:
-        """Save the current project to disk."""
-        logger.debug("Starting DataContext._save_project_config")
-        self._save_project_config_to_disk()
-
-    def _save_project_config_to_disk(self) -> None:
-        """Helper method to make save_project_config more explicit"""
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
+        variables = FileDataContextVariables(
+            config=self._project_config,
+            data_context=self,  # type: ignore[arg-type]
+        )
+        return variables

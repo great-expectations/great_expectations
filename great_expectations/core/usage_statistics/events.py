@@ -129,6 +129,7 @@ class UsageStatsEvents(enum.Enum):
     DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE = (
         "data_assistant.result.get_expectation_suite"
     )
+    CLOUD_MIGRATE = "cloud_migrator.migrate"
 
     @classmethod
     def get_all_event_names(cls):
@@ -165,7 +166,7 @@ class UsageStatsEvents(enum.Enum):
                 f"_{'_'.join([item.upper() for item in other_items])}"
             )
         else:
-            other_items_str: str = ""
+            other_items_str = ""
         enum_name: str = f"CLI_{noun.upper()}_{verb.upper()}{other_items_str}"
 
         return getattr(cls, enum_name).value

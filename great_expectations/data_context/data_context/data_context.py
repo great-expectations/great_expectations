@@ -4,7 +4,6 @@ import shutil
 import warnings
 from typing import Dict, Optional, Union
 
-import requests
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
@@ -23,14 +22,14 @@ from great_expectations.data_context.templates import (
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
+    AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     GeCloudConfig,
-    dataContextConfigSchema,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
-from great_expectations.exceptions import DataContextError
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -107,13 +106,13 @@ class DataContext(BaseDataContext):
             DataContext
         """
 
-        if not os.path.isdir(project_root_dir):
+        if not os.path.isdir(project_root_dir):  # type: ignore[arg-type]
             raise ge_exceptions.DataContextError(
                 "The project_root_dir must be an existing directory in which "
                 "to initialize a new DataContext"
             )
 
-        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)
+        ge_dir = os.path.join(project_root_dir, cls.GE_DIR)  # type: ignore[arg-type]
         os.makedirs(ge_dir, exist_ok=True)
         cls.scaffold_directories(ge_dir)
 
@@ -224,125 +223,63 @@ class DataContext(BaseDataContext):
         )
         shutil.copyfile(styles_template, styles_destination_path)
 
-    # TODO: deprecate ge_cloud_account_id
-    @classmethod
-    def _get_ge_cloud_config_dict(
-        cls,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> Dict[str, Optional[str]]:
-        ge_cloud_base_url = (
-            ge_cloud_base_url
-            or CloudDataContext._get_global_config_value(
-                environment_variable="GE_CLOUD_BASE_URL",
-                conf_file_section="ge_cloud_config",
-                conf_file_option="base_url",
-            )
-            or "https://app.greatexpectations.io/"
-        )
-
-        # TODO: remove if/else block when ge_cloud_account_id is deprecated.
-        if ge_cloud_account_id is not None:
-            logger.warning(
-                'The "ge_cloud_account_id" argument has been renamed "ge_cloud_organization_id" and will be '
-                "deprecated in the next major release."
-            )
-        else:
-            ge_cloud_account_id = CloudDataContext._get_global_config_value(
-                environment_variable="GE_CLOUD_ACCOUNT_ID",
-                conf_file_section="ge_cloud_config",
-                conf_file_option="account_id",
-            )
-
-        if ge_cloud_organization_id is None:
-            ge_cloud_organization_id = CloudDataContext._get_global_config_value(
-                environment_variable="GE_CLOUD_ORGANIZATION_ID",
-                conf_file_section="ge_cloud_config",
-                conf_file_option="organization_id",
-            )
-
-        ge_cloud_organization_id = ge_cloud_organization_id or ge_cloud_account_id
-        ge_cloud_access_token = (
-            ge_cloud_access_token
-            or CloudDataContext._get_global_config_value(
-                environment_variable="GE_CLOUD_ACCESS_TOKEN",
-                conf_file_section="ge_cloud_config",
-                conf_file_option="access_token",
-            )
-        )
-        return {
-            "base_url": ge_cloud_base_url,
-            "organization_id": ge_cloud_organization_id,
-            "access_token": ge_cloud_access_token,
-        }
-
-    # TODO: deprecate ge_cloud_account_id
-    def get_ge_cloud_config(
-        self,
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> GeCloudConfig:
-        """
-        Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
-        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
-        """
-        ge_cloud_config_dict = self._get_ge_cloud_config_dict(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_account_id=ge_cloud_account_id,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-        )
-
-        missing_keys = []
-        for key, val in ge_cloud_config_dict.items():
-            if not val:
-                missing_keys.append(key)
-        if len(missing_keys) > 0:
-            missing_keys_str = [f'"{key}"' for key in missing_keys]
-            global_config_path_str = [
-                f'"{path}"' for path in super().GLOBAL_CONFIG_PATHS
-            ]
-            raise DataContextError(
-                f"{(', ').join(missing_keys_str)} arg(s) required for ge_cloud_mode but neither provided nor found in "
-                f"environment or in global configs ({(', ').join(global_config_path_str)})."
-            )
-
-        return GeCloudConfig(**ge_cloud_config_dict)
-
-    # TODO: deprecate ge_cloud_account_id
     def __init__(
         self,
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         ge_cloud_mode: bool = False,
         ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         self._ge_cloud_mode = ge_cloud_mode
-        self._ge_cloud_config = None
-        ge_cloud_config = None
+        self._ge_cloud_config = self._init_ge_cloud_config(
+            ge_cloud_mode=ge_cloud_mode,
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
 
-        if ge_cloud_mode:
-            ge_cloud_config = self.get_ge_cloud_config(
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_account_id=ge_cloud_account_id,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
+        self._context_root_directory = self._init_context_root_directory(
+            context_root_dir=context_root_dir,
+        )
+
+        project_config = self._load_project_config()
+
+        super().__init__(
+            project_config=project_config,
+            context_root_dir=self._context_root_directory,
+            runtime_environment=runtime_environment,
+            ge_cloud_mode=self._ge_cloud_mode,
+            ge_cloud_config=self._ge_cloud_config,
+        )
+
+        # Save project config if data_context_id auto-generated
+        if self._check_for_usage_stats_sync(project_config):
+            self._save_project_config()
+
+    def _init_ge_cloud_config(
+        self,
+        ge_cloud_mode: bool,
+        ge_cloud_base_url: Optional[str],
+        ge_cloud_access_token: Optional[str],
+        ge_cloud_organization_id: Optional[str],
+    ) -> Optional[GeCloudConfig]:
+        if not ge_cloud_mode:
+            return None
+
+        ge_cloud_config = CloudDataContext.get_ge_cloud_config(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+        return ge_cloud_config
+
+    def _init_context_root_directory(self, context_root_dir: Optional[str]) -> str:
+        if self.ge_cloud_mode and context_root_dir is None:
+            context_root_dir = CloudDataContext.determine_context_root_directory(
+                context_root_dir
             )
-            self._ge_cloud_config = ge_cloud_config
-            # in ge_cloud_mode, if not provided, set context_root_dir to cwd
-            if context_root_dir is None:
-                context_root_dir = os.getcwd()
-                logger.info(
-                    f'context_root_dir was not provided - defaulting to current working directory "'
-                    f'{context_root_dir}".'
-                )
         else:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
             context_root_dir = (
@@ -351,52 +288,68 @@ class DataContext(BaseDataContext):
                 else context_root_dir
             )
 
-        context_root_directory = os.path.abspath(os.path.expanduser(context_root_dir))
-        self._context_root_directory = context_root_directory
-        project_config = self._load_project_config()
-        super().__init__(
-            project_config,
-            context_root_directory,
-            runtime_environment,
-            ge_cloud_mode=ge_cloud_mode,
-            ge_cloud_config=ge_cloud_config,
-        )
+        return os.path.abspath(os.path.expanduser(context_root_dir))
 
-        # save project config if data_context_id auto-generated or global config values applied
-        project_config_dict = dataContextConfigSchema.dump(project_config)
+    def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
+        """
+        If there are differences between the DataContextConfig used to instantiate
+        the DataContext and the DataContextConfig assigned to `self.config`, we want
+        to save those changes to disk so that subsequent instantiations will utilize
+        the same values.
+
+        A small caveat is that if that difference stems from a global override (env var
+        or conf file), we don't want to write to disk. This is due to the fact that
+        those mechanisms allow for dynamic values and saving them will make them static.
+
+        Args:
+            project_config: The DataContextConfig used to instantiate the DataContext.
+
+        Returns:
+            A boolean signifying whether or not the current DataContext's config needs
+            to be persisted in order to recognize changes made to usage statistics.
+        """
+        project_config_usage_stats: Optional[
+            AnonymizedUsageStatisticsConfig
+        ] = project_config.anonymous_usage_statistics
+        context_config_usage_stats: Optional[
+            AnonymizedUsageStatisticsConfig
+        ] = self.config.anonymous_usage_statistics
+
         if (
-            project_config.anonymous_usage_statistics.explicit_id is False
-            or project_config_dict != dataContextConfigSchema.dump(self.config)
+            project_config_usage_stats.enabled is False  # type: ignore[union-attr]
+            or context_config_usage_stats.enabled is False  # type: ignore[union-attr]
         ):
-            self._save_project_config()
+            return False
 
-    def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
-        """
-        Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
-        Given proper authorization, the request retrieves a data context config that is pre-populated with
-        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
+        if project_config_usage_stats.explicit_id is False:  # type: ignore[union-attr]
+            return True
 
-        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
-        over the wire.
+        if project_config_usage_stats == context_config_usage_stats:
+            return False
 
-        :return: the configuration object retrieved from the Cloud API
-        """
-        ge_cloud_url = (
-            self.ge_cloud_config.base_url
-            + f"/organizations/{self.ge_cloud_config.organization_id}/data-context-configuration"
-        )
-        auth_headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {self.ge_cloud_config.access_token}",
-        }
+        if project_config_usage_stats is None or context_config_usage_stats is None:
+            return True
 
-        response = requests.get(ge_cloud_url, headers=auth_headers)
-        if response.status_code != 200:
-            raise ge_exceptions.GeCloudError(
-                f"Bad request made to GE Cloud; {response.text}"
-            )
-        config = response.json()
-        return DataContextConfig(**config)
+        # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.
+        global_data_context_id: Optional[str] = self._get_data_context_id_override()
+        if (
+            project_config_usage_stats.data_context_id
+            != context_config_usage_stats.data_context_id
+            and context_config_usage_stats.data_context_id != global_data_context_id
+        ):
+            return True
+
+        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.
+        global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
+        if (
+            project_config_usage_stats.usage_statistics_url
+            != context_config_usage_stats.usage_statistics_url
+            and context_config_usage_stats.usage_statistics_url
+            != global_usage_stats_url
+        ):
+            return True
+
+        return False
 
     def _load_project_config(self):
         """
@@ -405,12 +358,16 @@ class DataContext(BaseDataContext):
         for how these are substituted.
 
         For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
-        - see self._retrieve_data_context_config_from_ge_cloud for more details.
+        - see CloudDataContext.retrieve_data_context_config_from_ge_cloud for more details.
 
         :return: the configuration object read from the file or template
         """
         if self.ge_cloud_mode:
-            config = self._retrieve_data_context_config_from_ge_cloud()
+            ge_cloud_config = self.ge_cloud_config
+            assert ge_cloud_config is not None
+            config = CloudDataContext.retrieve_data_context_config_from_ge_cloud(
+                ge_cloud_config=ge_cloud_config
+            )
             return config
 
         path_to_yml = os.path.join(self._context_root_directory, self.GE_YML)
@@ -418,15 +375,15 @@ class DataContext(BaseDataContext):
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
 
+        except DuplicateKeyError:
+            raise ge_exceptions.InvalidConfigurationYamlError(
+                "Error: duplicate key found in project YAML file."
+            )
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
                 "Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{}".format(
                     err
                 )
-            )
-        except DuplicateKeyError:
-            raise ge_exceptions.InvalidConfigurationYamlError(
-                "Error: duplicate key found in project YAML file."
             )
         except OSError:
             raise ge_exceptions.ConfigNotFoundError()
@@ -446,18 +403,17 @@ class DataContext(BaseDataContext):
         self._save_project_config()
         return new_store
 
-    def add_datasource(
+    def add_datasource(  # type: ignore[override]
         self, name: str, **kwargs: dict
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(name=name, **kwargs)
-        self._save_project_config()
+        ] = super().add_datasource(name=name, save_changes=True, **kwargs)
         return new_datasource
 
-    def update_datasource(
+    def update_datasource(  # type: ignore[override]
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
     ) -> None:
@@ -474,10 +430,29 @@ class DataContext(BaseDataContext):
             save_changes=True,
         )
 
-    def delete_datasource(self, name: str) -> None:
+    def delete_datasource(self, name: str) -> None:  # type: ignore[override]
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
-        super().delete_datasource(datasource_name=name)
+        super().delete_datasource(datasource_name=name, save_changes=True)
         self._save_project_config()
+
+    def add_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: Dict[str, dict],
+        variables: Optional[dict] = None,
+    ) -> RuleBasedProfiler:
+        """
+        Constructs a RuleBasedProfiler instance just like the parent `BaseDataContext.add_profiler`
+        but also persists the result object utilizing the context's ProfilerStore instance.
+        """
+        profiler: RuleBasedProfiler = super().add_profiler(
+            name=name,
+            config_version=config_version,
+            rules=rules,
+            variables=variables,
+        )
+        return profiler
 
     @classmethod
     def find_context_root_dir(cls):

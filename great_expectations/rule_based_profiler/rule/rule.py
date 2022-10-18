@@ -12,6 +12,7 @@ from great_expectations.rule_based_profiler.config.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -25,12 +26,11 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
-    RuleState,
     build_parameter_container_for_variables,
 )
+from great_expectations.rule_based_profiler.rule_state import RuleState
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -83,7 +83,7 @@ class Rule(SerializableDictDot):
 
     @measure_execution_time(
         execution_time_holder_object_reference_name="rule_state",
-        execution_time_property_name="execution_time",
+        execution_time_property_name="rule_execution_time",
         pretty_print=False,
     )
     def run(
@@ -112,24 +112,21 @@ class Rule(SerializableDictDot):
         """
         variables = build_parameter_container_for_variables(
             variables_configs=reconcile_rule_variables(
-                variables=variables,
-                variables_config=convert_variables_to_dict(variables=self.variables),
+                variables=self.variables,
+                variables_config=convert_variables_to_dict(variables=variables),
                 reconciliation_strategy=reconciliation_directives.variables,
-            )
-        )
-        domains: List[Domain] = (
-            []
-            if self.domain_builder is None
-            else self.domain_builder.get_domains(
-                rule_name=self.name,
-                variables=variables,
-                batch_list=batch_list,
-                batch_request=batch_request,
             )
         )
 
         if rule_state is None:
             rule_state = RuleState()
+
+        domains: List[Domain] = self._get_rule_domains(
+            variables=variables,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            rule_state=rule_state,
+        )
 
         rule_state.rule = self
         rule_state.variables = variables
@@ -320,3 +317,28 @@ class Rule(SerializableDictDot):
             expectation_configuration_builder.expectation_type: expectation_configuration_builder
             for expectation_configuration_builder in expectation_configuration_builders
         }
+
+    # noinspection PyUnusedLocal
+    @measure_execution_time(
+        execution_time_holder_object_reference_name="rule_state",
+        execution_time_property_name="rule_domain_builder_execution_time",
+        pretty_print=False,
+    )
+    def _get_rule_domains(
+        self,
+        variables: Optional[ParameterContainer] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        rule_state: Optional[RuleState] = None,
+    ) -> List[Domain]:
+        domains: List[Domain] = (
+            []
+            if self.domain_builder is None
+            else self.domain_builder.get_domains(
+                rule_name=self.name,
+                variables=variables,
+                batch_list=batch_list,
+                batch_request=batch_request,
+            )
+        )
+        return domains

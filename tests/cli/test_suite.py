@@ -25,7 +25,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 from great_expectations.util import deep_filter_properties_iterable, lint_code
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.render.renderer.v3.test_suite_profile_notebook_renderer import (
-    EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER,
+    EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT,
 )
 from tests.render.test_util import (
     find_code_in_notebook,
@@ -48,50 +48,13 @@ suite = profiler.build_suite()
 validator.expectation_suite = suite
 """
 PROFILER_CODE_CELL_ONBOARDING_DATA_ASSISTANT: str = """\
-data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+result = context.assistants.onboarding.run(
     batch_request=batch_request,
-    # include_column_names=include_column_names,
     exclude_column_names=exclude_column_names,
-    # include_column_name_suffixes=include_column_name_suffixes,
-    # exclude_column_name_suffixes=exclude_column_name_suffixes,
-    # semantic_type_filter_module_name=semantic_type_filter_module_name,
-    # semantic_type_filter_class_name=semantic_type_filter_class_name,
-    # include_semantic_types=include_semantic_types,
-    # exclude_semantic_types=exclude_semantic_types,
-    # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-    # cardinality_limit_mode="rel_100",  # case-insensitive (see documentation for other options)
-    # max_unique_values=max_unique_values,
-    # max_proportion_unique=max_proportion_unique,
-    # column_value_uniqueness_rule={
-    #     "success_ratio": 0.8,
-    # },
-    # column_value_nullity_rule={
-    # },
-    # column_value_nonnullity_rule={
-    # },
-    # numeric_columns_rule={
-    #     "round_decimals": 12,
-    #     "false_positive_rate": 0.1,
-    #     "random_seed": 43792,
-    # },
-    # datetime_columns_rule={
-    #     "truncate_values": {
-    #         "lower_bound": 0,
-    #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
-    #     },
-    #     "round_decimals": 0,
-    # },
-    # text_columns_rule={
-    #     "strict_min": True,
-    #     "strict_max": True,
-    #     "success_ratio": 0.8,
-    # },
-    # categorical_columns_rule={
-    #     "false_positive_rate": 0.1,
-    #     "round_decimals": 4,
-    # },
 )
-validator.expectation_suite = data_assistant_result.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+validator.expectation_suite = result.get_expectation_suite(
+    expectation_suite_name=expectation_suite_name
+)
 """
 
 
@@ -185,6 +148,7 @@ def test_suite_demo_deprecation_message(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.81s
 def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -299,6 +263,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.87s
 def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -413,6 +378,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.83s
 def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -525,6 +491,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.72s
 def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -801,6 +768,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 8.75s
 def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_runs_notebook_no_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -1235,6 +1203,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 9.03s
 def test_suite_edit_multiple_datasources_with_no_additional_args_without_citations_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -1492,6 +1461,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 9.08s
 def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -3067,6 +3037,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 9.08s
 def test_suite_new_profile_runs_notebook_no_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -3178,7 +3149,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = lint_code(
-        code=PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER
+        code=PROFILER_CODE_CELL_ONBOARDING_DATA_ASSISTANT
     ).rstrip("\n")
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
@@ -3197,10 +3168,9 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
     expected_expectation_configurations: List[
         ExpectationConfiguration
-    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -3296,6 +3266,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 9.29s
 def test_suite_new_profile_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
@@ -3403,7 +3374,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = lint_code(
-        code=PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER
+        code=PROFILER_CODE_CELL_ONBOARDING_DATA_ASSISTANT
     ).rstrip("\n")
 
     cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
@@ -3422,10 +3393,9 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
     expected_expectation_configurations: List[
         ExpectationConfiguration
-    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -4057,6 +4027,7 @@ How would you like to create your Expectation Suite?
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 8.82s
 def test__process_suite_new_flags_and_prompt(
     mock_emit,
     mock_prompt,
@@ -4419,6 +4390,7 @@ options can be used.
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 7.90s
 def test__process_suite_edit_flags_and_prompt(
     mock_emit,
     mock_prompt,

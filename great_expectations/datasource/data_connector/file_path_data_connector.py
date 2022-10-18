@@ -45,6 +45,7 @@ class FilePathDataConnector(DataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
@@ -62,8 +63,9 @@ class FilePathDataConnector(DataConnector):
 
         super().__init__(
             name=name,
+            id=id,
             datasource_name=datasource_name,
-            execution_engine=execution_engine,
+            execution_engine=execution_engine,  # type: ignore[arg-type] # execution_engine cannot be None
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
@@ -71,7 +73,7 @@ class FilePathDataConnector(DataConnector):
             default_regex = {}
         self._default_regex = default_regex
 
-        self._sorters = build_sorters_from_config(config_list=sorters)
+        self._sorters = build_sorters_from_config(config_list=sorters)  # type: ignore[arg-type]
         self._validate_sorters_configuration()
 
     @property
@@ -96,7 +98,7 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
-        if len(self.sorters) > 0:
+        if self.sorters:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list
             )
@@ -112,7 +114,7 @@ class FilePathDataConnector(DataConnector):
 
         return path_list
 
-    def get_batch_definition_list_from_batch_request(
+    def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BaseBatchRequest
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
@@ -154,6 +156,7 @@ class FilePathDataConnector(DataConnector):
 
         """
         self._validate_batch_request(batch_request=batch_request)
+
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
@@ -166,7 +169,7 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
-        if len(self.sorters) > 0:
+        if self.sorters:
             batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list
             )
@@ -202,7 +205,7 @@ class FilePathDataConnector(DataConnector):
             sorted list of batch_definitions
 
         """
-        sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
+        sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))  # type: ignore[union-attr]
         for sorter in sorters:
             batch_definition_list = sorter.get_sorted_batch_definitions(
                 batch_definitions=batch_definition_list

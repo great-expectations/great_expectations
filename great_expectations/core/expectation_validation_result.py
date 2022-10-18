@@ -2,14 +2,26 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, List, Optional
+
+try:
+    from typing import TypedDict
+except ImportError:
+    # Fallback for python < 3.8
+    from typing_extensions import TypedDict
+
 from uuid import UUID
+
+from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__ as ge_version
+from great_expectations.core.batch import BatchDefinition, BatchMarkers
 from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
+from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
@@ -17,18 +29,15 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.marshmallow__shade import (
-    Schema,
-    fields,
-    post_dump,
-    post_load,
-    pre_dump,
-)
-from great_expectations.render.types import (
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
     RenderedAtomicContent,
     RenderedAtomicContentSchema,
 )
 from great_expectations.types import SerializableDictDot
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +125,7 @@ class ExpectationValidationResult(SerializableDictDot):
                     or (
                         self.expectation_config is not None
                         and self.expectation_config.isEquivalentTo(
-                            other.expectation_config
+                            other=other.expectation_config, match_type="success"
                         )
                     ),
                     # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
@@ -204,11 +213,11 @@ class ExpectationValidationResult(SerializableDictDot):
         - atomic diagnostic renderer for the expectation configuration associated with this
           ExpectationValidationResult to self.rendered_content.
         """
-        inline_renderer_config: Dict[str, Union[str, ExpectationValidationResult]] = {
+        inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
             "class_name": "InlineRenderer",
             "render_object": self,
         }
-        module_name: str = "great_expectations.render.renderer.inline_renderer"
+        module_name = "great_expectations.render.renderer.inline_renderer"
         inline_renderer = instantiate_class_from_config(
             config=inline_renderer_config,
             runtime_environment={},
@@ -221,10 +230,17 @@ class ExpectationValidationResult(SerializableDictDot):
                 class_name=inline_renderer_config["class_name"],
             )
 
-        (
-            self.expectation_config.rendered_content,
-            self.rendered_content,
-        ) = inline_renderer.render()
+        rendered_content: List[
+            RenderedAtomicContent
+        ] = inline_renderer.get_rendered_content()
+
+        self.rendered_content = (
+            inline_renderer.replace_or_keep_existing_rendered_content(
+                existing_rendered_content=self.rendered_content,
+                new_rendered_content=rendered_content,
+                failed_renderer_type=AtomicDiagnosticRendererType.FAILED,
+            )
+        )
 
     @staticmethod
     def validate_result_dict(result):
@@ -359,14 +375,27 @@ class ExpectationValidationResultSchema(Schema):
         return ExpectationValidationResult(**data)
 
 
+class ExpectationSuiteValidationResultMeta(TypedDict):
+    active_batch_definition: BatchDefinition
+    batch_markers: BatchMarkers
+    batch_spec: BatchSpec
+    checkpoint_id: Optional[str]
+    checkpoint_name: str
+    expectation_suite_name: str
+    great_expectations_version: str
+    run_id: RunIdentifier
+    validation_id: Optional[str]
+    validation_time: str
+
+
 class ExpectationSuiteValidationResult(SerializableDictDot):
     def __init__(
         self,
-        success=None,
-        results=None,
-        evaluation_parameters=None,
-        statistics=None,
-        meta=None,
+        success: Optional[bool] = None,
+        results: Optional[list] = None,
+        evaluation_parameters: Optional[dict] = None,
+        statistics: Optional[dict] = None,
+        meta: Optional[ExpectationSuiteValidationResultMeta] = None,
         ge_cloud_id: Optional[UUID] = None,
     ) -> None:
         self.success = success

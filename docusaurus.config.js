@@ -1,14 +1,13 @@
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 
 const remarkCodeImport = require('remark-code-import')
-const lightCodeTheme = require('prism-react-renderer/themes/vsDark')
+const remarkNamedSnippets = require('./scripts/remark-named-snippets/index')
 
 module.exports = {
   title: 'Great Expectations',
   tagline: 'Always know what to expect from your data.',
   url: 'https://docs.greatexpectations.io', // Url to your site with no trailing slash
   baseUrl: '/',
-  onDuplicateRoutes: 'warn',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'https://greatexpectations.io/favicon-32x32.png',
@@ -16,12 +15,38 @@ module.exports = {
   projectName: 'great_expectations',
   plugins: [
     // ["plugin-image-zoom"],
-    require.resolve('@cmfcmf/docusaurus-search-local')
+    require.resolve('@cmfcmf/docusaurus-search-local'),
+    '@docusaurus-terminology/parser'
   ],
 
   themeConfig: {
+    algolia: {
+      // If Algolia did not provide you any appId, use 'BH4D9OD16A'
+      appId: 'B4HD9FJQCB',
+
+      // Public API key: it is safe to commit it
+      apiKey: '16dae2c1fabc515311cada8ace06060a',
+
+      indexName: 'docs-greatexpectations',
+
+      searchPagePath: 'search',
+
+      // Optional: see doc section below
+      // contextualSearch: true,
+
+       // Optional: Specify domains where the navigation should occur through window.location instead on history.push. Useful when our Algolia config crawls multiple documentation sites and we want to navigate with window.location.href to them.
+      // externalUrlRegex: 'external\\.com|domain\\.com',
+
+       // Optional: see doc section below
+      // appId: 'YOUR_APP_ID',
+
+       // Optional: Algolia search parameters
+      // searchParameters: {},
+
+      //... other Algolia params
+    },
     prism: {
-      theme: lightCodeTheme
+      theme: require('prism-react-renderer/themes/vsDark')
     },
     colorMode: {
       disableSwitch: true
@@ -39,7 +64,7 @@ module.exports = {
     navbar: {
       logo: {
         alt: 'Great Expectations',
-        src: 'img/great-expectations-long-logo.svg',
+        src: 'img/great-expectations-logo-full-size.png',
         href: 'https://greatexpectations.io'
       },
       items: [
@@ -56,8 +81,8 @@ module.exports = {
               href: 'https://github.com/great-expectations/great_expectations'
             },
             {
-              label: 'Discuss',
-              href: 'https://discuss.greatexpectations.io/'
+              label: 'Discussions',
+              href: 'https://github.com/great-expectations/great_expectations/discussions/'
             },
             {
               label: 'Newsletter',
@@ -113,8 +138,8 @@ module.exports = {
               href: 'https://greatexpectations.io/slack'
             },
             {
-              label: 'Discuss',
-              href: 'https://discuss.greatexpectations.io/'
+              label: 'Discussions',
+              href: 'https://github.com/great-expectations/great_expectations/discussions/'
             },
             {
               label: 'Twitter',
@@ -130,17 +155,17 @@ module.exports = {
       copyright: `Copyright © ${new Date().getFullYear()} Superconductive.`
     }
   },
-  // themes:['@docusaurus/theme-classic'],
+
+  // themes:[ ],
   presets: [
     [
       '@docusaurus/preset-classic',
-      ({
+      {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          remarkPlugins: [remarkCodeImport],
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl: 'https://github.com/great-expectations/great_expectations/tree/develop/'
+          remarkPlugins: [remarkCodeImport, remarkNamedSnippets],
+          editUrl:
+                        'https://github.com/great-expectations/great_expectations/tree/develop/'
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css')
@@ -151,7 +176,7 @@ module.exports = {
           // Optional fields.
           anonymizeIP: true // Should IPs be anonymized?
         }
-      })
+      }
     ]
   ]
 }

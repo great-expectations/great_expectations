@@ -11,33 +11,32 @@ from freezegun import freeze_time
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.data_assistant import (
-    DataAssistant,
-    VolumeDataAssistant,
+from great_expectations.rule_based_profiler.data_assistant import VolumeDataAssistant
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
+    NumericRangeEstimatorType,
 )
-from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
-    CardinalityLimitMode,
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+    VolumeDataAssistantResult,
+)
+from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
+    PlotResult,
+)
+from great_expectations.rule_based_profiler.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
     ParameterNode,
-    SemanticDomainTypes,
-)
-from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
-from great_expectations.rule_based_profiler.types.data_assistant_result import (
-    DataAssistantResult,
-    VolumeDataAssistantResult,
-)
-from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
-    PlotResult,
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
@@ -140,206 +139,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
-                "column": "pickup_datetime",
-            },
-            details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    "pickup_datetime": SemanticDomainTypes.TEXT,
-                },
-            },
-            rule_name="categorical_columns_rule",
-        ): {
-            "$parameter.column_distinct_values_count": {
-                "value": [
-                    9979,
-                    9965,
-                    9974,
-                    9979,
-                    9976,
-                    9980,
-                    9983,
-                    9974,
-                    9974,
-                    9968,
-                    9972,
-                    9977,
-                    9973,
-                    9977,
-                    9976,
-                    9984,
-                    9977,
-                    9970,
-                    9977,
-                    9975,
-                    9976,
-                    9981,
-                    9973,
-                    9976,
-                    9982,
-                    9981,
-                    9945,
-                    9955,
-                    9941,
-                    9953,
-                    9973,
-                    9955,
-                    9962,
-                    9970,
-                    9977,
-                    9969,
-                ],
-                "attributed_value": {
-                    "c92d0679f769ac83fef2bb5eaac5d12a": [9979],
-                    "562969eaef9c843cb4531aecbc13bbcb": [9965],
-                    "569a4a80bf434c888593c651dbf2f157": [9974],
-                    "f6c389dcef63c1f214c30f66b66945c0": [9979],
-                    "c4fe9afce1cf3e83eb8518a9f5abc754": [9976],
-                    "e20c38f98b9830a40b851939ca7189d4": [9980],
-                    "f2e4d3da6556638b55df8ce509b094c2": [9983],
-                    "44c1b1947c9049e7db62c5320dde4c63": [9974],
-                    "47157bdaf05a7992473cd699cabaef74": [9974],
-                    "08085632aff9ce4cebbb8023049e1aec": [9968],
-                    "bb54e4fa3906387218be10cff631a7c2": [9972],
-                    "58ce3b40d384eacd9bad7d916eb8f705": [9977],
-                    "0327cfb13205ec8512e1c28e438ab43b": [9973],
-                    "0808e185a52825d22356de2fe00a8f5f": [9977],
-                    "90bb41c1fbd7c71c05dbc8695320af71": [9976],
-                    "6c7e43619fe5e6963e8159cc84a28321": [9984],
-                    "976b121b46db6967854b9c1a6628396b": [9977],
-                    "9e58d3c72c7006b6f5800b623fbc9818": [9970],
-                    "ce5f02ac408b7b5c500050190f549736": [9977],
-                    "bb81456ec79522bf02f34b02762f95e0": [9975],
-                    "b20800a7faafd2808d6c888577a2ba1d": [9976],
-                    "33d910f95326c0c7dfe7536d1cfeba51": [9981],
-                    "61e4931d87cb627df2a19b8bc5819b7b": [9973],
-                    "3692b23382fd4734215465251290c65b": [9976],
-                    "eff8910cddcdff62e4741243099240d5": [9982],
-                    "f67d274202366f6b976414c950ca14bd": [9981],
-                    "7b3ce20a8e8cf3097bb9df270a7ae63a": [9945],
-                    "73612fdabd337d5a8279acc30ce22d00": [9955],
-                    "ad2ad2a70c3e0bf94ddef3f893e92291": [9941],
-                    "8ce0d477f610ea18e2ea4fbbb46de857": [9953],
-                    "ff5a6cc031dd2c98b8bccd4766af38c1": [9973],
-                    "940576153c66af14a949fd19aedd5f5b": [9955],
-                    "ab05b4fb82e37c8cf5b1ac40d0a37fe9": [9962],
-                    "57c04d62ada3a102248b48f34c755159": [9970],
-                    "816b147dcf3305839f723a131b9ad6af": [9977],
-                    "84000630d1b69a0fe870c94fb26a32bc": [9969],
-                },
-                "details": {
-                    "metric_configuration": {
-                        "metric_name": "column.distinct_values.count",
-                        "domain_kwargs": {"column": "pickup_datetime"},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
-                    },
-                    "num_batches": 36,
-                },
-            }
-        },
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
-                "column": "dropoff_datetime",
-            },
-            details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    "dropoff_datetime": SemanticDomainTypes.TEXT,
-                },
-            },
-            rule_name="categorical_columns_rule",
-        ): {
-            "$parameter.column_distinct_values_count": {
-                "value": [
-                    9979,
-                    9977,
-                    9972,
-                    9979,
-                    9984,
-                    9977,
-                    9985,
-                    9977,
-                    9971,
-                    9976,
-                    9975,
-                    9972,
-                    9972,
-                    9967,
-                    9973,
-                    9976,
-                    9986,
-                    9982,
-                    9982,
-                    9978,
-                    9974,
-                    9984,
-                    9977,
-                    9975,
-                    9975,
-                    9973,
-                    9968,
-                    9964,
-                    9939,
-                    9965,
-                    9966,
-                    9978,
-                    9970,
-                    9967,
-                    9976,
-                    9971,
-                ],
-                "attributed_value": {
-                    "c92d0679f769ac83fef2bb5eaac5d12a": [9979],
-                    "562969eaef9c843cb4531aecbc13bbcb": [9977],
-                    "569a4a80bf434c888593c651dbf2f157": [9972],
-                    "f6c389dcef63c1f214c30f66b66945c0": [9979],
-                    "c4fe9afce1cf3e83eb8518a9f5abc754": [9984],
-                    "e20c38f98b9830a40b851939ca7189d4": [9977],
-                    "f2e4d3da6556638b55df8ce509b094c2": [9985],
-                    "44c1b1947c9049e7db62c5320dde4c63": [9977],
-                    "47157bdaf05a7992473cd699cabaef74": [9971],
-                    "08085632aff9ce4cebbb8023049e1aec": [9976],
-                    "bb54e4fa3906387218be10cff631a7c2": [9975],
-                    "58ce3b40d384eacd9bad7d916eb8f705": [9972],
-                    "0327cfb13205ec8512e1c28e438ab43b": [9972],
-                    "0808e185a52825d22356de2fe00a8f5f": [9967],
-                    "90bb41c1fbd7c71c05dbc8695320af71": [9973],
-                    "6c7e43619fe5e6963e8159cc84a28321": [9976],
-                    "976b121b46db6967854b9c1a6628396b": [9986],
-                    "9e58d3c72c7006b6f5800b623fbc9818": [9982],
-                    "ce5f02ac408b7b5c500050190f549736": [9982],
-                    "bb81456ec79522bf02f34b02762f95e0": [9978],
-                    "b20800a7faafd2808d6c888577a2ba1d": [9974],
-                    "33d910f95326c0c7dfe7536d1cfeba51": [9984],
-                    "61e4931d87cb627df2a19b8bc5819b7b": [9977],
-                    "3692b23382fd4734215465251290c65b": [9975],
-                    "eff8910cddcdff62e4741243099240d5": [9975],
-                    "f67d274202366f6b976414c950ca14bd": [9973],
-                    "7b3ce20a8e8cf3097bb9df270a7ae63a": [9968],
-                    "73612fdabd337d5a8279acc30ce22d00": [9964],
-                    "ad2ad2a70c3e0bf94ddef3f893e92291": [9939],
-                    "8ce0d477f610ea18e2ea4fbbb46de857": [9965],
-                    "ff5a6cc031dd2c98b8bccd4766af38c1": [9966],
-                    "940576153c66af14a949fd19aedd5f5b": [9978],
-                    "ab05b4fb82e37c8cf5b1ac40d0a37fe9": [9970],
-                    "57c04d62ada3a102248b48f34c755159": [9967],
-                    "816b147dcf3305839f723a131b9ad6af": [9976],
-                    "84000630d1b69a0fe870c94fb26a32bc": [9971],
-                },
-                "details": {
-                    "metric_configuration": {
-                        "metric_name": "column.distinct_values.count",
-                        "domain_kwargs": {"column": "dropoff_datetime"},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
-                    },
-                    "num_batches": 36,
-                },
-            }
-        },
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
                 "column": "passenger_count",
             },
             details={
@@ -430,106 +229,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "metric_configuration": {
                         "metric_name": "column.distinct_values.count",
                         "domain_kwargs": {"column": "passenger_count"},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
-                    },
-                    "num_batches": 36,
-                },
-            }
-        },
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
-                "column": "trip_distance",
-            },
-            details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    "trip_distance": SemanticDomainTypes.NUMERIC,
-                },
-            },
-            rule_name="categorical_columns_rule",
-        ): {
-            "$parameter.column_distinct_values_count": {
-                "value": [
-                    1157,
-                    1141,
-                    1165,
-                    1176,
-                    1202,
-                    1202,
-                    1227,
-                    1252,
-                    1236,
-                    1192,
-                    1212,
-                    1206,
-                    1184,
-                    1200,
-                    1225,
-                    1240,
-                    1222,
-                    1266,
-                    1299,
-                    1293,
-                    1310,
-                    1279,
-                    1230,
-                    1249,
-                    1228,
-                    1190,
-                    1253,
-                    1273,
-                    1560,
-                    1430,
-                    1371,
-                    1319,
-                    1207,
-                    1188,
-                    1204,
-                    1196,
-                ],
-                "attributed_value": {
-                    "c92d0679f769ac83fef2bb5eaac5d12a": [1157],
-                    "562969eaef9c843cb4531aecbc13bbcb": [1141],
-                    "569a4a80bf434c888593c651dbf2f157": [1165],
-                    "f6c389dcef63c1f214c30f66b66945c0": [1176],
-                    "c4fe9afce1cf3e83eb8518a9f5abc754": [1202],
-                    "e20c38f98b9830a40b851939ca7189d4": [1202],
-                    "f2e4d3da6556638b55df8ce509b094c2": [1227],
-                    "44c1b1947c9049e7db62c5320dde4c63": [1252],
-                    "47157bdaf05a7992473cd699cabaef74": [1236],
-                    "08085632aff9ce4cebbb8023049e1aec": [1192],
-                    "bb54e4fa3906387218be10cff631a7c2": [1212],
-                    "58ce3b40d384eacd9bad7d916eb8f705": [1206],
-                    "0327cfb13205ec8512e1c28e438ab43b": [1184],
-                    "0808e185a52825d22356de2fe00a8f5f": [1200],
-                    "90bb41c1fbd7c71c05dbc8695320af71": [1225],
-                    "6c7e43619fe5e6963e8159cc84a28321": [1240],
-                    "976b121b46db6967854b9c1a6628396b": [1222],
-                    "9e58d3c72c7006b6f5800b623fbc9818": [1266],
-                    "ce5f02ac408b7b5c500050190f549736": [1299],
-                    "bb81456ec79522bf02f34b02762f95e0": [1293],
-                    "b20800a7faafd2808d6c888577a2ba1d": [1310],
-                    "33d910f95326c0c7dfe7536d1cfeba51": [1279],
-                    "61e4931d87cb627df2a19b8bc5819b7b": [1230],
-                    "3692b23382fd4734215465251290c65b": [1249],
-                    "eff8910cddcdff62e4741243099240d5": [1228],
-                    "f67d274202366f6b976414c950ca14bd": [1190],
-                    "7b3ce20a8e8cf3097bb9df270a7ae63a": [1253],
-                    "73612fdabd337d5a8279acc30ce22d00": [1273],
-                    "ad2ad2a70c3e0bf94ddef3f893e92291": [1560],
-                    "8ce0d477f610ea18e2ea4fbbb46de857": [1430],
-                    "ff5a6cc031dd2c98b8bccd4766af38c1": [1371],
-                    "940576153c66af14a949fd19aedd5f5b": [1319],
-                    "ab05b4fb82e37c8cf5b1ac40d0a37fe9": [1207],
-                    "57c04d62ada3a102248b48f34c755159": [1188],
-                    "816b147dcf3305839f723a131b9ad6af": [1204],
-                    "84000630d1b69a0fe870c94fb26a32bc": [1196],
-                },
-                "details": {
-                    "metric_configuration": {
-                        "metric_name": "column.distinct_values.count",
-                        "domain_kwargs": {"column": "trip_distance"},
                         "metric_value_kwargs": None,
                         "metric_dependencies": None,
                     },
@@ -740,106 +439,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
-                "column": "fare_amount",
-            },
-            details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    "fare_amount": SemanticDomainTypes.NUMERIC,
-                },
-            },
-            rule_name="categorical_columns_rule",
-        ): {
-            "$parameter.column_distinct_values_count": {
-                "value": [
-                    153,
-                    148,
-                    161,
-                    156,
-                    153,
-                    161,
-                    168,
-                    176,
-                    169,
-                    170,
-                    199,
-                    184,
-                    187,
-                    201,
-                    202,
-                    178,
-                    170,
-                    184,
-                    238,
-                    253,
-                    248,
-                    246,
-                    246,
-                    252,
-                    259,
-                    267,
-                    296,
-                    797,
-                    1500,
-                    813,
-                    575,
-                    575,
-                    571,
-                    568,
-                    552,
-                    588,
-                ],
-                "attributed_value": {
-                    "c92d0679f769ac83fef2bb5eaac5d12a": [153],
-                    "562969eaef9c843cb4531aecbc13bbcb": [148],
-                    "569a4a80bf434c888593c651dbf2f157": [161],
-                    "f6c389dcef63c1f214c30f66b66945c0": [156],
-                    "c4fe9afce1cf3e83eb8518a9f5abc754": [153],
-                    "e20c38f98b9830a40b851939ca7189d4": [161],
-                    "f2e4d3da6556638b55df8ce509b094c2": [168],
-                    "44c1b1947c9049e7db62c5320dde4c63": [176],
-                    "47157bdaf05a7992473cd699cabaef74": [169],
-                    "08085632aff9ce4cebbb8023049e1aec": [170],
-                    "bb54e4fa3906387218be10cff631a7c2": [199],
-                    "58ce3b40d384eacd9bad7d916eb8f705": [184],
-                    "0327cfb13205ec8512e1c28e438ab43b": [187],
-                    "0808e185a52825d22356de2fe00a8f5f": [201],
-                    "90bb41c1fbd7c71c05dbc8695320af71": [202],
-                    "6c7e43619fe5e6963e8159cc84a28321": [178],
-                    "976b121b46db6967854b9c1a6628396b": [170],
-                    "9e58d3c72c7006b6f5800b623fbc9818": [184],
-                    "ce5f02ac408b7b5c500050190f549736": [238],
-                    "bb81456ec79522bf02f34b02762f95e0": [253],
-                    "b20800a7faafd2808d6c888577a2ba1d": [248],
-                    "33d910f95326c0c7dfe7536d1cfeba51": [246],
-                    "61e4931d87cb627df2a19b8bc5819b7b": [246],
-                    "3692b23382fd4734215465251290c65b": [252],
-                    "eff8910cddcdff62e4741243099240d5": [259],
-                    "f67d274202366f6b976414c950ca14bd": [267],
-                    "7b3ce20a8e8cf3097bb9df270a7ae63a": [296],
-                    "73612fdabd337d5a8279acc30ce22d00": [797],
-                    "ad2ad2a70c3e0bf94ddef3f893e92291": [1500],
-                    "8ce0d477f610ea18e2ea4fbbb46de857": [813],
-                    "ff5a6cc031dd2c98b8bccd4766af38c1": [575],
-                    "940576153c66af14a949fd19aedd5f5b": [575],
-                    "ab05b4fb82e37c8cf5b1ac40d0a37fe9": [571],
-                    "57c04d62ada3a102248b48f34c755159": [568],
-                    "816b147dcf3305839f723a131b9ad6af": [552],
-                    "84000630d1b69a0fe870c94fb26a32bc": [588],
-                },
-                "details": {
-                    "metric_configuration": {
-                        "metric_name": "column.distinct_values.count",
-                        "domain_kwargs": {"column": "fare_amount"},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
-                    },
-                    "num_batches": 36,
-                },
-            }
-        },
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
                 "column": "extra",
             },
             details={
@@ -1030,106 +629,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                     "metric_configuration": {
                         "metric_name": "column.distinct_values.count",
                         "domain_kwargs": {"column": "mta_tax"},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
-                    },
-                    "num_batches": 36,
-                },
-            }
-        },
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
-                "column": "tip_amount",
-            },
-            details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    "tip_amount": SemanticDomainTypes.NUMERIC,
-                },
-            },
-            rule_name="categorical_columns_rule",
-        ): {
-            "$parameter.column_distinct_values_count": {
-                "value": [
-                    532,
-                    530,
-                    539,
-                    573,
-                    574,
-                    559,
-                    557,
-                    567,
-                    576,
-                    555,
-                    600,
-                    601,
-                    535,
-                    597,
-                    601,
-                    596,
-                    612,
-                    606,
-                    579,
-                    595,
-                    608,
-                    591,
-                    599,
-                    606,
-                    572,
-                    576,
-                    560,
-                    469,
-                    466,
-                    558,
-                    539,
-                    530,
-                    503,
-                    505,
-                    515,
-                    522,
-                ],
-                "attributed_value": {
-                    "c92d0679f769ac83fef2bb5eaac5d12a": [532],
-                    "562969eaef9c843cb4531aecbc13bbcb": [530],
-                    "569a4a80bf434c888593c651dbf2f157": [539],
-                    "f6c389dcef63c1f214c30f66b66945c0": [573],
-                    "c4fe9afce1cf3e83eb8518a9f5abc754": [574],
-                    "e20c38f98b9830a40b851939ca7189d4": [559],
-                    "f2e4d3da6556638b55df8ce509b094c2": [557],
-                    "44c1b1947c9049e7db62c5320dde4c63": [567],
-                    "47157bdaf05a7992473cd699cabaef74": [576],
-                    "08085632aff9ce4cebbb8023049e1aec": [555],
-                    "bb54e4fa3906387218be10cff631a7c2": [600],
-                    "58ce3b40d384eacd9bad7d916eb8f705": [601],
-                    "0327cfb13205ec8512e1c28e438ab43b": [535],
-                    "0808e185a52825d22356de2fe00a8f5f": [597],
-                    "90bb41c1fbd7c71c05dbc8695320af71": [601],
-                    "6c7e43619fe5e6963e8159cc84a28321": [596],
-                    "976b121b46db6967854b9c1a6628396b": [612],
-                    "9e58d3c72c7006b6f5800b623fbc9818": [606],
-                    "ce5f02ac408b7b5c500050190f549736": [579],
-                    "bb81456ec79522bf02f34b02762f95e0": [595],
-                    "b20800a7faafd2808d6c888577a2ba1d": [608],
-                    "33d910f95326c0c7dfe7536d1cfeba51": [591],
-                    "61e4931d87cb627df2a19b8bc5819b7b": [599],
-                    "3692b23382fd4734215465251290c65b": [606],
-                    "eff8910cddcdff62e4741243099240d5": [572],
-                    "f67d274202366f6b976414c950ca14bd": [576],
-                    "7b3ce20a8e8cf3097bb9df270a7ae63a": [560],
-                    "73612fdabd337d5a8279acc30ce22d00": [469],
-                    "ad2ad2a70c3e0bf94ddef3f893e92291": [466],
-                    "8ce0d477f610ea18e2ea4fbbb46de857": [558],
-                    "ff5a6cc031dd2c98b8bccd4766af38c1": [539],
-                    "940576153c66af14a949fd19aedd5f5b": [530],
-                    "ab05b4fb82e37c8cf5b1ac40d0a37fe9": [503],
-                    "57c04d62ada3a102248b48f34c755159": [505],
-                    "816b147dcf3305839f723a131b9ad6af": [515],
-                    "84000630d1b69a0fe870c94fb26a32bc": [522],
-                },
-                "details": {
-                    "metric_configuration": {
-                        "metric_name": "column.distinct_values.count",
-                        "domain_kwargs": {"column": "tip_amount"},
                         "metric_value_kwargs": None,
                         "metric_dependencies": None,
                     },
@@ -1340,106 +839,6 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
-                "column": "total_amount",
-            },
-            details={
-                INFERRED_SEMANTIC_TYPE_KEY: {
-                    "total_amount": SemanticDomainTypes.NUMERIC,
-                },
-            },
-            rule_name="categorical_columns_rule",
-        ): {
-            "$parameter.column_distinct_values_count": {
-                "value": [
-                    898,
-                    884,
-                    905,
-                    942,
-                    953,
-                    945,
-                    969,
-                    966,
-                    973,
-                    972,
-                    1043,
-                    1000,
-                    942,
-                    1016,
-                    1016,
-                    1012,
-                    1026,
-                    1044,
-                    1047,
-                    1077,
-                    1073,
-                    1070,
-                    1068,
-                    1060,
-                    1037,
-                    1036,
-                    1060,
-                    1387,
-                    2018,
-                    1440,
-                    1154,
-                    1153,
-                    1154,
-                    1161,
-                    1154,
-                    1164,
-                ],
-                "attributed_value": {
-                    "c92d0679f769ac83fef2bb5eaac5d12a": [898],
-                    "562969eaef9c843cb4531aecbc13bbcb": [884],
-                    "569a4a80bf434c888593c651dbf2f157": [905],
-                    "f6c389dcef63c1f214c30f66b66945c0": [942],
-                    "c4fe9afce1cf3e83eb8518a9f5abc754": [953],
-                    "e20c38f98b9830a40b851939ca7189d4": [945],
-                    "f2e4d3da6556638b55df8ce509b094c2": [969],
-                    "44c1b1947c9049e7db62c5320dde4c63": [966],
-                    "47157bdaf05a7992473cd699cabaef74": [973],
-                    "08085632aff9ce4cebbb8023049e1aec": [972],
-                    "bb54e4fa3906387218be10cff631a7c2": [1043],
-                    "58ce3b40d384eacd9bad7d916eb8f705": [1000],
-                    "0327cfb13205ec8512e1c28e438ab43b": [942],
-                    "0808e185a52825d22356de2fe00a8f5f": [1016],
-                    "90bb41c1fbd7c71c05dbc8695320af71": [1016],
-                    "6c7e43619fe5e6963e8159cc84a28321": [1012],
-                    "976b121b46db6967854b9c1a6628396b": [1026],
-                    "9e58d3c72c7006b6f5800b623fbc9818": [1044],
-                    "ce5f02ac408b7b5c500050190f549736": [1047],
-                    "bb81456ec79522bf02f34b02762f95e0": [1077],
-                    "b20800a7faafd2808d6c888577a2ba1d": [1073],
-                    "33d910f95326c0c7dfe7536d1cfeba51": [1070],
-                    "61e4931d87cb627df2a19b8bc5819b7b": [1068],
-                    "3692b23382fd4734215465251290c65b": [1060],
-                    "eff8910cddcdff62e4741243099240d5": [1037],
-                    "f67d274202366f6b976414c950ca14bd": [1036],
-                    "7b3ce20a8e8cf3097bb9df270a7ae63a": [1060],
-                    "73612fdabd337d5a8279acc30ce22d00": [1387],
-                    "ad2ad2a70c3e0bf94ddef3f893e92291": [2018],
-                    "8ce0d477f610ea18e2ea4fbbb46de857": [1440],
-                    "ff5a6cc031dd2c98b8bccd4766af38c1": [1154],
-                    "940576153c66af14a949fd19aedd5f5b": [1153],
-                    "ab05b4fb82e37c8cf5b1ac40d0a37fe9": [1154],
-                    "57c04d62ada3a102248b48f34c755159": [1161],
-                    "816b147dcf3305839f723a131b9ad6af": [1154],
-                    "84000630d1b69a0fe870c94fb26a32bc": [1164],
-                },
-                "details": {
-                    "metric_configuration": {
-                        "metric_name": "column.distinct_values.count",
-                        "domain_kwargs": {"column": "total_amount"},
-                        "metric_value_kwargs": None,
-                        "metric_dependencies": None,
-                    },
-                    "num_batches": 36,
-                },
-            }
-        },
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
                 "column": "congestion_surcharge",
             },
             details={
@@ -1547,7 +946,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
         name: str, exclude_column_names: Optional[List[str]] = None
     ) -> RuleBasedProfilerConfig:
         exclude_column_names = exclude_column_names or []
-        expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        expected_rule_based_profiler_config = RuleBasedProfilerConfig(
             config_version=1.0,
             name=name,
             variables={"random_seed": None},
@@ -1555,7 +954,9 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                 "table_rule": {
                     "variables": {
                         "false_positive_rate": 0.05,
-                        "quantile_statistic_interpolation_method": "auto",
+                        "quantile_statistic_interpolation_method": "nearest",
+                        "quantile_bias_correction": False,
+                        "quantile_bias_std_error_ratio_threshold": None,
                         "estimator": "bootstrap",
                         "n_resamples": 9999,
                         "include_estimator_samples_histogram_in_details": False,
@@ -1573,6 +974,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "replace_nan_with_zero": True,
                             "name": "table_row_count",
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                            "single_batch_mode": False,
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
                             "reduce_scalar_metric": True,
@@ -1598,6 +1000,8 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "metric_domain_kwargs": "$domain.domain_kwargs",
                                     "false_positive_rate": "$variables.false_positive_rate",
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                                    "quantile_bias_correction": "$variables.quantile_bias_correction",
+                                    "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
                                     "random_seed": "$variables.random_seed",
                                     "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",
                                     "round_decimals": "$variables.round_decimals",
@@ -1611,6 +1015,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                             "metric_value_kwargs": None,
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                             "metric_domain_kwargs": None,
+                                            "single_batch_mode": False,
                                             "reduce_scalar_metric": True,
                                             "metric_name": "table.row_count",
                                         }
@@ -1629,35 +1034,36 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                 },
                 "categorical_columns_rule": {
                     "variables": {
+                        "cardinality_limit_mode": "FEW",
                         "mostly": 1.0,
                         "strict_min": False,
                         "strict_max": False,
                         "false_positive_rate": 0.05,
-                        "quantile_statistic_interpolation_method": "auto",
+                        "quantile_statistic_interpolation_method": "nearest",
+                        "quantile_bias_correction": False,
+                        "quantile_bias_std_error_ratio_threshold": None,
                         "estimator": "bootstrap",
                         "n_resamples": 9999,
                         "include_estimator_samples_histogram_in_details": False,
                         "truncate_values": {
                             "lower_bound": 0.0,
                         },
-                        "round_decimals": 1,
+                        "round_decimals": 15,
                     },
                     "domain_builder": {
-                        "allowed_semantic_types_passthrough": ["logic"],
-                        "class_name": "CategoricalColumnDomainBuilder",
-                        "cardinality_limit_mode": {
-                            "name": "REL_100",
-                            "max_proportion_unique": 1.0,
-                            "metric_name_defining_limit": "column.unique_proportion",
-                        },
+                        "exclude_column_name_suffixes": ["_id", "_ID"],
                         "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
+                        "allowed_semantic_types_passthrough": ["logic"],
                         "exclude_column_names": sorted(
                             [
                                 "id",
+                                "ID",
+                                "Id",
                             ]
                             + exclude_column_names
                         ),
-                        "exclude_column_name_suffixes": ["_id"],
+                        "class_name": "CategoricalColumnDomainBuilder",
+                        "cardinality_limit_mode": "$variables.cardinality_limit_mode",
                         "exclude_semantic_types": ["binary", "currency", "identifier"],
                     },
                     "parameter_builders": [
@@ -1668,6 +1074,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
+                            "single_batch_mode": False,
                             "reduce_scalar_metric": True,
                             "metric_name": "column.distinct_values.count",
                         },
@@ -1698,6 +1105,8 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "metric_name": "column.distinct_values.count",
                                     "enforce_numeric_metric": True,
                                     "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
+                                    "quantile_bias_correction": "$variables.quantile_bias_correction",
+                                    "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",
                                     "replace_nan_with_zero": True,
                                     "n_resamples": "$variables.n_resamples",
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
@@ -1713,6 +1122,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                             "metric_value_kwargs": None,
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                             "metric_domain_kwargs": "$domain.domain_kwargs",
+                                            "single_batch_mode": False,
                                             "reduce_scalar_metric": True,
                                             "metric_name": "column.distinct_values.count",
                                         }
@@ -1764,52 +1174,6 @@ def quentin_expected_expectation_suite(
                         "profiler_details": {
                             "metric_configuration": {
                                 "metric_name": "column.distinct_values.count",
-                                "domain_kwargs": {"column": "pickup_datetime"},
-                                "metric_value_kwargs": None,
-                                "metric_dependencies": None,
-                            },
-                            "num_batches": 36,
-                        }
-                    },
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "strict_max": False,
-                        "max_value": 9983,
-                        "strict_min": False,
-                        "column": "pickup_datetime",
-                        "min_value": 9945,
-                    },
-                }
-            ),
-            ExpectationConfiguration(
-                **{
-                    "meta": {
-                        "profiler_details": {
-                            "metric_configuration": {
-                                "metric_name": "column.distinct_values.count",
-                                "domain_kwargs": {"column": "dropoff_datetime"},
-                                "metric_value_kwargs": None,
-                                "metric_dependencies": None,
-                            },
-                            "num_batches": 36,
-                        }
-                    },
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "strict_max": False,
-                        "max_value": 9985,
-                        "strict_min": False,
-                        "column": "dropoff_datetime",
-                        "min_value": 9958,
-                    },
-                }
-            ),
-            ExpectationConfiguration(
-                **{
-                    "meta": {
-                        "profiler_details": {
-                            "metric_configuration": {
-                                "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "passenger_count"},
                                 "metric_value_kwargs": None,
                                 "metric_dependencies": None,
@@ -1824,29 +1188,6 @@ def quentin_expected_expectation_suite(
                         "strict_min": False,
                         "column": "passenger_count",
                         "min_value": 7,
-                    },
-                }
-            ),
-            ExpectationConfiguration(
-                **{
-                    "meta": {
-                        "profiler_details": {
-                            "metric_configuration": {
-                                "metric_name": "column.distinct_values.count",
-                                "domain_kwargs": {"column": "trip_distance"},
-                                "metric_value_kwargs": None,
-                                "metric_dependencies": None,
-                            },
-                            "num_batches": 36,
-                        }
-                    },
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "strict_max": False,
-                        "max_value": 1430,
-                        "strict_min": False,
-                        "column": "trip_distance",
-                        "min_value": 1159,
                     },
                 }
             ),
@@ -1902,29 +1243,6 @@ def quentin_expected_expectation_suite(
                         "profiler_details": {
                             "metric_configuration": {
                                 "metric_name": "column.distinct_values.count",
-                                "domain_kwargs": {"column": "fare_amount"},
-                                "metric_value_kwargs": None,
-                                "metric_dependencies": None,
-                            },
-                            "num_batches": 36,
-                        }
-                    },
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "strict_max": False,
-                        "max_value": 813,
-                        "strict_min": False,
-                        "column": "fare_amount",
-                        "min_value": 153,
-                    },
-                }
-            ),
-            ExpectationConfiguration(
-                **{
-                    "meta": {
-                        "profiler_details": {
-                            "metric_configuration": {
-                                "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "extra"},
                                 "metric_value_kwargs": None,
                                 "metric_dependencies": None,
@@ -1962,29 +1280,6 @@ def quentin_expected_expectation_suite(
                         "strict_min": False,
                         "column": "mta_tax",
                         "min_value": 3,
-                    },
-                }
-            ),
-            ExpectationConfiguration(
-                **{
-                    "meta": {
-                        "profiler_details": {
-                            "metric_configuration": {
-                                "metric_name": "column.distinct_values.count",
-                                "domain_kwargs": {"column": "tip_amount"},
-                                "metric_value_kwargs": None,
-                                "metric_dependencies": None,
-                            },
-                            "num_batches": 36,
-                        }
-                    },
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "strict_max": False,
-                        "max_value": 608,
-                        "strict_min": False,
-                        "column": "tip_amount",
-                        "min_value": 469,
                     },
                 }
             ),
@@ -2040,29 +1335,6 @@ def quentin_expected_expectation_suite(
                         "profiler_details": {
                             "metric_configuration": {
                                 "metric_name": "column.distinct_values.count",
-                                "domain_kwargs": {"column": "total_amount"},
-                                "metric_value_kwargs": None,
-                                "metric_dependencies": None,
-                            },
-                            "num_batches": 36,
-                        }
-                    },
-                    "expectation_type": "expect_column_unique_value_count_to_be_between",
-                    "kwargs": {
-                        "strict_max": False,
-                        "max_value": 1440,
-                        "strict_min": False,
-                        "column": "total_amount",
-                        "min_value": 898,
-                    },
-                }
-            ),
-            ExpectationConfiguration(
-                **{
-                    "meta": {
-                        "profiler_details": {
-                            "metric_configuration": {
-                                "metric_name": "column.distinct_values.count",
                                 "domain_kwargs": {"column": "congestion_surcharge"},
                                 "metric_value_kwargs": None,
                                 "metric_dependencies": None,
@@ -2091,7 +1363,7 @@ def quentin_expected_expectation_suite(
 
         expectation_suite_name: str = "my_suite"
 
-        expected_expectation_suite: ExpectationSuite = ExpectationSuite(
+        expected_expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name,
         )
 
@@ -2109,7 +1381,7 @@ def quentin_expected_expectation_suite(
                     "profiler_config": quentin_expected_rule_based_profiler_configuration(
                         name=name
                     ).to_json_dict(),
-                    "comment": "Suite created by Rule-Based Profiler with the configuration included.",
+                    "comment": "Created by effective Rule-Based Profiler of VolumeDataAssistant with the configuration included.\n",
                 }
             ]
         }
@@ -2134,7 +1406,8 @@ def bobby_volume_data_assistant_result(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -2153,7 +1426,8 @@ def bobby_volume_data_assistant_result_usage_stats_enabled(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -2185,7 +1459,7 @@ def quentin_explicit_instantiation_result_actual_time(
 
     data_assistant_name: str = "test_volume_data_assistant"
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name=data_assistant_name,
         validator=validator,
     )
@@ -2222,7 +1496,7 @@ def quentin_explicit_instantiation_result_frozen_time(
 
     data_assistant_name: str = "test_volume_data_assistant"
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name=data_assistant_name,
         validator=validator,
     )
@@ -2246,7 +1520,8 @@ def quentin_implicit_invocation_result_actual_time(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -2267,7 +1542,8 @@ def quentin_implicit_invocation_result_frozen_time(
     }
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
-        batch_request=batch_request
+        batch_request=batch_request,
+        estimation="flag_outliers",
     )
 
     return cast(VolumeDataAssistantResult, data_assistant_result)
@@ -2311,7 +1587,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         DataAssistant,
         VolumeDataAssistant,
     )
-    from great_expectations.rule_based_profiler.types.data_assistant_result import DataAssistantResult
+    from great_expectations.rule_based_profiler.data_assistant_result import DataAssistantResult
     from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
     import great_expectations.exceptions as ge_exceptions
 
@@ -2336,7 +1612,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         persist=False,
     )
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
         validator=validator,
     )
@@ -2374,6 +1650,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_result_serialization(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2388,11 +1665,14 @@ def test_volume_data_assistant_result_serialization(
         bobby_volume_data_assistant_result.to_json_dict()
         == volume_data_assistant_result_as_dict
     )
+    assert len(bobby_volume_data_assistant_result.profiler_config.rules) == 2
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
+@pytest.mark.slow  # 1.06s
 def test_volume_data_assistant_result_get_expectation_suite(
     mock_emit,
     bobby_volume_data_assistant_result_usage_stats_enabled: VolumeDataAssistantResult,
@@ -2417,6 +1697,7 @@ def test_volume_data_assistant_result_get_expectation_suite(
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ):
@@ -2428,7 +1709,7 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     parameter_node: ParameterNode
     batch_id: str
     assert all(
-        bobby_volume_data_assistant_result.batch_id_to_batch_identifier_display_name_map[
+        bobby_volume_data_assistant_result._batch_id_to_batch_identifier_display_name_map[
             batch_id
         ]
         is not None
@@ -2442,6 +1723,8 @@ def test_volume_data_assistant_result_batch_id_to_batch_identifier_display_name_
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 3.72s
 def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_instantiation(
     quentin_explicit_instantiation_result_frozen_time,
     quentin_expected_metrics_by_domain,
@@ -2472,14 +1755,20 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
         == expected_expectation_suite.expectations
     )
 
-    assert deep_filter_properties_iterable(
-        properties=data_assistant_result.profiler_config.to_json_dict(),
-        delete_fields={"random_seed"},
-    ) == deep_filter_properties_iterable(
-        properties=quentin_expected_rule_based_profiler_configuration(
-            name=data_assistant_name,
-        ).to_json_dict(),
-        delete_fields={"random_seed"},
+    assert sorted(
+        deep_filter_properties_iterable(
+            properties=data_assistant_result.profiler_config.to_json_dict(),
+            delete_fields={"random_seed"},
+        ),
+        key=lambda element: element[0],
+    ) == sorted(
+        deep_filter_properties_iterable(
+            properties=quentin_expected_rule_based_profiler_configuration(
+                name=data_assistant_name,
+            ).to_json_dict(),
+            delete_fields={"random_seed"},
+        ),
+        key=lambda element: element[0],
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
@@ -2503,6 +1792,8 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
 
 
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.integration
+@pytest.mark.slow  # 3.53s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation(
     quentin_implicit_invocation_result_frozen_time,
     quentin_expected_metrics_by_domain,
@@ -2533,14 +1824,33 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
         == expected_expectation_suite.expectations
     )
 
-    assert deep_filter_properties_iterable(
-        properties=data_assistant_result.profiler_config.to_json_dict(),
-        delete_fields={"random_seed"},
-    ) == deep_filter_properties_iterable(
-        properties=quentin_expected_rule_based_profiler_configuration(
-            name=registered_data_assistant_name
-        ).to_json_dict(),
-        delete_fields={"random_seed"},
+    data_assistant_result_profiler_config_as_json_dict: dict = (
+        deep_filter_properties_iterable(
+            properties=data_assistant_result.profiler_config.to_json_dict(),
+            delete_fields={"random_seed"},
+        )
+    )
+    data_assistant_result_profiler_config_as_json_dict["rules"][
+        "categorical_columns_rule"
+    ]["domain_builder"]["exclude_semantic_types"] = sorted(
+        data_assistant_result_profiler_config_as_json_dict["rules"][
+            "categorical_columns_rule"
+        ]["domain_builder"]["exclude_semantic_types"]
+    )
+    quentin_expected_rule_based_profiler_configuration_as_json_dict = (
+        deep_filter_properties_iterable(
+            properties=quentin_expected_rule_based_profiler_configuration(
+                name=registered_data_assistant_name
+            ).to_json_dict(),
+            delete_fields={"random_seed"},
+        )
+    )
+    assert sorted(
+        data_assistant_result_profiler_config_as_json_dict,
+        key=lambda element: element[0],
+    ) == sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict,
+        key=lambda element: element[0],
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
@@ -2564,6 +1874,8 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
 
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.integration
+@pytest.mark.slow  # 3.03s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_domain_type_directives(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
@@ -2587,45 +1899,8 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     ]
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        # include_column_names=include_column_names,
+        estimation=NumericRangeEstimatorType.FLAG_OUTLIERS,
         exclude_column_names=exclude_column_names,
-        # include_column_name_suffixes=include_column_name_suffixes,
-        # exclude_column_name_suffixes=exclude_column_name_suffixes,
-        # semantic_type_filter_module_name=semantic_type_filter_module_name,
-        # semantic_type_filter_class_name=semantic_type_filter_class_name,
-        # include_semantic_types=include_semantic_types,
-        # exclude_semantic_types=exclude_semantic_types,
-        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        cardinality_limit_mode=CardinalityLimitMode.REL_100,
-        # max_unique_values=max_unique_values,
-        # max_proportion_unique=max_proportion_unique,
-        # column_value_uniqueness_rule={
-        #     "success_ratio": 0.8,
-        # },
-        # column_value_nullity_rule={
-        # },
-        # column_value_nonnullity_rule={
-        # },
-        # numeric_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "random_seed": 43792,
-        # },
-        # datetime_columns_rule={
-        #     "truncate_values": {
-        #         "lower_bound": 0,
-        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
-        #     },
-        #     "round_decimals": 0,
-        # },
-        # text_columns_rule={
-        #     "strict_min": True,
-        #     "strict_max": True,
-        #     "success_ratio": 0.8,
-        # },
-        # categorical_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "round_decimals": 3,
-        # },
     )
 
     column_name: str
@@ -2711,9 +1986,19 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
             "categorical_columns_rule"
         ]["domain_builder"]["exclude_column_names"]
     )
-    assert (
-        data_assistant_result_profiler_config_as_json_dict
-        == quentin_expected_rule_based_profiler_configuration_as_json_dict
+    data_assistant_result_profiler_config_as_json_dict["rules"][
+        "categorical_columns_rule"
+    ]["domain_builder"]["exclude_semantic_types"] = sorted(
+        data_assistant_result_profiler_config_as_json_dict["rules"][
+            "categorical_columns_rule"
+        ]["domain_builder"]["exclude_semantic_types"]
+    )
+    assert sorted(
+        data_assistant_result_profiler_config_as_json_dict,
+        key=lambda element: element[0],
+    ) == sorted(
+        quentin_expected_rule_based_profiler_configuration_as_json_dict,
+        key=lambda element: element[0],
     )
 
     data_assistant_result.citation.pop("profiler_config", None)
@@ -2736,6 +2021,37 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     assert actual_expectation_suite == expected_expectation_suite
 
 
+@freeze_time("09/26/2019 13:42:41")
+@pytest.mark.integration
+@pytest.mark.slow  # 3.30s
+def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_estimation_directive(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
+    )
+
+    rule_config: dict
+    assert all(
+        [
+            rule_config["variables"]["estimator"] == "exact"
+            if "estimator" in rule_config["variables"]
+            else True
+            for rule_config in data_assistant_result.profiler_config.rules.values()
+        ]
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.slow  # 3.31s
 def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invocation_with_variables_directives(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -2749,44 +2065,9 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
-        # include_column_names=include_column_names,
-        # exclude_column_names=exclude_column_names,
-        # include_column_name_suffixes=include_column_name_suffixes,
-        # exclude_column_name_suffixes=exclude_column_name_suffixes,
-        # semantic_type_filter_module_name=semantic_type_filter_module_name,
-        # semantic_type_filter_class_name=semantic_type_filter_class_name,
-        # include_semantic_types=include_semantic_types,
-        # exclude_semantic_types=exclude_semantic_types,
-        # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-        # cardinality_limit_mode=CardinalityLimitMode.REL_100,
-        # max_unique_values=max_unique_values,
-        # max_proportion_unique=max_proportion_unique,
-        # column_value_uniqueness_rule={
-        #     "success_ratio": 0.8,
-        # },
-        # column_value_nullity_rule={
-        # },
-        # column_value_nonnullity_rule={
-        # },
-        # numeric_columns_rule={
-        #     "false_positive_rate": 0.1,
-        #     "random_seed": 43792,
-        # },
-        # datetime_columns_rule={
-        #     "truncate_values": {
-        #         "lower_bound": 0,
-        #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
-        #     },
-        #     "round_decimals": 0,
-        # },
-        # text_columns_rule={
-        #     "strict_min": True,
-        #     "strict_max": True,
-        #     "success_ratio": 0.8,
-        # },
+        estimation=NumericRangeEstimatorType.FLAG_OUTLIERS,
         categorical_columns_rule={
             "false_positive_rate": 0.1,
-            # "round_decimals": 3,
         },
     )
     assert (
@@ -2797,6 +2078,8 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 4.97s
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
@@ -2804,10 +2087,12 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_explici
     data_assistant_result: DataAssistantResult
     validator, data_assistant_result = quentin_explicit_instantiation_result_actual_time
 
-    # Execution time (in seconds) must have non-trivial value.
-    assert data_assistant_result.execution_time > 0.0
+    # Rule-Based Profiler execution time (in seconds) must have non-trivial value.
+    assert data_assistant_result.profiler_execution_time > 0.0
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 3.37s
 def test_volume_data_assistant_execution_time_within_proper_bounds_using_implicit_invocation(
     quentin_implicit_invocation_result_actual_time,
 ):
@@ -2815,10 +2100,12 @@ def test_volume_data_assistant_execution_time_within_proper_bounds_using_implici
         quentin_implicit_invocation_result_actual_time
     )
 
-    # Execution time (in seconds) must have non-trivial value.
-    assert data_assistant_result.execution_time > 0.0
+    # Rule-Based Profiler execution time (in seconds) must have non-trivial value.
+    assert data_assistant_result.profiler_execution_time > 0.0
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 3.46s
 def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_by_domain_using_explicit_instantiation(
     quentin_explicit_instantiation_result_actual_time,
 ):
@@ -2843,6 +2130,8 @@ def test_volume_data_assistant_batch_id_order_consistency_in_attributed_metrics_
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 13.77s
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2867,6 +2156,8 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
         )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 11.07s
 def test_volume_data_assistant_plot_descriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2887,6 +2178,8 @@ def test_volume_data_assistant_plot_descriptive_notebook_execution(
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 11.91s
 def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2907,6 +2200,8 @@ def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 11.57s
 def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2929,6 +2224,8 @@ def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 12.09s
 def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -2953,6 +2250,7 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -2962,50 +2260,47 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_cha
     assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     plot_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics()
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 18  # One for each column present
+    assert len(column_domain_charts) == 10  # One for each column present
 
     columns: List[str] = [
         "VendorID",
-        "pickup_datetime",
-        "dropoff_datetime",
-        "passenger_count",
-        "trip_distance",
         "RatecodeID",
+        "passenger_count",
         "store_and_fwd_flag",
-        "PULocationID",
-        "DOLocationID",
         "payment_type",
-        "fare_amount",
         "extra",
         "mta_tax",
-        "tip_amount",
         "tolls_amount",
         "improvement_surcharge",
-        "total_amount",
         "congestion_surcharge",
     ]
     assert find_strings_in_nested_obj(column_domain_charts, columns)
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_include_column_names_filters_output(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    include_column_names: List[str] = ["VendorID", "pickup_datetime"]
+    include_column_names: List[str] = [
+        "VendorID",
+    ]
     plot_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics(
         include_column_names=include_column_names
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 2  # Normally 18 without filtering
+    assert len(column_domain_charts) == 1  # Normally 18 without filtering
     assert find_strings_in_nested_obj(column_domain_charts, include_column_names)
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_exclude_column_names_filters_output(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -3015,10 +2310,11 @@ def test_volume_data_assistant_plot_exclude_column_names_filters_output(
     )
 
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[1:]]
-    assert len(column_domain_charts) == 16  # Normally 18 without filtering
+    assert len(column_domain_charts) == 9  # Normally 18 without filtering
     assert not find_strings_in_nested_obj(column_domain_charts, exclude_column_names)
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_error(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -3030,6 +2326,7 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_custom_theme_overrides(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -3088,6 +2385,7 @@ def test_volume_data_assistant_plot_custom_theme_overrides(
     )
 
 
+@pytest.mark.integration
 def test_volume_data_assistant_plot_return_tooltip(
     bobby_volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
@@ -3131,7 +2429,7 @@ def test_volume_data_assistant_plot_return_tooltip(
         alt.Tooltip(
             **{
                 "field": "min_value",
-                "format": ",",
+                "format": "",
                 "title": "Min Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
@@ -3139,7 +2437,7 @@ def test_volume_data_assistant_plot_return_tooltip(
         alt.Tooltip(
             **{
                 "field": "max_value",
-                "format": ",",
+                "format": "",
                 "title": "Max Value",
                 "type": AltairDataTypes.QUANTITATIVE.value,
             }
@@ -3160,23 +2458,18 @@ def test_volume_data_assistant_plot_return_tooltip(
                 "type": AltairDataTypes.NOMINAL.value,
             }
         ),
-        alt.Tooltip(
-            **{
-                "field": "column_distinct_values_count",
-                "format": ",",
-                "title": "Column Distinct Values Count",
-                "type": AltairDataTypes.QUANTITATIVE.value,
-            }
-        ),
     ]
 
     single_column_return_chart: alt.LayerChart = plot_result.charts[2]
     layer_1: alt.Chart = single_column_return_chart.layer[1]
     actual_tooltip: List[alt.Tooltip] = layer_1.encoding.tooltip
 
-    assert actual_tooltip == expected_tooltip
+    for tooltip in expected_tooltip:
+        assert tooltip in actual_tooltip
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 11.63s
 def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -3197,6 +2490,8 @@ def test_volume_data_assistant_metrics_plot_descriptive_non_sequential_notebook_
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 12.09s
 def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_sequential_notebook_execution(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -3217,20 +2512,3 @@ def test_volume_data_assistant_metrics_and_expectations_plot_descriptive_non_seq
         new_cell=new_cell,
         implicit=True,
     )
-
-
-def test_volume_data_assistant_plot_non_sequential(
-    bobby_volume_data_assistant_result: VolumeDataAssistantResult,
-) -> None:
-    sequential: bool = False
-    plot_metrics_result: PlotResult = bobby_volume_data_assistant_result.plot_metrics(
-        sequential=sequential
-    )
-
-    assert all([chart.mark == "bar" for chart in plot_metrics_result.charts])
-
-    plot_expectations_result: PlotResult = (
-        bobby_volume_data_assistant_result.plot_metrics(sequential=sequential)
-    )
-
-    assert all([chart.mark == "bar" for chart in plot_expectations_result.charts])

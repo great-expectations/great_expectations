@@ -38,6 +38,7 @@ def test_requirements_files():
     assert (
         req_set_dict["requirements-dev-spark.txt"]
         & req_set_dict["requirements-dev-sqlalchemy.txt"]
+        & req_set_dict["requirements-dev-azure.txt"]
         == set()
     )
 
@@ -60,6 +61,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-teradata.txt"]
         | req_set_dict["requirements-dev-trino.txt"]
         | req_set_dict["requirements-dev-hive.txt"]
+        | req_set_dict["requirements-dev-vertica.txt"]
     ) == req_set_dict["requirements-dev-sqlalchemy.txt"]
 
     assert (
@@ -67,6 +69,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-sqlalchemy.txt"]
         | req_set_dict["requirements-dev-arrow.txt"]
+        | req_set_dict["requirements-dev-azure.txt"]
         | req_set_dict["requirements-dev-excel.txt"]
         | req_set_dict["requirements-dev-pagerduty.txt"]
         | req_set_dict["requirements-dev-spark.txt"]
@@ -92,4 +95,5 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-snowflake.txt"]
         | req_set_dict["requirements-dev-teradata.txt"]
         | req_set_dict["requirements-dev-trino.txt"]
+        | req_set_dict["requirements-dev-vertica.txt"]
     ) <= {"numpy>=1.21.0", "scipy>=1.7.0"}

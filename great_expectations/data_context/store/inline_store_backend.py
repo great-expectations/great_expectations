@@ -1,6 +1,8 @@
 import logging
-from typing import Any, List, Optional, Tuple
+import pathlib
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
+from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
@@ -9,6 +11,9 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions.exceptions import StoreBackendError
 from great_expectations.util import filter_properties_dict
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +38,8 @@ class InlineStoreBackend(StoreBackend):
 
     def __init__(
         self,
-        data_context: "DataContext",  # noqa: F821
+        data_context: "DataContext",
+        resource_type: DataContextVariableSchema,
         runtime_environment: Optional[dict] = None,
         fixed_length_key: bool = False,
         suppress_store_backend_id: bool = False,
@@ -48,6 +54,7 @@ class InlineStoreBackend(StoreBackend):
         )
 
         self._data_context = data_context
+        self._resource_type = resource_type
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
@@ -67,12 +74,9 @@ class InlineStoreBackend(StoreBackend):
         return self._config
 
     def _get(self, key: Tuple[str, ...]) -> Any:
-        (
-            resource_type,
-            resource_name,
-        ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
-
+        resource_name = InlineStoreBackend._determine_resource_name(key)
         project_config: DataContextConfig = self._data_context.config
+        resource_type = self._resource_type
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             return project_config
@@ -85,19 +89,16 @@ class InlineStoreBackend(StoreBackend):
         return variable_config
 
     def _set(self, key: Tuple[str, ...], value: Any, **kwargs: dict) -> None:
-        (
-            resource_type,
-            resource_name,
-        ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
-
+        resource_name = InlineStoreBackend._determine_resource_name(key)
         project_config: DataContextConfig = self._data_context.config
+        resource_type = self._resource_type
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             config_commented_map_from_yaml = yaml.load(value)
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
-            project_config = value
+            self._data_context.set_config(value)
         elif resource_name is not None:
             project_config[resource_type][resource_name] = value
         else:
@@ -145,10 +146,8 @@ class InlineStoreBackend(StoreBackend):
         """
         See `StoreBackend.remove_key` for more information.
         """
-        (
-            resource_type,
-            resource_name,
-        ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
+        resource_name = InlineStoreBackend._determine_resource_name(key)
+        resource_type = self._resource_type
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             raise StoreBackendError(
@@ -167,44 +166,39 @@ class InlineStoreBackend(StoreBackend):
 
         self._save_changes()
 
-    def _has_key(self, key: Tuple[str, ...]) -> bool:
-        (
-            resource_type,
-            resource_name,
-        ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
+    def build_key(
+        self,
+        id: Optional[str] = None,
+        name: Optional[str] = None,
+    ) -> DataContextVariableKey:
+        """Get the store backend specific implementation of the key. id included for super class compatibility."""
+        return DataContextVariableKey(
+            resource_name=name,
+        )
 
-        if len(key) == 1:
-            return resource_type in self._data_context.config
-        elif len(key) == 2:
+    def _has_key(self, key: Tuple[str, ...]) -> bool:
+        resource_name = InlineStoreBackend._determine_resource_name(key)
+        resource_type = self._resource_type
+
+        if resource_name is not None:
             res: dict = self._data_context.config.get(resource_type) or {}
             return resource_name in res
 
-        return False
-
-    def _validate_key(self, key: Tuple[str, ...]) -> None:
-        (
-            resource_type,
-            _,
-        ) = InlineStoreBackend._determine_resource_type_and_name_from_key(key)
-
-        if not isinstance(
-            resource_type, DataContextVariableSchema
-        ) and not DataContextVariableSchema.has_value(resource_type):
-            raise TypeError(
-                f"Keys in {self.__class__.__name__} must adhere to the schema defined by {DataContextVariableSchema.__name__}; invalid value ({resource_type}) of type {type(resource_type)} found"
-            )
+        return resource_type in self._data_context.config
 
     def _save_changes(self) -> None:
-        # NOTE: <DataContextRefactor> This responsibility will be moved into DataContext Variables object
-        self._data_context._save_project_config()
+        context = self._data_context
+        config_filepath = pathlib.Path(context.root_directory) / context.GE_YML  # type: ignore[arg-type]
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                context.config.to_yaml(outfile)
+        # In environments where wrting to disk is not allowed, it is impossible to
+        # save changes. As such, we log a warning but do not raise.
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
 
     @staticmethod
-    def _determine_resource_type_and_name_from_key(
-        key: Tuple[str, ...]
-    ) -> Tuple[DataContextVariableSchema, Optional[str]]:
-        resource_type: DataContextVariableSchema = DataContextVariableSchema(key[0])
-        resource_name: Optional[str] = None
-        if len(key) > 1 and key[1]:
-            resource_name = key[1]
-
-        return resource_type, resource_name
+    def _determine_resource_name(key: Tuple[str, ...]) -> Optional[str]:
+        resource_name: Optional[str] = key[0] or None
+        return resource_name

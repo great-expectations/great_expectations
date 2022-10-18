@@ -7,11 +7,22 @@ import random
 import re
 import string
 import threading
+import time
 import traceback
 import warnings
 from functools import wraps
 from types import ModuleType
-from typing import Dict, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import numpy as np
 import pandas as pd
@@ -36,6 +47,8 @@ from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
 )
+
+# from great_expectations.data_context.data_context import DataContext
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -54,6 +67,11 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import import_library_module
 from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Connection
+
+    from great_expectations.data_context import DataContext
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -80,9 +98,11 @@ except ImportError:
 try:
     from pyspark.sql import DataFrame as SparkDataFrame
     from pyspark.sql import SparkSession
+    from pyspark.sql.types import StructType
 except ImportError:
-    SparkSession = None
     SparkDataFrame = type(None)
+    SparkSession = None
+    StructType = None
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
@@ -159,7 +179,7 @@ except ImportError:
         )
         try:
             getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple = {}
+            bigquery_types_tuple: Dict = {}  # type: ignore[no-redef]
             BIGQUERY_TYPES = {
                 "INTEGER": sqla_bigquery.INTEGER,
                 "NUMERIC": sqla_bigquery.NUMERIC,
@@ -181,15 +201,15 @@ except ImportError:
             )
             from collections import namedtuple
 
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc]
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)  # type: ignore[assignment]
             BIGQUERY_TYPES = {}
 
     except (ImportError, AttributeError):
         sqla_bigquery = None
-        bigquery_types_tuple = None
+        bigquery_types_tuple = None  # type: ignore[assignment]
         BigQueryDialect = None
-        pybigquery = None
+        pybigquery = None  # type: ignore[var-annotated]
         BIGQUERY_TYPES = {}
 
 
@@ -240,10 +260,17 @@ except (ImportError, KeyError):
     MYSQL_TYPES = {}
 
 try:
+    # SQLAlchemy does not export the "INT" type for the MS SQL Server dialect; however "INT" is supported by the engine.
+    # Since SQLAlchemy exports the "INTEGER" type for the MS SQL Server dialect, alias "INT" to the "INTEGER" type.
     import sqlalchemy.dialects.mssql as mssqltypes
 
     # noinspection PyPep8Naming
     from sqlalchemy.dialects.mssql import dialect as mssqlDialect
+
+    try:
+        getattr(mssqltypes, "INT")
+    except AttributeError:
+        mssqltypes.INT = mssqltypes.INTEGER
 
     MSSQL_TYPES = {
         "BIGINT": mssqltypes.BIGINT,
@@ -257,6 +284,7 @@ try:
         "DECIMAL": mssqltypes.DECIMAL,
         "FLOAT": mssqltypes.FLOAT,
         "IMAGE": mssqltypes.IMAGE,
+        "INT": mssqltypes.INT,
         "INTEGER": mssqltypes.INTEGER,
         "MONEY": mssqltypes.MONEY,
         "NCHAR": mssqltypes.NCHAR,
@@ -310,6 +338,124 @@ except (ImportError, KeyError):
     trinoDialect = None
     TRINO_TYPES = {}
 
+try:
+    import sqlalchemy_redshift.dialect as redshifttypes
+    import sqlalchemy_redshift.dialect as redshiftDialect
+
+    REDSHIFT_TYPES = {
+        "BIGINT": redshifttypes.BIGINT,
+        "BOOLEAN": redshifttypes.BOOLEAN,
+        "CHAR": redshifttypes.CHAR,
+        "DATE": redshifttypes.DATE,
+        "DECIMAL": redshifttypes.DECIMAL,
+        "DOUBLE_PRECISION": redshifttypes.DOUBLE_PRECISION,
+        "FOREIGN_KEY_RE": redshifttypes.FOREIGN_KEY_RE,
+        "GEOMETRY": redshifttypes.GEOMETRY,
+        "INTEGER": redshifttypes.INTEGER,
+        "PRIMARY_KEY_RE": redshifttypes.PRIMARY_KEY_RE,
+        "REAL": redshifttypes.REAL,
+        "SMALLINT": redshifttypes.SMALLINT,
+        "TIMESTAMP": redshifttypes.TIMESTAMP,
+        "TIMESTAMPTZ": redshifttypes.TIMESTAMPTZ,
+        "TIMETZ": redshifttypes.TIMETZ,
+        "VARCHAR": redshifttypes.VARCHAR,
+    }
+except (ImportError, KeyError):
+    redshifttypes = None
+    redshiftDialect = None
+    REDSHIFT_TYPES = {}
+
+try:
+    import snowflake.sqlalchemy.custom_types as snowflaketypes
+    import snowflake.sqlalchemy.snowdialect
+    import snowflake.sqlalchemy.snowdialect as snowflakeDialect
+
+    # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
+    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+    sqlalchemy.dialects.registry.register(
+        "snowflake", "snowflake.sqlalchemy", "dialect"
+    )
+
+    SNOWFLAKE_TYPES = {
+        "ARRAY": snowflaketypes.ARRAY,
+        "BYTEINT": snowflaketypes.BYTEINT,
+        "CHARACTER": snowflaketypes.CHARACTER,
+        "DEC": snowflaketypes.DEC,
+        "DOUBLE": snowflaketypes.DOUBLE,
+        "FIXED": snowflaketypes.FIXED,
+        "NUMBER": snowflaketypes.NUMBER,
+        "OBJECT": snowflaketypes.OBJECT,
+        "STRING": snowflaketypes.STRING,
+        "TEXT": snowflaketypes.TEXT,
+        "TIMESTAMP_LTZ": snowflaketypes.TIMESTAMP_LTZ,
+        "TIMESTAMP_NTZ": snowflaketypes.TIMESTAMP_NTZ,
+        "TIMESTAMP_TZ": snowflaketypes.TIMESTAMP_TZ,
+        "TINYINT": snowflaketypes.TINYINT,
+        "VARBINARY": snowflaketypes.VARBINARY,
+        "VARIANT": snowflaketypes.VARIANT,
+    }
+except (ImportError, KeyError, AttributeError):
+    snowflake = None
+    snowflaketypes = None
+    snowflakeDialect = None
+    SNOWFLAKE_TYPES = {}
+
+try:
+    import pyathena.sqlalchemy_athena
+    from pyathena.sqlalchemy_athena import AthenaDialect as athenaDialect
+    from pyathena.sqlalchemy_athena import types as athenatypes
+
+    # athenatypes is just `from sqlalchemy import types`
+    # https://github.com/laughingman7743/PyAthena/blob/master/pyathena/sqlalchemy_athena.py#L692
+    #   - the _get_column_type method of AthenaDialect does some mapping via conditional statements
+    # https://github.com/laughingman7743/PyAthena/blob/master/pyathena/sqlalchemy_athena.py#L105
+    #   - The AthenaTypeCompiler has some methods named `visit_<TYPE>`
+    ATHENA_TYPES = {
+        "BOOLEAN": athenatypes.BOOLEAN,
+        "FLOAT": athenatypes.FLOAT,
+        "DOUBLE": athenatypes.FLOAT,
+        "REAL": athenatypes.FLOAT,
+        "TINYINT": athenatypes.INTEGER,
+        "SMALLINT": athenatypes.INTEGER,
+        "INTEGER": athenatypes.INTEGER,
+        "INT": athenatypes.INTEGER,
+        "BIGINT": athenatypes.BIGINT,
+        "DECIMAL": athenatypes.DECIMAL,
+        "CHAR": athenatypes.CHAR,
+        "VARCHAR": athenatypes.VARCHAR,
+        "STRING": athenatypes.String,
+        "DATE": athenatypes.DATE,
+        "TIMESTAMP": athenatypes.TIMESTAMP,
+        "BINARY": athenatypes.BINARY,
+        "VARBINARY": athenatypes.BINARY,
+        "ARRAY": athenatypes.String,
+        "MAP": athenatypes.String,
+        "STRUCT": athenatypes.String,
+        "ROW": athenatypes.String,
+        "JSON": athenatypes.String,
+    }
+except ImportError:
+    pyathena = None
+    athenatypes = None
+    athenaDialect = None
+    ATHENA_TYPES = {}
+
+# # Others from great_expectations/dataset/sqlalchemy_dataset.py
+# try:
+#     import sqlalchemy_dremio.pyodbc
+#
+#     sqlalchemy.dialects.registry.register(
+#         "dremio", "sqlalchemy_dremio.pyodbc", "dialect"
+#     )
+# except ImportError:
+#     sqlalchemy_dremio = None
+#
+# try:
+#     import teradatasqlalchemy.dialect
+#     import teradatasqlalchemy.types as teradatatypes
+# except ImportError:
+#     teradatasqlalchemy = None
+
 import tempfile
 
 # from tests.rule_based_profiler.conftest import ATOL, RTOL
@@ -325,13 +471,23 @@ SQL_DIALECT_NAMES = (
     "mssql",
     "bigquery",
     "trino",
+    "redshift",
+    # "athena",
+    "snowflake",
 )
+
+BACKEND_TO_ENGINE_NAME_DICT = {
+    "pandas": "pandas",
+    "spark": "spark",
+}
+
+BACKEND_TO_ENGINE_NAME_DICT.update({name: "sqlalchemy" for name in SQL_DIALECT_NAMES})
 
 
 class SqlAlchemyConnectionManager:
     def __init__(self) -> None:
         self.lock = threading.Lock()
-        self._connections = {}
+        self._connections: Dict[str, "Connection"] = {}
 
     def get_engine(self, connection_string):
         if sqlalchemy is not None:
@@ -384,7 +540,7 @@ def get_sqlite_connection_url(sqlite_db_path):
     return url
 
 
-def get_dataset(
+def get_dataset(  # noqa: C901 - 110
     dataset_type,
     data,
     schemas=None,
@@ -418,8 +574,7 @@ def get_dataset(
                     type_ = np.dtype(value)
                 except TypeError:
                     # noinspection PyUnresolvedReferences
-                    type_ = getattr(pd.core.dtypes.dtypes, value)
-                    # If this raises AttributeError it's okay: it means someone built a bad test
+                    type_ = getattr(pd, value)()
                 pandas_schema[key] = type_
             # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
@@ -760,6 +915,182 @@ def get_dataset(
             table_name, engine=engine, profiler=profiler, caching=caching
         )
 
+    elif dataset_type == "snowflake":
+        if not create_engine or not SNOWFLAKE_TYPES:
+            return None
+
+        engine = _create_snowflake_engine()
+        sql_dtypes = {}
+        if (
+            schemas
+            and "snowflake" in schemas
+            and isinstance(engine.dialect, snowflakeDialect)
+        ):
+            schema = schemas["snowflake"]
+            sql_dtypes = {
+                col: SNOWFLAKE_TYPES[dtype] for (col, dtype) in schema.items()
+            }
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
+
+        if table_name is None:
+            table_name = generate_test_table_name().lower()
+
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=engine, profiler=profiler, caching=caching
+        )
+
+    elif dataset_type == "redshift":
+        if not create_engine or not REDSHIFT_TYPES:
+            return None
+
+        engine = _create_redshift_engine()
+        sql_dtypes = {}
+        if (
+            schemas
+            and "redshift" in schemas
+            and isinstance(engine.dialect, redshiftDialect)
+        ):
+            schema = schemas["redshift"]
+            sql_dtypes = {col: REDSHIFT_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
+
+        if table_name is None:
+            table_name = generate_test_table_name().lower()
+
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=engine, profiler=profiler, caching=caching
+        )
+
+    elif dataset_type == "athena":
+        if not create_engine or not ATHENA_TYPES:
+            return None
+
+        engine = _create_athena_engine()
+        sql_dtypes = {}
+        if (
+            schemas
+            and "athena" in schemas
+            and isinstance(engine.dialect, athenaDialect)
+        ):
+            schema = schemas["athena"]
+            sql_dtypes = {col: ATHENA_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
+
+        if table_name is None:
+            table_name = generate_test_table_name().lower()
+
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=engine, profiler=profiler, caching=caching
+        )
+
     elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
 
@@ -869,15 +1200,19 @@ def get_dataset(
         raise ValueError(f"Unknown dataset_type {str(dataset_type)}")
 
 
-def get_test_validator_with_data(
+def get_test_validator_with_data(  # noqa: C901 - 31
     execution_engine,
     data,
     schemas=None,
     caching=True,
     table_name=None,
     sqlite_db_path=None,
+    extra_debug_info="",
+    debug_logger: Optional[logging.Logger] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ):
     """Utility to create datasets for json-formatted tests."""
+
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
@@ -902,8 +1237,7 @@ def get_test_validator_with_data(
                     type_ = np.dtype(value)
                 except TypeError:
                     # noinspection PyUnresolvedReferences
-                    type_ = getattr(pd.core.dtypes.dtypes, value)
-                    # If this raises AttributeError it's okay: it means someone built a bad test
+                    type_ = getattr(pd, value)()
                 pandas_schema[key] = type_
             # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
@@ -912,7 +1246,7 @@ def get_test_validator_with_data(
             # noinspection PyUnusedLocal
             table_name = generate_test_table_name()
 
-        return build_pandas_validator_with_data(df=df)
+        return build_pandas_validator_with_data(df=df, context=context)
 
     elif execution_engine in SQL_DIALECT_NAMES:
         if not create_engine:
@@ -928,6 +1262,9 @@ def get_test_validator_with_data(
             caching=caching,
             table_name=table_name,
             sqlite_db_path=sqlite_db_path,
+            extra_debug_info=extra_debug_info,
+            debug_logger=debug_logger,
+            context=context,
         )
         return result
 
@@ -982,7 +1319,7 @@ def get_test_validator_with_data(
                     type_ = schema[col]
                     if type_ in ["IntegerType", "LongType"]:
                         # Ints cannot be None...but None can be valid in Spark (as Null)
-                        vals = []
+                        vals: List[Union[str, int, float, None]] = []
                         for val in data[col]:
                             if val is None:
                                 vals.append(val)
@@ -1003,7 +1340,7 @@ def get_test_validator_with_data(
                             if val is None:
                                 vals.append(val)
                             else:
-                                vals.append(parse(val))
+                                vals.append(parse(val))  # type: ignore[arg-type]
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
@@ -1041,7 +1378,9 @@ def get_test_validator_with_data(
             # noinspection PyUnusedLocal
             table_name = generate_test_table_name()
 
-        return build_spark_validator_with_data(df=spark_df, spark=spark)
+        return build_spark_validator_with_data(
+            df=spark_df, spark=spark, context=context
+        )
 
     else:
         raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
@@ -1050,26 +1389,35 @@ def get_test_validator_with_data(
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
+    context: Optional["DataContext"] = None,  # noqa: F821
 ) -> Validator:
-    batch: Batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
         execution_engine=PandasExecutionEngine(),
         batches=[
             batch,
         ],
+        data_context=context,
     )
 
 
-def build_sa_validator_with_data(
+def build_sa_validator_with_data(  # noqa: C901 - 39
     df,
     sa_engine_name,
     schemas=None,
     caching=True,
     table_name=None,
     sqlite_db_path=None,
+    extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
+    debug_logger: Optional[logging.Logger] = None,
+    context: Optional["DataContext"] = None,
 ):
-    dialect_classes = {}
+    _debug = lambda x: x  # noqa: E731
+    if debug_logger:
+        _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr] # noqa: E731
+
+    dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
     try:
         dialect_classes["sqlite"] = sqlitetypes.dialect
@@ -1101,6 +1449,21 @@ def build_sa_validator_with_data(
         dialect_types["trino"] = TRINO_TYPES
     except AttributeError:
         pass
+    try:
+        dialect_classes["snowflake"] = snowflakeDialect.dialect
+        dialect_types["snowflake"] = SNOWFLAKE_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["redshift"] = redshiftDialect.RedshiftDialect
+        dialect_types["redshift"] = REDSHIFT_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["athena"] = athenaDialect
+        dialect_types["athena"] = ATHENA_TYPES
+    except AttributeError:
+        pass
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
@@ -1121,6 +1484,12 @@ def build_sa_validator_with_data(
         engine = _create_bigquery_engine()
     elif sa_engine_name == "trino":
         engine = _create_trino_engine(db_hostname)
+    elif sa_engine_name == "redshift":
+        engine = _create_redshift_engine()
+    elif sa_engine_name == "athena":
+        engine = _create_athena_engine()
+    elif sa_engine_name == "snowflake":
+        engine = _create_snowflake_engine()
     else:
         engine = None
 
@@ -1137,13 +1506,12 @@ def build_sa_validator_with_data(
     if (
         schemas
         and sa_engine_name in schemas
-        and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
+        and isinstance(engine.dialect, dialect_classes[sa_engine_name])
     ):
         schema = schemas[sa_engine_name]
 
         sql_dtypes = {
-            col: dialect_types.get(sa_engine_name)[dtype]
-            for (col, dtype) in schema.items()
+            col: dialect_types[sa_engine_name][dtype] for (col, dtype) in schema.items()
         }
         for col in schema:
             type_ = schema[col]
@@ -1185,6 +1553,8 @@ def build_sa_validator_with_data(
     else:
         sql_insert_method = None
 
+    _debug("Calling df.to_sql")
+    _start = time.time()
     df.to_sql(
         name=table_name,
         con=engine,
@@ -1192,6 +1562,10 @@ def build_sa_validator_with_data(
         dtype=sql_dtypes,
         if_exists="replace",
         method=sql_insert_method,
+    )
+    _end = time.time()
+    _debug(
+        f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
     )
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
@@ -1203,6 +1577,7 @@ def build_sa_validator_with_data(
         batches=[
             batch,
         ],
+        data_context=context,
     )
 
 
@@ -1228,6 +1603,7 @@ def build_spark_validator_with_data(
     df: Union[pd.DataFrame, SparkDataFrame],
     spark: SparkSession,
     batch_definition: Optional[BatchDefinition] = None,
+    context: Optional["DataContext"] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -1240,7 +1616,7 @@ def build_spark_validator_with_data(
             ],
             df.columns.tolist(),
         )
-    batch: Batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark,
         df=df,
@@ -1251,17 +1627,16 @@ def build_spark_validator_with_data(
         batches=[
             batch,
         ],
+        data_context=context,
     )
 
 
 def build_pandas_engine(
     df: pd.DataFrame,
 ) -> PandasExecutionEngine:
-    batch: Batch = Batch(data=df)
+    batch = Batch(data=df)
 
-    execution_engine: PandasExecutionEngine = PandasExecutionEngine(
-        batch_data_dict={batch.id: batch.data}
-    )
+    execution_engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
     return execution_engine
 
 
@@ -1269,6 +1644,7 @@ def build_sa_engine(
     df: pd.DataFrame,
     sa: ModuleType,
     schema: Optional[str] = None,
+    batch_id: Optional[str] = None,
     if_exists: str = "fail",
     index: bool = False,
     dtype: Optional[dict] = None,
@@ -1289,13 +1665,16 @@ def build_sa_engine(
     execution_engine: SqlAlchemyExecutionEngine
 
     execution_engine = SqlAlchemyExecutionEngine(engine=sqlalchemy_engine)
-    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+    batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
     )
-    batch: Batch = Batch(data=batch_data)
+    batch = Batch(data=batch_data)
+
+    if batch_id is None:
+        batch_id = batch.id
 
     execution_engine = SqlAlchemyExecutionEngine(
-        engine=sqlalchemy_engine, batch_data_dict={batch.id: batch_data}
+        engine=sqlalchemy_engine, batch_data_dict={batch_id: batch_data}
     )
 
     return execution_engine
@@ -1305,6 +1684,7 @@ def build_sa_engine(
 def build_spark_engine(
     spark: SparkSession,
     df: Union[pd.DataFrame, SparkDataFrame],
+    schema: StructType = None,
     batch_id: Optional[str] = None,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
@@ -1323,24 +1703,26 @@ def build_spark_engine(
         )
 
     if batch_id is None:
-        batch_id = batch_definition.id
+        batch_id = cast(BatchDefinition, batch_definition).id
 
     if isinstance(df, pd.DataFrame):
-        df = spark.createDataFrame(
-            [
+        if schema is None:
+            data: Union[pd.DataFrame, List[tuple]] = [
                 tuple(
                     None if isinstance(x, (float, int)) and np.isnan(x) else x
                     for x in record.tolist()
                 )
                 for record in df.to_records(index=False)
-            ],
-            df.columns.tolist(),
-        )
-    conf: List[tuple] = spark.sparkContext.getConf().getAll()
+            ]
+            schema = df.columns.tolist()
+        else:
+            data = df
+
+        df = spark.createDataFrame(data=data, schema=schema)
+
+    conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
-    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
-        spark_config=spark_config
-    )
+    execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
     execution_engine.load_batch_data(batch_id=batch_id, batch_data=df)
     return execution_engine
 
@@ -1553,7 +1935,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
     return False
 
 
-def build_test_backends_list(
+def build_test_backends_list(  # noqa: C901 - 48
     include_pandas=True,
     include_spark=False,
     include_sqlalchemy=True,
@@ -1564,6 +1946,10 @@ def build_test_backends_list(
     include_bigquery=False,
     include_aws=False,
     include_trino=False,
+    include_azure=False,
+    include_redshift=False,
+    include_athena=False,
+    include_snowflake=False,
     raise_exceptions_for_backends: bool = True,
 ) -> List[str]:
     """Attempts to identify supported backends by checking which imports are available."""
@@ -1695,6 +2081,9 @@ def build_test_backends_list(
             else:
                 test_backends += ["bigquery"]
 
+        if include_redshift or include_athena:
+            include_aws = True
+
         if include_aws:
             # TODO need to come up with a better way to do this check.
             # currently this checks the 3 default EVN variables that boto3 looks for
@@ -1735,25 +2124,129 @@ def build_test_backends_list(
             else:
                 test_backends += ["trino"]
 
+        if include_azure:
+            azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
+            azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
+            if not azure_access_key and not azure_credential:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "Azure tests are requested, but credentials were not set up"
+                    )
+                else:
+                    logger.warning(
+                        "Azure tests are requested, but credentials were not set up"
+                    )
+            test_backends += ["azure"]
+
+        if include_redshift:
+            # noinspection PyUnresolvedReferences
+            try:
+                engine = _create_redshift_engine()
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "redshift tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"redshift tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["redshift"]
+
+        if include_athena:
+            # noinspection PyUnresolvedReferences
+            try:
+                engine = _create_athena_engine()
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "athena tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"athena tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["athena"]
+
+        if include_snowflake:
+            # noinspection PyUnresolvedReferences
+            try:
+                engine = _create_snowflake_engine()
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "snowflake tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"snowflake tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["snowflake"]
+
     return test_backends
 
 
-def generate_expectation_tests(
+def generate_expectation_tests(  # noqa: C901 - 43
     expectation_type: str,
     test_data_cases: List[ExpectationTestDataCases],
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     raise_exceptions_for_backends: bool = False,
+    ignore_suppress: bool = False,
+    ignore_only_for: bool = False,
+    debug_logger: Optional[logging.Logger] = None,
+    only_consider_these_backends: Optional[List[str]] = None,
+    context: Optional["DataContext"] = None,
 ):
     """Determine tests to run
 
     :param expectation_type: snake_case name of the expectation type
     :param test_data_cases: list of ExpectationTestDataCases that has data, tests, schemas, and backends to use
     :param execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics object specifying the engines the expectation is implemented for
+    :param raise_exceptions_for_backends: bool object that when True will raise an Exception if a backend fails to connect
+    :param ignore_suppress: bool object that when True will ignore the suppress_test_for list on Expectation sample tests
+    :param ignore_only_for: bool object that when True will ignore the only_for list on Expectation sample tests
+    :param debug_logger: optional logging.Logger object to use for sending debug messages to
+    :param only_consider_these_backends: optional list of backends to consider
     :return: list of parametrized tests with loaded validators and accessible backends
     """
+    _debug = lambda x: x  # noqa: E731
+    _error = lambda x: x  # noqa: E731
+    if debug_logger:
+        _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
+        _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
+
     parametrized_tests = []
 
-    for d in test_data_cases:
+    if only_consider_these_backends:
+        only_consider_these_backends = [
+            backend
+            for backend in only_consider_these_backends
+            if backend in BACKEND_TO_ENGINE_NAME_DICT
+        ]
+
+    engines_implemented = []
+    if execution_engine_diagnostics.PandasExecutionEngine:
+        engines_implemented.append("pandas")
+    if execution_engine_diagnostics.SparkDFExecutionEngine:
+        engines_implemented.append("spark")
+    if execution_engine_diagnostics.SqlAlchemyExecutionEngine:
+        engines_implemented.append("sqlalchemy")
+    _debug(
+        f"Implemented engines for {expectation_type}: {', '.join(engines_implemented)}"
+    )
+
+    num_test_data_cases = len(test_data_cases)
+    for i, d in enumerate(test_data_cases, 1):
+        _debug(f"test_data_case {i}/{num_test_data_cases}")
         d = copy.deepcopy(d)
         dialects_to_include = {}
         engines_to_include = {}
@@ -1765,6 +2258,23 @@ def generate_expectation_tests(
                 if tb.backend == "sqlalchemy":
                     for dialect in tb.dialects:
                         dialects_to_include[dialect] = True
+            _debug(
+                f"Tests specify specific backends only: engines_to_include -> {engines_to_include}  dialects_to_include -> {dialects_to_include}"
+            )
+            if only_consider_these_backends:
+                test_backends = list(engines_to_include.keys()) + list(
+                    dialects_to_include.keys()
+                )
+                if "sqlalchemy" in test_backends:
+                    test_backends.extend(list(SQL_DIALECT_NAMES))
+                engines_to_include = {}
+                dialects_to_include = {}
+                for backend in set(test_backends) & set(only_consider_these_backends):
+                    dialects_to_include[backend] = True
+                    if backend in SQL_DIALECT_NAMES:
+                        engines_to_include["sqlalchemy"] = True
+                    else:
+                        engines_to_include[BACKEND_TO_ENGINE_NAME_DICT[backend]] = True
         else:
             engines_to_include[
                 "pandas"
@@ -1779,15 +2289,25 @@ def generate_expectation_tests(
                 engines_to_include.get("sqlalchemy") is True
                 and raise_exceptions_for_backends is False
             ):
-                dialects_to_include = {
-                    dialect: True
-                    for dialect in SQL_DIALECT_NAMES
-                    if dialect != "bigquery"
-                }
+                dialects_to_include = {dialect: True for dialect in SQL_DIALECT_NAMES}
 
-        # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
-        if engines_to_include.get("sqlalchemy") is True and not dialects_to_include:
-            dialects_to_include["sqlite"] = True
+            if only_consider_these_backends:
+                engines_to_include = {}
+                dialects_to_include = {}
+                for backend in only_consider_these_backends:
+                    if backend in SQL_DIALECT_NAMES:
+                        if "sqlalchemy" in engines_implemented:
+                            dialects_to_include[backend] = True
+                            engines_to_include["sqlalchemy"] = True
+                    else:
+                        if backend == "pandas" and "pandas" in engines_implemented:
+                            engines_to_include["pandas"] = True
+                        elif backend == "spark" and "spark" in engines_implemented:
+                            engines_to_include["spark"] = True
+
+        # # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
+        # if engines_to_include.get("sqlalchemy") is True and not dialects_to_include:
+        #     dialects_to_include["sqlite"] = True
 
         backends = build_test_backends_list(
             include_pandas=engines_to_include.get("pandas", False),
@@ -1799,10 +2319,58 @@ def generate_expectation_tests(
             include_mssql=dialects_to_include.get("mssql", False),
             include_bigquery=dialects_to_include.get("bigquery", False),
             include_trino=dialects_to_include.get("trino", False),
+            include_redshift=dialects_to_include.get("redshift", False),
+            include_athena=dialects_to_include.get("athena", False),
+            include_snowflake=dialects_to_include.get("snowflake", False),
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
+        titles = []
+        only_fors = []
+        suppress_test_fors = []
+        for _test_case in d.tests:
+            titles.append(_test_case.title)
+            only_fors.append(_test_case.only_for)
+            suppress_test_fors.append(_test_case.suppress_test_for)
+        _debug(f"titles -> {titles}")
+        _debug(
+            f"only_fors -> {only_fors}  suppress_test_fors -> {suppress_test_fors}  only_consider_these_backends -> {only_consider_these_backends}"
+        )
+        _debug(f"backends -> {backends}")
+        if not backends:
+            _debug("No suitable backends for this test_data_case")
+            continue
 
         for c in backends:
+            _debug(f"Getting validators with data: {c}")
+
+            tests_suppressed_for_backend = [
+                c in sup or ("sqlalchemy" in sup and c in SQL_DIALECT_NAMES)
+                if sup
+                else False
+                for sup in suppress_test_fors
+            ]
+            only_fors_ok = []
+            for i, only_for in enumerate(only_fors):
+                if not only_for:
+                    only_fors_ok.append(True)
+                    continue
+                if c in only_for or (
+                    "sqlalchemy" in only_for and c in SQL_DIALECT_NAMES
+                ):
+                    only_fors_ok.append(True)
+                else:
+                    only_fors_ok.append(False)
+            if tests_suppressed_for_backend and all(tests_suppressed_for_backend):
+                _debug(
+                    f"All {len(tests_suppressed_for_backend)} tests are SUPPRESSED for {c}"
+                )
+                continue
+            if not any(only_fors_ok):
+                _debug(f"No tests are allowed for {c}")
+                _debug(
+                    f"c -> {c}  only_fors -> {only_fors}  only_fors_ok -> {only_fors_ok}"
+                )
+                continue
 
             datasets = []
 
@@ -1817,26 +2385,37 @@ def generate_expectation_tests(
                                 dataset.get("schemas"),
                                 table_name=dataset.get("dataset_name"),
                                 sqlite_db_path=sqlite_db_path,
+                                extra_debug_info=expectation_type,
+                                debug_logger=debug_logger,
+                                context=context,
                             )
                         )
                     validator_with_data = datasets[0]
                 else:
                     validator_with_data = get_test_validator_with_data(
-                        c, d["data"], d["schemas"]
+                        c,
+                        d["data"],
+                        d["schemas"],
+                        extra_debug_info=expectation_type,
+                        debug_logger=debug_logger,
+                        context=context,
                     )
             except Exception as e:
-                # Adding these print statements for build_gallery.py's console output
-                print("\n\n[[ Problem calling get_test_validator_with_data ]]")
-                print(f"expectation_type -> {expectation_type}")
-                print(f"c -> {c}\ne -> {e}")
-                print(f"d['data'] -> {d.get('data')}")
-                print(f"d['schemas'] -> {d.get('schemas')}")
-                print("DataFrame from data without any casting/conversion ->")
-                print(pd.DataFrame(d.get("data")))
-                print()
+                _error(
+                    f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} {repr(e)[:300]}"
+                )
+                # # Adding these print statements for build_gallery.py's console output
+                # print("\n\n[[ Problem calling get_test_validator_with_data ]]")
+                # print(f"expectation_type -> {expectation_type}")
+                # print(f"c -> {c}\ne -> {e}")
+                # print(f"d['data'] -> {d.get('data')}")
+                # print(f"d['schemas'] -> {d.get('schemas')}")
+                # print("DataFrame from data without any casting/conversion ->")
+                # print(pd.DataFrame(d.get("data")))
+                # print()
 
                 if "data_alt" in d and d["data_alt"] is not None:
-                    print("There is alternate data to try!!")
+                    # print("There is alternate data to try!!")
                     try:
                         if isinstance(d["data_alt"], list):
                             sqlite_db_path = generate_sqlite_db_path()
@@ -1848,38 +2427,69 @@ def generate_expectation_tests(
                                         dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
+                                        extra_debug_info=expectation_type,
+                                        debug_logger=debug_logger,
+                                        context=context,
                                     )
                                 )
                             validator_with_data = datasets[0]
                         else:
                             validator_with_data = get_test_validator_with_data(
-                                c, d["data_alt"], d["schemas"]
+                                c,
+                                d["data_alt"],
+                                d["schemas"],
+                                extra_debug_info=expectation_type,
+                                debug_logger=debug_logger,
+                                context=context,
                             )
-                    except Exception as e2:
-                        print(
-                            "\n[[ STILL Problem calling get_test_validator_with_data ]]"
+                    except Exception:
+                        # print(
+                        #     "\n[[ STILL Problem calling get_test_validator_with_data ]]"
+                        # )
+                        # print(f"expectation_type -> {expectation_type}")
+                        # print(f"c -> {c}\ne2 -> {e2}")
+                        # print(f"d['data_alt'] -> {d.get('data_alt')}")
+                        # print(
+                        #     "DataFrame from data_alt without any casting/conversion ->"
+                        # )
+                        # print(pd.DataFrame(d.get("data_alt")))
+                        # print()
+                        parametrized_tests.append(
+                            {
+                                "expectation_type": expectation_type,
+                                "validator_with_data": None,
+                                "error": repr(e)[:300],
+                                "test": None,
+                                "backend": c,
+                            }
                         )
-                        print(f"expectation_type -> {expectation_type}")
-                        print(f"c -> {c}\ne2 -> {e2}")
-                        print(f"d['data_alt'] -> {d.get('data_alt')}")
-                        print(
-                            "DataFrame from data_alt without any casting/conversion ->"
-                        )
-                        print(pd.DataFrame(d.get("data_alt")))
-                        print()
                         continue
                     else:
-                        print("\n[[ The alternate data worked!! ]]\n")
+                        # print("\n[[ The alternate data worked!! ]]\n")
+                        pass
                 else:
+                    parametrized_tests.append(
+                        {
+                            "expectation_type": expectation_type,
+                            "validator_with_data": None,
+                            "error": repr(e)[:300],
+                            "test": None,
+                            "backend": c,
+                        }
+                    )
                     continue
 
-            except Exception as e:
+            except Exception:
                 continue
 
             for test in d["tests"]:
                 if not should_we_generate_this_test(
                     backend=c,
                     expectation_test_case=test,
+                    ignore_suppress=ignore_suppress,
+                    ignore_only_for=ignore_only_for,
+                    extra_debug_info=expectation_type,
+                    debug_logger=debug_logger,
                 ):
                     continue
 
@@ -1888,7 +2498,7 @@ def generate_expectation_tests(
                     "allow_cross_type_comparisons" in test["input"]
                     and validator_with_data
                     and isinstance(
-                        validator_with_data.execution_engine.active_batch_data,
+                        validator_with_data.execution_engine.batch_manager.active_batch_data,
                         SqlAlchemyBatchData,
                     )
                 ):
@@ -1909,7 +2519,15 @@ def generate_expectation_tests(
 def should_we_generate_this_test(
     backend: str,
     expectation_test_case: ExpectationTestCase,
+    ignore_suppress: bool = False,
+    ignore_only_for: bool = False,
+    extra_debug_info: str = "",
+    debug_logger: Optional[logging.Logger] = None,
 ):
+
+    _debug = lambda x: x  # noqa: E731
+    if debug_logger:
+        _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
 
     # backend will only ever be pandas, spark, or a specific SQL dialect, but sometimes
     # suppress_test_for or only_for may include "sqlalchemy"
@@ -1919,14 +2537,32 @@ def should_we_generate_this_test(
     #   - only_for can be any of: pandas, pandas_022, pandas_023, pandas>=024
     #   - See: https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/test_expectations_cfe.py#L176-L185
     if backend in expectation_test_case.suppress_test_for:
-        return False
+        if ignore_suppress:
+            _debug(
+                f"Should be suppressing {expectation_test_case.title} for {backend}, but ignore_suppress is True | {extra_debug_info}"
+            )
+            return True
+        else:
+            _debug(
+                f"Backend {backend} is suppressed for test {expectation_test_case.title}: | {extra_debug_info}"
+            )
+            return False
     if (
         "sqlalchemy" in expectation_test_case.suppress_test_for
         and backend in SQL_DIALECT_NAMES
     ):
-        return False
-    if expectation_test_case.only_for != None and expectation_test_case.only_for:
-        if not backend in expectation_test_case.only_for:
+        if ignore_suppress:
+            _debug(
+                f"Should be suppressing {expectation_test_case.title} for sqlalchemy (including {backend}), but ignore_suppress is True | {extra_debug_info}"
+            )
+            return True
+        else:
+            _debug(
+                f"All sqlalchemy (including {backend}) is suppressed for test: {expectation_test_case.title} | {extra_debug_info}"
+            )
+            return False
+    if expectation_test_case.only_for is not None and expectation_test_case.only_for:
+        if backend not in expectation_test_case.only_for:
             if (
                 "sqlalchemy" in expectation_test_case.only_for
                 and backend in SQL_DIALECT_NAMES
@@ -1943,7 +2579,17 @@ def should_we_generate_this_test(
                 elif "pandas>=024" in expectation_test_case.only_for:
                     if (major == "0" and int(minor) >= 24) or int(major) >= 1:
                         return True
-            return False
+
+            if ignore_only_for:
+                _debug(
+                    f"Should normally not run test {expectation_test_case.title} for {backend}, but ignore_only_for is True | {extra_debug_info}"
+                )
+                return True
+            else:
+                _debug(
+                    f"Only {expectation_test_case.only_for} allowed (not {backend}) for test: {expectation_test_case.title} | {extra_debug_info}"
+                )
+                return False
 
     return True
 
@@ -2097,7 +2743,10 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
             result = getattr(validator, expectation_type)(*kwargs)
         # As well as keyword arguments
         else:
-            runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
+            runtime_kwargs = {
+                "result_format": "COMPLETE",
+                "include_config": False,
+            }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)
     except (
@@ -2115,7 +2764,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
             check_json_test_result(
                 test=test,
                 result=result,
-                data_asset=validator.execution_engine.active_batch_data,
+                data_asset=validator.execution_engine.batch_manager.active_batch_data,
             )
         except Exception as e:
             if raise_exception:
@@ -2126,7 +2775,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
     return (result, error_message, stack_trace)
 
 
-def check_json_test_result(test, result, data_asset=None) -> None:
+def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901 - 49
     # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
     if "unexpected_list" in result["result"]:
         if ("result" in test["output"]) and (
@@ -2211,11 +2860,12 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                             rtol=RTOL,
                             atol=ATOL,
                         ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['success']} not np.allclose to {value}"
-
                     except TypeError:
                         assert (
                             result["success"] == value
                         ), f"{result['success']} != {value}"
+                else:
+                    assert result["success"] == value, f"{result['success']} != {value}"
 
             elif key == "observed_value":
                 if "tolerance" in test:
@@ -2284,14 +2934,17 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                         + " but got "
                         + str(result["result"]["unexpected_list"])
                     )
-                except AssertionError as e:
-                    if type(result["result"]["unexpected_list"][0]) == list:
-                        unexpected_list_tup = [
-                            tuple(x) for x in result["result"]["unexpected_list"]
-                        ]
-                        assert (
-                            unexpected_list_tup == value
-                        ), f"{unexpected_list_tup} != {value}"
+                except AssertionError:
+                    if result["result"]["unexpected_list"]:
+                        if type(result["result"]["unexpected_list"][0]) == list:
+                            unexpected_list_tup = [
+                                tuple(x) for x in result["result"]["unexpected_list"]
+                            ]
+                            assert (
+                                unexpected_list_tup == value
+                            ), f"{unexpected_list_tup} != {value}"
+                        else:
+                            raise
                     else:
                         raise
 
@@ -2425,7 +3078,11 @@ def _create_trino_engine(
 
     with engine.begin() as conn:
         try:
-            res = conn.execute(text(f"create schema {schema_name}"))
+            schemas = conn.execute(
+                text(f"show schemas from memory like {repr(schema_name)}")
+            ).fetchall()
+            if (schema_name,) not in schemas:
+                conn.execute(text(f"create schema {schema_name}"))
         except TrinoUserError:
             pass
     return engine
@@ -2456,6 +3113,82 @@ def _create_trino_engine(
     # return create_engine(
     #     f"trino://{trino_user}:{trino_password}@{trino_account}-{trino_cluster}.trino.galaxy.starburst.io:443/test_suite/test_ci"
     # )
+
+
+def _create_redshift_engine() -> Engine:
+    """
+    Copied get_redshift_connection_url func from tests/test_utils.py
+    """
+    host = os.environ.get("REDSHIFT_HOST")
+    port = os.environ.get("REDSHIFT_PORT")
+    user = os.environ.get("REDSHIFT_USERNAME")
+    pswd = os.environ.get("REDSHIFT_PASSWORD")
+    db = os.environ.get("REDSHIFT_DATABASE")
+    ssl = os.environ.get("REDSHIFT_SSLMODE")
+
+    if not host:
+        raise ValueError(
+            "Environment Variable REDSHIFT_HOST is required to run integration tests against Redshift"
+        )
+    if not port:
+        raise ValueError(
+            "Environment Variable REDSHIFT_PORT is required to run integration tests against Redshift"
+        )
+    if not user:
+        raise ValueError(
+            "Environment Variable REDSHIFT_USERNAME is required to run integration tests against Redshift"
+        )
+    if not pswd:
+        raise ValueError(
+            "Environment Variable REDSHIFT_PASSWORD is required to run integration tests against Redshift"
+        )
+    if not db:
+        raise ValueError(
+            "Environment Variable REDSHIFT_DATABASE is required to run integration tests against Redshift"
+        )
+    if not ssl:
+        raise ValueError(
+            "Environment Variable REDSHIFT_SSLMODE is required to run integration tests against Redshift"
+        )
+
+    url = f"redshift+psycopg2://{user}:{pswd}@{host}:{port}/{db}?sslmode={ssl}"
+    return create_engine(url)
+
+
+def _create_athena_engine(db_name_env_var: str = "ATHENA_DB_NAME") -> Engine:
+    """
+    Copied get_awsathena_connection_url and get_awsathena_db_name funcs from
+    tests/test_utils.py
+    """
+    ATHENA_DB_NAME: Optional[str] = os.getenv(db_name_env_var)
+    ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
+    if not ATHENA_DB_NAME:
+        raise ValueError(
+            f"Environment Variable {db_name_env_var} is required to run integration tests against AWS Athena"
+        )
+    if not ATHENA_STAGING_S3:
+        raise ValueError(
+            "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
+        )
+
+    url = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
+    return create_engine(url)
+
+
+def _create_snowflake_engine() -> Engine:
+    """
+    Copied get_snowflake_connection_url func from tests/test_utils.py
+    """
+    sfUser = os.environ.get("SNOWFLAKE_USER")
+    sfPswd = os.environ.get("SNOWFLAKE_PW")
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
+    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
+    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+    sfRole = os.environ.get("SNOWFLAKE_ROLE") or "PUBLIC"
+
+    url = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&role={sfRole}"
+    return create_engine(url)
 
 
 def generate_sqlite_db_path():

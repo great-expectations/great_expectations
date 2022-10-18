@@ -139,25 +139,23 @@ def test_ConfigOnlyDataContext_v013__initialization(
     )
 
 
+@pytest.mark.unit
 def test__normalize_absolute_or_relative_path(
     tmp_path_factory, basic_data_context_v013_config
 ):
-    config_path = str(
-        tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
+    full_test_path = tmp_path_factory.mktemp(
+        "test__normalize_absolute_or_relative_path__dir"
     )
+    test_dir = full_test_path.parts[-1]
+    config_path = str(full_test_path)
     context = BaseDataContext(
         basic_data_context_v013_config,
         config_path,
     )
 
-    pattern_string = os.path.join(
-        "^.*test__normalize_absolute_or_relative_path__dir\\d*", "yikes$"
+    assert context._normalize_absolute_or_relative_path("yikes").endswith(
+        f"{test_dir}/yikes"
     )
-    pattern = re.compile(pattern_string)
-    assert (
-        pattern.match(context._normalize_absolute_or_relative_path("yikes")) is not None
-    )
-
     assert (
         "test__normalize_absolute_or_relative_path__dir"
         not in context._normalize_absolute_or_relative_path("/yikes")
@@ -231,6 +229,7 @@ def test_get_config(empty_data_context):
         "checkpoint_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",
+        "include_rendered_content",
     }
 
 
@@ -504,6 +503,7 @@ data_connectors:
     )
 
 
+@pytest.mark.slow  # 1.06s
 def test_in_memory_data_context_configuration(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -589,7 +589,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
     selectable_count_sql_str = f"select count(*) from {selectable_table_name}"
     sa_engine = batch.data.execution_engine.engine
 
-    assert sa_engine.execute(selectable_count_sql_str).scalar() == 120
+    assert sa_engine.execute(selectable_count_sql_str).scalar() == 123
     assert batch.batch_markers.get("ge_load_time") is not None
     # since create_temp_table defaults to True, there should be 1 temp table
     assert len(get_sqlite_temp_table_names(batch.data.execution_engine.engine)) == 1

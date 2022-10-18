@@ -3,6 +3,7 @@ from typing import Optional
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 
 
@@ -47,7 +48,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     }
 
     map_metric = "multicolumn_sum.equal"
-    success_keys = ("sum_total",)
+    success_keys = ("mostly", "sum_total")
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -78,7 +79,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -91,7 +92,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         pass
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
         configuration=None,

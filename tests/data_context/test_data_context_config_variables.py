@@ -322,7 +322,7 @@ def test_substitute_config_variable():
     assert (
         """Unable to find a match for config substitution variable: `arg1`.
 Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
-See https://great-expectations.readthedocs.io/en/latest/reference/data_context_reference.html#managing-environment-and-secrets"""
+See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials"""
         in exc.value.message
     )
     assert (

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
@@ -9,20 +9,21 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.types import SerializableDictDot
 
 
 @dataclass(frozen=True)
 class RuleBasedProfilerResult(SerializableDictDot):
     """
-    RuleBasedProfilerResult is an immutable "dataclass" object, designed to hold results of executing
-    "RuleBasedProfiler.run()" method.  Available properties are: "fully_qualified_parameter_names_by_domain",
+    "RuleBasedProfilerResult" is an immutable "dataclass" object, designed to hold results with auxiliary information of
+    executing "RuleBasedProfiler.run()" method.  Principal properties are: "fully_qualified_parameter_names_by_domain",
     "parameter_values_for_fully_qualified_parameter_names_by_domain", "expectation_configurations", and "citation"
-    (which represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled").
+    (which represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled).
     """
 
     fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]]
@@ -31,9 +32,10 @@ class RuleBasedProfilerResult(SerializableDictDot):
     ]
     expectation_configurations: List[ExpectationConfiguration]
     citation: dict
-    execution_time: float
+    rule_domain_builder_execution_time: Dict[str, float]
     rule_execution_time: Dict[str, float]
-    usage_statistics_handler: Optional[UsageStatisticsHandler] = None
+    # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
+    _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     def to_dict(self) -> dict:
         """
@@ -69,8 +71,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
                 for expectation_configuration in self.expectation_configurations
             ],
             "citation": self.citation,
-            "execution_time": self.execution_time,
-            "usage_statistics_handler": self.usage_statistics_handler.__class__.__name__,
         }
 
     def to_json_dict(self) -> dict:
@@ -78,13 +78,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
         Returns: This RuleBasedProfilerResult as JSON-serializable dictionary.
         """
         return self.to_dict()
-
-    @property
-    def _usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
-        """
-        Returns: "UsageStatisticsHandler" object for this RuleBasedProfilerResult object (if configured).
-        """
-        return self.usage_statistics_handler
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE.value,

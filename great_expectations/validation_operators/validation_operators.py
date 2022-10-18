@@ -12,6 +12,9 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GeCloudIdentifier,
@@ -287,6 +290,7 @@ class ActionListValidationOperator(ValidationOperator):
         result_format=None,
         checkpoint_identifier=None,
         checkpoint_name: Optional[str] = None,
+        validation_id: Optional[str] = None,
     ) -> ValidationOperatorResult:
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -370,11 +374,11 @@ class ActionListValidationOperator(ValidationOperator):
             for batch, async_batch_validation_result in batch_and_async_result_tuples:
                 if self.data_context.ge_cloud_mode:
                     expectation_suite_identifier = GeCloudIdentifier(
-                        resource_type="expectation_suite",
+                        resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
                         ge_cloud_id=batch._expectation_suite.ge_cloud_id,
                     )
                     validation_result_id = GeCloudIdentifier(
-                        resource_type="suite_validation_result"
+                        resource_type=GeCloudRESTResource.VALIDATION_RESULT
                     )
                 else:
                     expectation_suite_identifier = ExpectationSuiteIdentifier(
@@ -386,18 +390,24 @@ class ActionListValidationOperator(ValidationOperator):
                         run_id=run_id,
                     )
 
+                validation_result = async_batch_validation_result.result()
+                validation_result.meta["validation_id"] = validation_id
+                validation_result.meta["checkpoint_id"] = (
+                    checkpoint_identifier.ge_cloud_id if checkpoint_identifier else None
+                )
+
                 batch_actions_results = self._run_actions(
                     batch=batch,
                     expectation_suite_identifier=expectation_suite_identifier,
                     expectation_suite=batch._expectation_suite,
-                    batch_validation_result=async_batch_validation_result.result(),
+                    batch_validation_result=validation_result,
                     run_id=run_id,
                     validation_result_id=validation_result_id,
                     checkpoint_identifier=checkpoint_identifier,
                 )
 
                 run_result_obj = {
-                    "validation_result": async_batch_validation_result.result(),
+                    "validation_result": validation_result,
                     "actions_results": batch_actions_results,
                 }
                 run_results[validation_result_id] = run_result_obj
@@ -759,7 +769,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         return query
 
-    def run(
+    def run(  # noqa: C901 - complexity 18
         self,
         assets_to_validate,
         run_id=None,
@@ -806,8 +816,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             batch_id = batch.batch_id
             run_id = run_id
 
-            assert not batch_id is None
-            assert not run_id is None
+            assert batch_id is not None
+            assert run_id is not None
 
             failure_expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=base_expectation_suite_name

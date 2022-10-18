@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions.exceptions
+# noinspection PyUnresolvedReferences
 from contrib.experimental.great_expectations_experimental.expectations.expect_queried_column_value_frequency_to_meet_threshold import (
     ExpectQueriedColumnValueFrequencyToMeetThreshold,
 )
@@ -13,7 +13,7 @@ from great_expectations.validator.validator import (
     Validator,
 )
 
-sqlite_runtime_batch_request = RuntimeBatchRequest(
+sqlite_runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     datasource_name="my_sqlite_db_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="titanic",
@@ -22,7 +22,7 @@ sqlite_runtime_batch_request = RuntimeBatchRequest(
     batch_spec_passthrough={"create_temp_table": False},
 )
 
-sqlite_batch_request = BatchRequest(
+sqlite_batch_request: BatchRequest = BatchRequest(
     datasource_name="my_sqlite_db_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="titanic",
@@ -39,15 +39,16 @@ sqlite_batch_request = BatchRequest(
         (sqlite_runtime_batch_request, True, 0.5, 'col("Age")>17', True),
     ],
 )
+@pytest.mark.slow  # 3.02s
 def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     batch_request,
     success,
     observed,
     row_condition,
     warns,
-    titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
@@ -122,6 +123,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
     ],
 )
+@pytest.mark.slow  # 3.92s
 def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_sqlite(
     batch_request,
     query,
@@ -129,9 +131,9 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     observed,
     row_condition,
     warns,
-    titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=batch_request)
 
@@ -178,11 +180,9 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     warns,
     spark_session,
     basic_spark_df_execution_engine,
+    titanic_df,
 ):
-    df = pd.read_csv(
-        "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/Titanic.csv"
-    )
-
+    df: pd.DataFrame = titanic_df
     validator: Validator = build_spark_validator_with_data(df, spark_session)
 
     if warns:
@@ -238,10 +238,9 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     warns,
     spark_session,
     basic_spark_df_execution_engine,
+    titanic_df,
 ):
-    df = pd.read_csv(
-        "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/Titanic.csv"
-    )
+    df: pd.DataFrame = titanic_df
 
     validator: Validator = build_spark_validator_with_data(df, spark_session)
 
@@ -274,9 +273,9 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 
 
 def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite_multi_value(
-    titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     validator: Validator = context.get_validator(batch_request=sqlite_batch_request)
 

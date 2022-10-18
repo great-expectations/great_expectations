@@ -91,6 +91,7 @@ def dialect_name_to_sql_statement():
             GESqlDialect.TERADATASQL: "SELECT TOP 10 * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE 1 = 1",
             GESqlDialect.TRINO: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
             GESqlDialect.HIVE: "SELECT * FROM `TEST_SCHEMA_NAME`.`TEST_TABLE` WHERE TRUE LIMIT 10",
+            GESqlDialect.VERTICA: "SELECT * FROM TEST_SCHEMA_NAME.TEST_TABLE WHERE TRUE LIMIT 10",
         }
         return dialect_name_to_sql_statement[dialect_name]
 
@@ -137,6 +138,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             GESqlDialect.TERADATASQL: "teradatasql://",
             GESqlDialect.TRINO: "trino://",
             GESqlDialect.HIVE: "hive://",
+            GESqlDialect.VERTICA: "vertica+vertica_python://",
         }
 
         @property
@@ -197,7 +199,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
 
     # 2. Create query using sampler
     table_name: str = "test_table"
-    batch_spec: BatchSpec = BatchSpec(
+    batch_spec = BatchSpec(
         table_name=table_name,
         schema_name="test_schema_name",
         sampling_method="sample_using_limit",

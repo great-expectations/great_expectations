@@ -70,6 +70,9 @@ stages:
                 great_expectations/**
                 tests/**
 
+                [ScriptsChanged]
+                assets/scripts/**
+
   - stage: deploy_gallery
     dependsOn: scope_check
     condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
@@ -78,9 +81,9 @@ stages:
 
     jobs:
       - job: build_gallery
+        timeoutInMinutes: 300
         variables:
-          python.version: '3.7'
-          GE_pytest_pip_opts: '"pyspark<3.0.0" "cookiecutter==1.7.3" "google-cloud-bigquery-storage" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+          python.version: '3.8'
           GE_pytest_opts: ''
 
         services:
@@ -99,9 +102,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install $(GE_pytest_pip_opts)
-              pip install --requirement requirements.txt
-              pip install  --editable .
+              pip install "google-cloud-bigquery-storage" -r requirements-dev-all-contrib-expectations.txt -e "contrib/cli" -e ".[dev]" -c constraints-dev.txt
             displayName: 'Install dependencies'
 
           - script: |
@@ -130,21 +131,96 @@ stages:
 #             done;
             displayName: 'Wait for Trino database to initialise'
 
-#         - task: DownloadSecureFile@1
-#           name: gcp_authkey
-#           displayName: 'Download Google Service Account'
-#           inputs:
-#             secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
-#             retryCount: '2'
+          - task: DownloadSecureFile@1
+            name: gcp_authkey
+            displayName: 'Download Google Service Account'
+            inputs:
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+              retryCount: '2'
 
-          - bash: python ./build_gallery.py
+          - task: DownloadSecureFile@1
+            name: aws_authkey
+            displayName: 'Download AWS Credentials'
+            inputs:
+              secureFile: 'aws_config_sandbox'
+              retryCount: '2'
+
+          - bash: python ./build_gallery.py --outfile-name "expectation_library_v2.json" 2>&1 | tee output--build_gallery.txt ; grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery.txt | sort > gallery-exp-types.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
-#           env:
-#             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-#             GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
-#             GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
-#             GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
+            env:
+              # snowflake credentials
+              SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
+              SNOWFLAKE_USER: $(SNOWFLAKE_USER)
+              SNOWFLAKE_PW: $(SNOWFLAKE_PW)
+              SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
+              SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
+              SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
+              SNOWFLAKE_ROLE: $(SNOWFLAKE_ROLE)
+              # redshift credentials
+              REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
+              REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
+              REDSHIFT_HOST: $(REDSHIFT_HOST)
+              REDSHIFT_PORT: $(REDSHIFT_PORT)
+              REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
+              REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
+              # AWS credentials
+              AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
+              ATHENA_DB_NAME: $(ATHENA_DB_NAME)
+              ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
+              ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
+              ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
+              # GCP credentials
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+              # Azure credentials
+              AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
+              AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+          - bash: grep -o "coverage_score:.*" output--build_gallery.txt | sort -k2,2nr
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show coverage scores'
+
+          - bash: cut -d " " -f 3,4 gallery-exp-types.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types.txt | sort
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show Expectation types and counts'
+
+          - bash: grep -o "Implemented engines.*" output--build_gallery.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show implemented engines'
+
+          - bash: cat checklists.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show full checklist summary'
+
+          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show checklist issues'
+
+          - bash: cat testing-error-messages.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing errors'
+
+          - bash: grep --color -n -i warning -B 2 output--build_gallery.txt || echo "No warnings found"
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing warnings'
+
+          - bash: cat gallery-tracebacks.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show gallery tracebacks'
+
+          - bash: grep "to df.to_sql" testing-times.txt || echo "No df.to_sql calls were made"
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show DataFrame to SQL times'
+
+          - bash: grep "to run" testing-times.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times grouped by backend and Expectation'
+
+          - bash: grep "to evaluate_json" testing-times.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times for individual tests'
 
           - bash: python ./build_package_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
@@ -159,6 +235,35 @@ stages:
               globExpressions: '*.json'
               targetFolder: 'static/gallery/'
               filesAcl: 'public-read'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '16.16'
+
+          - bash: bash ./trigger_algolia.sh
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Update Algolia indexes from S3'
+            env:
+              # algolia credentials
+              ALGOLIA_ACCOUNT: $(ALGOLIA_ACCOUNT)
+              ALGOLIA_EXPECTATION_INDEX: $(ALGOLIA_EXPECTATION_INDEX)
+              ALGOLIA_PACKAGE_EXPEC_INDEX: $(ALGOLIA_PACKAGE_EXPEC_INDEX)
+              ALGOLIA_PACKAGE_INDEX: $(ALGOLIA_PACKAGE_INDEX)
+              ALGOLIA_WRITE_KEY: $(ALGOLIA_WRITE_KEY)
+              # replica indices from expectations for sorting
+              ALGOLIA_EXPEC_REPLICA_ALPHA_ASC_INDEX: $(ALGOLIA_EXPEC_REPLICA_ALPHA_ASC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_ALPHA_DSC_INDEX: $(ALGOLIA_EXPEC_REPLICA_ALPHA_DSC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_COVERAGE_ASC_INDEX: $(ALGOLIA_EXPEC_REPLICA_COVERAGE_ASC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_COVERAGE_DSC_INDEX: $(ALGOLIA_EXPEC_REPLICA_COVERAGE_DSC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_CREATED_ASC_INDEX: $(ALGOLIA_EXPEC_REPLICA_CREATED_ASC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_CREATED_DSC_INDEX: $(ALGOLIA_EXPEC_REPLICA_CREATED_DSC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_UPDATED_ASC_INDEX: $(ALGOLIA_EXPEC_REPLICA_UPDATED_ASC_INDEX)
+              ALGOLIA_EXPEC_REPLICA_UPDATED_DSC_INDEX: $(ALGOLIA_EXPEC_REPLICA_UPDATED_DSC_INDEX)
+              # replica indices from package expectations for sorting
+              ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_ASC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_ASC_INDEX)
+              ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_DSC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_DSC_INDEX)
+              ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_ASC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_ASC_INDEX)
+              ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_DSC_INDEX: $(ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_DSC_INDEX)
 
 #         - bash: |
 #             echo "About to trigger webhook: $GALLERY_BUILD_HOOK"

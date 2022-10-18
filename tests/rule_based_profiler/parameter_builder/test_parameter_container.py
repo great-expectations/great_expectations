@@ -1,8 +1,10 @@
 from typing import Dict, List
 
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+import pytest
+
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
     build_parameter_container,
@@ -12,11 +14,12 @@ from great_expectations.rule_based_profiler.types import (
 )
 
 
+@pytest.mark.unit
 def test_build_parameter_container(
     parameters_with_different_depth_level_values,
     multi_part_name_parameter_container,
 ):
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     build_parameter_container(
         parameter_container=parameter_container,
         parameter_values=parameters_with_different_depth_level_values,
@@ -24,16 +27,17 @@ def test_build_parameter_container(
     assert parameter_container == multi_part_name_parameter_container
 
 
+@pytest.mark.unit
 def test_get_fully_qualified_parameter_names(
     parameters_with_different_depth_level_values,
 ):
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     build_parameter_container(
         parameter_container=parameter_container,
         parameter_values=parameters_with_different_depth_level_values,
     )
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=None,
         details=None,
@@ -80,16 +84,17 @@ def test_get_fully_qualified_parameter_names(
     )
 
 
+@pytest.mark.unit
 def test_get_parameter_values_for_fully_qualified_parameter_names(
     parameters_with_different_depth_level_values,
 ):
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     build_parameter_container(
         parameter_container=parameter_container,
         parameter_values=parameters_with_different_depth_level_values,
     )
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=None,
         details=None,

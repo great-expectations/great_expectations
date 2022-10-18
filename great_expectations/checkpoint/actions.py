@@ -137,6 +137,7 @@ class SlackNotificationAction(ValidationAction):
             # implement a custom one
             module_name: great_expectations.render.renderer.slack_renderer
             class_name: SlackRenderer
+          show_failed_expectations: *Optional* (boolean) shows a list of failed expectation types. default is false.
 
     """
 
@@ -149,6 +150,7 @@ class SlackNotificationAction(ValidationAction):
         slack_channel=None,
         notify_on="all",
         notify_with=None,
+        show_failed_expectations=False,
     ) -> None:
         """Construct a SlackNotificationAction
 
@@ -162,6 +164,7 @@ class SlackNotificationAction(ValidationAction):
             slack_webhook: incoming Slack webhook to which to send notification
             notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
             payload: *Optional* payload from other ValidationActions
+
         """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
@@ -187,6 +190,7 @@ class SlackNotificationAction(ValidationAction):
         self.slack_channel = slack_channel
         self.notify_on = notify_on
         self.notify_with = notify_with
+        self.show_failed_expectations = show_failed_expectations
 
     def _run(
         self,
@@ -233,7 +237,10 @@ class SlackNotificationAction(ValidationAction):
             and not validation_success
         ):
             query: Dict = self.renderer.render(
-                validation_result_suite, data_docs_pages, self.notify_with
+                validation_result_suite,
+                data_docs_pages,
+                self.notify_with,
+                self.show_failed_expectations,
             )
 
             # this will actually send the POST request to the Slack webapp server
@@ -496,6 +503,7 @@ class OpsgenieAlertAction(ValidationAction):
         region=None,
         priority="P3",
         notify_on="failure",
+        tags: Optional[list] = None,
     ) -> None:
         """Construct a OpsgenieAlertAction
 
@@ -525,6 +533,7 @@ class OpsgenieAlertAction(ValidationAction):
         self.region = region
         self.priority = priority
         self.notify_on = notify_on
+        self.tags = tags
 
     def _run(
         self,
@@ -571,6 +580,7 @@ class OpsgenieAlertAction(ValidationAction):
                 "api_key": self.api_key,
                 "region": self.region,
                 "priority": self.priority,
+                "tags": self.tags,
             }
 
             description = self.renderer.render(validation_result_suite, None, None)
@@ -813,9 +823,9 @@ class StoreValidationResultAction(ValidationAction):
                 )
             )
 
-        contract_ge_cloud_id = None
+        checkpoint_ge_cloud_id = None
         if self.data_context.ge_cloud_mode and checkpoint_identifier:
-            contract_ge_cloud_id = checkpoint_identifier.ge_cloud_id
+            checkpoint_ge_cloud_id = checkpoint_identifier.ge_cloud_id
 
         expectation_suite_ge_cloud_id = None
         if self.data_context.ge_cloud_mode and expectation_suite_identifier:
@@ -826,7 +836,7 @@ class StoreValidationResultAction(ValidationAction):
         return_val = self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
-            contract_id=contract_ge_cloud_id,
+            checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
         if self.data_context.ge_cloud_mode:
@@ -1131,7 +1141,7 @@ class CloudNotificationAction(ValidationAction):
 
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
-            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/contracts/"
+            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/checkpoints/"
             f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
         )
         auth_headers = {

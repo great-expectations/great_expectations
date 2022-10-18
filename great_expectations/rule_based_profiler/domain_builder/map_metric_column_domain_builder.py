@@ -1,15 +1,15 @@
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
+    NP_EPSILON,
     build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
-    SemanticDomainTypes,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -194,7 +194,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         )
         mean_table_row_count_as_float: float = (
             1.0 * sum(table_row_counts.values()) / num_batch_ids
-        )
+        ) + NP_EPSILON
 
         # If no "max_unexpected_ratio" is given, compute it based on average number of records across all Batch objects.
         if max_unexpected_ratio is None:

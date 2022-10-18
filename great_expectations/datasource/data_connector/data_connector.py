@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -45,6 +45,7 @@ class DataConnector:
         datasource_name: str,
         execution_engine: ExecutionEngine,
         batch_spec_passthrough: Optional[dict] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Base class for DataConnectors
@@ -61,13 +62,14 @@ class DataConnector:
             )
 
         self._name = name
+        self._id = id
         self._datasource_name = datasource_name
         self._execution_engine = execution_engine
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache = {}
+        self._data_references_cache: Dict = {}
 
-        self._data_context_root_directory = None
+        self._data_context_root_directory: Optional[str] = None
         self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
@@ -79,6 +81,10 @@ class DataConnector:
         return self._name
 
     @property
+    def id(self) -> Optional[str]:
+        return self._id
+
+    @property
     def datasource_name(self) -> str:
         return self._datasource_name
 
@@ -88,7 +94,7 @@ class DataConnector:
 
     @property
     def data_context_root_directory(self) -> str:
-        return self._data_context_root_directory
+        return self._data_context_root_directory  # type: ignore[return-value]
 
     @data_context_root_directory.setter
     def data_context_root_directory(self, data_context_root_directory: str) -> None:
@@ -97,7 +103,7 @@ class DataConnector:
     def get_batch_data_and_metadata(
         self,
         batch_definition: BatchDefinition,
-    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
+    ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         """
         Uses batch_definition to retrieve batch_data and batch_markers by building a batch_spec from batch_definition,
         then using execution_engine to return batch_data and batch_markers
@@ -140,7 +146,7 @@ class DataConnector:
             batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
 
         batch_spec_params.update(batch_spec_passthrough)
-        batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
+        batch_spec = BatchSpec(**batch_spec_params)
         return batch_spec
 
     def _refresh_data_references_cache(
@@ -355,7 +361,7 @@ class DataConnector:
 
         batch_definition_list: List[
             BatchDefinition
-        ] = self._map_data_reference_to_batch_definition_list(
+        ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
             data_reference=example_data_reference,
             data_asset_name=data_asset_name,
         )
@@ -374,7 +380,7 @@ class DataConnector:
         # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
         # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
         # resolve metrics.
-        validator: Validator = Validator(execution_engine=batch_data.execution_engine)
+        validator = Validator(execution_engine=batch_data.execution_engine)
         data: Any = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.head",

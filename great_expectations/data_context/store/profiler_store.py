@@ -3,6 +3,9 @@ import uuid
 from typing import Union
 
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -15,7 +18,7 @@ class ProfilerStore(ConfigurationStore):
     A ProfilerStore manages Profilers for the DataContext.
     """
 
-    _configuration_class = RuleBasedProfilerConfig
+    _configuration_class = RuleBasedProfilerConfig  # type: ignore[assignment]
 
     def serialization_self_check(self, pretty_print: bool) -> None:
         """
@@ -31,11 +34,12 @@ class ProfilerStore(ConfigurationStore):
 
         test_key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
-            test_key = self.key_class(
-                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+            test_key = self.key_class(  # type: ignore[assignment,call-arg]
+                resource_type=GeCloudRESTResource.PROFILER,
+                ge_cloud_id=str(uuid.uuid4()),
             )
         else:
-            test_key = self.key_class(configuration_key=test_profiler_name)
+            test_key = self.key_class(configuration_key=test_profiler_name)  # type: ignore[assignment,call-arg]
 
         if pretty_print:
             print(f"Attempting to add a new test key {test_key} to Profiler store...")
@@ -59,3 +63,14 @@ class ProfilerStore(ConfigurationStore):
             print(
                 f"\tTest key and value successfully removed from Profiler store: {test_value}\n"
             )
+
+    def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
+        """
+        This method takes full json response from GE cloud and outputs a dict appropriate for
+        deserialization into a GE object
+        """
+        ge_cloud_profiler_id = response_json["data"]["id"]
+        profiler_config_dict = response_json["data"]["attributes"]["profiler"]
+        profiler_config_dict["id"] = ge_cloud_profiler_id
+
+        return profiler_config_dict

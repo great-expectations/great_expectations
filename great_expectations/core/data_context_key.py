@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 
 class DataContextKey(metaclass=ABCMeta):
@@ -10,18 +10,18 @@ class DataContextKey(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def to_tuple(self) -> None:
-        pass
+    def to_tuple(self) -> tuple:
+        raise NotImplementedError
 
     @classmethod
     def from_tuple(cls, tuple_):
         return cls(*tuple_)
 
-    def to_fixed_length_tuple(self) -> None:
+    def to_fixed_length_tuple(self) -> tuple:
         raise NotImplementedError
 
     @classmethod
-    def from_fixed_length_tuple(cls, tuple_) -> None:
+    def from_fixed_length_tuple(cls, tuple_) -> "DataContextKey":
         raise NotImplementedError
 
     def __eq__(self, other):
@@ -80,19 +80,21 @@ class StringKey(DataContextKey):
 class DataContextVariableKey(DataContextKey):
     def __init__(
         self,
-        resource_type: "DataContextVariableSchema",  # noqa: F821
         resource_name: Optional[str] = None,
     ) -> None:
-        self._resource_type = resource_type
         self._resource_name = resource_name
 
-    def to_tuple(self) -> Tuple[str, Optional[str]]:
+    @property
+    def resource_name(self) -> Union[str, None]:
+        return self._resource_name
+
+    def to_tuple(self) -> Tuple[str]:
         """
         See parent `DataContextKey.to_tuple` for more information.
         """
-        return (self._resource_type, self._resource_name or "")
+        return (self._resource_name or "",)
 
-    def to_fixed_length_tuple(self) -> Tuple[str, Optional[str]]:
+    def to_fixed_length_tuple(self) -> Tuple[str]:
         """
         See parent `DataContextKey.to_fixed_length_tuple` for more information.
         """

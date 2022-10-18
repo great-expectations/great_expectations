@@ -151,10 +151,10 @@ class UsageStatisticsHandler:
     @staticmethod
     def _get_serialized_dependencies() -> List[dict]:
         """Get the serialized dependencies from the GEExecutionEnvironment."""
-        ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
+        ge_execution_environment = GEExecutionEnvironment()
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
-        schema: PackageInfoSchema = PackageInfoSchema()
+        schema = PackageInfoSchema()
 
         serialized_dependencies: List[dict] = [
             schema.dump(package_info) for package_info in dependencies

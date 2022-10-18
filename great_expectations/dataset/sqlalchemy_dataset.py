@@ -23,6 +23,7 @@ from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.util import (
     generate_temporary_table_name,
     get_pyathena_potential_type,
@@ -162,11 +163,19 @@ try:
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
     teradatasqlalchemy = None
+
 try:
     import trino.sqlalchemy.datatype as trinotypes
     import trino.sqlalchemy.dialect
 except ImportError:
     trino = None
+
+try:
+    import sqla_vertica_python.vertica_python
+
+    registry.register("vertica", "sqla_vertica_python.vertica_python", "dialect")
+except ImportError:
+    verticasqlalchemy = None
 
 
 class SqlAlchemyBatchReference:
@@ -274,7 +283,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 )
 
             count_query: Select
-            if self.sql_engine_dialect.name.lower() == "mssql":
+            if self.sql_engine_dialect.name.lower() == GESqlDialect.MSSQL:
                 count_query = self._get_count_query_mssql(
                     expected_condition=expected_condition,
                     ignore_values_condition=ignore_values_condition,
@@ -308,7 +317,7 @@ class MetaSqlAlchemyDataset(Dataset):
             count_results["unexpected_count"] = int(count_results["unexpected_count"])
 
             # limit doesn't compile properly for oracle so we will append rownum to query string later
-            if self.engine.dialect.name.lower() == "oracle":
+            if self.engine.dialect.name.lower() == GESqlDialect.ORACLE:
                 raw_query = (
                     sa.select([sa.column(column)])
                     .select_from(self._table)
@@ -538,11 +547,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
-            if engine.dialect.name.lower() != "trino":
+            if engine.dialect.name.lower() != GESqlDialect.TRINO:
                 schema = None
             table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
-            if engine.dialect.name.lower() == "mssql":
+            if engine.dialect.name.lower() == GESqlDialect.MSSQL:
                 table_name = f"#{table_name}"
             self.generated_table_name = table_name
         else:
@@ -563,11 +572,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
-        if self.engine.dialect.name.lower() == "bigquery":
+        if self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
             temp_table_schema_name = None
-        if self.engine.dialect.name.lower() == "trino":
+        if self.engine.dialect.name.lower() == GESqlDialect.TRINO:
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
             temp_table_schema_name = schema
         else:
@@ -586,50 +595,58 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         dialect_name: str = self.engine.dialect.name.lower()
 
         if dialect_name in [
-            "postgresql",
-            "mysql",
-            "sqlite",
-            "oracle",
-            "mssql",
-            "hive",
+            GESqlDialect.POSTGRESQL,
+            GESqlDialect.MYSQL,
+            GESqlDialect.SQLITE,
+            GESqlDialect.ORACLE,
+            GESqlDialect.MSSQL,
+            GESqlDialect.HIVE,
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
                 module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
-        elif dialect_name == "snowflake":
+        elif dialect_name == GESqlDialect.SNOWFLAKE:
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
-        elif self.engine.dialect.name.lower() == "dremio":
+        elif self.engine.dialect.name.lower() == GESqlDialect.DREMIO:
             # WARNING: Dremio Support is experimental, functionality is not fully under test
             self.dialect = import_library_module(
                 module_name="sqlalchemy_dremio.pyodbc.dialect"
             )
-        elif dialect_name == "redshift":
+        elif dialect_name == GESqlDialect.REDSHIFT:
             self.dialect = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
             )
-        elif dialect_name == "bigquery":
+        elif dialect_name == GESqlDialect.BIGQUERY:
             self.dialect = import_library_module(module_name=_BIGQUERY_MODULE_NAME)
-        elif dialect_name == "awsathena":
+        elif dialect_name == GESqlDialect.AWSATHENA:
             self.dialect = import_library_module(
                 module_name="pyathena.sqlalchemy_athena"
             )
-        elif dialect_name == "teradatasql":
+        elif dialect_name == GESqlDialect.TERADATASQL:
             # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
             )
-        elif dialect_name == "trino":
+        elif dialect_name == GESqlDialect.TRINO:
             # WARNING: Trino Support is experimental, functionality is not fully under test
             self.dialect = import_library_module(module_name="trino.sqlalchemy.dialect")
-
+        elif dialect_name == "vertica":
+            # WARNING: Vertica Support is experimental, functionality is not fully under test
+            self.dialect = import_library_module(
+                module_name="sqla_vertica_python.vertica_python"
+            )
         else:
             self.dialect = None
 
-        if engine and engine.dialect.name.lower() in ["sqlite", "mssql", "snowflake"]:
+        if engine and engine.dialect.name.lower() in [
+            GESqlDialect.SQLITE,
+            GESqlDialect.MSSQL,
+            GESqlDialect.SNOWFLAKE,
+        ]:
             # sqlite/mssql/snowflake temp tables only persist within a connection so override the engine
             self.engine = engine.connect()
 
@@ -642,7 +659,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # raise ValueError("Cannot specify both schema and custom_sql.")
             pass
 
-        if custom_sql is not None and self.engine.dialect.name.lower() == "bigquery":
+        if (
+            custom_sql is not None
+            and self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY
+        ):
             if (
                 self.generated_table_name is not None
                 and self.engine.dialect.dataset_id is None
@@ -658,11 +678,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
 
             if self.generated_table_name is not None:
-                if self.engine.dialect.name.lower() == "bigquery":
+                if self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
                     logger.warning(f"Created permanent table {table_name}")
-                if self.engine.dialect.name.lower() == "trino":
+                if self.engine.dialect.name.lower() == GESqlDialect.TRINO:
                     logger.warning(f"Created permanent view {schema}.{table_name}")
-                if self.engine.dialect.name.lower() == "awsathena":
+                if self.engine.dialect.name.lower() == GESqlDialect.AWSATHENA:
                     logger.warning(f"Created permanent table default.{table_name}")
 
         try:
@@ -716,24 +736,27 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # cannot work on a temp table.
             # If it fails, we are trying to get the data using read_sql
             head_sql_str = "select * from "
-            if self._table.schema and self.engine.dialect.name.lower() != "bigquery":
+            if (
+                self._table.schema
+                and self.engine.dialect.name.lower() != GESqlDialect.BIGQUERY
+            ):
                 head_sql_str += f"{self._table.schema}.{self._table.name}"
-            elif self.engine.dialect.name.lower() == "bigquery":
+            elif self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
                 head_sql_str += f"`{self._table.name}`"
             else:
                 head_sql_str += self._table.name
             head_sql_str += f" limit {n:d}"
 
             # Limit is unknown in mssql! Use top instead!
-            if self.engine.dialect.name.lower() == "mssql":
+            if self.engine.dialect.name.lower() == GESqlDialect.MSSQL:
                 head_sql_str = f"select top({n}) * from {self._table.name}"
 
             # Limit doesn't work in oracle either
-            if self.engine.dialect.name.lower() == "oracle":
+            if self.engine.dialect.name.lower() == GESqlDialect.ORACLE:
                 head_sql_str = f"select * from {self._table.name} WHERE ROWNUM <= {n}"
 
             # Limit is unknown in teradatasql! Use sample instead!
-            if self.engine.dialect.name.lower() == "teradatasql":
+            if self.engine.dialect.name.lower() == GESqlDialect.TERADATASQL:
                 head_sql_str = f"select * from {self._table.name} sample {n}"
 
             df = pd.read_sql(head_sql_str, con=self.engine)
@@ -776,7 +799,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                 sa.or_(
                                     # first part of OR(IN (NULL)) gives error in teradata
                                     sa.column(column).in_(ignore_values)
-                                    if self.engine.dialect.name.lower() != "teradatasql"
+                                    if self.engine.dialect.name.lower()
+                                    != GESqlDialect.TERADATASQL
                                     else False,
                                     # Below is necessary b/c sa.in_() uses `==` but None != None
                                     # But we only consider this if None is actually in the list of ignore values
@@ -877,8 +901,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_column_median(self, column):
         # AWS Athena and presto have an special function that can be used to retrieve the median
         if (
-            self.sql_engine_dialect.name.lower() == "awsathena"
-            or self.sql_engine_dialect.name.lower() == "trino"
+            self.sql_engine_dialect.name.lower() == GESqlDialect.AWSATHENA
+            or self.sql_engine_dialect.name.lower() == GESqlDialect.TRINO
         ):
             element_values = self.engine.execute(
                 f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
@@ -918,21 +942,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_column_quantiles(
         self, column: str, quantiles: Iterable, allow_relative_error: bool = False
     ) -> list:
-        if self.sql_engine_dialect.name.lower() == "mssql":
+        if self.sql_engine_dialect.name.lower() == GESqlDialect.MSSQL:
             return self._get_column_quantiles_mssql(column=column, quantiles=quantiles)
-        elif self.sql_engine_dialect.name.lower() == "awsathena":
+        elif self.sql_engine_dialect.name.lower() == GESqlDialect.AWSATHENA:
             return self._get_column_quantiles_awsathena(
                 column=column, quantiles=quantiles
             )
-        elif self.sql_engine_dialect.name.lower() == "trino":
+        elif self.sql_engine_dialect.name.lower() == GESqlDialect.TRINO:
             return self._get_column_quantiles_trino(column=column, quantiles=quantiles)
-        elif self.sql_engine_dialect.name.lower() == "bigquery":
+        elif self.sql_engine_dialect.name.lower() == GESqlDialect.BIGQUERY:
             return self._get_column_quantiles_bigquery(
                 column=column, quantiles=quantiles
             )
-        elif self.sql_engine_dialect.name.lower() == "mysql":
+        elif self.sql_engine_dialect.name.lower() == GESqlDialect.MYSQL:
             return self._get_column_quantiles_mysql(column=column, quantiles=quantiles)
-        elif self.sql_engine_dialect.name.lower() == "snowflake":
+        elif self.sql_engine_dialect.name.lower() == GESqlDialect.SNOWFLAKE:
             # NOTE: 20201216 - JPC - snowflake has a representation/precision limitation
             # in its percentile_disc implementation that causes an error when we do
             # not round. It is unclear to me *how* the call to round affects the behavior --
@@ -946,7 +970,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 quantiles=quantiles,
                 allow_relative_error=allow_relative_error,
             )
-        elif self.sql_engine_dialect.name.lower() == "sqlite":
+        elif self.sql_engine_dialect.name.lower() == GESqlDialect.SQLITE:
             return self._get_column_quantiles_sqlite(
                 column=column,
                 quantiles=quantiles,
@@ -1181,7 +1205,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
 
     def get_column_stdev(self, column):
-        if self.sql_engine_dialect.name.lower() == "mssql":
+        if self.sql_engine_dialect.name.lower() == GESqlDialect.MSSQL:
             # Note: "stdev_samp" is not a recognized built-in function name (but "stdev" does exist for "mssql").
             # This function is used to compute statistical standard deviation from sample data (per the reference in
             # https://sqlserverrider.wordpress.com/2013/03/06/standard-deviation-functions-stdev-and-stdevp-sql-server).
@@ -1433,25 +1457,25 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # handle cases where dialect.name.lower() returns a byte string (e.g. databricks)
         if isinstance(engine_dialect, bytes):
             engine_dialect = str(engine_dialect, "utf-8")
-        if engine_dialect == "bigquery":
+        if engine_dialect == GESqlDialect.BIGQUERY:
             stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
-        elif engine_dialect == "trino":
+        elif engine_dialect == GESqlDialect.TRINO:
             stmt = f"CREATE OR REPLACE VIEW {schema_name}.{table_name} AS {custom_sql}"
         elif engine_dialect == "databricks":
             stmt = f"CREATE OR REPLACE TEMPORARY VIEW `{table_name}` AS {custom_sql}"
-        elif engine_dialect == "dremio":
+        elif engine_dialect == GESqlDialect.DREMIO:
             stmt = f"CREATE OR REPLACE VDS {table_name} AS {custom_sql}"
-        elif engine_dialect == "snowflake":
+        elif engine_dialect == GESqlDialect.SNOWFLAKE:
             table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
 
             logger.info(f"Creating temporary table {table_name}")
             if schema_name is not None:
                 table_name = f"{schema_name}.{table_name}"
             stmt = f"CREATE OR REPLACE {table_type} TABLE {table_name} AS {custom_sql}"
-        elif self.sql_engine_dialect.name == "mysql":
+        elif self.sql_engine_dialect.name == GESqlDialect.MYSQL:
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the generic case.
             stmt = f"CREATE TEMPORARY TABLE {table_name} AS {custom_sql}"
-        elif self.sql_engine_dialect.name == "mssql":
+        elif self.sql_engine_dialect.name == GESqlDialect.MSSQL:
             # Insert "into #{table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
             # Note: transforming custom_sql to uppercase/lowercase has uninteded consequences (i.e., changing column names), so this is not an option!
@@ -1463,9 +1487,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = (
                 f"{custom_sqlmod[0]}into {{table_name}} from{custom_sqlmod[1]}"
             ).format(table_name=table_name)
-        elif engine_dialect == "awsathena":
+        elif engine_dialect == GESqlDialect.AWSATHENA:
             stmt = f"CREATE TABLE {table_name} AS {custom_sql}"
-        elif engine_dialect == "oracle":
+        elif engine_dialect == GESqlDialect.ORACLE:
             # oracle 18c introduced PRIVATE temp tables which are transient objects
             stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {table_name} ON COMMIT PRESERVE DEFINITION AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
@@ -1475,20 +1499,27 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt_2 = "CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif engine_dialect == "teradatasql":
+        elif engine_dialect == GESqlDialect.TERADATASQL:
             stmt = 'CREATE VOLATILE TABLE "{table_name}" AS ({custom_sql}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.sql_engine_dialect.name.lower() in ("hive", b"hive"):
+        elif self.sql_engine_dialect.name.lower() == GESqlDialect.HIVE:
             stmt = "CREATE TEMPORARY TABLE {schema_name}.{table_name} AS {custom_sql}".format(
                 schema_name=schema_name if schema_name is not None else "default",
                 table_name=table_name,
                 custom_sql=custom_sql,
             )
+        elif engine_dialect == "vertica":
+            full_table_name = (
+                f"{schema_name}.{table_name}"
+                if schema_name is not None
+                else f"{table_name}"
+            )
+            stmt = f"CREATE TEMPORARY TABLE {full_table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}"
         else:
             stmt = f'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'
 
-        if engine_dialect == "oracle":
+        if engine_dialect == GESqlDialect.ORACLE:
             try:
                 self.engine.execute(stmt_1)
             except DatabaseError:
@@ -1499,7 +1530,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
         col_info_dict_list: List[Dict]
-        if self.sql_engine_dialect.name.lower() == "mssql":
+        if self.sql_engine_dialect.name.lower() == GESqlDialect.MSSQL:
             type_module = self._get_dialect_type_module()
             # Get column names and types from the database
             # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
@@ -2064,7 +2095,7 @@ WHERE
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
         # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
         # just the column we will be performing the expectation on, and the query is performed against it.
-        if self.sql_engine_dialect.name.lower() == "mysql":
+        if self.sql_engine_dialect.name.lower() == GESqlDialect.MYSQL:
             temp_table_name = generate_temporary_table_name()
             temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
                 new_temp_table=temp_table_name,

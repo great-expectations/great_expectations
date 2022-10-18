@@ -410,6 +410,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         password: str = "YOUR_PASSWORD",
         database: str = "YOUR_DATABASE",
         schema_name: str = "YOUR_SCHEMA",
+        table_name: str = "YOUR_TABLE_NAME",
     ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.SQL,
@@ -423,6 +424,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         self.password = password
         self.database = database
         self.schema_name = schema_name
+        self.table_name = table_name
 
     def credentials_snippet(self) -> str:
         return f'''\
@@ -431,7 +433,10 @@ port = "{self.port}"
 username = "{self.username}"
 password = "{self.password}"
 database = "{self.database}"
-schema_name = "{self.schema_name}"'''
+schema_name = "{self.schema_name}"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "{self.table_name}"'''
 
     def yaml_snippet(self) -> str:
         yaml_str = '''f"""
@@ -444,7 +449,7 @@ execution_engine:
             yaml_str += f"""
     drivername: {self.driver}"""
 
-        yaml_str += '''
+        yaml_str += f'''
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
@@ -452,7 +457,17 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {{schema_name}}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {{table_name}}:
+        class_name: Asset
+        schema_name: {{schema_name}}
+"""'''
+
         return yaml_str
 
     def _yaml_innards(self) -> str:
@@ -463,8 +478,7 @@ data_connectors:
     port: '{port}'
     username: {username}
     password: {password}
-    database: {database}
-    schema_name: {schema_name}"""
+    database: {database}"""
 
     def get_notebook_renderer(
         self, context: DataContext
@@ -610,9 +624,10 @@ class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
 host = "{self.host}"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "{self.username}"
 database = ""  # The database name
-schema = ""  # The schema name
+schema_name = ""  # The schema name
 warehouse = ""  # The warehouse name
-role = ""  # The role name"""
+role = ""  # The role name
+table_name = ""  # A table that you would like to add initially as a Data Asset"""
 
         if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
             snippet += '''
@@ -634,7 +649,7 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
     username: {username}
     database: {database}
     query:
-      schema: {schema}
+      schema: {schema_name}
       warehouse: {warehouse}
       role: {role}
 """
@@ -666,7 +681,10 @@ class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
         return '''\
 # The SQLAlchemy url/connection string for the BigQuery connection
 # (reference: https://github.com/googleapis/python-bigquery-sqlalchemy#connection-string-parameters)"""
-connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
+connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"
+
+schema_name = ""  # or dataset name
+table_name = ""'''
 
     def verify_libraries_installed(self) -> bool:
         pybigquery_ok = verify_library_dependent_modules(
@@ -703,7 +721,14 @@ class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
         return '''\
 # The url/connection string for the sqlalchemy connection
 # (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
-connection_string = "YOUR_CONNECTION_STRING"'''
+connection_string = "YOUR_CONNECTION_STRING"
+
+# If schema_name is not relevant to your SQL backend (i.e. SQLite),
+# please remove from the following line and the configuration below
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
 
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
@@ -854,6 +879,6 @@ def check_if_datasource_name_exists(context: DataContext, datasource_name: str) 
     # TODO: 20210324 Anthony: Note reading the context from disk is a temporary fix to allow use in a notebook
     #  after test_yaml_config(). test_yaml_config() should update a copy of the in-memory data context rather than
     #  making changes directly to the in-memory context.
-    context_on_disk: DataContext = DataContext(context.root_directory)
+    context_on_disk = DataContext(context.root_directory)
 
     return datasource_name in [d["name"] for d in context_on_disk.list_datasources()]

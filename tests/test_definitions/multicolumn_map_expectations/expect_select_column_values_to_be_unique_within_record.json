@@ -1,6 +1,80 @@
 {
   "expectation_type" : "expect_select_column_values_to_be_unique_within_record",
   "datasets" : [{
+    "data": {
+        "a": [1,2,3,4],
+        "b": [5,6,7,8],
+        "c": [1,4,2,3]
+      },
+    "schemas": {
+      "spark": {
+        "a": "IntegerType",
+        "b": "IntegerType",
+        "c": "IntegerType"
+      }
+    },
+      "tests": [{
+          "title": "mostly_default_successful_expectation",
+          "include_in_gallery": true,
+          "exact_match_out" : false,
+          "in": {
+            "column_list": ["a", "b"]
+          },
+          "out": {
+              "unexpected_list": [],
+              "unexpected_index_list": [],
+              "success": true
+          }
+        }, {
+          "title": "mostly_default_fails_expectation",
+          "include_in_gallery": true,
+          "exact_match_out" : false,
+          "in": {
+            "column_list": ["a", "c"]
+          },
+          "out": {
+            "unexpected_list": [ {"a": 1.0, "c": 1.0 } ],
+            "success": false
+          }
+        }, {
+          "title": "mostly_set_successful_expectation",
+          "include_in_gallery": true,
+          "exact_match_out" : false,
+          "in": {
+            "column_list": ["a", "c"],
+            "mostly": 0.7
+          },
+          "out": {
+            "unexpected_list": [ {"a": 1.0, "c": 1.0 } ],
+            "success": true
+          }
+        }, {
+          "title": "mostly_set_fails_expectation",
+          "include_in_gallery": true,
+          "exact_match_out" : false,
+          "in": {
+            "column_list": ["a", "c"],
+            "mostly": 0.8
+          },
+          "out": {
+            "unexpected_list": [ {"a": 1.0, "c": 1.0 } ],
+            "success": false
+          }
+        }, {
+          "title": "mostly_set_incorrectly",
+          "include_in_gallery": true,
+          "exact_match_out" : false,
+          "in": {
+            "column_list": ["a", "c"],
+            "mostly": -0.3,
+            "catch_exceptions": true
+          },
+          "out": {
+            "traceback_substring": "must be between 0 and 1"
+          }
+        }
+      ]
+    }, {
     "data" : {
       "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
       "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
