@@ -249,9 +249,10 @@ stages:
               invoke tests --ci --cloud --timeout=3.0
 
             displayName: 'Unit Tests'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
           - script: |
-              env
               # Run pytest
               pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit and not e2e' --durations=10
@@ -325,7 +326,6 @@ stages:
           - script: |
               pip install pytest-cov pytest-azurepipelines
 
-              env 
               # Run pytest
               pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not e2e'
@@ -381,7 +381,6 @@ stages:
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              env
               pip install pytest-azurepipelines
               pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
@@ -434,9 +433,7 @@ stages:
               pip install .
             displayName: 'Install dependencies'
 
-          - script: |
-              env
-              
+          - script: |              
               # Install dependencies
               pip install pytest-cov pytest-azurepipelines
 
@@ -477,7 +474,6 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              env
               # Install dependencies
               pip install pytest-cov pytest-azurepipelines
 
@@ -524,7 +520,6 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              env
               # Install dependencies
               pip install pytest-cov pytest-azurepipelines
 
@@ -567,7 +562,6 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              env
               # Run pytest
               pytest --postgresql --spark --aws-integration tests/cli
 
