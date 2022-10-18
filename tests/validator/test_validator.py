@@ -1031,9 +1031,9 @@ def test_validator_load_additional_batch_to_validator(
     )
 
     assert len(validator.batches) == 1
-    assert validator.active_batch.id == "0327cfb13205ec8512e1c28e438ab43b"
+    assert validator.active_batch_id == "0327cfb13205ec8512e1c28e438ab43b"
 
-    first_batch_markers: BatchMarkers = validator.active_batch.batch_markers
+    first_batch_markers: BatchMarkers = validator.active_batch_markers
     assert (
         first_batch_markers["pandas_data_fingerprint"]
         == "c4f929e6d4fab001fedc9e075bf4b612"
@@ -1049,14 +1049,14 @@ def test_validator_load_additional_batch_to_validator(
     new_batch = context.get_batch_list(batch_request=feb_batch_request)
     validator.load_batch_list(batch_list=new_batch)
 
-    updated_batch_markers: BatchMarkers = validator.active_batch.batch_markers
+    updated_batch_markers: BatchMarkers = validator.active_batch_markers
     assert (
         updated_batch_markers["pandas_data_fingerprint"]
         == "88b447d903f05fb594b87b13de399e45"
     )
 
     assert len(validator.batches) == 2
-    assert validator.active_batch.id == "0808e185a52825d22356de2fe00a8f5f"
+    assert validator.active_batch_id == "0808e185a52825d22356de2fe00a8f5f"
     assert first_batch_markers != updated_batch_markers
 
 
@@ -1103,8 +1103,8 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
         == validator_two_batch_requests_two_batches.batches.keys()
     )
     assert (
-        validator_one_batch_request_two_batches.active_batch.id
-        == validator_two_batch_requests_two_batches.active_batch.id
+        validator_one_batch_request_two_batches.active_batch_id
+        == validator_two_batch_requests_two_batches.active_batch_id
     )
 
     with pytest.raises(ValueError) as ve:

@@ -114,9 +114,7 @@ class Validator:
         interactive_evaluation: bool = True,
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
-        data_context: Optional[
-            Any
-        ] = None,  # Cannot type DataContext due to circular import
+        data_context: Optional["DataContext"] = None,  # noqa: F821
         batches: Optional[List[Batch]] = None,
         include_rendered_content: Optional[bool] = None,
         **kwargs,
@@ -136,41 +134,38 @@ class Validator:
             batches: The batches for which to validate.
             include_rendered_content: Whether or not to include rendered_content in the ExpectationValidationResult.
         """
-        self._data_context = data_context
+        self._data_context: Optional["DataContext"] = data_context  # noqa: F821
 
-        execution_engine.batch_manager.reset_batch_cache()
-        self._execution_engine = execution_engine
-
-        self.load_batch_list(batch_list=batches)
-
-        self._expose_dataframe_methods = False
-
-        self._show_progress_bars = self._determine_progress_bars()
-
-        self._metrics_calculator = MetricsCalculator(
+        self._metrics_calculator: MetricsCalculator = MetricsCalculator(
             execution_engine=execution_engine,
             show_progress_bars=self._determine_progress_bars(),
         )
+        execution_engine.batch_manager.reset_batch_cache()
+        self._execution_engine: ExecutionEngine = execution_engine
 
-        self.interactive_evaluation = interactive_evaluation
+        self.load_batch_list(batch_list=batches)
+
+        self._expose_dataframe_methods: bool = False
+
+        self.interactive_evaluation: bool = interactive_evaluation
         self._initialize_expectations(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
-        self._default_expectation_args = copy.deepcopy(
+        self._default_expectation_args: dict = copy.deepcopy(
             Validator.DEFAULT_RUNTIME_CONFIGURATION
         )
 
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
-        self._active_validation = False
+        self._active_validation: bool = False
         if self._data_context and hasattr(
             self._data_context, "_expectation_explorer_manager"
         ):
             # TODO: verify flow of default expectation arguments
             self.set_default_expectation_argument("include_config", True)
 
-        self._include_rendered_content = include_rendered_content
+        self._include_rendered_content: Optional[bool] = include_rendered_content
 
     @property
     def execution_engine(self) -> ExecutionEngine:
