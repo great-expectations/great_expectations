@@ -1047,7 +1047,7 @@ def test_validator_load_additional_batch_to_validator(
     )
 
     new_batch = context.get_batch_list(batch_request=feb_batch_request)
-    validator.batch_cache.load_batch_list(batch_list=new_batch)
+    validator.load_batch_list(batch_list=new_batch)
 
     updated_batch_markers: BatchMarkers = validator.active_batch.batch_markers
     assert (
