@@ -22,6 +22,7 @@ class GESqlDialect(Enum):
     SQLITE = "sqlite"
     TERADATASQL = "teradatasql"
     TRINO = "trino"
+    VERTICA = "vertica"
     OTHER = "other"
 
     def __eq__(self, other: Union[str, bytes, GESqlDialect]):
