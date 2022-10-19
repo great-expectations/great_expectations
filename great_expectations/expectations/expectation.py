@@ -1863,6 +1863,8 @@ class TableExpectation(Expectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+        return True
+
     def _validate_metric_value_between(
         self,
         metric_name,
