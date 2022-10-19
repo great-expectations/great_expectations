@@ -795,11 +795,10 @@ def test_basic_instantiation_with_bigquery_creds_failure_pkey(sa):
 
 # Note: Abe 2020111: this test belongs with the data_connector tests, not here.
 @pytest.mark.integration
-def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine):
-    # Note: Abe 2020111: this test currently only uses a sqlite fixture.
-    # We should extend this to at least include postgresql in the unit tests.
-    # Other DBs can be run as integration tests.
-
+def test_introspect_db(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+    postgresql_sqlalchemy_datasource,
+):
     my_data_connector = instantiate_class_from_config(
         config={
             "class_name": "InferredAssetSqlDataConnector",
@@ -1116,6 +1115,41 @@ def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine
             "type": "view",
         },
     ]
+
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "my_test_data_connector",
+        },
+        runtime_environment={
+            "execution_engine": postgresql_sqlalchemy_datasource,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    introspected_tables = [
+        table
+        for table in my_data_connector._introspect_db()
+        if table["type"] == "table"
+    ]
+    assert len(introspected_tables) == 26072
+
+    introspected_schemas = {table.get("schema_name") for table in introspected_tables}
+    assert introspected_schemas == {"connection_test", "public"}
+
+    # ensure that tables with the same name are referenced by both schema_name and table_name
+    # test_df exists in both connection_test and public schemas
+    assert {
+        "schema_name": "connection_test",
+        "table_name": "test_df",
+        "type": "table",
+    } in introspected_tables
+    assert {
+        "schema_name": "public",
+        "table_name": "test_df",
+        "type": "table",
+    } in introspected_tables
 
 
 @pytest.mark.integration

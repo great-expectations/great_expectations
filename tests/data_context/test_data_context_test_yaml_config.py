@@ -24,7 +24,7 @@ from tests.test_utils import create_files_in_directory, set_directory
 
 @pytest.fixture
 def test_connectable_postgresql_db(sa, test_backends, test_df):
-    """Populates a postgres DB with a `test_df` table in the `connection_test` schema to test DataConnectors against"""
+    """Populates a postgres DB with a `test_df` table in the `connection_test` and `public` schemas to test DataConnectors against"""
 
     if "postgresql" not in test_backends:
         pytest.skip("skipping fixture because postgresql not selected")
@@ -56,6 +56,20 @@ SELECT EXISTS (
     ).fetchall()
     if table_check_results != [(True,)]:
         test_df.to_sql(name="test_df", con=engine, index=True, schema="connection_test")
+
+    # create a copy of test_df for the public schema to test InferredAssetSqlDataConnector introspection with duplicate
+    # table names.
+    table_check_results = engine.execute(
+        """
+SELECT EXISTS (
+   SELECT FROM information_schema.tables
+   WHERE  table_schema = 'public'
+   AND    table_name   = 'test_df'
+);
+"""
+    ).fetchall()
+    if table_check_results != [(True,)]:
+        test_df.to_sql(name="test_df", con=engine, index=True, schema="public")
 
     # Return a connection string to this newly-created db
     return engine
