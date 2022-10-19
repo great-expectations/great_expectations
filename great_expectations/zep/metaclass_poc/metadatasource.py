@@ -3,9 +3,23 @@ POC for dynamically bootstrapping context.sources/Datasource with all it's regis
 """
 from __future__ import annotations
 
-from typing import Callable, Dict, List
+import pathlib
+from pprint import pformat as pf
+from pprint import pprint as pp
+from typing import Callable, Dict, List, NamedTuple, Optional, Union
 
 from great_expectations.zep.interfaces import Datasource
+
+
+class Models(NamedTuple):
+    config: type
+    runtime: type
+
+
+class DatasourceDetails(NamedTuple):
+    assets: List[Models]
+    model: Models
+
 
 SourceFactoryFn = Callable[..., Datasource]
 
@@ -18,16 +32,38 @@ def _camel_to_snake(s: str) -> str:
 class _SourceFactories:
 
     __source_factories: Dict[str, Callable] = {}
+    __types: Dict[str, DatasourceDetails] = {}
+    __type_lookup: Dict[str, type] = {}
 
     @classmethod
-    def register_factory(cls, name: str, fn: SourceFactoryFn) -> None:
-        """Add/Register a datasource factory function."""
-        print(f"2. Adding {name} factory")
-        prexisting = cls.__source_factories.get(name, None)
+    def register_factory(
+        cls,
+        type_name: str,
+        fn: SourceFactoryFn,
+        type_: type,
+        asset_types: Optional[List[type]] = None,
+    ) -> None:
+        """
+        Add/Register a datasource factory function.
+        Attaches a method called `add_<TYPE_NAME>()`
+        """
+        method_name = f"add_{type_name}"
+        print(f"2a. Register `{type_name}` `{method_name}()` factory")
+        prexisting = cls.__type_lookup.get(type_name, None)
         if not prexisting:
-            cls.__source_factories[name] = fn  # type: ignore[assignment]
+            cls.__source_factories[method_name] = fn  # type: ignore[assignment]
+            print(f"2b. Register type `{type_name}` models ...")
+            # add Datasource type
+            cls.__type_lookup[type_name] = type_
+            cls.__types[type_name] = DatasourceDetails(
+                assets=[],
+                model=Models(
+                    runtime=type_,
+                    config=type_,  # TODO: use generated model
+                ),
+            )
         else:
-            raise ValueError(f"{name} already exists")
+            raise ValueError(f"{type_name} factory already exists")
 
     @property
     def factories(self) -> List[str]:
@@ -35,9 +71,12 @@ class _SourceFactories:
 
     def __getattr__(self, name):
         try:
-            return self.__sources[name]
+            return self.__source_factories[name]
         except KeyError:
             raise AttributeError(name)
+
+    # def __getitem__(self, key: str) -> _DatasourceDetails:
+    #     return self.__types[key.lower()]
 
     # def __dir__(self) -> List[str]:
     #     # TODO: update to work for standard methods too
@@ -56,13 +95,32 @@ class MetaDatasouce(type):
             return cls(*args, **kwargs)
 
         sources = _SourceFactories()
-        factory_name = f"add_{_camel_to_snake(cls_name)}".removesuffix("_datasource")
-        sources.register_factory(factory_name, _datasource_factory)
+        type_name = f"{_camel_to_snake(cls_name)}".removesuffix("_datasource")
+
+        # TODO: generate schemas from `cls`
+        # TODO: extract asset type details
+        print(
+            f"\n{cls_name}\n\n`cls_dict` details ->\n{pf(cls_dict)}\n\n`dir(cls)` details ->\n{pf(dir(cls))}\n"
+        )
+
+        sources.register_factory(type_name, _datasource_factory, cls)
 
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
 
 
+class MyAsset:
+    pass
+
+
+class FileAsset:
+    base_directory: pathlib.Path
+    sep: str = ","
+
+
 class PandasDatasource(metaclass=MetaDatasouce):
+
+    asset_types: Union[FileAsset, MyAsset]
+
     def __init__(self, name: str):
         self.name = name
 
@@ -71,18 +129,29 @@ class PandasDatasource(metaclass=MetaDatasouce):
 
     def add_csv(self, foo="foo", bar="bar", sep=","):
         """I'm a docstring!!"""
+        # NOTE: should this return the datasource or the csv asset?
         return self
 
 
-# class PostgresDatasource(metaclass=MetaDatasouce):
-#     pass
+class TableAsset:
+    """Postgres TableAsset"""
+
+    pass
+
+
+class PostgresDatasource(metaclass=MetaDatasouce):
+    asset_types: List[type] = [TableAsset, MyAsset]
+
+    def __init__(self, name: str, connection_str: str):
+        self.name = name
+        self.connection_str = connection_str
 
 
 class DataContext:
     _context = None
 
     @classmethod
-    def get_context(cls) -> "DataContext":
+    def get_context(cls) -> DataContext:
         if not cls._context:
             cls._context = DataContext()
 
