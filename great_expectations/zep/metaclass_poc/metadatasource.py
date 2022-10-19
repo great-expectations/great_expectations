@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import pathlib
 from pprint import pformat as pf
-from pprint import pprint as pp
 from typing import Callable, Dict, List, NamedTuple, Optional, Union
 
 from great_expectations.zep.interfaces import Datasource
@@ -32,8 +31,8 @@ def _camel_to_snake(s: str) -> str:
 class _SourceFactories:
 
     __source_factories: Dict[str, Callable] = {}
-    __types: Dict[str, DatasourceDetails] = {}
     __type_lookup: Dict[str, type] = {}
+    __types: Dict[str, DatasourceDetails] = {}  # TODO: more work here
 
     @classmethod
     def register_factory(
@@ -52,11 +51,21 @@ class _SourceFactories:
         prexisting = cls.__type_lookup.get(type_name, None)
         if not prexisting:
             cls.__source_factories[method_name] = fn  # type: ignore[assignment]
+
             print(f"2b. Register type `{type_name}` models ...")
             # add Datasource type
             cls.__type_lookup[type_name] = type_
+
+            asset_types = asset_types or []
+            for t in asset_types:
+                t_name = f"{_camel_to_snake(t.__name__).removesuffix('_asset')}"
+                print(f"2c. Register type `{t_name}`")
+                # TODO: need to check for name collisions here. And entire process should be atomic
+                cls.__type_lookup[t_name] = t
+
             cls.__types[type_name] = DatasourceDetails(
-                assets=[],
+                # TODO: separate runtime and config models??
+                assets=[Models(runtime=t, config=t) for t in asset_types],
                 model=Models(
                     runtime=type_,
                     config=type_,  # TODO: use generated model
@@ -74,6 +83,9 @@ class _SourceFactories:
             return self.__source_factories[name]
         except KeyError:
             raise AttributeError(name)
+
+    def types(self) -> Dict[str, type]:
+        return self.__type_lookup
 
     # def __getitem__(self, key: str) -> _DatasourceDetails:
     #     return self.__types[key.lower()]
@@ -98,12 +110,20 @@ class MetaDatasouce(type):
         type_name = f"{_camel_to_snake(cls_name)}".removesuffix("_datasource")
 
         # TODO: generate schemas from `cls`
+
         # TODO: extract asset type details
         print(
             f"\n{cls_name}\n\n`cls_dict` details ->\n{pf(cls_dict)}\n\n`dir(cls)` details ->\n{pf(dir(cls))}\n"
         )
+        asset_type_hint = cls_dict["__annotations__"]["asset_types"]
+        print(f"{type(asset_type_hint)} {asset_type_hint=}")
+        asset_types = cls_dict.get("asset_types", [])
+        for t in asset_types:
+            print(f"{type(t)} {t=}")
 
-        sources.register_factory(type_name, _datasource_factory, cls)
+        sources.register_factory(
+            type_name, _datasource_factory, cls, asset_types=asset_types
+        )
 
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
 
@@ -115,6 +135,12 @@ class MyAsset:
 class FileAsset:
     base_directory: pathlib.Path
     sep: str = ","
+
+
+class TableAsset:
+    """Postgres TableAsset"""
+
+    pass
 
 
 class PandasDatasource(metaclass=MetaDatasouce):
@@ -131,12 +157,6 @@ class PandasDatasource(metaclass=MetaDatasouce):
         """I'm a docstring!!"""
         # NOTE: should this return the datasource or the csv asset?
         return self
-
-
-class TableAsset:
-    """Postgres TableAsset"""
-
-    pass
 
 
 class PostgresDatasource(metaclass=MetaDatasouce):
@@ -174,5 +194,6 @@ def get_context() -> DataContext:
 
 if __name__ == "__main__":
     context = get_context()
+    print(f"Registered types ->\n{pf(context.sources.types())}")
     context.sources.add_pandas("taxi")
     # context.sources.add_postgres()
