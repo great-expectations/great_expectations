@@ -235,7 +235,6 @@ from .expect_column_values_to_be_valid_wikipedia_articles import (
 )
 from .expect_column_values_to_be_vectors import ExpectColumnValuesToBeVectors
 from .expect_column_values_to_be_weekday import ExpectColumnValuesToBeWeekday
-from .expect_column_values_to_be_xml_parseable import ExpectColumnValuesToBeXmlParseable
 from .expect_column_values_to_contain_valid_email import (
     ExpectColumnValuesToContainValidEmail,
 )
