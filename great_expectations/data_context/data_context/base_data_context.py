@@ -5,25 +5,12 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Union
 
 if TYPE_CHECKING:
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
     )
-
-from typing import Any, Callable, Dict, List, Mapping, Optional, Union, cast
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML
@@ -36,7 +23,6 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
@@ -61,7 +47,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
-    send_usage_message,
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
