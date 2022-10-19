@@ -48,7 +48,7 @@ try:
     from typing import Literal
 except ImportError:
     # Fallback for python < 3.8
-    from typing_extensions import Literal
+    from typing_extensions import Literal  # type: ignore[misc]
 
 yaml = YAMLHandler()
 
@@ -381,7 +381,7 @@ class YamlConfigValidator:
         instantiated_class = cast(
             Datasource,
             self._data_context._instantiate_datasource_from_config_and_update_project_config(
-                name=datasource_name,  # type: ignore[arg-type]
+                name=datasource_name,  # type: ignore[arg-type,call-arg]
                 config=config,
                 initialize=True,
             ),
