@@ -329,11 +329,11 @@ class YamlConfigValidator:
             raise e
 
         try:
-            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
+            config: CommentedMap = yaml.load(config_str_with_substituted_variables)  # type: ignore[arg-type]
             return config
 
         except Exception as e:
-            usage_stats_event_payload: dict = {
+            usage_stats_event_payload = {
                 "diagnostic_info": ["__yaml_parse_error__"],
             }
             send_usage_message_from_handler(
@@ -363,7 +363,7 @@ class YamlConfigValidator:
         store_name = instantiated_class.store_name or store_name
         self._data_context.config["stores"][store_name] = config  # type: ignore[index]
 
-        anonymizer = Anonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self._data_context.data_context_id)
         usage_stats_event_payload = anonymizer.anonymize(
             store_name=store_name, store_obj=instantiated_class  # type: ignore[arg-type]
         )
@@ -381,7 +381,7 @@ class YamlConfigValidator:
         instantiated_class = cast(
             Datasource,
             self._data_context._instantiate_datasource_from_config_and_update_project_config(
-                name=datasource_name,
+                name=datasource_name,  # type: ignore[arg-type]
                 config=config,
                 initialize=True,
             ),
