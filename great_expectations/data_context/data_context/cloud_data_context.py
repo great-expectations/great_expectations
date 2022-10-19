@@ -244,7 +244,7 @@ class CloudDataContext(AbstractDataContext):
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
             )
-            or "https://app.greatexpectations.io/"
+            or "https://api.greatexpectations.io/"
         )
         ge_cloud_organization_id = (
             ge_cloud_organization_id

@@ -67,7 +67,7 @@ def data_context_config_dict() -> dict:
         "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
             enabled=True,
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
-            usage_statistics_url="https://app.greatexpectations.io/",
+            usage_statistics_url="https://api.greatexpectations.io/",
         ),
         "notebooks": None,
         "concurrency": None,

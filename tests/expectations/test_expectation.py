@@ -140,3 +140,26 @@ def test_multicolumn_expectation_validation_errors_with_bad_mostly(
 ):
     with pytest.raises(InvalidExpectationConfigurationError):
         fake_expectation = fake_expectation_cls(config)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "fake_expectation_cls, config",
+    [
+        (
+            FakeColumnMapExpectation,
+            fake_config(
+                "fake_column_map_expectation",
+                {
+                    "column": "col",
+                    "min_value": {"$PARAMETER": "foo"},
+                    "max_value": {"$PARAMETER": "bar"},
+                },
+            ),
+        ),
+    ],
+)
+def test_value_range_evaluation_parameters(fake_expectation_cls, config):
+    assert (
+        fake_expectation_cls.validate_metric_value_between_configuration(config) is True
+    )

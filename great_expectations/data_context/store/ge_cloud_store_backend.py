@@ -176,7 +176,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
-    DEFAULT_BASE_URL = "https://app.greatexpectations.io/"
+    DEFAULT_BASE_URL = "https://api.greatexpectations.io/"
 
     def __init__(
         self,
