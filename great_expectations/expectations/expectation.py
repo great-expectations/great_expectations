@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import glob
 import json
@@ -11,7 +13,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 from dateutil.parser import parse
@@ -92,6 +94,9 @@ from great_expectations.util import camel_to_snake, is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
+
 logger = logging.getLogger(__name__)
 
 
@@ -102,6 +107,57 @@ _TEST_DEFS_DIR = os.path.join(
     "tests",
     "test_definitions",
 )
+
+
+def render_evaluation_parameter_string(render_func) -> Callable:
+    def inner_func(*args: Tuple[MetaExpectation], **kwargs):
+        rendered_string_template: Union[
+            List[RenderedStringTemplateContent], RenderedAtomicContent
+        ] = render_func(*args, **kwargs)
+        current_expectation_params = list()
+        app_template_str = (
+            "\n - $eval_param = $eval_param_value (at time of validation)."
+        )
+        configuration = kwargs.get("configuration", None)
+        kwargs_dict = configuration.kwargs
+        for key, value in kwargs_dict.items():
+            if isinstance(value, dict) and "$PARAMETER" in value.keys():
+                current_expectation_params.append(value["$PARAMETER"])
+
+        # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
+        if len(current_expectation_params) > 0:
+            runtime_configuration = kwargs.get("runtime_configuration", None)
+            if runtime_configuration:
+                eval_params = runtime_configuration.get("evaluation_parameters", {})
+                styling = runtime_configuration.get("styling")
+                for key, val in eval_params.items():
+                    # this needs to be more complicated?
+                    # the possibility that it is a substring?
+                    for param in current_expectation_params:
+                        # "key in param" condition allows for eval param values to be rendered if arithmetic is present
+                        if key == param or key in param:
+                            app_params = {}
+                            app_params["eval_param"] = key
+                            app_params["eval_param_value"] = val
+                            to_append = RenderedStringTemplateContent(
+                                **{
+                                    "content_block_type": "string_template",
+                                    "string_template": {
+                                        "template": app_template_str,
+                                        "params": app_params,
+                                        "styling": styling,
+                                    },
+                                }
+                            )
+                            rendered_string_template.append(to_append)
+            else:
+                raise GreatExpectationsError(
+                    f"""GE was not able to render the value of evaluation parameters.
+                        Expectation {render_func} had evaluation parameters set, but they were not passed in."""
+                )
+        return rendered_string_template
+
+    return inner_func
 
 
 # noinspection PyMethodParameters
@@ -165,8 +221,8 @@ class Expectation(metaclass=MetaExpectation):
     """
 
     version = ge_version
-    domain_keys = tuple()
-    success_keys = tuple()
+    domain_keys = ()
+    success_keys = ()
     runtime_keys = (
         "include_config",
         "catch_exceptions",
@@ -183,7 +239,7 @@ class Expectation(metaclass=MetaExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         if configuration is not None:
-            self.validate_configuration(configuration)
+            self.validate_configuration(configuration=configuration)
 
         self._configuration = configuration
 
@@ -764,11 +820,11 @@ class Expectation(metaclass=MetaExpectation):
             configuration = self.configuration
 
         validation_dependencies: dict = self.get_validation_dependencies(
-            configuration,
+            configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        runtime_configuration["result_format"] = validation_dependencies[
+        runtime_configuration["result_format"] = validation_dependencies[  # type: ignore[index]
             "result_format"
         ]
         requested_metrics = validation_dependencies["metrics"]
@@ -831,18 +887,15 @@ class Expectation(metaclass=MetaExpectation):
         }
 
     def get_domain_kwargs(
-        self, configuration: Optional[ExpectationConfiguration] = None
-    ):
-        if not configuration:
-            configuration = self.configuration
-
-        domain_kwargs = {
+        self, configuration: ExpectationConfiguration
+    ) -> Dict[str, Optional[str]]:
+        domain_kwargs: Dict[str, Optional[str]] = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
             for key in self.domain_keys
         }
-        # Process evaluation parameter dependencies
-
-        missing_kwargs = set(self.domain_keys) - set(domain_kwargs.keys())
+        missing_kwargs: Union[set, Set[str]] = set(self.domain_keys) - set(
+            domain_kwargs.keys()
+        )
         if missing_kwargs:
             raise InvalidExpectationKwargsError(
                 f"Missing domain kwargs: {list(missing_kwargs)}"
@@ -855,8 +908,10 @@ class Expectation(metaclass=MetaExpectation):
         if not configuration:
             configuration = self.configuration
 
-        domain_kwargs = self.get_domain_kwargs(configuration)
-        success_kwargs = {
+        domain_kwargs: Dict[str, Optional[str]] = self.get_domain_kwargs(
+            configuration=configuration
+        )
+        success_kwargs: Dict[str, Any] = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
             for key in self.success_keys
         }
@@ -893,14 +948,12 @@ class Expectation(metaclass=MetaExpectation):
         self,
         configuration: ExpectationConfiguration,
         runtime_configuration: dict = None,
-    ) -> dict:
-        default_result_format: Optional[
-            Union[bool, str]
-        ] = self.default_kwarg_values.get("result_format")
-        configuration_result_format: dict = configuration.kwargs.get(
-            "result_format", default_result_format
-        )
-        result_format: dict
+    ) -> Union[Dict[str, Union[str, int, bool]], str]:
+        default_result_format: str = self.default_kwarg_values.get("result_format")
+        configuration_result_format: Union[
+            Dict[str, Union[str, int, bool]], str
+        ] = configuration.kwargs.get("result_format", default_result_format)
+        result_format: Union[Dict[str, Union[str, int, bool]], str]
         if runtime_configuration:
             result_format = runtime_configuration.get(
                 "result_format",
@@ -931,7 +984,7 @@ class Expectation(metaclass=MetaExpectation):
         data_context=None,
         runtime_configuration=None,
     ):
-        include_rendered_content: bool = validator._include_rendered_content
+        include_rendered_content: bool = validator._include_rendered_content or False
 
         if configuration is None:
             configuration = deepcopy(self.configuration)
@@ -949,7 +1002,7 @@ class Expectation(metaclass=MetaExpectation):
         return evr
 
     @property
-    def configuration(self):
+    def configuration(self) -> ExpectationConfiguration:
         if self._configuration is None:
             raise InvalidExpectationConfigurationError(
                 "cannot access configuration: expectation has not yet been configured"
@@ -1001,7 +1054,7 @@ class Expectation(metaclass=MetaExpectation):
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
-        context: Optional["DataContext"] = None,  # noqa: F821
+        context: Optional[DataContext] = None,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -1029,8 +1082,6 @@ class Expectation(metaclass=MetaExpectation):
         if debug_logger:
             _debug = lambda x: debug_logger.debug(f"(run_diagnostics) {x}")
             _error = lambda x: debug_logger.error(f"(run_diagnostics) {x}")
-
-        errors: List[ExpectationErrorDiagnostics] = []
 
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
@@ -1825,7 +1876,7 @@ class TableExpectation(Expectation, ABC):
 
     @staticmethod
     def validate_metric_value_between_configuration(
-        configuration: Optional[ExpectationConfiguration],
+        configuration: ExpectationConfiguration,
     ):
         # Validating that Minimum and Maximum values are of the proper format and type
         min_val = None
@@ -2003,9 +2054,7 @@ class QueryExpectation(TableExpectation, ABC):
         "condition_parser",
     )
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
         """Raises an exception if the configuration is not viable for an expectation.
 
         Args:
@@ -2015,11 +2064,11 @@ class QueryExpectation(TableExpectation, ABC):
               InvalidExpectationConfigurationError: If no `query` is specified
               UserWarning: If query is not parameterized, and/or row_condition is passed.
         """
-        super().validate_configuration(configuration)
+        super().validate_configuration(configuration=configuration)
 
-        query: str = configuration.kwargs.get("query") or self.default_kwarg_values.get(
+        query: Optional[str] = configuration.kwargs.get(
             "query"
-        )
+        ) or self.default_kwarg_values.get("query")
         row_condition: str = configuration.kwargs.get(
             "row_condition"
         ) or self.default_kwarg_values.get("row_condition")
@@ -2034,7 +2083,7 @@ class QueryExpectation(TableExpectation, ABC):
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
-                if x.lower() != "" and x.lower() not in valid_sql_tokens_and_types
+                if x.upper() != "" and x.upper() not in valid_sql_tokens_and_types
             }
             assert "{active_batch}" in parsed_query, (
                 "Your query appears to not be parameterized for a data asset. "
@@ -2061,9 +2110,7 @@ class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
         # Ensuring basic configuration parameters are properly set
         try:
             assert (
@@ -2091,10 +2138,8 @@ class ColumnMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        super().validate_configuration(configuration)
+    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
+        super().validate_configuration(configuration=configuration)
         try:
             assert (
                 "column" in configuration.kwargs
@@ -2233,7 +2278,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        result_format = self.get_result_format(
+        result_format: Union[
+            Dict[str, Union[str, int, bool]], str
+        ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
         include_unexpected_rows = result_format.get("include_unexpected_rows")
@@ -2303,7 +2350,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
-        super().validate_configuration(configuration)
+        super().validate_configuration(configuration=configuration)
         try:
             assert (
                 "column_A" in configuration.kwargs
@@ -2432,7 +2479,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        result_format = self.get_result_format(
+        result_format: Union[
+            Dict[str, Union[str, int, bool]], str
+        ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
         total_count = metrics.get("table.row_count")
@@ -2496,7 +2545,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
-        super().validate_configuration(configuration)
+        super().validate_configuration(configuration=configuration)
         try:
             assert (
                 "column_list" in configuration.kwargs
@@ -2625,11 +2674,17 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
-        total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
-        unexpected_values = metrics.get(f"{self.map_metric}.unexpected_values")
-        unexpected_index_list = metrics.get(f"{self.map_metric}.unexpected_index_list")
-        filtered_row_count = metrics.get(f"{self.map_metric}.filtered_row_count")
+        total_count: Optional[int] = metrics.get("table.row_count")
+        unexpected_count: int = metrics.get(f"{self.map_metric}.unexpected_count")
+        unexpected_values: Optional[Any] = metrics.get(
+            f"{self.map_metric}.unexpected_values"
+        )
+        unexpected_index_list: Optional[List[int]] = metrics.get(
+            f"{self.map_metric}.unexpected_index_list"
+        )
+        filtered_row_count: Optional[int] = metrics.get(
+            f"{self.map_metric}.filtered_row_count"
+        )
 
         if (
             total_count is None
@@ -2792,7 +2847,7 @@ def _format_map_output(
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")
 
 
-def _validate_mostly_config(configuration: Optional[ExpectationConfiguration]) -> None:
+def _validate_mostly_config(configuration: ExpectationConfiguration) -> None:
     """
     Validates "mostly" in ExpectationConfiguration is a number if it exists.
 
@@ -2823,52 +2878,21 @@ def _mostly_success(
     return success_ratio >= mostly
 
 
-def render_evaluation_parameter_string(render_func) -> Callable:
-    def inner_func(*args: Tuple[MetaExpectation], **kwargs):
-        rendered_string_template: Union[
-            List[RenderedStringTemplateContent], RenderedAtomicContent
-        ] = render_func(*args, **kwargs)
-        current_expectation_params = list()
-        app_template_str = (
-            "\n - $eval_param = $eval_param_value (at time of validation)."
-        )
-        configuration = kwargs.get("configuration", None)
-        kwargs_dict = configuration.kwargs
-        for key, value in kwargs_dict.items():
-            if isinstance(value, dict) and "$PARAMETER" in value.keys():
-                current_expectation_params.append(value["$PARAMETER"])
-
-        # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
-        if len(current_expectation_params) > 0:
-            runtime_configuration = kwargs.get("runtime_configuration", None)
-            if runtime_configuration:
-                eval_params = runtime_configuration.get("evaluation_parameters", {})
-                styling = runtime_configuration.get("styling")
-                for key, val in eval_params.items():
-                    # this needs to be more complicated?
-                    # the possibility that it is a substring?
-                    for param in current_expectation_params:
-                        # "key in param" condition allows for eval param values to be rendered if arithmetic is present
-                        if key == param or key in param:
-                            app_params = {}
-                            app_params["eval_param"] = key
-                            app_params["eval_param_value"] = val
-                            to_append = RenderedStringTemplateContent(
-                                **{
-                                    "content_block_type": "string_template",
-                                    "string_template": {
-                                        "template": app_template_str,
-                                        "params": app_params,
-                                        "styling": styling,
-                                    },
-                                }
-                            )
-                            rendered_string_template.append(to_append)
-            else:
-                raise GreatExpectationsError(
-                    f"""GE was not able to render the value of evaluation parameters.
-                        Expectation {render_func} had evaluation parameters set, but they were not passed in."""
-                )
-        return rendered_string_template
-
-    return inner_func
+def add_values_with_json_schema_from_list_in_params(
+    params: dict,
+    params_with_json_schema: dict,
+    param_key_with_list: str,
+    list_values_type: str = "string",
+) -> dict:
+    """
+    Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
+    convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).
+    """
+    target_list = params.get(param_key_with_list)
+    if target_list is not None and len(target_list) > 0:
+        for i, v in enumerate(target_list):
+            params_with_json_schema[f"v__{str(i)}"] = {
+                "schema": {"type": list_values_type},
+                "value": v,
+            }
+    return params_with_json_schema

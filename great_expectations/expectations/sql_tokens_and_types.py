@@ -261,10 +261,10 @@ class ValidSparkSqlTokens(str, Enum):
 valid_sql_tokens_and_types: Set[str] = set(
     chain.from_iterable(
         [
-            list(map(lambda i: i.lower(), ValidSqlTokens.__members__.keys())),
-            list(map(lambda i: i.lower(), ValidSqlAlchemyTypes.__members__.keys())),
-            list(map(lambda i: i.lower(), ValidSparkSqlTokens.__members__.keys())),
-            list(map(lambda i: i.lower(), ValidSparkSqlTypes.__members__.keys())),
+            list(map(lambda i: i.upper(), ValidSqlTokens.__members__.keys())),
+            list(map(lambda i: i.upper(), ValidSqlAlchemyTypes.__members__.keys())),
+            list(map(lambda i: i.upper(), ValidSparkSqlTokens.__members__.keys())),
+            list(map(lambda i: i.upper(), ValidSparkSqlTypes.__members__.keys())),
         ]
     )
 )

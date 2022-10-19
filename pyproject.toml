@@ -80,7 +80,6 @@ exclude = [
     'expectations/core/expect_select_column_values_to_be_unique_within_record\.py', # 3
     'expectations/core/expect_table_column', # 25
     'expectations/core/expect_table_row_count_to', # 5
-    'expectations/expectation\.py',  # 59
     'expectations/metrics',  # 130
     'expectations/regex_based_column_map_expectation\.py',  # 3
     'expectations/registry\.py',  # 19
