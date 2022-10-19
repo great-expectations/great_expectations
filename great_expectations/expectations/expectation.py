@@ -63,7 +63,9 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.sql_tokens_and_types import valid_tokens_and_types
+from great_expectations.expectations.sql_tokens_and_types import (
+    valid_sql_tokens_and_types,
+)
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -2032,7 +2034,7 @@ class QueryExpectation(TableExpectation, ABC):
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
-                if x.lower() != "" and x.lower() not in valid_tokens_and_types
+                if x.lower() != "" and x.lower() not in valid_sql_tokens_and_types
             }
             assert "{active_batch}" in parsed_query, (
                 "Your query appears to not be parameterized for a data asset. "

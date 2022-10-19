@@ -8,8 +8,9 @@ from great_expectations.expectations.expectation import (
 logger = logging.getLogger(__name__)
 
 
-def render_evaluation_parameter_string(render_func) -> Callable:
-    return render_evaluation_parameter_string(render_func=render_func)
+@render_evaluation_parameter_string
+def render_evaluation_parameter_string() -> Callable:
+    pass
 
 
 def add_values_with_json_schema_from_list_in_params(

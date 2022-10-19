@@ -3,7 +3,7 @@ from itertools import chain
 from typing import Set
 
 
-class ValidSqlTokens(Enum):
+class ValidSqlTokens(str, Enum):
     SELECT = "SELECT"
     ASTERISK = "*"
     DISTINCT = "DISTINCT"
@@ -59,7 +59,7 @@ class ValidSqlTokens(Enum):
     CAST = "CAST"
 
 
-class ValidSqlAlchemyTypes(Enum):
+class ValidSqlAlchemyTypes(str, Enum):
     ARRAY = "ARRAY"
     BIGINT = "BIGINT"
     BINARY = "BINARY"
@@ -94,7 +94,7 @@ class ValidSqlAlchemyTypes(Enum):
     VARCHAR = "VARCHAR"
 
 
-class ValidSparkSqlTypes(Enum):
+class ValidSparkSqlTypes(str, Enum):
     ARRAYTYPE = "ARRAY"
     BINARYTYPE = "BINARY"
     BOOLEAN = "BOOLEAN"
@@ -126,7 +126,7 @@ class ValidSparkSqlTypes(Enum):
     TIMESTAMP = "TIMESTAMP"
 
 
-class ValidSparkSqlTokens(Enum):
+class ValidSparkSqlTokens(str, Enum):
     SELECT = "SELECT"
     CLUSTER = "CLUSTER"
     ALTER = "ALTER"
@@ -258,7 +258,7 @@ class ValidSparkSqlTokens(Enum):
     FOR = "FOR"
 
 
-valid_tokens_and_types: Set[str] = set(
+valid_sql_tokens_and_types: Set[str] = set(
     chain.from_iterable(
         [
             list(map(lambda i: i.lower(), ValidSqlTokens.__members__.keys())),
