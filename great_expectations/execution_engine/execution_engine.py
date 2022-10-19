@@ -58,6 +58,33 @@ class MetricFunctionTypes(Enum):
     AGGREGATE_VALUE = "value"  # "aggregate_value"
 
 
+class MetricPartialFunctionTypes(Enum):
+    MAP_FN = "map_fn"
+    MAP_SERIES = "map_series"
+    MAP_CONDITION_FN = "map_condition_fn"
+    MAP_CONDITION_SERIES = "map_condition_series"
+    WINDOW_FN = "window_fn"
+    WINDOW_CONDITION_FN = "window_condition_fn"
+    AGGREGATE_FN = "aggregate_fn"
+
+    @property
+    def metric_suffix(self) -> str:
+        if self.name in ["MAP_FN", "MAP_SERIES", "WINDOW_FN"]:
+            return "map"
+
+        if self.name in [
+            "MAP_CONDITION_FN",
+            "MAP_CONDITION_SERIES",
+            "WINDOW_CONDITION_FN",
+        ]:
+            return "condition"
+
+        if self.name in ["AGGREGATE_FN"]:
+            return "aggregate_fn"
+
+        return ""
+
+
 class DataConnectorStorageDataReferenceResolver:
     DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
         "InferredAssetS3DataConnector": "S3",
@@ -699,26 +726,3 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs["column_list"] = column_list
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
-
-
-class MetricPartialFunctionTypes(Enum):
-    MAP_FN = "map_fn"
-    MAP_SERIES = "map_series"
-    MAP_CONDITION_FN = "map_condition_fn"
-    MAP_CONDITION_SERIES = "map_condition_series"
-    WINDOW_FN = "window_fn"
-    WINDOW_CONDITION_FN = "window_condition_fn"
-    AGGREGATE_FN = "aggregate_fn"
-
-    @property
-    def metric_suffix(self):
-        if self.name in ["MAP_FN", "MAP_SERIES", "WINDOW_FN"]:
-            return "map"
-        elif self.name in [
-            "MAP_CONDITION_FN",
-            "MAP_CONDITION_SERIES",
-            "WINDOW_CONDITION_FN",
-        ]:
-            return "condition"
-        elif self.name in ["AGGREGATE_FN"]:
-            return "aggregate_fn"
