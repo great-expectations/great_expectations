@@ -22,37 +22,42 @@ def render_evaluation_parameter_string(render_func):
             if isinstance(value, dict) and "$PARAMETER" in value.keys():
                 current_expectation_params.append(value["$PARAMETER"])
 
-        # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
-        if len(current_expectation_params) > 0:
-            runtime_configuration = kwargs.get("runtime_configuration", None)
-            if runtime_configuration:
-                eval_params = runtime_configuration.get("evaluation_parameters", {})
-                styling = runtime_configuration.get("styling")
-                for key, val in eval_params.items():
-                    # this needs to be more complicated?
-                    # the possibility that it is a substring?
-                    for param in current_expectation_params:
-                        # "key in param" condition allows for eval param values to be rendered if arithmetic is present
-                        if key == param or key in param:
-                            app_params = {}
-                            app_params["eval_param"] = key
-                            app_params["eval_param_value"] = val
-                            to_append = RenderedStringTemplateContent(
-                                **{
-                                    "content_block_type": "string_template",
-                                    "string_template": {
-                                        "template": app_template_str,
-                                        "params": app_params,
-                                        "styling": styling,
-                                    },
-                                }
-                            )
-                            rendered_string_template.append(to_append)
-            else:
-                raise GreatExpectationsError(
-                    f"""GE was not able to render the value of evaluation parameters.
-                        Expectation {render_func} had evaluation parameters set, but they were not passed in."""
-                )
+            # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
+            if len(current_expectation_params) > 0:
+                runtime_configuration = kwargs.get("runtime_configuration", None)
+                if runtime_configuration:
+                    eval_params = runtime_configuration.get("evaluation_parameters", {})
+                    styling = runtime_configuration.get("styling")
+                    for key, val in eval_params.items():
+                        # this needs to be more complicated?
+                        # the possibility that it is a substring?
+                        for param in current_expectation_params:
+                            # "key in param" condition allows for eval param values to be rendered if arithmetic is present
+                            if key == param or key in param:
+                                app_params = {}
+                                app_params["eval_param"] = key
+                                app_params["eval_param_value"] = val
+                                rendered_content = RenderedStringTemplateContent(
+                                    **{
+                                        "content_block_type": "string_template",
+                                        "string_template": {
+                                            "template": app_template_str,
+                                            "params": app_params,
+                                            "styling": styling,
+                                        },
+                                    }
+                                )
+                else:
+                    # if there are eval params, but runtime_configuration is None, render the eval params only because they
+                    # may still contain values such as now() that don't require a runtime_configuration.
+                    rendered_content = RenderedStringTemplateContent(
+                        **{
+                            "content_block_type": "string_template",
+                            "string_template": {
+                                "template": app_template_str,
+                            },
+                        }
+                    )
         return rendered_string_template
 
     return inner_func

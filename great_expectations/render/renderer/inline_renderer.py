@@ -119,9 +119,9 @@ class InlineRenderer(Renderer):
                     expectation_type=expectation_type,
                 )
                 rendered_content.append(renderer_rendered_content)
-            except Exception:
+            except Exception as e:
                 logger.info(
-                    f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type}".'
+                    f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type} with exception message: {str(e)}".'
                 )
                 failed_renderer_type: str
                 if isinstance(render_object, ExpectationConfiguration):
