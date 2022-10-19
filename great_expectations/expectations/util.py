@@ -1,7 +1,7 @@
 import logging
 from enum import Enum
 from itertools import chain
-from typing import Set
+from typing import List, Set
 
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 def render_evaluation_parameter_string(render_func):
     def inner_func(*args, **kwargs):
-        rendered_string_template = render_func(*args, **kwargs)
+        rendered_string_template: List[RenderedStringTemplateContent] = render_func(
+            *args, **kwargs
+        )
         current_expectation_params = list()
         app_template_str = (
             "\n - $eval_param = $eval_param_value (at time of validation)."
@@ -37,7 +39,7 @@ def render_evaluation_parameter_string(render_func):
                                 app_params = {}
                                 app_params["eval_param"] = key
                                 app_params["eval_param_value"] = val
-                                rendered_content = RenderedStringTemplateContent(
+                                to_append = RenderedStringTemplateContent(
                                     **{
                                         "content_block_type": "string_template",
                                         "string_template": {
@@ -47,16 +49,11 @@ def render_evaluation_parameter_string(render_func):
                                         },
                                     }
                                 )
+                                rendered_string_template.append(to_append)
                 else:
-                    # if there are eval params, but runtime_configuration is None, render the eval params only because they
-                    # may still contain values such as now() that don't require a runtime_configuration.
-                    rendered_content = RenderedStringTemplateContent(
-                        **{
-                            "content_block_type": "string_template",
-                            "string_template": {
-                                "template": app_template_str,
-                            },
-                        }
+                    raise GreatExpectationsError(
+                        f"""GE was not able to render the value of evaluation parameters.
+                            Expectation {render_func} had evaluation parameters set, but they were not passed in."""
                     )
         return rendered_string_template
 
