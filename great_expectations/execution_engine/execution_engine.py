@@ -5,10 +5,14 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-import pandas as pd
-
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchMarkers, BatchSpec
+from great_expectations.core.batch import (
+    BatchData,
+    BatchDataType,
+    BatchMarkers,
+    BatchSpec,
+)
+from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.execution_engine.bundled_metric_configuration import (
@@ -25,6 +29,16 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
+
+
 class NoOpDict:
     def __getitem__(self, item):
         return None
@@ -32,21 +46,9 @@ class NoOpDict:
     def __setitem__(self, key, value):
         return None
 
+    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def update(self, value):
         return None
-
-
-class BatchData:
-    def __init__(self, execution_engine) -> None:
-        self._execution_engine = execution_engine
-
-    @property
-    def execution_engine(self):
-        return self._execution_engine
-
-    def head(self, *args, **kwargs):
-        # CONFLICT ON PURPOSE. REMOVE.
-        return pd.DataFrame({})
 
 
 class MetricFunctionTypes(Enum):
@@ -54,6 +56,33 @@ class MetricFunctionTypes(Enum):
     MAP_VALUES = "value"  # "map_values"
     WINDOW_VALUES = "value"  # "window_values"
     AGGREGATE_VALUE = "value"  # "aggregate_value"
+
+
+class MetricPartialFunctionTypes(Enum):
+    MAP_FN = "map_fn"
+    MAP_SERIES = "map_series"
+    MAP_CONDITION_FN = "map_condition_fn"
+    MAP_CONDITION_SERIES = "map_condition_series"
+    WINDOW_FN = "window_fn"
+    WINDOW_CONDITION_FN = "window_condition_fn"
+    AGGREGATE_FN = "aggregate_fn"
+
+    @property
+    def metric_suffix(self) -> str:
+        if self.name in ["MAP_FN", "MAP_SERIES", "WINDOW_FN"]:
+            return "map"
+
+        if self.name in [
+            "MAP_CONDITION_FN",
+            "MAP_CONDITION_SERIES",
+            "WINDOW_CONDITION_FN",
+        ]:
+            return "condition"
+
+        if self.name in ["AGGREGATE_FN"]:
+            return "aggregate_fn"
+
+        return ""
 
 
 class DataConnectorStorageDataReferenceResolver:
@@ -173,10 +202,13 @@ class ExecutionEngine(ABC):
 
         if batch_spec_defaults is None:
             batch_spec_defaults = {}
+
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
             logger.warning(
-                f"Unrecognized batch_spec_default(s): {str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}"
+                f"""Unrecognized batch_spec_default(s): \
+{str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}
+"""
             )
 
         self._batch_spec_defaults = {
@@ -185,11 +217,12 @@ class ExecutionEngine(ABC):
             if key in self.recognized_batch_spec_defaults
         }
 
-        self._batch_data_dict = {}
+        self._batch_manager = BatchManager(execution_engine=self)
+
         if batch_data_dict is None:
             batch_data_dict = {}
-        self._active_batch_data_id = None
-        self._load_batch_data_from_dict(batch_data_dict)
+
+        self._load_batch_data_from_dict(batch_data_dict=batch_data_dict)
 
         # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values, and
         # set the instance "_config" variable equal to the resulting dictionary.
@@ -209,53 +242,31 @@ class ExecutionEngine(ABC):
         pass
 
     @property
-    def active_batch_data_id(self):
-        """The batch id for the default batch data.
-
-        When an execution engine is asked to process a compute domain that does
-        not include a specific batch_id, then the data associated with the
-        active_batch_data_id will be used as the default.
-        """
-        if self._active_batch_data_id is not None:
-            return self._active_batch_data_id
-        elif len(self.loaded_batch_data_dict) == 1:
-            return list(self.loaded_batch_data_dict.keys())[0]
-        else:
-            return None
-
-    @active_batch_data_id.setter
-    def active_batch_data_id(self, batch_id) -> None:
-        if batch_id in self.loaded_batch_data_dict.keys():
-            self._active_batch_data_id = batch_id
-        else:
-            raise ge_exceptions.ExecutionEngineError(
-                f"Unable to set active_batch_data_id to {batch_id}. The may data may not be loaded."
-            )
-
-    @property
-    def active_batch_data(self):
-        """The data from the currently-active batch."""
-        if self.active_batch_data_id is None:
-            return None
-
-        return self.loaded_batch_data_dict.get(self.active_batch_data_id)
-
-    @property
-    def loaded_batch_data_dict(self):
-        """The current dictionary of batches."""
-        return self._batch_data_dict
-
-    @property
-    def loaded_batch_data_ids(self):
-        return list(self.loaded_batch_data_dict.keys())
-
-    @property
     def config(self) -> dict:
         return self._config
 
     @property
     def dialect(self):
         return None
+
+    @property
+    def batch_manager(self) -> BatchManager:
+        """Getter for batch_manager"""
+        return self._batch_manager
+
+    def _load_batch_data_from_dict(
+        self, batch_data_dict: Dict[str, BatchDataType]
+    ) -> None:
+        """
+        Loads all data in batch_data_dict using cache_batch_data
+        """
+        batch_id: str
+        batch_data: BatchDataType
+        for batch_id, batch_data in batch_data_dict.items():
+            self.load_batch_data(batch_id=batch_id, batch_data=batch_data)
+
+    def load_batch_data(self, batch_id: str, batch_data: BatchDataType) -> None:
+        self._batch_manager.save_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data(
         self,
@@ -276,20 +287,6 @@ class ExecutionEngine(ABC):
     @abstractmethod
     def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
         raise NotImplementedError
-
-    def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
-        """
-        Loads the specified batch_data into the execution engine
-        """
-        self._batch_data_dict[batch_id] = batch_data
-        self._active_batch_data_id = batch_id
-
-    def _load_batch_data_from_dict(self, batch_data_dict) -> None:
-        """
-        Loads all data in batch_data_dict into load_batch_data
-        """
-        for batch_id, batch_data in batch_data_dict.items():
-            self.load_batch_data(batch_id, batch_data)
 
     def resolve_metrics(
         self,
@@ -454,8 +451,8 @@ class ExecutionEngine(ABC):
             3. a dictionary describing the access instructions for data elements included in the compute domain
                 (e.g. specific column name).
 
-            In general, the union of the compute_domain_kwargs and accessor_domain_kwargs will be the same as the domain_kwargs
-            provided to this method.
+            In general, the union of the compute_domain_kwargs and accessor_domain_kwargs will be the same as the
+            domain_kwargs provided to this method.
         """
 
         raise NotImplementedError
@@ -469,7 +466,8 @@ class ExecutionEngine(ABC):
 
         Args:
             domain_kwargs: the domain kwargs to use as the base and to which to add the condition
-            column_name: if provided, use this name to add the condition; otherwise, will use "column" key from table_domain_kwargs
+            column_name: if provided, use this name to add the condition; otherwise, will use "column" key from
+                table_domain_kwargs
             filter_null: if true, add a filter for null values
             filter_nan: if true, add a filter for nan values
         """
@@ -620,7 +618,7 @@ class ExecutionEngine(ABC):
                     map(lambda element: f'"{element}"', unexpected_keys)
                 )
                 logger.warning(
-                    f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
+                    f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}"."""
                 )
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
@@ -728,26 +726,3 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs["column_list"] = column_list
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
-
-
-class MetricPartialFunctionTypes(Enum):
-    MAP_FN = "map_fn"
-    MAP_SERIES = "map_series"
-    MAP_CONDITION_FN = "map_condition_fn"
-    MAP_CONDITION_SERIES = "map_condition_series"
-    WINDOW_FN = "window_fn"
-    WINDOW_CONDITION_FN = "window_condition_fn"
-    AGGREGATE_FN = "aggregate_fn"
-
-    @property
-    def metric_suffix(self):
-        if self.name in ["MAP_FN", "MAP_SERIES", "WINDOW_FN"]:
-            return "map"
-        elif self.name in [
-            "MAP_CONDITION_FN",
-            "MAP_CONDITION_SERIES",
-            "WINDOW_CONDITION_FN",
-        ]:
-            return "condition"
-        elif self.name in ["AGGREGATE_FN"]:
-            return "aggregate_fn"
