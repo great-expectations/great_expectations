@@ -52,6 +52,10 @@ exclude = [
     'core/expectation_configuration\.py', # 21
     'core/expectation_diagnostics', # 20
     'core/expectation_validation_result\.py', # 9
+    'core/usage_statistics/anonymizers', # 96
+    'core/usage_statistics/usage_statistics\.py', # 19
+    'core/usage_statistics/util\.py', # 2
+    'core/util\.py', # 18
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
@@ -69,7 +73,13 @@ exclude = [
     'execution_engine/sqlalchemy_batch_data\.py',  # 1
     'execution_engine/sqlalchemy_dialect.py',  # 1
     'execution_engine/sqlalchemy_execution_engine\.py',  # 8
-    'expectations/core',  # 257
+    'expectations/core/expect_column_', # 214
+    'expectations/core/expect_compound_columns_to_be_unique\.py', # 3
+    'expectations/core/expect_multicolumn_sum_to_equal\.py', # 4
+    'expectations/core/expect_multicolumn_values_to_be_unique\.py', # 3
+    'expectations/core/expect_select_column_values_to_be_unique_within_record\.py', # 3
+    'expectations/core/expect_table_column', # 25
+    'expectations/core/expect_table_row_count_to', # 5
     'expectations/expectation\.py',  # 59
     'expectations/metrics',  # 130
     'expectations/regex_based_column_map_expectation\.py',  # 3
@@ -84,7 +94,6 @@ exclude = [
     'render/renderer/content_block/exception_list_content_block\.py',  # 4
     'render/renderer/content_block/validation_results_table_content_block\.py',  # 2
     'render/renderer/datasource_new_notebook_renderer\.py',  #  4
-    'render/renderer/inline_renderer\.py',  # 3
     'render/renderer/notebook_renderer\.py',  # 2
     'render/renderer/page_renderer\.py',  # 10
     'render/renderer/profiling_results_overview_section_renderer\.py',  # 2
@@ -94,7 +103,6 @@ exclude = [
     'render/renderer/suite_scaffold_notebook_renderer\.py',  # 7
     'render/renderer/v3/suite_edit_notebook_renderer\.py',  # 11
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
-    'render/types',  # 4
     'render/util\.py',  # 2
     'render/view',  # 11
     'rule_based_profiler/attributed_resolved_metrics\.py',  # 4
