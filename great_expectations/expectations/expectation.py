@@ -10,9 +10,8 @@ import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter, defaultdict
 from copy import deepcopy
-from enum import Enum
 from inspect import isabstract
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 from dateutil.parser import parse
@@ -64,10 +63,7 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.util import (
-    render_evaluation_parameter_string,
-    valid_tokens_and_types,
-)
+from great_expectations.expectations.sql_tokens_and_types import valid_tokens_and_types
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -2823,3 +2819,54 @@ def _mostly_success(
         rows_considered_cnt_as_float - unexpected_cnt_as_float
     ) / rows_considered_cnt_as_float
     return success_ratio >= mostly
+
+
+def render_evaluation_parameter_string(render_func) -> Callable:
+    def inner_func(*args: Tuple[MetaExpectation], **kwargs):
+        rendered_string_template: Union[
+            List[RenderedStringTemplateContent], RenderedAtomicContent
+        ] = render_func(*args, **kwargs)
+        current_expectation_params = list()
+        app_template_str = (
+            "\n - $eval_param = $eval_param_value (at time of validation)."
+        )
+        configuration = kwargs.get("configuration", None)
+        kwargs_dict = configuration.kwargs
+        for key, value in kwargs_dict.items():
+            if isinstance(value, dict) and "$PARAMETER" in value.keys():
+                current_expectation_params.append(value["$PARAMETER"])
+
+        # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
+        if len(current_expectation_params) > 0:
+            runtime_configuration = kwargs.get("runtime_configuration", None)
+            if runtime_configuration:
+                eval_params = runtime_configuration.get("evaluation_parameters", {})
+                styling = runtime_configuration.get("styling")
+                for key, val in eval_params.items():
+                    # this needs to be more complicated?
+                    # the possibility that it is a substring?
+                    for param in current_expectation_params:
+                        # "key in param" condition allows for eval param values to be rendered if arithmetic is present
+                        if key == param or key in param:
+                            app_params = {}
+                            app_params["eval_param"] = key
+                            app_params["eval_param_value"] = val
+                            to_append = RenderedStringTemplateContent(
+                                **{
+                                    "content_block_type": "string_template",
+                                    "string_template": {
+                                        "template": app_template_str,
+                                        "params": app_params,
+                                        "styling": styling,
+                                    },
+                                }
+                            )
+                            rendered_string_template.append(to_append)
+            else:
+                raise GreatExpectationsError(
+                    f"""GE was not able to render the value of evaluation parameters.
+                        Expectation {render_func} had evaluation parameters set, but they were not passed in."""
+                )
+        return rendered_string_template
+
+    return inner_func
