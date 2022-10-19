@@ -20,6 +20,8 @@ RUN git clone --filter=tree:0 --branch ${BRANCH} https://github.com/great-expect
 WORKDIR /great_expectations
 
 FROM build_${SOURCE} AS dev
+ARG GE_USAGE_STATISTICS_URL=""
+env GE_USAGE_STATISTICS_URL="${GE_USAGE_STATISTICS_URL}"
 RUN pip install --no-cache-dir --requirement requirements-dev.txt --constraint constraints-dev.txt
 RUN pip install .
 CMD [ "python", "--version"]
