@@ -305,7 +305,7 @@ class YamlConfigValidator:
             )
 
             substitutions: dict = {
-                **substituted_config_variables,
+                **substituted_config_variables,  # type: ignore[list-item]
                 **dict(os.environ),
                 **runtime_environment,
             }
@@ -361,11 +361,11 @@ class YamlConfigValidator:
             ),
         )
         store_name = instantiated_class.store_name or store_name
-        self._data_context.config["stores"][store_name] = config
+        self._data_context.config["stores"][store_name] = config  # type: ignore[index]
 
         anonymizer = Anonymizer(self.data_context_id)
         usage_stats_event_payload = anonymizer.anonymize(
-            store_name=store_name, store_obj=instantiated_class
+            store_name=store_name, store_obj=instantiated_class  # type: ignore[arg-type]
         )
         return instantiated_class, usage_stats_event_payload
 
@@ -392,7 +392,7 @@ class YamlConfigValidator:
         if class_name == "SimpleSqlalchemyDatasource":
             # Use the raw config here, defaults will be added in the anonymizer
             usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class, name=datasource_name, config=config
+                obj=instantiated_class, name=datasource_name, config=config  # type: ignore[arg-type]
             )
         else:
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
@@ -400,7 +400,7 @@ class YamlConfigValidator:
             full_datasource_config = datasourceConfigSchema.dump(datasource_config)
             usage_stats_event_payload = anonymizer.anonymize(
                 obj=instantiated_class,
-                name=datasource_name,
+                name=datasource_name,  # type: ignore[arg-type]
                 config=full_datasource_config,
             )
         return instantiated_class, usage_stats_event_payload
@@ -437,7 +437,7 @@ class YamlConfigValidator:
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
-        anonymizer: Anonymizer = Anonymizer(self._data_context.data_context_id)
+        anonymizer = Anonymizer(self._data_context.data_context_id)
 
         usage_stats_event_payload = anonymizer.anonymize(
             obj=instantiated_class, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
@@ -504,7 +504,7 @@ class YamlConfigValidator:
             },
         )
 
-        anonymizer: Anonymizer = Anonymizer(self._data_context.data_context_id)
+        anonymizer = Anonymizer(self._data_context.data_context_id)
 
         usage_stats_event_payload: dict = anonymizer.anonymize(
             obj=instantiated_class, name=profiler_name, config=profiler_config  # type: ignore[arg-type]
@@ -539,7 +539,7 @@ class YamlConfigValidator:
         )
 
         # If a subclass of a supported type, find the parent class and anonymize
-        anonymizer: Anonymizer = Anonymizer(self._data_context.data_context_id)
+        anonymizer = Anonymizer(self._data_context.data_context_id)
 
         parent_class_from_object = anonymizer.get_parent_class(
             object_=instantiated_class
