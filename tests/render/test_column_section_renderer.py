@@ -1569,7 +1569,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         "table_options": {"search": True, "icon-size": "sm"},
     }
 
-    # test case where evaluation_parameters aren't required as runtime such as using now()
+    # also test case where evaluation_parameters aren't required at runtime such as using now()
     evr = ExpectationValidationResult(
         success=True,
         result={
@@ -1594,8 +1594,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         ),
     )
 
-    # evaluation_parameters are usually stored at the ExpectationSuiteValidationResult
-    # and passed along as a kwarg to the ValidationResultsTableContentBlockRenderer
     result = ValidationResultsTableContentBlockRenderer.render(
         [evr],
     ).to_json_dict()
