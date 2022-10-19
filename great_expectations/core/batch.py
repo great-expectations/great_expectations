@@ -519,6 +519,9 @@ class BatchData:
         return pd.DataFrame({})
 
 
+BatchDataType = Union[BatchData, pd.DataFrame, SparkDataFrame]
+
+
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
@@ -527,7 +530,7 @@ class BatchData:
 class Batch(SerializableDictDot):
     def __init__(
         self,
-        data: Union[BatchData, pd.DataFrame, SparkDataFrame],
+        data: BatchDataType,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         batch_definition: BatchDefinition = None,
         batch_spec: BatchSpec = None,
@@ -566,8 +569,14 @@ class Batch(SerializableDictDot):
         self._batch_kwargs = batch_kwargs or BatchKwargs()
 
     @property
-    def data(self):
+    def data(self) -> BatchDataType:
+        """Getter for Batch data"""
         return self._data
+
+    @data.setter
+    def data(self, value: BatchDataType) -> None:
+        """Setter for Batch data"""
+        self._data = value
 
     @property
     def batch_request(self):
