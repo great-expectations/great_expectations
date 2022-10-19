@@ -116,6 +116,9 @@ def get_expectation_file_info_dict(
 
     for file_path in sorted(files_found):
         file_path = file_path.replace(f"{repo_path}{os.path.sep}", "")
+        package_name = os.path.basename(os.path.dirname(os.path.dirname(file_path)))
+        if package_name == "expectations":
+            package_name = "core"
         name = os.path.basename(file_path).replace(".py", "")
         if only_these_expectations and name not in only_these_expectations:
             continue
@@ -132,9 +135,10 @@ def get_expectation_file_info_dict(
             .decode("utf-8")
             .strip(),
             "path": file_path,
+            "package": package_name,
         }
         logger.debug(
-            f"{name} was created {result[name]['created_at']} and updated {result[name]['updated_at']}"
+            f"{name} ({package_name}) was created {result[name]['created_at']} and updated {result[name]['updated_at']}"
         )
         with open(file_path) as fp:
             text = fp.read()
@@ -371,6 +375,9 @@ def build_gallery(
                 gallery_info[expectation]["updated_at"] = expectation_file_info[
                     expectation
                 ]["updated_at"]
+                gallery_info[expectation]["package"] = expectation_file_info[
+                    expectation
+                ]["package"]
                 gallery_info[expectation]["exp_type"] = expectation_file_info[
                     expectation
                 ].get("exp_type")
