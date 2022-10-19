@@ -35,6 +35,9 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 
 yaml = YAMLHandler()
 
@@ -67,7 +70,7 @@ def data_context_config_dict() -> dict:
         "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
             enabled=True,
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
-            usage_statistics_url="https://api.greatexpectations.io/",
+            usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
         "notebooks": None,
         "concurrency": None,

@@ -47,6 +47,8 @@ class CloudDataContext(AbstractDataContext):
     Subclass of AbstractDataContext that contains functionality necessary to hydrate state from cloud
     """
 
+    DEFAULT_BASE_URL = "https://api.greatexpectations.io/"
+
     def __init__(
         self,
         project_config: Optional[Union[DataContextConfig, Mapping]] = None,
@@ -244,7 +246,7 @@ class CloudDataContext(AbstractDataContext):
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
             )
-            or "https://api.greatexpectations.io/"
+            or DEFAULT_BASE_URL
         )
         ge_cloud_organization_id = (
             ge_cloud_organization_id

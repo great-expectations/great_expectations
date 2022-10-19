@@ -16,6 +16,9 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
     GeCloudStoreBackend,
@@ -30,7 +33,7 @@ def construct_ge_cloud_store_backend(
     ge_cloud_access_token: str,
 ) -> Callable[[GeCloudRESTResource], GeCloudStoreBackend]:
     def _closure(resource_type: GeCloudRESTResource) -> GeCloudStoreBackend:
-        ge_cloud_base_url = "https://api.greatexpectations.io/"
+        ge_cloud_base_url = CloudDataContext.DEFAULT_BASE_URL
         ge_cloud_credentials = {
             "access_token": ge_cloud_access_token,
             "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
@@ -197,7 +200,7 @@ def test_construct_json_payload(
             organization_id=organization_id,
             attributes_key=attributes_key,
             attributes_value=attributes_value,
-            **kwargs
+            **kwargs,
         )
         == expected
     )
@@ -227,7 +230,7 @@ def test_set(
         store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
             mock.ANY,  # requests.Session object
-            "https://api.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            f"{CloudDataContext.DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
             json={
                 "data": {
                     "type": "checkpoint",
@@ -271,7 +274,7 @@ def test_list_keys(
         store_backend.list_keys()
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
-            "https://api.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            f"{CloudDataContext.DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
         )
 
 
@@ -296,7 +299,7 @@ def test_remove_key(
         )
         mock_delete.assert_called_with(
             mock.ANY,  # requests.Session object
-            "https://api.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
+            f"{CloudDataContext.DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
             json={
@@ -403,7 +406,7 @@ def test_config_property_and_defaults(
     assert store_backend.config == {
         "class_name": "GeCloudStoreBackend",
         "fixed_length_key": True,
-        "ge_cloud_base_url": "https://api.greatexpectations.io/",
+        "ge_cloud_base_url": CloudDataContext.DEFAULT_BASE_URL,
         "ge_cloud_resource_type": GeCloudRESTResource.CHECKPOINT,
         "manually_initialize_store_backend_id": "",
         "module_name": "great_expectations.data_context.store.ge_cloud_store_backend",

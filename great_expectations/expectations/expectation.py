@@ -1863,19 +1863,6 @@ class TableExpectation(Expectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-        # Only test for min <= max if both values are numeric. If either is a dictionary,
-        # (for example because it is set as an evaluation parameter), skip it.
-        if (
-            isinstance(min_val, (float, int))
-            and isinstance(max_val, (float, int))
-            and min_val > max_val
-        ):
-            raise InvalidExpectationConfigurationError(
-                "Minimum Threshold cannot be larger than Maximum Threshold"
-            )
-
-        return True
-
     def _validate_metric_value_between(
         self,
         metric_name,
