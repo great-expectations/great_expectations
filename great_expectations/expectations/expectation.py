@@ -789,7 +789,7 @@ class Expectation(metaclass=MetaExpectation):
         return cls._get_observed_value_from_evr(result=result)
 
     @classmethod
-    def get_allowed_config_keys(cls) -> Tuple[str]:
+    def get_allowed_config_keys(cls) -> Union[Tuple[str, ...], Tuple[str]]:
         key_list: Union[list, List[str]] = []
         if len(cls.domain_keys) > 0:
             key_list.extend(list(cls.domain_keys))
@@ -797,7 +797,7 @@ class Expectation(metaclass=MetaExpectation):
             key_list.extend(list(cls.success_keys))
         if len(cls.runtime_keys) > 0:
             key_list.extend(list(cls.runtime_keys))
-        return tuple(key_list)
+        return tuple(str(key) for key in key_list)
 
     def metrics_validate(
         self,
@@ -1620,7 +1620,7 @@ class Expectation(metaclass=MetaExpectation):
 
         supported_renderers = self._get_registered_renderers(
             expectation_type=expectation_type,
-            registered_renderers=registered_renderers,
+            registered_renderers=registered_renderers,  # type: ignore[arg-type]
         )
 
         renderer_diagnostic_list = []
@@ -1934,13 +1934,13 @@ class TableExpectation(Expectation, ABC):
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        min_value: Optional[Union[Number, datetime.datetime]] = self.get_success_kwargs(
+        min_value: Optional[Any] = self.get_success_kwargs(
             configuration=configuration
         ).get("min_value")
         strict_min: Optional[bool] = self.get_success_kwargs(
             configuration=configuration
         ).get("strict_min")
-        max_value: Optional[Union[Number, datetime.datetime]] = self.get_success_kwargs(
+        max_value: Optional[Any] = self.get_success_kwargs(
             configuration=configuration
         ).get("max_value")
         strict_max: Optional[bool] = self.get_success_kwargs(
