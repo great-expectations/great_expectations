@@ -1139,7 +1139,7 @@ def test_validator_progress_bar_config_enabled(mock_tqdm, mock_metric_configurat
 
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
     with mock.patch(
-        "great_expectations.validator.validation_graph.ValidationGraph.parse",
+        "great_expectations.validator.validation_graph.ValidationGraph._parse",
         return_value=(
             {},
             {},
@@ -1179,7 +1179,7 @@ def test_validator_progress_bar_config_disabled(
 
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
     with mock.patch(
-        "great_expectations.validator.validation_graph.ValidationGraph.parse",
+        "great_expectations.validator.validation_graph.ValidationGraph._parse",
         return_value=(
             {},
             {},
