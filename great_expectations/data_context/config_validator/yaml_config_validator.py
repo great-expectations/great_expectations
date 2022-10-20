@@ -15,6 +15,7 @@ import os
 import traceback
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
+from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
@@ -25,7 +26,6 @@ from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer 
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message_from_handler,
 )
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import Store
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -50,7 +50,10 @@ except ImportError:
     # Fallback for python < 3.8
     from typing_extensions import Literal  # type: ignore[misc]
 
-yaml = YAMLHandler()
+# TODO: check if this can be refactored to use YAMLHandler class
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 class YamlConfigValidator:
