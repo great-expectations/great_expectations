@@ -534,7 +534,7 @@ def validate_pandas_datasource_configuration_inferred_multi_batch_snippets():
                     # <snippet name="datasource_configuration_inferred_multi_batch_regex_pattern">
                     "pattern": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv",
                     # </snippet>
-                    # <snippet name="">
+                    # <snippet name="group_names for inferred multi batch default_regex key">
                     "group_names": ["data_asset_name", "month"],
                     # </snippet>
                 }
@@ -546,7 +546,7 @@ def validate_pandas_datasource_configuration_inferred_multi_batch_snippets():
     # Snippet: full data connector config for inferred Data Connector multi batch
     datasource_config = {
         "data_connectors": {
-            # <snippet name="data_connector_configuration_post_inferred_multi_batch_regex">
+            # <snippet name="data connector config for inferred filesystem data connector multi batch">
             "name_of_my_inferred_data_connector": {
                 "class_name": "InferredAssetFilesystemDataConnector",
                 "base_directory": "../data",
@@ -909,7 +909,7 @@ def validate_pandas_datsource_configuration_runtime_snippets():
     datasource_config: dict = {
         "data_connectors": {
             "name_of_my_runtime_data_connector": {
-                # <snippet name="batch_identifiers for pandas runtime data connector">
+                # <snippet name="batch_identifiers for filesystem runtime data connector">
                 "batch_identifiers": ["batch_timestamp"]
                 # </snippet>
             }
