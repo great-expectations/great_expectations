@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import glob
 import logging
 import os
@@ -25,7 +27,7 @@ class DocusaurusRef:
     @classmethod
     def from_regex_parsed_values(
         cls, file: str, values: Tuple[str, str, str]
-    ) -> "DocusaurusRef":
+    ) -> DocusaurusRef:
         path, start, end = values
 
         start_line: int = int(start)

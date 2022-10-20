@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 from typing import Any, Dict, List, Optional, Type, Union
@@ -575,7 +577,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         profiler: "RuleBasedProfiler",  # noqa: F821
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-    ) -> "RuleBasedProfilerConfig":  # noqa: F821
+    ) -> RuleBasedProfilerConfig:
         """Reconciles variables/rules by taking into account runtime overrides and variable substitution.
 
         Utilized in usage statistics to interact with the args provided in `RuleBasedProfiler.run()`.
