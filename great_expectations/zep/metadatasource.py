@@ -65,8 +65,7 @@ class _SourceFactories:
             raise AttributeError(name)
 
     def __dir__(self) -> List[str]:
-        return ["register_factory",  "factories", *self.factories]
-
+        return ["register_factory", "factories", *self.factories]
 
 
 class MetaDatasouce(type):
@@ -90,24 +89,24 @@ class MetaDatasouce(type):
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
 
 
-class FileAsset:
-    pass
+# class FileAsset:
+#     pass
 
 
-class PandasDatasource(metaclass=MetaDatasouce):
+# class PandasDatasource(metaclass=MetaDatasouce):
 
-    asset_types = [FileAsset]
+#     asset_types = [FileAsset]
 
-    def __init__(self, name: str):
-        self.name = name
+#     def __init__(self, name: str):
+#         self.name = name
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}(name='{self.name}')"
+#     def __repr__(self):
+#         return f"{self.__class__.__name__}(name='{self.name}')"
 
-    def add_csv(self, foo="foo", bar="bar", sep=","):
-        """I'm a docstring!!"""
-        # NOTE: should this return the datasource or the csv asset?
-        return self
+#     def add_csv(self, foo="foo", bar="bar", sep=","):
+#         """I'm a docstring!!"""
+#         # NOTE: should this return the datasource or the csv asset?
+#         return self
 
 
 # class TableAsset:
@@ -149,5 +148,5 @@ def get_context() -> DataContext:
 
 if __name__ == "__main__":
     context = get_context()
-    context.sources.add_pandas("taxi")
+    # context.sources.add_pandas("taxi")
     # context.sources.add_postgres("taxi2", connection_str="postgres://...")
