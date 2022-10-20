@@ -24,7 +24,6 @@ title: Changelog
 * [MAINTENANCE] Use `from __future__ import annotations` to clean up type hints (#6127)
 * [MAINTENANCE] Make sure that quick stage check returns 0 if there are no problems (#6177)
 * [MAINTENANCE] Remove SQL for expect_column_discrete_entropy_to_be_between (#6180)
-* [MAINTENANCE] Add unit test for MetricsCalculator.get_metric() Method -- as an example template (#6179)
 
 ### 0.15.27
 * [FEATURE] Add logging/warnings to GX Cloud migration process (#6106)
