@@ -120,6 +120,13 @@ class MetaDatasouce(type):
 
 
 class DataContext:
+    """
+    NOTE: this is just a scaffold for exploring and iterating on our ZEP prototype
+    this will be formalized and tested prior to release.
+
+    Use `great_expectations.get_context()` for a real DataContext.
+    """
+
     _context = None
 
     @classmethod
