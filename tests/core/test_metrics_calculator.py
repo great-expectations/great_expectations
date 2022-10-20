@@ -141,25 +141,18 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result(
     """
     metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
     metric_name = "my_metric_name"
-    metric_domain_kwargs: dict = {}
+    metric_value = "my_metric_value"
     with mock.patch(
-        "great_expectations.validator.metric_configuration.MetricConfiguration.metric_name",
-        new_callable=mock.PropertyMock,
-        return_value=metric_name,
-    ), mock.patch(
-        "great_expectations.validator.metric_configuration.MetricConfiguration.metric_domain_kwargs",
-        new_callable=mock.PropertyMock,
-        return_value=IDDict(metric_domain_kwargs),
-    ), mock.patch(
         "great_expectations.validator.metrics_calculator.MetricsCalculator.get_metrics",
-        return_value={metric_name: "my_metric_value"},
+        return_value={metric_name: metric_value},
     ) as mock_get_metrics_method:
-        metric_configuration = MetricConfiguration(
-            metric_name=metric_name,
-            metric_domain_kwargs=metric_domain_kwargs,
+        # create a fake configuration
+        metric_configuration = MetricConfiguration(metric_name=metric_name)
+        resolved_metric_value = metrics_calculator.get_metric(
+            metric=metric_configuration
         )
-        metric_value: Any = metrics_calculator.get_metric(metric=metric_configuration)
+
         mock_get_metrics_method.assert_called_once_with(
             metrics={metric_name: metric_configuration}
         )
-        assert metric_value == mock_get_metrics_method()[metric_name]
+        assert resolved_metric_value == metric_value
