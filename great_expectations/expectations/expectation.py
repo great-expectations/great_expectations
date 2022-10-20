@@ -225,9 +225,9 @@ class Expectation(metaclass=MetaExpectation):
     """
 
     version = ge_version
-    domain_keys = ()
-    success_keys = ()
-    runtime_keys = (
+    domain_keys: Union[tuple, Tuple[str]] = ()
+    success_keys: Union[tuple, Tuple[str]] = ()
+    runtime_keys: Union[tuple, Tuple[str]] = (
         "include_config",
         "catch_exceptions",
         "result_format",
@@ -1003,7 +1003,7 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     def build_configuration(cls, *args, **kwargs: dict) -> ExpectationConfiguration:
         # Combine all arguments into a single new "all_args" dictionary to name positional parameters
-        all_args = dict(zip(cls.validation_kwargs, args))
+        all_args = dict(zip(cls.validation_kwargs, args))  # type: ignore[attr-defined]
         all_args.update(kwargs)
 
         # Unpack display parameters; remove them from all_args if appropriate
@@ -1165,7 +1165,7 @@ class Expectation(metaclass=MetaExpectation):
             _num_backends + _num_engines + _total_passed - (1.5 * _total_failed)
         )
         _debug(
-            f"coverage_score: {coverage_score} for {self.expectation_type} ... "
+            f"coverage_score: {coverage_score} for {self.expectation_type} ... "  # type: ignore[attr-defined]
             f"engines: {_num_engines}, backends: {_num_backends}, "
             f"passing tests: {_total_passed}, failing tests:{_total_failed}"
         )
@@ -1257,7 +1257,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         try:
             # Currently, only community contrib expectations have an examples attribute
-            all_examples = self.examples
+            all_examples = self.examples  # type: ignore[attr-defined]
         except AttributeError:
             all_examples = self._get_examples_from_json()
             if all_examples == []:
@@ -1353,7 +1353,7 @@ class Expectation(metaclass=MetaExpectation):
                     for test in tests:
                         if test.output.get("success"):
                             return ExpectationConfiguration(
-                                expectation_type=self.expectation_type,
+                                expectation_type=self.expectation_type,  # type: ignore[attr-defined]
                                 kwargs=test.input,
                             )
 
@@ -1364,7 +1364,7 @@ class Expectation(metaclass=MetaExpectation):
                     for test in tests:
                         if test.input:
                             return ExpectationConfiguration(
-                                expectation_type=self.expectation_type,
+                                expectation_type=self.expectation_type,  # type: ignore[attr-defined]
                                 kwargs=test.input,
                             )
         return None
@@ -1387,7 +1387,7 @@ class Expectation(metaclass=MetaExpectation):
                 f"Expectation {name} was not found in the list of registered Expectations. "
                 f"Please check your configuration and try again"
             )
-        if "auto" in expectation_impl.default_kwarg_values:
+        if "auto" in expectation_impl.default_kwarg_values:  # type: ignore[attr-defined]
             print(
                 f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
             )
