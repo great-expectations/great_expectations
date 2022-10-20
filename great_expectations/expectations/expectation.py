@@ -1878,11 +1878,17 @@ class TableExpectation(Expectation, ABC):
 
     @staticmethod
     def validate_metric_value_between_configuration(
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration],
     ) -> bool:
         # Validating that Minimum and Maximum values are of the proper format and type
-        min_val: Optional[Number] = configuration.kwargs.get("min_value")
-        max_val: Optional[Number] = configuration.kwargs.get("min_value")
+        min_val = None
+        max_val = None
+
+        if "min_value" in configuration.kwargs:
+            min_val = configuration.kwargs["min_value"]
+
+        if "max_value" in configuration.kwargs:
+            max_val = configuration.kwargs["max_value"]
 
         try:
             assert (
@@ -1924,13 +1930,13 @@ class TableExpectation(Expectation, ABC):
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        min_value: Optional[Any] = self.get_success_kwargs(
+        min_value: Optional[Union[Number, datetime.datetime]] = self.get_success_kwargs(
             configuration=configuration
         ).get("min_value")
         strict_min: Optional[bool] = self.get_success_kwargs(
             configuration=configuration
         ).get("strict_min")
-        max_value: Optional[Any] = self.get_success_kwargs(
+        max_value: Optional[Union[Number, datetime.datetime]] = self.get_success_kwargs(
             configuration=configuration
         ).get("max_value")
         strict_max: Optional[bool] = self.get_success_kwargs(
@@ -1966,7 +1972,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
 
-        if isinstance(metric_value, (datetime.datetime, int, float)):
+        if isinstance(metric_value, datetime.datetime):
             if isinstance(min_value, str):
                 try:
                     min_value = parse(min_value)
@@ -2759,6 +2765,9 @@ def _format_map_output(
 
     This function handles the logic for mapping those fields for column_map_expectations.
     """
+    if element_count is None:
+        element_count = 0
+
     # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
     # Incrementally add to result and return when all values for the specified level are present
     return_obj: Dict[str, Any] = {"success": success}
@@ -2770,13 +2779,13 @@ def _format_map_output(
     missing_count: Optional[int] = None
     if nonnull_count is None:
         skip_missing = True
-    elif element_count is not None and nonnull_count is not None:
+    else:
         missing_count = element_count - nonnull_count
 
     missing_percent: Optional[float] = None
     unexpected_percent_total: Optional[float] = None
     unexpected_percent_nonmissing: Optional[float] = None
-    if unexpected_count is not None and element_count is not None and element_count > 0:
+    if unexpected_count is not None and element_count > 0:
         unexpected_percent_total = unexpected_count / element_count * 100
 
         if not skip_missing and missing_count is not None:
