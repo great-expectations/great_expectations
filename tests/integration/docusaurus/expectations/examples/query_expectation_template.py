@@ -108,10 +108,10 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
             "@your_name_here",  # Don't forget to add your github handle here!
         ],
     }
-    # </snippet
+    # </snippet>
 
 
 if __name__ == "__main__":
     # <snippet>
     ExpectQueryToMatchSomeCriteria().print_diagnostic_checklist()
-    # </snippet
+    # </snippet>
