@@ -141,6 +141,9 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result(
         1) MetricsCalculator.get_metric() calls MetricsCalculator.get_metrics() exactly once for specific "metric_name";
         2) MetricsCalculator.get_metric() correctly retrieves result from dictionary, returned by
            MetricsCalculator.get_metrics() by using the specific "metric_name", mentioned above, as the key.
+
+    Note that the usage of "MagicMock" is purposefully aimed at focusing precisely on the functionality under test
+    (i.e., avoiding "test leakage" by mocking all but the essential methods and properties involved in the test).
     """
     metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
     metric_name = "my_metric_name"
