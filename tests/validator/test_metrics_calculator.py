@@ -149,10 +149,6 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result(
     actual_metric_value = "my_metric_value"
     metric_domain_kwargs: dict = {}
     with mock.patch(
-        "great_expectations.validator.metric_configuration.MetricConfiguration.metric_name",
-        new_callable=mock.PropertyMock,
-        return_value=metric_name,
-    ), mock.patch(
         "great_expectations.validator.metrics_calculator.MetricsCalculator.get_metrics",
         return_value={metric_name: actual_metric_value},
     ) as mock_get_metrics_method:
