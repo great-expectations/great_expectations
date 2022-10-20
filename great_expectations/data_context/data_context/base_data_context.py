@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import logging
 import os
@@ -416,7 +418,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
-    ) -> "ValidationOperator":
+    ) -> ValidationOperator:
         """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
 
         Args:

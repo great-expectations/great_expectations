@@ -56,7 +56,6 @@ variables:
   isRelease: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/')]
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
-  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
   - stage: lint
@@ -144,6 +143,7 @@ stages:
               python.version: '3.9'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+          GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
         steps:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
@@ -151,7 +151,8 @@ stages:
               # prune it's depth since we don't need the git history.
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
-              CMD+=" --build-arg SOURCE=github --build-arg BRANCH=develop ."
+              CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
+              CMD+="--build-arg SOURCE=github --build-arg BRANCH=develop ."
               echo ${CMD}
               eval ${CMD}
             displayName: 'Build python $(python.version) image'

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Tuple, Union
 
@@ -21,7 +23,7 @@ class DataContextKey(metaclass=ABCMeta):
         raise NotImplementedError
 
     @classmethod
-    def from_fixed_length_tuple(cls, tuple_) -> "DataContextKey":
+    def from_fixed_length_tuple(cls, tuple_) -> DataContextKey:
         raise NotImplementedError
 
     def __eq__(self, other):
@@ -101,9 +103,7 @@ class DataContextVariableKey(DataContextKey):
         return self.to_tuple()
 
     @classmethod
-    def from_fixed_length_tuple(
-        cls, tuple_: tuple
-    ) -> "DataContextVariableKey":  # noqa: F821
+    def from_fixed_length_tuple(cls, tuple_: tuple) -> DataContextVariableKey:
         """
         See parent `DataContextKey.from_fixed_length_tuple` for more information.
         """
