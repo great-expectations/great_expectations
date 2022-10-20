@@ -64,6 +64,10 @@ class _SourceFactories:
         except KeyError:
             raise AttributeError(name)
 
+    def __dir__(self) -> List[str]:
+        return ["register_factory",  "factories", *self.factories]
+
+
 
 class MetaDatasouce(type):
     def __new__(meta_cls, cls_name, bases, cls_dict) -> MetaDatasouce:
