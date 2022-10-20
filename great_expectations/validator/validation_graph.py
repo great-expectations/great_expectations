@@ -1,6 +1,6 @@
 import logging
 import traceback
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 from tqdm.auto import tqdm
 
@@ -169,9 +169,9 @@ class ValidationGraph:
                     computable_metrics.add(metric)
 
             try:
+                # Access "ExecutionEngine.resolve_metrics()" method, to resolve missing "MetricConfiguration" objects.
                 metrics.update(
-                    self._resolve_metrics(
-                        execution_engine=execution_engine,
+                    execution_engine.resolve_metrics(
                         metrics_to_resolve=computable_metrics,
                         metrics=metrics,
                         runtime_configuration=runtime_configuration,
@@ -243,21 +243,6 @@ class ValidationGraph:
                         unmet_dependency.add(edge.left)
 
         return maybe_ready - unmet_dependency, unmet_dependency
-
-    @staticmethod
-    def _resolve_metrics(
-        execution_engine: ExecutionEngine,
-        metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict[Tuple[str, str, str], Any] = None,
-        runtime_configuration: dict = None,
-    ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
-        """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
-        resolved"""
-        return execution_engine.resolve_metrics(
-            metrics_to_resolve=metrics_to_resolve,
-            metrics=metrics,
-            runtime_configuration=runtime_configuration,
-        )
 
 
 class ExpectationValidationGraph:
