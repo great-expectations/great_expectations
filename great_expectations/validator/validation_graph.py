@@ -265,6 +265,14 @@ class ExpectationValidationGraph:
         self._configuration = configuration
         self._graph = ValidationGraph()
 
+    @property
+    def configuration(self) -> ExpectationConfiguration:
+        return self._configuration
+
+    @property
+    def graph(self) -> ValidationGraph:
+        return self._graph
+
     def update(self, graph: ValidationGraph) -> None:
         edge: MetricEdge
         for edge in graph.edges:
@@ -314,11 +322,3 @@ class ExpectationValidationGraph:
             for metric_id, metric_info_item in metric_info.items()
             if metric_id in graph_metric_ids
         }
-
-    @property
-    def configuration(self) -> ExpectationConfiguration:
-        return self._configuration
-
-    @property
-    def graph(self) -> ValidationGraph:
-        return self._graph
