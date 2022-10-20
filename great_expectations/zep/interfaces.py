@@ -8,6 +8,7 @@ from great_expectations.execution_engine import ExecutionEngine
 
 class Datasource(Protocol):
     execution_engine: ExecutionEngine
+    asset_types: List[type]
 
     def get_batch_list_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
