@@ -54,26 +54,26 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
         column_value_counts = column.value_counts()
         return scipy.stats.entropy(column_value_counts, base=base)
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
-    def _sqlalchemy(
-        cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
-        runtime_configuration: Dict,
-    ):
-        (
-            selectable,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
-        base = metric_value_kwargs["base"]
+    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    # def _sqlalchemy(
+    #     cls,
+    #     execution_engine: "SqlAlchemyExecutionEngine",
+    #     metric_domain_kwargs: Dict,
+    #     metric_value_kwargs: Dict,
+    #     metrics: Dict[Tuple, Any],
+    #     runtime_configuration: Dict,
+    # ):
+    #     (
+    #         selectable,
+    #         compute_domain_kwargs,
+    #         accessor_domain_kwargs,
+    #     ) = execution_engine.get_compute_domain(
+    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
+    #     )
+    #     base = metric_value_kwargs["base"]
 
-        column_value_counts = metrics.get("column.value_counts")
-        return scipy.stats.entropy(column_value_counts, base=base)
+    #     column_value_counts = metrics.get("column.value_counts")
+    #     return scipy.stats.entropy(column_value_counts, base=base)
 
     @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     def _spark(
