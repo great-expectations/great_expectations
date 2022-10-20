@@ -407,19 +407,20 @@ class MetaSqlAlchemyDataset(Dataset):
         """
 
         argspec = inspect.getfullargspec(func)[0][
-                  1:]  # Get the names and default values of a Python function’s parameters.
+            1:
+        ]  # Get the names and default values of a Python function’s parameters.
 
         @cls.expectation(argspec)  # found in data_asset.py
         @wraps(func)
         def inner_wrapper(
-                self,
-                column_A,
-                column_B,
-                mostly=None,
-                ignore_row_if="both_values_are_missing",
-                result_format=None,
-                *args,
-                **kwargs
+            self,
+            column_A,
+            column_B,
+            mostly=None,
+            ignore_row_if="both_values_are_missing",
+            result_format=None,
+            *args,
+            **kwargs,
         ):
 
             if self.batch_kwargs.get("use_quoted_name"):
@@ -441,14 +442,20 @@ class MetaSqlAlchemyDataset(Dataset):
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
             # return the expected condition which is used as a filter?
-            expected_condition: BinaryExpression = func(self, column_A, column_B, *args, **kwargs)
+            expected_condition: BinaryExpression = func(
+                self, column_A, column_B, *args, **kwargs
+            )
 
             ignore_values_condition: BinaryExpression
 
             if ignore_row_if == "both_values_are_missing":
-                ignore_values_condition = sa.and_(sa.column(column_A).is_(None), sa.column(column_B).is_(None))
+                ignore_values_condition = sa.and_(
+                    sa.column(column_A).is_(None), sa.column(column_B).is_(None)
+                )
             elif ignore_row_if == "either_value_is_missing":
-                ignore_values_condition = sa.or_(sa.column(column_A).is_(None), sa.column(column_B).is_(None))
+                ignore_values_condition = sa.or_(
+                    sa.column(column_A).is_(None), sa.column(column_B).is_(None)
+                )
             elif ignore_row_if == "never":
                 ignore_values_condition = BinaryExpression(
                     sa.literal(False), sa.literal(True), custom_op("=")
@@ -460,32 +467,41 @@ class MetaSqlAlchemyDataset(Dataset):
                 [
                     sa.func.sum(
                         sa.case(
-                            [(
-                                sa.or_(
-                                    sa.column(column_A) != (None),
-                                    sa.column(column_A) == (None)
-                                ),
-                                1,
-                            )],
+                            [
+                                (
+                                    sa.or_(
+                                        sa.column(column_A) != (None),
+                                        sa.column(column_A) == (None),
+                                    ),
+                                    1,
+                                )
+                            ],
                             else_=0,
                         )
                     ).label("column_A_count"),
                     sa.func.sum(
                         sa.case(
-                            [(
-                                sa.or_(
-                                    sa.column(column_B) != (None),
-                                    sa.column(column_B) == (None)
-                                ),
-                                1,
-                            )],
+                            [
+                                (
+                                    sa.or_(
+                                        sa.column(column_B) != (None),
+                                        sa.column(column_B) == (None),
+                                    ),
+                                    1,
+                                )
+                            ],
                             else_=0,
                         )
-                    ).label("column_B_count")
+                    ).label("column_B_count"),
                 ]
             ).select_from(self._table)
-            count_value_query_results = dict(self.engine.execute(count_value_query).fetchone())
-            assert count_value_query_results['column_A_count'] == count_value_query_results['column_B_count']
+            count_value_query_results = dict(
+                self.engine.execute(count_value_query).fetchone()
+            )
+            assert (
+                count_value_query_results["column_A_count"]
+                == count_value_query_results["column_B_count"]
+            )
 
             """
             COUNT VALUES IN QUERY
@@ -505,13 +521,19 @@ class MetaSqlAlchemyDataset(Dataset):
             count_results: dict = dict(self.engine.execute(count_query).fetchone())
 
             # Handle case of empty table gracefully:
-            if ("element_count" not in count_results or count_results["element_count"] is None):
+            if (
+                "element_count" not in count_results
+                or count_results["element_count"] is None
+            ):
                 count_results["element_count"] = 0
 
             if "null_count" not in count_results or count_results["null_count"] is None:
                 count_results["null_count"] = 0
 
-            if ("unexpected_count" not in count_results or count_results["unexpected_count"] is None):
+            if (
+                "unexpected_count" not in count_results
+                or count_results["unexpected_count"] is None
+            ):
                 count_results["unexpected_count"] = 0
 
             # Some engines may return Decimal from count queries (lookin' at you MSSQL)
@@ -557,7 +579,7 @@ class MetaSqlAlchemyDataset(Dataset):
             unexpected_query_results = self.engine.execute(query)
 
             nonnull_count: int = (
-                    count_results["element_count"] - count_results["null_count"]
+                count_results["element_count"] - count_results["null_count"]
             )
             maybe_limited_unexpected_list = []
             for x in unexpected_query_results.fetchall():
@@ -2283,16 +2305,16 @@ WHERE
 
     @MetaSqlAlchemyDataset.column_pair_map_expectation
     def expect_column_pair_values_to_be_in_set(
-            self,
-            column_A,
-            column_B,
-            value_pairs_set,
-            mostly=None,
-            parse_strings_as_datetimes=None,
-            result_format=None,
-            include_config=True,
-            catch_exceptions=None,
-            meta=None,
+        self,
+        column_A,
+        column_B,
+        value_pairs_set,
+        mostly=None,
+        parse_strings_as_datetimes=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
     ):
         if value_pairs_set is None:
             # vacuously true
@@ -2306,10 +2328,19 @@ WHERE
         if len(parsed_value_set) == 0:
             return False
 
-        conditions: List[BinaryExpression] = [sa.and_(
-            sa.and_(sa.column(column_A) == value[0], (sa.column(column_A) == value[0]).is_not(None)),
-            sa.and_(sa.column(column_B) == value[1], (sa.column(column_B) == value[1]).is_not(None))
-        ) for value in parsed_value_set]
+        conditions: List[BinaryExpression] = [
+            sa.and_(
+                sa.and_(
+                    sa.column(column_A) == value[0],
+                    (sa.column(column_A) == value[0]).is_not(None),
+                ),
+                sa.and_(
+                    sa.column(column_B) == value[1],
+                    (sa.column(column_B) == value[1]).is_not(None),
+                ),
+            )
+            for value in parsed_value_set
+        ]
         return sa.or_(*conditions)
 
     def _get_dialect_regex_expression(self, column, regex, positive=True):
