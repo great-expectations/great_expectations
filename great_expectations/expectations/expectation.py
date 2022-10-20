@@ -1878,8 +1878,11 @@ class TableExpectation(Expectation, ABC):
 
     @staticmethod
     def validate_metric_value_between_configuration(
-        configuration: Optional[ExpectationConfiguration],
+        configuration: Optional[ExpectationConfiguration] = None,
     ) -> bool:
+        if configuration is None:
+            return True
+
         # Validating that Minimum and Maximum values are of the proper format and type
         min_val = None
         max_val = None
