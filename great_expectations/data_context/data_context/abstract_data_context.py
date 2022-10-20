@@ -912,10 +912,12 @@ class AbstractDataContext(ABC):
                     batch_request_list is not None,
                 ]
             )
-            > 1
+            != 1
         ):
             raise ValueError(
-                "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"
+                "Exactly one of batch, batch_list, batch_request, or batch_request_list can be specified: "
+                f"batch = {batch}, batch_list = {batch_list}, batch_request = {batch_request}, "
+                f"batch_request_list = {batch_request_list}"
             )
 
         if batch_list:
@@ -955,13 +957,28 @@ class AbstractDataContext(ABC):
                     )
                 )
 
-        return self.get_validator_using_batch_list(
+        # For ZEP datasources, we are trying to simplify our datatypes and we don't currently have `batch_definitions`
+        # defined on a `Batch`. Because of this, we grab the execution engine using a batch_request object.
+        execution_engine: ExecutionEngine
+        if batch_request_list:
+            # either batch_request or batch_request_list was passed in. We previously have made a batch_request_list if
+            # necessary.
+            execution_engine = self.datasources[  # type: ignore[union-attr]
+                batch_request_list[-1][datasource_name]
+            ].execution_engine
+        else:
+            # either batch or batch_list was passed in. We previously have created a batch_list from batch if necessary.
+            execution_engine = self.datasources[  # type: ignore[union-attr]
+                batch_list[-1].batch_definition.datasource_name
+            ].execution_engine
+
+        return self._get_validator_using_batch_list(
             expectation_suite=expectation_suite,  # type: ignore[arg-type]
             batch_list=batch_list,  # type: ignore[arg-type]
+            execution_engine=execution_engine,
             include_rendered_content=include_rendered_content,
         )
 
-    # noinspection PyUnusedLocal
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
@@ -980,6 +997,27 @@ class AbstractDataContext(ABC):
         Returns:
 
         """
+        batch_definition: BatchDefinition = batch_list[-1].batch_definition
+        execution_engine: ExecutionEngine = self.datasources[  # type: ignore[union-attr]
+            batch_definition.datasource_name
+        ].execution_engine
+        return self._get_validator_using_batch_list(
+            expectation_suite=expectation_suite,
+            batch_list=batch_list,
+            execution_engine=execution_engine,
+            include_rendered_content=include_rendered_content,
+            **kwargs,
+        )
+
+    # noinspection PyUnusedLocal
+    def _get_validator_using_batch_list(
+        self,
+        expectation_suite: ExpectationSuite,
+        batch_list: List[Batch],
+        execution_engine: ExecutionEngine,
+        include_rendered_content: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> Validator:
         if len(batch_list) == 0:
             raise ge_exceptions.InvalidBatchRequestError(
                 """Validator could not be created because BatchRequest returned an empty batch_list.
@@ -991,12 +1029,6 @@ class AbstractDataContext(ABC):
                 include_rendered_content=include_rendered_content
             )
         )
-        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
-        # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        batch_definition: BatchDefinition = batch_list[-1].batch_definition
-        execution_engine: ExecutionEngine = self.datasources[  # type: ignore[union-attr]
-            batch_definition.datasource_name
-        ].execution_engine
         validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
