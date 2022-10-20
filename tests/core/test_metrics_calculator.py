@@ -154,6 +154,4 @@ def test_get_metric(execution_engine: mock.MagicMock):
         mock_get_metrics_method.assert_called_once_with(
             metrics={metric_name: metric_configuration}
         )
-        assert (
-            metric_value == mock_get_metrics_method()[metric_configuration.metric_name]
-        )
+        assert metric_value == mock_get_metrics_method()[metric_name]
