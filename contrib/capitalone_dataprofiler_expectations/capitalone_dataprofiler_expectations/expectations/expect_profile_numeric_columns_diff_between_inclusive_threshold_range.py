@@ -140,6 +140,7 @@ class DataProfilerProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
         return dependencies
 
 
+# TODO: <Alex>ALEX -- Note: I corrected a typographical error in the expectation name (it was missing the syllable "inclusive").  Similar errors may be present in other Expectation implementation modules in this directory.</Alex>
 class ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
     ProfileNumericColumnsDiffExpectation
 ):
@@ -154,7 +155,7 @@ class ExpectProfileNumericColumnsDiffBetweenInclusiveThresholdRange(
         limit_check_report_keys (dict): A dict, containing column names as keys and dicts as values that contain statistics as keys and dicts as values containing two keys:
                                         "lower" denoting the lower bound for the threshold range, and "upper" denoting the upper bound for the threshold range.
         mostly (float - optional): a value indicating the lower bound percentage of successful values that must be present to evaluate to success=True.
-    validator.expect_profile_numerical_columns_diff_between_threshold_range(
+    validator.expect_profile_numeric_columns_diff_between_inclusive_threshold_range(
         profile_path = "C:/path_to/my_profile.pkl",
         limit_check_report_keys = {
             "column_one": {

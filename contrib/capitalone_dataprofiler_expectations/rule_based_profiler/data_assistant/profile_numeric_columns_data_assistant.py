@@ -88,7 +88,7 @@ class ProfileNumericColumnsDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every metric of interest.
 
-        data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
+        data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_single_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
             metric_name="data_profiler.profile_numeric_columns_diff_between_inclusive_threshold_range",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
@@ -96,7 +96,7 @@ class ProfileNumericColumnsDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_multi_batch_parameter_builder_for_validations: ParameterBuilder = data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_multi_batch_parameter_builder_for_metrics
+        data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_single_batch_parameter_builder_for_validations: ParameterBuilder = data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_single_batch_parameter_builder_for_metrics
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
 
@@ -104,16 +104,17 @@ class ProfileNumericColumnsDataAssistant(DataAssistant):
 
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
-                **data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_multi_batch_parameter_builder_for_validations.to_json_dict(),
+                **data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_single_batch_parameter_builder_for_validations.to_json_dict(),
             ),
         ]
-        expect_profile_numerical_columns_diff_between_threshold_range_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_profile_numerical_columns_diff_between_threshold_range",
+        expect_profile_numeric_columns_diff_between_inclusive_threshold_range_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+            expectation_type="expect_profile_numeric_columns_diff_between_inclusive_threshold_range",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             profile_path=f"{VARIABLES_KEY}profile_path",
-            limit_check_report_keys=f"{data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+            limit_check_report_keys=f"{data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_single_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+            # TODO: <Alex>ALEX -- We still need to figure out how to handle the "*" argument.</Alex>
             meta={
-                "profiler_details": f"{data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                "profiler_details": f"{data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_single_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
             },
         )
         # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
@@ -122,10 +123,10 @@ class ProfileNumericColumnsDataAssistant(DataAssistant):
             "profile_path": "default_profiler_path",
         }
         parameter_builders: List[ParameterBuilder] = [
-            data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_multi_batch_parameter_builder_for_metrics,
+            data_profiler_profile_numeric_columns_diff_between_inclusive_threshold_range_metric_single_batch_parameter_builder_for_metrics,
         ]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
-            expect_profile_numerical_columns_diff_between_threshold_range_expectation_configuration_builder,
+            expect_profile_numeric_columns_diff_between_inclusive_threshold_range_expectation_configuration_builder,
         ]
         rule = Rule(
             name="table_rule",
