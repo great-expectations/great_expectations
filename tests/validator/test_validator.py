@@ -36,10 +36,11 @@ from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.metrics_calculator import (
+from great_expectations.validator.validation_graph import (
     MAX_METRIC_COMPUTATION_RETRIES,
+    MetricEdge,
+    ValidationGraph,
 )
-from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
 
@@ -148,21 +149,20 @@ def test_parse_validation_graph():
     # noinspection PyUnusedLocal
     batch = Batch(data=df)
     graph = ValidationGraph()
-    engine = PandasExecutionEngine()
+    execution_engine = PandasExecutionEngine()
     for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
         )
         validation_dependencies = expectation_impl(
             configuration
-        ).get_validation_dependencies(configuration, engine)
+        ).get_validation_dependencies(configuration, execution_engine)
 
         for metric_configuration in validation_dependencies["metrics"].values():
-            Validator(
-                execution_engine=engine
-            ).metrics_calculator.build_metric_dependency_graph(
-                graph=graph,
+            graph.build_metric_dependency_graph(
+                execution_engine=execution_engine,
                 metric_configuration=metric_configuration,
+                runtime_configuration=None,
             )
 
     ready_metrics, needed_metrics = graph.parse(metrics=dict())
@@ -182,8 +182,7 @@ def test_parse_validation_graph_with_bad_metrics_args():
         },
     )
     graph = ValidationGraph()
-    engine = PandasExecutionEngine()
-    validator = Validator(execution_engine=engine)
+    execution_engine = PandasExecutionEngine()
     for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
@@ -192,13 +191,14 @@ def test_parse_validation_graph_with_bad_metrics_args():
             configuration
         ).get_validation_dependencies(
             configuration,
-            execution_engine=engine,
+            execution_engine=execution_engine,
         )
 
         for metric_configuration in validation_dependencies["metrics"].values():
-            validator.metrics_calculator.build_metric_dependency_graph(
-                graph=graph,
+            graph.build_metric_dependency_graph(
+                execution_engine=execution_engine,
                 metric_configuration=metric_configuration,
+                runtime_configuration=None,
             )
 
     # noinspection PyTypeChecker
@@ -223,7 +223,7 @@ def test_populate_dependencies():
     # noinspection PyUnusedLocal
     batch = Batch(data=df)
     graph = ValidationGraph()
-    engine = PandasExecutionEngine()
+    execution_engine = PandasExecutionEngine()
     for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
@@ -232,14 +232,12 @@ def test_populate_dependencies():
             configuration
         ).get_validation_dependencies(
             configuration,
-            engine,
+            execution_engine,
         )
 
         for metric_configuration in validation_dependencies["metrics"].values():
-            Validator(
-                execution_engine=engine
-            ).metrics_calculator.build_metric_dependency_graph(
-                graph=graph,
+            graph.build_metric_dependency_graph(
+                execution_engine=execution_engine,
                 metric_configuration=metric_configuration,
             )
 
@@ -263,29 +261,16 @@ def test_populate_dependencies_with_incorrect_metric_name():
     # noinspection PyUnusedLocal
     batch = Batch(data=df)
     graph = ValidationGraph()
-    engine = PandasExecutionEngine()
-    for configuration in [expectation_configuration]:
-        expectation_impl = get_expectation_impl(
-            "expect_column_value_z_scores_to_be_less_than"
+    execution_engine = PandasExecutionEngine()
+    try:
+        graph.build_metric_dependency_graph(
+            execution_engine=execution_engine,
+            metric_configuration=MetricConfiguration(
+                "column_values.not_a_metric", IDDict()
+            ),
         )
-        validation_dependencies = expectation_impl(
-            configuration
-        ).get_validation_dependencies(
-            configuration,
-            engine,
-        )
-
-        try:
-            Validator(
-                execution_engine=engine
-            ).metrics_calculator.build_metric_dependency_graph(
-                graph=graph,
-                metric_configuration=MetricConfiguration(
-                    "column_values.not_a_metric", IDDict()
-                ),
-            )
-        except ge_exceptions.MetricProviderError as e:
-            graph = e
+    except ge_exceptions.MetricProviderError as e:
+        graph = e
 
     assert isinstance(graph, ge_exceptions.MetricProviderError)
 
@@ -379,7 +364,8 @@ def test_graph_validate_with_exception(basic_datasource):
     )
 
     validator = Validator(execution_engine=PandasExecutionEngine(), batches=[batch])
-    validator.metrics_calculator.build_metric_dependency_graph = mock_error
+    graph = ValidationGraph()
+    graph.build_metric_dependency_graph = mock_error
 
     result = validator.graph_validate(configurations=[expectation_configuration])
 
@@ -466,6 +452,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
 
     execution_engine = PandasExecutionEngine()
 
+    # noinspection PyUnusedLocal
     validator = Validator(execution_engine=execution_engine, batches=[batch])
 
     expectation_impl = get_expectation_impl(expectation_configuration.expectation_type)
@@ -476,8 +463,8 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
     graph = ValidationGraph()
 
     for metric_configuration in validation_dependencies.values():
-        validator.metrics_calculator.build_metric_dependency_graph(
-            graph=graph,
+        graph.build_metric_dependency_graph(
+            execution_engine=execution_engine,
             metric_configuration=metric_configuration,
             runtime_configuration=runtime_configuration,
         )
@@ -486,8 +473,8 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
     aborted_metrics_info: Dict[
         Tuple[str, str, str],
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-    ] = validator.metrics_calculator.resolve_validation_graph(
-        graph=graph,
+    ] = graph.resolve_validation_graph(
+        execution_engine=execution_engine,
         metrics=metrics,
         runtime_configuration=runtime_configuration,
     )
@@ -1144,26 +1131,34 @@ def test_validate_expectation(multi_batch_taxi_validator):
     }
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
-@mock.patch("great_expectations.validator.metrics_calculator.tqdm")
+@mock.patch("great_expectations.validator.metric_configuration.MetricConfiguration")
+@mock.patch("great_expectations.validator.validation_graph.tqdm")
 @pytest.mark.unit
-def test_validator_progress_bar_config_enabled(
-    mock_tqdm, mock_validation_graph, mock_data_context
-):
-    data_context = mock_data_context()
-    engine = PandasExecutionEngine()
-    validator = Validator(engine, data_context=data_context)
+def test_validator_progress_bar_config_enabled(mock_tqdm, mock_metric_configuration):
+    execution_engine = PandasExecutionEngine()
 
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
-    mock_validation_graph.edges.__len__ = lambda _: 3
-    mock_validation_graph.parse.return_value = (
-        {},
-        {},
-    )
-    validator.metrics_calculator.resolve_validation_graph(
-        graph=mock_validation_graph, metrics={}
-    )
+    with mock.patch(
+        "great_expectations.validator.validation_graph.ValidationGraph.parse",
+        return_value=(
+            {},
+            {},
+        ),
+    ), mock.patch(
+        "great_expectations.validator.validation_graph.ValidationGraph.edges",
+        new_callable=mock.PropertyMock,
+        return_value=[
+            MetricEdge(left=mock_metric_configuration),
+            MetricEdge(left=mock_metric_configuration),
+            MetricEdge(left=mock_metric_configuration),
+        ],
+    ):
+        graph = ValidationGraph()
+        graph.resolve_validation_graph(
+            execution_engine=execution_engine,
+            metrics={},
+            runtime_configuration=None,
+        )
 
     # Still invoked but doesn't actually do anything due to `disabled`
     assert mock_tqdm.called is True
@@ -1171,26 +1166,40 @@ def test_validator_progress_bar_config_enabled(
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
-@mock.patch("great_expectations.validator.metrics_calculator.tqdm")
+@mock.patch("great_expectations.validator.metric_configuration.MetricConfiguration")
+@mock.patch("great_expectations.validator.validation_graph.tqdm")
 @pytest.mark.unit
 def test_validator_progress_bar_config_disabled(
-    mock_tqdm, mock_validation_graph, mock_data_context
+    mock_tqdm, mock_metric_configuration, mock_data_context
 ):
     data_context = mock_data_context()
     data_context.progress_bars = ProgressBarsConfig(metric_calculations=False)
-    engine = PandasExecutionEngine()
-    validator = Validator(engine, data_context=data_context)
+
+    execution_engine = PandasExecutionEngine()
 
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
-    mock_validation_graph.edges.__len__ = lambda _: 3
-    mock_validation_graph.parse.return_value = (
-        {},
-        {},
-    )
-    validator.metrics_calculator.resolve_validation_graph(
-        graph=mock_validation_graph, metrics={}, show_progress_bars=False
-    )
+    with mock.patch(
+        "great_expectations.validator.validation_graph.ValidationGraph.parse",
+        return_value=(
+            {},
+            {},
+        ),
+    ), mock.patch(
+        "great_expectations.validator.validation_graph.ValidationGraph.edges",
+        new_callable=mock.PropertyMock,
+        return_value=[
+            MetricEdge(left=mock_metric_configuration),
+            MetricEdge(left=mock_metric_configuration),
+            MetricEdge(left=mock_metric_configuration),
+        ],
+    ):
+        graph = ValidationGraph()
+        graph.resolve_validation_graph(
+            execution_engine=execution_engine,
+            metrics={},
+            runtime_configuration=None,
+            show_progress_bars=False,
+        )
 
     assert mock_tqdm.called is True
     assert mock_tqdm.call_args[1]["disable"] is True
