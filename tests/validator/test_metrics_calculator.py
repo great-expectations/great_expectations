@@ -5,7 +5,6 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-from great_expectations.core import IDDict
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.self_check.util import get_test_validator_with_data
 from great_expectations.util import isclose
@@ -142,8 +141,8 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result(
         2) MetricsCalculator.get_metric() correctly retrieves result from dictionary, returned by
            MetricsCalculator.get_metrics() by using the specific "metric_name", mentioned above, as the key.
 
-    Note that the usage of "MagicMock" is purposefully aimed at focusing precisely on the functionality under test
-    (i.e., avoiding "test leakage" by mocking all but the essential methods and properties involved in the test).
+    The usage of "MagicMock" is used judiciously, trading off the focus on the functionality under test (i.e., avoiding
+    "test leakage") against going as far as mocking all non-essential methods and properties, favoring code readability.
     """
     metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
     metric_name = "my_metric_name"
@@ -153,10 +152,6 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result(
         "great_expectations.validator.metric_configuration.MetricConfiguration.metric_name",
         new_callable=mock.PropertyMock,
         return_value=metric_name,
-    ), mock.patch(
-        "great_expectations.validator.metric_configuration.MetricConfiguration.metric_domain_kwargs",
-        new_callable=mock.PropertyMock,
-        return_value=IDDict(metric_domain_kwargs),
     ), mock.patch(
         "great_expectations.validator.metrics_calculator.MetricsCalculator.get_metrics",
         return_value={metric_name: actual_metric_value},
