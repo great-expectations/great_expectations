@@ -1047,7 +1047,9 @@ class Validator:
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
             validation_dependencies: dict = (
                 expectation_impl().get_validation_dependencies(
-                    evaluated_config, self._execution_engine, runtime_configuration
+                    configuration=evaluated_config,
+                    execution_engine=self._execution_engine,
+                    runtime_configuration=runtime_configuration,
                 )["metrics"]
             )
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import json
 import logging
@@ -33,6 +35,7 @@ from great_expectations.render import RenderedAtomicContent, RenderedAtomicConte
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
 logger = logging.getLogger(__name__)
@@ -979,9 +982,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self,
         evaluation_parameters,
         interactive_evaluation: bool = True,
-        data_context: Optional[
-            Any
-        ] = None,  # Can't type as DataContext due to import cycle
+        data_context: Optional[DataContext] = None,
     ) -> None:
         if self._raw_kwargs is not None:
             logger.debug(
@@ -1426,7 +1427,7 @@ class ExpectationConfiguration(SerializableDictDot):
         Renders content using the atomic prescriptive renderer for this Expectation Configuration to
             ExpectationConfiguration.rendered_content.
         """
-        inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
+        inline_renderer_config: InlineRendererConfig = {
             "class_name": "InlineRenderer",
             "render_object": self,
         }

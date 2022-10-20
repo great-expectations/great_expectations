@@ -1,6 +1,18 @@
+from __future__ import annotations
+
 import logging
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
@@ -10,6 +22,9 @@ from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     AtomicRendererType,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core import ExpectationConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -244,7 +259,7 @@ def get_metric_function_type(
 
 def get_metric_kwargs(
     metric_name: str,
-    configuration: Optional["ExpectationConfiguration"] = None,  # noqa: F821
+    configuration: Optional[ExpectationConfiguration] = None,
     runtime_configuration: Optional[dict] = None,
 ) -> Dict:
     try:

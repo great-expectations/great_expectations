@@ -3,7 +3,7 @@ import os
 import re
 from collections import defaultdict
 from dataclasses import asdict, dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -61,7 +61,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     # introspection alone, but in order to see what they return, we need to
     # instantiate the Expectation and actually run the method.
 
-    library_metadata: AugmentedLibraryMetadata
+    library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics]
     description: ExpectationDescriptionDiagnostics
     execution_engines: ExpectationExecutionEngineDiagnostics
 
