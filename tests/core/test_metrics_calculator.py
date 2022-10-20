@@ -130,7 +130,15 @@ def test_column_partition_metric(
 
 
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
-def test_get_metric(execution_engine: mock.MagicMock):
+def test_get_metric_calls_get_metrics_and_returns_correct_result(
+    execution_engine: mock.MagicMock,
+):
+    """
+    The purpose of this basic test is to insure that:
+        1) MetricsCalculator.get_metric() calls MetricsCalculator.get_metrics() exactly once; and
+        2) MetricsCalculator.get_metric() correctly retrieves result from dictionary, returned by
+           MetricsCalculator.get_metrics() by using the "metric_name" as the key.
+    """
     metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
     metric_name = "my_metric_name"
     metric_domain_kwargs: dict = {}
