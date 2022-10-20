@@ -998,7 +998,7 @@ class Validator:
         for configuration in processed_configurations:
             try:
                 result = configuration.metrics_validate(
-                    metrics,
+                    metrics=metrics,
                     execution_engine=self._execution_engine,
                     runtime_configuration=runtime_configuration,
                 )

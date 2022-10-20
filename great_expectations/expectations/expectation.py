@@ -1916,8 +1916,9 @@ class TableExpectation(Expectation, ABC):
         self,
         metric_name,
         configuration: ExpectationConfiguration,
-        metrics: dict,
-        **kwargs: dict,
+        metrics: Dict,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ) -> Dict[str, Union[bool, Dict[str, Any]]]:
         metric_value: Optional[Any] = metrics.get(metric_name)
 
