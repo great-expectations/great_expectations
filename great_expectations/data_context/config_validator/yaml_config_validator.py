@@ -378,12 +378,14 @@ class YamlConfigValidator:
         """
         print(f"\tInstantiating as a Datasource, since class_name is {class_name}")
         datasource_name: str = name or config.get("name") or "my_temp_datasource"
+        datasource_config = datasourceConfigSchema.load(config)
+        datasource_config.name = datasource_name
         instantiated_class = cast(
             Datasource,
             self._data_context._instantiate_datasource_from_config_and_update_project_config(
-                name=datasource_name,  # type: ignore[arg-type,call-arg]
-                config=config,
+                config=datasource_config,
                 initialize=True,
+                save_changes=False,
             ),
         )
 
