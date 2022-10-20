@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import json
@@ -704,7 +706,7 @@ constructor arguments.
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
-    ) -> "Checkpoint":
+    ) -> Checkpoint:
         checkpoint_config: Union[CheckpointConfig, dict]
 
         # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
@@ -773,7 +775,7 @@ constructor arguments.
         checkpoint_config: CheckpointConfig,
         data_context: "DataContext",  # noqa: F821
         **runtime_kwargs,
-    ) -> "Checkpoint":
+    ) -> Checkpoint:
         config: dict = checkpoint_config.to_json_dict()
 
         key: str

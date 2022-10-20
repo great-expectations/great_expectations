@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import enum
+from enum import Enum
 from typing import Any, List, Union
 
 
-class GESqlDialect(enum.Enum):
+class GESqlDialect(Enum):
     """Contains sql dialects that have some level of support in Great Expectations.
     Also contains an unsupported attribute if the dialect is not in the list.
     """
@@ -22,11 +22,15 @@ class GESqlDialect(enum.Enum):
     SQLITE = "sqlite"
     TERADATASQL = "teradatasql"
     TRINO = "trino"
+    VERTICA = "vertica"
     OTHER = "other"
 
-    def __eq__(self, other: Union[str, GESqlDialect]):
+    def __eq__(self, other: Union[str, bytes, GESqlDialect]):
         if isinstance(other, str):
             return self.value.lower() == other.lower()
+        # Comparison against byte string, e.g. `b"hive"` should be treated as unicode
+        elif isinstance(other, bytes):
+            return self.value.lower() == other.lower().decode("utf-8")
         return self.value.lower() == other.value.lower()
 
     def __hash__(self: GESqlDialect):
