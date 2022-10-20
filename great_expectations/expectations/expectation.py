@@ -2759,32 +2759,24 @@ def _format_map_output(
 
     This function handles the logic for mapping those fields for column_map_expectations.
     """
-    if element_count is None:
-        element_count = 0
-
-    if nonnull_count is None:
-        nonnull_count = 0
-
     # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
     # Incrementally add to result and return when all values for the specified level are present
-    return_obj: Dict
-    return_obj = {"success": success}
+    return_obj: Dict[str, Any] = {"success": success}
 
     if result_format["result_format"] == "BOOLEAN_ONLY":
         return return_obj
 
-    skip_missing: bool = False
-
+    skip_missing = False
     missing_count: Optional[int] = None
-    if element_count == 0:
+    if nonnull_count is None:
         skip_missing = True
-    else:
+    elif element_count is not None and nonnull_count is not None:
         missing_count = element_count - nonnull_count
 
     missing_percent: Optional[float] = None
     unexpected_percent_total: Optional[float] = None
     unexpected_percent_nonmissing: Optional[float] = None
-    if unexpected_count is not None and element_count > 0:
+    if unexpected_count is not None and element_count is not None and element_count > 0:
         unexpected_percent_total = unexpected_count / element_count * 100
 
         if not skip_missing and missing_count is not None:
