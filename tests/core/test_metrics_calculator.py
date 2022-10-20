@@ -5,6 +5,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 
+from great_expectations.core import IDDict
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.self_check.util import get_test_validator_with_data
 from great_expectations.util import isclose
@@ -128,32 +129,43 @@ def test_column_partition_metric(
     )
 
 
+@pytest.mark.unit
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 def test_get_metric_calls_get_metrics_and_returns_correct_result(
     execution_engine: mock.MagicMock,
 ):
     """
-    The purpose of this basic test is to insure that:
-        1) MetricsCalculator.get_metric() calls MetricsCalculator.get_metrics() exactly once; and
+    This basic test insures that MetricsCalculator.get_metric() uses MetricsCalculator.get_metrics() correctly.
+
+    In more detail, the purpose of this basic test is to insure that:
+        1) MetricsCalculator.get_metric() calls MetricsCalculator.get_metrics() exactly once for specific "metric_name";
         2) MetricsCalculator.get_metric() correctly retrieves result from dictionary, returned by
-           MetricsCalculator.get_metrics() by using the "metric_name" as the key.
+           MetricsCalculator.get_metrics() by using the specific "metric_name", mentioned above, as the key.
     """
     metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
     metric_name = "my_metric_name"
-    metric_value = "my_metric_value"
+    actual_metric_value = "my_metric_value"
+    metric_domain_kwargs: dict = {}
     with mock.patch(
+        "great_expectations.validator.metric_configuration.MetricConfiguration.metric_name",
+        new_callable=mock.PropertyMock,
+        return_value=metric_name,
+    ), mock.patch(
+        "great_expectations.validator.metric_configuration.MetricConfiguration.metric_domain_kwargs",
+        new_callable=mock.PropertyMock,
+        return_value=IDDict(metric_domain_kwargs),
+    ), mock.patch(
         "great_expectations.validator.metrics_calculator.MetricsCalculator.get_metrics",
-        return_value={metric_name: metric_value},
+        return_value={metric_name: actual_metric_value},
     ) as mock_get_metrics_method:
-        # create a fake configuration
         metric_configuration = MetricConfiguration(
-            metric_name=metric_name, metric_domain_kwargs={}
+            metric_name=metric_name,
+            metric_domain_kwargs=metric_domain_kwargs,
         )
-        resolved_metric_value = metrics_calculator.get_metric(
+        resolved_metric_value: Any = metrics_calculator.get_metric(
             metric=metric_configuration
         )
-
         mock_get_metrics_method.assert_called_once_with(
             metrics={metric_name: metric_configuration}
         )
-        assert resolved_metric_value == metric_value
+        assert resolved_metric_value == actual_metric_value
