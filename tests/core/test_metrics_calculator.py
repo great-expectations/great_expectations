@@ -132,24 +132,27 @@ def test_column_partition_metric(
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 def test_get_metric(execution_engine: mock.MagicMock):
     metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
+    metric_name = "my_metric_name"
+    metric_domain_kwargs: dict = {}
     with mock.patch(
         "great_expectations.validator.metric_configuration.MetricConfiguration.metric_name",
         new_callable=mock.PropertyMock,
-        return_value="my_metric_name",
+        return_value=metric_name,
     ), mock.patch(
         "great_expectations.validator.metric_configuration.MetricConfiguration.metric_domain_kwargs",
         new_callable=mock.PropertyMock,
-        return_value=IDDict({}),
+        return_value=IDDict(metric_domain_kwargs),
     ), mock.patch(
         "great_expectations.validator.metrics_calculator.MetricsCalculator.get_metrics",
-        return_value={"my_metric_name": "my_metric_value"},
+        return_value={metric_name: "my_metric_value"},
     ) as mock_get_metrics_method:
         metric_configuration = MetricConfiguration(
-            metric_name="my_metric_name", metric_domain_kwargs={}
+            metric_name=metric_name,
+            metric_domain_kwargs=metric_domain_kwargs,
         )
         metric_value: Any = metrics_calculator.get_metric(metric=metric_configuration)
         mock_get_metrics_method.assert_called_once_with(
-            metrics={"my_metric_name": metric_configuration}
+            metrics={metric_name: metric_configuration}
         )
         assert (
             metric_value == mock_get_metrics_method()[metric_configuration.metric_name]
