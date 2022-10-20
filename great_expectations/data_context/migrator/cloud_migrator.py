@@ -17,6 +17,8 @@ migrator = gx.CloudMigrator.migrate(context=context, test_migrate=True)
 migrator.retry_unsuccessful_validations()
 ```
 """
+from __future__ import annotations
+
 import logging
 from typing import Dict, List, NamedTuple, Optional
 
@@ -97,7 +99,7 @@ class CloudMigrator:
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
-    ) -> "CloudMigrator":
+    ) -> CloudMigrator:
         """Migrate your Data Context to GX Cloud.
 
         Args:

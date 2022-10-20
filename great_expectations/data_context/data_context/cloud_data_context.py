@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 from enum import Enum
@@ -573,7 +575,7 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
-    ) -> "Checkpoint":
+    ) -> Checkpoint:
         """
         See `AbstractDataContext.add_checkpoint` for more information.
         """
