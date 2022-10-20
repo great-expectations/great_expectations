@@ -95,7 +95,9 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_library_metadata(
-        library_metadata: AugmentedLibraryMetadata,
+        library_metadata: Union[
+            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
+        ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
         sub_messages = []
@@ -553,7 +555,9 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_full_test_suite(
-        library_metadata: AugmentedLibraryMetadata,
+        library_metadata: Union[
+            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
+        ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if Expectation has a full test suite"""
         return ExpectationDiagnosticCheckMessage(
@@ -563,7 +567,9 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_manual_code_review(
-        library_metadata: AugmentedLibraryMetadata,
+        library_metadata: Union[
+            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
+        ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if a manual code review has been performed"""
         return ExpectationDiagnosticCheckMessage(

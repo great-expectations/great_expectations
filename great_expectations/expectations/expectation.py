@@ -1862,6 +1862,7 @@ class TableExpectation(Expectation, ABC):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
+        metric_name: str
         for metric_name in self.metric_dependencies:
             metric_kwargs = get_metric_kwargs(
                 metric_name=metric_name,
