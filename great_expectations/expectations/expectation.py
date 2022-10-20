@@ -868,7 +868,6 @@ class Expectation(metaclass=MetaExpectation):
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
         runtime_configuration = self.get_runtime_kwargs(
             configuration=configuration,
-            execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
         result_format: dict = runtime_configuration["result_format"]
