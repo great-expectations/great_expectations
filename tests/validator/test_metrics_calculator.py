@@ -139,13 +139,17 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result():
            MetricsCalculator.get_metrics() by using the specific "metric_name", mentioned above, as the key.
 
     In the present test case, the role of "ExecutionEngine" is limited to providing the required constructor argument to
-    the "MetricsCalculator" class (one of whose methods is under test); hence, a dummy "ExecutionEngine" is employed.
+    the "MetricsCalculator" class (one of whose methods is under test); hence, a "DummyExecutionEngine" is employed.
 
     The "with mock.patch" is used judiciously, trading off the focus on the functionality under test (i.e., avoiding
     "test leakage") against going as far as mocking all non-essential methods and properties, favoring code readability.
     """
-    dummy_execution_engine = cast(ExecutionEngine, object())
-    metrics_calculator = MetricsCalculator(execution_engine=dummy_execution_engine)
+
+    # noinspection PyAbstractClass
+    class DummyExecutionEngine(ExecutionEngine):
+        pass
+
+    metrics_calculator = MetricsCalculator(execution_engine=DummyExecutionEngine())
 
     metric_name = "my_metric_name"
     actual_metric_value = "my_metric_value"
