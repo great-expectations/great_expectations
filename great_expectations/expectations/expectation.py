@@ -13,18 +13,8 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Number,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-)
+from numbers import Number
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 from dateutil.parser import parse
