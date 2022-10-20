@@ -20,7 +20,7 @@ from functools import reduce
 from typing import List, Tuple
 
 # Import the necessary modules for the examples, and initialize a Data Context.
-# <snippet name="gx_imports_test">
+# <snippet name="filesystem_datasource_config_gx_imports">
 from ruamel import yaml
 
 import great_expectations as gx
@@ -81,7 +81,7 @@ def is_subset(subset, superset):
 
 
 def get_full_pandas_inferred_datasource_single_batch():
-    # <snippet>
+    # <snippet name="pandas_inferred_datasource_single_batch_full_snippet">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -113,7 +113,7 @@ def get_full_pandas_inferred_datasource_single_batch():
 
 
 def get_full_pandas_inferred_datasource_multi_batch():
-    # <snippet>
+    # <snippet name="pandas_inferred_datasource_multi_batch_full_snippet">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -145,7 +145,7 @@ def get_full_pandas_inferred_datasource_multi_batch():
 
 
 def get_full_pandas_configured_datasource_single_batch():
-    # <snippet>
+    # <snippet name="pandas_configured_datasource_single_batch_full_snippet">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -179,7 +179,7 @@ def get_full_pandas_configured_datasource_single_batch():
 
 
 def get_full_pandas_configured_datasource_multi_batch():
-    # <snippet>
+    # <snippet name="pandas_configured_datasource_multi_batch_full_snippet">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -213,7 +213,7 @@ def get_full_pandas_configured_datasource_multi_batch():
 
 
 def get_full_pandas_runtime_datasource():
-    # <snippet>
+    # <snippet name="pandas_runtime_datasource_full_snippet">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -247,20 +247,20 @@ def validate_pandas_datasource_configuration_snippets():
 
     """
     # Snippet: create an empty dict for your configuration.
-    # <snippet>
+    # <snippet name="datasource_configuration_empty_dictionary">
     datasource_config: dict = {}
     # </snippet>
 
     # Snippet: adding a name to your datasource
     datasource_config: dict = {
-        # <snippet>
+        # <snippet name="datasource_configuration_name_key">
         "name": "my_datasource_name",  # Preferably name it something relevant
         # </snippet>
     }
     prev_snippet = datasource_config
 
     # Snippet: full config after adding a name to your Datasource.
-    # <snippet>
+    # <snippet name="datasource_configuration_post_name_key">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
     }
@@ -270,7 +270,7 @@ def validate_pandas_datasource_configuration_snippets():
     # Snippet: Adding a class_name and module_name to your Datasource.
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
-        # <snippet>
+        # <snippet name="datasource_configuration_class_and_module_keys">
         "class_name": "Datasource",
         "module_name": "great_expectations.datasource"
         # </snippet>
@@ -279,7 +279,7 @@ def validate_pandas_datasource_configuration_snippets():
     prev_snippet = datasource_config
 
     # Snippet: Full configuration after adding class_name and module_name to your Datasource.
-    # <snippet>
+    # <snippet name="datasource_configuration_post_class_and_module_keys">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -293,7 +293,7 @@ def validate_pandas_datasource_configuration_snippets():
         "name": "my_datasource_name",
         "class_name": "Datasource",
         "module_name": "great_expectations.datasource",
-        # <snippet>
+        # <snippet name="datasource_configuration_add_execution_engine">
         "execution_engine": {
             "class_name": "PandasExecutionEngine",
             "module_name": "great_expectations.execution_engine",
@@ -304,7 +304,7 @@ def validate_pandas_datasource_configuration_snippets():
     prev_snippet = datasource_config
 
     # Snippet: Full config after adding an Execution Engine to your Datasource.
-    # <snippet>
+    # <snippet name="datasource_configuration_post_execution_engine">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -319,7 +319,7 @@ def validate_pandas_datasource_configuration_snippets():
     prev_snippet = datasource_config
 
     # Snippet: Add an empty dictionary for your data_connectors configuration.
-    # <snippet>
+    # <snippet name="datasource_configuration_add_empty_data_connectors_key">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -353,7 +353,7 @@ def validate_pandas_datasource_configuration_inferred_snippets():
     full_inferred_multi_batch_config = get_full_pandas_inferred_datasource_multi_batch()
 
     # Snippet for adding the Data Connector configuration dictionary.
-    # <snippet>
+    # <snippet name="datasource_configuration_add_inferred_data_connector">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -372,7 +372,7 @@ def validate_pandas_datasource_configuration_inferred_snippets():
     datasource_config: dict = {
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
-                # <snippet>
+                # <snippet name="datasource_configuration_data_connector_class_name_inferred">
                 "class_name": "InferredAssetFilesystemDataConnector",
                 # </snippet>
             }
@@ -385,7 +385,7 @@ def validate_pandas_datasource_configuration_inferred_snippets():
     datasource_config: dict = {
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
-                # <snippet>
+                # <snippet name="datasource_configuration_filesystem_base_directory">
                 "base_directory": "../data",
                 # </snippet>
             }
@@ -395,7 +395,7 @@ def validate_pandas_datasource_configuration_inferred_snippets():
     is_subset(datasource_config, full_inferred_multi_batch_config)
 
     # Snippet for the final version of data_connectors class_name and module_name configuration.
-    # <snippet>
+    # <snippet name="datasource_configuration_pandas_inferred_empty_regex">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -420,7 +420,7 @@ def validate_pandas_datasource_configuration_inferred_snippets():
     datasource_config = {
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
-                # <snippet>
+                # <snippet name="datasource_configuration_glob_directive">
                 "glob_directive": "*.*"
                 # </snippet>
             }
@@ -428,7 +428,7 @@ def validate_pandas_datasource_configuration_inferred_snippets():
     }
     prev_config = datasource_config
     # Snippet: Full config after adding glob_directive.
-    # <snippet>
+    # <snippet name="datasource_configuration_post_glob_directive">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -469,10 +469,10 @@ def validate_pandas_datasource_configuration_inferred_single_batch_snippets():
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
                 "default_regex": {
-                    # <snippet>
+                    # <snippet name="datasource_configuration_inferred_single_batch_regex_pattern">
                     "pattern": "(.*)\\.csv",
                     # </snippet>
-                    # <snippet>
+                    # <snippet name="datasource_configuration_inferred_single_batch_group_names">
                     "group_names": ["data_asset_name"],
                     # </snippet>
                 }
@@ -484,7 +484,7 @@ def validate_pandas_datasource_configuration_inferred_single_batch_snippets():
     # Snippet: full inferred_data_connector with single batch default_regex
     datasource_config = {
         "data_connectors": {
-            # <snippet>
+            # <snippet name="data_connector_configuration_post_single_batch_regex">
             "name_of_my_inferred_data_connector": {
                 "class_name": "InferredAssetFilesystemDataConnector",
                 "base_directory": "../data",
@@ -499,7 +499,7 @@ def validate_pandas_datasource_configuration_inferred_single_batch_snippets():
     is_subset(datasource_config, full_inferred_single_batch_config)
 
     # Snippet: Full configuration for inferred Datasource with single batch default_regex.
-    # <snippet>
+    # <snippet name="datasource_configuration_post_inferred_data_connector">
     datasource_config = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -526,25 +526,15 @@ def validate_pandas_datasource_configuration_inferred_single_batch_snippets():
 def validate_pandas_datasource_configuration_inferred_multi_batch_snippets():
     full_inferred_multi_batch_config = get_full_pandas_inferred_datasource_multi_batch()
     # Snippet: multibatch pattern for inferred Data Connector default_regex
-    datasource_config = {
-        "data_connectors": {
-            "name_of_my_inferred_data_connector": {
-                "default_regex": {
-                    # <snippet>
-                    "pattern": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv",
-                    # </snippet>
-                }
-            }
-        }
-    }
-    is_subset(datasource_config, full_inferred_multi_batch_config)
-
     # Snippet: multibatch group_names for inferred Data Connector default_regex
     datasource_config = {
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
                 "default_regex": {
-                    # <snippet>
+                    # <snippet name="datasource_configuration_inferred_multi_batch_regex_pattern">
+                    "pattern": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv",
+                    # </snippet>
+                    # <snippet name="">
                     "group_names": ["data_asset_name", "month"],
                     # </snippet>
                 }
@@ -556,7 +546,7 @@ def validate_pandas_datasource_configuration_inferred_multi_batch_snippets():
     # Snippet: full data connector config for inferred Data Connector multi batch
     datasource_config = {
         "data_connectors": {
-            # <snippet>
+            # <snippet name="data_connector_configuration_post_inferred_multi_batch_regex">
             "name_of_my_inferred_data_connector": {
                 "class_name": "InferredAssetFilesystemDataConnector",
                 "base_directory": "../data",
@@ -571,7 +561,7 @@ def validate_pandas_datasource_configuration_inferred_multi_batch_snippets():
     is_subset(datasource_config, full_inferred_multi_batch_config)
 
     # Snippet: Full configuration for Pandas multibatch Inferred Datasource.
-    # <snippet>
+    # <snippet name="datasource_configuration_post_multi_batch_inferred_data_connector">
     datasource_config = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -605,7 +595,7 @@ def validate_pandas_datasource_configuration_configured_snippets():
     )
 
     # Snippet: Add a dictionary for your configured data_connector
-    # <snippet>
+    # <snippet name="datasource_configuration_add_configured_data_connector">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -624,20 +614,10 @@ def validate_pandas_datasource_configuration_configured_snippets():
     datasource_config: dict = {
         "data_connectors": {
             "name_of_my_configured_data_connector": {
-                # <snippet>
+                # <snippet name="data_connector_configuration_configured_class_name">
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
                 # </snippet>
-            }
-        }
-    }
-    is_subset(datasource_config, full_configured_single_batch_config)
-    is_subset(datasource_config, full_configured_multi_batch_config)
-
-    # Snippet: Add base_directory to your data connector config
-    datasource_config: dict = {
-        "data_connectors": {
-            "name_of_my_configured_data_connector": {
-                # <snippet>
+                # <snippet name="data_connector_configuration_configured_base_directory">
                 "base_directory": "../data",
                 # </snippet>
             }
@@ -647,7 +627,7 @@ def validate_pandas_datasource_configuration_configured_snippets():
     is_subset(datasource_config, full_configured_multi_batch_config)
 
     # Snippet: Full config for data connector, with empty assets dictionary
-    # <snippet>
+    # <snippet name="datasource_config_configured_data_connector_empty_data_asset">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -680,7 +660,7 @@ def validate_pandas_datasource_configuration_configured_single_batch_snippets():
         "data_connectors": {
             "name_of_my_configured_data_connector": {
                 "assets": {
-                    # <snippet>
+                    # <snippet name="empty_data_asset_configuration_configured_single_batch">
                     "yellow_tripdata_jan": {}
                     # </snippet>
                 }
@@ -696,10 +676,10 @@ def validate_pandas_datasource_configuration_configured_single_batch_snippets():
             "name_of_my_configured_data_connector": {
                 "assets": {
                     "yellow_tripdata_jan": {
-                        # <snippet>
+                        # <snippet name="pattern_for_single_batch_configured_data_asset_configuration">
                         "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
                         # </snippet>
-                        # <snippet>
+                        # <snippet name="group_names for single batch configured assets configuration">
                         "group_names": ["month"],
                         # </snippet>
                     }
@@ -714,7 +694,7 @@ def validate_pandas_datasource_configuration_configured_single_batch_snippets():
         "data_connectors": {
             "name_of_my_configured_data_connector": {
                 "assets": {
-                    # <snippet>
+                    # <snippet name="full_data_asset_for_single_batch_configured_data_connector">
                     "yellow_tripdata_jan": {
                         "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
                         "group_names": ["month"],
@@ -729,7 +709,7 @@ def validate_pandas_datasource_configuration_configured_single_batch_snippets():
     # Snippet: Full configuration for a Configured Data Connector with a single-batch Data Asset.
     datasource_config = {
         "data_connectors": {
-            # <snippet>
+            # <snippet name="full_single_batch_configured_data_connector_configuration">
             "name_of_my_configured_data_connector": {
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
                 "base_directory": "../data",
@@ -746,7 +726,7 @@ def validate_pandas_datasource_configuration_configured_single_batch_snippets():
     is_subset(datasource_config, full_configured_single_batch_config)
 
     # Snippet: Full configuration for a Datasource using a Configured Data Connector and single-batch Data Asset.
-    # <snippet>
+    # <snippet name="full datasource_config for pandas execution engine, configured data connector; single batch asset">
     datasource_config = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -783,7 +763,7 @@ def validate_pandas_datasource_configuration_configured_multi_batch_snippets():
         "data_connectors": {
             "name_of_my_configured_data_connector": {
                 "assets": {
-                    # <snippet>
+                    # <snippet name="empty data asset for configured, multi batch datasource">
                     "yellow_tripdata_2020": {}
                     # </snippet>
                 }
@@ -799,10 +779,10 @@ def validate_pandas_datasource_configuration_configured_multi_batch_snippets():
             "name_of_my_configured_data_connector": {
                 "assets": {
                     "yellow_tripdata_2020": {
-                        # <snippet>
+                        # <snippet name="pattern for asset in configured, multi-batch datasource">
                         "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
                         # </snippet>
-                        # <snippet>
+                        # <snippet name="group_names for asset in configured, multi-batch datasource">
                         "group_names": ["month"],
                         # </snippet>
                     }
@@ -817,7 +797,7 @@ def validate_pandas_datasource_configuration_configured_multi_batch_snippets():
         "data_connectors": {
             "name_of_my_configured_data_connector": {
                 "assets": {
-                    # <snippet>
+                    # <snippet name="multi batch data asset for configured pandas datasource">
                     "yellow_tripdata_2020": {
                         "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
                         "group_names": ["month"],
@@ -832,7 +812,7 @@ def validate_pandas_datasource_configuration_configured_multi_batch_snippets():
     # Snippet: Full configuration for a Configured Data Connector with a single-batch Data Asset.
     datasource_config = {
         "data_connectors": {
-            # <snippet>
+            # <snippet name="data connector for configured, multi-batch, Pandas datasource">
             "name_of_my_configured_data_connector": {
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
                 "base_directory": "../data",
@@ -849,7 +829,7 @@ def validate_pandas_datasource_configuration_configured_multi_batch_snippets():
     is_subset(datasource_config, full_configured_multi_batch_config)
 
     # Snippet: Full configuration for a Datasource using a Configured Data Connector and single-batch Data Asset.
-    # <snippet>
+    # <snippet name="full config for Pandas, configured, multi-batch Datasource">
     datasource_config = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -879,7 +859,7 @@ def validate_pandas_datsource_configuration_runtime_snippets():
     full_runtime_config = get_full_pandas_runtime_datasource()
 
     # Snippet: Add empty dictionary for runtime data connector.
-    # <snippet>
+    # <snippet name="add empty dictionary for runtime data connector">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -897,7 +877,7 @@ def validate_pandas_datsource_configuration_runtime_snippets():
     datasource_config: dict = {
         "data_connectors": {
             "name_of_my_runtime_data_connector": {
-                # <snippet>
+                # <snippet name="class_name for pandas runtime data connector">
                 "class_name": "RuntimeDataConnector",
                 # </snippet>
             }
@@ -906,7 +886,7 @@ def validate_pandas_datsource_configuration_runtime_snippets():
     is_subset(datasource_config, full_runtime_config)
 
     # Snippet: Full datasource config for runtime data connector with blank batch_identifiers list.
-    # <snippet>
+    # <snippet name="full config for pandas runtime Datasource with blank data asset identifiers">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -929,7 +909,7 @@ def validate_pandas_datsource_configuration_runtime_snippets():
     datasource_config: dict = {
         "data_connectors": {
             "name_of_my_runtime_data_connector": {
-                # <snippet>
+                # <snippet name="batch_identifiers for pandas runtime data connector">
                 "batch_identifiers": ["batch_timestamp"]
                 # </snippet>
             }
@@ -938,7 +918,7 @@ def validate_pandas_datsource_configuration_runtime_snippets():
     is_subset(datasource_config, full_runtime_config)
 
     # Snippet: Full Pandas Datasource configuration with Runtime data connector and timestamp batch identifier.
-    # <snippet>
+    # <snippet name="full pandas runtime Datasource configuration">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
