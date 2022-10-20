@@ -2059,7 +2059,9 @@ class QueryExpectation(TableExpectation, ABC):
         "condition_parser",
     )
 
-    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         """Raises an exception if the configuration is not viable for an expectation.
 
         Args:
@@ -2115,7 +2117,9 @@ class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
-    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         # Ensuring basic configuration parameters are properly set
         try:
             assert (
@@ -2143,7 +2147,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         super().validate_configuration(configuration=configuration)
         try:
             assert (
@@ -2322,11 +2328,11 @@ class ColumnMapExpectation(TableExpectation, ABC):
         else:
             nonnull_count = total_count - null_count
 
-        success = None
+        success: bool
         if total_count == 0 or nonnull_count == 0:
             # Vacuously true
             success = True
-        elif nonnull_count > 0:
+        else:
             success = _mostly_success(
                 nonnull_count,
                 unexpected_count,
@@ -2372,7 +2378,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         super().validate_configuration(configuration=configuration)
         try:
             assert (
@@ -2572,7 +2580,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
     def is_abstract(cls) -> bool:
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(self, configuration: ExpectationConfiguration) -> None:
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         super().validate_configuration(configuration=configuration)
         try:
             assert (
