@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import configparser
 import copy
 import errno
@@ -306,7 +308,7 @@ class AbstractDataContext(ABC):
         return self.variables.evaluation_parameter_store_name
 
     @property
-    def evaluation_parameter_store(self) -> "EvaluationParameterStore":
+    def evaluation_parameter_store(self) -> EvaluationParameterStore:
         return self.stores[self.evaluation_parameter_store_name]
 
     @property
@@ -358,7 +360,7 @@ class AbstractDataContext(ABC):
             raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
     @property
-    def checkpoint_store(self) -> "CheckpointStore":
+    def checkpoint_store(self) -> CheckpointStore:
         checkpoint_store_name: str = self.checkpoint_store_name  # type: ignore[assignment]
         try:
             return self.stores[checkpoint_store_name]
@@ -752,7 +754,7 @@ class AbstractDataContext(ABC):
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
-    ) -> "Checkpoint":
+    ) -> Checkpoint:
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
@@ -959,6 +961,7 @@ class AbstractDataContext(ABC):
             include_rendered_content=include_rendered_content,
         )
 
+    # noinspection PyUnusedLocal
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
@@ -982,6 +985,7 @@ class AbstractDataContext(ABC):
                 """Validator could not be created because BatchRequest returned an empty batch_list.
                 Please check your parameters and try again."""
             )
+
         include_rendered_content = (
             self._determine_if_expectation_validation_result_include_rendered_content(
                 include_rendered_content=include_rendered_content

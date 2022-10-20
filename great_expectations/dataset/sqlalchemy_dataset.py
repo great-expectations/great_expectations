@@ -170,6 +170,13 @@ try:
 except ImportError:
     trino = None
 
+try:
+    import sqla_vertica_python.vertica_python
+
+    registry.register("vertica", "sqla_vertica_python.vertica_python", "dialect")
+except ImportError:
+    verticasqlalchemy = None
+
 
 class SqlAlchemyBatchReference:
     def __init__(self, engine, table_name=None, schema=None, query=None) -> None:
@@ -627,7 +634,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif dialect_name == GESqlDialect.TRINO:
             # WARNING: Trino Support is experimental, functionality is not fully under test
             self.dialect = import_library_module(module_name="trino.sqlalchemy.dialect")
-
+        elif dialect_name == "vertica":
+            # WARNING: Vertica Support is experimental, functionality is not fully under test
+            self.dialect = import_library_module(
+                module_name="sqla_vertica_python.vertica_python"
+            )
         else:
             self.dialect = None
 
@@ -1492,12 +1503,19 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = 'CREATE VOLATILE TABLE "{table_name}" AS ({custom_sql}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.sql_engine_dialect.name.lower() in (GESqlDialect.HIVE, b"hive"):
+        elif self.sql_engine_dialect.name.lower() == GESqlDialect.HIVE:
             stmt = "CREATE TEMPORARY TABLE {schema_name}.{table_name} AS {custom_sql}".format(
                 schema_name=schema_name if schema_name is not None else "default",
                 table_name=table_name,
                 custom_sql=custom_sql,
             )
+        elif engine_dialect == "vertica":
+            full_table_name = (
+                f"{schema_name}.{table_name}"
+                if schema_name is not None
+                else f"{table_name}"
+            )
+            stmt = f"CREATE TEMPORARY TABLE {full_table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}"
         else:
             stmt = f'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'
 

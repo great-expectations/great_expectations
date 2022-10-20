@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import enum
@@ -107,7 +109,7 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def from_commented_map(
         cls, commented_map: Union[CommentedMap, Dict]
-    ) -> "BaseYamlConfig":
+    ) -> BaseYamlConfig:
         try:
             schema_instance: Schema = cls._get_schema_instance()
             config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)

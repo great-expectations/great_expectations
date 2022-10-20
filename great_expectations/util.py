@@ -51,6 +51,7 @@ from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.exceptions import (
+    GeCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -1673,7 +1674,7 @@ def get_context(
     ge_cloud_base_url: Optional[str] = None,
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
-    ge_cloud_mode: bool = False,
+    ge_cloud_mode: Optional[bool] = None,
 ) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
     """
     Method to return the appropriate DataContext depending on parameters and environment.
@@ -1697,6 +1698,15 @@ def get_context(
         ge_cloud_access_token, ge_cloud_organization_id) are passed in as parameters to get_context(), configured as
         environment variables, or in a .conf file, then get_context() will return a CloudDataContext.
 
+
+    +-----------------------+---------------------+---------------+
+    |  get_context params   |    Env Not Config'd |  Env Config'd |
+    +-----------------------+---------------------+---------------+
+    | ()                    | Local               | Cloud         |
+    | (ge_cloud_mode=True)  | Exception!          | Cloud         |
+    | (ge_cloud_mode=False) | Local               | Local         |
+    +-----------------------+---------------------+---------------+
+
     TODO: This method will eventually return FileDataContext and EphemeralDataContext, rather than DataContext and Base
 
     Args:
@@ -1710,7 +1720,7 @@ def get_context(
         ge_cloud_base_url (str): url for ge_cloud endpoint.
         ge_cloud_access_token (str): access_token for ge_cloud account.
         ge_cloud_organization_id (str): org_id for ge_cloud account.
-        ge_cloud_mode (bool): bool flag to specify whether to run GE in cloud mode (default is False).
+        ge_cloud_mode (bool): bool flag to specify whether to run GE in cloud mode (default is None).
 
     Returns:
         DataContext. Either a DataContext, BaseDataContext, or CloudDataContext depending on environment and/or
@@ -1723,14 +1733,16 @@ def get_context(
         DataContext,
     )
 
-    if (
-        CloudDataContext.is_ge_cloud_config_available(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-        )
-        or ge_cloud_mode
-    ):
+    # First, check for ge_cloud conditions
+
+    config_available = CloudDataContext.is_ge_cloud_config_available(
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_access_token=ge_cloud_access_token,
+        ge_cloud_organization_id=ge_cloud_organization_id,
+    )
+
+    # If config available and not explicitly disabled
+    if config_available and ge_cloud_mode is not False:
         return CloudDataContext(
             project_config=project_config,
             runtime_environment=runtime_environment,
@@ -1739,17 +1751,25 @@ def get_context(
             ge_cloud_access_token=ge_cloud_access_token,
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
-    elif project_config is not None:
+
+    if ge_cloud_mode and not config_available:
+        raise GeCloudConfigurationError(
+            "GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
+        )
+
+    # Second, check for which type of local
+
+    if project_config is not None:
         return BaseDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
-    else:
-        return DataContext(
-            context_root_dir=context_root_dir,
-            runtime_environment=runtime_environment,
-        )
+
+    return DataContext(
+        context_root_dir=context_root_dir,
+        runtime_environment=runtime_environment,
+    )
 
 
 def is_sane_slack_webhook(url: str) -> bool:
