@@ -268,8 +268,8 @@ class Expectation(metaclass=MetaExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: dict,
-        runtime_configuration: dict = None,
-        **kwargs: dict,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ) -> Union[ExpectationValidationResult, dict]:
         raise NotImplementedError
 
@@ -803,6 +803,7 @@ class Expectation(metaclass=MetaExpectation):
         self,
         metrics: dict,
         configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: dict = None,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
@@ -811,6 +812,7 @@ class Expectation(metaclass=MetaExpectation):
 
         validation_dependencies: dict = self.get_validation_dependencies(
             configuration=configuration,
+            execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
         runtime_configuration["result_format"] = validation_dependencies[  # type: ignore[index]
@@ -859,12 +861,14 @@ class Expectation(metaclass=MetaExpectation):
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> Dict[str, dict]:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
         runtime_configuration = self.get_runtime_kwargs(
             configuration=configuration,
+            execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
         result_format: dict = runtime_configuration["result_format"]
@@ -1851,11 +1855,14 @@ class TableExpectation(Expectation, ABC):
     def get_validation_dependencies(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> Dict[str, dict]:
         dependencies = super().get_validation_dependencies(
-            configuration=configuration, runtime_configuration=runtime_configuration
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
         )
         for metric_name in self.metric_dependencies:
             metric_kwargs = get_metric_kwargs(
@@ -2146,7 +2153,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
         **kwargs: dict,
     ) -> Dict[str, dict]:
         dependencies = super().get_validation_dependencies(
-            configuration=configuration, runtime_configuration=runtime_configuration
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
         )
         assert isinstance(
             self.map_metric, str
@@ -2270,7 +2279,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
-        **kwargs: dict,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
             Dict[str, Union[str, int, bool]], str
@@ -2376,6 +2385,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
     ) -> Dict[str, dict]:
         dependencies = super().get_validation_dependencies(
             configuration=configuration,
+            execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
         assert isinstance(
@@ -2487,7 +2497,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
-        **kwargs: dict,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
             Dict[str, Union[str, int, bool]], str
@@ -2571,7 +2581,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
     ) -> Dict[str, dict]:
         dependencies = super().get_validation_dependencies(
-            configuration=configuration, runtime_configuration=runtime_configuration
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
         )
         assert isinstance(
             self.map_metric, str
@@ -2681,7 +2693,8 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
