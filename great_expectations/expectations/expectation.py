@@ -830,6 +830,7 @@ class Expectation(metaclass=MetaExpectation):
             configuration=configuration,
             metrics=provided_metrics,
             runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine,
         )
         evr: ExpectationValidationResult = self._build_evr(
             raw_response=expectation_validation_result,
