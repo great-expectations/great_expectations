@@ -40,13 +40,19 @@ class MetricEdge:
 
 
 class ValidationGraph:
-    def __init__(self, edges: Optional[List[MetricEdge]] = None) -> None:
+    def __init__(
+        self,
+        edges: Optional[List[MetricEdge]] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+    ) -> None:
         if edges:
             self._edges = edges
         else:
             self._edges = []
 
         self._edge_ids = {edge.id for edge in self._edges}
+
+        self._execution_engine = execution_engine
 
     @property
     def edges(self):
@@ -56,6 +62,15 @@ class ValidationGraph:
     def edge_ids(self):
         return {edge.id for edge in self._edges}
 
+    @property
+    def execution_engine(self) -> ExecutionEngine:
+        """Returns "ExecutionEngine" object, used for resolving "MetricConfiguration" objects in graph."""
+        return self._execution_engine
+
+    @execution_engine.setter
+    def execution_engine(self, value: ExecutionEngine):
+        self._execution_engine = value
+
     def add(self, edge: MetricEdge) -> None:
         if edge.id not in self._edge_ids:
             self._edges.append(edge)
@@ -63,7 +78,6 @@ class ValidationGraph:
 
     def build_metric_dependency_graph(
         self,
-        execution_engine: ExecutionEngine,
         metric_configuration: MetricConfiguration,
         runtime_configuration: Optional[dict] = None,
     ) -> None:
@@ -71,11 +85,11 @@ class ValidationGraph:
         until all metrics have been added."""
 
         metric_impl = get_metric_provider(
-            metric_configuration.metric_name, execution_engine=execution_engine
+            metric_configuration.metric_name, execution_engine=self._execution_engine
         )[0]
         metric_dependencies = metric_impl.get_evaluation_dependencies(
             metric=metric_configuration,
-            execution_engine=execution_engine,
+            execution_engine=self._execution_engine,
             runtime_configuration=runtime_configuration,
         )
 
@@ -101,14 +115,12 @@ class ValidationGraph:
                     )
                 )
                 self.build_metric_dependency_graph(
-                    execution_engine=execution_engine,
                     metric_configuration=metric_dependency,
                     runtime_configuration=runtime_configuration,
                 )
 
     def resolve_validation_graph(  # noqa: C901 - complexity 16
         self,
-        execution_engine: ExecutionEngine,
         metrics: Dict[Tuple[str, str, str], Any],
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
@@ -171,7 +183,7 @@ class ValidationGraph:
             try:
                 # Access "ExecutionEngine.resolve_metrics()" method, to resolve missing "MetricConfiguration" objects.
                 metrics.update(
-                    execution_engine.resolve_metrics(
+                    self._execution_engine.resolve_metrics(
                         metrics_to_resolve=computable_metrics,
                         metrics=metrics,
                         runtime_configuration=runtime_configuration,
@@ -246,9 +258,13 @@ class ValidationGraph:
 
 
 class ExpectationValidationGraph:
-    def __init__(self, configuration: ExpectationConfiguration) -> None:
+    def __init__(
+        self,
+        configuration: ExpectationConfiguration,
+        execution_engine: Optional[ExecutionEngine] = None,
+    ) -> None:
         self._configuration = configuration
-        self._graph = ValidationGraph()
+        self._graph = ValidationGraph(execution_engine=execution_engine)
 
     @property
     def configuration(self) -> ExpectationConfiguration:

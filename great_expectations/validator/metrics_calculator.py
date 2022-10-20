@@ -151,7 +151,9 @@ class MetricsCalculator:
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
-        graph: ValidationGraph = ValidationGraph()
+        graph: ValidationGraph = ValidationGraph(
+            execution_engine=self._execution_engine
+        )
 
         metric_configuration: MetricConfiguration
         for metric_configuration in metric_configurations:
@@ -169,7 +171,6 @@ class MetricsCalculator:
             )
 
             graph.build_metric_dependency_graph(
-                execution_engine=self._execution_engine,
                 metric_configuration=metric_configuration,
                 runtime_configuration=None,
             )
@@ -181,7 +182,6 @@ class MetricsCalculator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ] = graph.resolve_validation_graph(
-            execution_engine=self._execution_engine,
             metrics=resolved_metrics,
             runtime_configuration=None,
         )

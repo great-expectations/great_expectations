@@ -214,8 +214,8 @@ def test_parse_validation_graph():
     expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
     # noinspection PyUnusedLocal
     batch = Batch(data=df)
-    graph = ValidationGraph()
     execution_engine = PandasExecutionEngine()
+    graph = ValidationGraph(execution_engine=execution_engine)
     for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
@@ -226,7 +226,6 @@ def test_parse_validation_graph():
 
         for metric_configuration in validation_dependencies["metrics"].values():
             graph.build_metric_dependency_graph(
-                execution_engine=execution_engine,
                 metric_configuration=metric_configuration,
                 runtime_configuration=None,
             )
@@ -247,8 +246,8 @@ def test_parse_validation_graph_with_bad_metrics_args():
             "double_sided": True,
         },
     )
-    graph = ValidationGraph()
     execution_engine = PandasExecutionEngine()
+    graph = ValidationGraph(execution_engine=execution_engine)
     for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
@@ -262,7 +261,6 @@ def test_parse_validation_graph_with_bad_metrics_args():
 
         for metric_configuration in validation_dependencies["metrics"].values():
             graph.build_metric_dependency_graph(
-                execution_engine=execution_engine,
                 metric_configuration=metric_configuration,
                 runtime_configuration=None,
             )
@@ -288,8 +286,8 @@ def test_populate_dependencies():
     expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
     # noinspection PyUnusedLocal
     batch = Batch(data=df)
-    graph = ValidationGraph()
     execution_engine = PandasExecutionEngine()
+    graph = ValidationGraph(execution_engine=execution_engine)
     for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
@@ -303,7 +301,6 @@ def test_populate_dependencies():
 
         for metric_configuration in validation_dependencies["metrics"].values():
             graph.build_metric_dependency_graph(
-                execution_engine=execution_engine,
                 metric_configuration=metric_configuration,
             )
 
@@ -326,11 +323,10 @@ def test_populate_dependencies_with_incorrect_metric_name():
     expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
     # noinspection PyUnusedLocal
     batch = Batch(data=df)
-    graph = ValidationGraph()
     execution_engine = PandasExecutionEngine()
+    graph = ValidationGraph(execution_engine=execution_engine)
     try:
         graph.build_metric_dependency_graph(
-            execution_engine=execution_engine,
             metric_configuration=MetricConfiguration(
                 "column_values.not_a_metric", IDDict()
             ),
@@ -385,11 +381,10 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
         expectation_configuration, execution_engine, runtime_configuration
     )["metrics"]
 
-    graph = ValidationGraph()
+    graph = ValidationGraph(execution_engine=execution_engine)
 
     for metric_configuration in validation_dependencies.values():
         graph.build_metric_dependency_graph(
-            execution_engine=execution_engine,
             metric_configuration=metric_configuration,
             runtime_configuration=runtime_configuration,
         )
@@ -399,7 +394,6 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
         Tuple[str, str, str],
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
     ] = graph.resolve_validation_graph(
-        execution_engine=execution_engine,
         metrics=metrics,
         runtime_configuration=runtime_configuration,
     )
@@ -422,8 +416,6 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
 @mock.patch("great_expectations.validator.validation_graph.tqdm")
 @pytest.mark.unit
 def test_progress_bar_config_enabled(mock_tqdm, mock_metric_configuration):
-    execution_engine = PandasExecutionEngine()
-
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
     with mock.patch(
         "great_expectations.validator.validation_graph.ValidationGraph._parse",
@@ -440,9 +432,9 @@ def test_progress_bar_config_enabled(mock_tqdm, mock_metric_configuration):
             MetricEdge(left=mock_metric_configuration),
         ],
     ):
-        graph = ValidationGraph()
+        execution_engine = PandasExecutionEngine()
+        graph = ValidationGraph(execution_engine=execution_engine)
         graph.resolve_validation_graph(
-            execution_engine=execution_engine,
             metrics={},
             runtime_configuration=None,
         )
@@ -462,8 +454,6 @@ def test_progress_bar_config_disabled(
     data_context = mock_data_context()
     data_context.progress_bars = ProgressBarsConfig(metric_calculations=False)
 
-    execution_engine = PandasExecutionEngine()
-
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
     with mock.patch(
         "great_expectations.validator.validation_graph.ValidationGraph._parse",
@@ -480,9 +470,9 @@ def test_progress_bar_config_disabled(
             MetricEdge(left=mock_metric_configuration),
         ],
     ):
-        graph = ValidationGraph()
+        execution_engine = PandasExecutionEngine()
+        graph = ValidationGraph(execution_engine=execution_engine)
         graph.resolve_validation_graph(
-            execution_engine=execution_engine,
             metrics={},
             runtime_configuration=None,
             show_progress_bars=False,

@@ -248,9 +248,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
                 # dependencies, so we use a validator
                 #
-                graph = ValidationGraph()
+                graph = ValidationGraph(execution_engine=execution_engine)
                 graph.build_metric_dependency_graph(
-                    execution_engine=execution_engine,
                     metric_configuration=partition_metric_configuration,
                 )
 

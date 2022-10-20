@@ -822,8 +822,9 @@ def test_graph_validate_with_exception(basic_datasource):
         },
     )
 
-    validator = Validator(execution_engine=PandasExecutionEngine(), batches=[batch])
-    graph = ValidationGraph()
+    execution_engine = PandasExecutionEngine()
+    validator = Validator(execution_engine=execution_engine, batches=[batch])
+    graph = ValidationGraph(execution_engine=execution_engine)
     graph.build_metric_dependency_graph = mock_error
 
     result = validator.graph_validate(configurations=[expectation_configuration])
