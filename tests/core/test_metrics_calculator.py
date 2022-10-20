@@ -1,9 +1,11 @@
 import datetime
-from typing import Union
+from typing import Any, Union
+from unittest import mock
 
 import pandas as pd
 import pytest
 
+from great_expectations.core import IDDict
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.self_check.util import get_test_validator_with_data
 from great_expectations.util import isclose
@@ -125,3 +127,30 @@ def test_column_partition_metric(
         )
         for idx, element in enumerate(results[desired_metric.id])
     )
+
+
+@mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
+def test_get_metric(execution_engine: mock.MagicMock):
+    metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
+    with mock.patch(
+        "great_expectations.validator.metric_configuration.MetricConfiguration.metric_name",
+        new_callable=mock.PropertyMock,
+        return_value="my_metric_name",
+    ), mock.patch(
+        "great_expectations.validator.metric_configuration.MetricConfiguration.metric_domain_kwargs",
+        new_callable=mock.PropertyMock,
+        return_value=IDDict({}),
+    ), mock.patch(
+        "great_expectations.validator.metrics_calculator.MetricsCalculator.get_metrics",
+        return_value={"my_metric_name": "my_metric_value"},
+    ) as mock_get_metrics_method:
+        metric_configuration = MetricConfiguration(
+            metric_name="my_metric_name", metric_domain_kwargs={}
+        )
+        metric_value: Any = metrics_calculator.get_metric(metric=metric_configuration)
+        mock_get_metrics_method.assert_called_once_with(
+            metrics={"my_metric_name": metric_configuration}
+        )
+        assert (
+            metric_value == mock_get_metrics_method()[metric_configuration.metric_name]
+        )
