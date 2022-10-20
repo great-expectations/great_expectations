@@ -116,7 +116,7 @@ class YamlConfigValidator:
         self._data_context = data_context
 
     @property
-    def usage_stats_handler(self):
+    def usage_statistics_handler(self):
         return self._data_context.usage_statistics_handler
 
     @property
@@ -245,7 +245,7 @@ class YamlConfigValidator:
 
             send_usage_message_from_handler(
                 event=usage_stats_event_name,
-                handler=self.usage_stats_handler,
+                handler=self.usage_statistics_handler,
                 event_payload=usage_stats_event_payload,
                 success=True,
             )
@@ -280,7 +280,7 @@ class YamlConfigValidator:
                 usage_stats_event_payload["parent_class"] = class_name
             send_usage_message_from_handler(
                 event=usage_stats_event_name,
-                handler=self.usage_stats_handler,
+                handler=self.usage_statistics_handler,
                 event_payload=usage_stats_event_payload,
                 success=False,
             )
@@ -322,7 +322,7 @@ class YamlConfigValidator:
             }
             send_usage_message_from_handler(
                 event=usage_stats_event_name,
-                handler=self.usage_stats_handler,
+                handler=self.usage_statistics_handler,
                 event_payload=usage_stats_event_payload,
                 success=False,
             )
@@ -338,7 +338,7 @@ class YamlConfigValidator:
             }
             send_usage_message_from_handler(
                 event=usage_stats_event_name,
-                handler=self.usage_stats_handler,
+                handler=self.usage_statistics_handler,
                 event_payload=usage_stats_event_payload,
                 success=False,
             )
@@ -431,10 +431,12 @@ class YamlConfigValidator:
         )
 
         if class_name == "Checkpoint":
-            instantiated_class = Checkpoint(data_context=self, **checkpoint_class_args)
+            instantiated_class = Checkpoint(
+                data_context=self._data_context, **checkpoint_class_args
+            )
         elif class_name == "SimpleCheckpoint":
             instantiated_class = SimpleCheckpoint(
-                data_context=self, **checkpoint_class_args
+                data_context=self._data_context, **checkpoint_class_args
             )
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
@@ -499,7 +501,7 @@ class YamlConfigValidator:
 
         instantiated_class = instantiate_class_from_config(
             config=profiler_config,
-            runtime_environment={"data_context": self},
+            runtime_environment={"data_context": self._data_context},
             config_defaults={
                 "module_name": "great_expectations.rule_based_profiler",
                 "class_name": "RuleBasedProfiler",
