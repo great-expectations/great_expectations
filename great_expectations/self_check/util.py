@@ -14,7 +14,6 @@ from functools import wraps
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
-    Any,
     Dict,
     Iterable,
     List,
@@ -72,6 +71,8 @@ from great_expectations.validator.validator import Validator
 if TYPE_CHECKING:
     from sqlalchemy.engine import Connection
 
+    from great_expectations.data_context import DataContext
+
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
 expectationConfigurationSchema = ExpectationConfigurationSchema()
@@ -99,14 +100,14 @@ try:
     from pyspark.sql import SparkSession
     from pyspark.sql.types import StructType
 except ImportError:
-    SparkDataFrame = type(None)  # type: ignore
-    SparkSession = None  # type: ignore
-    StructType = None  # type: ignore
+    SparkDataFrame = type(None)
+    SparkSession = None
+    StructType = None
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
 except ImportError:
-    spark_DataFrame = type(None)  # type: ignore
+    spark_DataFrame = type(None)
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -178,7 +179,7 @@ except ImportError:
         )
         try:
             getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple = {}  # type: ignore[var-annotated]
+            bigquery_types_tuple: Dict = {}  # type: ignore[no-redef]
             BIGQUERY_TYPES = {
                 "INTEGER": sqla_bigquery.INTEGER,
                 "NUMERIC": sqla_bigquery.NUMERIC,
@@ -436,7 +437,7 @@ try:
 except ImportError:
     pyathena = None
     athenatypes = None
-    athenaDialect = None  # type: ignore
+    athenaDialect = None
     ATHENA_TYPES = {}
 
 # # Others from great_expectations/dataset/sqlalchemy_dataset.py
@@ -539,7 +540,7 @@ def get_sqlite_connection_url(sqlite_db_path):
     return url
 
 
-def get_dataset(
+def get_dataset(  # noqa: C901 - 110
     dataset_type,
     data,
     schemas=None,
@@ -1199,7 +1200,7 @@ def get_dataset(
         raise ValueError(f"Unknown dataset_type {str(dataset_type)}")
 
 
-def get_test_validator_with_data(
+def get_test_validator_with_data(  # noqa: C901 - 31
     execution_engine,
     data,
     schemas=None,
@@ -1318,7 +1319,7 @@ def get_test_validator_with_data(
                     type_ = schema[col]
                     if type_ in ["IntegerType", "LongType"]:
                         # Ints cannot be None...but None can be valid in Spark (as Null)
-                        vals = []  # type: ignore
+                        vals: List[Union[str, int, float, None]] = []
                         for val in data[col]:
                             if val is None:
                                 vals.append(val)
@@ -1329,9 +1330,9 @@ def get_test_validator_with_data(
                         vals = []
                         for val in data[col]:
                             if val is None:
-                                vals.append(val)  # type: ignore
+                                vals.append(val)
                             else:
-                                vals.append(float(val))  # type: ignore
+                                vals.append(float(val))
                         data[col] = vals
                     elif type_ in ["DateType", "TimestampType"]:
                         vals = []
@@ -1339,7 +1340,7 @@ def get_test_validator_with_data(
                             if val is None:
                                 vals.append(val)
                             else:
-                                vals.append(parse(val))  # type: ignore
+                                vals.append(parse(val))  # type: ignore[arg-type]
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
@@ -1400,7 +1401,7 @@ def build_pandas_validator_with_data(
     )
 
 
-def build_sa_validator_with_data(
+def build_sa_validator_with_data(  # noqa: C901 - 39
     df,
     sa_engine_name,
     schemas=None,
@@ -1410,11 +1411,11 @@ def build_sa_validator_with_data(
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional["DataContext"] = None,
 ):
-    _debug = lambda x: x
+    _debug = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")
+        _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr] # noqa: E731
 
     dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
@@ -1602,7 +1603,7 @@ def build_spark_validator_with_data(
     df: Union[pd.DataFrame, SparkDataFrame],
     spark: SparkSession,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional["DataContext"] = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -1702,7 +1703,7 @@ def build_spark_engine(
         )
 
     if batch_id is None:
-        batch_id = cast(BatchDefinition, batch_definition).id  # type: ignore
+        batch_id = cast(BatchDefinition, batch_definition).id
 
     if isinstance(df, pd.DataFrame):
         if schema is None:
@@ -1934,7 +1935,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
     return False
 
 
-def build_test_backends_list(
+def build_test_backends_list(  # noqa: C901 - 48
     include_pandas=True,
     include_spark=False,
     include_sqlalchemy=True,
@@ -2194,7 +2195,7 @@ def build_test_backends_list(
     return test_backends
 
 
-def generate_expectation_tests(
+def generate_expectation_tests(  # noqa: C901 - 43
     expectation_type: str,
     test_data_cases: List[ExpectationTestDataCases],
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
@@ -2203,7 +2204,7 @@ def generate_expectation_tests(
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional["DataContext"] = None,
 ):
     """Determine tests to run
 
@@ -2217,11 +2218,11 @@ def generate_expectation_tests(
     :param only_consider_these_backends: optional list of backends to consider
     :return: list of parametrized tests with loaded validators and accessible backends
     """
-    _debug = lambda x: x
-    _error = lambda x: x
+    _debug = lambda x: x  # noqa: E731
+    _error = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")
-        _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")
+        _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
+        _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
 
     parametrized_tests = []
 
@@ -2336,7 +2337,7 @@ def generate_expectation_tests(
         )
         _debug(f"backends -> {backends}")
         if not backends:
-            _debug(f"No suitable backends for this test_data_case")
+            _debug("No suitable backends for this test_data_case")
             continue
 
         for c in backends:
@@ -2441,7 +2442,7 @@ def generate_expectation_tests(
                                 debug_logger=debug_logger,
                                 context=context,
                             )
-                    except Exception as e2:
+                    except Exception:
                         # print(
                         #     "\n[[ STILL Problem calling get_test_validator_with_data ]]"
                         # )
@@ -2478,7 +2479,7 @@ def generate_expectation_tests(
                     )
                     continue
 
-            except Exception as e:
+            except Exception:
                 continue
 
             for test in d["tests"]:
@@ -2497,7 +2498,7 @@ def generate_expectation_tests(
                     "allow_cross_type_comparisons" in test["input"]
                     and validator_with_data
                     and isinstance(
-                        validator_with_data.execution_engine.active_batch_data,
+                        validator_with_data.execution_engine.batch_manager.active_batch_data,
                         SqlAlchemyBatchData,
                     )
                 ):
@@ -2524,9 +2525,9 @@ def should_we_generate_this_test(
     debug_logger: Optional[logging.Logger] = None,
 ):
 
-    _debug = lambda x: x
+    _debug = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")
+        _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
 
     # backend will only ever be pandas, spark, or a specific SQL dialect, but sometimes
     # suppress_test_for or only_for may include "sqlalchemy"
@@ -2560,8 +2561,8 @@ def should_we_generate_this_test(
                 f"All sqlalchemy (including {backend}) is suppressed for test: {expectation_test_case.title} | {extra_debug_info}"
             )
             return False
-    if expectation_test_case.only_for != None and expectation_test_case.only_for:
-        if not backend in expectation_test_case.only_for:
+    if expectation_test_case.only_for is not None and expectation_test_case.only_for:
+        if backend not in expectation_test_case.only_for:
             if (
                 "sqlalchemy" in expectation_test_case.only_for
                 and backend in SQL_DIALECT_NAMES
@@ -2763,7 +2764,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
             check_json_test_result(
                 test=test,
                 result=result,
-                data_asset=validator.execution_engine.active_batch_data,
+                data_asset=validator.execution_engine.batch_manager.active_batch_data,
             )
         except Exception as e:
             if raise_exception:
@@ -2774,7 +2775,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
     return (result, error_message, stack_trace)
 
 
-def check_json_test_result(test, result, data_asset=None) -> None:
+def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901 - 49
     # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
     if "unexpected_list" in result["result"]:
         if ("result" in test["output"]) and (
@@ -2933,7 +2934,7 @@ def check_json_test_result(test, result, data_asset=None) -> None:
                         + " but got "
                         + str(result["result"]["unexpected_list"])
                     )
-                except AssertionError as e:
+                except AssertionError:
                     if result["result"]["unexpected_list"]:
                         if type(result["result"]["unexpected_list"][0]) == list:
                             unexpected_list_tup = [
@@ -3081,7 +3082,7 @@ def _create_trino_engine(
                 text(f"show schemas from memory like {repr(schema_name)}")
             ).fetchall()
             if (schema_name,) not in schemas:
-                res = conn.execute(text(f"create schema {schema_name}"))
+                conn.execute(text(f"create schema {schema_name}"))
         except TrinoUserError:
             pass
     return engine
@@ -3159,7 +3160,7 @@ def _create_athena_engine(db_name_env_var: str = "ATHENA_DB_NAME") -> Engine:
     Copied get_awsathena_connection_url and get_awsathena_db_name funcs from
     tests/test_utils.py
     """
-    ATHENA_DB_NAME: str = os.getenv(db_name_env_var)
+    ATHENA_DB_NAME: Optional[str] = os.getenv(db_name_env_var)
     ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
     if not ATHENA_DB_NAME:
         raise ValueError(
