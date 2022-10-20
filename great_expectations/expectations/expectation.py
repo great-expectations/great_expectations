@@ -961,7 +961,7 @@ class Expectation(metaclass=MetaExpectation):
             configuration = self.configuration
         try:
             assert (
-                configuration.expectation_type == self.expectation_type
+                configuration.expectation_type == self.expectation_type  # type: ignore[attr-defined]
             ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -1011,18 +1011,18 @@ class Expectation(metaclass=MetaExpectation):
             include_config = kwargs["include_config"]
             del all_args["include_config"]
         else:
-            include_config = cls.default_expectation_args["include_config"]
+            include_config = cls.default_expectation_args["include_config"]  # type: ignore[attr-defined]
 
         if "catch_exceptions" in kwargs:
             catch_exceptions = kwargs["catch_exceptions"]
             del all_args["catch_exceptions"]
         else:
-            catch_exceptions = cls.default_expectation_args["catch_exceptions"]
+            catch_exceptions = cls.default_expectation_args["catch_exceptions"]  # type: ignore[attr-defined]
 
         if "result_format" in kwargs:
             result_format = kwargs["result_format"]
         else:
-            result_format = cls.default_expectation_args["result_format"]
+            result_format = cls.default_expectation_args["result_format"]  # type: ignore[attr-defined]
 
         # Extract the meta object for use as a top-level expectation_config holder
         if "meta" in kwargs:
@@ -1033,7 +1033,7 @@ class Expectation(metaclass=MetaExpectation):
 
         # Construct the expectation_config object
         return ExpectationConfiguration(
-            expectation_type=cls.expectation_type,
+            expectation_type=cls.expectation_type,  # type: ignore[attr-defined]
             kwargs=convert_to_json_serializable(deepcopy(all_args)),
             meta=meta,
         )
@@ -1100,7 +1100,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         if not _expectation_config:
             _error(
-                f"Was NOT able to get Expectation configuration for {self.expectation_type}. "
+                f"Was NOT able to get Expectation configuration for {self.expectation_type}. "  # type: ignore[attr-defined]
                 "Is there at least one sample test where 'success' is True?"
             )
         metric_diagnostics_list: List[
@@ -1177,11 +1177,11 @@ class Expectation(metaclass=MetaExpectation):
         all_beta = all([check.passed for check in maturity_checklist.beta])
         all_production = all([check.passed for check in maturity_checklist.production])
         if all_production and all_beta and all_experimental:
-            library_metadata.maturity = "PRODUCTION"
+            library_metadata.maturity = "PRODUCTION"  # type: ignore[attr-defined]
         elif all_beta and all_experimental:
-            library_metadata.maturity = "BETA"
+            library_metadata.maturity = "BETA"  # type: ignore[attr-defined]
         else:
-            library_metadata.maturity = "EXPERIMENTAL"
+            library_metadata.maturity = "EXPERIMENTAL"  # type: ignore[attr-defined]
 
         # Set the errors found when running tests
         errors = [
@@ -1223,7 +1223,7 @@ class Expectation(metaclass=MetaExpectation):
             for test in diagnostics.tests:
                 if test.test_passed is False:
                     print(f"=== {test.test_title} ({test.backend}) ===\n")
-                    print(test.stack_trace)
+                    print(test.stack_trace)  # type: ignore[attr-defined]
                     print(f"{80 * '='}\n")
 
         checklist: str = diagnostics.generate_checklist()
@@ -1432,7 +1432,7 @@ class Expectation(metaclass=MetaExpectation):
         ignore_only_for: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
-        context: Optional["DataContext"] = None,  # noqa: F821
+        context: Optional[DataContext] = None,
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
 
