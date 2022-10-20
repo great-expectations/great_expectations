@@ -1399,7 +1399,7 @@ class ExpectationConfiguration(SerializableDictDot):
     ):
         expectation_impl: "Expectation" = self._get_expectation_impl()  # noqa: F821
         return expectation_impl(self).metrics_validate(
-            metrics,
+            metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
         )

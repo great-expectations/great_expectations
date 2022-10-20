@@ -803,8 +803,8 @@ class Expectation(metaclass=MetaExpectation):
         self,
         metrics: dict,
         configuration: Optional[ExpectationConfiguration] = None,
+        runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: dict = None,
         **kwargs: dict,
     ) -> ExpectationValidationResult:
         if configuration is None:
@@ -864,7 +864,6 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs: dict,
     ) -> Dict[str, dict]:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
         runtime_configuration = self.get_runtime_kwargs(
@@ -923,7 +922,7 @@ class Expectation(metaclass=MetaExpectation):
         if runtime_configuration:
             configuration.kwargs.update(runtime_configuration)
 
-        success_kwargs = self.get_success_kwargs(configuration)
+        success_kwargs = self.get_success_kwargs(configuration=configuration)
         runtime_kwargs = {
             key: configuration.kwargs.get(key, self.default_kwarg_values.get(key))
             for key in self.runtime_keys
@@ -1857,7 +1856,6 @@ class TableExpectation(Expectation, ABC):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs: dict,
     ) -> Dict[str, dict]:
         dependencies = super().get_validation_dependencies(
             configuration=configuration,
@@ -1926,21 +1924,21 @@ class TableExpectation(Expectation, ABC):
             return {"success": False, "result": {"observed_value": metric_value}}
 
         # Obtaining components needed for validation
-        min_value: Optional[Any] = self.get_success_kwargs(configuration).get(
-            "min_value"
-        )
-        strict_min: Optional[bool] = self.get_success_kwargs(configuration).get(
-            "strict_min"
-        )
-        max_value: Optional[Any] = self.get_success_kwargs(configuration).get(
-            "max_value"
-        )
-        strict_max: Optional[bool] = self.get_success_kwargs(configuration).get(
-            "strict_max"
-        )
+        min_value: Optional[Any] = self.get_success_kwargs(
+            configuration=configuration
+        ).get("min_value")
+        strict_min: Optional[bool] = self.get_success_kwargs(
+            configuration=configuration
+        ).get("strict_min")
+        max_value: Optional[Any] = self.get_success_kwargs(
+            configuration=configuration
+        ).get("max_value")
+        strict_max: Optional[bool] = self.get_success_kwargs(
+            configuration=configuration
+        ).get("strict_max")
 
         parse_strings_as_datetimes: Optional[bool] = self.get_success_kwargs(
-            configuration
+            configuration=configuration
         ).get("parse_strings_as_datetimes")
 
         if parse_strings_as_datetimes:
@@ -1968,7 +1966,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if not isinstance(metric_value, datetime.datetime) and pd.isnull(metric_value):
             return {"success": False, "result": {"observed_value": None}}
 
-        if isinstance(metric_value, datetime.datetime):
+        if isinstance(metric_value, (datetime.datetime, int, float)):
             if isinstance(min_value, str):
                 try:
                     min_value = parse(min_value)
@@ -2745,7 +2743,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
 def _format_map_output(
     result_format: dict,
     success: bool,
-    element_count: Optional[int] = None,
+    element_count: int,
     nonnull_count: Optional[int] = None,
     unexpected_count: Optional[int] = None,
     unexpected_list: Optional[List[Any]] = None,
@@ -2780,7 +2778,7 @@ def _format_map_output(
     missing_percent: Optional[float] = None
     unexpected_percent_total: Optional[float] = None
     unexpected_percent_nonmissing: Optional[float] = None
-    if unexpected_count is not None and element_count is not None and element_count > 0:
+    if unexpected_count is not None and element_count > 0:
         unexpected_percent_total = unexpected_count / element_count * 100
 
         if not skip_missing and missing_count is not None:
