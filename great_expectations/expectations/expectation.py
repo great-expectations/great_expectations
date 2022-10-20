@@ -402,7 +402,7 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.META_PROPERTIES)
     def _diagnostic_meta_properties_renderer(
         cls, result: Optional[ExpectationValidationResult] = None, **kwargs: dict
-    ) -> Union[List[str], List[list]]:
+    ) -> Union[list, List[str], List[list]]:
         """
             Render function used to add custom meta to Data Docs
             It gets a column set in the `properties_to_render` dictionary within `meta` and adds columns in Data Docs with the values that were set.
@@ -636,10 +636,10 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         **kwargs: dict,
     ) -> Optional[RenderedTableContent]:
-        try:
-            result_dict: Optional[dict] = result.result
-        except KeyError:
+        if result is None:
             return None
+
+        result_dict: Optional[dict] = result.result
 
         if result_dict is None:
             return None
@@ -790,7 +790,14 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     def get_allowed_config_keys(cls) -> Tuple[str]:
-        return cls.domain_keys + cls.success_keys + cls.runtime_keys
+        key_list: Union[list, List[str]] = []
+        if len(cls.domain_keys) > 0:
+            key_list.extend(list(cls.domain_keys))
+        if len(cls.success_keys) > 0:
+            key_list.extend(list(cls.success_keys))
+        if len(cls.runtime_keys) > 0:
+            key_list.extend(list(cls.runtime_keys))
+        return tuple(key_list)
 
     def metrics_validate(
         self,
@@ -1058,11 +1065,12 @@ class Expectation(metaclass=MetaExpectation):
         that do not exist). These errors are added under "errors" key in the report.
         """
 
-        _debug = lambda x: x
-        _error = lambda x: x
-        if debug_logger:
+        if debug_logger is not None:
             _debug = lambda x: debug_logger.debug(f"(run_diagnostics) {x}")
             _error = lambda x: debug_logger.error(f"(run_diagnostics) {x}")
+        else:
+            _debug = lambda x: x
+            _error = lambda x: x
 
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
@@ -1333,7 +1341,7 @@ class Expectation(metaclass=MetaExpectation):
     def _get_expectation_configuration_from_examples(
         self,
         examples: List[ExpectationTestDataCases],
-    ) -> ExpectationConfiguration:
+    ) -> Optional[ExpectationConfiguration]:
         """Return an ExpectationConfiguration instance using test input expected to succeed"""
         if examples:
             for example in examples:
@@ -1356,6 +1364,7 @@ class Expectation(metaclass=MetaExpectation):
                                 expectation_type=self.expectation_type,
                                 kwargs=test.input,
                             )
+        return None
 
     @staticmethod
     def is_expectation_self_initializing(name: str) -> bool:
@@ -1836,7 +1845,7 @@ class TableExpectation(Expectation, ABC):
         "row_condition",
         "condition_parser",
     )
-    metric_dependencies = tuple()
+    metric_dependencies = ()
     domain_type = MetricDomainTypes.TABLE
 
     def get_validation_dependencies(
@@ -2268,9 +2277,11 @@ class ColumnMapExpectation(TableExpectation, ABC):
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
-        include_unexpected_rows: Optional[bool] = result_format.get(
-            "include_unexpected_rows"
-        )
+        include_unexpected_rows: bool = False
+        if isinstance(result_format, dict):
+            include_unexpected_rows = result_format.get(
+                "include_unexpected_rows", False
+            )
 
         total_count: Optional[int] = metrics.get("table.row_count")
         null_count: Optional[int] = metrics.get(
@@ -2279,7 +2290,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_count: Optional[int] = metrics.get(
             f"{self.map_metric}.unexpected_count"
         )
-        unexpected_values: Optional[Any] = metrics.get(
+        unexpected_values: Optional[List[Any]] = metrics.get(
             f"{self.map_metric}.unexpected_values"
         )
         unexpected_index_list: Optional[List[int]] = metrics.get(
@@ -2723,7 +2734,7 @@ def _format_map_output(
     element_count: Optional[int] = None,
     nonnull_count: Optional[int] = None,
     unexpected_count: Optional[int] = None,
-    unexpected_list: Optional[int] = None,
+    unexpected_list: Optional[List[Any]] = None,
     unexpected_index_list: Optional[List[int]] = None,
     unexpected_rows=None,
 ) -> Dict:
@@ -2738,6 +2749,7 @@ def _format_map_output(
     """
     # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
     # Incrementally add to result and return when all values for the specified level are present
+    return_obj: Dict
     return_obj = {"success": success}
 
     if result_format["result_format"] == "BOOLEAN_ONLY":
@@ -2748,18 +2760,18 @@ def _format_map_output(
     missing_count: Optional[int] = None
     if nonnull_count is None:
         skip_missing = True
-    else:
+    elif element_count is not None and nonnull_count is not None:
         missing_count = element_count - nonnull_count
 
     missing_percent: Optional[float] = None
     unexpected_percent_total: Optional[float] = None
     unexpected_percent_nonmissing: Optional[float] = None
-    if element_count > 0:
+    if unexpected_count is not None and element_count is not None and element_count > 0:
         unexpected_percent_total = unexpected_count / element_count * 100
 
-        if not skip_missing:
+        if not skip_missing and missing_count is not None:
             missing_percent = missing_count / element_count * 100
-            if nonnull_count > 0:
+            if nonnull_count is not None and nonnull_count > 0:
                 unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
             else:
                 unexpected_percent_nonmissing = None
@@ -2770,10 +2782,12 @@ def _format_map_output(
         "element_count": element_count,
         "unexpected_count": unexpected_count,
         "unexpected_percent": unexpected_percent_nonmissing,
-        "partial_unexpected_list": unexpected_list[
-            : result_format["partial_unexpected_count"]
-        ],
     }
+
+    if unexpected_list is not None:
+        return_obj["result"]["partial_unexpected_list"] = unexpected_list[
+            : result_format["partial_unexpected_count"]
+        ]
 
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count
@@ -2793,19 +2807,23 @@ def _format_map_output(
     if result_format["result_format"] == "BASIC":
         return return_obj
 
-    if len(unexpected_list) and isinstance(unexpected_list[0], dict):
-        # in the case of multicolumn map expectations `unexpected_list` contains dicts,
-        # which will throw an exception when we hash it to count unique members.
-        # As a workaround, we flatten the values out to tuples.
-        immutable_unexpected_list = [
-            tuple([val for val in item.values()]) for item in unexpected_list
-        ]
-    else:
-        immutable_unexpected_list = unexpected_list
+    if unexpected_list is not None:
+        if len(unexpected_list) and isinstance(unexpected_list[0], dict):
+            # in the case of multicolumn map expectations `unexpected_list` contains dicts,
+            # which will throw an exception when we hash it to count unique members.
+            # As a workaround, we flatten the values out to tuples.
+            immutable_unexpected_list = [
+                tuple([val for val in item.values()]) for item in unexpected_list
+            ]
+        else:
+            immutable_unexpected_list = unexpected_list
 
     # Try to return the most common values, if possible.
+    partial_unexpected_count: Optional[int] = result_format.get(
+        "partial_unexpected_count"
+    )
     partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
-    if 0 < result_format.get("partial_unexpected_count"):
+    if partial_unexpected_count is not None and 0 < partial_unexpected_count:
         try:
             partial_unexpected_counts = [
                 {"value": key, "count": value}

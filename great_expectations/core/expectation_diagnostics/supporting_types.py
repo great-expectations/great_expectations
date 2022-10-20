@@ -129,7 +129,7 @@ class ExpectationTestDiagnostics(SerializableDictDot):
     backend: str
     test_passed: bool
     include_in_gallery: bool
-    validation_result: ExpectationValidationResult
+    validation_result: Optional[ExpectationValidationResult]
     error_diagnostics: ExpectationErrorDiagnostics
 
 
