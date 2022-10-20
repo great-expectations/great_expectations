@@ -1,11 +1,11 @@
 import datetime
-from typing import Any, Union
+from typing import Any, Union, cast
 from unittest import mock
 
 import pandas as pd
 import pytest
 
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.self_check.util import get_test_validator_with_data
 from great_expectations.util import isclose
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -129,10 +129,7 @@ def test_column_partition_metric(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
-def test_get_metric_calls_get_metrics_and_returns_correct_result(
-    execution_engine: mock.MagicMock,
-):
+def test_get_metric_calls_get_metrics_and_returns_correct_result():
     """
     This basic test insures that MetricsCalculator.get_metric() uses MetricsCalculator.get_metrics() correctly.
 
@@ -141,13 +138,19 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result(
         2) MetricsCalculator.get_metric() correctly retrieves result from dictionary, returned by
            MetricsCalculator.get_metrics() by using the specific "metric_name", mentioned above, as the key.
 
-    The usage of "MagicMock" is used judiciously, trading off the focus on the functionality under test (i.e., avoiding
+    In the present test case, the role of "ExecutionEngine" is limited to providing the required constructor argument to
+    the "MetricsCalculator" class (one of whose methods is under test); hence, a dummy "ExecutionEngine" is employed.
+
+    The "with mock.patch" is used judiciously, trading off the focus on the functionality under test (i.e., avoiding
     "test leakage") against going as far as mocking all non-essential methods and properties, favoring code readability.
     """
-    metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
+    dummy_execution_engine = cast(ExecutionEngine, object())
+    metrics_calculator = MetricsCalculator(execution_engine=dummy_execution_engine)
+
     metric_name = "my_metric_name"
     actual_metric_value = "my_metric_value"
     metric_domain_kwargs: dict = {}
+
     with mock.patch(
         "great_expectations.validator.metrics_calculator.MetricsCalculator.get_metrics",
         return_value={metric_name: actual_metric_value},
