@@ -42,7 +42,9 @@ class _SourceFactories:
             camel_to_snake(ds_type.__name__), "_datasource"
         )
         method_name = f"add_{simplified_name}"
-        print(f"2. Register `{simplified_name}` Datasource `{method_name}()` factory")
+        print(
+            f"2. Registering {ds_type.__name__} as {simplified_name} with {method_name}() factory"
+        )
 
         pre_existing = cls.__source_factories.get(method_name)
         if not pre_existing:
