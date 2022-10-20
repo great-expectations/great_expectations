@@ -2743,7 +2743,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
 def _format_map_output(
     result_format: dict,
     success: bool,
-    element_count: int,
+    element_count: Optional[int] = None,
     nonnull_count: Optional[int] = None,
     unexpected_count: Optional[int] = None,
     unexpected_list: Optional[List[Any]] = None,
@@ -2759,6 +2759,12 @@ def _format_map_output(
 
     This function handles the logic for mapping those fields for column_map_expectations.
     """
+    if element_count is None:
+        element_count = 0
+
+    if nonnull_count is None:
+        nonnull_count = 0
+
     # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
     # Incrementally add to result and return when all values for the specified level are present
     return_obj: Dict
@@ -2770,9 +2776,9 @@ def _format_map_output(
     skip_missing: bool = False
 
     missing_count: Optional[int] = None
-    if nonnull_count is None:
+    if element_count == 0:
         skip_missing = True
-    elif element_count is not None and nonnull_count is not None:
+    else:
         missing_count = element_count - nonnull_count
 
     missing_percent: Optional[float] = None
