@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Union
+from typing import Any, Union, cast
 from unittest import mock
 
 import pandas as pd
@@ -145,11 +145,11 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result():
     "test leakage") against going as far as mocking all non-essential methods and properties, favoring code readability.
     """
 
-    # noinspection PyAbstractClass
-    class DummyExecutionEngine(ExecutionEngine):
+    class DummyExecutionEngine:
         pass
 
-    metrics_calculator = MetricsCalculator(execution_engine=DummyExecutionEngine())
+    dummy_execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+    metrics_calculator = MetricsCalculator(execution_engine=dummy_execution_engine)
 
     metric_name = "my_metric_name"
     actual_metric_value = "my_metric_value"
