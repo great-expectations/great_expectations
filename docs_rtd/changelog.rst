@@ -4,6 +4,30 @@
 Changelog
 #########
 
+0.15.28
+-----------------
+* [FEATURE] Initial zep datasource protocol. (#6153)
+* [FEATURE] Introduce BatchManager to manage Batch objects used by Validator and BatchData used by ExecutionEngine (#6156)
+* [FEATURE] Add support for Vertica dialect (#6145) (thanks @viplazylmht)
+* [FEATURE] Introduce MetricsCalculator and Refactor Redundant Code out of Validator (#6165)
+* [BUGFIX] SQLAlchemy selectable Bug fix (#6159) (thanks @tommy-watts-depop)
+* [BUGFIX] Parameterize usage stats endpoint in test dockerfile. (#6169)
+* [BUGFIX] B/great 1305/usage stats endpoint (#6170)
+* [BUGFIX] Ensure that spaces are recognized in named snippets (#6172)
+* [DOCS] Clarify wording for interactive mode in databricks (#6154)
+* [DOCS] fix source activate command (#6161) (thanks @JGrzywacz)
+* [DOCS] Update version in `runtime.txt` to fix breaking Netlify builds (#6181)
+* [DOCS] Clean up snippets and line number validation in docs (#6142)
+* [MAINTENANCE] Add Enums for renderer types (#6112)
+* [MAINTENANCE] Minor cleanup in preparation for Validator refactoring into separate concerns (#6155)
+* [MAINTENANCE] add the internal `GE_DATA_CONTEXT_ID` env var to the docker file (#6122)
+* [MAINTENANCE] Rollback setting GE_DATA_CONTEXT_ID in docker image. (#6163)
+* [MAINTENANCE] disable ge_cloud_mode when specified, detect misconfiguration (#6162)
+* [MAINTENANCE] Re-add missing Expectations to gallery and include package names (#6171)
+* [MAINTENANCE] Use `from __future__ import annotations` to clean up type hints (#6127)
+* [MAINTENANCE] Make sure that quick stage check returns 0 if there are no problems (#6177)
+* [MAINTENANCE] Remove SQL for expect_column_discrete_entropy_to_be_between (#6180)
+
 0.15.27
 -----------------
 * [FEATURE] Add logging/warnings to GX Cloud migration process (#6106)
