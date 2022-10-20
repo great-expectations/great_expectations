@@ -10,6 +10,13 @@ from great_expectations.zep.interfaces import Datasource
 SourceFactoryFn = Callable[..., Datasource]
 
 
+def _remove_suffix(s: str, suffix: str) -> str:
+    # NOTE: str.remove_suffix() added in python 3.9
+    if s.endswith(suffix):
+        s = s[: -len(suffix)]
+    return s
+
+
 def _camel_to_snake(s: str) -> str:
     # https://stackoverflow.com/a/44969381/6304433
     return "".join(["_" + c.lower() if c.isupper() else c for c in s]).lstrip("_")
@@ -35,8 +42,8 @@ class _SourceFactories:
         -------
         `class PandasDatasource` -> `add_pandas()`
         """
-        simplified_name = (
-            f"{_camel_to_snake(ds_type.__name__).removesuffix('_datasource')}"
+        simplified_name = _remove_suffix(
+            _camel_to_snake(ds_type.__name__), "_datasource"
         )
         method_name = f"add_{simplified_name}"
         print(f"2. Register `{simplified_name}` Datasource `{method_name}()` factory")
