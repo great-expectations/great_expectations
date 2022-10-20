@@ -165,7 +165,7 @@ def test_parse_validation_graph():
                 runtime_configuration=None,
             )
 
-    ready_metrics, needed_metrics = graph.parse(metrics=dict())
+    ready_metrics, needed_metrics = graph._parse(metrics=dict())
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
@@ -202,7 +202,7 @@ def test_parse_validation_graph_with_bad_metrics_args():
             )
 
     # noinspection PyTypeChecker
-    ready_metrics, needed_metrics = graph.parse(metrics=("nonexistent", "NONE"))
+    ready_metrics, needed_metrics = graph._parse(metrics=("nonexistent", "NONE"))
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 

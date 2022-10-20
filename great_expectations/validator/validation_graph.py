@@ -48,6 +48,14 @@ class ValidationGraph:
 
         self._edge_ids = {edge.id for edge in self._edges}
 
+    @property
+    def edges(self):
+        return self._edges
+
+    @property
+    def edge_ids(self):
+        return {edge.id for edge in self._edges}
+
     def add(self, edge: MetricEdge) -> None:
         if edge.id not in self._edge_ids:
             self._edges.append(edge)
@@ -135,7 +143,7 @@ class ValidationGraph:
 
         done: bool = False
         while not done:
-            ready_metrics, needed_metrics = self.parse(metrics=metrics)
+            ready_metrics, needed_metrics = self._parse(metrics=metrics)
 
             # Check to see if the user has disabled progress bars
             disable = not show_progress_bars
@@ -212,22 +220,7 @@ class ValidationGraph:
 
         return aborted_metrics_info
 
-    @staticmethod
-    def _resolve_metrics(
-        execution_engine: ExecutionEngine,
-        metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Dict[Tuple[str, str, str], Any] = None,
-        runtime_configuration: dict = None,
-    ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
-        """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
-        resolved"""
-        return execution_engine.resolve_metrics(
-            metrics_to_resolve=metrics_to_resolve,
-            metrics=metrics,
-            runtime_configuration=runtime_configuration,
-        )
-
-    def parse(
+    def _parse(
         self,
         metrics: Dict[Tuple[str, str, str], Any],
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
@@ -251,13 +244,20 @@ class ValidationGraph:
 
         return maybe_ready - unmet_dependency, unmet_dependency
 
-    @property
-    def edges(self):
-        return self._edges
-
-    @property
-    def edge_ids(self):
-        return {edge.id for edge in self._edges}
+    @staticmethod
+    def _resolve_metrics(
+        execution_engine: ExecutionEngine,
+        metrics_to_resolve: Iterable[MetricConfiguration],
+        metrics: Dict[Tuple[str, str, str], Any] = None,
+        runtime_configuration: dict = None,
+    ) -> Dict[Tuple[str, str, str], MetricConfiguration]:
+        """A means of accessing the Execution Engine's resolve_metrics method, where missing metric configurations are
+        resolved"""
+        return execution_engine.resolve_metrics(
+            metrics_to_resolve=metrics_to_resolve,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+        )
 
 
 class ExpectationValidationGraph:
