@@ -22,7 +22,7 @@ Changelog
 * [MAINTENANCE] Minor cleanup in preparation for Validator refactoring into separate concerns (#6155)
 * [MAINTENANCE] add the internal `GE_DATA_CONTEXT_ID` env var to the docker file (#6122)
 * [MAINTENANCE] Rollback setting GE_DATA_CONTEXT_ID in docker image. (#6163)
-* [MAINTENANCE] disable ge_cloud_mode when specified, detect misconfiguration (#6162) (thanks @rreinoldsc)
+* [MAINTENANCE] disable ge_cloud_mode when specified, detect misconfiguration (#6162)
 * [MAINTENANCE] Re-add missing Expectations to gallery and include package names (#6171)
 * [MAINTENANCE] Use `from __future__ import annotations` to clean up type hints (#6127)
 * [MAINTENANCE] Make sure that quick stage check returns 0 if there are no problems (#6177)
