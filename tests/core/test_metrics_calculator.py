@@ -5,7 +5,6 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-from great_expectations.core import IDDict
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.self_check.util import get_test_validator_with_data
 from great_expectations.util import isclose
@@ -147,7 +146,9 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result(
         return_value={metric_name: metric_value},
     ) as mock_get_metrics_method:
         # create a fake configuration
-        metric_configuration = MetricConfiguration(metric_name=metric_name)
+        metric_configuration = MetricConfiguration(
+            metric_name=metric_name, metric_domain_kwargs={}
+        )
         resolved_metric_value = metrics_calculator.get_metric(
             metric=metric_configuration
         )
