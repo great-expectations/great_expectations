@@ -276,7 +276,7 @@ def test_parse_validation_graph(
     )
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
-    # Show that by having "nonexistent" metric in dictionary of resolved metrics does not increase ready_metrics count.
+    # Show that including "nonexistent" metric in dictionary of resolved metrics does not increase ready_metrics count.
     available_metrics = {("nonexistent", "nonexistent", "nonexistent"): "NONE"}
     (
         ready_metrics,
