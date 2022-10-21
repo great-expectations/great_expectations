@@ -310,7 +310,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):
     return dependencies
 
 
-def parse_evaluation_parameter(  # noqa: C901 - complexity 21
+def parse_evaluation_parameter(  # noqa: C901 - complexity 19
     parameter_expression: str,
     evaluation_parameters: Optional[Dict[str, Any]] = None,
     data_context: Optional[DataContext] = None,
