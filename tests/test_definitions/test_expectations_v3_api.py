@@ -12,7 +12,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.self_check.util import (
     BigQueryDialect,
-    candidate_test_is_on_temporary_notimplemented_list_cfe,
+    candidate_test_is_on_temporary_notimplemented_list_v3_api,
     evaluate_json_test_v3_api,
     generate_sqlite_db_path,
     get_test_validator_with_data,
@@ -22,7 +22,7 @@ from great_expectations.self_check.util import (
     sqliteDialect,
     trinoDialect,
 )
-from tests.conftest import build_test_backends_list_cfe
+from tests.conftest import build_test_backends_list_v2_api
 
 
 def pytest_generate_tests(metafunc):
@@ -35,7 +35,7 @@ def pytest_generate_tests(metafunc):
     ]
     parametrized_tests = []
     ids = []
-    backends = build_test_backends_list_cfe(metafunc)
+    backends = build_test_backends_list_v2_api(metafunc)
     validator_with_data = None
     for expectation_category in expectation_dirs:
 
@@ -59,7 +59,7 @@ def pytest_generate_tests(metafunc):
                     if suppress_test_for and not isinstance(suppress_test_for, list):
                         # coerce into list if passed in as string
                         suppress_test_for = [suppress_test_for]
-                    if candidate_test_is_on_temporary_notimplemented_list_cfe(
+                    if candidate_test_is_on_temporary_notimplemented_list_v3_api(
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True

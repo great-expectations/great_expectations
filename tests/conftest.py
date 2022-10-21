@@ -207,7 +207,7 @@ def pytest_addoption(parser):
 
 
 def build_test_backends_list(metafunc):
-    test_backend_names: List[str] = build_test_backends_list_cfe(metafunc)
+    test_backend_names: List[str] = build_test_backends_list_v2_api(metafunc)
     backend_name_class_name_map: Dict[str, str] = {
         "pandas": "PandasDataset",
         "spark": "SparkDFDataset",
@@ -223,7 +223,7 @@ def build_test_backends_list(metafunc):
     ]
 
 
-def build_test_backends_list_cfe(metafunc):
+def build_test_backends_list_v2_api(metafunc):
     # adding deprecation warnings
     if metafunc.config.getoption("--no-postgresql"):
         warnings.warn(

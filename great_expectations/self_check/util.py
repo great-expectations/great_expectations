@@ -1806,8 +1806,10 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
     return False
 
 
-def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    candidate_test_is_on_temporary_notimplemented_list_cfe_trino = [
+def candidate_test_is_on_temporary_notimplemented_list_v3_api(
+    context, expectation_type
+):
+    candidate_test_is_on_temporary_notimplemented_list_v3_api_trino = [
         "expect_column_distinct_values_to_contain_set",
         "expect_column_max_to_be_between",
         "expect_column_mean_to_be_between",
@@ -1843,7 +1845,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
     ]
-    candidate_test_is_on_temporary_notimplemented_list_cfe_other_sql = [
+    candidate_test_is_on_temporary_notimplemented_list_v3_api_other_sql = [
         "expect_column_values_to_be_increasing",
         "expect_column_values_to_be_decreasing",
         "expect_column_values_to_match_strftime_format",
@@ -1871,8 +1873,10 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
     ]
     if context in ["trino"]:
         return expectation_type in set(
-            candidate_test_is_on_temporary_notimplemented_list_cfe_trino
-        ).union(set(candidate_test_is_on_temporary_notimplemented_list_cfe_other_sql))
+            candidate_test_is_on_temporary_notimplemented_list_v3_api_trino
+        ).union(
+            set(candidate_test_is_on_temporary_notimplemented_list_v3_api_other_sql)
+        )
     if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v3_sql = [
             "expect_column_values_to_be_increasing",
