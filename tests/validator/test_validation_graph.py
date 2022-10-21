@@ -306,6 +306,7 @@ def test_populate_dependencies_with_incorrect_metric_name():
     pandas_execution_engine_stub = cast(ExecutionEngine, PandasExecutionEngineStub())
 
     graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
+    exc: Optional[ge_exceptions.GreatExpectationsError] = None
     try:
         graph.build_metric_dependency_graph(
             metric_configuration=MetricConfiguration(
@@ -313,9 +314,9 @@ def test_populate_dependencies_with_incorrect_metric_name():
             ),
         )
     except ge_exceptions.MetricProviderError as e:
-        graph = e
+        exc = e
 
-    assert isinstance(graph, ge_exceptions.MetricProviderError)
+    assert isinstance(exc, ge_exceptions.MetricProviderError)
 
 
 @pytest.mark.integration
