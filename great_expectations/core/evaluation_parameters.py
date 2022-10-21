@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import logging
@@ -5,7 +7,7 @@ import math
 import operator
 import traceback
 from collections import namedtuple
-from typing import Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from pyparsing import (
     CaselessKeyword,
@@ -26,6 +28,9 @@ from pyparsing import (
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import EvaluationParameterError
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
 
 logger = logging.getLogger(__name__)
 _epsilon = 1e-12
@@ -307,7 +312,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):
 def parse_evaluation_parameter(  # noqa: C901 - complexity 21
     parameter_expression: str,
     evaluation_parameters: Optional[Dict[str, Any]] = None,
-    data_context: Optional[Any] = None,  # Cannot type 'DataContext' due to import cycle
+    data_context: Optional[DataContext] = None,
 ) -> Any:
     """Use the provided evaluation_parameters dict to parse a given parameter expression.
 
