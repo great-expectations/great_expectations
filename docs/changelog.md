@@ -1,4 +1,3 @@
-foo
 ---
 title: Changelog
 ---
