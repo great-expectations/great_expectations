@@ -396,8 +396,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.validator.validation_graph.tqdm")
-def test_progress_bar_config_enabled(mock_tqdm: mock.MagicMock):
+def test_progress_bar_config_enabled():
     class DummyMetricConfiguration:
         pass
 
@@ -422,21 +421,22 @@ def test_progress_bar_config_enabled(mock_tqdm: mock.MagicMock):
             MetricEdge(left=dummy_metric_configuration),
             MetricEdge(left=dummy_metric_configuration),
         ],
-    ):
+    ), mock.patch(
+        "great_expectations.validator.validation_graph.tqdm",
+    ) as mock_tqdm:
         graph = ValidationGraph(execution_engine=dummy_execution_engine)
         graph.resolve_validation_graph(
             metrics={},
             runtime_configuration=None,
         )
 
-    # Still invoked but doesn't actually do anything due to `disabled`
-    assert mock_tqdm.called is True
-    assert mock_tqdm.call_args[1]["disable"] is False
+        # Still invoked but doesn't actually do anything due to `disabled`
+        assert mock_tqdm.called is True
+        assert mock_tqdm.call_args[1]["disable"] is False
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.validator.validation_graph.tqdm")
-def test_progress_bar_config_disabled(mock_tqdm: mock.MagicMock):
+def test_progress_bar_config_disabled():
     class DummyMetricConfiguration:
         pass
 
@@ -461,7 +461,9 @@ def test_progress_bar_config_disabled(mock_tqdm: mock.MagicMock):
             MetricEdge(left=dummy_metric_configuration),
             MetricEdge(left=dummy_metric_configuration),
         ],
-    ):
+    ), mock.patch(
+        "great_expectations.validator.validation_graph.tqdm",
+    ) as mock_tqdm:
         graph = ValidationGraph(execution_engine=dummy_execution_engine)
         graph.resolve_validation_graph(
             metrics={},
@@ -469,5 +471,5 @@ def test_progress_bar_config_disabled(mock_tqdm: mock.MagicMock):
             show_progress_bars=False,
         )
 
-    assert mock_tqdm.called is True
-    assert mock_tqdm.call_args[1]["disable"] is True
+        assert mock_tqdm.called is True
+        assert mock_tqdm.call_args[1]["disable"] is True
