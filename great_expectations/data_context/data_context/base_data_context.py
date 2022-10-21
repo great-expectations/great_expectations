@@ -399,20 +399,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
 
-    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
-        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
-
-        Args:
-            store_name (str): a key for the new Store in in self._stores
-            store_config (dict): a config for the Store to add
-
-        Returns:
-            store (Store)
-        """
-
-        self.config.stores[store_name] = store_config  # type: ignore[index]
-        return self._build_store_from_config(store_name, store_config)
-
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
     ) -> ValidationOperator:
@@ -2146,31 +2132,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         self._synchronize_self_with_underlying_data_context()
         return checkpoint
-
-    def get_checkpoint(
-        self,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> Checkpoint:
-        checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
-            name=name, ge_cloud_id=ge_cloud_id
-        )
-        checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
-            checkpoint_config=checkpoint_config,
-            data_context=self,
-            name=name,
-        )
-
-        return checkpoint
-
-    def delete_checkpoint(
-        self,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> None:
-        return self.checkpoint_store.delete_checkpoint(
-            name=name, ge_cloud_id=ge_cloud_id
-        )
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT.value,

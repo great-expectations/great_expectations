@@ -63,6 +63,7 @@ from great_expectations.data_context.store.validations_store import ValidationsS
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
+    CheckpointConfig,
     ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
@@ -685,6 +686,20 @@ class AbstractDataContext(ABC):
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
 
+    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
+        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+
+        Args:
+            store_name (str): a key for the new Store in in self._stores
+            store_config (dict): a config for the Store to add
+
+        Returns:
+            store (Store)
+        """
+
+        self.config.stores[store_name] = store_config  # type: ignore[index]
+        return self._build_store_from_config(store_name, store_config)
+
     def list_datasources(self) -> List[dict]:
         """List currently-configured datasources on this context. Masks passwords.
 
@@ -794,6 +809,31 @@ class AbstractDataContext(ABC):
 
         self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
         return checkpoint
+
+    def get_checkpoint(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> Checkpoint:
+        checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
+            name=name, ge_cloud_id=ge_cloud_id
+        )
+        checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
+            checkpoint_config=checkpoint_config,
+            data_context=self,
+            name=name,
+        )
+
+        return checkpoint
+
+    def delete_checkpoint(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        return self.checkpoint_store.delete_checkpoint(
+            name=name, ge_cloud_id=ge_cloud_id
+        )
 
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None
