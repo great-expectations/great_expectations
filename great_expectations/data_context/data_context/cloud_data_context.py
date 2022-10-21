@@ -370,6 +370,9 @@ class CloudDataContext(AbstractDataContext):
             )
         )
 
+    def delete_datasource(self, datasource_name: str) -> None:
+        super().delete_datasource(datasource_name=datasource_name, save_changes=True)
+
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
