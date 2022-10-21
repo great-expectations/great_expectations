@@ -287,7 +287,8 @@ def pytest_generate_tests(metafunc):
 @pytest.mark.order(index=1)
 @pytest.mark.integration
 @pytest.mark.slow  # 14.90s
-def test_case_runner(test_case):
+@pytest.mark.v2_api
+def test_case_runner_v2_api(test_case):
     if test_case["skip"]:
         pytest.skip()
 
