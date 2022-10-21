@@ -262,33 +262,34 @@ def test_ExpectationValidationGraph_get_exception_info(
 
 @pytest.mark.unit
 def test_parse_validation_graph(
-    expect_column_value_z_scores_to_be_less_than_expectation_validation_graph,
+    expect_column_value_z_scores_to_be_less_than_expectation_validation_graph: ValidationGraph,
 ):
+    available_metric: Dict[Tuple[str, str, str], Any]
+
+    # Parse input "ValidationGraph" object and confirm the numbers of ready and still needed metrics.
+    available_metrics = {}
     (
         ready_metrics,
         needed_metrics,
     ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(
-        metrics=dict()
+        metrics=available_metrics
     )
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
-
-@pytest.mark.unit
-def test_parse_validation_graph_with_bad_metrics_args(
-    expect_column_value_z_scores_to_be_less_than_expectation_validation_graph,
-):
+    # Show that by having "nonexistent" metric in dictionary of resolved metrics does not increase ready_metrics count.
+    available_metrics = {("nonexistent", "nonexistent", "nonexistent"): "NONE"}
     (
         ready_metrics,
         needed_metrics,
     ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(
-        metrics=("nonexistent", "NONE")
+        metrics=available_metrics
     )
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
 @pytest.mark.unit
 def test_populate_dependencies(
-    expect_column_value_z_scores_to_be_less_than_expectation_validation_graph,
+    expect_column_value_z_scores_to_be_less_than_expectation_validation_graph: ValidationGraph,
 ):
     assert (
         len(
