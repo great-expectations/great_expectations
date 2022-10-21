@@ -50,12 +50,60 @@ def expect_column_values_to_be_unique_expectation_config() -> ExpectationConfigu
 
 
 @pytest.fixture
-def expectation_validation_graph(
+def expect_column_value_z_scores_to_be_less_than_expectation_config() -> ExpectationConfiguration:
+    return ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
+    )
+
+
+@pytest.fixture
+def expect_column_values_to_be_unique_expectation_validation_graph(
     expect_column_values_to_be_unique_expectation_config: ExpectationConfiguration,
 ) -> ExpectationValidationGraph:
     return ExpectationValidationGraph(
         configuration=expect_column_values_to_be_unique_expectation_config
     )
+
+
+@pytest.fixture
+def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph(
+    expect_column_value_z_scores_to_be_less_than_expectation_config,
+):
+    class PandasExecutionEngineStub:
+        pass
+
+    PandasExecutionEngineStub.__name__ = "PandasExecutionEngine"
+    pandas_execution_engine_stub = cast(ExecutionEngine, PandasExecutionEngineStub())
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
+    )
+    graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
+    validation_dependencies = (
+        ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
+            expectation_configuration, pandas_execution_engine_stub
+        )
+    )
+
+    for metric_configuration in validation_dependencies["metrics"].values():
+        graph.build_metric_dependency_graph(
+            metric_configuration=metric_configuration,
+            runtime_configuration=None,
+        )
+
+    return graph
 
 
 @pytest.mark.parametrize(
@@ -145,30 +193,41 @@ def test_ValidationGraph_add(metric_edge: MetricEdge) -> None:
 @pytest.mark.unit
 def test_ExpectationValidationGraph_constructor(
     expect_column_values_to_be_unique_expectation_config: ExpectationConfiguration,
-    expectation_validation_graph: ExpectationValidationGraph,
+    expect_column_values_to_be_unique_expectation_validation_graph: ExpectationValidationGraph,
 ) -> None:
     assert (
-        expectation_validation_graph.configuration
+        expect_column_values_to_be_unique_expectation_validation_graph.configuration
         == expect_column_values_to_be_unique_expectation_config
     )
-    assert expectation_validation_graph.graph.__dict__ == ValidationGraph().__dict__
+    assert (
+        expect_column_values_to_be_unique_expectation_validation_graph.graph.__dict__
+        == ValidationGraph().__dict__
+    )
 
 
 @pytest.mark.unit
 def test_ExpectationValidationGraph_update(
-    expectation_validation_graph: ExpectationValidationGraph,
+    expect_column_values_to_be_unique_expectation_validation_graph: ExpectationValidationGraph,
     validation_graph_with_single_edge: ValidationGraph,
 ) -> None:
-    assert len(expectation_validation_graph.graph.edges) == 0
+    assert (
+        len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges)
+        == 0
+    )
 
-    expectation_validation_graph.update(validation_graph_with_single_edge)
+    expect_column_values_to_be_unique_expectation_validation_graph.update(
+        validation_graph_with_single_edge
+    )
 
-    assert len(expectation_validation_graph.graph.edges) == 1
+    assert (
+        len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges)
+        == 1
+    )
 
 
 @pytest.mark.unit
 def test_ExpectationValidationGraph_get_exception_info(
-    expectation_validation_graph: ExpectationValidationGraph,
+    expect_column_values_to_be_unique_expectation_validation_graph: ExpectationValidationGraph,
     validation_graph_with_single_edge: ValidationGraph,
     metric_edge: MetricEdge,
 ) -> None:
@@ -190,8 +249,10 @@ def test_ExpectationValidationGraph_get_exception_info(
         right.id: {"exception_info": {right_exception}},
     }
 
-    expectation_validation_graph.update(validation_graph_with_single_edge)
-    exception_info = expectation_validation_graph.get_exception_info(
+    expect_column_values_to_be_unique_expectation_validation_graph.update(
+        validation_graph_with_single_edge
+    )
+    exception_info = expect_column_values_to_be_unique_expectation_validation_graph.get_exception_info(
         metric_info=metric_info
     )
 
@@ -200,104 +261,41 @@ def test_ExpectationValidationGraph_get_exception_info(
 
 
 @pytest.mark.unit
-def test_parse_validation_graph():
-    class PandasExecutionEngineStub:
-        pass
-
-    PandasExecutionEngineStub.__name__ = "PandasExecutionEngine"
-    pandas_execution_engine_stub = cast(ExecutionEngine, PandasExecutionEngineStub())
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={
-            "column": "a",
-            "mostly": 0.9,
-            "threshold": 4,
-            "double_sided": True,
-        },
+def test_parse_validation_graph(
+    expect_column_value_z_scores_to_be_less_than_expectation_validation_graph,
+):
+    (
+        ready_metrics,
+        needed_metrics,
+    ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(
+        metrics=dict()
     )
-    graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
-    validation_dependencies = (
-        ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, pandas_execution_engine_stub
-        )
-    )
-
-    for metric_configuration in validation_dependencies["metrics"].values():
-        graph.build_metric_dependency_graph(
-            metric_configuration=metric_configuration,
-            runtime_configuration=None,
-        )
-
-    ready_metrics, needed_metrics = graph._parse(metrics=dict())
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
 @pytest.mark.unit
-def test_parse_validation_graph_with_bad_metrics_args():
-    class PandasExecutionEngineStub:
-        pass
-
-    PandasExecutionEngineStub.__name__ = "PandasExecutionEngine"
-    pandas_execution_engine_stub = cast(ExecutionEngine, PandasExecutionEngineStub())
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={
-            "column": "a",
-            "mostly": 0.9,
-            "threshold": 4,
-            "double_sided": True,
-        },
+def test_parse_validation_graph_with_bad_metrics_args(
+    expect_column_value_z_scores_to_be_less_than_expectation_validation_graph,
+):
+    (
+        ready_metrics,
+        needed_metrics,
+    ) = expect_column_value_z_scores_to_be_less_than_expectation_validation_graph._parse(
+        metrics=("nonexistent", "NONE")
     )
-    graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
-    validation_dependencies = (
-        ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, execution_engine=pandas_execution_engine_stub
-        )
-    )
-
-    for metric_configuration in validation_dependencies["metrics"].values():
-        graph.build_metric_dependency_graph(
-            metric_configuration=metric_configuration,
-            runtime_configuration=None,
-        )
-
-    # noinspection PyTypeChecker
-    ready_metrics, needed_metrics = graph._parse(metrics=("nonexistent", "NONE"))
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
 @pytest.mark.unit
-def test_populate_dependencies():
-    class PandasExecutionEngineStub:
-        pass
-
-    PandasExecutionEngineStub.__name__ = "PandasExecutionEngine"
-    pandas_execution_engine_stub = cast(ExecutionEngine, PandasExecutionEngineStub())
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={
-            "column": "a",
-            "mostly": 0.9,
-            "threshold": 4,
-            "double_sided": True,
-        },
-    )
-    graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
-    validation_dependencies = (
-        ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, pandas_execution_engine_stub
+def test_populate_dependencies(
+    expect_column_value_z_scores_to_be_less_than_expectation_validation_graph,
+):
+    assert (
+        len(
+            expect_column_value_z_scores_to_be_less_than_expectation_validation_graph.edges
         )
+        == 33
     )
-
-    for metric_configuration in validation_dependencies["metrics"].values():
-        graph.build_metric_dependency_graph(
-            metric_configuration=metric_configuration,
-        )
-
-    assert len(graph.edges) == 33
 
 
 @pytest.mark.unit
