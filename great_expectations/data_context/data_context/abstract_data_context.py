@@ -1600,6 +1600,18 @@ class AbstractDataContext(ABC):
             ge_cloud_id=ge_cloud_id,
         )
 
+    def list_validation_operators(self):
+        """List currently-configured Validation Operators on this context"""
+
+        validation_operators = []
+        for (
+            name,
+            value,
+        ) in self.variables.validation_operators.items():
+            value["name"] = name
+            validation_operators.append(value)
+        return validation_operators
+
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
     ):
@@ -1715,6 +1727,54 @@ class AbstractDataContext(ABC):
             **kwargs,
         )
         return batch_kwargs
+
+    def clean_data_docs(self, site_name=None) -> bool:
+        """
+        Clean a given data docs site.
+
+        This removes all files from the configured Store.
+
+        Args:
+            site_name (str): Optional, the name of the site to clean. If not
+            specified, all sites will be cleaned.
+        """
+        data_docs_sites = self.variables.data_docs_sites
+        if not data_docs_sites:
+            raise ge_exceptions.DataContextError(
+                "No data docs sites were found on this DataContext, therefore no sites will be cleaned.",
+            )
+
+        data_docs_site_names = list(data_docs_sites.keys())
+        if site_name:
+            if site_name not in data_docs_site_names:
+                raise ge_exceptions.DataContextError(
+                    f"The specified site name `{site_name}` does not exist in this project."
+                )
+            return self._clean_data_docs_site(site_name)
+
+        cleaned = []
+        for existing_site_name in data_docs_site_names:
+            cleaned.append(self._clean_data_docs_site(existing_site_name))
+        return all(cleaned)
+
+    def _clean_data_docs_site(self, site_name: str) -> bool:
+        sites = self.variables.data_docs_sites
+        if not sites:
+            return False
+        site_config = sites.get(site_name)
+
+        site_builder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+            },
+            config_defaults={
+                "module_name": "great_expectations.render.renderer.site_builder"
+            },
+        )
+        site_builder.clean_site()
+        return True
 
     @staticmethod
     def _default_profilers_exist(directory_path: Optional[str]) -> bool:
@@ -2335,6 +2395,11 @@ class AbstractDataContext(ABC):
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
 
         self._evaluation_parameter_dependencies_compiled = True
+
+    def store_validation_result_metrics(
+        self, requested_metrics, validation_results, target_store_name
+    ) -> None:
+        self._store_metrics(requested_metrics, validation_results, target_store_name)
 
     def _store_metrics(
         self, requested_metrics, validation_results, target_store_name
