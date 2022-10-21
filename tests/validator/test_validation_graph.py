@@ -89,10 +89,10 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
         },
     )
     graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
-    validation_dependencies = (
-        ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, pandas_execution_engine_stub
-        )
+    validation_dependencies: Dict[
+        str, Union[dict, Dict[str, MetricConfiguration]]
+    ] = ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
+        expectation_configuration, pandas_execution_engine_stub
     )
 
     for metric_configuration in validation_dependencies["metrics"].values():
@@ -358,9 +358,13 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
     # noinspection PyUnusedLocal
     validator = Validator(execution_engine=execution_engine, batches=[batch])
 
-    validation_dependencies = ExpectColumnMaxToBeBetween().get_validation_dependencies(
+    validation_dependencies: Dict[
+        str, MetricConfiguration
+    ] = ExpectColumnMaxToBeBetween().get_validation_dependencies(
         expectation_configuration, execution_engine, runtime_configuration
-    )["metrics"]
+    )[
+        "metrics"
+    ]
 
     graph = ValidationGraph(execution_engine=execution_engine)
 
