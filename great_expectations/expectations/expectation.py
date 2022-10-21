@@ -2594,6 +2594,8 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration=configuration)
+        if configuration is None:
+            configuration = self.configuration
         try:
             assert (
                 "column_list" in configuration.kwargs
