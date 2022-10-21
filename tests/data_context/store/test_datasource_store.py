@@ -335,20 +335,6 @@ def test_datasource_store_retrieve_by_name(
     )
 
 
-@pytest.mark.unit
-def test_datasource_store_delete_by_name(
-    fake_datasource_name,
-    datasource_store_with_single_datasource: DatasourceStore,
-) -> None:
-    assert len(datasource_store_with_single_datasource.list_keys()) == 1
-
-    datasource_store_with_single_datasource.delete_by_name(
-        datasource_name=fake_datasource_name
-    )
-
-    assert len(datasource_store_with_single_datasource.list_keys()) == 0
-
-
 @pytest.mark.integration
 def test_datasource_store_update_by_name(
     fake_datasource_name,
