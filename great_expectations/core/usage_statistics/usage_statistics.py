@@ -608,7 +608,7 @@ def send_usage_message_from_handler(
     """Send a usage statistics message using an already instantiated handler."""
     # noinspection PyBroadException
     try:
-        if handler is not None:
+        if handler:
             message: dict = {
                 "event": event,
                 "event_payload": event_payload,
