@@ -1,3 +1,4 @@
+foo
 ---
 title: Changelog
 ---
