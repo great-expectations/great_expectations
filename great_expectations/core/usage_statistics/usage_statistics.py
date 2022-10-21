@@ -615,8 +615,10 @@ def send_usage_message_from_handler(
                 "success": success,
             }
             handler.emit(message)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, Exception encountered while running send_usage_message_from_handler()."
+        )
 
 
 # noinspection SpellCheckingInspection
