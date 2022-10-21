@@ -73,7 +73,7 @@ stages:
                 tests/test_sets/**
 
                 [GEChanged]
-                great_expectations/**
+                great_expectations/**/*.py
                 tests/**
                 /*.txt
                 /*.yml
@@ -433,7 +433,7 @@ stages:
               pip install .
             displayName: 'Install dependencies'
 
-          - script: |              
+          - script: |
               # Install dependencies
               pip install pytest-cov pytest-azurepipelines
 
