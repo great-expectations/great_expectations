@@ -200,7 +200,6 @@ def test_ExpectationValidationGraph_get_exception_info(
 
 @pytest.mark.integration
 def test_parse_validation_graph():
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
@@ -210,10 +209,6 @@ def test_parse_validation_graph():
             "double_sided": True,
         },
     )
-    # noinspection PyUnusedLocal
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
-    # noinspection PyUnusedLocal
-    batch = Batch(data=df)
     execution_engine = PandasExecutionEngine()
     graph = ValidationGraph(execution_engine=execution_engine)
     for configuration in [expectation_configuration]:
@@ -272,7 +267,6 @@ def test_parse_validation_graph_with_bad_metrics_args():
 
 @pytest.mark.integration
 def test_populate_dependencies():
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
@@ -282,10 +276,6 @@ def test_populate_dependencies():
             "double_sided": True,
         },
     )
-    # noinspection PyUnusedLocal
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
-    # noinspection PyUnusedLocal
-    batch = Batch(data=df)
     execution_engine = PandasExecutionEngine()
     graph = ValidationGraph(execution_engine=execution_engine)
     for configuration in [expectation_configuration]:
@@ -309,20 +299,6 @@ def test_populate_dependencies():
 
 @pytest.mark.integration
 def test_populate_dependencies_with_incorrect_metric_name():
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={
-            "column": "a",
-            "mostly": 0.9,
-            "threshold": 4,
-            "double_sided": True,
-        },
-    )
-    # noinspection PyUnusedLocal
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
-    # noinspection PyUnusedLocal
-    batch = Batch(data=df)
     execution_engine = PandasExecutionEngine()
     graph = ValidationGraph(execution_engine=execution_engine)
     try:
