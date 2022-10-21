@@ -262,7 +262,7 @@ def test_ExpectationValidationGraph_get_exception_info(
 def test_parse_validation_graph(
     expect_column_value_z_scores_to_be_less_than_expectation_validation_graph: ValidationGraph,
 ):
-    available_metric: Dict[Tuple[str, str, str], Any]
+    available_metrics: Dict[Tuple[str, str, str], Any]
 
     # Parse input "ValidationGraph" object and confirm the numbers of ready and still needed metrics.
     available_metrics = {}
