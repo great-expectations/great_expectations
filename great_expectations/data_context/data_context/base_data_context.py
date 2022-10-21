@@ -20,7 +20,7 @@ from ruamel.yaml import YAML
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.config_validator.yaml_config_validator import (
-    YamlConfigValidator,
+    _YamlConfigValidator,
 )
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
@@ -336,7 +336,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_config,
                 )
 
-        self._yaml_config_validator = YamlConfigValidator(
+        self._yaml_config_validator = _YamlConfigValidator(
             data_context=self,
         )
 

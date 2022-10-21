@@ -56,7 +56,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-class YamlConfigValidator:
+class _YamlConfigValidator:
     """Helper class for validating YAML configurations of Great Expectations components.
 
     Attributes:
@@ -115,7 +115,7 @@ class YamlConfigValidator:
         self,
         data_context: AbstractDataContext,
     ):
-        """Init YamlConfigValidator with a Data Context"""
+        """Init _YamlConfigValidator with a Data Context"""
         self._data_context = data_context
 
     @property
