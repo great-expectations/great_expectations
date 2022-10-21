@@ -2073,6 +2073,8 @@ class QueryExpectation(TableExpectation, ABC):
               UserWarning: If query is not parameterized, and/or row_condition is passed.
         """
         super().validate_configuration(configuration=configuration)
+        if configuration is None:
+            configuration = self.configuration
 
         query: Optional[str] = configuration.kwargs.get(
             "query"
@@ -2121,6 +2123,9 @@ class ColumnExpectation(TableExpectation, ABC):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        super().validate_configuration(configuration=configuration)
+        if configuration is None:
+            configuration = self.configuration
         # Ensuring basic configuration parameters are properly set
         try:
             assert (
@@ -2152,6 +2157,8 @@ class ColumnMapExpectation(TableExpectation, ABC):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration=configuration)
+        if configuration is None:
+            configuration = self.configuration
         try:
             assert (
                 "column" in configuration.kwargs
@@ -2383,6 +2390,8 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration=configuration)
+        if configuration is None:
+            configuration = self.configuration
         try:
             assert (
                 "column_A" in configuration.kwargs
