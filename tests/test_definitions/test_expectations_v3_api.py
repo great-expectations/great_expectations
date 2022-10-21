@@ -154,7 +154,7 @@ def pytest_generate_tests(metafunc):
                                 ):
                                     generate_test = True
                                 elif (
-                                    "bigquery_cfe" in only_for
+                                    "bigquery_v3_api" in only_for
                                     and BigQueryDialect is not None
                                     and hasattr(
                                         validator_with_data.active_batch_data.sql_engine_dialect,
@@ -293,7 +293,7 @@ def pytest_generate_tests(metafunc):
                                     == "bigquery"
                                 )
                                 or (
-                                    "bigquery_cfe" in suppress_test_for
+                                    "bigquery_v3_api" in suppress_test_for
                                     and BigQueryDialect is not None
                                     and validator_with_data
                                     and isinstance(
