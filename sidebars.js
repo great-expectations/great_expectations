@@ -211,6 +211,7 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations',
+            'guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations',

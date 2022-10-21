@@ -23,7 +23,7 @@ This guide will help you pass an in-memory DataFrame to an existing <TechnicalTa
 
 
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L2-L6
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L2-L7
 ```
 
 If you have an existing configured DataContext in your filesystem in the form of a `great_expectations.yml` file, you can load it like this:

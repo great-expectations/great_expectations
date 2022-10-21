@@ -321,6 +321,11 @@ local_tests = [
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
+        name="expect_multicolumn_values_to_be_multiples_of_three",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py",
+        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    ),
+    IntegrationTestFixture(
         name="how_to_use_great_expectations_in_aws_glue",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py",
         extra_backend_dependencies=BackendDependencies.SPARK,
