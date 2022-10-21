@@ -72,9 +72,7 @@ def expect_column_values_to_be_unique_expectation_validation_graph(
 
 
 @pytest.fixture
-def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph(
-    expect_column_value_z_scores_to_be_less_than_expectation_config,
-):
+def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
     class PandasExecutionEngineStub:
         pass
 
