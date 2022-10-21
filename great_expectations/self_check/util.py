@@ -2679,7 +2679,7 @@ def evaluate_json_test(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=True):
+def evaluate_json_test_v3_api(validator, expectation_type, test, raise_exception=True):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 

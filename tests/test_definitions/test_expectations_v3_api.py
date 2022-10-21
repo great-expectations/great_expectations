@@ -13,7 +13,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.self_check.util import (
     BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list_cfe,
-    evaluate_json_test_cfe,
+    evaluate_json_test_v3_api,
     generate_sqlite_db_path,
     get_test_validator_with_data,
     mssqlDialect,
@@ -385,13 +385,13 @@ def test_case_runner_v3_api(test_case):
     # test_case["batch"]._initialize_expectations()
     if "parse_strings_as_datetimes" in test_case["test"]["in"]:
         with pytest.deprecated_call():
-            evaluate_json_test_cfe(
+            evaluate_json_test_v3_api(
                 validator=test_case["validator_with_data"],
                 expectation_type=test_case["expectation_type"],
                 test=test_case["test"],
             )
     else:
-        evaluate_json_test_cfe(
+        evaluate_json_test_v3_api(
             validator=test_case["validator_with_data"],
             expectation_type=test_case["expectation_type"],
             test=test_case["test"],
