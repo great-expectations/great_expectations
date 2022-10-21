@@ -2,8 +2,6 @@ import glob
 import json
 import logging
 import os
-import random
-import string
 from collections import OrderedDict
 
 import pandas as pd
@@ -12,7 +10,7 @@ import pytest
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.self_check.util import (
     BigQueryDialect,
-    candidate_test_is_on_temporary_notimplemented_list,
+    candidate_test_is_on_temporary_notimplemented_list_v2_api,
     evaluate_json_test_v2_api,
     generate_sqlite_db_path,
     get_dataset,
@@ -66,7 +64,7 @@ def pytest_generate_tests(metafunc):
                     if suppress_test_for and not isinstance(suppress_test_for, list):
                         # coerce into list if passed in as string
                         suppress_test_for = [suppress_test_for]
-                    if candidate_test_is_on_temporary_notimplemented_list(
+                    if candidate_test_is_on_temporary_notimplemented_list_v2_api(
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True

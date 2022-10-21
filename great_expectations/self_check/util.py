@@ -1736,7 +1736,9 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
         return getter in []
 
 
-def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
+def candidate_test_is_on_temporary_notimplemented_list_v2_api(
+    context, expectation_type
+):
     if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v2_sql = [
             "expect_column_values_to_be_increasing",
