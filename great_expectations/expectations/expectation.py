@@ -427,9 +427,13 @@ class Expectation(metaclass=MetaExpectation):
         if result is None:
             return []
         custom_property_values = []
-        meta_properties_to_render: Optional[
-            dict
-        ] = result.expectation_config.kwargs.get("meta_properties_to_render")
+        meta_properties_to_render: Optional[dict]
+        if result.expectation_config is not None:
+            meta_properties_to_render = result.expectation_config.kwargs.get(
+                "meta_properties_to_render"
+            )
+        else:
+            meta_properties_to_render = None
         if meta_properties_to_render is not None:
             for key in sorted(meta_properties_to_render.keys()):
                 meta_property = meta_properties_to_render[key]
@@ -547,13 +551,18 @@ class Expectation(metaclass=MetaExpectation):
                 "\n\n$expectation_type raised an exception:\n$exception_message"
             )
 
+            if result.expectation_config is not None:
+                expectation_type = result.expectation_config.expectation_type
+            else:
+                expectation_type = None
+
             exception_message = RenderedStringTemplateContent(
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": exception_message_template_str,
                         "params": {
-                            "expectation_type": result.expectation_config.expectation_type,
+                            "expectation_type": expectation_type,
                             "exception_message": result.exception_info[
                                 "exception_message"
                             ],
@@ -962,7 +971,7 @@ class Expectation(metaclass=MetaExpectation):
         try:
             assert (
                 configuration.expectation_type == self.expectation_type  # type: ignore[attr-defined]
-            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
+            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"  # type: ignore[attr-defined]
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -1095,19 +1104,20 @@ class Expectation(metaclass=MetaExpectation):
             self._get_description_diagnostics()
         )
 
-        _expectation_config: ExpectationConfiguration = (
-            self._get_expectation_configuration_from_examples(examples)
-        )
+        _expectation_config: Optional[
+            ExpectationConfiguration
+        ] = self._get_expectation_configuration_from_examples(examples)
         if not _expectation_config:
             _error(
                 f"Was NOT able to get Expectation configuration for {self.expectation_type}. "  # type: ignore[attr-defined]
                 "Is there at least one sample test where 'success' is True?"
             )
-        metric_diagnostics_list: List[
-            ExpectationMetricDiagnostics
-        ] = self._get_metric_diagnostics_list(
-            expectation_config=_expectation_config,
-        )
+        else:
+            metric_diagnostics_list: List[
+                ExpectationMetricDiagnostics
+            ] = self._get_metric_diagnostics_list(
+                expectation_config=_expectation_config,
+            )
 
         introspected_execution_engines: ExpectationExecutionEngineDiagnostics = (
             self._get_execution_engine_diagnostics(
@@ -1138,7 +1148,7 @@ class Expectation(metaclass=MetaExpectation):
         ] = self._get_renderer_diagnostics(
             expectation_type=description_diagnostics.snake_name,
             test_diagnostics=test_results,
-            registered_renderers=_registered_renderers,
+            registered_renderers=_registered_renderers,  # type: ignore[arg-type]
         )
 
         maturity_checklist: ExpectationDiagnosticMaturityMessages = (
@@ -1436,11 +1446,12 @@ class Expectation(metaclass=MetaExpectation):
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
 
-        _debug = lambda x: x
-        _error = lambda x: x
-        if debug_logger:
+        if debug_logger is not None:
             _debug = lambda x: debug_logger.debug(f"(_get_test_results) {x}")
             _error = lambda x: debug_logger.error(f"(_get_test_results) {x}")
+        else:
+            _debug = lambda x: x
+            _error = lambda x: x
         _debug("Starting")
 
         test_results = []
@@ -1457,6 +1468,7 @@ class Expectation(metaclass=MetaExpectation):
             context=context,
         )
 
+        error_diagnostics: Optional[ExpectationErrorDiagnostics]
         backend_test_times = defaultdict(list)
         for exp_test in exp_tests:
             if exp_test["test"] is None:
@@ -2054,7 +2066,7 @@ class QueryExpectation(TableExpectation, ABC):
         "condition_parser": None,
     }
 
-    domain_keys = (
+    domain_keys = (  # type: ignore[assignment]
         "batch_id",
         "row_condition",
         "condition_parser",
@@ -2090,6 +2102,9 @@ class QueryExpectation(TableExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         try:
+            assert isinstance(
+                query, str
+            ), f"'query' must be a string, but your query is type: {type(query)}"
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
@@ -2117,7 +2132,7 @@ class QueryExpectation(TableExpectation, ABC):
 
 
 class ColumnExpectation(TableExpectation, ABC):
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")  # type: ignore[assignment]
     domain_type = MetricDomainTypes.COLUMN
 
     def validate_configuration(
@@ -2137,7 +2152,7 @@ class ColumnExpectation(TableExpectation, ABC):
 
 class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")  # type: ignore[assignment]
     domain_type = MetricDomainTypes.COLUMN
     success_keys = ("mostly",)
     default_kwarg_values = {
@@ -2363,7 +2378,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
 class ColumnPairMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = (
+    domain_keys = (  # type: ignore[assignment]
         "batch_id",
         "table",
         "column_A",
@@ -2566,7 +2581,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
 
 class MulticolumnMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = (
+    domain_keys = (  # type: ignore[assignment]
         "batch_id",
         "table",
         "column_list",

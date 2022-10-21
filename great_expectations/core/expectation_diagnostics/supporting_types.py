@@ -130,7 +130,7 @@ class ExpectationTestDiagnostics(SerializableDictDot):
     test_passed: bool
     include_in_gallery: bool
     validation_result: Optional[ExpectationValidationResult]
-    error_diagnostics: ExpectationErrorDiagnostics
+    error_diagnostics: Optional[ExpectationErrorDiagnostics]
 
 
 @dataclass
