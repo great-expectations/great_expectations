@@ -67,7 +67,7 @@ stages:
                 contrib/**
 
                 [GEChanged]
-                great_expectations/**
+                great_expectations/**/*.py
                 tests/**
 
                 [ScriptsChanged]
