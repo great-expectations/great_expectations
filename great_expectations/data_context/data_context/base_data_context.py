@@ -442,10 +442,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 )
         return resource_store
 
-    def get_site_names(self) -> List[str]:
-        """Get a list of configured site names."""
-        return list(self.variables.data_docs_sites.keys())  # type: ignore[union-attr]
-
     def get_docs_sites_urls(
         self,
         resource_identifier=None,

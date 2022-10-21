@@ -583,6 +583,10 @@ class AbstractDataContext(ABC):
         self.config.datasources[datasource_name] = datasource_config  # type: ignore[assignment,index]
         self._cached_datasources[datasource_name] = datasource_config
 
+    def get_site_names(self) -> List[str]:
+        """Get a list of configured site names."""
+        return list(self.variables.data_docs_sites.keys())  # type: ignore[union-attr]
+
     def get_config_with_variables_substituted(
         self, config: Optional[DataContextConfig] = None
     ) -> DataContextConfig:
