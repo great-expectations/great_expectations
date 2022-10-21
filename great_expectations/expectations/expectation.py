@@ -10,7 +10,6 @@ import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter, defaultdict
 from copy import deepcopy
-from enum import Enum
 from inspect import isabstract
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 

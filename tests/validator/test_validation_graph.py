@@ -6,7 +6,7 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import IDDict
-from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.core import (
@@ -201,6 +201,12 @@ def test_ExpectationValidationGraph_get_exception_info(
 
 @pytest.mark.integration
 def test_parse_validation_graph():
+    class DummyExecutionEngine(PandasExecutionEngine):
+        pass
+
+    DummyExecutionEngine.__name__ = "PandasExecutionEngine"
+    dummy_execution_engine = DummyExecutionEngine()
+
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
@@ -210,11 +216,10 @@ def test_parse_validation_graph():
             "double_sided": True,
         },
     )
-    execution_engine = PandasExecutionEngine()
-    graph = ValidationGraph(execution_engine=execution_engine)
+    graph = ValidationGraph(execution_engine=dummy_execution_engine)
     validation_dependencies = (
         ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, execution_engine
+            expectation_configuration, dummy_execution_engine
         )
     )
 
@@ -228,9 +233,14 @@ def test_parse_validation_graph():
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
-# Should be passing tests even if given incorrect MetricProvider data
 @pytest.mark.integration
 def test_parse_validation_graph_with_bad_metrics_args():
+    class DummyExecutionEngine(PandasExecutionEngine):
+        pass
+
+    DummyExecutionEngine.__name__ = "PandasExecutionEngine"
+    dummy_execution_engine = DummyExecutionEngine()
+
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
@@ -240,11 +250,10 @@ def test_parse_validation_graph_with_bad_metrics_args():
             "double_sided": True,
         },
     )
-    execution_engine = PandasExecutionEngine()
-    graph = ValidationGraph(execution_engine=execution_engine)
+    graph = ValidationGraph(execution_engine=dummy_execution_engine)
     validation_dependencies = (
         ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, execution_engine=execution_engine
+            expectation_configuration, execution_engine=dummy_execution_engine
         )
     )
 
@@ -261,6 +270,12 @@ def test_parse_validation_graph_with_bad_metrics_args():
 
 @pytest.mark.integration
 def test_populate_dependencies():
+    class DummyExecutionEngine(PandasExecutionEngine):
+        pass
+
+    DummyExecutionEngine.__name__ = "PandasExecutionEngine"
+    dummy_execution_engine = DummyExecutionEngine()
+
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
@@ -270,11 +285,10 @@ def test_populate_dependencies():
             "double_sided": True,
         },
     )
-    execution_engine = PandasExecutionEngine()
-    graph = ValidationGraph(execution_engine=execution_engine)
+    graph = ValidationGraph(execution_engine=dummy_execution_engine)
     validation_dependencies = (
         ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, execution_engine
+            expectation_configuration, dummy_execution_engine
         )
     )
 
@@ -288,8 +302,13 @@ def test_populate_dependencies():
 
 @pytest.mark.integration
 def test_populate_dependencies_with_incorrect_metric_name():
-    execution_engine = PandasExecutionEngine()
-    graph = ValidationGraph(execution_engine=execution_engine)
+    class DummyExecutionEngine(PandasExecutionEngine):
+        pass
+
+    DummyExecutionEngine.__name__ = "PandasExecutionEngine"
+    dummy_execution_engine = DummyExecutionEngine()
+
+    graph = ValidationGraph(execution_engine=dummy_execution_engine)
     try:
         graph.build_metric_dependency_graph(
             metric_configuration=MetricConfiguration(
