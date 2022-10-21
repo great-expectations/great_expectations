@@ -1,0 +1,40 @@
+    def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
+    def ge_cloud_config(self) -> Optional[GeCloudConfig]:
+    def ge_cloud_mode(self) -> bool:
+    def add_validation_operator(
+    def get_site_names(self) -> List[str]:
+    def get_docs_sites_urls(
+    def open_data_docs(
+    def escape_all_config_variables(
+    def save_config_variable(
+    def delete_datasource(  # type: ignore[override]
+    def get_available_data_asset_names(
+    def build_batch_kwargs(
+    def run_validation_operator(
+    def get_batch_list(
+    def list_validation_operator_names(self):
+    def add_datasource(
+    def update_datasource(
+    def add_batch_kwargs_generator(
+    def list_validation_operators(self):
+    def create_expectation_suite(
+    def get_expectation_suite(
+    def delete_expectation_suite(  # type: ignore[override]
+    def save_expectation_suite(
+    def store_validation_result_metrics(
+    def root_directory(self) -> Optional[str]:
+    def get_validation_result(
+    def build_data_docs(
+    def clean_data_docs(self, site_name=None) -> bool:
+    def profile_datasource(  # noqa: C901 - complexity 25
+    def profile_data_asset(  # noqa: C901 - complexity 16
+    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+    def add_checkpoint(
+    def run_checkpoint(
+    def save_profiler(
+    def list_profilers(self) -> List[str]:
+    def run_profiler_with_dynamic_arguments(
+    def run_profiler_on_data(
+    def list_expectation_suites(self) -> Optional[List[str]]:
+    def list_expectation_suite_names(self) -> List[str]:
+    def test_yaml_config(  # noqa: C901 - complexity 17
