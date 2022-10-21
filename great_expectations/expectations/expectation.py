@@ -1126,12 +1126,11 @@ class Expectation(metaclass=MetaExpectation):
                 f"Was NOT able to get Expectation configuration for {self.expectation_type}. "  # type: ignore[attr-defined]
                 "Is there at least one sample test where 'success' is True?"
             )
-        else:
-            metric_diagnostics_list: List[
-                ExpectationMetricDiagnostics
-            ] = self._get_metric_diagnostics_list(
-                expectation_config=_expectation_config,
-            )
+        metric_diagnostics_list: List[
+            ExpectationMetricDiagnostics
+        ] = self._get_metric_diagnostics_list(
+            expectation_config=_expectation_config,
+        )
 
         introspected_execution_engines: ExpectationExecutionEngineDiagnostics = (
             self._get_execution_engine_diagnostics(
@@ -1745,7 +1744,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def _get_metric_diagnostics_list(
         self,
-        expectation_config: ExpectationConfiguration,
+        expectation_config: Optional[ExpectationConfiguration],
     ) -> List[ExpectationMetricDiagnostics]:
         """Check to see which Metrics are upstream dependencies for this Expectation."""
 
