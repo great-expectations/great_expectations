@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Set, Tuple, Union
+from typing import Any, Dict, Optional, Set, Tuple, Union, cast
 from unittest import mock
 
 import pandas as pd
@@ -8,9 +8,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import IDDict
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.data_context.types.base import ProgressBarsConfig
-from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.core import ExpectColumnValueZScoresToBeLessThan
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -388,10 +386,18 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
     )
 
 
-@mock.patch("great_expectations.validator.metric_configuration.MetricConfiguration")
-@mock.patch("great_expectations.validator.validation_graph.tqdm")
 @pytest.mark.unit
-def test_progress_bar_config_enabled(mock_tqdm, mock_metric_configuration):
+@mock.patch("great_expectations.validator.validation_graph.tqdm")
+def test_progress_bar_config_enabled(mock_tqdm: mock.MagicMock):
+    class DummyMetricConfiguration:
+        pass
+
+    class DummyExecutionEngine:
+        pass
+
+    dummy_metric_configuration = cast(MetricConfiguration, DummyMetricConfiguration)
+    dummy_execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
     with mock.patch(
         "great_expectations.validator.validation_graph.ValidationGraph._parse",
@@ -403,13 +409,12 @@ def test_progress_bar_config_enabled(mock_tqdm, mock_metric_configuration):
         "great_expectations.validator.validation_graph.ValidationGraph.edges",
         new_callable=mock.PropertyMock,
         return_value=[
-            MetricEdge(left=mock_metric_configuration),
-            MetricEdge(left=mock_metric_configuration),
-            MetricEdge(left=mock_metric_configuration),
+            MetricEdge(left=dummy_metric_configuration),
+            MetricEdge(left=dummy_metric_configuration),
+            MetricEdge(left=dummy_metric_configuration),
         ],
     ):
-        execution_engine = PandasExecutionEngine()
-        graph = ValidationGraph(execution_engine=execution_engine)
+        graph = ValidationGraph(execution_engine=dummy_execution_engine)
         graph.resolve_validation_graph(
             metrics={},
             runtime_configuration=None,
@@ -420,15 +425,17 @@ def test_progress_bar_config_enabled(mock_tqdm, mock_metric_configuration):
     assert mock_tqdm.call_args[1]["disable"] is False
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch("great_expectations.validator.metric_configuration.MetricConfiguration")
-@mock.patch("great_expectations.validator.validation_graph.tqdm")
 @pytest.mark.unit
-def test_progress_bar_config_disabled(
-    mock_tqdm, mock_metric_configuration, mock_data_context
-):
-    data_context = mock_data_context()
-    data_context.progress_bars = ProgressBarsConfig(metric_calculations=False)
+@mock.patch("great_expectations.validator.validation_graph.tqdm")
+def test_progress_bar_config_disabled(mock_tqdm: mock.MagicMock):
+    class DummyMetricConfiguration:
+        pass
+
+    class DummyExecutionEngine:
+        pass
+
+    dummy_metric_configuration = cast(MetricConfiguration, DummyMetricConfiguration)
+    dummy_execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
 
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
     with mock.patch(
@@ -441,13 +448,12 @@ def test_progress_bar_config_disabled(
         "great_expectations.validator.validation_graph.ValidationGraph.edges",
         new_callable=mock.PropertyMock,
         return_value=[
-            MetricEdge(left=mock_metric_configuration),
-            MetricEdge(left=mock_metric_configuration),
-            MetricEdge(left=mock_metric_configuration),
+            MetricEdge(left=dummy_metric_configuration),
+            MetricEdge(left=dummy_metric_configuration),
+            MetricEdge(left=dummy_metric_configuration),
         ],
     ):
-        execution_engine = PandasExecutionEngine()
-        graph = ValidationGraph(execution_engine=execution_engine)
+        graph = ValidationGraph(execution_engine=dummy_execution_engine)
         graph.resolve_validation_graph(
             metrics={},
             runtime_configuration=None,
