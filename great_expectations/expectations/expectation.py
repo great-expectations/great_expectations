@@ -129,7 +129,10 @@ def render_evaluation_parameter_string(render_func) -> Callable:
                     current_expectation_params.append(value["$PARAMETER"])
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
-        if len(current_expectation_params) > 0:
+        # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support
+        if len(current_expectation_params) > 0 and isinstance(
+            rendered_string_template, list
+        ):
             runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")
             if runtime_configuration:
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
@@ -232,7 +235,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
-    default_kwarg_values = {
+    default_kwarg_values: Dict = {
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
@@ -949,7 +952,9 @@ class Expectation(metaclass=MetaExpectation):
         configuration: ExpectationConfiguration,
         runtime_configuration: dict = None,
     ) -> Union[Dict[str, Union[str, int, bool]], str]:
-        default_result_format: str = self.default_kwarg_values.get("result_format")
+        default_result_format: Dict[
+            str, Union[bool, str]
+        ] = self.default_kwarg_values.get("result_format")
         configuration_result_format: Union[
             Dict[str, Union[str, int, bool]], str
         ] = configuration.kwargs.get("result_format", default_result_format)
@@ -2088,10 +2093,10 @@ class QueryExpectation(TableExpectation, ABC):
         if configuration is None:
             configuration = self.configuration
 
-        query: Optional[str] = configuration.kwargs.get(
+        query: Optional[Any] = configuration.kwargs.get(
             "query"
         ) or self.default_kwarg_values.get("query")
-        row_condition: str = configuration.kwargs.get(
+        row_condition: Optional[Any] = configuration.kwargs.get(
             "row_condition"
         ) or self.default_kwarg_values.get("row_condition")
 
@@ -2323,7 +2328,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
-        include_unexpected_rows: bool = False
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
                 "include_unexpected_rows", False
@@ -2351,8 +2355,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         else:
             nonnull_count = total_count - null_count
 
-        success: bool
-        if total_count == 0 or nonnull_count == 0:
+        if unexpected_count is None or total_count == 0 or nonnull_count == 0:
             # Vacuously true
             success = True
         else:
@@ -2545,14 +2548,23 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
-        total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
-        unexpected_values = metrics.get(f"{self.map_metric}.unexpected_values")
-        unexpected_index_list = metrics.get(f"{self.map_metric}.unexpected_index_list")
-        filtered_row_count = metrics.get(f"{self.map_metric}.filtered_row_count")
+        total_count: Optional[int] = metrics.get("table.row_count")
+        unexpected_count: Optional[int] = metrics.get(
+            f"{self.map_metric}.unexpected_count"
+        )
+        unexpected_values: Optional[Any] = metrics.get(
+            f"{self.map_metric}.unexpected_values"
+        )
+        unexpected_index_list: Optional[List[int]] = metrics.get(
+            f"{self.map_metric}.unexpected_index_list"
+        )
+        filtered_row_count: Optional[int] = metrics.get(
+            f"{self.map_metric}.filtered_row_count"
+        )
 
         if (
             total_count is None
+            or unexpected_count is None
             or filtered_row_count is None
             or total_count == 0
             or filtered_row_count == 0
@@ -2760,6 +2772,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
 
         if (
             total_count is None
+            or unexpected_count is None
             or filtered_row_count is None
             or total_count == 0
             or filtered_row_count == 0
