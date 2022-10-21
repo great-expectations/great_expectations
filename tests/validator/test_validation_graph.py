@@ -199,7 +199,7 @@ def test_ExpectationValidationGraph_get_exception_info(
     assert right_exception in exception_info
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_parse_validation_graph():
     class PandasExecutionEngineStub:
         pass
@@ -233,7 +233,7 @@ def test_parse_validation_graph():
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_parse_validation_graph_with_bad_metrics_args():
     class PandasExecutionEngineStub:
         pass
@@ -268,7 +268,7 @@ def test_parse_validation_graph_with_bad_metrics_args():
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_populate_dependencies():
     class PandasExecutionEngineStub:
         pass
@@ -300,7 +300,7 @@ def test_populate_dependencies():
     assert len(graph.edges) == 33
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_populate_dependencies_with_incorrect_metric_name():
     class PandasExecutionEngineStub:
         pass
