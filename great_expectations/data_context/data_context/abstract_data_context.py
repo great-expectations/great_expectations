@@ -912,12 +912,10 @@ class AbstractDataContext(ABC):
                     batch_request_list is not None,
                 ]
             )
-            != 1
+            > 1
         ):
             raise ValueError(
-                "Exactly one of batch, batch_list, batch_request, or batch_request_list can be specified: "
-                f"batch = {batch}, batch_list = {batch_list}, batch_request = {batch_request}, "
-                f"batch_request_list = {batch_request_list}"
+                "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"
             )
 
         if batch_list:
@@ -959,15 +957,16 @@ class AbstractDataContext(ABC):
 
         # For ZEP datasources, we are trying to simplify our datatypes and we don't currently have `batch_definitions`
         # defined on a `Batch`. Because of this, we grab the execution engine using a batch_request object.
+        # Once a ZEP `Batch` gets defined we will clean this up and with a more appropriate type check.
+        # NOTE: for non-ZEP workflows, both branches are equivalent.
         execution_engine: ExecutionEngine
-        if batch_request_list:
-            # either batch_request or batch_request_list was passed in. We previously have made a batch_request_list if
-            # necessary.
+        if batch_request_list and datasource_name:
+            # a datasource name and either batch_request or batch_request_list was passed in. We previously have made a
+            # batch_request_list if necessary.
             execution_engine = self.datasources[  # type: ignore[union-attr]
                 batch_request_list[-1][datasource_name]
             ].execution_engine
         else:
-            # either batch or batch_list was passed in. We previously have created a batch_list from batch if necessary.
             execution_engine = self.datasources[  # type: ignore[union-attr]
                 batch_list[-1].batch_definition.datasource_name
             ].execution_engine
