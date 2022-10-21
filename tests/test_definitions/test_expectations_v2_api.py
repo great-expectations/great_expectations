@@ -13,7 +13,7 @@ from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemy
 from great_expectations.self_check.util import (
     BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list,
-    evaluate_json_test,
+    evaluate_json_test_v2_api,
     generate_sqlite_db_path,
     get_dataset,
     mssqlDialect,
@@ -295,6 +295,6 @@ def test_case_runner_v2_api(test_case):
     # Note: this should never be done in practice, but we are wiping expectations to reuse datasets during testing.
     test_case["dataset"]._initialize_expectations()
 
-    evaluate_json_test(
+    evaluate_json_test_v2_api(
         test_case["dataset"], test_case["expectation_type"], test_case["test"]
     )

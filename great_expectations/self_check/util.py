@@ -2618,7 +2618,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test(data_asset, expectation_type, test) -> None:
+def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
