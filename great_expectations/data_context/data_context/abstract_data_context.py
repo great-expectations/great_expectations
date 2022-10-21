@@ -168,18 +168,18 @@ class AbstractDataContext(ABC):
         )
 
         # Store cached datasources but don't init them
-        self._cached_datasources = {}
+        self._cached_datasources: dict = {}
 
         # Build the datasources we know about and have access to
         self._init_datasources()
 
         self._evaluation_parameter_dependencies_compiled = False
-        self._evaluation_parameter_dependencies = {}
+        self._evaluation_parameter_dependencies: dict = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
-        self.validation_operators = {}
+        self.validation_operators: dict = {}
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
@@ -538,7 +538,7 @@ class AbstractDataContext(ABC):
         datasource_name: str = datasource.name
 
         if save_changes:
-            self._datasource_store.update_by_name(
+            self._datasource_store.update_by_name(  # type: ignore[attr-defined]
                 datasource_name=datasource_name, datasource_config=datasource_config
             )
         self.config.datasources[datasource_name] = datasource_config  # type: ignore[assignment,index]
@@ -1520,21 +1520,6 @@ class AbstractDataContext(ABC):
             raise ge_exceptions.DataContextError(
                 f"expectation_suite {expectation_suite_name} not found"
             )
-
-    def store_validation_result_metrics(
-        self, requested_metrics, validation_results, target_store_name
-    ) -> None:
-        """
-
-        Args:
-            requested_metrics ():
-            validation_results ():
-            target_store_name ():
-
-        Returns:
-
-        """
-        self._store_metrics(requested_metrics, validation_results, target_store_name)
 
     def add_profiler(
         self,

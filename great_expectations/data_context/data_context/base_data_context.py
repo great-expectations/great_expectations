@@ -311,7 +311,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # plugins are built.
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
-        self.validation_operators = {}
+        self.validation_operators: dict = {}
         if (
             "validation_operators" in self.get_config().commented_map  # type: ignore[union-attr]
             and self.config.validation_operators
