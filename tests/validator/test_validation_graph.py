@@ -201,11 +201,11 @@ def test_ExpectationValidationGraph_get_exception_info(
 
 @pytest.mark.integration
 def test_parse_validation_graph():
-    class FakePandasExecutionEngine:
+    class PandasExecutionEngineStub:
         pass
 
-    FakePandasExecutionEngine.__name__ = "PandasExecutionEngine"
-    fake_pandas_execution_engine = cast(ExecutionEngine, FakePandasExecutionEngine())
+    PandasExecutionEngineStub.__name__ = "PandasExecutionEngine"
+    pandas_execution_engine_stub = cast(ExecutionEngine, PandasExecutionEngineStub())
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
@@ -216,10 +216,10 @@ def test_parse_validation_graph():
             "double_sided": True,
         },
     )
-    graph = ValidationGraph(execution_engine=fake_pandas_execution_engine)
+    graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
     validation_dependencies = (
         ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, fake_pandas_execution_engine
+            expectation_configuration, pandas_execution_engine_stub
         )
     )
 
@@ -235,11 +235,11 @@ def test_parse_validation_graph():
 
 @pytest.mark.integration
 def test_parse_validation_graph_with_bad_metrics_args():
-    class FakePandasExecutionEngine:
+    class PandasExecutionEngineStub:
         pass
 
-    FakePandasExecutionEngine.__name__ = "PandasExecutionEngine"
-    fake_pandas_execution_engine = cast(ExecutionEngine, FakePandasExecutionEngine())
+    PandasExecutionEngineStub.__name__ = "PandasExecutionEngine"
+    pandas_execution_engine_stub = cast(ExecutionEngine, PandasExecutionEngineStub())
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
@@ -250,10 +250,10 @@ def test_parse_validation_graph_with_bad_metrics_args():
             "double_sided": True,
         },
     )
-    graph = ValidationGraph(execution_engine=fake_pandas_execution_engine)
+    graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
     validation_dependencies = (
         ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, execution_engine=fake_pandas_execution_engine
+            expectation_configuration, execution_engine=pandas_execution_engine_stub
         )
     )
 
@@ -270,11 +270,11 @@ def test_parse_validation_graph_with_bad_metrics_args():
 
 @pytest.mark.integration
 def test_populate_dependencies():
-    class FakePandasExecutionEngine:
+    class PandasExecutionEngineStub:
         pass
 
-    FakePandasExecutionEngine.__name__ = "PandasExecutionEngine"
-    fake_pandas_execution_engine = cast(ExecutionEngine, FakePandasExecutionEngine())
+    PandasExecutionEngineStub.__name__ = "PandasExecutionEngine"
+    pandas_execution_engine_stub = cast(ExecutionEngine, PandasExecutionEngineStub())
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
@@ -285,10 +285,10 @@ def test_populate_dependencies():
             "double_sided": True,
         },
     )
-    graph = ValidationGraph(execution_engine=fake_pandas_execution_engine)
+    graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
     validation_dependencies = (
         ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
-            expectation_configuration, fake_pandas_execution_engine
+            expectation_configuration, pandas_execution_engine_stub
         )
     )
 
@@ -302,13 +302,13 @@ def test_populate_dependencies():
 
 @pytest.mark.integration
 def test_populate_dependencies_with_incorrect_metric_name():
-    class FakePandasExecutionEngine:
+    class PandasExecutionEngineStub:
         pass
 
-    FakePandasExecutionEngine.__name__ = "PandasExecutionEngine"
-    fake_pandas_execution_engine = cast(ExecutionEngine, FakePandasExecutionEngine())
+    PandasExecutionEngineStub.__name__ = "PandasExecutionEngine"
+    pandas_execution_engine_stub = cast(ExecutionEngine, PandasExecutionEngineStub())
 
-    graph = ValidationGraph(execution_engine=fake_pandas_execution_engine)
+    graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
     try:
         graph.build_metric_dependency_graph(
             metric_configuration=MetricConfiguration(
