@@ -955,6 +955,7 @@ class AbstractDataContext(ABC):
                     )
                 )
 
+        self._check_len_batch_list(batch_list)
         # For ZEP datasources, we are trying to simplify our datatypes and we don't currently have `batch_definitions`
         # defined on a `Batch`. Because of this, we grab the execution engine using a batch_request object.
         # Once a ZEP `Batch` gets defined we will clean this up and with a more appropriate type check.
@@ -981,6 +982,13 @@ class AbstractDataContext(ABC):
             include_rendered_content=include_rendered_content,
         )
 
+    def _check_len_batch_list(self, batch_list: List[Batch]):
+        if len(batch_list) == 0:
+            raise ge_exceptions.InvalidBatchRequestError(
+                """Validator could not be created because BatchRequest returned an empty batch_list.
+                Please check your parameters and try again."""
+            )
+
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
@@ -999,9 +1007,9 @@ class AbstractDataContext(ABC):
         Returns:
 
         """
-        batch_definition: BatchDefinition = batch_list[-1].batch_definition
+        self._check_len_batch_list(batch_list)
         execution_engine: ExecutionEngine = self.datasources[  # type: ignore[union-attr]
-            batch_definition.datasource_name
+            batch_list[-1].batch_definition.datasource_name
         ].execution_engine
         return self._get_validator_using_batch_list(
             expectation_suite=expectation_suite,
@@ -1020,12 +1028,6 @@ class AbstractDataContext(ABC):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
-        if len(batch_list) == 0:
-            raise ge_exceptions.InvalidBatchRequestError(
-                """Validator could not be created because BatchRequest returned an empty batch_list.
-                Please check your parameters and try again."""
-            )
-
         include_rendered_content = (
             self._determine_if_expectation_validation_result_include_rendered_content(
                 include_rendered_content=include_rendered_content
