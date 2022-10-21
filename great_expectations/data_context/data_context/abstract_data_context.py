@@ -29,6 +29,11 @@ from great_expectations.core.serializer import (
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
+from great_expectations.rule_based_profiler.config.base import (
+    RuleBasedProfilerConfig,
+    ruleBasedProfilerConfigSchema,
+)
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
     from great_expectations.data_context.store import EvaluationParameterStore
@@ -1220,6 +1225,58 @@ class AbstractDataContext(ABC):
 
         """
         self._store_metrics(requested_metrics, validation_results, target_store_name)
+
+    def add_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: Dict[str, dict],
+        variables: Optional[dict] = None,
+    ) -> RuleBasedProfiler:
+        config_data = {
+            "name": name,
+            "config_version": config_version,
+            "rules": rules,
+            "variables": variables,
+        }
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
+        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
+        profiler_config.pop("class_name")
+        profiler_config.pop("module_name")
+
+        config = RuleBasedProfilerConfig(**profiler_config)
+
+        profiler = RuleBasedProfiler.add_profiler(
+            config=config,
+            data_context=self,
+            profiler_store=self.profiler_store,
+        )
+        return profiler
+
+    def get_profiler(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> RuleBasedProfiler:
+        return RuleBasedProfiler.get_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
+    def delete_profiler(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        RuleBasedProfiler.delete_profiler(
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
 
     @staticmethod
     def _default_profilers_exist(directory_path: Optional[str]) -> bool:

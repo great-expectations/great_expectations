@@ -35,9 +35,6 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
-)
 
 try:
     from typing import Literal  # type: ignore[attr-defined]
@@ -2245,35 +2242,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         return result
 
-    def add_profiler(
-        self,
-        name: str,
-        config_version: float,
-        rules: Dict[str, dict],
-        variables: Optional[dict] = None,
-    ) -> RuleBasedProfiler:
-        config_data = {
-            "name": name,
-            "config_version": config_version,
-            "rules": rules,
-            "variables": variables,
-        }
-
-        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
-        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
-        profiler_config.pop("class_name")
-        profiler_config.pop("module_name")
-
-        config = RuleBasedProfilerConfig(**profiler_config)
-
-        profiler = RuleBasedProfiler.add_profiler(
-            config=config,
-            data_context=self,
-            profiler_store=self.profiler_store,
-        )
-        return profiler
-
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
@@ -2299,29 +2267,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         profiler = self.get_profiler(name=name, ge_cloud_id=ge_cloud_id)
         return profiler
-
-    def get_profiler(
-        self,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> RuleBasedProfiler:
-        return RuleBasedProfiler.get_profiler(
-            data_context=self,
-            profiler_store=self.profiler_store,
-            name=name,
-            ge_cloud_id=ge_cloud_id,
-        )
-
-    def delete_profiler(
-        self,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> None:
-        RuleBasedProfiler.delete_profiler(
-            profiler_store=self.profiler_store,
-            name=name,
-            ge_cloud_id=ge_cloud_id,
-        )
 
     def list_profilers(self) -> List[str]:
         if self.profiler_store is None:
