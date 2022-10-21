@@ -715,7 +715,7 @@ class AbstractDataContext(ABC):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        if datasource_name is None:
+        if not datasource_name:
             raise ValueError("Datasource names must be a datasource name")
 
         datasource = self.get_datasource(datasource_name=datasource_name)
