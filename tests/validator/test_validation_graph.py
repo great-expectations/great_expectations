@@ -9,7 +9,10 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.registry import get_expectation_impl
+from great_expectations.expectations.core import (
+    ExpectColumnMaxToBeBetween,
+    ExpectColumnValueZScoresToBeLessThan,
+)
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import (
@@ -209,19 +212,17 @@ def test_parse_validation_graph():
     )
     execution_engine = PandasExecutionEngine()
     graph = ValidationGraph(execution_engine=execution_engine)
-    for configuration in [expectation_configuration]:
-        expectation_impl = get_expectation_impl(
-            "expect_column_value_z_scores_to_be_less_than"
+    validation_dependencies = (
+        ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
+            expectation_configuration, execution_engine
         )
-        validation_dependencies = expectation_impl(
-            configuration
-        ).get_validation_dependencies(configuration, execution_engine)
+    )
 
-        for metric_configuration in validation_dependencies["metrics"].values():
-            graph.build_metric_dependency_graph(
-                metric_configuration=metric_configuration,
-                runtime_configuration=None,
-            )
+    for metric_configuration in validation_dependencies["metrics"].values():
+        graph.build_metric_dependency_graph(
+            metric_configuration=metric_configuration,
+            runtime_configuration=None,
+        )
 
     ready_metrics, needed_metrics = graph._parse(metrics=dict())
     assert len(ready_metrics) == 2 and len(needed_metrics) == 9
@@ -241,22 +242,17 @@ def test_parse_validation_graph_with_bad_metrics_args():
     )
     execution_engine = PandasExecutionEngine()
     graph = ValidationGraph(execution_engine=execution_engine)
-    for configuration in [expectation_configuration]:
-        expectation_impl = get_expectation_impl(
-            "expect_column_value_z_scores_to_be_less_than"
+    validation_dependencies = (
+        ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
+            expectation_configuration, execution_engine=execution_engine
         )
-        validation_dependencies = expectation_impl(
-            configuration
-        ).get_validation_dependencies(
-            configuration,
-            execution_engine=execution_engine,
-        )
+    )
 
-        for metric_configuration in validation_dependencies["metrics"].values():
-            graph.build_metric_dependency_graph(
-                metric_configuration=metric_configuration,
-                runtime_configuration=None,
-            )
+    for metric_configuration in validation_dependencies["metrics"].values():
+        graph.build_metric_dependency_graph(
+            metric_configuration=metric_configuration,
+            runtime_configuration=None,
+        )
 
     # noinspection PyTypeChecker
     ready_metrics, needed_metrics = graph._parse(metrics=("nonexistent", "NONE"))
@@ -276,21 +272,16 @@ def test_populate_dependencies():
     )
     execution_engine = PandasExecutionEngine()
     graph = ValidationGraph(execution_engine=execution_engine)
-    for configuration in [expectation_configuration]:
-        expectation_impl = get_expectation_impl(
-            "expect_column_value_z_scores_to_be_less_than"
+    validation_dependencies = (
+        ExpectColumnValueZScoresToBeLessThan().get_validation_dependencies(
+            expectation_configuration, execution_engine
         )
-        validation_dependencies = expectation_impl(
-            configuration
-        ).get_validation_dependencies(
-            configuration,
-            execution_engine,
-        )
+    )
 
-        for metric_configuration in validation_dependencies["metrics"].values():
-            graph.build_metric_dependency_graph(
-                metric_configuration=metric_configuration,
-            )
+    for metric_configuration in validation_dependencies["metrics"].values():
+        graph.build_metric_dependency_graph(
+            metric_configuration=metric_configuration,
+        )
 
     assert len(graph.edges) == 33
 
@@ -350,8 +341,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
     # noinspection PyUnusedLocal
     validator = Validator(execution_engine=execution_engine, batches=[batch])
 
-    expectation_impl = get_expectation_impl(expectation_configuration.expectation_type)
-    validation_dependencies = expectation_impl().get_validation_dependencies(
+    validation_dependencies = ExpectColumnMaxToBeBetween().get_validation_dependencies(
         expectation_configuration, execution_engine, runtime_configuration
     )["metrics"]
 
