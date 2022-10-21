@@ -235,7 +235,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
-    default_kwarg_values: Dict = {
+    default_kwarg_values: Dict[str, Optional[Any]] = {
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
@@ -669,16 +669,21 @@ class Expectation(metaclass=MetaExpectation):
             # we will use this as simply a better (non-repeating) source of
             # "sampled" unexpected values
             total_count = 0
-            for unexpected_count_dict in result_dict.get("partial_unexpected_counts"):
-                value: Any = unexpected_count_dict.get("value")
-                count: int = unexpected_count_dict.get("count")
-                total_count += count
-                if value is not None and value != "":
-                    table_rows.append([value, count])
-                elif value == "":
-                    table_rows.append(["EMPTY", count])
-                else:
-                    table_rows.append(["null", count])
+            partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
+                "partial_unexpected_counts"
+            )
+            if partial_unexpected_counts is not None:
+                for unexpected_count_dict in partial_unexpected_counts:
+                    value: Optional[Any] = unexpected_count_dict.get("value")
+                    count: Optional[int] = unexpected_count_dict.get("count")
+                    if count is not None:
+                        total_count += count
+                        if value is not None and value != "":
+                            table_rows.append([value, count])
+                        elif value == "":
+                            table_rows.append(["EMPTY", count])
+                        else:
+                            table_rows.append(["null", count])
 
             # Check to see if we have *all* of the unexpected values accounted for. If so,
             # we show counts. If not, we only show "sampled" unexpected values.
@@ -690,16 +695,20 @@ class Expectation(metaclass=MetaExpectation):
         else:
             header_row = ["Sampled Unexpected Values"]
             sampled_values_set = set()
-            for unexpected_value in result_dict.get("partial_unexpected_list"):
-                if unexpected_value:
-                    string_unexpected_value = str(unexpected_value)
-                elif unexpected_value == "":
-                    string_unexpected_value = "EMPTY"
-                else:
-                    string_unexpected_value = "null"
-                if string_unexpected_value not in sampled_values_set:
-                    table_rows.append([unexpected_value])
-                    sampled_values_set.add(string_unexpected_value)
+            partial_unexpected_list: Optional[List[Any]] = result_dict.get(
+                "partial_unexpected_list"
+            )
+            if partial_unexpected_list is not None:
+                for unexpected_value in partial_unexpected_list:
+                    if unexpected_value:
+                        string_unexpected_value = str(unexpected_value)
+                    elif unexpected_value == "":
+                        string_unexpected_value = "EMPTY"
+                    else:
+                        string_unexpected_value = "null"
+                    if string_unexpected_value not in sampled_values_set:
+                        table_rows.append([unexpected_value])
+                        sampled_values_set.add(string_unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
             **{
@@ -952,9 +961,9 @@ class Expectation(metaclass=MetaExpectation):
         configuration: ExpectationConfiguration,
         runtime_configuration: dict = None,
     ) -> Union[Dict[str, Union[str, int, bool]], str]:
-        default_result_format: Dict[
-            str, Union[bool, str]
-        ] = self.default_kwarg_values.get("result_format")
+        default_result_format: Optional[str] = self.default_kwarg_values.get(
+            "result_format"
+        )
         configuration_result_format: Union[
             Dict[str, Union[str, int, bool]], str
         ] = configuration.kwargs.get("result_format", default_result_format)
@@ -1644,7 +1653,7 @@ class Expectation(metaclass=MetaExpectation):
         for renderer_name in set(standard_renderers).union(set(supported_renderers)):
             samples = []
             if renderer_name in supported_renderers:
-                _, renderer = registered_renderers[expectation_type][renderer_name]
+                _, renderer = registered_renderers[expectation_type][renderer_name]  # type: ignore[call-overload]
 
                 for test_diagnostic in test_diagnostics:
                     test_title = test_diagnostic["test_title"]
