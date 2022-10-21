@@ -23,26 +23,6 @@ from typing import (
     cast,
 )
 
-from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.serializer import (
-    AbstractConfigSerializer,
-    DictConfigSerializer,
-)
-from great_expectations.data_asset import DataAsset
-from great_expectations.datasource.datasource_serializer import (
-    NamedDatasourceSerializer,
-)
-from great_expectations.rule_based_profiler.config.base import (
-    RuleBasedProfilerConfig,
-    ruleBasedProfilerConfigSchema,
-)
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-
-if TYPE_CHECKING:
-    from great_expectations.data_context.store import EvaluationParameterStore
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.data_context.store import CheckpointStore
-
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
@@ -55,9 +35,15 @@ from great_expectations.core.batch import (
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
+from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.serializer import (
+    AbstractConfigSerializer,
+    DictConfigSerializer,
+)
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
@@ -88,11 +74,19 @@ from great_expectations.data_context.util import (
     substitute_config_variable,
 )
 from great_expectations.datasource import LegacyDatasource
+from great_expectations.datasource.datasource_serializer import (
+    NamedDatasourceSerializer,
+)
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.rule_based_profiler.config.base import (
+    RuleBasedProfilerConfig,
+    ruleBasedProfilerConfigSchema,
+)
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
 )
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
@@ -100,6 +94,16 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     UsageStatisticsHandler,
     send_usage_message,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint
+    from great_expectations.data_context.store import (
+        CheckpointStore,
+        EvaluationParameterStore,
+    )
+    from great_expectations.validation_operators.validation_operators import (
+        ValidationOperator,
+    )
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
@@ -210,15 +214,18 @@ class AbstractDataContext(ABC):
         )
 
         # Store cached datasources but don't init them
-        self._cached_datasources: dict = {}
+        self._cached_datasources = {}
 
         # Build the datasources we know about and have access to
         self._init_datasources()
 
         self._evaluation_parameter_dependencies_compiled = False
-        self._evaluation_parameter_dependencies: dict = {}
+        self._evaluation_parameter_dependencies = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
+
+        # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
+        self.validation_operators = {}
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
@@ -1627,6 +1634,41 @@ class AbstractDataContext(ABC):
             ge_cloud_id=ge_cloud_id,
         )
 
+    def add_validation_operator(
+        self, validation_operator_name: str, validation_operator_config: dict
+    ) -> ValidationOperator:
+        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
+
+        Args:
+            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
+            validation_operator_config (dict): a config for the ValidationOperator to add
+
+        Returns:
+            validation_operator (ValidationOperator)
+        """
+
+        self.config.validation_operators[
+            validation_operator_name
+        ] = validation_operator_config
+        config = self.variables.validation_operators[validation_operator_name]  # type: ignore[index]
+        module_name = "great_expectations.validation_operators"
+        new_validation_operator = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                "data_context": self,
+                "name": validation_operator_name,
+            },
+            config_defaults={"module_name": module_name},
+        )
+        if not new_validation_operator:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=config["class_name"],
+            )
+        self.validation_operators[validation_operator_name] = new_validation_operator
+        return new_validation_operator
+
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
 
@@ -1638,6 +1680,12 @@ class AbstractDataContext(ABC):
             value["name"] = name
             validation_operators.append(value)
         return validation_operators
+
+    def list_validation_operator_names(self):
+        if not self.validation_operators:
+            return []
+
+        return list(self.validation_operators.keys())
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None

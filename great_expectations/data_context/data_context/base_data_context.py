@@ -8,23 +8,7 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
-
-if TYPE_CHECKING:
-    from great_expectations.validation_operators.validation_operators import (
-        ValidationOperator,
-    )
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML
@@ -336,8 +320,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
         # plugins are built.
-        self.validation_operators: Dict = {}
+
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
+        self.validation_operators = {}
         if (
             "validation_operators" in self.get_config().commented_map  # type: ignore[union-attr]
             and self.config.validation_operators
@@ -398,41 +383,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 self.config.to_yaml(outfile)
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
-
-    def add_validation_operator(
-        self, validation_operator_name: str, validation_operator_config: dict
-    ) -> ValidationOperator:
-        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
-
-        Args:
-            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
-            validation_operator_config (dict): a config for the ValidationOperator to add
-
-        Returns:
-            validation_operator (ValidationOperator)
-        """
-
-        self.config.validation_operators[
-            validation_operator_name
-        ] = validation_operator_config
-        config = self.variables.validation_operators[validation_operator_name]  # type: ignore[index]
-        module_name = "great_expectations.validation_operators"
-        new_validation_operator = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": self,
-                "name": validation_operator_name,
-            },
-            config_defaults={"module_name": module_name},
-        )
-        if not new_validation_operator:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        self.validation_operators[validation_operator_name] = new_validation_operator
-        return new_validation_operator
 
     def _normalize_store_path(self, resource_store):
         if resource_store["type"] == "filesystem":
@@ -834,12 +784,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             batch_spec_passthrough=batch_spec_passthrough,
             **kwargs,
         )
-
-    def list_validation_operator_names(self):
-        if not self.validation_operators:
-            return []
-
-        return list(self.validation_operators.keys())
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE.value,
