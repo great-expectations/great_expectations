@@ -19,7 +19,7 @@ from great_expectations.self_check.util import (
     postgresqlDialect,
     sqliteDialect,
 )
-from tests.conftest import build_test_backends_list
+from tests.conftest import build_test_backends_list_v2_api
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def pytest_generate_tests(metafunc):
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        backends = build_test_backends_list(metafunc)
+        backends = build_test_backends_list_v2_api(metafunc)
         for c in backends:
             if c in [
                 "trino",

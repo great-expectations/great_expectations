@@ -78,7 +78,7 @@ The core team will not be able to merge your contribution until they're able to 
                 help="If set, suppress tests against presto",
             )
 
-    * **In build_test_backends_list, add a variable and if clause**
+    * **In build_test_backends_list_v2_api, add a variable and if clause**
 
         .. code-block:: python
 

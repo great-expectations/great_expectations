@@ -22,7 +22,7 @@ from great_expectations.self_check.util import (
     sqliteDialect,
     trinoDialect,
 )
-from tests.conftest import build_test_backends_list_v2_api
+from tests.conftest import build_test_backends_list_v3_api
 
 
 def pytest_generate_tests(metafunc):
@@ -35,7 +35,7 @@ def pytest_generate_tests(metafunc):
     ]
     parametrized_tests = []
     ids = []
-    backends = build_test_backends_list_v2_api(metafunc)
+    backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
     for expectation_category in expectation_dirs:
 
