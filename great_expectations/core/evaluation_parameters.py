@@ -343,14 +343,14 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
         # NOTE: 20211122 - Chetan - Any future built-ins that are zero arity functions will match this behavior
         pass
 
-    elif len(parse_results) == 1 and parse_results[0] not in evaluation_parameters:
+    elif len(parse_results) == 1 and parse_results[0] not in evaluation_parameters:  # type: ignore[index, arg-type]
         # In this special case there were no operations to find, so only one value, but we don't have something to
         # substitute for that value
         try:
-            res = ge_urn.parseString(parse_results[0])
+            res = ge_urn.parseString(parse_results[0])  # type: ignore[index]
             if res["urn_type"] == "stores":
                 store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
-                return store.get_query_result(
+                return store.get_query_result(  # type: ignore[union-attr]
                     res["metric_name"], res.get("metric_kwargs", {})
                 )
             else:
@@ -358,29 +358,29 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
                 )
                 raise EvaluationParameterError(
-                    f"No value found for $PARAMETER {str(parse_results[0])}"
+                    f"No value found for $PARAMETER {str(parse_results[0])}"  # type: ignore[index]
                 )
         except ParseException as e:
             logger.debug(
                 f"Parse exception while parsing evaluation parameter: {str(e)}"
             )
             raise EvaluationParameterError(
-                f"No value found for $PARAMETER {str(parse_results[0])}"
+                f"No value found for $PARAMETER {str(parse_results[0])}"  # type: ignore[index]
             ) from e
         except AttributeError as e:
             logger.warning("Unable to get store for store-type valuation parameter.")
             raise EvaluationParameterError(
-                f"No value found for $PARAMETER {str(parse_results[0])}"
+                f"No value found for $PARAMETER {str(parse_results[0])}"  # type: ignore[index]
             ) from e
 
-    elif len(parse_results) == 1:
+    elif len(parse_results) == 1:  # type: ignore[arg-type]
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this
         # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)
         # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that
         # case here; is the evaluation parameter provided here in fact a metric definition?
-        return evaluation_parameters[parse_results[0]]
+        return evaluation_parameters[parse_results[0]]  # type: ignore[index]
 
-    elif len(parse_results) == 0 or parse_results[0] != "Parse Failure":
+    elif len(parse_results) == 0 or parse_results[0] != "Parse Failure":  # type: ignore[index, arg-type]
         # we have a stack to evaluate and there was no parse failure.
         # iterate through values and look for URNs pointing to a store:
         for i, ob in enumerate(EXPR.exprStack):
@@ -393,7 +393,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
                     if res["urn_type"] == "stores":
                         store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
                         EXPR.exprStack[i] = str(
-                            store.get_query_result(
+                            store.get_query_result(  # type: ignore[union-attr]
                                 res["metric_name"], res.get("metric_kwargs", {})
                             )
                         )  # value placed back in stack must be a string
@@ -407,7 +407,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
                     pass
 
     else:
-        err_str, err_line, err_col = parse_results[-1]
+        err_str, err_line, err_col = parse_results[-1]  # type: ignore[index]
         raise EvaluationParameterError(
             f"Parse Failure: {err_str}\nStatement: {err_line}\nColumn: {err_col}"
         )
