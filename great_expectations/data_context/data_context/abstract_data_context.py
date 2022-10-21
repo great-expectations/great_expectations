@@ -959,8 +959,11 @@ class AbstractDataContext(ABC):
         # defined on a `Batch`. Because of this, we grab the execution engine using a batch_request object.
         # Once a ZEP `Batch` gets defined we will clean this up and with a more appropriate type check.
         # NOTE: for non-ZEP workflows, both branches are equivalent.
+        # NOTE: `batch_request_list != [None]` is a workaround when no batch, batch_list, batch_request,
+        # batch_request_list is passed in. This should not be allowed but many tests currently do this and need to be
+        # fixed.
         execution_engine: ExecutionEngine
-        if batch_request_list and datasource_name:
+        if batch_request_list and batch_request_list != [None] and datasource_name:
             # a datasource name and either batch_request or batch_request_list was passed in. We previously have made a
             # batch_request_list if necessary.
             execution_engine = self.datasources[  # type: ignore[union-attr]
