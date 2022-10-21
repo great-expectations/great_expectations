@@ -391,7 +391,7 @@ def test_cloud_context_datasource_crud_e2e() -> None:
     saved_datasource = context.get_datasource(datasource_name)
     assert saved_datasource is not None and saved_datasource.name == datasource_name
 
-    context.delete_datasource(datasource_name=datasource_name)
+    context.delete_datasource(datasource_name)
 
     # Make another call to the backend to confirm deletion
     with pytest.raises(ValueError) as e:
