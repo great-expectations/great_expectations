@@ -15,6 +15,80 @@ from great_expectations.validator.validator import Validator
 yaml = YAML(typ="safe")
 
 
+def test_instantiation_with_partitions_in_connector(glue_titanic_catalog):
+    config = yaml.load(
+        """
+    name: my_glue_catalog_data_connector
+    datasource_name: FAKE_Datasource_NAME
+    partitions:
+        - PClass
+        - SexCode
+        
+    assets:
+        db_test.tb_titanic:
+            table_name: tb_titanic_with_partitions
+            database_name: db_test
+            splitter_method: split_on_column_value
+            splitter_kwargs:
+                column_name: PClass
+            partitions:
+                - SexCode
+        asset2:
+            table_name: tb_titanic_with_partitions
+            database_name: db_test
+            sampling_method: _sample_using_random
+            sampling_kwargs:
+                p: 0.5
+                seed: 0
+            partitions:
+                - PClass
+        asset3:
+            table_name: tb_titanic_with_partitions
+            database_name: db_test
+    """,
+    )
+    config["execution_engine"] = "execution_engine"
+
+    my_data_connector = ConfiguredAssetAWSGlueDataCatalogDataConnector(**config)
+
+    report = my_data_connector.self_check()
+    assert report == {
+        "class_name": "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+        "data_asset_count": 3,
+        "example_data_asset_names": ["asset2", "asset3", "db_test.tb_titanic"],
+        "data_assets": {
+            "asset2": {
+                "batch_definition_count": 3,
+                "example_data_references": [
+                    {"PClass": "1st"},
+                    {"PClass": "2nd"},
+                    {"PClass": "3rd"},
+                ],
+            },
+            "asset3": {
+                "batch_definition_count": 6,
+                "example_data_references": [
+                    {"PClass": "1st", "SexCode": "0"},
+                    {"PClass": "1st", "SexCode": "1"},
+                    {"PClass": "2nd", "SexCode": "0"},
+                ],
+            },
+            "db_test.tb_titanic": {
+                "batch_definition_count": 2,
+                "example_data_references": [
+                    {"SexCode": "0"},
+                    {"SexCode": "1"},
+                ],
+            },
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+    }
+    # noinspection PyProtectedMember
+    assert len(my_data_connector.get_available_data_asset_names()) == 3
+    assert my_data_connector.get_unmatched_data_references() == []
+
+
 def test_basic_instantiation(glue_titanic_catalog):
     config = yaml.load(
         """
@@ -35,6 +109,8 @@ def test_basic_instantiation(glue_titanic_catalog):
             sampling_kwargs:
                 p: 0.5
                 seed: 0
+            partitions:
+                - PClass
         asset3:
             table_name: tb_titanic_with_partitions
             database_name: db_test

@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -18,7 +18,7 @@ from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
 from great_expectations.exceptions import DataConnectorError
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine, SparkDFExecutionEngine
 
 try:
     import boto3
@@ -44,6 +44,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
         catalog_id: Optional[str] = None,
+        partitions: Optional[List[str]] = None,
         assets: Optional[Dict[str, dict]] = None,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
@@ -57,6 +58,9 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             datasource_name (str): Name of datasource that this DataConnector is connected to
             execution_engine (ExecutionEngine): Execution Engine object to actually read the data
             catalog_id (str): Optional catalog ID from which to retrieve databases. If none is provided, the AWS account ID is used by default.
+                Make sure you use the same catalog id configured in your spark session.
+            partitions (list): List of partition keys one want to define for all data assets. The partitions defined in data asset config
+                will override the partitions defined in the connector level.
             assets (dict): dict of assets configuration
             boto3_options (dict): optional boto3 options
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
@@ -65,6 +69,8 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             "Warning: great_expectations.datasource.data_connector.ConfiguredAssetAWSGlueDataCatalogDataConnector is "
             "experimental. Methods, APIs, and core behavior may change in the future."
         )
+        if execution_engine:
+            execution_engine = cast(SparkDFExecutionEngine, execution_engine)
 
         super().__init__(
             name=name,
@@ -84,6 +90,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             )
 
         self._catalog_id = catalog_id
+        self._partitions = partitions
 
         self._assets: Dict[str, dict] = {}
         self._refresh_data_assets_cache(assets=assets)
@@ -101,6 +108,10 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
     @property
     def assets(self) -> Dict[str, dict]:
         return self._assets
+
+    @property
+    def partitions(self) -> Optional[List[str]]:
+        return self._partitions
 
     def build_batch_spec(
         self, batch_definition: BatchDefinition
@@ -235,6 +246,10 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
                 message=f"{self.__class__.__name__} ran into an error while initializing Asset names, 'table_name' was not specified"
             )
 
+        if self.partitions:
+            # Asset config partitions takes precedence.
+            config["partitions"] = config.get("partitions", self.partitions)
+
         partitions = config.get("partitions")
         if partitions and not isinstance(partitions, list):
             raise DataConnectorError(
@@ -295,7 +310,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         database_name: str = data_asset_config["database_name"]
         partitions: Optional[list] = data_asset_config.get("partitions")
 
-        batch_identifiers_list: List[dict] = [{}]
+        batch_identifiers_list: Optional[List[dict]] = None
         if partitions:
             batch_identifiers_list = self._get_batch_identifiers(
                 partition_keys=partitions,
@@ -303,7 +318,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
                 table_name=table_name,
             )
 
-        return batch_identifiers_list
+        return batch_identifiers_list or [{}]
 
     def _refresh_data_references_cache(self) -> None:
         self._data_references_cache = {}

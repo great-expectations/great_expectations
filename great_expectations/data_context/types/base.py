@@ -687,6 +687,9 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     # AWS Glue Data Catalog
     glue_introspection_directives = fields.Dict(required=False, allow_none=True)
     catalog_id = fields.String(required=False, allow_none=True)
+    partitions = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
 
     # noinspection PyUnusedLocal
     @validates_schema  # noqa: C901
@@ -868,7 +871,11 @@ continue.
                 """
             )
 
-        if ("catalog_id" in data or "glue_introspection_directives" in data) and not (
+        if (
+            "partitions" in data
+            or "catalog_id" in data
+            or "glue_introspection_directives" in data
+        ) and not (
             data["class_name"]
             in [
                 "InferredAssetAWSGlueDataCatalogDataConnector",
