@@ -1,7 +1,6 @@
-from typing import TypeVar, Hashable, Mapping, Union, Optional
+import pprint
 from collections import UserDict
-
-import pandas as pd
+from typing import Hashable, Mapping, Optional, TypeVar
 
 T = TypeVar("T", bound=Hashable)
 
@@ -34,17 +33,21 @@ class BiDict(
         super().__setitem__(key, value)
         super().__setitem__(value, key)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{type(self).__name__}({super().__repr__()})"
 
+    def __str__(self) -> str:
+        return str(self.data)
 
-if __name__ == "__main__":
-    d1: BiDict = BiDict({"foo": "bar"})
-    print(d1)
-    d2: BiDict[str] = BiDict(foo="bar")
-    print(d1["foo"])
-    print(d1["bar"])
-    td: BiDict[Union[str, type]] = BiDict(dict=dict, pandas=pd.DataFrame)
-    print(td)
-    print(repr(td))
-    # print(td[pd.DataFrame])
+
+# This makes BiDict pretty printable like a regular dict
+if isinstance(getattr(pprint.PrettyPrinter, "_dispatch"), dict):
+    # we are relying on a private implementation detail here, so first check that the
+    # attribute still exists
+
+    def pprint_BiDict(printer, object, stream, indent, allowance, context, level):
+        return printer._pprint_dict(
+            object.data, stream, indent, allowance, context, level
+        )
+
+    pprint.PrettyPrinter._dispatch[BiDict.__repr__] = pprint_BiDict  # type: ignore[attr-defined]
