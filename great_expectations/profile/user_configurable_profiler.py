@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import logging
 import math
-from typing import Callable, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, cast
 
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -30,6 +31,9 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context import AbstractDataContext
 
 
 class UserConfigurableProfiler:
@@ -111,7 +115,7 @@ class UserConfigurableProfiler:
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
 
-        context: Optional["DataContext"] = None
+        context: Optional[AbstractDataContext] = None
         if isinstance(self.profile_dataset, Batch):
             context = self.profile_dataset.data_context
             self.profile_dataset = Validator(

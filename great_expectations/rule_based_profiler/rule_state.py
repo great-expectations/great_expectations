@@ -1,10 +1,15 @@
-from typing import Dict, List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.rule_based_profiler.rule.rule import Rule
 
 
 class RuleState:
@@ -17,7 +22,7 @@ class RuleState:
 
     def __init__(
         self,
-        rule: Optional["Rule"] = None,  # noqa: F821
+        rule: Optional[Rule] = None,
         variables: Optional[ParameterContainer] = None,
         domains: Optional[List[Domain]] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -47,11 +52,11 @@ class RuleState:
         self._rule_execution_time = 0.0
 
     @property
-    def rule(self) -> "Rule":  # noqa: F821:
+    def rule(self) -> Optional[Rule]:
         return self._rule
 
     @rule.setter
-    def rule(self, value: "Rule") -> None:  # noqa: F821:
+    def rule(self, value: Rule) -> None:
         self._rule = value
 
     @property

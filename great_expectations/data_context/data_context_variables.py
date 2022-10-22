@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -71,7 +73,7 @@ class DataContextVariables(ABC):
 
     config: DataContextConfig
     substitutions: Optional[dict] = None
-    _store: Optional["DataContextStore"] = None
+    _store: Optional[DataContextStore] = None
 
     def __post_init__(self) -> None:
         if self.substitutions is None:
@@ -84,13 +86,13 @@ class DataContextVariables(ABC):
         return repr(self.config)
 
     @property
-    def store(self) -> "DataContextStore":
+    def store(self) -> DataContextStore:
         if self._store is None:
             self._store = self._init_store()
         return self._store
 
     @abstractmethod
-    def _init_store(self) -> "DataContextStore":
+    def _init_store(self) -> DataContextStore:
         raise NotImplementedError
 
     def get_key(self) -> DataContextKey:
@@ -289,7 +291,7 @@ class DataContextVariables(ABC):
 
 @dataclass(repr=False)
 class EphemeralDataContextVariables(DataContextVariables):
-    def _init_store(self) -> "DataContextStore":
+    def _init_store(self) -> DataContextStore:
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
@@ -319,7 +321,7 @@ class FileDataContextVariables(DataContextVariables):
                 f"A reference to a data context is required for {self.__class__.__name__}"
             )
 
-    def _init_store(self) -> "DataContextStore":
+    def _init_store(self) -> DataContextStore:
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
@@ -363,7 +365,7 @@ class CloudDataContextVariables(DataContextVariables):
                 f"All of the following attributes are required for{ self.__class__.__name__}:\n  self.ge_cloud_base_url\n  self.ge_cloud_organization_id\n  self.ge_cloud_access_token"
             )
 
-    def _init_store(self) -> "DataContextStore":
+    def _init_store(self) -> DataContextStore:
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
