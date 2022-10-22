@@ -443,7 +443,9 @@ def _get_parse_results(
     return parse_results
 
 
-def _is_single_function_no_args(parse_results: Union[ParseResults, list]) -> bool:
+def _is_single_function_no_args(
+    parse_results: Union[ParseResults, Iterable[Union[str, tuple]]]
+) -> bool:
     # Represents a valid parser result of a single function that has no arguments
     return (
         len(parse_results) == 1
