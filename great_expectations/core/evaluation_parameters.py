@@ -7,7 +7,7 @@ import math
 import operator
 import traceback
 from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 from pyparsing import (
     CaselessKeyword,
@@ -334,9 +334,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
         evaluation_parameters = {}
 
     # Calling get_parser clears the stack
-    parse_results: Union[
-        ParseResults, Iterable[Union[str, tuple]]
-    ] = _get_parse_results(parameter_expression)
+    parse_results: Union[ParseResults, list] = _get_parse_results(parameter_expression)
 
     if _is_single_function_no_args(parse_results):
         # Necessary to catch `now()` (which only needs to be evaluated with `expr.exprStack`)
@@ -430,7 +428,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
 
 def _get_parse_results(
     parameter_expression: str,
-) -> Union[ParseResults, Iterable[Union[str, tuple]]]:
+) -> Union[ParseResults, Union[ParseResults, list]]:
     parser = EXPR.get_parser()
     try:
         parse_results = parser.parseString(parameter_expression, parseAll=True)
@@ -443,9 +441,7 @@ def _get_parse_results(
     return parse_results
 
 
-def _is_single_function_no_args(
-    parse_results: Union[ParseResults, Iterable[Union[str, tuple]]]
-) -> bool:
+def _is_single_function_no_args(parse_results: Union[ParseResults, list]) -> bool:
     # Represents a valid parser result of a single function that has no arguments
     return (
         len(parse_results) == 1
