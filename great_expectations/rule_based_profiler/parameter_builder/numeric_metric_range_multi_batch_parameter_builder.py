@@ -1,8 +1,9 @@
 import copy
 import datetime
 import itertools
+import logging
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Set, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -31,6 +32,7 @@ from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_e
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     build_numeric_range_estimation_result,
+    datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
     integer_semantic_domain_type,
 )
@@ -55,6 +57,9 @@ from great_expectations.util import (
     is_ndarray_decimal_dtype,
     is_numeric,
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 MAX_DECIMALS: int = 9
 
@@ -433,6 +438,9 @@ detected.
 """
             )
 
+        if estimator == "exact":
+            return ExactNumericRangeEstimator()
+
         if estimator == "quantiles":
             return QuantilesNumericRangeEstimator(
                 configuration=Attributes(
@@ -444,8 +452,20 @@ detected.
                 )
             )
 
-        if estimator == "exact":
-            return ExactNumericRangeEstimator()
+        # Since complex numerical calculations do not support DateTime/TimeStamp data types, use "quantiles" estimator.
+        if datetime_semantic_domain_type(domain=domain):
+            logger.info(
+                f'Estimator "{estimator}" does not support DateTime/TimeStamp data types (downgrading to "quantiles").'
+            )
+            return QuantilesNumericRangeEstimator(
+                configuration=Attributes(
+                    {
+                        "false_positive_rate": self.false_positive_rate,
+                        "round_decimals": round_decimals,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                    }
+                )
+            )
 
         if estimator == "bootstrap":
             return BootstrapNumericRangeEstimator(
@@ -534,7 +554,10 @@ detected.
             2,
             NUM_HISTOGRAM_BINS + 1,
         )
-        datetime_detected: bool = self._is_metric_values_ndarray_datetime_dtype(
+
+        datetime_detected: bool = datetime_semantic_domain_type(
+            domain=domain
+        ) or self._is_metric_values_ndarray_datetime_dtype(
             metric_values=metric_values,
             metric_value_vector_indices=metric_value_vector_indices,
         )
@@ -592,11 +615,11 @@ detected.
 
             min_value = numeric_range_estimation_result.value_range[0]
             if lower_bound is not None:
-                min_value = max(cast(float, min_value), lower_bound)
+                min_value = max(np.float64(min_value), np.float64(lower_bound))
 
             max_value = numeric_range_estimation_result.value_range[1]
             if upper_bound is not None:
-                max_value = min(cast(float, max_value), upper_bound)
+                max_value = min(np.float64(max_value), np.float64(upper_bound))
 
             # Obtain index of metric element (by discarding "N"-element samples dimension).
             metric_value_idx = metric_value_idx[1:]
@@ -617,12 +640,20 @@ detected.
                 metric_value_range[metric_value_range_min_idx] = min_value
                 metric_value_range[metric_value_range_max_idx] = max_value
             else:
-                metric_value_range[metric_value_range_min_idx] = round(
-                    cast(float, min_value), round_decimals
-                )
-                metric_value_range[metric_value_range_max_idx] = round(
-                    cast(float, max_value), round_decimals
-                )
+                if round_decimals is None:
+                    metric_value_range[metric_value_range_min_idx] = np.float64(
+                        min_value
+                    )
+                    metric_value_range[metric_value_range_max_idx] = np.float64(
+                        max_value
+                    )
+                else:
+                    metric_value_range[metric_value_range_min_idx] = round(
+                        np.float64(min_value), round_decimals
+                    )
+                    metric_value_range[metric_value_range_max_idx] = round(
+                        np.float64(max_value), round_decimals
+                    )
 
             # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
             estimation_histogram[
@@ -651,7 +682,9 @@ detected.
         for metric_value_idx in metric_value_vector_indices:
             metric_value_vector = metric_values[metric_value_idx]
             if not is_ndarray_datetime_dtype(
-                data=metric_value_vector, parse_strings_as_datetimes=True
+                data=metric_value_vector,
+                parse_strings_as_datetimes=True,
+                fuzzy=False,
             ):
                 return False
 
@@ -736,15 +769,15 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        if round_decimals is None:
-            round_decimals = MAX_DECIMALS
-        else:
-            if not isinstance(round_decimals, int) or (round_decimals < 0):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
+        if not (
+            round_decimals is None
+            or (isinstance(round_decimals, int) and (round_decimals >= 0))
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).
 """
-                )
+            )
 
         if np.issubdtype(metric_values.dtype, np.integer):
             round_decimals = 0

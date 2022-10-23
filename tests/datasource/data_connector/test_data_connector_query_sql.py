@@ -258,7 +258,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index(
         datasource_name="taxi_multi_batch_sql_datasource",
         data_connector_name="by_pickup_date_time",
         data_asset_name="yellow_tripdata_sample_2020_01",
-        batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 08"}),
+        batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 23"}),
     )
     assert expected_batch_definition == returned_batch_definition_list[0]
 
@@ -298,13 +298,13 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="taxi_multi_batch_sql_datasource",
             data_connector_name="by_pickup_date_time",
             data_asset_name="yellow_tripdata_sample_2020_01",
-            batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 10"}),
+            batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 00"}),
         ),
         BatchDefinition(
             datasource_name="taxi_multi_batch_sql_datasource",
             data_connector_name="by_pickup_date_time",
             data_asset_name="yellow_tripdata_sample_2020_01",
-            batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 17"}),
+            batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 03"}),
         ),
     ]
     assert returned_batch_definition_list == expected

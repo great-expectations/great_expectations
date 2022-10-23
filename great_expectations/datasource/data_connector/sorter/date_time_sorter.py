@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 from typing import Any
 
@@ -41,4 +42,4 @@ class DateTimeSorter(Sorter):
             "type": "DateTimeSorter",
             "date_time_format": self._datetime_format,
         }
-        return str(doc_fields_dict)
+        return json.dumps(doc_fields_dict, indent=2)

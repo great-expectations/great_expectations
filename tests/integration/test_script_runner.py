@@ -85,8 +85,8 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
     ),
     IntegrationTestFixture(
-        name="how_to_get_a_batch_of_data_from_a_configured_datasource",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py",
+        name="how_to_get_one_or_more_batches_of_data_from_a_configured_datasource",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
@@ -319,6 +319,11 @@ local_tests = [
         name="expect_queried_table_row_count_to_be",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py",
         extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTestFixture(
+        name="expect_multicolumn_values_to_be_multiples_of_three",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py",
+        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="how_to_use_great_expectations_in_aws_glue",

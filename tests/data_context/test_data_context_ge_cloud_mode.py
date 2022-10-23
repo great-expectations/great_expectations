@@ -11,7 +11,7 @@ from great_expectations.exceptions import DataContextError, GeCloudError
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error():
     # Don't want to make a real request in a unit test so we simply patch the config fixture
     with mock.patch(
-        "great_expectations.data_context.DataContext._get_ge_cloud_config_dict",
+        "great_expectations.data_context.CloudDataContext._get_ge_cloud_config_dict",
         return_value={"base_url": None, "organization_id": None, "access_token": None},
     ):
         with pytest.raises(DataContextError):

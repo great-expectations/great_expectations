@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, List
 
@@ -52,4 +53,4 @@ class CustomListSorter(Sorter):
             "reverse": self.reverse,
             "type": "CustomListSorter",
         }
-        return str(doc_fields_dict)
+        return json.dumps(doc_fields_dict, indent=2)

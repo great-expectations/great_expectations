@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import configparser
 import copy
 import errno
@@ -110,52 +112,6 @@ class AbstractDataContext(ABC):
         "/etc/great_expectations.conf",
     ]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
-    TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
-        "ExpectationsStore",
-        "ValidationsStore",
-        "HtmlSiteStore",
-        "EvaluationParameterStore",
-        "MetricStore",
-        "SqlAlchemyQueryStore",
-        "CheckpointStore",
-        "ProfilerStore",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES = [
-        "Datasource",
-        "SimpleSqlalchemyDatasource",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES = [
-        "InferredAssetFilesystemDataConnector",
-        "ConfiguredAssetFilesystemDataConnector",
-        "InferredAssetS3DataConnector",
-        "ConfiguredAssetS3DataConnector",
-        "InferredAssetAzureDataConnector",
-        "ConfiguredAssetAzureDataConnector",
-        "InferredAssetGCSDataConnector",
-        "ConfiguredAssetGCSDataConnector",
-        "InferredAssetSqlDataConnector",
-        "ConfiguredAssetSqlDataConnector",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
-        "Checkpoint",
-        "SimpleCheckpoint",
-    ]
-    TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
-        "RuleBasedProfiler",
-    ]
-    ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
-        "__substitution_error__",
-        "__yaml_parse_error__",
-        "__custom_subclass_not_core_ge__",
-        "__class_name_not_provided__",
-    ]
-    ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES = (
-        TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
-    )
     MIGRATION_WEBSITE: str = "https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
 
     def __init__(self, runtime_environment: Optional[dict] = None) -> None:
@@ -306,7 +262,7 @@ class AbstractDataContext(ABC):
         return self.variables.evaluation_parameter_store_name
 
     @property
-    def evaluation_parameter_store(self) -> "EvaluationParameterStore":
+    def evaluation_parameter_store(self) -> EvaluationParameterStore:
         return self.stores[self.evaluation_parameter_store_name]
 
     @property
@@ -358,7 +314,7 @@ class AbstractDataContext(ABC):
             raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
     @property
-    def checkpoint_store(self) -> "CheckpointStore":
+    def checkpoint_store(self) -> CheckpointStore:
         checkpoint_store_name: str = self.checkpoint_store_name  # type: ignore[assignment]
         try:
             return self.stores[checkpoint_store_name]
@@ -460,6 +416,47 @@ class AbstractDataContext(ABC):
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
         self.variables.config = project_config
+
+    def save_datasource(
+        self, datasource: Union[LegacyDatasource, BaseDatasource]
+    ) -> Union[LegacyDatasource, BaseDatasource]:
+        """Save a Datasource to the configured DatasourceStore.
+
+        Stores the underlying DatasourceConfig in the store and Data Context config,
+        updates the cached Datasource and returns the Datasource.
+        The cached and returned Datasource is re-constructed from the config
+        that was stored as some store implementations make edits to the stored
+        config (e.g. adding identifiers).
+
+        Args:
+            datasource: Datasource to store.
+
+        Returns:
+            The datasource, after storing and retrieving the stored config.
+        """
+
+        datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
+        # Manually need to add in class name to the config since it is not part of the runtime obj
+        datasource_config_dict["class_name"] = datasource.__class__.__name__
+
+        datasource_config = datasourceConfigSchema.load(datasource_config_dict)
+        datasource_name: str = datasource.name
+
+        updated_datasource_config_from_store: DatasourceConfig = self._datasource_store.set(  # type: ignore[attr-defined]
+            key=None, value=datasource_config
+        )
+        # Use the updated datasource config, since the store may populate additional info on update.
+        self.config.datasources[datasource_name] = updated_datasource_config_from_store  # type: ignore[index,assignment]
+
+        # Also use the updated config to initialize a datasource for the cache and overwrite the existing datasource.
+        substituted_config = self._perform_substitutions_on_datasource_config(
+            updated_datasource_config_from_store
+        )
+        updated_datasource: Union[
+            LegacyDatasource, BaseDatasource
+        ] = self._instantiate_datasource_from_config(config=substituted_config)
+        self._cached_datasources[datasource_name] = updated_datasource
+        return updated_datasource
 
     def add_datasource(
         self,
@@ -711,7 +708,7 @@ class AbstractDataContext(ABC):
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
-    ) -> "Checkpoint":
+    ) -> Checkpoint:
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
@@ -918,6 +915,7 @@ class AbstractDataContext(ABC):
             include_rendered_content=include_rendered_content,
         )
 
+    # noinspection PyUnusedLocal
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
@@ -941,6 +939,7 @@ class AbstractDataContext(ABC):
                 """Validator could not be created because BatchRequest returned an empty batch_list.
                 Please check your parameters and try again."""
             )
+
         include_rendered_content = (
             self._determine_if_expectation_validation_result_include_rendered_content(
                 include_rendered_content=include_rendered_content

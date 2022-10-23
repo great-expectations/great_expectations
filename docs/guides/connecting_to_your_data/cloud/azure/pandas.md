@@ -29,7 +29,7 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L5-L8
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L5-L9
 ```
 
 Load your DataContext into memory using the `get_context()` method.
@@ -87,30 +87,30 @@ The below configuration is representative of the default setup you'll see when p
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  
+
   <TabItem value="yaml">
-  
+
   ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L19-L43
   ```
-  
+
   Run this code to test your configuration.
-  
+
   ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L60
   ```
   </TabItem>
-  
+
   <TabItem value="python">
-  
+
   ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L13-L38
   ```
-  
+
   Run this code to test your configuration.
-  
+
   ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L59
   ```
-  
+
   </TabItem>
-  
+
   </Tabs>
 
 </TabItem>

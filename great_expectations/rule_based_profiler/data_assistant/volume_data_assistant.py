@@ -244,7 +244,7 @@ class VolumeDataAssistant(DataAssistant):
                 "lower_bound": 0.0,
                 "upper_bound": None,
             },
-            "round_decimals": 15,
+            "round_decimals": None,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,

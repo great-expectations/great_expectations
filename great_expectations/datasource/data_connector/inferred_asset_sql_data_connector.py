@@ -1,9 +1,10 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
 )
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.util import deep_filter_properties_iterable
 
 try:
@@ -171,7 +172,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
     def _introspect_db(  # noqa: C901 - 16
         self,
-        schema_name: str = None,
+        schema_name: Union[str, None] = None,
         ignore_information_schemas_and_system_tables: bool = True,
         information_schemas: Optional[List[str]] = None,
         system_tables: Optional[List[str]] = None,
@@ -213,7 +214,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
                 tables.append(
                     {
-                        "schema_name": schema_name,
+                        "schema_name": schema_name,  # type: ignore[dict-item]
                         "table_name": table_name,
                         "type": "table",
                     }
@@ -236,7 +237,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
                         tables.append(
                             {
-                                "schema_name": schema_name,
+                                "schema_name": schema_name,  # type: ignore[dict-item]
                                 "table_name": view_name,
                                 "type": "view",
                             }
@@ -246,7 +247,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         # The following code fetches the names of external schemas and tables from a special table
         # 'svv_external_tables'.
         try:
-            if "redshift" == engine.dialect.name.lower():
+            if engine.dialect.name.lower() == GESqlDialect.REDSHIFT:
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
                 result = engine.execute(
                     "select schemaname, tablename from svv_external_tables"

@@ -1,205 +1,189 @@
+import enum
 import glob
-import logging
-import os
+import pprint
 import re
-from collections import defaultdict
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import List, Optional, Tuple
 
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
+# This should be reduced as snippets are added/fixed
+VIOLATION_THRESHOLD = 523
+
+r = re.compile(r"```\w+ file=(.+)")
 
 
-OPENING_TAG: str = "<snippet>"
-CLOSING_TAG: str = "</snippet>"
-DOCUSAURUS_REGEX: re.Pattern = re.compile(r"```python file=(.+)#L(\d*)(?:-L)?(\d*)")
+class Status(enum.Enum):
+    MISSING_BOTH = 0
+    MISSING_OPENING = 1
+    MISSING_CLOSING = 2
+    COMPLETE = 3
 
 
 @dataclass
-class DocusaurusRef:
-    docs_file: str
-    py_file: str
-    line_numbers: Tuple[int, int]
-
-    @classmethod
-    def from_regex_parsed_values(
-        cls, file: str, values: Tuple[str, str, str]
-    ) -> "DocusaurusRef":
-        path, start, end = values
-
-        start_line: int = int(start)
-        end_line: int = int(end) if end else start_line
-        line_numbers: Tuple[int, int] = (start_line, end_line)
-
-        relative_path: str = os.path.join(os.path.dirname(file), path)
-        cleaned_path: str = os.path.normpath(relative_path)
-
-        return cls(docs_file=file, py_file=cleaned_path, line_numbers=line_numbers)
+class Reference:
+    raw: str
+    origin_path: str
+    origin_line: int
+    target_path: str
+    target_lines: Optional[Tuple[int, int]]
 
 
-def collect_docusaurus_refs(directory: str) -> Dict[str, List[DocusaurusRef]]:
-    """Iterate through a directory and parses all embedded Docusaurus refs to Python files.
+@dataclass
+class Result:
+    ref: Reference
+    status: Status
 
-    Args:
-        directory: The dir to recursively search through.
-
-    Returns:
-        A map between Python files and the docs that reference them.
-    """
-    docusaurus_refs: Dict[str, List[DocusaurusRef]] = defaultdict(list)
-    for file in glob.glob(f"{directory}/**/*.md", recursive=True):
-        logger.debug(f"Checking {file} for Docusaurus links")
-        _collect_docusaurus_refs(file=file, reference_map=docusaurus_refs)
-
-    return docusaurus_refs
+    def to_dict(self) -> dict:
+        data = self.__dict__
+        data["ref"] = data["ref"].__dict__
+        data["status"] = data["status"].name
+        return data
 
 
-def _collect_docusaurus_refs(
-    file: str, reference_map: Dict[str, List[DocusaurusRef]]
-) -> None:
+def collect_references(files: List[str]) -> List[Reference]:
+    all_refs = []
+    for file in files:
+        file_refs = _collect_references(file)
+        all_refs.extend(file_refs)
+
+    return all_refs
+
+
+def _collect_references(file: str) -> List[Reference]:
     with open(file) as f:
-        contents = f.read()
+        lines = f.readlines()
 
-    references: List[Tuple[str, str, str]] = DOCUSAURUS_REGEX.findall(contents)
+    refs = []
+    for i, line in enumerate(lines):
+        match = r.match(line.strip())
+        if not match:
+            continue
 
-    for reference in references:
-        docusaurus_ref = DocusaurusRef.from_regex_parsed_values(
-            file=file, values=reference
-        )
-        reference_map[docusaurus_ref.py_file].append(docusaurus_ref)
-        logger.debug(
-            f"Create association between {docusaurus_ref.py_file} and the docs that use it"
-        )
+        ref = _parse_reference(match=match, file=file, line=i + 1)
+        refs.append(ref)
 
-
-def evaluate_snippet_validity(
-    docusaurus_refs: Dict[str, List[DocusaurusRef]]
-) -> List[DocusaurusRef]:
-    """Given a series of references, reviews the referenced files and ensures that
-    opening and closing tags directly surround the snippet.
-
-    Ex: ```python file=...#L2
-
-        1 <snippet>
-        2
-        3 context = DataContext()
-        4 </snippet>
-
-    Note that the tags do not need to be immediately before and after the content - as long
-    as the lines in between are whitespace, the algorithm will not flag it as an issue.
-
-    Args:
-        docusaurus_refs: A map between Python files and the docs that reference them.
-
-    Returns:
-        A list of broken references.
-    """
-    all_broken_refs: List[DocusaurusRef] = []
-    for docs_file, ref_list in docusaurus_refs.items():
-        logger.debug(f"Checking {docs_file} for snippet validity")
-        file_broken_refs: List[DocusaurusRef] = _evaluate_snippet_validity(
-            docs_file, ref_list
-        )
-        all_broken_refs.extend(file_broken_refs)
-
-    return all_broken_refs
+    return refs
 
 
-def _evaluate_snippet_validity(
-    file: str, ref_list: List[DocusaurusRef]
-) -> List[DocusaurusRef]:
-    with open(file) as f:
-        file_contents: List[str] = f.readlines()
+def _parse_reference(match: re.Match, file: str, line: int) -> Reference:
+    # Chetan - 20221007 - This parsing logic could probably be cleaned up with a regex
+    # and pathlib/os but since this is not prod code, I'll leave cleanup as a nice-to-have
+    raw_path = match.groups()[0].strip()
+    parts = raw_path.split("#")
 
-    broken_refs: List[DocusaurusRef] = []
-    for ref in ref_list:
-        if not _validate_docusaurus_ref(ref, file_contents):
-            broken_refs.append(ref)
+    target_path = parts[0]
+    while target_path.startswith("../"):
+        target_path = target_path[3:]
 
-    return broken_refs
+    target_lines: Optional[Tuple[int, int]]
+    if len(parts) == 1:
+        target_lines = None
+    else:
+        line_nos = parts[1].split("-")
 
+        start = int(line_nos[0][1:])
+        end: int
+        if len(line_nos) == 1:
+            end = start
+        else:
+            end = int(line_nos[1][1:])
+        target_lines = (start, end)
 
-def _validate_docusaurus_ref(
-    docusaurus_ref: DocusaurusRef, file_contents: List[str]
-) -> bool:
-    start_line, end_line = docusaurus_ref.line_numbers
-    if start_line > len(file_contents) or end_line > len(file_contents):
-        logger.warning(
-            f"Invalid snippet due to out-of-bounds reference: {docusaurus_ref}"
-        )
-        return False
-
-    return _validate_opening_tag(start_line, file_contents) and _validate_closing_tag(
-        end_line, file_contents
+    return Reference(
+        raw=raw_path,
+        origin_path=file,
+        origin_line=line,
+        target_path=target_path,
+        target_lines=target_lines,
     )
 
 
-def _validate_opening_tag(start_line: int, file_contents: List[str]) -> bool:
-    ptr: int = start_line - 1
+def determine_results(refs: List[Reference]) -> List[Result]:
+    all_results = []
+    for ref in refs:
+        result = _determine_result(ref)
+        all_results.append(result)
 
-    line: str
-    while ptr >= 0:
-        line = file_contents[ptr - 1]
-        if OPENING_TAG in line:
-            return True
-        elif not line.isspace():
-            return False
-        ptr -= 1
-
-    return False
+    return all_results
 
 
-def _validate_closing_tag(end_line: int, file_contents: List[str]) -> bool:
-    ptr: int = end_line + 1
+def _determine_result(ref: Reference) -> Result:
+    if ref.target_lines is None:
+        return Result(
+            ref=ref,
+            status=Status.COMPLETE,
+        )
 
-    line: str
-    while ptr < len(file_contents):
-        line = file_contents[ptr - 1]
-        if CLOSING_TAG in line:
-            return True
-        elif not line.isspace():
-            return False
-        ptr += 1
+    with open(ref.target_path) as f:
+        lines = f.readlines()
 
-    return False
+    start, end = ref.target_lines
 
+    try:
+        open_tag = lines[start - 2]
+        valid_open = "<snippet" in open_tag
+    except IndexError:
+        valid_open = False
 
-def print_diagnostic_report(broken_refs: List[DocusaurusRef]) -> None:
-    """Prints results to console for the user to review.
+    try:
+        close_tag = lines[end]
+        valid_close = "snippet>" in close_tag
+    except IndexError:
+        valid_close = False
 
-    Args:
-        broken_refs: A list of broken refernces (as parsed and determined by prior stages).
-    """
-    refs_by_source_doc: Dict[str, List[DocusaurusRef]] = defaultdict(list)
-    for ref in broken_refs:
-        refs_by_source_doc[ref.docs_file].append(ref)
+    status: Status
+    if valid_open and valid_close:
+        status = Status.COMPLETE
+    elif valid_open:
+        status = Status.MISSING_CLOSING
+    elif valid_close:
+        status = Status.MISSING_OPENING
+    else:
+        status = Status.MISSING_BOTH
 
-    for docs_file, refs in refs_by_source_doc.items():
-        print(f"\n{docs_file}:")
-        for ref in refs:
-            start, end = ref.line_numbers
-            print(f"  {ref.py_file}: L{start}-L{end}")
-
-    print(
-        f"\n[ERROR] {len(broken_refs)} snippet issue(s) found in {len(refs_by_source_doc)} docs file(s)!"
+    return Result(
+        ref=ref,
+        status=status,
     )
+
+
+def evaluate_results(results: List[Result]) -> None:
+    summary = {}
+
+    for res in results:
+        key = res.status.name
+        val = res.to_dict()
+        if key not in summary:
+            summary[key] = []
+        summary[key].append(val)
+
+    pprint.pprint(summary)
+
+    print("\n[SUMMARY]")
+    for key, val in summary.items():
+        print(f"* {key}: {len(val)}")
+
+    violations = len(results) - len(summary[Status.COMPLETE.name])
+    assert (
+        violations <= VIOLATION_THRESHOLD
+    ), f"Expected {VIOLATION_THRESHOLD} or fewer snippet violations, got {violations}"
+
+    # There should only be COMPLETE (valid snippets) or MISSING_BOTH (snippets that haven't recieved surrounding tags yet)
+    # The presence of MISSING_OPENING or MISSING_CLOSING signifies a misaligned line number reference
+    assert (
+        summary.get(Status.MISSING_OPENING.name, 0) == 0
+    ), "Found a snippet without an opening snippet tag"
+    assert (
+        summary.get(Status.MISSING_CLOSING.name, 0) == 0
+    ), "Found a snippet without an closing snippet tag"
+
+
+def main() -> None:
+    files = glob.glob("docs/**/*.md", recursive=True)
+    refs = collect_references(files)
+    results = determine_results(refs)
+
+    evaluate_results(results)
 
 
 if __name__ == "__main__":
-    docusaurus_refs: Dict[str, List[DocusaurusRef]] = collect_docusaurus_refs("docs")
-    broken_refs: List[DocusaurusRef] = evaluate_snippet_validity(docusaurus_refs)
-    if broken_refs:
-        print_diagnostic_report(broken_refs)
-    else:
-        print("[SUCCESS] All snippets are valid and referenced properly!")
-
-    # Chetan - 20220316 - While this number should be 0, getting the number of warnings down takes time
-    # and effort. In the meanwhile, we want to set an upper bound on warnings to ensure we're not introducing
-    # further regressions. As snippets are validated, developers should update this number.
-    broken_ref_threshold: int = 494
-    broken_ref_count: int = len(broken_refs)
-    assert (
-        broken_ref_count <= broken_ref_threshold
-    ), f"""A broken snippet reference was introduced; please resolve the matter before merging.
-                We expect there to be {broken_ref_threshold} or fewer broken references (actual: {broken_ref_count})"""
+    main()

@@ -10,9 +10,10 @@ import string
 import traceback
 import warnings
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
 
 from great_expectations._version import get_versions  # isort:skip
+
 
 __version__ = get_versions()["version"]  # isort:skip
 
@@ -54,6 +55,7 @@ from great_expectations.execution_engine.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
@@ -118,7 +120,9 @@ try:
     import sqlalchemy_dremio.pyodbc
 
     if sa:
-        sa.dialects.registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
+        sa.dialects.registry.register(
+            GESqlDialect.DREMIO, "sqlalchemy_dremio.pyodbc", "dialect"
+        )
 except ImportError:
     sqlalchemy_dremio = None
 
@@ -128,7 +132,9 @@ try:
     if sa:
         # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
+        sa.dialects.registry.register(
+            GESqlDialect.SNOWFLAKE, "snowflake.sqlalchemy", "dialect"
+        )
 except (ImportError, KeyError, AttributeError):
     snowflake = None
 
@@ -136,10 +142,13 @@ _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
     import sqlalchemy_bigquery as sqla_bigquery
 
-    sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+    sa.dialects.registry.register(
+        GESqlDialect.BIGQUERY, _BIGQUERY_MODULE_NAME, "dialect"
+    )
     bigquery_types_tuple = None
 except ImportError:
     try:
+        # noinspection PyUnresolvedReferences
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
         # deprecated-v0.14.7
@@ -151,7 +160,9 @@ except ImportError:
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        sa.dialects.registry.register(
+            GESqlDialect.BIGQUERY, _BIGQUERY_MODULE_NAME, "dialect"
+        )
         try:
             getattr(sqla_bigquery, "INTEGER")
             bigquery_types_tuple = None
@@ -174,6 +185,7 @@ try:
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
     teradatasqlalchemy = None
+    teradatatypes = None
 
 
 def _get_dialect_type_module(dialect):
@@ -187,6 +199,7 @@ def _get_dialect_type_module(dialect):
     try:
         # Redshift does not (yet) export types to top level; only recognize base SA types
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+            # noinspection PyUnresolvedReferences
             return dialect.sa
     except (TypeError, AttributeError):
         pass
@@ -221,12 +234,13 @@ def _get_dialect_type_module(dialect):
 
 
 class SqlAlchemyExecutionEngine(ExecutionEngine):
+    # noinspection PyUnusedLocal
     def __init__(
         self,
         name: Optional[str] = None,
         credentials: Optional[dict] = None,
         data_context: Optional[Any] = None,
-        engine=None,
+        engine: "Optional[sa.engine]" = None,
         connection_string: Optional[str] = None,
         url: Optional[str] = None,
         batch_data_dict: Optional[dict] = None,
@@ -300,42 +314,42 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # these are two backends where temp_table_creation is not supported we set the default value to False.
         if self.dialect_name in [
-            "trino",
-            "awsathena",  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
+            GESqlDialect.TRINO,
+            GESqlDialect.AWSATHENA,  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
         ]:
             self._create_temp_table = False
 
         # Get the dialect **for purposes of identifying types**
         if self.dialect_name in [
-            "postgresql",
-            "mysql",
-            "sqlite",
-            "oracle",
-            "mssql",
+            GESqlDialect.POSTGRESQL,
+            GESqlDialect.MYSQL,
+            GESqlDialect.SQLITE,
+            GESqlDialect.ORACLE,
+            GESqlDialect.MSSQL,
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect_module = import_library_module(
                 module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
-        elif self.dialect_name == "snowflake":
+        elif self.dialect_name == GESqlDialect.SNOWFLAKE:
             self.dialect_module = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
-        elif self.dialect_name == "dremio":
+        elif self.dialect_name == GESqlDialect.DREMIO:
             # WARNING: Dremio Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_dremio.pyodbc"
             )
-        elif self.dialect_name == "redshift":
+        elif self.dialect_name == GESqlDialect.REDSHIFT:
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
             )
-        elif self.dialect_name == "bigquery":
+        elif self.dialect_name == GESqlDialect.BIGQUERY:
             self.dialect_module = import_library_module(
                 module_name=_BIGQUERY_MODULE_NAME
             )
-        elif self.dialect_name == "teradatasql":
+        elif self.dialect_name == GESqlDialect.TERADATASQL:
             # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
@@ -349,16 +363,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # Connection can be handled separately.
         self._engine_backup = None
         if self.engine and self.dialect_name in [
-            "sqlite",
-            "mssql",
-            "snowflake",
-            "mysql",
+            GESqlDialect.SQLITE,
+            GESqlDialect.MSSQL,
+            GESqlDialect.SNOWFLAKE,
+            GESqlDialect.MYSQL,
         ]:
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
-            if self._engine_backup.dialect.name.lower() == "sqlite" and not isinstance(
-                self._engine_backup, sa.engine.base.Connection
+            if (
+                self._engine_backup.dialect.name.lower() == GESqlDialect.SQLITE
+                and not isinstance(self._engine_backup, sa.engine.base.Connection)
             ):
                 raw_connection = self._engine_backup.raw_connection()
                 raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
@@ -529,15 +544,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_id: Optional[str] = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.active_batch_data:
-                data_object = self.active_batch_data
+            if self.batch_manager.active_batch_data:
+                data_object = cast(
+                    SqlAlchemyBatchData, self.batch_manager.active_batch_data
+                )
             else:
                 raise GreatExpectationsError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.loaded_batch_data_dict:
-                data_object = self.loaded_batch_data_dict[batch_id]
+            if batch_id in self.batch_manager.batch_data_cache:
+                data_object = cast(
+                    SqlAlchemyBatchData, self.batch_manager.batch_data_cache[batch_id]
+                )
             else:
                 raise GreatExpectationsError(
                     f"Unable to find batch with batch_id {batch_id}"
@@ -621,7 +640,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             and "column_B" in domain_kwargs
             and "ignore_row_if" in domain_kwargs
         ):
-            if self.active_batch_data.use_quoted_name:
+            if cast(
+                SqlAlchemyBatchData, self.batch_manager.active_batch_data
+            ).use_quoted_name:
                 # Checking if case-sensitive and using appropriate name
                 # noinspection PyPep8Naming
                 column_A_name = quoted_name(domain_kwargs["column_A"], quote=True)
@@ -670,7 +691,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use \
+"neither" moving forward.
 """,
                         DeprecationWarning,
                     )
@@ -678,7 +700,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             return selectable
 
         if "column_list" in domain_kwargs and "ignore_row_if" in domain_kwargs:
-            if self.active_batch_data.use_quoted_name:
+            if cast(
+                SqlAlchemyBatchData, self.batch_manager.active_batch_data
+            ).use_quoted_name:
                 # Checking if case-sensitive and using appropriate name
                 column_list = [
                     quoted_name(domain_kwargs[column_name], quote=True)
@@ -785,7 +809,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         # Checking if case-sensitive and using appropriate name
-        if self.active_batch_data.use_quoted_name:
+        if cast(
+            SqlAlchemyBatchData, self.batch_manager.active_batch_data
+        ).use_quoted_name:
             accessor_domain_kwargs["column"] = quoted_name(
                 compute_domain_kwargs.pop("column"), quote=True
             )
@@ -825,7 +851,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         # Checking if case-sensitive and using appropriate name
-        if self.active_batch_data.use_quoted_name:
+        if cast(
+            SqlAlchemyBatchData, self.batch_manager.active_batch_data
+        ).use_quoted_name:
             accessor_domain_kwargs["column_A"] = quoted_name(
                 compute_domain_kwargs.pop("column_A"), quote=True
             )
@@ -870,7 +898,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             raise GreatExpectationsError("column_list must contain at least 2 columns")
 
         # Checking if case-sensitive and using appropriate name
-        if self.active_batch_data.use_quoted_name:
+        if cast(
+            SqlAlchemyBatchData, self.batch_manager.active_batch_data
+        ).use_quoted_name:
             accessor_domain_kwargs["column_list"] = [
                 quoted_name(column_name, quote=True) for column_name in column_list
             ]
@@ -935,7 +965,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 queries[domain_id]["select"].append(
                     metric_fn.label(
                         metric_to_resolve.metric_name.join(
-                            random.choices(string.ascii_lowercase, k=2)
+                            random.choices(string.ascii_lowercase, k=4)
                         )
                     )
                 )
@@ -978,7 +1008,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     ).fetchall()
 
                 logger.debug(
-                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"
+                    f"""SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id \
+{IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"""
                 )
             except OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
@@ -1097,7 +1128,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         else:
-            if self.dialect_name == "sqlite":
+            if self.dialect_name == GESqlDialect.SQLITE:
                 split_clause = sa.text("1 = 1")
             else:
                 split_clause = sa.true()

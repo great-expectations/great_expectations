@@ -19,6 +19,7 @@ from great_expectations.cli.datasource import (
 from great_expectations.datasource.types import DatasourceTypes
 
 
+@pytest.mark.unit
 def test_SQLCredentialYamlHelper_defaults(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"})
     expected_credentials_snippet = '''\
@@ -27,7 +28,10 @@ port = "YOUR_PORT"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"
-schema_name = "YOUR_SCHEMA"'''
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
     assert (
         helper.yaml_snippet()
@@ -42,7 +46,6 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
-    schema_name: {schema_name}
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
@@ -50,13 +53,23 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)
     assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
 
 
+@pytest.mark.unit
 def test_SQLCredentialYamlHelper_driver(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"}, driver="stuff")
     expected_credentials_snippet = '''\
@@ -65,7 +78,10 @@ port = "YOUR_PORT"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"
-schema_name = "YOUR_SCHEMA"'''
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     print(helper.yaml_snippet())
@@ -83,7 +99,6 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
-    schema_name: {schema_name}
     drivername: stuff
 data_connectors:
   default_runtime_data_connector_name:
@@ -92,7 +107,16 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)
@@ -110,7 +134,10 @@ port = "3306"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"
-schema_name = "YOUR_SCHEMA"'''
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
@@ -126,7 +153,6 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
-    schema_name: {schema_name}
     drivername: mysql+pymysql
 data_connectors:
   default_runtime_data_connector_name:
@@ -135,7 +161,16 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
     )
 
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -169,7 +204,10 @@ port = "5432"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"
-schema_name = "YOUR_SCHEMA"'''
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
@@ -185,7 +223,6 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
-    schema_name: {schema_name}
     drivername: postgresql
 data_connectors:
   default_runtime_data_connector_name:
@@ -194,7 +231,16 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -226,7 +272,10 @@ port = "5439"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"
-schema_name = "YOUR_SCHEMA"'''
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
     assert (
         helper.yaml_snippet()
@@ -241,7 +290,6 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
-    schema_name: {schema_name}
     query:
       sslmode: prefer
     drivername: postgresql+psycopg2
@@ -252,7 +300,16 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
     )
 
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -291,9 +348,10 @@ def test_SnowflakeCredentialYamlHelper_password_auth(
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
 database = ""  # The database name
-schema = ""  # The schema name
+schema_name = ""  # The schema name
 warehouse = ""  # The warehouse name
 role = ""  # The role name
+table_name = ""  # A table that you would like to add initially as a Data Asset
 password = "YOUR_PASSWORD"'''
 
     assert helper.credentials_snippet() == expected_credentials_snippet
@@ -310,7 +368,7 @@ execution_engine:
     username: {username}
     database: {database}
     query:
-      schema: {schema}
+      schema: {schema_name}
       warehouse: {warehouse}
       role: {role}
     password: {password}
@@ -322,7 +380,16 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -347,9 +414,10 @@ def test_SnowflakeCredentialYamlHelper_sso_auth(
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
 database = ""  # The database name
-schema = ""  # The schema name
+schema_name = ""  # The schema name
 warehouse = ""  # The warehouse name
 role = ""  # The role name
+table_name = ""  # A table that you would like to add initially as a Data Asset
 authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' used to connect through SSO"""
     assert helper.credentials_snippet() == expected_credentials_snippet
     assert (
@@ -364,7 +432,7 @@ execution_engine:
     username: {username}
     database: {database}
     query:
-      schema: {schema}
+      schema: {schema_name}
       warehouse: {warehouse}
       role: {role}
     connect_args:
@@ -377,7 +445,16 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -401,9 +478,10 @@ def test_SnowflakeCredentialYamlHelper_key_pair_auth(
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
 database = ""  # The database name
-schema = ""  # The schema name
+schema_name = ""  # The schema name
 warehouse = ""  # The warehouse name
 role = ""  # The role name
+table_name = ""  # A table that you would like to add initially as a Data Asset
 private_key_path = "YOUR_KEY_PATH"  # Path to the private key used for authentication
 private_key_passphrase = ""   # Passphrase for the private key used for authentication (optional -- leave blank for none)"""
     assert helper.credentials_snippet() == expected_credentials_snippet
@@ -420,7 +498,7 @@ execution_engine:
     username: {username}
     database: {database}
     query:
-      schema: {schema}
+      schema: {schema_name}
       warehouse: {warehouse}
       role: {role}
     private_key_path: {private_key_path}
@@ -433,7 +511,16 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -468,7 +555,10 @@ def test_BigqueryCredentialYamlHelper(mock_emit, empty_data_context_stats_enable
         == '''\
 # The SQLAlchemy url/connection string for the BigQuery connection
 # (reference: https://github.com/googleapis/python-bigquery-sqlalchemy#connection-string-parameters)"""
-connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
+connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"
+
+schema_name = ""  # or dataset name
+table_name = ""'''
     )
 
     assert (
@@ -486,7 +576,16 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -514,10 +613,7 @@ def test_ConnectionStringCredentialYamlHelper(
     helper = ConnectionStringCredentialYamlHelper("my_datasource")
     assert (
         helper.credentials_snippet()
-        == '''\
-# The url/connection string for the sqlalchemy connection
-# (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
-connection_string = "YOUR_CONNECTION_STRING"'''
+        == '# The url/connection string for the sqlalchemy connection\n# (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)\nconnection_string = "YOUR_CONNECTION_STRING"\n\n# If schema_name is not relevant to your SQL backend (i.e. SQLite),\n# please remove from the following line and the configuration below\nschema_name = "YOUR_SCHEMA"\n\n# A table that you would like to add initially as a Data Asset\ntable_name = "YOUR_TABLE_NAME"'
     )
 
     assert (
@@ -535,7 +631,16 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {schema_name}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {table_name}:
+        class_name: Asset
+        schema_name: {schema_name}
+"""'''
     )
 
     assert helper.verify_libraries_installed() is True

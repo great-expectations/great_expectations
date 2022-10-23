@@ -43,6 +43,10 @@ from great_expectations.exceptions import (
     DataContextError,
     InvalidExpectationConfigurationError,
 )
+from great_expectations.render import (
+    AtomicPrescriptiveRendererType,
+    RenderedAtomicContent,
+)
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -101,6 +105,10 @@ class ExpectationSuite(SerializableDictDot):
         # We require meta information to be serializable, but do not convert until necessary
         ensure_json_serializable(meta)
         self.meta = meta
+
+    @property
+    def name(self) -> str:
+        return self.expectation_suite_name
 
     def add_citation(
         self,
@@ -720,19 +728,23 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configuration: ExpectationConfiguration
         domain_type: MetricDomainTypes
         kwargs: dict
+        pprint_objects: List[dict] = []
         for expectation_configuration in expectation_configurations:
             domain_type = expectation_configuration.get_domain_type()
             kwargs = expectation_configuration.kwargs
-            pprint.pprint(  # type: ignore[call-arg]
-                object={
+            pprint_objects.append(
+                {
                     expectation_configuration.expectation_type: {
                         "domain": domain_type.value,
                         **kwargs,
                     }
-                },
-                indent=2,
-                sort_dicts=False,
+                }
             )
+        pprint.pprint(  # type: ignore[call-arg]
+            object=pprint_objects,
+            indent=2,
+            sort_dicts=False,
+        )
 
     def get_grouped_and_ordered_expectations_by_domain_type(
         self,
@@ -974,8 +986,14 @@ class ExpectationSuite(SerializableDictDot):
                     class_name=inline_renderer_config["class_name"],
                 )
 
-            expectation_configuration.rendered_content = (
-                inline_renderer.get_rendered_content()
+            rendered_content: List[
+                RenderedAtomicContent
+            ] = inline_renderer.get_rendered_content()
+
+            expectation_configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
+                existing_rendered_content=expectation_configuration.rendered_content,
+                new_rendered_content=rendered_content,
+                failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
             )
 
 

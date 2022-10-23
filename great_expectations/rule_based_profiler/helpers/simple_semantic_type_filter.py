@@ -143,9 +143,12 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             type_name.upper() for type_name in ProfilerTypeMapping.BOOLEAN_TYPE_NAMES
         }:
             semantic_column_type = SemanticDomainTypes.LOGIC
-        elif column_type in {
-            type_name.upper() for type_name in ProfilerTypeMapping.DATETIME_TYPE_NAMES
-        }:
+        elif any(
+            map(
+                lambda type_name: column_type.startswith(type_name.upper()),
+                ProfilerTypeMapping.DATETIME_TYPE_NAMES,
+            )
+        ):
             semantic_column_type = SemanticDomainTypes.DATETIME
         elif column_type in {
             type_name.upper() for type_name in ProfilerTypeMapping.BINARY_TYPE_NAMES

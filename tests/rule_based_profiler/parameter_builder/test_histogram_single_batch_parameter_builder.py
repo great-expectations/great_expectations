@@ -137,19 +137,8 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
     assert parameter_container.parameter_nodes is None
 
     with mock.patch(
-        "great_expectations.execution_engine.pandas_batch_data.PandasBatchData.dataframe",
-        new_callable=mock.PropertyMock,
-        return_value=pd.DataFrame(
-            {
-                "my_column": [
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                ],
-            }
-        ),
+        "great_expectations.expectations.metrics.column_aggregate_metrics.column_partition._get_column_partition_using_metrics",
+        return_value=None,
     ):
         with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
             variables: Optional[ParameterContainer] = None
@@ -165,6 +154,86 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
             "Partitioning values for HistogramSingleBatchParameterBuilder by column_partition_metric_single_batch_parameter_builder into bins encountered empty or non-existent elements."
             in str(excinfo.value)
         )
+
+
+@pytest.mark.integration
+def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    parameter_builder: ParameterBuilder = HistogramSingleBatchParameterBuilder(
+        name="my_name",
+        bins="auto",
+        evaluation_parameter_builder_configs=None,
+        data_context=data_context,
+    )
+
+    metric_domain_kwargs: dict = {"column": "my_column"}
+    domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
+        rule_name="my_rule",
+    )
+
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
+    assert parameter_container.parameter_nodes is None
+
+    with mock.patch(
+        "great_expectations.execution_engine.pandas_batch_data.PandasBatchData.dataframe",
+        new_callable=mock.PropertyMock,
+        return_value=pd.DataFrame(
+            {
+                "my_column": [
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                ],
+            }
+        ),
+    ):
+        variables: Optional[ParameterContainer] = None
+        parameter_builder.build_parameters(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+            batch_request=batch_request,
+        )
+
+        expected_parameter_value: dict = {
+            "value": {"bins": [None], "weights": [], "tail_weights": [0.5, 0.5]},
+            "details": {
+                "metric_configuration": {
+                    "metric_name": "column.histogram",
+                    "domain_kwargs": {"column": "my_column"},
+                    "metric_value_kwargs": {"bins": [None]},
+                    "metric_dependencies": None,
+                },
+                "num_batches": 1,
+            },
+        }
+
+        parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=parameter_builder.json_serialized_fully_qualified_parameter_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        assert parameter_node == expected_parameter_value
 
 
 @pytest.mark.integration

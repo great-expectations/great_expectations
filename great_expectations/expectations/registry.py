@@ -5,6 +5,11 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+    AtomicRendererType,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -64,34 +69,37 @@ def register_renderer(
         return
 
 
-def get_renderer_names(object_name: str) -> List[str]:
+def get_renderer_names(expectation_or_metric_type: str) -> List[str]:
     """Gets renderer names for a given Expectation or Metric.
 
     Args:
-        object_name: The name of an Expectation or Metric for which to get renderer names.
+        expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
 
     Returns:
         A list of renderer names for the Expectation or Metric.
     """
-    return list(_registered_renderers.get(object_name, {}).keys())
+    return list(_registered_renderers.get(expectation_or_metric_type, {}).keys())
 
 
-def get_renderer_names_with_renderer_prefix(
-    object_name: str, renderer_prefix: str
-) -> List[str]:
-    """Gets renderer names, with a given prefix, for a given Expectation or Metric.
+def get_renderer_names_with_renderer_type(
+    expectation_or_metric_type: str,
+    renderer_type: AtomicRendererType,
+) -> List[Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]]:
+    """Gets renderer names of a given type, for a given Expectation or Metric.
 
     Args:
-        object_name: The name of an Expectation or Metric for which to get renderer names.
-        renderer_prefix: The prefix of the renderers for which to return.
+        expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
+        renderer_type: The type of the renderers for which to return names.
 
     Returns:
         A list of renderer names for the given prefix and Expectation or Metric.
     """
     return [
         renderer_name
-        for renderer_name in get_renderer_names(object_name=object_name)
-        if renderer_name.startswith(renderer_prefix)
+        for renderer_name in get_renderer_names(
+            expectation_or_metric_type=expectation_or_metric_type
+        )
+        if renderer_name.startswith(renderer_type)
     ]
 
 

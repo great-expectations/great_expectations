@@ -51,13 +51,19 @@ def test_expectation_self_check():
         "gallery_examples": [],
         "renderers": [
             {
+                "is_standard": False,
+                "is_supported": True,
+                "name": "atomic.diagnostic.failed",
+                "samples": [],
+            },
+            {
                 "name": "atomic.diagnostic.observed_value",
                 "is_supported": True,
                 "is_standard": False,
                 "samples": [],
             },
             {
-                "name": "atomic.prescriptive.kwargs",
+                "name": "atomic.prescriptive.failed",
                 "is_supported": True,
                 "is_standard": False,
                 "samples": [],
