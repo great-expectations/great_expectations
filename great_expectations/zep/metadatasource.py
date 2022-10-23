@@ -57,11 +57,30 @@ class _SourceFactories:
 
         method_name = f"add_{simplified_name}"
         print(
-            f"2. Registering {ds_type.__name__} as {simplified_name} with {method_name}() factory"
+            f"2a. Registering {ds_type.__name__} as {simplified_name} with {method_name}() factory"
         )
 
         pre_existing = cls.__source_factories.get(method_name)
         if not pre_existing:
+
+            # TODO: simplify or extract the following datasource & asset type registration logic
+            asset_types = asset_types or []
+            asset_type_names = [
+                _get_simplified_name_from_type(t, suffix_to_remove="_asset")
+                for t in asset_types
+            ]
+
+            already_registered_assets = set(asset_type_names).intersection(
+                cls.type_lookup.keys()
+            )
+            if already_registered_assets:
+                raise ValueError(
+                    f"The following names already have a registered type - {already_registered_assets} "
+                )
+
+            for type_, name in zip(asset_types, asset_type_names):
+                cls.type_lookup[type_] = name
+
             cls.type_lookup[ds_type] = simplified_name
             cls.__source_factories[method_name] = fn  # type: ignore[assignment]
         else:
@@ -177,3 +196,21 @@ if __name__ == "__main__":
     context = get_context()
     # context.sources.add_pandas("taxi")
     # context.sources.add_postgres("taxi2", connection_str="postgres://...")
+
+    # # Demo the use of the `type_lookup` `BiDict`
+    # # Alternatively use a Graph/Tree-like structure
+    # sources = context.sources
+    # print("\n  Datasource & DataAsset lookups ...")
+
+    # s = "pandas"
+    # pd_ds: PandasDatasource = sources.type_lookup[s]
+    # print(f"\n'{s}' -> {pd_ds}")
+
+    # pd_ds_assets = pd_ds.asset_types
+    # print(f"\n{pd_ds} -> {pd_ds_assets}")
+
+    # pd_ds_asset_names = [sources.type_lookup[t] for t in pd_ds_assets]
+    # print(f"\n{pd_ds_assets} -> {pd_ds_asset_names}")
+
+    # pd_ds_assets_from_names = [sources.type_lookup[name] for name in pd_ds_asset_names]
+    # print(f"\n{pd_ds_asset_names} -> {pd_ds_assets_from_names}")
