@@ -3,8 +3,10 @@ POC for dynamically bootstrapping context.sources with Datasource factory method
 """
 from __future__ import annotations
 
-from typing import Callable, Dict, List
+from pprint import pformat as pf
+from typing import Callable, Dict, List, Union
 
+from great_expectations.core.bi_directional_dict import BiDict
 from great_expectations.util import camel_to_snake
 from great_expectations.zep.interfaces import Datasource
 
@@ -20,6 +22,7 @@ def _remove_suffix(s: str, suffix: str) -> str:
 
 class _SourceFactories:
 
+    type_lookup: BiDict[Union[str, type]] = BiDict()
     __source_factories: Dict[str, SourceFactoryFn] = {}
 
     @classmethod
@@ -48,6 +51,7 @@ class _SourceFactories:
 
         pre_existing = cls.__source_factories.get(method_name)
         if not pre_existing:
+            cls.type_lookup[ds_type] = simplified_name
             cls.__source_factories[method_name] = fn  # type: ignore[assignment]
         else:
             raise ValueError(f"{simplified_name} factory already exists")
@@ -138,7 +142,8 @@ class DataContext:
 
     def __init__(self) -> None:
         self._sources: _SourceFactories = _SourceFactories()
-        print(f"4. Available Factories - {self._sources.factories}")
+        print(f"4a. Available Factories - {self._sources.factories}")
+        print(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
 
     @property
     def sources(self) -> _SourceFactories:
