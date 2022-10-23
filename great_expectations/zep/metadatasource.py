@@ -70,8 +70,8 @@ class _SourceFactories:
         return ["register_factory", "factories", *self.factories]
 
 
-class MetaDatasouce(type):
-    def __new__(meta_cls, cls_name, bases, cls_dict) -> MetaDatasouce:
+class MetaDatasource(type):
+    def __new__(meta_cls, cls_name, bases, cls_dict) -> MetaDatasource:
         print(f"1. {meta_cls.__name__}.__new__() for `{cls_name}`")
 
         cls = type(cls_name, bases, cls_dict)
@@ -95,7 +95,7 @@ class MetaDatasouce(type):
 #     pass
 
 
-# class PandasDatasource(metaclass=MetaDatasouce):
+# class PandasDatasource(metaclass=MetaDatasource):
 
 #     asset_types = [FileAsset]
 
@@ -115,7 +115,7 @@ class MetaDatasouce(type):
 #     pass
 
 
-# class PostgresDatasource(metaclass=MetaDatasouce):
+# class PostgresDatasource(metaclass=MetaDatasource):
 #     asset_types = [TableAsset]
 
 #     def __init__(self, name: str, connection_str: str):
