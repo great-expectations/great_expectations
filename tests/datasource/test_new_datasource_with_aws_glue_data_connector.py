@@ -3,6 +3,11 @@ from typing import Union
 import pytest
 from ruamel.yaml import YAML
 
+try:
+    pyspark = pytest.importorskip("pyspark")
+except ImportError:
+    pyspark = None
+
 from great_expectations import DataContext
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
