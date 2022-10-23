@@ -16,10 +16,9 @@ class BiDict(
         **kwargs: Hashable,
     ):
         if isinstance(__dict, Mapping):
-            kws: dict = {**__dict, **kwargs}
-            super().__init__(**kws)
-        else:
-            super().__init__(__dict=__dict, **kwargs)
+            kwargs: dict = {**__dict, **kwargs}  # type: ignore[no-redef]
+            __dict = None
+        super().__init__(__dict, **kwargs)
 
     def __delitem__(self, key: Hashable):
         value = self.data.pop(key)
