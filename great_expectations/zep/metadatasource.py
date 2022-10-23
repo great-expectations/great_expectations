@@ -4,7 +4,7 @@ POC for dynamically bootstrapping context.sources with Datasource factory method
 from __future__ import annotations
 
 from pprint import pformat as pf
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Optional, Union
 
 from great_expectations.core.bi_directional_dict import BiDict
 from great_expectations.util import camel_to_snake
@@ -39,6 +39,7 @@ class _SourceFactories:
         cls,
         ds_type: type,
         fn: SourceFactoryFn,
+        asset_types: Optional[List[type]] = None,
     ) -> None:
         """
         Add/Register a datasource factory function.
@@ -82,7 +83,7 @@ class _SourceFactories:
 
 class MetaDatasource(type):
     def __new__(meta_cls, cls_name, bases, cls_dict) -> MetaDatasource:
-        print(f"1. {meta_cls.__name__}.__new__() for `{cls_name}`")
+        print(f"1a. {meta_cls.__name__}.__new__() for `{cls_name}`")
 
         cls = type(cls_name, bases, cls_dict)
 
@@ -95,8 +96,14 @@ class MetaDatasource(type):
         # TODO: generate schemas from `cls` if needed
 
         # TODO: extract asset type details
+        asset_types: List[type] = getattr(cls, "asset_types")
+        print(f"1b. Extracting Asset details - {asset_types}")
+        # TODO: raise a TypeError here instead
+        assert all(
+            [isinstance(t, type) for t in asset_types]
+        ), f"Datasource `asset_types` must be a iterable of classes/types got {asset_types}"
 
-        sources.register_factory(cls, _datasource_factory)
+        sources.register_factory(cls, _datasource_factory, asset_types=asset_types)
 
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
 
