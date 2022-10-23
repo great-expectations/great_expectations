@@ -20,6 +20,15 @@ def _remove_suffix(s: str, suffix: str) -> str:
     return s
 
 
+def _get_simplified_name_from_type(
+    t: type, suffix_to_remove: Optional[str] = None
+) -> str:
+    result = camel_to_snake(t.__name__)
+    if suffix_to_remove:
+        return _remove_suffix(result, suffix_to_remove)
+    return result
+
+
 class _SourceFactories:
 
     type_lookup: BiDict[Union[str, type]] = BiDict()
@@ -41,9 +50,10 @@ class _SourceFactories:
         -------
         `class PandasDatasource` -> `add_pandas()`
         """
-        simplified_name = _remove_suffix(
-            camel_to_snake(ds_type.__name__), "_datasource"
+        simplified_name = _get_simplified_name_from_type(
+            ds_type, suffix_to_remove="_datasource"
         )
+
         method_name = f"add_{simplified_name}"
         print(
             f"2. Registering {ds_type.__name__} as {simplified_name} with {method_name}() factory"
