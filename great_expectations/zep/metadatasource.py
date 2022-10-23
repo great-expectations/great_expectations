@@ -118,6 +118,8 @@ class MetaDatasource(type):
         asset_types: List[type] = getattr(cls, "asset_types")
         print(f"1b. Extracting Asset details - {asset_types}")
         # TODO: raise a TypeError here instead
+        # NOTE: This check is a shortcut. What we need to protect against is different asset types
+        # that share the same name. But we might want a Datasource to be able to use/register a previously registered type ??
         assert all(
             [isinstance(t, type) for t in asset_types]
         ), f"Datasource `asset_types` must be a iterable of classes/types got {asset_types}"
