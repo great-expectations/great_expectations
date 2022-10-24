@@ -6,8 +6,8 @@ from __future__ import annotations
 from pprint import pformat as pf
 from typing import Callable, Dict, List, Optional, Union
 
-from great_expectations.core.bi_directional_dict import BiDict
 from great_expectations.util import camel_to_snake
+from great_expectations.zep.bi_directional_dict import BiDict
 from great_expectations.zep.interfaces import Datasource
 
 SourceFactoryFn = Callable[..., Datasource]

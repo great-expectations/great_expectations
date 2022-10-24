@@ -1,6 +1,6 @@
 import pprint
 from collections import UserDict
-from typing import Hashable, Mapping, Optional, TypeVar
+from typing import Hashable, Iterable, Mapping, Optional, TypeVar
 
 T = TypeVar("T", bound=Hashable)
 
@@ -37,6 +37,9 @@ class BiDict(
 
     def __str__(self) -> str:
         return str(self.data)
+
+    def contains_anyof(self, collection_: Iterable[Hashable]) -> bool:
+        return bool(set(collection_).intersection(self.keys()))
 
 
 # This makes BiDict pretty printable like a regular dict
