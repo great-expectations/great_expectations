@@ -78,6 +78,9 @@ class _SourceFactories:
                 for t in asset_types
             ]
 
+            # NOTE: This check is a shortcut. What we need to protect against is different asset types
+            # that share the same name. But we might want a Datasource to be able to use/register a previously
+            # registered type ??
             already_registered_assets = set(asset_type_names).intersection(
                 cls.type_lookup.keys()
             )
@@ -115,23 +118,22 @@ class MetaDatasource(type):
 
         cls = type(cls_name, bases, cls_dict)
 
+        sources = _SourceFactories()
+        # TODO: generate schemas from `cls` if needed
+
+        # TODO: extract asset type details to build factory method signature etc. (pull args from __init__)
+
+        asset_types: List[type] = getattr(cls, "asset_types")
+        LOGGER.info(f"1b. Extracting Asset details - {asset_types}")
+        # TODO: raise a TypeError here instead
+        assert all(
+            [isinstance(t, type) for t in asset_types]
+        ), f"Datasource `asset_types` must be a iterable of classes/types got {asset_types}"
+
         def _datasource_factory(*args, **kwargs) -> Datasource:
             # TODO: update signature to match Datasource __init__ (ex update __signature__)
             LOGGER.info(f"5. Adding `{args[0] if args else ''}` {cls_name}")
             return cls(*args, **kwargs)
-
-        sources = _SourceFactories()
-        # TODO: generate schemas from `cls` if needed
-
-        # TODO: extract asset type details
-        asset_types: List[type] = getattr(cls, "asset_types")
-        LOGGER.info(f"1b. Extracting Asset details - {asset_types}")
-        # TODO: raise a TypeError here instead
-        # NOTE: This check is a shortcut. What we need to protect against is different asset types
-        # that share the same name. But we might want a Datasource to be able to use/register a previously registered type ??
-        assert all(
-            [isinstance(t, type) for t in asset_types]
-        ), f"Datasource `asset_types` must be a iterable of classes/types got {asset_types}"
 
         sources.register_factory(cls, _datasource_factory, asset_types=asset_types)
 
