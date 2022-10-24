@@ -83,7 +83,7 @@
             "observed_value": 1.1547005383792517
           },
           "only_for": [
-            "bigquery_cfe"
+            "bigquery_v3_api"
           ]
         },
         {
