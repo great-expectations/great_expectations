@@ -3,6 +3,7 @@ POC for dynamically bootstrapping context.sources with Datasource factory method
 """
 from __future__ import annotations
 
+import logging
 from pprint import pformat as pf
 from typing import Callable, Dict, List, Optional, Union
 
@@ -11,6 +12,13 @@ from great_expectations.zep.bi_directional_dict import BiDict
 from great_expectations.zep.interfaces import Datasource
 
 SourceFactoryFn = Callable[..., Datasource]
+
+LOGGER = logging.getLogger(__name__)
+
+if __name__ == "__main__":
+    # don't setup the logger unless being run as a script
+    # TODO: remove this before release
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 def _remove_suffix(s: str, suffix: str) -> str:
@@ -56,7 +64,7 @@ class _SourceFactories:
         )
 
         method_name = f"add_{simplified_name}"
-        print(
+        LOGGER.info(
             f"2a. Registering {ds_type.__name__} as {simplified_name} with {method_name}() factory"
         )
 
@@ -103,13 +111,13 @@ class _SourceFactories:
 
 class MetaDatasource(type):
     def __new__(meta_cls, cls_name, bases, cls_dict) -> MetaDatasource:
-        print(f"1a. {meta_cls.__name__}.__new__() for `{cls_name}`")
+        LOGGER.info(f"1a. {meta_cls.__name__}.__new__() for `{cls_name}`")
 
         cls = type(cls_name, bases, cls_dict)
 
         def _datasource_factory(*args, **kwargs) -> Datasource:
             # TODO: update signature to match Datasource __init__ (ex update __signature__)
-            print(f"5. Adding `{args[0] if args else ''}` {cls_name}")
+            LOGGER.info(f"5. Adding `{args[0] if args else ''}` {cls_name}")
             return cls(*args, **kwargs)
 
         sources = _SourceFactories()
@@ -117,7 +125,7 @@ class MetaDatasource(type):
 
         # TODO: extract asset type details
         asset_types: List[type] = getattr(cls, "asset_types")
-        print(f"1b. Extracting Asset details - {asset_types}")
+        LOGGER.info(f"1b. Extracting Asset details - {asset_types}")
         # TODO: raise a TypeError here instead
         # NOTE: This check is a shortcut. What we need to protect against is different asset types
         # that share the same name. But we might want a Datasource to be able to use/register a previously registered type ??
@@ -181,8 +189,8 @@ class DataContext:
 
     def __init__(self) -> None:
         self._sources: _SourceFactories = _SourceFactories()
-        print(f"4a. Available Factories - {self._sources.factories}")
-        print(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
+        LOGGER.info(f"4a. Available Factories - {self._sources.factories}")
+        LOGGER.info(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
 
     @property
     def sources(self) -> _SourceFactories:
@@ -190,7 +198,7 @@ class DataContext:
 
 
 def get_context() -> DataContext:
-    print("3. Getting context")
+    LOGGER.info("3. Getting context")
     context = DataContext.get_context()
     return context
 
