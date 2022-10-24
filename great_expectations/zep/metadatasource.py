@@ -97,7 +97,8 @@ class _SourceFactories:
             raise AttributeError(name)
 
     def __dir__(self) -> List[str]:
-        return ["register_factory", "factories", *self.factories]
+        """Preserves autocompletion for dynamic attributes."""
+        return [*self.factories, *super().__dir__()]
 
 
 class MetaDatasource(type):
