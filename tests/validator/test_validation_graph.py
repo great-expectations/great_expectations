@@ -264,8 +264,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
         "result_format": {"result_format": "BASIC"},
     }
 
-    execution_engine = PandasExecutionEngine()
-    execution_engine._load_batch_data_from_dict({"my_batch_id": df})
+    execution_engine = PandasExecutionEngine(batch_data_dict={"my_batch_id": df})
 
     validation_dependencies: Dict[
         str, MetricConfiguration
