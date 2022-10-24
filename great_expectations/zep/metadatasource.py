@@ -131,6 +131,11 @@ class MetaDatasource(type):
 
         cls = type(cls_name, bases, cls_dict)
 
+        # TODO: TypeError & expose the missing details
+        # assert isinstance(
+        #     cls, Datasource
+        # ), f"{cls.__name__} does not satisfy the {Datasource.__name__} protocol"
+
         sources = _SourceFactories()
         # TODO: generate schemas from `cls` if needed
 

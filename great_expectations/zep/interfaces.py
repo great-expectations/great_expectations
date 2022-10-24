@@ -1,11 +1,12 @@
 from typing import List, Union
 
-from typing_extensions import Protocol
+from typing_extensions import Protocol, runtime_checkable
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine import ExecutionEngine
 
 
+@runtime_checkable
 class Datasource(Protocol):
     execution_engine: ExecutionEngine
     asset_types: List[type]
