@@ -333,7 +333,6 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
     if evaluation_parameters is None:
         evaluation_parameters = {}
 
-    # Calling get_parser clears the stack
     parse_results: Union[ParseResults, list] = _get_parse_results(parameter_expression)
 
     if _is_single_function_no_args(parse_results):
@@ -429,6 +428,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
 def _get_parse_results(
     parameter_expression: str,
 ) -> Union[ParseResults, Union[ParseResults, list]]:
+    # Calling get_parser clears the stack
     parser = EXPR.get_parser()
     try:
         parse_results = parser.parseString(parameter_expression, parseAll=True)
