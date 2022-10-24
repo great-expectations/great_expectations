@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, Iterable, List, Optional, Union, Type, Tuple
 
 from great_expectations.util import camel_to_snake
 from great_expectations.zep.bi_directional_dict import BiDict
@@ -121,7 +121,9 @@ class _SourceFactories:
 
 
 class MetaDatasource(type):
-    def __new__(meta_cls, cls_name, bases, cls_dict) -> MetaDatasource:
+    def __new__(
+        meta_cls: Type[MetaDatasource], cls_name: str, bases: tuple[type], cls_dict
+    ) -> MetaDatasource:
         """
         MetaDatasource hook that runs when a new `Datasource` is defined.
         This methods binds a factory method for the defined `Datasource` to `_SourceFactories` class which becomes
