@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import Callable, Dict, Iterable, List, Optional, Union, Type, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from great_expectations.util import camel_to_snake
 from great_expectations.zep.bi_directional_dict import BiDict
@@ -128,23 +128,18 @@ class MetaDatasource(type):
         MetaDatasource hook that runs when a new `Datasource` is defined.
         This methods binds a factory method for the defined `Datasource` to `_SourceFactories` class which becomes
         available as part of the `DataContext`.
+
+        Also binds asset adding methods according to the declared `asset_types`.
         """
         LOGGER.info(f"1a. {meta_cls.__name__}.__new__() for `{cls_name}`")
 
-        cls = type(cls_name, bases, cls_dict)
-
-        # TODO: TypeError & expose the missing details
-        # assert isinstance(
-        #     cls, Datasource
-        # ), f"{cls.__name__} does not satisfy the {Datasource.__name__} protocol"
-
-        sources = _SourceFactories()
-        # TODO: generate schemas from `cls` if needed
-
         # TODO: extract asset type details to build factory method signature etc. (pull args from __init__)
 
-        asset_types: List[type] = getattr(cls, "asset_types")
+        asset_types: List[type] = cls_dict.get("asset_types")
         LOGGER.info(f"1b. Extracting Asset details - {asset_types}")
+        if asset_types:
+            meta_cls._inject_asset_methods(cls_dict, asset_types)
+
         # TODO: raise a TypeError here instead
         assert all(
             [isinstance(t, type) for t in asset_types]
@@ -155,29 +150,73 @@ class MetaDatasource(type):
             LOGGER.info(f"5. Adding `{args[0] if args else ''}` {cls_name}")
             return cls(*args, **kwargs)
 
+        cls = type(cls_name, bases, cls_dict)
+        LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
+
+        # TODO: TypeError & expose the missing details
+        # assert isinstance(
+        #     cls, Datasource
+        # ), f"{cls.__name__} does not satisfy the {Datasource.__name__} protocol"
+
+        sources = _SourceFactories()
+        # TODO: generate schemas from `cls` if needed
+
         sources.register_factory(cls, _datasource_factory, asset_types=asset_types)
 
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
 
+    @classmethod
+    def _inject_asset_methods(
+        cls: Type[MetaDatasource],
+        ds_cls_dict: Dict[str, Callable],
+        asset_types: List[type],
+    ) -> None:
+        LOGGER.info(f"1c. Injecting `add_<ASSET_TYPE>` methods for {asset_types}")
+
+        asset_tuples: Iterable[Tuple[str, type]] = (
+            (f"add_{_get_simplified_name_from_type(t)}", t) for t in asset_types
+        )
+
+        for method_name, asset_type in asset_tuples:
+
+            method_already_defined = ds_cls_dict.get(method_name)
+            if method_already_defined:
+                LOGGER.info(
+                    f"  {asset_type.__name__} method `{method_name}()` already defined"
+                )
+                continue
+
+            attr_annotations = asset_type.__dict__["__annotations__"]
+
+            # TODO: update signature with `attr_annotations`
+            def _add_asset(*args, **kwargs):
+                LOGGER.info(f"Creating {asset_type.__name__} ...")
+
+            ds_cls_dict[method_name] = _add_asset
+            LOGGER.info(f"  {method_name}() - {attr_annotations} injected")
+
 
 # class FileAsset:
-#     pass
+#     file_path: str
+#     delimiter: str
+#     ...
+
+
+# class MyOtherAsset:
+#     foo: str
+#     bar: List[int]
 
 
 # class PandasDatasource(metaclass=MetaDatasource):
 
-#     asset_types = [FileAsset]
+#     name: str
+#     asset_types = [FileAsset, MyOtherAsset]
 
 #     def __init__(self, name: str):
 #         self.name = name
 
 #     def __repr__(self):
 #         return f"{self.__class__.__name__}(name='{self.name}')"
-
-#     def add_csv(self, foo="foo", bar="bar", sep=","):
-#         """I'm a docstring!!"""
-#         # NOTE: should this return the datasource or the csv asset?
-#         return self
 
 
 # class TableAsset:
