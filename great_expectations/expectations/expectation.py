@@ -678,7 +678,7 @@ class Expectation(metaclass=MetaExpectation):
                     count: Optional[int] = unexpected_count_dict.get("count")
                     if count is not None:
                         total_count += count
-                        if value is not None and value != "":
+                        if value:
                             table_rows.append([value, count])
                         elif value == "":
                             table_rows.append(["EMPTY", count])
@@ -1632,7 +1632,7 @@ class Expectation(metaclass=MetaExpectation):
     ) -> List[ExpectationRendererDiagnostics]:
         """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExpectationTestDiagnostics."""
 
-        if standard_renderers is None:
+        if not standard_renderers:
             standard_renderers = [
                 LegacyRendererType.ANSWER,
                 LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
@@ -1710,7 +1710,7 @@ class Expectation(metaclass=MetaExpectation):
 
         In order for a given execution engine to count, *every* metric must have support on that execution engines.
         """
-        if execution_engine_names is None:
+        if not execution_engine_names:
             execution_engine_names = [
                 "PandasExecutionEngine",
                 "SqlAlchemyExecutionEngine",
@@ -2115,9 +2115,10 @@ class QueryExpectation(TableExpectation, ABC):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         try:
-            assert isinstance(
-                query, str
-            ), f"'query' must be a string, but your query is type: {type(query)}"
+            if not isinstance(query, str):
+                raise TypeError(
+                    f"'query' must be a string, but your query is type: {type(query)}"
+                )
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
@@ -2133,7 +2134,7 @@ class QueryExpectation(TableExpectation, ABC):
                 "By not parameterizing your query with `{active_batch}`, {col}, etc., "
                 "you may not be validating against your intended data asset, or the expectation may fail."
             )
-        except AssertionError as e:
+        except (TypeError, AssertionError) as e:
             warnings.warn(str(e), UserWarning)
         try:
             assert row_condition is None, (
