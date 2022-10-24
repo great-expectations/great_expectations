@@ -1,12 +1,13 @@
+from pprint import pprint
+
 import pandas as pd
 import pytest
 
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationSuite,
     ExpectationValidationResult,
 )
-from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.core.batch import Batch
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -25,8 +26,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-from pprint import pprint
-
 
 @pytest.fixture
 def dataframe_for_unexpected_rows():
@@ -34,6 +33,17 @@ def dataframe_for_unexpected_rows():
         {
             "a": [1, 5, 22, 3, 5, 10],
             "b": ["cat", "fish", "dog", "giraffe", "lion", "zebra"],
+        }
+    )
+
+@pytest.fixture
+def dataframe_for_unexpected_rows_with_index():
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "numbers_with_duplicates": [1, 5, 22, 3, 5, 10],
+            "animal_names_no_duplicates": ["cat", "fish", "dog", "giraffe", "lion", "zebra"],
         }
     )
 
@@ -248,13 +258,13 @@ def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_
     }
 
 
-def test_pandas_unexpected_index_columns_complete_result_format(
-    dataframe_for_unexpected_rows,
+def test_pandas_default_unexpected_index_columns_complete_result_format(
+    dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
-            "column": "a",
+            "column": "numbers_with_duplicates",
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
@@ -265,7 +275,7 @@ def test_pandas_unexpected_index_columns_complete_result_format(
     )
 
     expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
-    batch: Batch = Batch(data=dataframe_for_unexpected_rows)
+    batch: Batch = Batch(data=dataframe_for_unexpected_rows_with_index)
     engine = PandasExecutionEngine()
     validator = Validator(
         execution_engine=engine,
@@ -282,7 +292,102 @@ def test_pandas_unexpected_index_columns_complete_result_format(
         "unexpected_percent": 33.33333333333333,
         "partial_unexpected_list": [3, 10],
         "unexpected_list": [3, 10],
-        "unexpected_index_columns": [{"a": 3, "b": "giraffe"}, {"a": 10, "b": "zebra"}],
+        "unexpected_column_indexes": [{"index": 3,}, {"index": 5,}],
+        "partial_unexpected_index_list": [3, 5],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_pandas_single_unexpected_index_columns_complete_result_format(
+    dataframe_for_unexpected_rows_with_index: pd.DataFrame,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "include_unexpected_index_columns": True,
+                "include_unexpected_rows": True,
+                "unexpected_index_columns": ["pk_1"],  # Single column
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=dataframe_for_unexpected_rows_with_index)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    pprint(convert_to_json_serializable(result.result))
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_index_list": [3, 5],
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "unexpected_list": [3, 10],
+        "unexpected_column_indexes": [{"pk_1": 3,}, {"pk_1": 5, }],
+        "partial_unexpected_index_list": [3, 5],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+def test_pandas_multiple_unexpected_index_columns_complete_result_format(
+    dataframe_for_unexpected_rows_with_index: pd.DataFrame,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "include_unexpected_index_columns": True,
+                "include_unexpected_rows": True,
+                "unexpected_index_columns": ["pk_1", "pk_2"],  # Multiple columns
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=dataframe_for_unexpected_rows_with_index)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    pprint(convert_to_json_serializable(result.result))
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_index_list": [3, 5],
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "unexpected_list": [3, 10],
+        "unexpected_column_indexes": [{"pk_1": 3, "pk_2": "three"}, {"pk_1": 5, "pk_2": "five"}],
         "partial_unexpected_index_list": [3, 5],
         "partial_unexpected_counts": [
             {"value": 3, "count": 1},
