@@ -26,7 +26,6 @@ from typing import (
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint import Checkpoint
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
@@ -97,6 +96,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
 )
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
@@ -1085,6 +1085,8 @@ class AbstractDataContext(ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> Checkpoint:
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
         checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
             name=name, ge_cloud_id=ge_cloud_id
         )
