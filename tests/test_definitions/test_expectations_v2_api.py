@@ -155,7 +155,7 @@ def pytest_generate_tests(metafunc):
                                 ):
                                     generate_test = True
                                 elif (
-                                    "bigquery_v2" in only_for
+                                    "bigquery_v2_api" in only_for
                                     and BigQueryDialect is not None
                                     and isinstance(data_asset, SqlAlchemyDataset)
                                     and hasattr(data_asset.engine.dialect, "name")
@@ -236,6 +236,14 @@ def pytest_generate_tests(metafunc):
                                 )
                                 or (
                                     "bigquery" in suppress_test_for
+                                    and BigQueryDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and hasattr(data_asset.engine.dialect, "name")
+                                    and data_asset.engine.dialect.name.lower()
+                                    == "bigquery"
+                                )
+                                or (
+                                    "bigquery_v2_api" in suppress_test_for
                                     and BigQueryDialect is not None
                                     and isinstance(data_asset, SqlAlchemyDataset)
                                     and hasattr(data_asset.engine.dialect, "name")
