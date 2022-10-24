@@ -94,6 +94,7 @@ class Rule(SerializableDictDot):
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
         rule_state: Optional[RuleState] = None,
+        enable_progress_bars: bool = True,
     ) -> RuleState:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
@@ -143,6 +144,7 @@ class Rule(SerializableDictDot):
             position=1,
             leave=False,
             bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
+            disable=not enable_progress_bars,
         ):
             rule_state.initialize_parameter_container_for_domain(domain=domain)
 

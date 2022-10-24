@@ -188,6 +188,7 @@ class MetricsCalculator:
         ] = self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
+            show_progress_bars=self.show_progress_bars,
         )
 
         if aborted_metrics_info:

@@ -322,6 +322,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
                 reconciliation_directives=reconciliation_directives,
                 rule_state=RuleState(),
+                enable_progress_bars=not disable,
             )
             self.rule_states.append(rule_state)
 
