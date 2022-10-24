@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, Set, Tuple, Union, cast
 from unittest import mock
 
 import pandas as pd
@@ -237,17 +237,18 @@ def test_populate_dependencies_with_incorrect_metric_name():
     pandas_execution_engine_stub = cast(ExecutionEngine, PandasExecutionEngineStub())
 
     graph = ValidationGraph(execution_engine=pandas_execution_engine_stub)
-    exc: Optional[ge_exceptions.GreatExpectationsError] = None
-    try:
+
+    with pytest.raises(ge_exceptions.MetricProviderError) as e:
         graph.build_metric_dependency_graph(
             metric_configuration=MetricConfiguration(
                 "column_values.not_a_metric", IDDict()
             ),
         )
-    except ge_exceptions.MetricProviderError as e:
-        exc = e
 
-    assert isinstance(exc, ge_exceptions.MetricProviderError)
+    assert (
+        e.value.message
+        == "No provider found for column_values.not_a_metric using PandasExecutionEngine"
+    )
 
 
 @pytest.mark.integration
