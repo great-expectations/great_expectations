@@ -9,6 +9,14 @@ class BiDict(
     UserDict,
     Mapping[T, T],
 ):
+    """
+    Dict-like Mapping object that creates keys from values and values from keys.
+    Because of this, all values must be Hashable.
+
+    If a Mapping-like object is passed as the first parameter, its key/values will be
+    unpacked (and combined with kwargs) into the new `BiDict` object.
+    """
+
     def __init__(
         self,
         __dict: Optional[Mapping[Hashable, Hashable]] = None,

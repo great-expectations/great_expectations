@@ -38,6 +38,12 @@ def _get_simplified_name_from_type(
 
 
 class _SourceFactories:
+    """
+    Contains a collection of datasource factory methods in the format `.add_<TYPE_NAME>()`
+
+    Contains a `.type_lookup` dict-like two way mapping between previously registered `Datasource`
+    or `DataAsset` types and a simplified name for those types.
+    """
 
     type_lookup: BiDict[Union[str, type]] = BiDict()
     __source_factories: Dict[str, SourceFactoryFn] = {}
@@ -54,6 +60,8 @@ class _SourceFactories:
 
         Derives a SIMPLIFIED_NAME from the provided `Datasource` type.
         Attaches a method called `add_<SIMPLIFIED_NAME>()`.
+
+        Also registers related `DataAsset` types.
 
         Example
         -------
@@ -114,6 +122,11 @@ class _SourceFactories:
 
 class MetaDatasource(type):
     def __new__(meta_cls, cls_name, bases, cls_dict) -> MetaDatasource:
+        """
+        MetaDatasource hook that runs when a new `Datasource` is defined.
+        This methods binds a factory method for the defined `Datasource` to `_SourceFactories` class which becomes
+        available as part of the `DataContext`.
+        """
         LOGGER.info(f"1a. {meta_cls.__name__}.__new__() for `{cls_name}`")
 
         cls = type(cls_name, bases, cls_dict)
