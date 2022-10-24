@@ -6,7 +6,6 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import IDDict
-from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.core import (
@@ -21,7 +20,6 @@ from great_expectations.validator.validation_graph import (
     MetricEdge,
     ValidationGraph,
 )
-from great_expectations.validator.validator import Validator
 
 
 @pytest.fixture
@@ -253,28 +251,8 @@ def test_populate_dependencies_with_incorrect_metric_name():
 
 
 @pytest.mark.integration
-def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
-    basic_datasource,
-):
+def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
-    )
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_max_to_be_between",
@@ -287,9 +265,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true(
     }
 
     execution_engine = PandasExecutionEngine()
-
-    # noinspection PyUnusedLocal
-    validator = Validator(execution_engine=execution_engine, batches=[batch])
+    execution_engine._load_batch_data_from_dict({"my_batch_id": df})
 
     validation_dependencies: Dict[
         str, MetricConfiguration
