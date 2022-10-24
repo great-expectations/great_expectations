@@ -190,7 +190,8 @@ class MetaDatasource(type):
 
             # TODO: update signature with `attr_annotations`
             def _add_asset(*args, **kwargs):
-                LOGGER.info(f"Creating {asset_type.__name__} ...")
+                LOGGER.info(f"6. Creating {asset_type.__name__} ...")
+                # TODO: actually return an asset instance
 
             ds_cls_dict[method_name] = _add_asset
             LOGGER.info(f"  {method_name}() - {attr_annotations} injected")
@@ -266,7 +267,8 @@ def get_context() -> DataContext:
 
 if __name__ == "__main__":
     context = get_context()
-    # context.sources.add_pandas("taxi")
+    ds = context.sources.add_pandas("taxi")
+    ds.add_my_other_asset(foo="bar")
     # context.sources.add_postgres("taxi2", connection_str="postgres://...")
 
     # # Demo the use of the `type_lookup` `BiDict`
