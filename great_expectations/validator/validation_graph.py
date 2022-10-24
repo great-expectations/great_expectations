@@ -62,15 +62,6 @@ class ValidationGraph:
     def edge_ids(self):
         return {edge.id for edge in self._edges}
 
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        """Returns "ExecutionEngine" object, used for resolving "MetricConfiguration" objects in graph."""
-        return self._execution_engine
-
-    @execution_engine.setter
-    def execution_engine(self, value: ExecutionEngine):
-        self._execution_engine = value
-
     def add(self, edge: MetricEdge) -> None:
         if edge.id not in self._edge_ids:
             self._edges.append(edge)
