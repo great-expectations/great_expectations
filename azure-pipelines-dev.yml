@@ -136,7 +136,7 @@ stages:
         name: UnusedImportChecker
 
   - stage: import_ge
-    dependsOn: [lint]
+    dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-18.04'
 
