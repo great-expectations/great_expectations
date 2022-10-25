@@ -11,10 +11,8 @@ from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
 )
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    render_evaluation_parameter_string,
-)
+from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,

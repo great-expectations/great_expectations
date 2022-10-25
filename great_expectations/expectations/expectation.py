@@ -13,6 +13,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
+from numbers import Number
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
@@ -832,6 +833,7 @@ class Expectation(metaclass=MetaExpectation):
 
         validation_dependencies: dict = self.get_validation_dependencies(
             configuration=configuration,
+            execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
         runtime_configuration["result_format"] = validation_dependencies[  # type: ignore[index]
@@ -982,8 +984,8 @@ class Expectation(metaclass=MetaExpectation):
             configuration = self.configuration
         try:
             assert (
-                configuration.expectation_type == self.expectation_type
-            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
+                configuration.expectation_type == self.expectation_type  # type: ignore[attr-defined]
+            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"  # type: ignore[attr-defined]
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -1024,7 +1026,7 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     def build_configuration(cls, *args, **kwargs: dict) -> ExpectationConfiguration:
         # Combine all arguments into a single new "all_args" dictionary to name positional parameters
-        all_args = dict(zip(cls.validation_kwargs, args))
+        all_args = dict(zip(cls.validation_kwargs, args))  # type: ignore[attr-defined]
         all_args.update(kwargs)
 
         # Unpack display parameters; remove them from all_args if appropriate
@@ -1032,18 +1034,18 @@ class Expectation(metaclass=MetaExpectation):
             include_config = kwargs["include_config"]
             del all_args["include_config"]
         else:
-            include_config = cls.default_expectation_args["include_config"]
+            include_config = cls.default_expectation_args["include_config"]  # type: ignore[attr-defined]
 
         if "catch_exceptions" in kwargs:
             catch_exceptions = kwargs["catch_exceptions"]
             del all_args["catch_exceptions"]
         else:
-            catch_exceptions = cls.default_expectation_args["catch_exceptions"]
+            catch_exceptions = cls.default_expectation_args["catch_exceptions"]  # type: ignore[attr-defined]
 
         if "result_format" in kwargs:
             result_format = kwargs["result_format"]
         else:
-            result_format = cls.default_expectation_args["result_format"]
+            result_format = cls.default_expectation_args["result_format"]  # type: ignore[attr-defined]
 
         # Extract the meta object for use as a top-level expectation_config holder
         if "meta" in kwargs:
@@ -1054,7 +1056,7 @@ class Expectation(metaclass=MetaExpectation):
 
         # Construct the expectation_config object
         return ExpectationConfiguration(
-            expectation_type=cls.expectation_type,
+            expectation_type=cls.expectation_type,  # type: ignore[attr-defined]
             kwargs=convert_to_json_serializable(deepcopy(all_args)),
             meta=meta,
         )
@@ -1121,7 +1123,7 @@ class Expectation(metaclass=MetaExpectation):
         ] = self._get_expectation_configuration_from_examples(examples)
         if not _expectation_config:
             _error(
-                f"Was NOT able to get Expectation configuration for {self.expectation_type}. "
+                f"Was NOT able to get Expectation configuration for {self.expectation_type}. "  # type: ignore[attr-defined]
                 "Is there at least one sample test where 'success' is True?"
             )
         metric_diagnostics_list: List[
@@ -1278,7 +1280,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         try:
             # Currently, only community contrib expectations have an examples attribute
-            all_examples = self.examples
+            all_examples = self.examples  # type: ignore[attr-defined]
         except AttributeError:
             all_examples = self._get_examples_from_json()
             if all_examples == []:
@@ -1374,7 +1376,7 @@ class Expectation(metaclass=MetaExpectation):
                     for test in tests:
                         if test.output.get("success"):
                             return ExpectationConfiguration(
-                                expectation_type=self.expectation_type,
+                                expectation_type=self.expectation_type,  # type: ignore[attr-defined]
                                 kwargs=test.input,
                             )
 
@@ -1385,7 +1387,7 @@ class Expectation(metaclass=MetaExpectation):
                     for test in tests:
                         if test.input:
                             return ExpectationConfiguration(
-                                expectation_type=self.expectation_type,
+                                expectation_type=self.expectation_type,  # type: ignore[attr-defined]
                                 kwargs=test.input,
                             )
         return None
@@ -1408,7 +1410,7 @@ class Expectation(metaclass=MetaExpectation):
                 f"Expectation {name} was not found in the list of registered Expectations. "
                 f"Please check your configuration and try again"
             )
-        if "auto" in expectation_impl.default_kwarg_values:
+        if "auto" in expectation_impl.default_kwarg_values:  # type: ignore[attr-defined]
             print(
                 f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
             )
@@ -2077,7 +2079,7 @@ class QueryExpectation(TableExpectation, ABC):
         "condition_parser": None,
     }
 
-    domain_keys = (
+    domain_keys = (  # type: ignore[assignment]
         "batch_id",
         "row_condition",
         "condition_parser",
@@ -2144,7 +2146,7 @@ class QueryExpectation(TableExpectation, ABC):
 
 
 class ColumnExpectation(TableExpectation, ABC):
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")  # type: ignore[assignment]
     domain_type = MetricDomainTypes.COLUMN
 
     def validate_configuration(
@@ -2164,7 +2166,7 @@ class ColumnExpectation(TableExpectation, ABC):
 
 class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")  # type: ignore[assignment]
     domain_type = MetricDomainTypes.COLUMN
     success_keys = ("mostly",)
     default_kwarg_values = {
@@ -2388,7 +2390,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
 class ColumnPairMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = (
+    domain_keys = (  # type: ignore[assignment]
         "batch_id",
         "table",
         "column_A",
@@ -2600,7 +2602,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
 
 class MulticolumnMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = (
+    domain_keys = (  # type: ignore[assignment]
         "batch_id",
         "table",
         "column_list",
