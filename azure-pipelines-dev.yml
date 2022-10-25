@@ -177,14 +177,12 @@ stages:
               numpy.version: '1.17.0'
               pandas.version: '0.23.4'
               scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
             Python37-Pandas025:
               python.version: '3.7'
               numpy.version: '1.17.0'
               pandas.version: '0.25.3'
               scipy.version: 'latest'
               # numpy 1.20 and pandas 0.25.3 do not coexist happily
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
@@ -221,8 +219,8 @@ stages:
 
           - script: |
               pip install --requirement requirements.txt
-              echo "about to run pip install $(GE_pytest_pip_opts)"
-              pip install $(GE_pytest_pip_opts)
+              echo "about to run pip install --requirement requirements-dev-test.txt --constraint constraints-dev.txt"
+              pip install --requirement requirements-dev-test.txt --constraint constraints-dev.txt
               pip install  .
             displayName: 'Install dependencies'
 
