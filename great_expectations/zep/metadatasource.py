@@ -5,11 +5,12 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Callable, Dict, List, Optional, Type, Union
 
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.util import camel_to_snake
 from great_expectations.zep.bi_directional_dict import BiDict
-from great_expectations.zep.interfaces import Datasource
+from great_expectations.zep.interfaces import DataAsset, Datasource
 
 SourceFactoryFn = Callable[..., Datasource]
 
@@ -169,15 +170,16 @@ class MetaDatasource(type):
     def _inject_asset_methods(
         cls: Type[MetaDatasource],
         ds_cls_dict: Dict[str, Callable],
-        asset_types: List[type],
+        asset_types: List[Type[DataAsset]],
     ) -> None:
         LOGGER.info(f"1c. Injecting `add_<ASSET_TYPE>` methods for {asset_types}")
 
-        asset_tuples: Iterable[Tuple[str, type]] = (
-            (f"add_{_get_simplified_name_from_type(t)}", t) for t in asset_types
-        )
+        type_method_pairs: Dict[Type[DataAsset], str] = {
+            t: f"add_{_get_simplified_name_from_type(t)}" for t in asset_types
+        }
 
-        for method_name, asset_type in asset_tuples:
+        # TODO: only inject 1 method per call to deal with issue of closures in a loop
+        for asset_type, method_name in type_method_pairs.items():
 
             method_already_defined = ds_cls_dict.get(method_name)
             if method_already_defined:
@@ -189,9 +191,11 @@ class MetaDatasource(type):
             attr_annotations = asset_type.__dict__["__annotations__"]
 
             # TODO: update signature with `attr_annotations`
-            def _add_asset(*args, **kwargs):
-                LOGGER.info(f"6. Creating {asset_type.__name__} ...")
-                # TODO: actually return an asset instance
+            def _add_asset(self: Datasource, name: str, *args, **kwargs):
+                LOGGER.info(f"6. Creating `{asset_type.__name__}` '{name}' ...")
+                data_asset = asset_type(name, *args, **kwargs)
+                self.assets[name] = data_asset
+                return data_asset
 
             ds_cls_dict[method_name] = _add_asset
             LOGGER.info(f"  {method_name}() - {attr_annotations} injected")
