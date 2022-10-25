@@ -100,8 +100,10 @@ class _SourceFactories:
 
             for type_, name in zip(asset_types, asset_type_names):
                 cls.type_lookup[type_] = name
+                LOGGER.debug(f"'{name}' added to `type_lookup`")
 
             cls.type_lookup[ds_type] = simplified_name
+            LOGGER.debug(f"'{simplified_name}' added to `type_lookup`")
             cls.__source_factories[method_name] = fn  # type: ignore[assignment]
         else:
             raise ValueError(f"{simplified_name} factory already exists")
@@ -141,10 +143,10 @@ class MetaDatasource(type):
         if asset_types:
             meta_cls._inject_asset_methods(cls_dict, asset_types)
 
-        # TODO: raise a TypeError here instead
-        assert all(
-            [isinstance(t, type) for t in asset_types]
-        ), f"Datasource `asset_types` must be a iterable of classes/types got {asset_types}"
+            # TODO: raise a TypeError here instead
+            assert all(
+                [isinstance(t, type) for t in asset_types]
+            ), f"Datasource `asset_types` must be a iterable of classes/types got {asset_types}"
 
         def _datasource_factory(*args, **kwargs) -> Datasource:
             # TODO: update signature to match Datasource __init__ (ex update __signature__)
@@ -188,7 +190,7 @@ class MetaDatasource(type):
                 )
                 continue
 
-            attr_annotations = asset_type.__dict__["__annotations__"]
+            attr_annotations = asset_type.__dict__.get("__annotations__", "")
 
             # TODO: update signature with `attr_annotations`
             def _add_asset(self: Datasource, name: str, *args, **kwargs):
@@ -198,7 +200,7 @@ class MetaDatasource(type):
                 return data_asset
 
             ds_cls_dict[method_name] = _add_asset
-            LOGGER.info(f"  {method_name}() - {attr_annotations} injected")
+            LOGGER.info(f"  {method_name}({attr_annotations}) - injected")
 
 
 class FileAsset(DataAsset):
