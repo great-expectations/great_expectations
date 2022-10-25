@@ -2,7 +2,9 @@ from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.expectation import (
+    render_evaluation_parameter_string,
+)
 from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (

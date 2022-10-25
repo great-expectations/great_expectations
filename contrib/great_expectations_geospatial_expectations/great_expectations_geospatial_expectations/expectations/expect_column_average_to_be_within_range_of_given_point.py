@@ -11,12 +11,14 @@ from typing import Any, Dict, List, Union
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import (
+    ColumnExpectation,
+    render_evaluation_parameter_string,
+)
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     RenderedBulletListContent,
