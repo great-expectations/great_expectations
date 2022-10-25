@@ -743,6 +743,24 @@ def postgresql_engine(test_backend):
         pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
 
 
+@pytest.fixture
+def mysql_engine(test_backend):
+    if test_backend == "mysql":
+        try:
+            import sqlalchemy as sa
+
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+            engine = sa.create_engine(
+                f"mysql+pymysql://root@{db_hostname}/test_ci"
+            ).connect()
+            yield engine
+            engine.close()
+        except ImportError:
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+    else:
+        pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
+
+
 @pytest.fixture(scope="function")
 def empty_data_context(
     tmp_path,
