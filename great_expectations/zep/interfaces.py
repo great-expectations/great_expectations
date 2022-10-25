@@ -1,4 +1,5 @@
-from typing import List, Union
+import abc
+from typing import List, Mapping, Type, Union
 
 from typing_extensions import Protocol, runtime_checkable
 
@@ -6,10 +7,18 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 from great_expectations.execution_engine import ExecutionEngine
 
 
+class DataAsset(abc.ABC):
+    name: str
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
 @runtime_checkable
 class Datasource(Protocol):
+    assets: Mapping[str, DataAsset]
     execution_engine: ExecutionEngine
-    asset_types: List[type]
+    asset_types: List[Type[DataAsset]]
 
     def get_batch_list_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
@@ -22,3 +31,8 @@ class Datasource(Protocol):
         Returns:
             A list of batches. The list may be empty.
         """
+
+    def get_asset(self, asset_name: str) -> DataAsset:
+        """Returns the DataAsset referred to by name"""
+        # This default implementation will be used if protocol is inherited
+        return self.assets[asset_name]
