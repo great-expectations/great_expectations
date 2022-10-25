@@ -147,7 +147,7 @@ class CloudMigrator:
                 "Migration failed. Please check the error message for more details."
             ) from e
 
-    def retry_unsuccessful_validations(self) -> None:
+    def retry_migrate_validation_results(self) -> None:
         if not self._unsuccessful_validations:
             print("No unsuccessful validations found!")
             return
