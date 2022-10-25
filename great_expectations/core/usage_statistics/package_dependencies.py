@@ -139,6 +139,7 @@ class GEDependencies:
         "mock-alchemy",
         "moto",
         "nbconvert",
+        "py",
         "pyfakefs",
         "pytest",
         "pytest-benchmark",
