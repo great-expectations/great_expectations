@@ -39,19 +39,19 @@ function codeImport () {
     })
 
     for (const [node] of codes) {
-      const nameMeta = (node.meta || '')
-        .split(' ')
-        .find(meta => meta.startsWith('name='))
-
-      if (!nameMeta) {
+      const meta = node.meta || ''
+      if (!meta) {
         continue
       }
 
-      const res = /^name=(?<snippetName>.+?)$/.exec(
-        nameMeta
+      const nameMeta = /^name=(?<snippetName>.+?)$/.exec(
+        meta
       )
+      if (!nameMeta) {
+          continue
+      }
 
-      let name = res.groups.snippetName
+      let name = nameMeta.groups.snippetName
       if (!name) {
         throw new Error(`Unable to parse named reference ${nameMeta}`)
       }
@@ -61,7 +61,9 @@ function codeImport () {
       if (!(name in snippetMap)) {
         throw new Error(`Could not find any snippet named ${name}`)
       }
+
       node.value = snippetMap[name].contents
+      console.log(`Substituted value for named snippet "${name}"`)
     }
 
     if (promises.length) {

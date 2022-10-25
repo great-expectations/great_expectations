@@ -5,6 +5,7 @@ from great_expectations.expectations.set_based_column_map_expectation import (
 
 # <snippet>
 class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
+    # </snippet>
     """Values in this column should be valid members of the Solfege scale: do, re, mi, etc."""
 
     set_ = [

@@ -199,7 +199,7 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 
 **Results**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L239-L254
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L239-L253
 ```
 
 ```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L258-L268
@@ -224,7 +224,7 @@ This configuration omits the "validations" key from the YAML, which means a "val
 ```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L325-L340
 ```
 
-```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L344-L354
+```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L344-L356
 ```
 
 </TabItem>
@@ -274,7 +274,7 @@ This configuration specifies the SimpleCheckpoint class under the "class_name" k
 
 **Equivalent YAML, using Checkpoint**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L465-L492
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L465-L494
 ```
 
 **Runtime**:
@@ -287,7 +287,7 @@ This configuration specifies the SimpleCheckpoint class under the "class_name" k
 ```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L506-L510
 ```
 
-```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L515-L519
+```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L515-L521
 ```
 
 </TabItem>
