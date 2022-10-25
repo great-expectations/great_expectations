@@ -370,7 +370,7 @@ class CloudDataContext(AbstractDataContext):
             )
         )
 
-    def delete_datasource(
+    def delete_datasource(  # type: ignore[override]
         self, datasource_name: str, save_changes: bool = True
     ) -> None:
         if save_changes is not True:
