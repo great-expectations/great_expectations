@@ -283,7 +283,7 @@ stages:
 
           - script: |
               pip install --requirement requirements.txt
-              echo "about to run pip install $(GE_pytest_pip_opts)"
+              echo "about to run pip install --requirement requirements-dev.txt --constraint constraints-dev.txt"
               pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
               pip install  .
             displayName: 'Install dependencies'
