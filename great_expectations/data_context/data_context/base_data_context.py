@@ -58,9 +58,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    ExpectationSuiteIdentifier,
     GeCloudIdentifier,
-    ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
