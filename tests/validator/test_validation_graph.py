@@ -260,7 +260,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
         metric_dependencies=None,
     )
 
-    class PandasExecutionEngineStub:
+    class PandasExecutionEngineFake:
         # noinspection PyUnusedLocal
         @staticmethod
         def resolve_metrics(
@@ -288,8 +288,8 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
                 for metric_configuration in metrics_to_resolve
             }
 
-    PandasExecutionEngineStub.__name__ = "PandasExecutionEngine"
-    execution_engine = cast(ExecutionEngine, PandasExecutionEngineStub())
+    PandasExecutionEngineFake.__name__ = "PandasExecutionEngine"
+    execution_engine = cast(ExecutionEngine, PandasExecutionEngineFake())
 
     graph = ValidationGraph(execution_engine=execution_engine)
 
