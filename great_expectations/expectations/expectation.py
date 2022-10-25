@@ -313,6 +313,8 @@ class Expectation(metaclass=MetaExpectation):
     def _atomic_prescriptive_template(
         cls,
         configuration: ExpectationConfiguration,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> Tuple[str, dict, Optional[dict]]:
@@ -342,6 +344,8 @@ class Expectation(metaclass=MetaExpectation):
     def _prescriptive_summary(
         cls,
         configuration: ExpectationConfiguration,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ):
@@ -376,6 +380,9 @@ class Expectation(metaclass=MetaExpectation):
     def _prescriptive_renderer(
         cls,
         configuration: ExpectationConfiguration,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ):
         return [
@@ -465,7 +472,10 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.STATUS_ICON)
     def _diagnostic_status_icon_renderer(
         cls,
+        configuration: ExpectationConfiguration,
         result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ):
         assert result, "Must provide a result object."
@@ -542,7 +552,10 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT)
     def _diagnostic_unexpected_statement_renderer(
         cls,
+        configuration: ExpectationConfiguration,
         result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ):
         assert result, "Must provide a result object."
@@ -645,7 +658,10 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE)
     def _diagnostic_unexpected_table_renderer(
         cls,
+        configuration: ExpectationConfiguration,
         result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> Optional[RenderedTableContent]:
         if result is None:
@@ -672,18 +688,17 @@ class Expectation(metaclass=MetaExpectation):
             partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
                 "partial_unexpected_counts"
             )
-            if partial_unexpected_counts is not None:
-                for unexpected_count_dict in partial_unexpected_counts:
-                    value: Optional[Any] = unexpected_count_dict.get("value")
-                    count: Optional[int] = unexpected_count_dict.get("count")
-                    if count is not None:
-                        total_count += count
-                        if value:
-                            table_rows.append([value, count])
-                        elif value == "":
-                            table_rows.append(["EMPTY", count])
-                        else:
-                            table_rows.append(["null", count])
+            for unexpected_count_dict in partial_unexpected_counts:
+                value: Optional[Any] = unexpected_count_dict.get("value")
+                count: Optional[int] = unexpected_count_dict.get("count")
+                if count is not None:
+                    total_count += count
+                    if value:
+                        table_rows.append([value, count])
+                    elif value == "":
+                        table_rows.append(["EMPTY", count])
+                    else:
+                        table_rows.append(["null", count])
 
             # Check to see if we have *all* of the unexpected values accounted for. If so,
             # we show counts. If not, we only show "sampled" unexpected values.
@@ -698,17 +713,16 @@ class Expectation(metaclass=MetaExpectation):
             partial_unexpected_list: Optional[List[Any]] = result_dict.get(
                 "partial_unexpected_list"
             )
-            if partial_unexpected_list is not None:
-                for unexpected_value in partial_unexpected_list:
-                    if unexpected_value:
-                        string_unexpected_value = str(unexpected_value)
-                    elif unexpected_value == "":
-                        string_unexpected_value = "EMPTY"
-                    else:
-                        string_unexpected_value = "null"
-                    if string_unexpected_value not in sampled_values_set:
-                        table_rows.append([unexpected_value])
-                        sampled_values_set.add(string_unexpected_value)
+            for unexpected_value in partial_unexpected_list:
+                if unexpected_value:
+                    string_unexpected_value = str(unexpected_value)
+                elif unexpected_value == "":
+                    string_unexpected_value = "EMPTY"
+                else:
+                    string_unexpected_value = "null"
+                if string_unexpected_value not in sampled_values_set:
+                    table_rows.append([unexpected_value])
+                    sampled_values_set.add(string_unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
             **{
@@ -779,7 +793,10 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
-        result: ExpectationValidationResult,
+        configuration: ExpectationConfiguration,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
@@ -804,7 +821,10 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
-        result: ExpectationValidationResult,
+        configuration: ExpectationConfiguration,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs: dict,
     ) -> str:
         return cls._get_observed_value_from_evr(result=result)
