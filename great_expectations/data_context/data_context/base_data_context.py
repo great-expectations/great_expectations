@@ -31,8 +31,6 @@ from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
-    add_datasource_usage_statistics,
-    get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     usage_statistics_enabled_method,
@@ -557,10 +555,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 **kwargs,
             )
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST.value,
-        args_payload_fn=get_batch_list_usage_statistics,
-    )
     def get_batch_list(
         self,
         datasource_name: Optional[str] = None,
@@ -649,10 +643,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             **kwargs,
         )
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE.value,
-        args_payload_fn=add_datasource_usage_statistics,
-    )
     def add_datasource(
         self,
         name: str,

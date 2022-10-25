@@ -101,6 +101,8 @@ from great_expectations.validator.validator import BridgeValidator, Validator
 
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
     UsageStatisticsHandler,
+    add_datasource_usage_statistics,
+    get_batch_list_usage_statistics,
     send_usage_message,
     usage_statistics_enabled_method,
 )
@@ -487,6 +489,10 @@ class AbstractDataContext(ABC):
         self._cached_datasources[datasource_name] = updated_datasource
         return updated_datasource
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE.value,
+        args_payload_fn=add_datasource_usage_statistics,
+    )
     def add_datasource(
         self,
         name: str,
@@ -1407,6 +1413,10 @@ class AbstractDataContext(ABC):
         )
         return validator
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST.value,
+        args_payload_fn=get_batch_list_usage_statistics,
+    )
     def get_batch_list(
         self,
         datasource_name: Optional[str] = None,
