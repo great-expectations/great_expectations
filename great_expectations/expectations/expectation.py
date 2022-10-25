@@ -316,7 +316,6 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs: dict,
     ) -> Tuple[str, dict, Optional[dict]]:
         """
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
@@ -359,7 +358,6 @@ class Expectation(metaclass=MetaExpectation):
         ) = cls._atomic_prescriptive_template(
             configuration=configuration,
             runtime_configuration=runtime_configuration,
-            **kwargs,
         )
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -688,12 +686,13 @@ class Expectation(metaclass=MetaExpectation):
             partial_unexpected_counts: Optional[List[dict]] = result_dict.get(
                 "partial_unexpected_counts"
             )
-            for unexpected_count_dict in partial_unexpected_counts:
-                value: Optional[Any] = unexpected_count_dict.get("value")
-                count: Optional[int] = unexpected_count_dict.get("count")
-                if count is not None:
-                    total_count += count
-                    if value:
+            if partial_unexpected_counts:
+                for unexpected_count_dict in partial_unexpected_counts:
+                    value: Optional[Any] = unexpected_count_dict.get("value")
+                    count: Optional[int] = unexpected_count_dict.get("count")
+                    if count:
+                        total_count += count
+                    if value is not None and value != "":
                         table_rows.append([value, count])
                     elif value == "":
                         table_rows.append(["EMPTY", count])
@@ -713,16 +712,17 @@ class Expectation(metaclass=MetaExpectation):
             partial_unexpected_list: Optional[List[Any]] = result_dict.get(
                 "partial_unexpected_list"
             )
-            for unexpected_value in partial_unexpected_list:
-                if unexpected_value:
-                    string_unexpected_value = str(unexpected_value)
-                elif unexpected_value == "":
-                    string_unexpected_value = "EMPTY"
-                else:
-                    string_unexpected_value = "null"
-                if string_unexpected_value not in sampled_values_set:
-                    table_rows.append([unexpected_value])
-                    sampled_values_set.add(string_unexpected_value)
+            if partial_unexpected_list:
+                for unexpected_value in partial_unexpected_list:
+                    if unexpected_value:
+                        string_unexpected_value = str(unexpected_value)
+                    elif unexpected_value == "":
+                        string_unexpected_value = "EMPTY"
+                    else:
+                        string_unexpected_value = "null"
+                    if string_unexpected_value not in sampled_values_set:
+                        table_rows.append([unexpected_value])
+                        sampled_values_set.add(string_unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
             **{
