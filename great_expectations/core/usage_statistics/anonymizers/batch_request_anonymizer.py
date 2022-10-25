@@ -90,6 +90,10 @@ class BatchRequestAnonymizer(BaseAnonymizer):
             logger.debug(
                 "anonymize_batch_request: Unable to create anonymized_batch_request payload field"
             )
+            # BDIRKS: Current zep datasource breaks the usage stats and we hit this exception.
+            # This causes us to die since we expect a dict to be returned. I've added this early
+            # return for the prototype. This will be fixed before a PR is made.
+            return {}
 
         return anonymized_batch_request_properties_dict
 

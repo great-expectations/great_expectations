@@ -1346,6 +1346,7 @@ class AbstractDataContext(ABC):
                 batch_request_list = [batch_request]  # type: ignore[list-item]
 
             for batch_request in batch_request_list:
+                # BDIRKS usage stats error is caused by call get_batch_list
                 batch_list.extend(  # type: ignore[union-attr]
                     self.get_batch_list(
                         datasource_name=datasource_name,
@@ -1409,10 +1410,16 @@ class AbstractDataContext(ABC):
         )
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        batch_definition: BatchDefinition = batch_list[-1].batch_definition
-        execution_engine: ExecutionEngine = self.datasources[  # type: ignore[union-attr]
-            batch_definition.datasource_name
-        ].execution_engine
+        # BDIRKS: The new ZEP datasources do not have a batch_definition but do explicitly store the datasource
+        #         We may want to switch on type instead of checking an attribute or we may want to update
+        #         current Batches.
+        execution_engine: ExecutionEngine
+        if hasattr(batch_list[-1], "execution_engine"):
+            execution_engine = batch_list[-1].execution_engine
+        else:
+            execution_engine = self.datasources[  # type: ignore[union-attr]
+                batch_list[-1].batch_definition.datasource_name
+            ].execution_engine
         validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,

@@ -771,11 +771,12 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     """
 
     if batch_request:
-        if not isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
-            raise TypeError(
-                f"""batch_request must be an instance of BatchRequest or RuntimeBatchRequest object, not \
-{type(batch_request)}"""
-            )
+        # BDIRKS I removed this check so the ZEP BatchRequest type could pass this check.
+        # We will need to modify this to get ZEP working.
+        #if not isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
+        #    raise TypeError(
+        #        f"""batch_request must be an instance of BatchRequest or RuntimeBatchRequest object, not {type(batch_request)}"""
+        #    )
         datasource_name = batch_request.datasource_name
 
     # ensure that the first parameter is datasource_name, which should be a str. This check prevents users
