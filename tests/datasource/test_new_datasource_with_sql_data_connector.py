@@ -794,7 +794,7 @@ def test_basic_instantiation_with_bigquery_creds_failure_pkey(sa):
 
 
 @pytest.mark.integration
-def test_include_schema_name_introspection(postgresql_sqlalchemy_datasource):
+def test_include_schema_name_introspection_postgres(postgresql_sqlalchemy_datasource):
     my_data_connector = instantiate_class_from_config(
         config={
             "class_name": "InferredAssetSqlDataConnector",
@@ -819,16 +819,12 @@ def test_include_schema_name_introspection(postgresql_sqlalchemy_datasource):
 
     # ensure that tables with the same name are referenced by both schema_name and table_name
     # test_df exists in both connection_test and public schemas
-    assert {
-        "schema_name": "connection_test",
-        "table_name": "test_df",
-        "type": "table",
-    } in introspected_tables
-    assert {
-        "schema_name": "public",
-        "table_name": "test_df",
-        "type": "table",
-    } in introspected_tables
+    for schema_name in introspected_schemas:
+        assert {
+            "schema_name": schema_name,
+            "table_name": "test_df",
+            "type": "table",
+        } in introspected_tables
 
 
 @pytest.mark.integration
