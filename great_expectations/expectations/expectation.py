@@ -13,7 +13,6 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter, defaultdict
 from copy import deepcopy
 from inspect import isabstract
-from numbers import Number
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
@@ -130,8 +129,8 @@ def render_evaluation_parameter_string(render_func) -> Callable:
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration
         # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support
-        if len(current_expectation_params) > 0 and isinstance(
-            rendered_string_template, list
+        if len(current_expectation_params) > 0 and not isinstance(
+            rendered_string_template, RenderedAtomicContent
         ):
             runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")
             if runtime_configuration:
@@ -738,8 +737,12 @@ class Expectation(metaclass=MetaExpectation):
         return unexpected_table_content_block
 
     @classmethod
-    def _get_observed_value_from_evr(self, result: ExpectationValidationResult) -> str:
-        result_dict = result.result
+    def _get_observed_value_from_evr(
+        self, result: Optional[ExpectationValidationResult]
+    ) -> str:
+        result_dict: Optional[dict] = None
+        if result:
+            result_dict = result.result
         if result_dict is None:
             return "--"
 
