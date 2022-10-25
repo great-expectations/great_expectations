@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import configparser
 import copy
+import datetime
 import errno
 import json
 import logging
@@ -9,6 +10,7 @@ import os
 import sys
 import uuid
 import warnings
+import webbrowser
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
@@ -41,6 +43,7 @@ from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
 )
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_asset import DataAsset
@@ -93,14 +96,18 @@ from great_expectations.validator.validator import BridgeValidator, Validator
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
     UsageStatisticsHandler,
     send_usage_message,
+    usage_statistics_enabled_method,
 )
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
+    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
     )
+    from great_expectations.render.renderer.site_builder import SiteBuilder
+    from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
     )
@@ -1107,6 +1114,76 @@ class AbstractDataContext(ABC):
             name=name, ge_cloud_id=ge_cloud_id
         )
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT.value,
+    )
+    def run_checkpoint(
+        self,
+        checkpoint_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        template_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        run_id: Optional[Union[str, int, float]] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[datetime.datetime] = None,
+        result_format: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ) -> CheckpointResult:
+        """
+        Validate against a pre-defined Checkpoint. (Experimental)
+        Args:
+            checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
+            template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
+            run_name_template: The template to use for run_name
+            expectation_suite_name: Expectation suite to be used by Checkpoint run
+            batch_request: Batch request to be used by Checkpoint run
+            action_list: List of actions to be performed by the Checkpoint
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            runtime_configuration: Runtime configuration override parameters
+            validations: Validations to be performed by the Checkpoint run
+            profilers: Profilers to be used by the Checkpoint run
+            run_id: The run_id for the validation; if None, a default value will be used
+            run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: One of several supported formatting directives for expectation validation results
+            ge_cloud_id: Great Expectations Cloud id for the checkpoint
+            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
+            **kwargs: Additional kwargs to pass to the validation operator
+
+        Returns:
+            CheckpointResult
+        """
+        checkpoint: Checkpoint = self.get_checkpoint(
+            name=checkpoint_name,
+            ge_cloud_id=ge_cloud_id,
+        )
+        result: CheckpointResult = checkpoint.run_with_runtime_args(
+            template_name=template_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            run_id=run_id,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            **kwargs,
+        )
+        return result
+
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None
     ) -> None:
@@ -1575,6 +1652,81 @@ class AbstractDataContext(ABC):
             ge_cloud_id=ge_cloud_id,
         )
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
+    )
+    def run_profiler_with_dynamic_arguments(
+        self,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        variables: Optional[dict] = None,
+        rules: Optional[dict] = None,
+    ) -> RuleBasedProfilerResult:
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
+
+        Args:
+            batch_list: Explicit list of Batch objects to supply data at runtime
+            batch_request: Explicit batch_request used to supply data at runtime
+            name: Identifier used to retrieve the profiler from a store.
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            variables: Attribute name/value pairs (overrides)
+            rules: Key-value pairs of name/configuration-dictionary (overrides)
+
+        Returns:
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
+
+        Raises:
+            AssertionError if both a `name` and `ge_cloud_id` are provided.
+            AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
+        """
+        return RuleBasedProfiler.run_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+            variables=variables,
+            rules=rules,
+        )
+
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA.value,
+    )
+    def run_profiler_on_data(
+        self,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> RuleBasedProfilerResult:
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
+
+        Args:
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            name: Identifier used to retrieve the profiler from a store.
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+
+        Returns:
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
+
+        Raises:
+            ProfilerConfigurationError is both "batch_list" and "batch_request" arguments are specified.
+            AssertionError if both a `name` and `ge_cloud_id` are provided.
+            AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
+        """
+        return RuleBasedProfiler.run_profiler_on_data(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
     ) -> ValidationOperator:
@@ -1743,6 +1895,120 @@ class AbstractDataContext(ABC):
             **kwargs,
         )
         return batch_kwargs
+
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS.value,
+    )
+    def open_data_docs(
+        self,
+        resource_identifier: Optional[str] = None,
+        site_name: Optional[str] = None,
+        only_if_exists: bool = True,
+    ) -> None:
+        """
+        A stdlib cross-platform way to open a file in a browser.
+
+        Args:
+            resource_identifier: ExpectationSuiteIdentifier,
+                ValidationResultIdentifier or any other type's identifier. The
+                argument is optional - when not supplied, the method returns the
+                URL of the index page.
+            site_name: Optionally specify which site to open. If not specified,
+                open all docs found in the project.
+            only_if_exists: Optionally specify flag to pass to "self.get_docs_sites_urls()".
+        """
+        data_docs_urls: List[Dict[str, str]] = self.get_docs_sites_urls(
+            resource_identifier=resource_identifier,
+            site_name=site_name,
+            only_if_exists=only_if_exists,
+        )
+        urls_to_open: List[str] = [site["site_url"] for site in data_docs_urls]
+
+        for url in urls_to_open:
+            if url is not None:
+                logger.debug(f"Opening Data Docs found here: {url}")
+                webbrowser.open(url)
+
+    def get_docs_sites_urls(
+        self,
+        resource_identifier=None,
+        site_name: Optional[str] = None,
+        only_if_exists=True,
+        site_names: Optional[List[str]] = None,
+    ) -> List[Dict[str, str]]:
+        """
+        Get URLs for a resource for all data docs sites.
+
+        This function will return URLs for any configured site even if the sites
+        have not been built yet.
+
+        Args:
+            resource_identifier (object): optional. It can be an identifier of
+                ExpectationSuite's, ValidationResults and other resources that
+                have typed identifiers. If not provided, the method will return
+                the URLs of the index page.
+            site_name: Optionally specify which site to open. If not specified,
+                return all urls in the project.
+            site_names: Optionally specify which sites are active. Sites not in
+                this list are not processed, even if specified in site_name.
+
+        Returns:
+            list: a list of URLs. Each item is the URL for the resource for a
+                data docs site
+        """
+        unfiltered_sites = self.variables.data_docs_sites
+
+        # Filter out sites that are not in site_names
+        sites = (
+            {k: v for k, v in unfiltered_sites.items() if k in site_names}  # type: ignore[union-attr]
+            if site_names
+            else unfiltered_sites
+        )
+
+        if not sites:
+            logger.debug("Found no data_docs_sites.")
+            return []
+        logger.debug(f"Found {len(sites)} data_docs_sites.")
+
+        if site_name:
+            if site_name not in sites.keys():
+                raise ge_exceptions.DataContextError(
+                    f"Could not find site named {site_name}. Please check your configurations"
+                )
+            site = sites[site_name]
+            site_builder = self._load_site_builder_from_site_config(site)
+            url = site_builder.get_resource_url(
+                resource_identifier=resource_identifier, only_if_exists=only_if_exists
+            )
+            return [{"site_name": site_name, "site_url": url}]
+
+        site_urls = []
+        for _site_name, site_config in sites.items():
+            site_builder = self._load_site_builder_from_site_config(site_config)
+            url = site_builder.get_resource_url(
+                resource_identifier=resource_identifier, only_if_exists=only_if_exists
+            )
+            site_urls.append({"site_name": _site_name, "site_url": url})
+
+        return site_urls
+
+    def _load_site_builder_from_site_config(self, site_config) -> SiteBuilder:
+        default_module_name = "great_expectations.render.renderer.site_builder"
+        site_builder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+            },
+            config_defaults={"module_name": default_module_name},
+        )
+        if not site_builder:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=default_module_name,
+                package_name=None,
+                class_name=site_config["class_name"],
+            )
+        return site_builder
 
     def clean_data_docs(self, site_name=None) -> bool:
         """
