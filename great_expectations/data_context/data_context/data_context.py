@@ -412,9 +412,7 @@ class DataContext(BaseDataContext):
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(
-            name=name, initialize=True, save_changes=True, **kwargs
-        )
+        ] = super().add_datasource(name=name, save_changes=True, **kwargs)
         return new_datasource
 
     def update_datasource(  # type: ignore[override]

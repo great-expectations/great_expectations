@@ -6,30 +6,16 @@ import os
 from collections import OrderedDict
 from typing import Any, Callable, List, Mapping, Optional, Union
 
-from ruamel.yaml import YAML
-
-from great_expectations.core.config_peer import ConfigPeer
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.data_context.config_validator.yaml_config_validator import (
-    _YamlConfigValidator,
-)
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
-
-try:
-    from typing import Literal  # type: ignore[attr-defined]
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[misc]
-
 from marshmallow import ValidationError
+from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import Batch, BatchRequestBase
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
@@ -44,6 +30,9 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 )
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
+)
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudRESTResource,
 )
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
@@ -307,10 +296,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                     validation_operator_name,
                     validation_operator_config,
                 )
-
-        self._yaml_config_validator = _YamlConfigValidator(
-            data_context=self,
-        )
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -1222,63 +1207,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         See parent 'AbstractDataContext.list_expectation_suite_names()` for more information.
         """
         return self._data_context.list_expectation_suite_names()  # type: ignore[union-attr]
-
-    def test_yaml_config(  # noqa: C901 - complexity 17
-        self,
-        yaml_config: str,
-        name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        runtime_environment: Optional[dict] = None,
-        pretty_print: bool = True,
-        return_mode: Union[  # type: ignore[name-defined]
-            Literal["instantiated_class"], Literal["report_object"]
-        ] = "instantiated_class",
-        shorten_tracebacks: bool = False,
-    ):
-        """Convenience method for testing yaml configs
-
-        test_yaml_config is a convenience method for configuring the moving
-        parts of a Great Expectations deployment. It allows you to quickly
-        test out configs for system components, especially Datasources,
-        Checkpoints, and Stores.
-
-        For many deployments of Great Expectations, these components (plus
-        Expectations) are the only ones you'll need.
-
-        test_yaml_config is mainly intended for use within notebooks and tests.
-
-        --Public API--
-
-        --Documentation--
-            https://docs.greatexpectations.io/docs/terms/data_context
-            https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
-
-        Args:
-            yaml_config: A string containing the yaml config to be tested
-            name: (Optional) A string containing the name of the component to instantiate
-            pretty_print: Determines whether to print human-readable output
-            return_mode: Determines what type of object test_yaml_config will return.
-                Valid modes are "instantiated_class" and "report_object"
-            shorten_tracebacks:If true, catch any errors during instantiation and print only the
-                last element of the traceback stack. This can be helpful for
-                rapid iteration on configs in a notebook, because it can remove
-                the need to scroll up and down a lot.
-
-        Returns:
-            The instantiated component (e.g. a Datasource)
-            OR
-            a json object containing metadata from the component's self_check method.
-            The returned object is determined by return_mode.
-        """
-        return self._yaml_config_validator.test_yaml_config(
-            yaml_config=yaml_config,
-            name=name,
-            class_name=class_name,
-            runtime_environment=runtime_environment,
-            pretty_print=pretty_print,
-            return_mode=return_mode,
-            shorten_tracebacks=shorten_tracebacks,
-        )
 
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
