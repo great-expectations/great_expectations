@@ -22,8 +22,10 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.expectation import (
+    render_evaluation_parameter_string,
+)
 from great_expectations.expectations.metrics.util import column_reflection_fallback
-from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.self_check.util import build_sa_validator_with_data
 from great_expectations.self_check.util import (

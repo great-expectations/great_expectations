@@ -23,6 +23,7 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
     InvalidExpectationConfigurationError,
     _format_map_output,
+    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
@@ -35,7 +36,6 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
