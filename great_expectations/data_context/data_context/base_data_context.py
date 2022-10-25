@@ -3,12 +3,9 @@ from __future__ import annotations
 import datetime
 import logging
 import os
-import uuid
-import warnings
 from collections import OrderedDict
 from typing import Any, Callable, List, Mapping, Optional, Union
 
-from dateutil.parser import parse
 from ruamel.yaml import YAML
 
 from great_expectations.core.config_peer import ConfigPeer
@@ -32,7 +29,6 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import (
     add_datasource_usage_statistics,
@@ -59,10 +55,7 @@ from great_expectations.data_context.types.base import (
     GeCloudConfig,
     dataContextConfigSchema,
 )
-from great_expectations.data_context.types.refs import (
-    GeCloudIdAwareRef,
-    GeCloudResourceRef,
-)
+from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -73,7 +66,6 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
     parse_substitution_variable,
 )
-from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
@@ -1208,193 +1200,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 logger.warning(
                     f"Skipped {skipped_data_assets} data assets due to errors."
                 )
-
-        profiling_results["success"] = True
-        return profiling_results
-
-    def profile_data_asset(  # noqa: C901 - complexity 16
-        self,
-        datasource_name,
-        batch_kwargs_generator_name=None,
-        data_asset_name=None,
-        batch_kwargs=None,
-        expectation_suite_name=None,
-        profiler=BasicDatasetProfiler,
-        profiler_configuration=None,
-        run_id=None,
-        additional_batch_kwargs=None,
-        run_name=None,
-        run_time=None,
-    ):
-        """
-        Profile a data asset
-
-        :param datasource_name: the name of the datasource to which the profiled data asset belongs
-        :param batch_kwargs_generator_name: the name of the batch kwargs generator to use to get batches (only if batch_kwargs are not provided)
-        :param data_asset_name: the name of the profiled data asset
-        :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the batch kwargs generator (generator_name arg) will choose a batch
-        :param profiler: the profiler class to use
-        :param profiler_configuration: Optional profiler configuration dict
-        :param run_name: optional - if set, the validation result created by the profiler will be under the provided run_name
-        :param additional_batch_kwargs:
-        :returns
-            A dictionary::
-
-                {
-                    "success": True/False,
-                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
-                }
-
-            When success = False, the error details are under "error" key
-        """
-
-        assert not (run_id and run_name) and not (
-            run_id and run_time
-        ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                pass
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
-            run_id = RunIdentifier(**run_id)
-        elif not isinstance(run_id, RunIdentifier):
-            run_name = run_name or "profiling"
-            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
-
-        logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
-
-        if not additional_batch_kwargs:
-            additional_batch_kwargs = {}
-
-        if batch_kwargs is None:
-            try:
-                generator = self.get_datasource(
-                    datasource_name=datasource_name
-                ).get_batch_kwargs_generator(name=batch_kwargs_generator_name)
-                batch_kwargs = generator.build_batch_kwargs(
-                    data_asset_name, **additional_batch_kwargs
-                )
-            except ge_exceptions.BatchKwargsError:
-                raise ge_exceptions.ProfilerError(
-                    "Unable to build batch_kwargs for datasource {}, using batch kwargs generator {} for name {}".format(
-                        datasource_name, batch_kwargs_generator_name, data_asset_name
-                    )
-                )
-            except ValueError:
-                raise ge_exceptions.ProfilerError(
-                    "Unable to find datasource {} or batch kwargs generator {}.".format(
-                        datasource_name, batch_kwargs_generator_name
-                    )
-                )
-        else:
-            batch_kwargs.update(additional_batch_kwargs)
-
-        profiling_results = {"success": False, "results": []}
-
-        total_columns, total_expectations, total_rows = 0, 0, 0
-        total_start_time = datetime.datetime.now()
-
-        name = data_asset_name
-        # logger.info("\tProfiling '%s'..." % name)
-
-        start_time = datetime.datetime.now()
-
-        if expectation_suite_name is None:
-            if batch_kwargs_generator_name is None and data_asset_name is None:
-                expectation_suite_name = (
-                    datasource_name
-                    + "."
-                    + profiler.__name__
-                    + "."
-                    + BatchKwargs(batch_kwargs).to_id()
-                )
-            else:
-                expectation_suite_name = (
-                    datasource_name
-                    + "."
-                    + batch_kwargs_generator_name
-                    + "."
-                    + data_asset_name
-                    + "."
-                    + profiler.__name__
-                )
-
-        self.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name, overwrite_existing=True
-        )
-
-        # TODO: Add batch_parameters
-        batch = self.get_batch(
-            expectation_suite_name=expectation_suite_name,
-            batch_kwargs=batch_kwargs,
-        )
-
-        if not profiler.validate(batch):
-            raise ge_exceptions.ProfilerError(
-                f"batch '{name}' is not a valid batch for the '{profiler.__name__}' profiler"
-            )
-
-        # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
-        # will have more to unpack.
-        expectation_suite, validation_results = profiler.profile(
-            batch, run_id=run_id, profiler_configuration=profiler_configuration
-        )
-        profiling_results["results"].append((expectation_suite, validation_results))
-
-        validation_ref = self.validations_store.set(
-            key=ValidationResultIdentifier(
-                expectation_suite_identifier=ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite_name
-                ),
-                run_id=run_id,
-                batch_identifier=batch.batch_id,
-            ),
-            value=validation_results,
-        )
-
-        if isinstance(validation_ref, GeCloudIdAwareRef):
-            ge_cloud_id = validation_ref.ge_cloud_id
-            validation_results.ge_cloud_id = uuid.UUID(ge_cloud_id)
-
-        if isinstance(batch, Dataset):
-            # For datasets, we can produce some more detailed statistics
-            row_count = batch.get_row_count()
-            total_rows += row_count
-            new_column_count = len(
-                {
-                    exp.kwargs["column"]
-                    for exp in expectation_suite.expectations
-                    if "column" in exp.kwargs
-                }
-            )
-            total_columns += new_column_count
-
-        new_expectation_count = len(expectation_suite.expectations)
-        total_expectations += new_expectation_count
-
-        self.save_expectation_suite(expectation_suite)
-        duration = (datetime.datetime.now() - start_time).total_seconds()
-        # noinspection PyUnboundLocalVariable
-        logger.info(
-            f"\tProfiled {new_column_count} columns using {row_count} rows from {name} ({duration:.3f} sec)"
-        )
-
-        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
-        logger.info(
-            f"""
-Profiled the data asset, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
-Generated, evaluated, and stored {total_expectations} Expectations during profiling. Please review results using data-docs."""
-        )
 
         profiling_results["success"] = True
         return profiling_results
