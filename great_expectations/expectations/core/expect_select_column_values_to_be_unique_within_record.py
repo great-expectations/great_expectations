@@ -1,8 +1,8 @@
 from typing import Optional
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.expectations.expectation import MulticolumnMapExpectation
-from great_expectations.expectations.util import (
+from great_expectations.expectations.expectation import (
+    MulticolumnMapExpectation,
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
