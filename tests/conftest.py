@@ -95,6 +95,30 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.order(index=2)
+@pytest.fixture(scope="module")
+def spark_warehouse_session(tmp_path_factory):
+    # Note this fixture will configure spark to use in-memory metastore
+    try:
+        pyspark = pytest.importorskip("pyspark")
+        # noinspection PyPep8Naming
+        from pyspark.sql import SparkSession
+    except ImportError:
+        pyspark = None
+        SparkSession = None
+
+    spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
+    spark: SparkSession = get_or_create_spark_application(
+        spark_config={
+            "spark.sql.catalogImplementation": "in-memory",
+            "spark.executor.memory": "450m",
+            "spark.sql.warehouse.dir": spark_warehouse_path,
+        }
+    )
+    yield spark
+    spark.stop()
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers",
@@ -1460,6 +1484,45 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
     return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture(scope="module")
+def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
+    try:
+        from pyspark.sql import DataFrame
+    except ImportError:
+        raise ValueError("spark tests are requested, but pyspark is not installed")
+
+    titanic_database_name: str = "db_test"
+    titanic_csv_path: str = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    project_path: str = str(tmp_path_factory.mktemp("data"))
+    project_dataset_path: str = str(os.path.join(project_path, "Titanic.csv"))
+
+    shutil.copy(titanic_csv_path, project_dataset_path)
+    titanic_df: DataFrame = spark_warehouse_session.read.csv(
+        project_dataset_path, header=True
+    )
+
+    spark_warehouse_session.sql(
+        f"CREATE DATABASE IF NOT EXISTS {titanic_database_name}"
+    )
+    spark_warehouse_session.catalog.setCurrentDatabase(titanic_database_name)
+    titanic_df.write.saveAsTable(
+        "tb_titanic_with_partitions",
+        partitionBy=["PClass", "SexCode"],
+        mode="overwrite",
+    )
+    titanic_df.write.saveAsTable("tb_titanic_without_partitions", mode="overwrite")
+
+    row_count = spark_warehouse_session.sql(
+        f"SELECT COUNT(*) from {titanic_database_name}.tb_titanic_without_partitions"
+    ).collect()
+    assert row_count and row_count[0][0] == 1313
+    yield spark_warehouse_session
+    spark_warehouse_session.sql(
+        f"DROP DATABASE IF EXISTS {titanic_database_name} CASCADE"
+    )
+    spark_warehouse_session.catalog.setCurrentDatabase("default")
 
 
 @pytest.fixture
