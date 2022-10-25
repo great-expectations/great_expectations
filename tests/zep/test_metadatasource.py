@@ -3,7 +3,7 @@ from typing import MutableMapping
 
 import pytest
 
-from great_expectations.zep.interfaces import DataAsset
+from great_expectations.zep.interfaces import DataAsset, Datasource
 from great_expectations.zep.metadatasource import (
     MetaDatasource,
     _SourceFactories,
@@ -110,10 +110,10 @@ def test_minimal_ds_to_asset_flow(context_sources_clean):
     context = get_context()
 
     # 3. Add a datasource
-    red_ds = context.sources.add_red("my_ds_name")
+    red_ds: Datasource = context.sources.add_red("my_ds_name")
 
     # 4. Add a DataAsset
-    blue_asset = red_ds.add_blue_asset("my_asset_name")
+    blue_asset: DataAsset = red_ds.add_blue_asset("my_asset_name")
     assert isinstance(blue_asset, BlueAsset)
 
     # 5. Get an asset by name
