@@ -846,10 +846,10 @@ def test_include_schema_name_introspection_mysql(mysql_sqlalchemy_datasource):
         for table in my_data_connector._introspect_db()
         if table["type"] == "table"
     ]
-    assert len(introspected_tables) == 0
+    assert len(introspected_tables) == 2
 
     introspected_schemas = {table.get("schema_name") for table in introspected_tables}
-    assert introspected_schemas == set()
+    assert introspected_schemas == {"test_ci", "test_connection"}
 
     # ensure that tables with the same name are referenced by both schema_name and table_name
     # test_df exists in both connection_test and public schemas
