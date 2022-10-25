@@ -328,21 +328,21 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "value_to_assert, show_progress_bars, ",
+    "show_progress_bars, are_progress_bars_disabled, ",
     [
         pytest.param(
-            False,
             None,
+            False,
         ),
         pytest.param(
-            True,
             False,
+            True,
         ),
     ],
 )
 def test_progress_bar_config(
-    value_to_assert: bool,
     show_progress_bars: bool,
+    are_progress_bars_disabled: bool,
 ):
     """
     This test creates mocked environment for progress bar tests; it then executes the method under test that utilizes
@@ -390,4 +390,4 @@ def test_progress_bar_config(
         graph = ValidationGraph(execution_engine=dummy_execution_engine)
         graph.resolve_validation_graph(**call_args)
         assert mock_tqdm.called is True
-        assert mock_tqdm.call_args[1]["disable"] is value_to_assert
+        assert mock_tqdm.call_args[1]["disable"] is are_progress_bars_disabled
