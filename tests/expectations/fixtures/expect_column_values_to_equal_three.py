@@ -1,10 +1,12 @@
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    render_evaluation_parameter_string,
+)
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
