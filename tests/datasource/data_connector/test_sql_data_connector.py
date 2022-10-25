@@ -2066,3 +2066,325 @@ def test_ConfiguredAssetSqlDataConnector_return_all_batch_definitions_sorted(
     ]
 
     assert expected == sorted_batch_definition_list
+
+
+@pytest.mark.integration
+def test_introspect_db(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "my_test_data_connector",
+        },
+        runtime_environment={
+            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    assert my_data_connector._introspect_db() == [
+        {
+            "schema_name": "main",
+            "table_name": "table_containing_id_spacers_for_D",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "table_full__I", "type": "table"},
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_date_column__A",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_foreign_key__F",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_incrementing_batch_id__E",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_multiple_columns__G",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_timestamp_column__B",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_that_should_be_partitioned_by_random_hash__H",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_with_fk_reference_from_F",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "view_by_date_column__A", "type": "view"},
+        {
+            "schema_name": "main",
+            "table_name": "view_by_incrementing_batch_id__E",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_multiple_columns__G",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_regularly_spaced_incrementing_id_column__C",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_timestamp_column__B",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_containing_id_spacers_for_D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_partitioned_by_foreign_key__F",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_that_should_be_partitioned_by_random_hash__H",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_with_fk_reference_from_F",
+            "type": "view",
+        },
+    ]
+
+    assert my_data_connector._introspect_db(schema_name="main") == [
+        {
+            "schema_name": "main",
+            "table_name": "table_containing_id_spacers_for_D",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "table_full__I", "type": "table"},
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_date_column__A",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_foreign_key__F",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_incrementing_batch_id__E",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_multiple_columns__G",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_timestamp_column__B",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_that_should_be_partitioned_by_random_hash__H",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_with_fk_reference_from_F",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "view_by_date_column__A", "type": "view"},
+        {
+            "schema_name": "main",
+            "table_name": "view_by_incrementing_batch_id__E",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_multiple_columns__G",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_regularly_spaced_incrementing_id_column__C",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_timestamp_column__B",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_containing_id_spacers_for_D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_partitioned_by_foreign_key__F",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_that_should_be_partitioned_by_random_hash__H",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_with_fk_reference_from_F",
+            "type": "view",
+        },
+    ]
+
+    assert my_data_connector._introspect_db(schema_name="waffle") == []
+
+    # This is a weak test, since this db doesn't have any additional schemas or system tables to show.
+    assert my_data_connector._introspect_db(
+        ignore_information_schemas_and_system_tables=False
+    ) == [
+        {
+            "schema_name": "main",
+            "table_name": "table_containing_id_spacers_for_D",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "table_full__I", "type": "table"},
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_date_column__A",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_foreign_key__F",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_incrementing_batch_id__E",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_multiple_columns__G",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_timestamp_column__B",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_that_should_be_partitioned_by_random_hash__H",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_with_fk_reference_from_F",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "view_by_date_column__A", "type": "view"},
+        {
+            "schema_name": "main",
+            "table_name": "view_by_incrementing_batch_id__E",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_multiple_columns__G",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_regularly_spaced_incrementing_id_column__C",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_timestamp_column__B",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_containing_id_spacers_for_D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_partitioned_by_foreign_key__F",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_that_should_be_partitioned_by_random_hash__H",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_with_fk_reference_from_F",
+            "type": "view",
+        },
+    ]
