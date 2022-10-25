@@ -20,7 +20,6 @@ class BiDict(
     def __init__(
         self,
         __dict: Optional[Mapping[Hashable, Hashable]] = None,
-        /,
         **kwargs: Hashable,
     ):
         if isinstance(__dict, Mapping):
