@@ -1,4 +1,4 @@
-from typing import Any, Dict, Set, Tuple, Union, cast
+from typing import Any, Dict, Optional, Set, Tuple, Union, cast
 from unittest import mock
 
 import pandas as pd
@@ -100,6 +100,58 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
         )
 
     return graph
+
+
+def _invoke_progress_bar_using_resolve_validation_graph_with_mocked_internal_methods(
+    value_to_assert: bool, show_progress_bars: Optional[bool] = None
+) -> None:
+    """
+    This utility method creates mocked environment for progress bar tests; it then executes the method under test that
+    utilizes progress bar, "ValidationGraph.resolve_validation_graph()", with composed arguments, and verifies result.
+    """
+
+    class DummyMetricConfiguration:
+        pass
+
+    class DummyExecutionEngine:
+        pass
+
+    dummy_metric_configuration = cast(MetricConfiguration, DummyMetricConfiguration)
+    dummy_execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+
+    # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
+    with mock.patch(
+        "great_expectations.validator.validation_graph.ValidationGraph._parse",
+        return_value=(
+            {},
+            {},
+        ),
+    ), mock.patch(
+        "great_expectations.validator.validation_graph.ValidationGraph.edges",
+        new_callable=mock.PropertyMock,
+        return_value=[
+            MetricEdge(left=dummy_metric_configuration),
+            MetricEdge(left=dummy_metric_configuration),
+            MetricEdge(left=dummy_metric_configuration),
+        ],
+    ), mock.patch(
+        "great_expectations.validator.validation_graph.tqdm",
+    ) as mock_tqdm:
+        call_args = {
+            "metrics": {},
+            "runtime_configuration": None,
+        }
+        if show_progress_bars is not None:
+            call_args.update(
+                {
+                    "show_progress_bars": show_progress_bars,
+                }
+            )
+
+        graph = ValidationGraph(execution_engine=dummy_execution_engine)
+        graph.resolve_validation_graph(**call_args)
+        assert mock_tqdm.called is True
+        assert mock_tqdm.call_args[1]["disable"] is value_to_assert
 
 
 @pytest.mark.unit
@@ -308,79 +360,13 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
 
 @pytest.mark.unit
 def test_progress_bar_config_enabled():
-    class DummyMetricConfiguration:
-        pass
-
-    class DummyExecutionEngine:
-        pass
-
-    dummy_metric_configuration = cast(MetricConfiguration, DummyMetricConfiguration)
-    dummy_execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
-
-    # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
-    with mock.patch(
-        "great_expectations.validator.validation_graph.ValidationGraph._parse",
-        return_value=(
-            {},
-            {},
-        ),
-    ), mock.patch(
-        "great_expectations.validator.validation_graph.ValidationGraph.edges",
-        new_callable=mock.PropertyMock,
-        return_value=[
-            MetricEdge(left=dummy_metric_configuration),
-            MetricEdge(left=dummy_metric_configuration),
-            MetricEdge(left=dummy_metric_configuration),
-        ],
-    ), mock.patch(
-        "great_expectations.validator.validation_graph.tqdm",
-    ) as mock_tqdm:
-        graph = ValidationGraph(execution_engine=dummy_execution_engine)
-        graph.resolve_validation_graph(
-            metrics={},
-            runtime_configuration=None,
-        )
-
-        # Still invoked but doesn't actually do anything due to `disabled`
-        assert mock_tqdm.called is True
-        assert mock_tqdm.call_args[1]["disable"] is False
+    _invoke_progress_bar_using_resolve_validation_graph_with_mocked_internal_methods(
+        value_to_assert=False
+    )
 
 
 @pytest.mark.unit
 def test_progress_bar_config_disabled():
-    class DummyMetricConfiguration:
-        pass
-
-    class DummyExecutionEngine:
-        pass
-
-    dummy_metric_configuration = cast(MetricConfiguration, DummyMetricConfiguration)
-    dummy_execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
-
-    # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
-    with mock.patch(
-        "great_expectations.validator.validation_graph.ValidationGraph._parse",
-        return_value=(
-            {},
-            {},
-        ),
-    ), mock.patch(
-        "great_expectations.validator.validation_graph.ValidationGraph.edges",
-        new_callable=mock.PropertyMock,
-        return_value=[
-            MetricEdge(left=dummy_metric_configuration),
-            MetricEdge(left=dummy_metric_configuration),
-            MetricEdge(left=dummy_metric_configuration),
-        ],
-    ), mock.patch(
-        "great_expectations.validator.validation_graph.tqdm",
-    ) as mock_tqdm:
-        graph = ValidationGraph(execution_engine=dummy_execution_engine)
-        graph.resolve_validation_graph(
-            metrics={},
-            runtime_configuration=None,
-            show_progress_bars=False,
-        )
-
-        assert mock_tqdm.called is True
-        assert mock_tqdm.call_args[1]["disable"] is True
+    _invoke_progress_bar_using_resolve_validation_graph_with_mocked_internal_methods(
+        value_to_assert=True, show_progress_bars=False
+    )
