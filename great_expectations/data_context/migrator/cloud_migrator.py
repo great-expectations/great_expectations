@@ -13,7 +13,7 @@ Usage:
 # Once tested, the boolean flag is to be flipped
 migrator = gx.CloudMigrator.migrate(context=context, test_migrate=True)
 
-# If the migrate process failed while processing validtion results: (Optional)
+# If the migrate process failed while processing validation results: (Optional)
 migrator.retry_migrate_validation_results()
 ```
 """
