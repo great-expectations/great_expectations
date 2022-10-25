@@ -1,0 +1,72 @@
+{
+    "expectation_type" : "expect_column_values_to_be_json_parseable",
+    "datasets" : [{
+      "data" : {
+        "x" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
+        "y" : ["{\"a\":1}", "{\"a\":2}", "{\"a\":3}", "{\"a\":4}", "{\"a\":5}", "{\"a\":6}","{\"a\":7}","{\"a\":8}","{\"a\":9}","{\"a\":10}"],
+        "z" : ["{\"a\":1}", "{\"a\":2}", "{\"a\":3}", "{\"a\":4}", "{\"a\":5}", null, null, null, null, null]
+      },
+     "schemas": {
+      "spark": {
+        "x": "IntegerType",
+        "y": "StringType",
+        "z": "StringType"
+      },
+       "postgresql": {
+        "x": "INT",
+        "y": "TEXT",
+        "z": "TEXT"
+       }
+    },
+      "tests": [{
+        "title": "positive_test",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in":{
+          "column": "y"
+        },
+        "out":{
+          "success": true,
+          "unexpected_list": []
+        }
+      },
+        {
+        "title": "positive_test_postgres",
+          "only_for": ["sqlite", "postgres"],
+
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in":{
+          "column": "y"
+        },
+        "out":{
+          "success": true,
+          "unexpected_list": []
+        }
+      },
+      {
+        "title": "positive_test_with_nulls",
+        "exact_match_out" : false,
+        "in":{
+          "column": "z",
+          "mostly": 0.75
+        },
+        "out":{
+          "success": true
+        }
+      },
+      {
+        "title": "negative_test",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in":{
+          "column": "x",
+          "mostly": 0.75
+        },
+        "out":{
+          "success": false
+        }
+      }
+      ]
+    }]
+}

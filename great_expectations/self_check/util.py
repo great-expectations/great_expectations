@@ -258,7 +258,7 @@ except (ImportError, KeyError):
     mysqltypes = None
     mysqlDialect = None
     MYSQL_TYPES = {}
-
+# marker for schema types
 try:
     # SQLAlchemy does not export the "INT" type for the MS SQL Server dialect; however "INT" is supported by the engine.
     # Since SQLAlchemy exports the "INTEGER" type for the MS SQL Server dialect, alias "INT" to the "INTEGER" type.
@@ -1852,7 +1852,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v3_api(
         "expect_column_values_to_be_decreasing",
         "expect_column_values_to_match_strftime_format",
         "expect_column_values_to_be_dateutil_parseable",
-        "expect_column_values_to_be_json_parseable",
+        # "expect_column_values_to_be_json_parseable",
         "expect_column_values_to_match_json_schema",
         "expect_column_stdev_to_be_between",
         # "expect_column_unique_value_count_to_be_between",
@@ -1885,7 +1885,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v3_api(
             "expect_column_values_to_be_decreasing",
             "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
-            "expect_column_values_to_be_json_parseable",
+            # "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",

@@ -28,11 +28,12 @@ from tests.conftest import build_test_backends_list_v3_api
 def pytest_generate_tests(metafunc):
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    expectation_dirs = [
-        dir_
-        for dir_ in os.listdir(dir_path)
-        if os.path.isdir(os.path.join(dir_path, dir_))
-    ]
+    # expectation_dirs = [
+    #     dir_
+    #     for dir_ in os.listdir(dir_path)
+    #     if os.path.isdir(os.path.join(dir_path, dir_))
+    # ]
+    expectation_dirs = ["column_map_expectations"]
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
@@ -42,6 +43,11 @@ def pytest_generate_tests(metafunc):
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
+        test_configuration_files = [
+            dir_path
+            + "/"
+            + "column_map_expectations/expect_column_values_to_be_json_parseable.json"
+        ]
         for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
