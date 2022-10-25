@@ -3095,9 +3095,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: Union[  # type: ignore[name-defined]
-            Literal["instantiated_class"], Literal["report_object"]
-        ] = "instantiated_class",
+        return_mode: Literal["instantiated_class", "report_object"] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
         """Convenience method for testing yaml configs
