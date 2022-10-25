@@ -143,20 +143,11 @@ stages:
     jobs:
       - job: import_ge
 
-        strategy:
-         matrix:
-           Python37:
-             python.version: '3.7'
-           Python38:
-             python.version: '3.8'
-           Python39:
-             python.version: '3.9'
-
         steps:
          - task: UsePythonVersion@0
            inputs:
-             versionSpec: '$(python.version)'
-           displayName: 'Use Python $(python.version)'
+             versionSpec: '3.7'
+           displayName: 'Use Python 3.7'
 
          - bash: python -m pip install --upgrade pip==21.3.1
            displayName: 'Update pip'
@@ -193,12 +184,6 @@ stages:
               pandas.version: '0.25.3'
               scipy.version: 'latest'
               # numpy 1.20 and pandas 0.25.3 do not coexist happily
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
-            Python38-PandasLatest:
-              python.version: '3.8'
-              numpy.version: 'latest'
-              pandas.version: 'latest'
-              scipy.version: 'latest'
               GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
 
         steps:
@@ -283,43 +268,23 @@ stages:
         variables:
           GE_pytest_opts: '--postgresql --spark'
 
-        strategy:
-          matrix:
-            Python37:
-              python.version: '3.7'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python38:
-              python.version: '3.8'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python39:
-              python.version: '3.9'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-
-
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
-              if [[ $(pandas.version) == 'latest' ]]; then
                 pip install pandas
-              else
-                pip install pandas==$(pandas.version)
-              fi
             displayName: 'Install pandas'
 
           - script: |
               pip install --requirement requirements.txt
               echo "about to run pip install $(GE_pytest_pip_opts)"
-              pip install $(GE_pytest_pip_opts)
+              pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
               pip install  .
             displayName: 'Install dependencies'
 
