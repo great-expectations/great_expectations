@@ -166,7 +166,7 @@ stages:
       vmImage: 'ubuntu-18.04'
 
     jobs:
-      - job: compatability_matrix
+      - job: compatibility_matrix
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
