@@ -268,8 +268,7 @@ def test_pandas_default_unexpected_index_columns_complete_result_format(
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "include_unexpected_index_columns": True,
-                "include_unexpected_rows": True,
+                "include_unexpected_index": True,
             },
         },
     )
@@ -288,12 +287,11 @@ def test_pandas_default_unexpected_index_columns_complete_result_format(
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "unexpected_count": 2,
-        "unexpected_index_list": [3, 5],
+        "unexpected_index_list": [3, 5],  # Default pandas index applied, compatible with existing functionality (list of ints)
+        "partial_unexpected_index_list": [3, 5],
         "unexpected_percent": 33.33333333333333,
         "partial_unexpected_list": [3, 10],
         "unexpected_list": [3, 10],
-        "unexpected_column_indexes": [{"index": 3,}, {"index": 5,}],
-        "partial_unexpected_index_list": [3, 5],
         "partial_unexpected_counts": [
             {"value": 3, "count": 1},
             {"value": 10, "count": 1},
@@ -315,8 +313,7 @@ def test_pandas_single_unexpected_index_columns_complete_result_format(
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "include_unexpected_index_columns": True,
-                "include_unexpected_rows": True,
+                "include_unexpected_index": True,
                 "unexpected_index_columns": ["pk_1"],  # Single column
             },
         },
@@ -336,12 +333,11 @@ def test_pandas_single_unexpected_index_columns_complete_result_format(
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "unexpected_count": 2,
-        "unexpected_index_list": [3, 5],
+        "unexpected_index_list": [{"pk_1": 3, }, {"pk_1": 5, }],  # Dicts since a column was provided
+        "partial_unexpected_index_list": [{"pk_1": 3, }, {"pk_1": 5, }],  # Dicts since a column was provided
         "unexpected_percent": 33.33333333333333,
         "partial_unexpected_list": [3, 10],
         "unexpected_list": [3, 10],
-        "unexpected_column_indexes": [{"pk_1": 3,}, {"pk_1": 5, }],
-        "partial_unexpected_index_list": [3, 5],
         "partial_unexpected_counts": [
             {"value": 3, "count": 1},
             {"value": 10, "count": 1},
@@ -362,8 +358,7 @@ def test_pandas_multiple_unexpected_index_columns_complete_result_format(
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "include_unexpected_index_columns": True,
-                "include_unexpected_rows": True,
+                "include_unexpected_index": True,
                 "unexpected_index_columns": ["pk_1", "pk_2"],  # Multiple columns
             },
         },
@@ -383,12 +378,11 @@ def test_pandas_multiple_unexpected_index_columns_complete_result_format(
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "unexpected_count": 2,
-        "unexpected_index_list": [3, 5],
+        "unexpected_index_list": [{"pk_1": 3, "pk_2": "three"}, {"pk_1": 5, "pk_2": "five"}],  # Dicts since columns were provided
+        "partial_unexpected_index_list": [{"pk_1": 3, "pk_2": "three"}, {"pk_1": 5, "pk_2": "five"}],  # Dicts since columns were provided
         "unexpected_percent": 33.33333333333333,
         "partial_unexpected_list": [3, 10],
         "unexpected_list": [3, 10],
-        "unexpected_column_indexes": [{"pk_1": 3, "pk_2": "three"}, {"pk_1": 5, "pk_2": "five"}],
-        "partial_unexpected_index_list": [3, 5],
         "partial_unexpected_counts": [
             {"value": 3, "count": 1},
             {"value": 10, "count": 1},
