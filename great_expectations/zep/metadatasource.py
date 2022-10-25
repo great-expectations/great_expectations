@@ -201,27 +201,37 @@ class MetaDatasource(type):
             LOGGER.info(f"  {method_name}() - {attr_annotations} injected")
 
 
-# class FileAsset:
-#     file_path: str
-#     delimiter: str
-#     ...
+class FileAsset(DataAsset):
+    file_path: str
+    delimiter: str
+    ...
 
 
-# class MyOtherAsset:
-#     foo: str
-#     bar: List[int]
+class MyOtherAsset(DataAsset):
+    foo: str
+    bar: List[int]
 
 
-# class PandasDatasource(metaclass=MetaDatasource):
+# NOTE: Set the PandasDatasource `metaclass=MetaDatasource` in order to kick off the __new__ hook
+class PandasDatasource:
 
-#     name: str
-#     asset_types = [FileAsset, MyOtherAsset]
+    execution_engine = PandasExecutionEngine()
+    asset_types = [FileAsset, MyOtherAsset]
+    name: str
+    assets: Dict[str, DataAsset]
 
-#     def __init__(self, name: str):
-#         self.name = name
+    def __init__(self, name: str):
+        self.name = name
+        self.assets = {}
 
-#     def __repr__(self):
-#         return f"{self.__class__.__name__}(name='{self.name}')"
+    def __repr__(self):
+        return f"{self.__class__.__name__}(name='{self.name}')"
+
+    def get_batch_list_from_batch_request(self, batch_request):
+        pass
+
+    def get_asset(self, asset_name: str) -> DataAsset:
+        return self.assets[asset_name]
 
 
 # class TableAsset:
@@ -272,7 +282,11 @@ def get_context() -> DataContext:
 if __name__ == "__main__":
     context = get_context()
     ds = context.sources.add_pandas("taxi")
-    ds.add_my_other_asset(foo="bar")
+    asset1 = ds.add_my_other_asset("bob")
+    asset2 = ds.get_asset("bob")
+    assert asset1 is asset2
+    print("Successful Asset Roundtrip")
+
     # context.sources.add_postgres("taxi2", connection_str="postgres://...")
 
     # # Demo the use of the `type_lookup` `BiDict`
