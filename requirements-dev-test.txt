@@ -1,3 +1,2 @@
 --requirement requirements-dev-lite.txt
 --requirement requirements-dev-contrib.txt
-py>=1.8.2 # Until a new pytest-benchmark release is cut (see https://github.com/ionelmc/pytest-benchmark/issues/226)
