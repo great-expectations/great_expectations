@@ -88,7 +88,7 @@ from great_expectations.render.types import (
 )
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
-    evaluate_json_test_cfe,
+    evaluate_json_test_v3_api,
     generate_expectation_tests,
 )
 from great_expectations.util import camel_to_snake, is_parseable_date
@@ -1511,7 +1511,7 @@ class Expectation(metaclass=MetaExpectation):
             exp_combined_test_name = f"{exp_test['backend']}--{exp_test['test']['title']}--{expectation_type}"
             _debug(f"Starting {exp_combined_test_name}")
             _start = time.time()
-            validation_result, error_message, stack_trace = evaluate_json_test_cfe(
+            validation_result, error_message, stack_trace = evaluate_json_test_v3_api(
                 validator=exp_test["validator_with_data"],
                 expectation_type=exp_test["expectation_type"],
                 test=exp_test["test"],
@@ -1521,7 +1521,7 @@ class Expectation(metaclass=MetaExpectation):
             _duration = _end - _start
             backend_test_times[exp_test["backend"]].append(_duration)
             _debug(
-                f"Took {_duration} seconds to evaluate_json_test_cfe for {exp_combined_test_name}"
+                f"Took {_duration} seconds to evaluate_json_test_v3_api for {exp_combined_test_name}"
             )
             if error_message is None:
                 _debug(f"PASSED {exp_combined_test_name}")
