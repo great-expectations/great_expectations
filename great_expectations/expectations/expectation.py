@@ -470,7 +470,7 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.STATUS_ICON)
     def _diagnostic_status_icon_renderer(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
@@ -550,7 +550,7 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT)
     def _diagnostic_unexpected_statement_renderer(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
@@ -656,7 +656,7 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE)
     def _diagnostic_unexpected_table_renderer(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
@@ -793,7 +793,7 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=AtomicDiagnosticRendererType.OBSERVED_VALUE)
     def _atomic_diagnostic_observed_value(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
@@ -821,7 +821,7 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         language: Optional[str] = None,
         runtime_configuration: Optional[dict] = None,
