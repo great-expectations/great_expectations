@@ -1,5 +1,5 @@
 import abc
-from typing import List, Mapping, MutableMapping, Type, Union
+from typing import List, MutableMapping, Type, Union
 
 from typing_extensions import Protocol, runtime_checkable
 
