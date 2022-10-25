@@ -166,6 +166,65 @@ stages:
       vmImage: 'ubuntu-18.04'
 
     jobs:
+      - job: compatability-matrix
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        variables:
+          GE_pytest_opts: '--no-sqlalchemy'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+                pip install numpy
+                pip install pandas
+                pip install scipy
+            displayName: 'Install numpy, pandas, and scipy'
+
+          - script: |
+              pip install --requirement requirements.txt
+              echo "about to run pip install --requirement requirements-dev-test.txt --constraint constraints-dev.txt"
+              pip install --requirement requirements-dev-test.txt --constraint constraints-dev.txt
+              pip install  .
+            displayName: 'Install dependencies'
+
+          - script: |
+              # Install dependencies
+              pip install pytest-cov pytest-icdiff pytest-mock pytest-azurepipelines invoke
+
+              # Run unit-tests
+              invoke tests --ci --cloud --timeout=3.0
+
+            displayName: 'Unit Tests'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+
+          - script: |
+              # Run pytest
+              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit and not e2e' --durations=10
+
+            displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
       - job: comprehensive
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
         timeoutInMinutes: 120
@@ -195,17 +254,6 @@ stages:
               pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
               pip install  .
             displayName: 'Install dependencies'
-
-          - script: |
-              # Install dependencies
-              pip install pytest-cov pytest-icdiff pytest-mock pytest-azurepipelines invoke
-
-              # Run unit-tests
-              invoke tests --ci --cloud --timeout=3.0
-
-            displayName: 'Unit Tests'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
           - script: |
               # Run pytest
