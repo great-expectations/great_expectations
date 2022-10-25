@@ -1,21 +1,25 @@
-from dataclasses import dataclass
+import dataclasses
 from typing import List, TypeVar, Generic
 
 from typing_extensions import Protocol
 
 from great_expectations.core.batch import BatchDataType
-from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 
 class DataAsset:
-    # Gabriel is adding this
-    pass
+    def __init__(self, name: str):
+        self._name = name
+
+    @property
+    def name(self):
+        return self._name
 
 
 class Datasource(Protocol):
     execution_engine: ExecutionEngine
     asset_types: List[type]
+    name: str
 
     def get_batch_list_from_batch_request(
             self, batch_request: "BatchRequest"
@@ -33,31 +37,43 @@ class Datasource(Protocol):
         """Returns the DataAsset referred to by name"""
 
 
-# The BatchSpec provides extensibility for a specific execution engine.
-# A particular execution engine can subclass BatchSpec and add its relevant properties.
-# Currently, this is a special dict that should be put under stronger typing
-BatchSpecT = TypeVar("BatchSpecT", bound=BatchSpec)
+# The BatchParams provides extensibility for a specific execution engine.
+# A particular execution engine can subclass BatchParams and add its relevant properties.
+class BatchParams:
+    pass
 
 
-@dataclass(frozen=True)
-class BatchRequest(Generic[BatchSpecT]):
+BatchParamsT = TypeVar("BatchParamsT", bound=BatchParams)
+
+
+@dataclasses.dataclass(frozen=True)
+class BatchRequest(Generic[BatchParamsT]):
     # This is a collection of immutable parameters used to get data from the datasource/data asset
     # We plan to expand this to provide a mechanism to add request parameters that exist for all
     # datasources.
     datasource_name: str
     data_asset_name: str
-    batch_spec: BatchSpecT
+    batch_params: BatchParamsT
+
+    # Usage stats expects a method like this to exist but I'm not sure if we really want to
+    # implement it or not. Other changes would also be necessary. I've commented it out while
+    # I sort through the usage stats piece.
+    # def to_json_dict(self) -> dict:
+    #     # Convert the BatchRequest to a dictionary that is json serializable
+    #     # NOT a JSON string.
+    #     # This is necessary for usage stats.
+    #     return dataclasses.asdict(self)
 
 
-class Batch(Generic[BatchSpecT]):
+class Batch(Generic[BatchParamsT]):
     # This represents a batch of data
     def __init__(
             self,
             datasource: Datasource,
-            data_asset: DataAsset,  # BDIRKS, this needs to be incorporated from Gabriel's changes.
-            batch_request: BatchRequest[BatchSpecT],
-            data: BatchDataType,   # BDIRKS, this needs to be make more generic? Maybe users can subclass
-                                   # BatchData or maybe introduce a protocol.
+            data_asset: DataAsset,
+            batch_request: BatchRequest[BatchParamsT],
+            data: BatchDataType,  # BDIRKS, this needs to be make more generic? Maybe users can subclass
+            # BatchData or maybe introduce a protocol.
     ):
         """This represents a batch of data.
 
@@ -67,11 +83,14 @@ class Batch(Generic[BatchSpecT]):
         # These properties are intended to be READ-ONLY
         self._datasource: Datasource = datasource
         self._data_asset: DataAsset = data_asset
-        self._batch_request: BatchRequest[BatchSpecT] = batch_request
+        self._batch_request: BatchRequest[BatchParamsT] = batch_request
         self._data: BatchDataType = data
 
         # computed property
-        self._id: str = batch_request.batch_spec.to_id()
+        # We need to unique identifier. This will likely change as I get more input
+        self._id: str = "-".join(
+            [datasource.name, data_asset.name, str(batch_request)]
+        )
 
     @property
     def datasource(self) -> Datasource:
@@ -82,7 +101,7 @@ class Batch(Generic[BatchSpecT]):
         return self._data_asset
 
     @property
-    def batch_request(self) -> BatchRequest[BatchSpecT]:
+    def batch_request(self) -> BatchRequest[BatchParamsT]:
         return self._batch_request
 
     @property
@@ -96,4 +115,3 @@ class Batch(Generic[BatchSpecT]):
     @property
     def execution_engine(self):
         return self.datasource.execution_engine
-
