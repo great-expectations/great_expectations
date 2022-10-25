@@ -79,7 +79,6 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
         r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,255}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  #  Matching URL (including http(s) protocol)
         r"<\/?(?:p|a|b|img)(?: \/)?>",  # HTML tags
         r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}",  # IPv4 IP address
-        r"(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",  # IPv6 IP address,
         r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ",  # UUID
     }
 
@@ -322,7 +321,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": "(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",
+        "value": "-?\\d+",
         "details": {
             "evaluated_regexes": {
                 r"\d+": 1.0,
@@ -334,7 +333,6 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
                 r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,255}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)": 0.0,
                 r"<\/?(?:p|a|b|img)(?: \/)?>": 0.0,
                 r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}": 0.0,
-                r"(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}": 1.0,
                 r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ": 0.0,
             },
             "success_ratio": 1.0,
