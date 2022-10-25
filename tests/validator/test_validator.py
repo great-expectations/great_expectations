@@ -155,7 +155,9 @@ def test_parse_validation_graph():
         )
         validation_dependencies = expectation_impl(
             configuration
-        ).get_validation_dependencies(configuration, engine)
+        ).get_validation_dependencies(
+            configuration=configuration, execution_engine=engine
+        )
 
         for metric_configuration in validation_dependencies["metrics"].values():
             Validator(
