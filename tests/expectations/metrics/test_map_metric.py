@@ -268,7 +268,6 @@ def test_pandas_default_unexpected_index_columns_complete_result_format(
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "include_unexpected_index": True,
             },
         },
     )
@@ -313,7 +312,6 @@ def test_pandas_single_unexpected_index_columns_complete_result_format(
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "include_unexpected_index": True,
                 "unexpected_index_columns": ["pk_1"],  # Single column
             },
         },
@@ -358,7 +356,6 @@ def test_pandas_multiple_unexpected_index_columns_complete_result_format(
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "include_unexpected_index": True,
                 "unexpected_index_columns": ["pk_1", "pk_2"],  # Multiple columns
             },
         },
