@@ -19,19 +19,22 @@ class BiDict(
 
     def __init__(
         self,
-        __dict: Optional[Mapping[Hashable, Hashable]] = None,
-        **kwargs: Hashable,
+        __dict: Optional[Mapping[T, T]] = None,
+        **kwargs: T,
     ):
         if isinstance(__dict, Mapping):
             kwargs: dict = {**__dict, **kwargs}  # type: ignore[no-redef]
             __dict = None
         super().__init__(__dict, **kwargs)
 
+    def __getitem__(self, key: Hashable) -> T:
+        return super().__getitem__(key)
+
     def __delitem__(self, key: Hashable):
         value = self.data.pop(key)
         super().pop(value, None)
 
-    def __setitem__(self, key: Hashable, value: Hashable):
+    def __setitem__(self, key: T, value: T):
         if key in self:
             del self[self[key]]
         if value in self:
