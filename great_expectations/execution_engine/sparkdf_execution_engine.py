@@ -7,7 +7,6 @@ import uuid
 import warnings
 from functools import reduce
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -86,9 +85,6 @@ except ImportError:
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
-
-if TYPE_CHECKING:
-    from pyspark.sql import DataFrame
 
 
 # noinspection SpellCheckingInspection
