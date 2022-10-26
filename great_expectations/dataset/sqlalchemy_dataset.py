@@ -429,6 +429,7 @@ class MetaSqlAlchemyDataset(Dataset):
             *args,
             **kwargs,
         ):
+            """Inner method of decorator."""
 
             if self.batch_kwargs.get("use_quoted_name"):
                 column_A = quoted_name(column_A, quote=True)
@@ -2334,6 +2335,17 @@ WHERE
         catch_exceptions=None,
         meta=None,
     ):
+        """Expect that column pair values are in set.
+
+         Expect that column_A, column_B matches one of the value pairs
+         in the set of `value_pairs_set`.
+         E.g. if value_pairs_set = {[1,1], [1,2]} and the data is:
+         column_A  column_B
+         1         1
+         1         2
+         2         1
+         Then the first two rows would pass and the third row would fail.
+         """
         if value_pairs_set is None:
             # vacuously true
             return True
