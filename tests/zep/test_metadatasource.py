@@ -3,12 +3,9 @@ from typing import MutableMapping
 
 import pytest
 
+from great_expectations.zep.context import _SourceFactories, get_context
 from great_expectations.zep.interfaces import DataAsset, Datasource
-from great_expectations.zep.metadatasource import (
-    MetaDatasource,
-    _SourceFactories,
-    get_context,
-)
+from great_expectations.zep.metadatasource import MetaDatasource
 
 param = pytest.param
 

@@ -2,8 +2,9 @@ import logging
 from typing import Dict, List
 
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.zep.context import get_context
 from great_expectations.zep.interfaces import DataAsset
-from great_expectations.zep.metadatasource import MetaDatasource, get_context
+from great_expectations.zep.metadatasource import MetaDatasource
 
 if __name__ == "__main__":
     # don't setup the logger unless being run as a script
@@ -87,3 +88,8 @@ def type_lookup():
 
     pd_ds_assets_from_names = [sources.type_lookup[name] for name in pd_ds_asset_names]
     print(f"\n{pd_ds_asset_names} -> {pd_ds_assets_from_names}")
+
+
+if __name__ == "__main__":
+    round_trip()
+    type_lookup()
