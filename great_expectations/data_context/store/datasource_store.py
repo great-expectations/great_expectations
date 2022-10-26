@@ -125,17 +125,6 @@ class DatasourceStore(Store):
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
         return datasource_config
 
-    def delete_by_name(self, datasource_name: str) -> None:
-        """Deletes a DatasourceConfig persisted in the store by it's given name.
-
-        Args:
-            datasource_name: The name of the Datasource to retrieve.
-        """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
-        self.remove_key(datasource_key)
-
     def delete(self, datasource_config: DatasourceConfig) -> None:
         """Deletes a DatasourceConfig persisted in the store using its config.
 
