@@ -17,7 +17,7 @@ class DataSampler(abc.ABC):
         Returns:
             sampler method.
         """
-        sampler_method_name: str = self._get_sampler_method_name(sampler_method_name)
+        sampler_method_name = self._get_sampler_method_name(sampler_method_name)
 
         return getattr(self, sampler_method_name)
 
