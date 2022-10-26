@@ -13,8 +13,8 @@ Usage:
 # Once tested, the boolean flag is to be flipped
 migrator = gx.CloudMigrator.migrate(context=context, test_migrate=True)
 
-# If any validations failed during the `migrate` call
-migrator.retry_unsuccessful_validations()
+# If the migrate process failed while processing validation results: (Optional)
+migrator.retry_migrate_validation_results()
 ```
 """
 from __future__ import annotations
@@ -147,7 +147,7 @@ class CloudMigrator:
                 "Migration failed. Please check the error message for more details."
             ) from e
 
-    def retry_unsuccessful_validations(self) -> None:
+    def retry_migrate_validation_results(self) -> None:
         if not self._unsuccessful_validations:
             print("No unsuccessful validations found!")
             return
@@ -391,7 +391,7 @@ class CloudMigrator:
         print(
             "\nTo retry uploading these validation results, you can use the following "
             "code snippet:\n"
-            "  `migrator.retry_unsuccessful_validations()`"
+            "  `migrator.retry_migrate_validation_results()`"
         )
 
     def _print_migration_introduction_message(self) -> None:
