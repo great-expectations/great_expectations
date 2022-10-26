@@ -2007,8 +2007,11 @@ class AbstractDataContext(ABC):
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
-                    res = dict(yaml.load(config_variables_file.read()))
-                    return res or {}
+                    contents = config_variables_file.read()
+
+                variables = yaml.load(contents) or {}
+                return dict(variables)
+
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
