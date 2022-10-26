@@ -92,12 +92,16 @@ class TestMetaDatasource:
 
 def test_minimal_ds_to_asset_flow(context_sources_clean):
     # 1. Define Datasource & Assets
+
+    class RedAsset(DataAsset):
+        pass
+
     class BlueAsset(DataAsset):
         pass
 
-    class RedDatasource(metaclass=MetaDatasource):
+    class PurpleDatasource(metaclass=MetaDatasource):
         assets: MutableMapping[str, DataAsset]
-        asset_types = [BlueAsset]
+        asset_types = [RedAsset, BlueAsset]
 
         def __init__(self, name: str) -> None:
             self.name = name
@@ -110,14 +114,14 @@ def test_minimal_ds_to_asset_flow(context_sources_clean):
     context = get_context()
 
     # 3. Add a datasource
-    red_ds: Datasource = context.sources.add_red("my_ds_name")
+    purple_ds: Datasource = context.sources.add_purple("my_ds_name")
 
     # 4. Add a DataAsset
-    blue_asset: DataAsset = red_ds.add_blue_asset("my_asset_name")
-    assert isinstance(blue_asset, BlueAsset)
+    red_asset: DataAsset = purple_ds.add_red_asset("my_asset_name")
+    assert isinstance(red_asset, RedAsset)
 
     # 5. Get an asset by name
-    assert blue_asset is red_ds.get_asset("my_asset_name")
+    assert red_asset is purple_ds.get_asset("my_asset_name")
 
 
 if __name__ == "__main__":

@@ -137,7 +137,8 @@ class MetaDatasource(type):
         asset_types: List[type] = cls_dict.get("asset_types")
         LOGGER.info(f"1b. Extracting Asset details - {asset_types}")
         if asset_types:
-            meta_cls._inject_asset_methods(cls_dict, asset_types)
+            for t in asset_types:
+                meta_cls._inject_asset_method(cls_dict, t)
 
             # TODO: raise a TypeError here instead
             assert all(
@@ -165,38 +166,30 @@ class MetaDatasource(type):
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
 
     @classmethod
-    def _inject_asset_methods(
+    def _inject_asset_method(
         cls: Type[MetaDatasource],
         ds_cls_dict: Dict[str, Callable],
-        asset_types: List[Type[DataAsset]],
+        asset_type: Type[DataAsset],
     ) -> None:
-        LOGGER.info(f"1c. Injecting `add_<ASSET_TYPE>` methods for {asset_types}")
+        LOGGER.info(f"1c. Injecting `add_<ASSET_TYPE>` method for {asset_type}")
+        method_name = f"add_{_get_simplified_name_from_type(asset_type)}"
 
-        type_method_pairs: Dict[Type[DataAsset], str] = {
-            t: f"add_{_get_simplified_name_from_type(t)}" for t in asset_types
-        }
+        method_already_defined = ds_cls_dict.get(method_name)
+        if method_already_defined:
+            LOGGER.info(
+                f"  {asset_type.__name__} method `{method_name}()` already defined"
+            )
+        attr_annotations = asset_type.__dict__.get("__annotations__", "")
 
-        # TODO: only inject 1 method per call to deal with issue of closures in a loop
-        for asset_type, method_name in type_method_pairs.items():
+        # TODO: update signature with `attr_annotations`
+        def _add_asset(self: Datasource, name: str, *args, **kwargs):
+            LOGGER.info(f"6. Creating `{asset_type.__name__}` '{name}' ...")
+            data_asset = asset_type(name, *args, **kwargs)
+            self.assets[name] = data_asset
+            return data_asset
 
-            method_already_defined = ds_cls_dict.get(method_name)
-            if method_already_defined:
-                LOGGER.info(
-                    f"  {asset_type.__name__} method `{method_name}()` already defined"
-                )
-                continue
-
-            attr_annotations = asset_type.__dict__.get("__annotations__", "")
-
-            # TODO: update signature with `attr_annotations`
-            def _add_asset(self: Datasource, name: str, *args, **kwargs):
-                LOGGER.info(f"6. Creating `{asset_type.__name__}` '{name}' ...")
-                data_asset = asset_type(name, *args, **kwargs)
-                self.assets[name] = data_asset
-                return data_asset
-
-            ds_cls_dict[method_name] = _add_asset
-            LOGGER.info(f"  {method_name}({attr_annotations}) - injected")
+        ds_cls_dict[method_name] = _add_asset
+        LOGGER.info(f"  {method_name}({attr_annotations}) - injected")
 
 
 # TODO: move this
