@@ -205,10 +205,6 @@ class AbstractDataContext(ABC):
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
 
-        self._yaml_config_validator = _YamlConfigValidator(
-            data_context=self,
-        )
-
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
@@ -3135,7 +3131,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             a json object containing metadata from the component's self_check method.
             The returned object is determined by return_mode.
         """
-        return self._yaml_config_validator.test_yaml_config(
+        yaml_config_validator = _YamlConfigValidator(
+            data_context=self,
+        )
+        return yaml_config_validator.test_yaml_config(
             yaml_config=yaml_config,
             name=name,
             class_name=class_name,
