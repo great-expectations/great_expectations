@@ -13,13 +13,13 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationConfiguration,
+    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.util import get_dialect_regex_expression
-from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
