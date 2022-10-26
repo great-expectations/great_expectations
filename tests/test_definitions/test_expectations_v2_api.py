@@ -235,6 +235,14 @@ def pytest_generate_tests(metafunc):
                                     )
                                 )
                                 or (
+                                    "mssql_v2_api" in suppress_test_for
+                                    and mssqlDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and isinstance(
+                                        data_asset.engine.dialect, mssqlDialect
+                                    )
+                                )
+                                or (
                                     "bigquery" in suppress_test_for
                                     and BigQueryDialect is not None
                                     and isinstance(data_asset, SqlAlchemyDataset)
