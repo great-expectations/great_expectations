@@ -44,7 +44,7 @@ We provide an in-depth guide to using the CLI (and what flags are available to y
 
 As with creating Expectations interactively, you will start with your Data Context.  However, in this case you will be working in a Python environment, so you will need to load or create your Data Context as an instantiated object.  Next, you will create a Batch Request to specify the data you would like to <TechnicalTag tag="profiling" text="Profile" /> with your Data Assistant.  Once you have a <TechnicalTag tag="batch_request" text="Batch Request" /> configured you will use it as the input for the run method of your Data Assistant, which can be accessed from your Data Context object.  Once the Data Assistant has run, you will be able to review the results as well as save the generated Expectations to an empty Expectation Suite.
 
-The Data Assistant we recommend using for new data is the Onboarding Data Assistnat.  We provide an in-depth guide to this in our documentation on [how to create an Expectation Suite with the Onboarding Data Assistant](./data_assistnats/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
+The Data Assistant we recommend using for new data is the Onboarding Data Assistant.  We provide an in-depth guide to this in our documentation on [how to create an Expectation Suite with the Onboarding Data Assistant](./data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
 
 ### Testing your Expectation Suite
 
