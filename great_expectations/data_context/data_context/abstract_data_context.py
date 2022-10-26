@@ -1005,7 +1005,7 @@ class AbstractDataContext(ABC):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        if datasource_name is None:
+        if not datasource_name:
             raise ValueError("Datasource names must be a datasource name")
 
         datasource = self.get_datasource(datasource_name=datasource_name)
@@ -1014,7 +1014,8 @@ class AbstractDataContext(ABC):
             raise ValueError(f"Datasource {datasource_name} not found")
 
         if save_changes:
-            self._datasource_store.delete_by_name(datasource_name)  # type: ignore[attr-defined]
+            datasource_config = datasourceConfigSchema.load(datasource.config)
+            self._datasource_store.delete(datasource_config)  # type: ignore[attr-defined]
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 

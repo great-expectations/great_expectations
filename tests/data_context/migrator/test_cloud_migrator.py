@@ -445,7 +445,7 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
         "If you continue to use your existing Data Context your configurations could become out of sync.",
         "Please note that there were 1 validation result(s) that were not successfully migrated",
         "To retry uploading these validation results, you can use the following code snippet:",
-        "migrator.retry_unsuccessful_validations()",
+        "migrator.retry_migrate_validation_results()",
     ]
 
     assert_stdout_is_accurate_and_properly_ordered(
