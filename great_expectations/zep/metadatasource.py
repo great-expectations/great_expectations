@@ -5,21 +5,17 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import Callable, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type, Union
 
-from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.util import camel_to_snake
 from great_expectations.zep.bi_directional_dict import BiDict
-from great_expectations.zep.interfaces import DataAsset, Datasource
 
-SourceFactoryFn = Callable[..., Datasource]
+if TYPE_CHECKING:
+    from great_expectations.zep.interfaces import DataAsset, Datasource
+
+SourceFactoryFn = Callable[..., "Datasource"]
 
 LOGGER = logging.getLogger(__name__)
-
-if __name__ == "__main__":
-    # don't setup the logger unless being run as a script
-    # TODO: remove this before release
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 def _remove_suffix(s: str, suffix: str) -> str:
@@ -203,51 +199,7 @@ class MetaDatasource(type):
             LOGGER.info(f"  {method_name}({attr_annotations}) - injected")
 
 
-class FileAsset(DataAsset):
-    file_path: str
-    delimiter: str
-    ...
-
-
-class MyOtherAsset(DataAsset):
-    foo: str
-    bar: List[int]
-
-
-# NOTE: Set the PandasDatasource `metaclass=MetaDatasource` in order to kick off the __new__ hook
-class PandasDatasource:
-
-    execution_engine = PandasExecutionEngine()
-    asset_types = [FileAsset, MyOtherAsset]
-    name: str
-    assets: Dict[str, DataAsset]
-
-    def __init__(self, name: str):
-        self.name = name
-        self.assets = {}
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}(name='{self.name}')"
-
-    def get_batch_list_from_batch_request(self, batch_request):
-        pass
-
-    def get_asset(self, asset_name: str) -> DataAsset:
-        return self.assets[asset_name]
-
-
-# class TableAsset:
-#     pass
-
-
-# class PostgresDatasource(metaclass=MetaDatasource):
-#     asset_types = [TableAsset]
-
-#     def __init__(self, name: str, connection_str: str):
-#         self.name = name
-#         self.connection_str = connection_str
-
-
+# TODO: move this
 class DataContext:
     """
     NOTE: this is just a scaffold for exploring and iterating on our ZEP prototype
@@ -279,32 +231,3 @@ def get_context() -> DataContext:
     LOGGER.info("3. Getting context")
     context = DataContext.get_context()
     return context
-
-
-if __name__ == "__main__":
-    context = get_context()
-    ds = context.sources.add_pandas("taxi")
-    asset1 = ds.add_my_other_asset("bob")
-    asset2 = ds.get_asset("bob")
-    assert asset1 is asset2
-    print("Successful Asset Roundtrip")
-
-    # context.sources.add_postgres("taxi2", connection_str="postgres://...")
-
-    # # Demo the use of the `type_lookup` `BiDict`
-    # # Alternatively use a Graph/Tree-like structure
-    # sources = context.sources
-    # print("\n  Datasource & DataAsset lookups ...")
-
-    # s = "pandas"
-    # pd_ds: PandasDatasource = sources.type_lookup[s]
-    # print(f"\n'{s}' -> {pd_ds}")
-
-    # pd_ds_assets = pd_ds.asset_types
-    # print(f"\n{pd_ds} -> {pd_ds_assets}")
-
-    # pd_ds_asset_names = [sources.type_lookup[t] for t in pd_ds_assets]
-    # print(f"\n{pd_ds_assets} -> {pd_ds_asset_names}")
-
-    # pd_ds_assets_from_names = [sources.type_lookup[name] for name in pd_ds_asset_names]
-    # print(f"\n{pd_ds_asset_names} -> {pd_ds_assets_from_names}")
