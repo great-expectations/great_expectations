@@ -1,3 +1,5 @@
+import getopt
+import sys
 from typing import Any, Dict, Iterable, Optional, Set, Tuple, Union, cast
 from unittest import mock
 
@@ -391,3 +393,28 @@ def test_progress_bar_config(
         graph.resolve_validation_graph(**call_args)
         assert mock_tqdm.called is True
         assert mock_tqdm.call_args[1]["disable"] is are_progress_bars_disabled
+
+
+if __name__ == "__main__":
+    argv: list = sys.argv[1:]
+
+    if argv and ((len(argv) > 1) or (argv[0] not in ["unit", "integration"])):
+        raise ValueError(
+            f'Value of test type can be only "unit" or "integration" ({argv} was entered.)'
+        )
+
+    test_type: str = "integration" if argv and argv[0] == "integration" else "unit"
+    pytest.main(
+        [
+            __file__,
+            f"-m {test_type}",
+            "--durations=5",
+            "--cloud",
+            "--spark",
+            "--cov=great_expectations/validator",
+            "--cov-report=term",
+            "--cov-report=html",
+            "-svv",
+            "--log-level=DEBUG",
+        ]
+    )
