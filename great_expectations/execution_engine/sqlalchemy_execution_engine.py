@@ -201,8 +201,8 @@ except ImportError:
     teradatatypes = None
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine as SaEngine
     import sqlalchemy as sa
+    from sqlalchemy.engine import Engine as SaEngine
 
 
 def _get_dialect_type_module(dialect):
@@ -252,7 +252,7 @@ def _get_dialect_type_module(dialect):
 
 class SqlAlchemyExecutionEngine(ExecutionEngine):
     # noinspection PyUnusedLocal
-    def __init__(
+    def __init__(  # noqa: C901 - 17
         self,
         name: Optional[str] = None,
         credentials: Optional[dict] = None,
@@ -541,7 +541,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             create_engine_kwargs,
         )
 
-    def get_domain_records(
+    def get_domain_records(  # noqa: C901 - 24
         self,
         domain_kwargs: Dict,
     ) -> Selectable:
@@ -678,8 +678,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.not_(
                             sa.and_(
-                                sa.column(column_A_name) == None,
-                                sa.column(column_B_name) == None,
+                                sa.column(column_A_name) is None,
+                                sa.column(column_B_name) is None,
                             )
                         )
                     )
@@ -691,8 +691,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.not_(
                             sa.or_(
-                                sa.column(column_A_name) == None,
-                                sa.column(column_B_name) == None,
+                                sa.column(column_A_name) is None,
+                                sa.column(column_B_name) is None,
                             )
                         )
                     )
@@ -736,7 +736,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.not_(
                             sa.and_(
                                 *(
-                                    sa.column(column_name) == None
+                                    sa.column(column_name) is None
                                     for column_name in column_list
                                 )
                             )
@@ -751,7 +751,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.not_(
                             sa.or_(
                                 *(
-                                    sa.column(column_name) == None
+                                    sa.column(column_name) is None
                                     for column_name in column_list
                                 )
                             )
