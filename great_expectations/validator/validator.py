@@ -1107,8 +1107,8 @@ class Validator:
         )
         return validation_graph
 
+    @staticmethod
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
-        self,
         validation_graph: ValidationGraph,
         metrics: Dict[Tuple[str, str, str], Any],
         runtime_configuration: dict,

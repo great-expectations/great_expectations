@@ -754,6 +754,7 @@ def test_graph_validate_with_runtime_config(basic_datasource):
         )
     except AssertionError as e:
         result = e
+
     assert result == [
         ExpectationValidationResult(
             success=False,
@@ -789,6 +790,7 @@ def test_graph_validate_with_runtime_config(basic_datasource):
 
 @pytest.mark.integration
 def test_graph_validate_with_exception(basic_datasource):
+    # noinspection PyUnusedLocal
     def mock_error(*args, **kwargs):
         raise Exception("Mock Error")
 
