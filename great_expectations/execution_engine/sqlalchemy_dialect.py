@@ -25,7 +25,7 @@ class GESqlDialect(Enum):
     VERTICA = "vertica"
     OTHER = "other"
 
-    def __eq__(self, other: Union[str, bytes, GESqlDialect]):
+    def __eq__(self, other: Union[str, bytes, GESqlDialect]):  # type: ignore[override] # supertype uses `object`
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         # Comparison against byte string, e.g. `b"hive"` should be treated as unicode
@@ -37,7 +37,7 @@ class GESqlDialect(Enum):
         return hash(self.value)
 
     @classmethod
-    def _missing_(cls, value: Any) -> None:
+    def _missing_(cls, value: Any) -> Any:
         try:
             # Sometimes `value` is a byte string, e.g. `b"hive"`, it should be converted
             return cls(value.decode())
