@@ -36,7 +36,9 @@ try:
 except ImportError:
     pass
 
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.expectation import (
+    render_evaluation_parameter_string,
+)
 
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
