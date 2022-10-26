@@ -412,8 +412,8 @@ class DataContext(BaseDataContext):
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(  # type: ignore[arg-type]
-            name=name, save_changes=True, **kwargs
+        ] = super().add_datasource(
+            name=name, save_changes=True, **kwargs  # type: ignore[arg-type]
         )
         return new_datasource
 
