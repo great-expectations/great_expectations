@@ -428,9 +428,9 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check if all statment renderers are defined"""
         passed = False
-        # For now, don't include the "question" and "descriptive" types since they are so
-        # sparsely implemented
-        # all_renderer_types = {"diagnostic", "prescriptive", "question", "descriptive"}
+        # For now, don't include the "question", "descriptive", or "answer"
+        # types since they are so sparsely implemented
+        # all_renderer_types = {"diagnostic", "prescriptive", "question", "descriptive", "answer"}
         all_renderer_types = {"diagnostic", "prescriptive"}
         renderer_names = [
             name
@@ -438,7 +438,7 @@ class ExpectationDiagnostics(SerializableDictDot):
             if name.endswith("renderer") and name.startswith("_")
         ]
         renderer_types = {name.split("_")[1] for name in renderer_names}
-        if renderer_types - {"question", "descriptive"} == all_renderer_types:
+        if all_renderer_types & renderer_types == all_renderer_types:
             passed = True
         return ExpectationDiagnosticCheckMessage(
             # message="Has all four statement Renderers: question, descriptive, prescriptive, diagnostic",
