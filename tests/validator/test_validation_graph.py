@@ -1,4 +1,3 @@
-import getopt
 import sys
 from typing import Any, Dict, Iterable, Optional, Set, Tuple, Union, cast
 from unittest import mock
