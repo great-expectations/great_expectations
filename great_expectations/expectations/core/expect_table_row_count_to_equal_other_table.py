@@ -55,6 +55,8 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     metric_dependencies = ("table.row_count",)
@@ -183,6 +185,11 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         ] = table_row_count_metric_config_other
 
         return dependencies
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        super().validate_configuration(configuration)
 
     def _validate(
         self,
