@@ -37,7 +37,7 @@ class GESqlDialect(Enum):
         return hash(self.value)
 
     @classmethod
-    def _missing_(cls, value: Any) -> GESqlDialect:
+    def _missing_(cls, value: Any) -> Any:
         try:
             # Sometimes `value` is a byte string, e.g. `b"hive"`, it should be converted
             return cls(value.decode())
