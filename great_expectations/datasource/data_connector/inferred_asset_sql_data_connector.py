@@ -196,7 +196,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         selected_schema_name = schema_name
 
         tables: List[Dict[str, str]] = []
-        for schema_name in inspector.get_schema_names():
+        schema_names: List[str] = inspector.get_schema_names()
+        for schema_name in schema_names:
             if (
                 ignore_information_schemas_and_system_tables
                 and schema_name in information_schemas
