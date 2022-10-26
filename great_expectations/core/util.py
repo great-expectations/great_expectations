@@ -260,7 +260,7 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
                 index_name: convert_to_json_serializable(idx),
                 value_name: convert_to_json_serializable(val),
             }
-            for idx, val in data.iteritems()
+            for idx, val in data.items()
         ]
 
     if isinstance(data, pd.DataFrame):
@@ -372,7 +372,7 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
                 index_name: ensure_json_serializable(idx),
                 value_name: ensure_json_serializable(val),
             }
-            for idx, val in data.iteritems()
+            for idx, val in data.items()
         ]
         return
 
