@@ -258,6 +258,7 @@ except (ImportError, KeyError):
     mysqltypes = None
     mysqlDialect = None
     MYSQL_TYPES = {}
+
 try:
     # SQLAlchemy does not export the "INT" type for the MS SQL Server dialect; however "INT" is supported by the engine.
     # Since SQLAlchemy exports the "INTEGER" type for the MS SQL Server dialect, alias "INT" to the "INTEGER" type.
