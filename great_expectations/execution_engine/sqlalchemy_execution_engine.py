@@ -678,8 +678,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.not_(
                             sa.and_(
-                                sa.column(column_A_name) is None,
-                                sa.column(column_B_name) is None,
+                                sa.column(column_A_name) == None,  # noqa: E711
+                                sa.column(column_B_name) == None,  # noqa: E711
                             )
                         )
                     )
@@ -691,8 +691,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.not_(
                             sa.or_(
-                                sa.column(column_A_name) is None,
-                                sa.column(column_B_name) is None,
+                                sa.column(column_A_name) == None,  # noqa: E711
+                                sa.column(column_B_name) == None,  # noqa: E711
                             )
                         )
                     )
@@ -736,7 +736,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.not_(
                             sa.and_(
                                 *(
-                                    sa.column(column_name) is None
+                                    sa.column(column_name) == None  # noqa: E711
                                     for column_name in column_list
                                 )
                             )
@@ -751,7 +751,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.not_(
                             sa.or_(
                                 *(
-                                    sa.column(column_name) is None
+                                    sa.column(column_name) == None  # noqa: E711
                                     for column_name in column_list
                                 )
                             )
