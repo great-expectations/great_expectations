@@ -17,6 +17,7 @@ from great_expectations.execution_engine.execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationValidationResult,
+    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -24,7 +25,6 @@ from great_expectations.expectations.metrics import (
     metric_partial,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     CollapseContent,

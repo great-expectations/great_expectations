@@ -15,9 +15,11 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
-from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    render_evaluation_parameter_string,
+)
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent

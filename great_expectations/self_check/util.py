@@ -1736,7 +1736,9 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
         return getter in []
 
 
-def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
+def candidate_test_is_on_temporary_notimplemented_list_v2_api(
+    context, expectation_type
+):
     if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v2_sql = [
             "expect_column_values_to_be_increasing",
@@ -1805,8 +1807,10 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
     return False
 
 
-def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    candidate_test_is_on_temporary_notimplemented_list_cfe_trino = [
+def candidate_test_is_on_temporary_notimplemented_list_v3_api(
+    context, expectation_type
+):
+    candidate_test_is_on_temporary_notimplemented_list_v3_api_trino = [
         "expect_column_distinct_values_to_contain_set",
         "expect_column_max_to_be_between",
         "expect_column_mean_to_be_between",
@@ -1842,7 +1846,7 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
     ]
-    candidate_test_is_on_temporary_notimplemented_list_cfe_other_sql = [
+    candidate_test_is_on_temporary_notimplemented_list_v3_api_other_sql = [
         "expect_column_values_to_be_increasing",
         "expect_column_values_to_be_decreasing",
         "expect_column_values_to_match_strftime_format",
@@ -1870,8 +1874,10 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
     ]
     if context in ["trino"]:
         return expectation_type in set(
-            candidate_test_is_on_temporary_notimplemented_list_cfe_trino
-        ).union(set(candidate_test_is_on_temporary_notimplemented_list_cfe_other_sql))
+            candidate_test_is_on_temporary_notimplemented_list_v3_api_trino
+        ).union(
+            set(candidate_test_is_on_temporary_notimplemented_list_v3_api_other_sql)
+        )
     if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v3_sql = [
             "expect_column_values_to_be_increasing",
@@ -2617,7 +2623,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test(data_asset, expectation_type, test) -> None:
+def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -2678,7 +2684,7 @@ def evaluate_json_test(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=True):
+def evaluate_json_test_v3_api(validator, expectation_type, test, raise_exception=True):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
