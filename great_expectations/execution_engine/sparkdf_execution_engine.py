@@ -1,10 +1,23 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import logging
 import uuid
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 from dateutil.parser import parse
 
@@ -73,6 +86,9 @@ except ImportError:
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
+
+if TYPE_CHECKING:
+    from pyspark.sql import DataFrame
 
 
 # noinspection SpellCheckingInspection
@@ -306,7 +322,7 @@ illegal.  Please check your config."""
             # this can happen if we have not converted schema into json at Datasource-config level
             elif isinstance(schema, str):
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""
+                    """
                                 Spark schema was not properly serialized.
                                 Please run the .jsonValue() method on the schema object before loading into GE.
                                 schema: your_schema.jsonValue()
@@ -432,7 +448,7 @@ illegal.  Please check your config."""
                 f"Unable to find reader_method {reader_method} in spark.",
             )
 
-    def get_domain_records(
+    def get_domain_records(  # noqa: C901 - 18
         self,
         domain_kwargs: dict,
     ) -> DataFrame:
