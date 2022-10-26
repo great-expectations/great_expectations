@@ -145,13 +145,13 @@ class MetaDatasource(type):
                 [isinstance(t, type) for t in asset_types]
             ), f"Datasource `asset_types` must be a iterable of classes/types got {asset_types}"
 
+        cls = type(cls_name, bases, cls_dict)
+        LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
+
         def _datasource_factory(*args, **kwargs) -> Datasource:
             # TODO: update signature to match Datasource __init__ (ex update __signature__)
             LOGGER.info(f"5. Adding `{args[0] if args else ''}` {cls_name}")
             return cls(*args, **kwargs)
-
-        cls = type(cls_name, bases, cls_dict)
-        LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
 
         # TODO: TypeError & expose the missing details
         # assert isinstance(
