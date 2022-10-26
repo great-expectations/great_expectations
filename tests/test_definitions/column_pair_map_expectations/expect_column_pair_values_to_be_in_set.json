@@ -25,12 +25,21 @@
         "z": "IntegerType",
         "a": "IntegerType",
         "b": "IntegerType"
+      },
+      "mysql": {
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "TEXT",
+        "z": "INTEGER",
+        "a": "INTEGER",
+        "b": "INTEGER"
       }
     },
     "tests" : [{
       "title": "basic_positive_test_without_nulls",
       "include_in_gallery": true,
       "exact_match_out" : false,
+      "suppress_test_for": ["mssql_v2_api"],
       "in": {
         "column_A": "x",
         "column_B": "x",
@@ -44,6 +53,7 @@
     },{
       "title": "positive_test_with_nulls_and_ignore_row_if_either_value_is_missing",
       "exact_match_out" : false,
+      "suppress_test_for": ["mssql_v2_api"],
       "in": {
         "column_A": "x",
         "column_B": "z",
@@ -59,7 +69,7 @@
       "title": "negative_test_with_nulls",
       "include_in_gallery": true,
       "exact_match_out" : false,
-      "suppress_test_for": ["trino"],
+      "suppress_test_for": ["trino", "mssql_v2_api"],
       "in": {
         "column_A": "x",
         "column_B": "z",
@@ -73,6 +83,7 @@
     },{
       "title": "another_positive_test_with_nulls",
       "exact_match_out" : false,
+      "suppress_test_for": ["mssql_v2_api"],
       "in": {
         "column_A": "a",
         "column_B": "b",
