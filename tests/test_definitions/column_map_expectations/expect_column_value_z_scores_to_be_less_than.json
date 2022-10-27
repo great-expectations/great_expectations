@@ -86,6 +86,20 @@
         }
       },
       {
+        "title": "basic_test_zero",
+        "suppress_test_for": ["pandas"],
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "in":{
+          "column": "zero",
+          "threshold": 1,
+          "double_sided": true
+        },
+        "out":{
+          "success": true
+           }
+      },
+      {
         "title": "basic_test_zero_pandas",
         "only_for": ["pandas"],
         "include_in_gallery": true,
