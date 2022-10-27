@@ -105,7 +105,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
             )
             send_usage_message(
                 data_context=context,
-                event=UsageStatsEvents.CLI_INIT_CREATE.value,
+                event=UsageStatsEvents.CLI_INIT_CREATE,
                 success=True,
             )
         except DataContextError as e:
