@@ -123,7 +123,7 @@ class PandasDataSplitter(DataSplitter):
         """
         self._validate_date_parts(date_parts)
 
-        date_parts: List[DatePart] = self._convert_date_parts(date_parts)
+        date_parts = self._convert_date_parts(date_parts)
 
         column_batch_identifiers: dict = batch_identifiers[column_name]
 
