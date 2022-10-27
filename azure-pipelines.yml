@@ -187,6 +187,12 @@ stages:
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
+          - task: DownloadSecureFile@1
+            name: aws_authkey
+            displayName: 'Download AWS Credentials'
+            inputs:
+              secureFile: 'aws_config_sandbox'
+              retryCount: '2'
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               mkdir coverage
@@ -205,6 +211,8 @@ stages:
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest $(python.version)'
+            env:
+              - AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -284,6 +292,12 @@ stages:
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
+          - task: DownloadSecureFile@1
+            name: aws_authkey
+            displayName: 'Download AWS Credentials'
+            inputs:
+              secureFile: 'aws_config_sandbox'
+              retryCount: '2'
           - bash: |
               printf "Waiting for MySQL database to accept connections: "
               until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
@@ -305,6 +319,8 @@ stages:
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest MySQL'
+            env:
+              - AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
 
       - job: test_trino
         dependsOn: [make_suffix, build_push]
@@ -323,6 +339,12 @@ stages:
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
+          - task: DownloadSecureFile@1
+            name: aws_authkey
+            displayName: 'Download AWS Credentials'
+            inputs:
+              secureFile: 'aws_config_sandbox'
+              retryCount: '2'
           - bash: |
               printf 'Waiting for Trino database to accept connections'
               sleep 30
@@ -335,6 +357,8 @@ stages:
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest Trino'
+            env:
+              - AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
 
       - job: test_cli
         dependsOn: [make_suffix, build_push]
