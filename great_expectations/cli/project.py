@@ -39,7 +39,7 @@ def project_check_config(ctx: click.Context) -> None:
 
     send_usage_message(
         data_context=context,
-        event=UsageStatsEvents.CLI_PROJECT_CHECK_CONFIG.value,
+        event=UsageStatsEvents.CLI_PROJECT_CHECK_CONFIG,
         success=True,
     )
 
