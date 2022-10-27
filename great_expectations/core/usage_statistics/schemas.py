@@ -1136,7 +1136,7 @@ anonymized_usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {"enum": [UsageStatsEvents.CLOUD_MIGRATE.value]},
+                "event": {"enum": [UsageStatsEvents.CLOUD_MIGRATE]},
                 "event_payload": {"$ref": "#/definitions/cloud_migrate"},
             },
         },
