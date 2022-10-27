@@ -336,14 +336,18 @@ def test_datasource_store_retrieve_by_name(
 
 
 @pytest.mark.unit
-def test_datasource_store_delete_by_name(
-    fake_datasource_name,
+def test_datasource_store_delete(
+    datasource_config: DatasourceConfig,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
-    assert len(datasource_store_with_single_datasource.list_keys()) == 1
+    initial_keys = datasource_store_with_single_datasource.list_keys()
+    assert len(initial_keys) == 1
 
-    datasource_store_with_single_datasource.delete_by_name(
-        datasource_name=fake_datasource_name
+    datasource_name = initial_keys[0][0]
+    datasource_config.name = datasource_name
+
+    datasource_store_with_single_datasource.delete(
+        datasource_config=datasource_config,
     )
 
     assert len(datasource_store_with_single_datasource.list_keys()) == 0

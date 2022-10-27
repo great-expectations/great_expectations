@@ -148,9 +148,7 @@ class RenderedAtomicValue(DictDot):
         self.table: Optional[List[List[RenderedAtomicValue]]] = table
 
         # GraphType
-        self.graph: Optional[RenderedAtomicValueGraph] = RenderedAtomicValueGraph(
-            graph=graph
-        )
+        self.graph = RenderedAtomicValueGraph(graph=graph)
 
     def __repr__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
@@ -225,7 +223,11 @@ class RenderedAtomicValueSchema(Schema):
         their values are None."""
         data = deepcopy(data)
         for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
-            if key == "graph" and key in data and data[key]["graph"] is None:
+            if (
+                key == "graph"
+                and key in data
+                and data.get(key, {}).get("graph") is None
+            ):
                 data.pop(key)
             elif key in data and data[key] is None:
                 data.pop(key)
