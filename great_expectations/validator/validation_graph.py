@@ -42,17 +42,17 @@ class MetricEdge:
 class ValidationGraph:
     def __init__(
         self,
+        execution_engine: ExecutionEngine,
         edges: Optional[List[MetricEdge]] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
     ) -> None:
+        self._execution_engine = execution_engine
+
         if edges:
             self._edges = edges
         else:
             self._edges = []
 
         self._edge_ids = {edge.id for edge in self._edges}
-
-        self._execution_engine = execution_engine
 
     @property
     def edges(self):

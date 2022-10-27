@@ -1056,8 +1056,8 @@ class Validator:
             try:
                 expectation_validation_graph: ExpectationValidationGraph = (
                     ExpectationValidationGraph(
-                        configuration=evaluated_config,
                         execution_engine=self._execution_engine,
+                        configuration=evaluated_config,
                     )
                 )
                 for metric_configuration in validation_dependencies.values():
@@ -1103,7 +1103,7 @@ class Validator:
             )
         )
         validation_graph = ValidationGraph(
-            edges=edges, execution_engine=self._execution_engine
+            execution_engine=self._execution_engine, edges=edges
         )
         return validation_graph
 

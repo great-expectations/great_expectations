@@ -30,8 +30,12 @@ def metric_edge(
 
 @pytest.fixture
 def validation_graph_with_single_edge(metric_edge: MetricEdge) -> ValidationGraph:
-    edges = [metric_edge]
-    return ValidationGraph(edges=edges)
+    class DummyExecutionEngine:
+        pass
+
+    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+
+    return ValidationGraph(execution_engine=execution_engine, edges=[metric_edge])
 
 
 @pytest.fixture
@@ -100,7 +104,12 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
 
 @pytest.mark.unit
 def test_ValidationGraph_init_no_input_edges() -> None:
-    graph = ValidationGraph()
+    class DummyExecutionEngine:
+        pass
+
+    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+
+    graph = ValidationGraph(execution_engine=execution_engine)
 
     assert graph.edges == []
     assert graph.edge_ids == set()
@@ -110,8 +119,13 @@ def test_ValidationGraph_init_no_input_edges() -> None:
 def test_ValidationGraph_init_with_input_edges(
     metric_edge: MetricEdge,
 ) -> None:
+    class DummyExecutionEngine:
+        pass
+
+    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+
     edges = [metric_edge]
-    graph = ValidationGraph(edges=edges)
+    graph = ValidationGraph(execution_engine=execution_engine, edges=edges)
 
     assert graph.edges == edges
     assert graph.edge_ids == {e.id for e in edges}
@@ -119,7 +133,12 @@ def test_ValidationGraph_init_with_input_edges(
 
 @pytest.mark.unit
 def test_ValidationGraph_add(metric_edge: MetricEdge) -> None:
-    graph = ValidationGraph()
+    class DummyExecutionEngine:
+        pass
+
+    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+
+    graph = ValidationGraph(execution_engine=execution_engine)
 
     assert graph.edges == []
     assert graph.edge_ids == set()
@@ -356,8 +375,8 @@ def test_progress_bar_config(
     class DummyExecutionEngine:
         pass
 
-    dummy_metric_configuration = cast(MetricConfiguration, DummyMetricConfiguration)
-    dummy_execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+    metric_configuration = cast(MetricConfiguration, DummyMetricConfiguration)
+    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
 
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
     with mock.patch(
@@ -370,9 +389,9 @@ def test_progress_bar_config(
         "great_expectations.validator.validation_graph.ValidationGraph.edges",
         new_callable=mock.PropertyMock,
         return_value=[
-            MetricEdge(left=dummy_metric_configuration),
-            MetricEdge(left=dummy_metric_configuration),
-            MetricEdge(left=dummy_metric_configuration),
+            MetricEdge(left=metric_configuration),
+            MetricEdge(left=metric_configuration),
+            MetricEdge(left=metric_configuration),
         ],
     ), mock.patch(
         "great_expectations.validator.validation_graph.tqdm",
@@ -388,7 +407,7 @@ def test_progress_bar_config(
                 }
             )
 
-        graph = ValidationGraph(execution_engine=dummy_execution_engine)
+        graph = ValidationGraph(execution_engine=execution_engine)
         graph.resolve_validation_graph(**call_args)
         assert mock_tqdm.called is True
         assert mock_tqdm.call_args[1]["disable"] is are_progress_bars_disabled
