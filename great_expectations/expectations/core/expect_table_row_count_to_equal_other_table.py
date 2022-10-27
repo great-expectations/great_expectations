@@ -3,8 +3,10 @@ from typing import Dict, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.expectation import (
+    TableExpectation,
+    render_evaluation_parameter_string,
+)
 from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -53,6 +55,8 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     metric_dependencies = ("table.row_count",)
@@ -181,6 +185,11 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         ] = table_row_count_metric_config_other
 
         return dependencies
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        super().validate_configuration(configuration)
 
     def _validate(
         self,

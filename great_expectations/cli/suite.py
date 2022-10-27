@@ -447,9 +447,9 @@ def _suite_new_mode_from_prompt(
     suite_create_method: str = click.prompt(
         """
 How would you like to create your Expectation Suite?
-    1. Manually, without interacting with a sample batch of data (default)
-    2. Interactively, with a sample batch of data
-    3. Automatically, using a profiler
+    1. Manually, without interacting with a sample Batch of data (default)
+    2. Interactively, with a sample Batch of data
+    3. Automatically, using a Data Assistant
 """,
         type=click.Choice(["1", "2", "3"]),
         show_choices=False,

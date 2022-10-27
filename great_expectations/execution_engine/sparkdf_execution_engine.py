@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import logging
@@ -12,6 +14,7 @@ from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
+    GlueDataCatalogBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
@@ -287,7 +290,7 @@ illegal.  Please check your config."""
                     """
                 )
 
-        elif isinstance(batch_spec, PathBatchSpec):
+        elif isinstance(batch_spec, (PathBatchSpec, GlueDataCatalogBatchSpec)):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
             path: str = batch_spec.path
@@ -305,7 +308,7 @@ illegal.  Please check your config."""
             # this can happen if we have not converted schema into json at Datasource-config level
             elif isinstance(schema, str):
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""
+                    """
                                 Spark schema was not properly serialized.
                                 Please run the .jsonValue() method on the schema object before loading into GE.
                                 schema: your_schema.jsonValue()
@@ -350,6 +353,14 @@ illegal.  Please check your config."""
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
+        # Note this is to get a batch from tables in AWS Glue Data Catalog by its partitions
+        partitions: Optional[List[str]] = batch_spec.get("partitions")
+        if partitions:
+            batch_data = self._data_splitter.split_on_multi_column_values(
+                df=batch_data,
+                column_names=partitions,
+                batch_identifiers=batch_spec.get("batch_identifiers"),
+            )
 
         splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
         if splitter_method_name:
@@ -423,7 +434,7 @@ illegal.  Please check your config."""
                 f"Unable to find reader_method {reader_method} in spark.",
             )
 
-    def get_domain_records(
+    def get_domain_records(  # noqa: C901 - 18
         self,
         domain_kwargs: dict,
     ) -> DataFrame:
