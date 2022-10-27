@@ -206,7 +206,7 @@ class TestUsageStats:
 
         mock_send_usage_message.assert_called_once_with(
             data_context=mock.ANY,
-            event=UsageStatsEvents.CLOUD_MIGRATE.value,
+            event=UsageStatsEvents.CLOUD_MIGRATE,
             event_payload={"organization_id": ge_cloud_organization_id},
             success=True,
         )
@@ -220,7 +220,7 @@ class TestUsageStats:
 
         mock_send_usage_message.assert_called_once_with(
             data_context=mock.ANY,
-            event=UsageStatsEvents.CLOUD_MIGRATE.value,
+            event=UsageStatsEvents.CLOUD_MIGRATE,
             event_payload={"organization_id": ge_cloud_organization_id},
             success=False,
         )
