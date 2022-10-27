@@ -113,7 +113,7 @@ class SqlAlchemyBatchData(BatchData):
         try:
             dialect = GESqlDialect(dialect_name)
         except ValueError:
-            dialect: GESqlDialect = GESqlDialect.OTHER
+            dialect = GESqlDialect.OTHER
 
         self._dialect = dialect
 
@@ -202,7 +202,7 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(
+    def _create_temporary_table(  # noqa: C901 - 18
         self, temp_table_name, query, temp_table_schema_name=None
     ) -> None:
         """

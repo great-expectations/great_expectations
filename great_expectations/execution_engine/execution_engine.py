@@ -1,9 +1,22 @@
+from __future__ import annotations
+
 import copy
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -25,6 +38,9 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.expectations.metrics import MetricProvider
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +194,7 @@ class SplitDomainKwargs:
 
 
 class ExecutionEngine(ABC):
-    recognized_batch_spec_defaults = set()
+    recognized_batch_spec_defaults: Set[str] = set()
 
     def __init__(
         self,
@@ -196,7 +212,7 @@ class ExecutionEngine(ABC):
         self._caching = caching
         # NOTE: 20200918 - this is a naive cache; update.
         if self._caching:
-            self._metric_cache = {}
+            self._metric_cache: Union[Dict, NoOpDict] = {}
         else:
             self._metric_cache = NoOpDict()
 
@@ -288,7 +304,7 @@ class ExecutionEngine(ABC):
     def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
         raise NotImplementedError
 
-    def resolve_metrics(
+    def resolve_metrics(  # noqa: C901 - 16
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
         metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
@@ -313,7 +329,7 @@ class ExecutionEngine(ABC):
         metric_fn_bundle: List[BundledMetricConfiguration] = []
 
         metric_fn_type: MetricFunctionTypes
-        metric_class: "MetricProvider"  # noqa: F821
+        metric_class: MetricProvider
         metric_fn: Any
         compute_domain_kwargs: dict
         accessor_domain_kwargs: dict
@@ -327,7 +343,7 @@ class ExecutionEngine(ABC):
             for k, v in metric_to_resolve.metric_dependencies.items():
                 if v.id in metrics:
                     metric_dependencies[k] = metrics[v.id]
-                elif self._caching and v.id in self._metric_cache:
+                elif self._caching and v.id in self._metric_cache:  # type: ignore[operator] # TODO: update NoOpDict
                     metric_dependencies[k] = self._metric_cache[v.id]
                 else:
                     raise ge_exceptions.MetricError(
@@ -510,7 +526,7 @@ class ExecutionEngine(ABC):
 
     def _split_domain_kwargs(
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: Dict[str, Any],
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> SplitDomainKwargs:
@@ -567,7 +583,7 @@ class ExecutionEngine(ABC):
             )
         else:
             compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-            accessor_domain_kwargs = {}
+            accessor_domain_kwargs: Dict[str, Any] = {}
             split_domain_kwargs = SplitDomainKwargs(
                 compute_domain_kwargs, accessor_domain_kwargs
             )

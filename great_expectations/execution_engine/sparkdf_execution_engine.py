@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import logging
@@ -306,7 +308,7 @@ illegal.  Please check your config."""
             # this can happen if we have not converted schema into json at Datasource-config level
             elif isinstance(schema, str):
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""
+                    """
                                 Spark schema was not properly serialized.
                                 Please run the .jsonValue() method on the schema object before loading into GE.
                                 schema: your_schema.jsonValue()
@@ -432,7 +434,7 @@ illegal.  Please check your config."""
                 f"Unable to find reader_method {reader_method} in spark.",
             )
 
-    def get_domain_records(
+    def get_domain_records(  # noqa: C901 - 18
         self,
         domain_kwargs: dict,
     ) -> DataFrame:
