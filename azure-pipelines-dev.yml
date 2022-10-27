@@ -242,7 +242,7 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest $(pytest_opts)
+              pytest $(pytest_opts) \
                 --ignore 'tests/cli' \
                 --ignore 'tests/integration/usage_statistics' \
                 --napoleon-docstrings \
