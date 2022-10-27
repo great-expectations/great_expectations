@@ -477,7 +477,10 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install \
+                --requirement reqs/requirements-dev-test.txt \
+                --requirement reqs/requirements-dev-sqlalchemy.txt \
+                --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'

@@ -34,7 +34,7 @@ def get_extras_require():
         "all-contrib-expectations",
     )
     rx_fname_part = re.compile(r"requirements-dev-(.*).txt")
-    for fname in sorted(glob("requirements-dev-*.txt")):
+    for fname in sorted(glob("reqs/requirements-dev-*.txt")):
         key = rx_fname_part.match(fname).group(1)
         if key in ignore_keys:
             continue
