@@ -50,6 +50,8 @@ def data_source_config_with_aws_glue_catalog_data_connectors():
                     database_name: db_test
         glue_inferred_connector:
             class_name: InferredAssetAWSGlueDataCatalogDataConnector
+            boto3_options:
+                region: us-east-1
     """
     return yaml.load(config)
 
