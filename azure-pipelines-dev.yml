@@ -455,9 +455,11 @@ stages:
               # Install dependencies
               pip install pytest-cov pytest-azurepipelines
 
-              # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              # Run pytest on Trino-specific tests
+              pytest tests --trino --mark trino
+
+              # Run all Expectation tests that may contain Trino
+              pytest tests/test_dataset_implementations tests/test_definitions
 
             displayName: 'pytest'
             env:
