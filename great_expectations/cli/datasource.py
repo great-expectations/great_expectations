@@ -273,7 +273,7 @@ class BaseDatasourceNewYamlHelper:
     def send_backend_choice_usage_message(self, context: DataContext) -> None:
         send_usage_message(
             data_context=context,
-            event=UsageStatsEvents.CLI_NEW_DS_CHOICE.value,
+            event=UsageStatsEvents.CLI_NEW_DS_CHOICE,
             event_payload={
                 "type": self.datasource_type.value,
                 **self.usage_stats_payload,
