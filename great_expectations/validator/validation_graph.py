@@ -166,7 +166,7 @@ class ValidationGraph:
             computable_metrics = set()
 
             for metric in ready_metrics:
-                if metric.id in failed_metric_info and failed_metric_info[metric.id]["num_failures"] >= MAX_METRIC_COMPUTATION_RETRIES:  # type: ignore
+                if metric.id in failed_metric_info and failed_metric_info[metric.id]["num_failures"] >= MAX_METRIC_COMPUTATION_RETRIES:  # type: ignore[operator]  # Incorrect flagging of 'Unsupported operand types for <= ("int" and "MetricConfiguration") and for >= ("Set[ExceptionInfo]" and "int")' in deep "Union" structure.
                     aborted_metrics_info[metric.id] = failed_metric_info[metric.id]
                 else:
                     computable_metrics.add(metric)
@@ -192,14 +192,14 @@ class ValidationGraph:
                     )
                     for failed_metric in err.failed_metrics:
                         if failed_metric.id in failed_metric_info:
-                            failed_metric_info[failed_metric.id]["num_failures"] += 1  # type: ignore
-                            failed_metric_info[failed_metric.id]["exception_info"].add(exception_info)  # type: ignore
+                            failed_metric_info[failed_metric.id]["num_failures"] += 1  # type: ignore[operator]  # Incorrect flagging of 'Unsupported operand types for <= ("int" and "MetricConfiguration") and for >= ("Set[ExceptionInfo]" and "int")' in deep "Union" structure.
+                            failed_metric_info[failed_metric.id]["exception_info"].add(exception_info)  # type: ignore[union-attr]  # Incorrect flagging of 'Item "MetricConfiguration" of "Union[MetricConfiguration, Set[ExceptionInfo], int]" has no attribute "add" and Item "int" of "Union[MetricConfiguration, Set[ExceptionInfo], int]" has no attribute "add"' in deep "Union" structure.
                         else:
                             failed_metric_info[failed_metric.id] = {}
                             failed_metric_info[failed_metric.id][
                                 "metric_configuration"
                             ] = failed_metric
-                            failed_metric_info[failed_metric.id]["num_failures"] = 1  # type: ignore
+                            failed_metric_info[failed_metric.id]["num_failures"] = 1
                             failed_metric_info[failed_metric.id]["exception_info"] = {
                                 exception_info
                             }
@@ -219,7 +219,7 @@ class ValidationGraph:
             ):
                 done = True
 
-        progress_bar.close()  # type: ignore
+        progress_bar.close()  # type: ignore[union-attr]  # Incorrect flagging of 'Item "None" of "Optional[Any]" has no attribute "close"' in external package.
 
         return aborted_metrics_info
 
@@ -281,10 +281,10 @@ class ExpectationValidationGraph:
         metric_exception_info: Set[ExceptionInfo] = set()
         metric_id: Tuple[str, str, str]
         metric_info_item: Union[MetricConfiguration, Set[ExceptionInfo], int]
-        for metric_id, metric_info_item in metric_info.items():  # type: ignore
+        for metric_id, metric_info_item in metric_info.items():  # type: ignore[assignment]  # Incorrect flagging of 'Incompatible types in assignment (expression has type "Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]", variable has type "Union[MetricConfiguration, Set[ExceptionInfo], int]")' in deep "Union" structure.
             # noinspection PyUnresolvedReferences
             metric_exception_info.update(
-                cast(Set[ExceptionInfo], metric_info_item["exception_info"])  # type: ignore
+                cast(Set[ExceptionInfo], metric_info_item["exception_info"])  # type: ignore[index]  # Incorrect flagging of 'Value of type "Union[MetricConfiguration, Set[ExceptionInfo], int]" is not indexable' in deep "Union" structure.
             )
 
         return metric_exception_info
