@@ -22,19 +22,19 @@
       },
       "postgresql": {
         "dist1": "INTEGER",
-        "dist2": "INTEGER",
+        "dist2": "BIGINT",
         "zero": "INTEGER",
         "missing": "INTEGER"
       },
       "mysql": {
         "dist1": "INTEGER",
-        "dist2": "INTEGER",
+        "dist2": "BIGINT",
         "zero": "INTEGER",
         "missing": "INTEGER"
       },
       "mssql": {
         "dist1": "INTEGER",
-        "dist2": "INTEGER",
+        "dist2": "BIGINT",
         "zero": "INTEGER",
         "missing": "INTEGER"
       },
