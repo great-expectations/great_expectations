@@ -33,9 +33,12 @@ def get_extras_require():
         "dev-tools",
         "all-contrib-expectations",
     )
-    rx_fname_part = re.compile(r"requirements-dev-(.*).txt")
-    for fname in sorted(glob("reqs/requirements-dev-*.txt")):
-        key = rx_fname_part.match(fname).group(1)
+    requirements_dir = "reqs"
+    rx_fname_part = re.compile(rf"{requirements_dir}/requirements-dev-(.*).txt")
+    for fname in glob(f"{requirements_dir}/*.txt"):
+        match = rx_fname_part.match(fname)
+        assert match is not None
+        key = match.group(1)
         if key in ignore_keys:
             continue
         with open(fname) as f:
