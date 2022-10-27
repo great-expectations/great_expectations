@@ -13,6 +13,7 @@ from great_expectations.rule_based_profiler.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
     ColumnDomainBuilder,
+    DomainBuilder,
     TableDomainBuilder,
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -183,7 +184,7 @@ class OnboardingDataAssistant(DataAssistant):
         """
         # Step-1: Instantiate "TableDomainBuilder" object.
 
-        table_domain_builder = TableDomainBuilder(
+        table_domain_builder: DomainBuilder = TableDomainBuilder(
             data_context=None,
         )
 
@@ -298,7 +299,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting numeric columns (but not "ID-type" columns).
 
-        numeric_column_type_domain_builder = ColumnDomainBuilder(
+        numeric_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -614,7 +615,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper datetime columns (not "datetime-looking" text).
 
-        datetime_column_type_domain_builder = ColumnDomainBuilder(
+        datetime_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -770,7 +771,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
-        text_column_type_domain_builder = ColumnDomainBuilder(
+        text_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -919,7 +920,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.
 
-        categorical_column_type_domain_builder: CategoricalColumnDomainBuilder = (
+        categorical_column_type_domain_builder: DomainBuilder = (
             CategoricalColumnDomainBuilder(
                 include_column_names=None,
                 exclude_column_names=None,
