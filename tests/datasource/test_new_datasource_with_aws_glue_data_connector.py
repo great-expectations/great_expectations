@@ -24,6 +24,8 @@ def data_source_config_with_aws_glue_catalog_data_connectors():
     data_connectors:
         glue_configured_connector:
             class_name: ConfiguredAssetAWSGlueDataCatalogDataConnector
+            boto3_options:
+                region: us-east-1
             partitions:
                 - PClass
                 - SexCode
