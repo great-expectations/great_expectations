@@ -236,7 +236,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return domain_builder
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN.value,
+        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN,
         args_payload_fn=get_profiler_run_usage_statistics,
     )
     def run(

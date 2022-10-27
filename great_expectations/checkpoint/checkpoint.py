@@ -96,7 +96,7 @@ class BaseCheckpoint(ConfigPeer):
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
     #  while run_name_template also undergoes strftime datetime substitution
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.CHECKPOINT_RUN.value,
+        event_name=UsageStatsEvents.CHECKPOINT_RUN,
         args_payload_fn=get_checkpoint_run_usage_statistics,
     )
     def run(
