@@ -8,6 +8,7 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 )
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
+    DomainBuilder,
     TableDomainBuilder,
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -88,7 +89,7 @@ class VolumeDataAssistant(DataAssistant):
         """
         # Step-1: Instantiate "TableDomainBuilder" object.
 
-        table_domain_builder = TableDomainBuilder(
+        table_domain_builder: DomainBuilder = TableDomainBuilder(
             data_context=None,
         )
 
@@ -168,7 +169,7 @@ class VolumeDataAssistant(DataAssistant):
         """
         # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.
 
-        categorical_column_type_domain_builder: CategoricalColumnDomainBuilder = (
+        categorical_column_type_domain_builder: DomainBuilder = (
             CategoricalColumnDomainBuilder(
                 include_column_names=None,
                 exclude_column_names=None,
