@@ -2443,7 +2443,7 @@ def test_include_schema_name_introspection_mysql(mysql_sqlalchemy_datasource):
         for table in my_data_connector._introspect_db()
         if table["type"] == "table"
     ]
-    assert len(introspected_tables) == 146
+    assert len(introspected_tables) == 147
 
     introspected_schemas = {table.get("schema_name") for table in introspected_tables}
     assert introspected_schemas == {"test_ci", "test_connection"}
