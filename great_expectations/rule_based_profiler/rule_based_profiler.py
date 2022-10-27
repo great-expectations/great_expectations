@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import json
 import logging
 import sys
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -77,6 +79,12 @@ from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
 from great_expectations.rule_based_profiler.rule_state import RuleState
 from great_expectations.util import filter_properties_dict
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.base_data_context import (
+        BaseDataContext,
+    )
+    from great_expectations.data_context.store.profiler_store import ProfilerStore
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -95,7 +103,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def __init__(
         self,
         profiler_config: RuleBasedProfilerConfig,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[BaseDataContext] = None,
         usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
     ) -> None:
         """
@@ -215,7 +223,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def _init_rule_domain_builder(
         domain_builder_config: dict,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[BaseDataContext] = None,
     ) -> DomainBuilder:
         domain_builder: DomainBuilder = instantiate_class_from_config(
             config=domain_builder_config,
@@ -1046,8 +1054,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def run_profiler(
-        data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: "ProfilerStore",  # noqa: F821
+        data_context: BaseDataContext,
+        profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
@@ -1076,8 +1084,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def run_profiler_on_data(
-        data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: "ProfilerStore",  # noqa: F821
+        data_context: BaseDataContext,
+        profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
@@ -1110,9 +1118,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def add_profiler(
         config: RuleBasedProfilerConfig,
-        data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: "ProfilerStore",  # noqa: F821
-    ) -> "RuleBasedProfiler":  # noqa: F821
+        data_context: BaseDataContext,
+        profiler_store: ProfilerStore,
+    ) -> RuleBasedProfiler:
         if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
             config=config
         ):
@@ -1121,7 +1129,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
 
         # Chetan - 20220204 - BaseDataContext to be removed once it can be decoupled from RBP
-        new_profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
+        new_profiler: RuleBasedProfiler = instantiate_class_from_config(
             config=config.to_json_dict(),
             runtime_environment={
                 "data_context": data_context,
@@ -1174,11 +1182,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def get_profiler(
-        data_context: "BaseDataContext",  # noqa: F821
-        profiler_store: "ProfilerStore",  # noqa: F821
+        data_context: BaseDataContext,
+        profiler_store: ProfilerStore,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ) -> "RuleBasedProfiler":  # noqa: F821
+    ) -> RuleBasedProfiler:
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id (but not both)"
@@ -1210,7 +1218,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         config = filter_properties_dict(properties=config, clean_falsy=True)
 
-        profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
+        profiler: RuleBasedProfiler = instantiate_class_from_config(
             config=config,
             runtime_environment={
                 "data_context": data_context,
@@ -1225,7 +1233,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def delete_profiler(
-        profiler_store: "ProfilerStore",  # noqa: F821
+        profiler_store: ProfilerStore,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
@@ -1255,7 +1263,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def list_profilers(
-        profiler_store: "ProfilerStore",  # noqa: F821
+        profiler_store: ProfilerStore,
         ge_cloud_mode: bool,
     ) -> List[str]:
         if ge_cloud_mode:
@@ -1421,7 +1429,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         config_version: float,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[BaseDataContext] = None,
         id: Optional[str] = None,
     ) -> None:
         """
