@@ -51,7 +51,12 @@ jobs:
           displayName: 'Update pip'
 
         - script: |
-            pip install --requirement requirements.txt --requirement requirements-dev-contrib.txt --requirement requirements-dev-lite.txt --constraint constraints-dev.txt -e .
+            pip install \
+              --requirement requirements.txt \
+              --requirement reqs/requirements-dev-contrib.txt \
+              --requirement reqs/requirements-dev-lite.txt \
+              --constraint constraints-dev.txt \
+              --editable .
           displayName: 'Install dependencies'
 
         - script: |

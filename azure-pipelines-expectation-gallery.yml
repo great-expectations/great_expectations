@@ -102,7 +102,12 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install "google-cloud-bigquery-storage" -r requirements-dev-all-contrib-expectations.txt -e "contrib/cli" -e ".[dev]" -c constraints-dev.txt
+              pip install \
+                "google-cloud-bigquery-storage" \
+                --requirement reqs/requirements-dev-all-contrib-expectations.txt \
+                --editable "contrib/cli" \
+                --editable ".[dev]" \
+                --constraint constraints-dev.txt
             displayName: 'Install dependencies'
 
           - script: |
