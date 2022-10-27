@@ -64,8 +64,14 @@ def expect_column_value_z_scores_to_be_less_than_expectation_config() -> Expecta
 def expect_column_values_to_be_unique_expectation_validation_graph(
     expect_column_values_to_be_unique_expectation_config: ExpectationConfiguration,
 ) -> ExpectationValidationGraph:
+    class DummyExecutionEngine:
+        pass
+
+    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+
     return ExpectationValidationGraph(
-        configuration=expect_column_values_to_be_unique_expectation_config
+        execution_engine=execution_engine,
+        configuration=expect_column_values_to_be_unique_expectation_config,
     )
 
 
