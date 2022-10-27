@@ -749,18 +749,10 @@ def mysql_engine(test_backend):
         try:
             import sqlalchemy as sa
 
-            test_df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
-
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
             engine = sa.create_engine(
                 f"mysql+pymysql://root@{db_hostname}/test_ci"
             ).connect()
-            # table_name = "test_df"
-            # test_df.to_sql(name=table_name, con=engine)
-            # schema_name = "test_connection"
-            # stmt = f"CREATE SCHEMA {schema_name}"
-            # engine.execute(stmt)
-            # test_df.to_sql(name=f"{schema_name}.{table_name}", con=engine)
             yield engine
             engine.close()
         except ImportError:
