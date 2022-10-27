@@ -29,6 +29,7 @@ class FakeAbstractDataContext(AbstractDataContext):
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
         self._cached_datasources: dict = {}
+        self._usage_statistics_handler = None
 
     def _init_variables(self):
         """Using EphemeralDataContextVariables to store in memory."""
