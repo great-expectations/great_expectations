@@ -190,7 +190,9 @@ stages:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               mkdir coverage
-              PYTEST="docker run --network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
+              PYTEST="docker run -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} "
+              PYTEST+="-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} "
+              PYTEST+="--network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
               # We don't run e2e because we don't want to test connections to external dependencies here.
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest -m 'not e2e' "
               PYTEST+="--random-order --postgresql --cloud "
@@ -202,9 +204,14 @@ stages:
               PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py "
               # The last \" closes the quote from bash -c \"
               PYTEST+="&& mv coverage.xml /coverage/coverage.xml\""
+
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest $(python.version)'
+            env:
+              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -296,7 +303,9 @@ stages:
               mkdir script
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > script/mysql_setup.sql
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PYTEST="docker run --network=host --mount type=bind,source=${PWD}/script,target=/script "
+              PYTEST="docker run -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} "
+              PYTEST+="-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} "
+              PYTEST+="--network=host --mount type=bind,source=${PWD}/script,target=/script "
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \""
               PYTEST+="mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < /script/mysql_setup.sql && "
               PYTEST+="pytest --mysql --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistics "
@@ -305,6 +314,10 @@ stages:
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest MySQL'
+            env:
+              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
 
       - job: test_trino
         dependsOn: [make_suffix, build_push]
@@ -329,12 +342,18 @@ stages:
             displayName: 'Wait for Trino'
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
+              PYTEST="docker run -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} "
+              PYTEST+="-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} "
+              PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} "
               PYTEST+="pytest --trino --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistics "
               PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py"
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest Trino'
+            env:
+              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
 
       - job: test_cli
         dependsOn: [make_suffix, build_push]
