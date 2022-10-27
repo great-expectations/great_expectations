@@ -224,13 +224,3 @@ def test_cloud_context_with_in_memory_config_overrides(
 def test_invalid_root_dir_gives_error():
     with pytest.raises(ConfigNotFoundError):
         gx.get_context(context_root_dir="i/dont/exist")
-
-
-@pytest.mark.unit
-def test_default_with_cloud_env_vars(set_up_cloud_envs):
-    with mock.patch(
-        "great_expectations.data_context.data_context.data_context.DataContext.__init__"
-    ) as mock_init:
-        mock_init.return_value = None
-        gx.get_context()
-    mock_init.assert_called_once()
