@@ -73,7 +73,7 @@ stages:
                 tests/test_sets/**
 
                 [GEChanged]
-                great_expectations/**
+                great_expectations/**/*.py
                 tests/**
                 /*.txt
                 /*.yml
@@ -136,27 +136,18 @@ stages:
         name: UnusedImportChecker
 
   - stage: import_ge
-    dependsOn: [lint]
+    dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-18.04'
 
     jobs:
       - job: import_ge
 
-        strategy:
-         matrix:
-           Python37:
-             python.version: '3.7'
-           Python38:
-             python.version: '3.8'
-           Python39:
-             python.version: '3.9'
-
         steps:
          - task: UsePythonVersion@0
            inputs:
-             versionSpec: '$(python.version)'
-           displayName: 'Use Python $(python.version)'
+             versionSpec: '3.7'
+           displayName: 'Use Python 3.7'
 
          - bash: python -m pip install --upgrade pip==21.3.1
            displayName: 'Update pip'
@@ -179,65 +170,26 @@ stages:
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
-        strategy:
-          matrix:
-            Python37-Pandas023:
-              python.version: '3.7'
-              numpy.version: '1.17.0'
-              pandas.version: '0.23.4'
-              scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
-            Python37-Pandas025:
-              python.version: '3.7'
-              numpy.version: '1.17.0'
-              pandas.version: '0.25.3'
-              scipy.version: 'latest'
-              # numpy 1.20 and pandas 0.25.3 do not coexist happily
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
-            Python38-PandasLatest:
-              python.version: '3.8'
-              numpy.version: 'latest'
-              pandas.version: 'latest'
-              scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
-              if [[ $(numpy.version) == 'latest' ]]; then
                 pip install numpy
-              else
-                pip install numpy==$(numpy.version)
-              fi
-            displayName: 'Install numpy'
-
-          - script: |
-              if [[ $(pandas.version) == 'latest' ]]; then
                 pip install pandas
-              else
-                pip install pandas==$(pandas.version)
-              fi
-            displayName: 'Install pandas'
-
-          - script: |
-              if [[ $(scipy.version) == 'latest' ]]; then
                 pip install scipy
-              else
-                pip install scipy==$(scipy.version)
-              fi
-            displayName: 'Install scipy'
+            displayName: 'Install numpy, pandas, and scipy'
 
           - script: |
               pip install --requirement requirements.txt
-              echo "about to run pip install $(GE_pytest_pip_opts)"
-              pip install $(GE_pytest_pip_opts)
+              echo "about to run pip install --requirement requirements-dev-test.txt --constraint constraints-dev.txt"
+              pip install --requirement requirements-dev-test.txt --constraint constraints-dev.txt
               pip install  .
             displayName: 'Install dependencies'
 
@@ -249,6 +201,8 @@ stages:
               invoke tests --ci --cloud --timeout=3.0
 
             displayName: 'Unit Tests'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
           - script: |
               # Run pytest
@@ -256,6 +210,8 @@ stages:
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit and not e2e' --durations=10
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -279,43 +235,23 @@ stages:
         variables:
           GE_pytest_opts: '--postgresql --spark'
 
-        strategy:
-          matrix:
-            Python37:
-              python.version: '3.7'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python38:
-              python.version: '3.8'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python39:
-              python.version: '3.9'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-
-
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
-              if [[ $(pandas.version) == 'latest' ]]; then
                 pip install pandas
-              else
-                pip install pandas==$(pandas.version)
-              fi
             displayName: 'Install pandas'
 
           - script: |
               pip install --requirement requirements.txt
-              echo "about to run pip install $(GE_pytest_pip_opts)"
-              pip install $(GE_pytest_pip_opts)
+              echo "about to run pip install --requirement requirements-dev.txt --constraint constraints-dev.txt"
+              pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
               pip install  .
             displayName: 'Install dependencies'
 
@@ -327,6 +263,8 @@ stages:
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not e2e'
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
           - script: |
               # These are tests that are specific to Great Expectations Cloud.
@@ -379,6 +317,8 @@ stages:
               pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
   - stage: db_integration
     pool:
@@ -434,6 +374,8 @@ stages:
                 --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
@@ -472,6 +414,8 @@ stages:
                 --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
@@ -516,6 +460,8 @@ stages:
                 --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, import_ge, custom_checks]
@@ -552,3 +498,5 @@ stages:
               pytest --postgresql --spark --aws-integration tests/cli
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}

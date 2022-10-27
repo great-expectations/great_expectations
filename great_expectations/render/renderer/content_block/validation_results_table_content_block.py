@@ -8,6 +8,7 @@ from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less
     ExpectColumnKlDivergenceToBeLessThan,
 )
 from great_expectations.expectations.registry import get_renderer_impl
+from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
@@ -85,7 +86,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
         expectation_string_fn = get_renderer_impl(
-            object_name=expectation_type, renderer_type="renderer.prescriptive"
+            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
         expectation_string_fn = (
             expectation_string_fn[1] if expectation_string_fn else None
@@ -117,7 +118,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
             status_icon_renderer = get_renderer_impl(
                 object_name=expectation_type,
-                renderer_type="renderer.diagnostic.status_icon",
+                renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
             )
             status_cell = (
                 [status_icon_renderer[1](result=result)]
@@ -136,7 +137,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             try:
                 unexpected_statement_renderer = get_renderer_impl(
                     object_name=expectation_type,
-                    renderer_type="renderer.diagnostic.unexpected_statement",
+                    renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
                 )
                 unexpected_statement = (
                     unexpected_statement_renderer[1](result=result)
@@ -153,7 +154,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             try:
                 unexpected_table_renderer = get_renderer_impl(
                     object_name=expectation_type,
-                    renderer_type="renderer.diagnostic.unexpected_table",
+                    renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
                 )
                 unexpected_table = (
                     unexpected_table_renderer[1](result=result)
@@ -170,7 +171,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             try:
                 observed_value_renderer = get_renderer_impl(
                     object_name=expectation_type,
-                    renderer_type="renderer.diagnostic.observed_value",
+                    renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
                 )
                 observed_value = [
                     observed_value_renderer[1](result=result)
@@ -202,7 +203,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
             meta_properties_renderer = get_renderer_impl(
                 object_name=expectation_type,
-                renderer_type="renderer.diagnostic.meta_properties",
+                renderer_type=LegacyDiagnosticRendererType.META_PROPERTIES,
             )
             if meta_properties_renderer:
                 output_row[0] += meta_properties_renderer[1](result=result)

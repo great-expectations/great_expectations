@@ -734,7 +734,7 @@ def test_column_partition_metric_pd():
         ),
     )
 
-    second_in_week: int = 604800
+    seconds_in_week: int = 604800
 
     n_bins: int = 10
 
@@ -861,7 +861,7 @@ def test_column_partition_metric_pd():
     metrics.update(results)
 
     increment = datetime.timedelta(
-        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+        seconds=(seconds_in_week * float(n_bins + 1) / n_bins)
     )
     assert all(
         isclose(
@@ -914,7 +914,7 @@ def test_column_partition_metric_sa(sa):
         sa,
     )
 
-    second_in_week: int = 604800
+    seconds_in_week: int = 604800
 
     n_bins: int = 10
 
@@ -1095,7 +1095,7 @@ def test_column_partition_metric_sa(sa):
     metrics.update(results)
 
     increment = datetime.timedelta(
-        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+        seconds=(seconds_in_week * float(n_bins + 1) / n_bins)
     )
     assert all(
         isclose(
@@ -1157,7 +1157,7 @@ def test_column_partition_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    second_in_week: int = 604800
+    seconds_in_week: int = 604800
 
     n_bins: int = 10
 
@@ -1338,7 +1338,7 @@ def test_column_partition_metric_spark(spark_session):
     metrics.update(results)
 
     increment = datetime.timedelta(
-        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+        seconds=(seconds_in_week * float(n_bins + 1) / n_bins)
     )
     assert all(
         isclose(

@@ -44,6 +44,7 @@ class JsonSchemaProfiler(Profiler):
         JsonSchemaTypes.INTEGER.value: ProfilerTypeMapping.INT_TYPE_NAMES,
         JsonSchemaTypes.NUMBER.value: ProfilerTypeMapping.FLOAT_TYPE_NAMES,
         JsonSchemaTypes.BOOLEAN.value: ProfilerTypeMapping.BOOLEAN_TYPE_NAMES,
+        JsonSchemaTypes.OBJECT.value: ProfilerTypeMapping.OBJECT_TYPE_NAMES,
     }
 
     def __init__(self, configuration: Optional[dict] = None) -> None:

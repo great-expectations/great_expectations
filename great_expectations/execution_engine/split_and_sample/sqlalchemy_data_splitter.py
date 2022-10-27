@@ -703,7 +703,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
             return self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
                 processed_splitter_method_name
             ]
-        except ValueError as e:
+        except ValueError:
             raise ge_exceptions.InvalidConfigError(
                 f"Please provide a supported splitter method name, you provided: {splitter_method_name}"
             )

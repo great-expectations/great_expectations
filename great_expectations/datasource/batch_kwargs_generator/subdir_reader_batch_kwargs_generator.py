@@ -1,6 +1,7 @@
 import logging
 import os
 import warnings
+from typing import Dict, Iterable
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
@@ -40,7 +41,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     by this generator.
     """
 
-    _default_reader_options = {}
+    _default_reader_options: Dict = {}
     recognized_batch_parameters = {"data_asset_name", "partition_id"}
 
     def __init__(
@@ -260,7 +261,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
     def _build_batch_kwargs_path_iter(
         self, path_list, reader_options=None, limit=None
-    ) -> None:
+    ) -> Iterable[PathBatchKwargs]:
         for path in path_list:
             yield self._build_batch_kwargs_from_path(
                 path, reader_options=reader_options, limit=limit

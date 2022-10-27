@@ -1,6 +1,6 @@
 import logging
 from copy import deepcopy
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -67,9 +67,9 @@ class DataConnector:
         self._execution_engine = execution_engine
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache = {}
+        self._data_references_cache: Dict = {}
 
-        self._data_context_root_directory = None
+        self._data_context_root_directory: Optional[str] = None
         self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
@@ -94,7 +94,7 @@ class DataConnector:
 
     @property
     def data_context_root_directory(self) -> str:
-        return self._data_context_root_directory
+        return self._data_context_root_directory  # type: ignore[return-value]
 
     @data_context_root_directory.setter
     def data_context_root_directory(self, data_context_root_directory: str) -> None:
@@ -361,7 +361,7 @@ class DataConnector:
 
         batch_definition_list: List[
             BatchDefinition
-        ] = self._map_data_reference_to_batch_definition_list(
+        ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
             data_reference=example_data_reference,
             data_asset_name=data_asset_name,
         )

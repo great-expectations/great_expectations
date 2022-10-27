@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import shutil
@@ -84,7 +86,7 @@ class DataContext(BaseDataContext):
         project_root_dir: Optional[str] = None,
         usage_statistics_enabled: bool = True,
         runtime_environment: Optional[dict] = None,
-    ) -> "DataContext":
+    ) -> DataContext:
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
@@ -277,10 +279,8 @@ class DataContext(BaseDataContext):
 
     def _init_context_root_directory(self, context_root_dir: Optional[str]) -> str:
         if self.ge_cloud_mode and context_root_dir is None:
-            context_root_dir = os.getcwd()
-            logger.info(
-                f'context_root_dir was not provided - defaulting to current working directory "'
-                f'{context_root_dir}".'
+            context_root_dir = CloudDataContext.determine_context_root_directory(
+                context_root_dir
             )
         else:
             # Determine the "context root directory" - this is the parent of "great_expectations" dir
@@ -412,7 +412,9 @@ class DataContext(BaseDataContext):
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = super().add_datasource(name=name, save_changes=True, **kwargs)
+        ] = super().add_datasource(
+            name=name, save_changes=True, **kwargs  # type: ignore[arg-type]
+        )
         return new_datasource
 
     def update_datasource(  # type: ignore[override]

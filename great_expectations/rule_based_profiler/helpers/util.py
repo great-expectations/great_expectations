@@ -40,11 +40,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import (
-    convert_ndarray_datetime_to_float_dtype,
+    convert_ndarray_datetime_to_float_dtype_utc_timezone,
     convert_ndarray_float_to_datetime_dtype,
-    convert_ndarray_float_to_datetime_tuple,
     convert_ndarray_to_datetime_dtype_best_effort,
-    is_ndarray_datetime_dtype,
     numpy_quantile,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -488,6 +486,33 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
     )
 
 
+def datetime_semantic_domain_type(domain: Domain) -> bool:
+    """
+    This method examines "INFERRED_SEMANTIC_TYPE_KEY" attribute of "Domain" argument to check whether or not underlying
+    "SemanticDomainTypes" enum value is "SemanticDomainTypes.DATETIME".
+
+    Note: Inability to assess underlying "SemanticDomainTypes" details of "Domain" object produces "False" return value.
+
+    Args:
+        domain: "Domain" object to inspect for underlying "SemanticDomainTypes" details
+
+    Returns:
+        Boolean value indicating whether or not specified "Domain" is inferred as "SemanticDomainTypes.DATETIME"
+    """
+
+    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
+        INFERRED_SEMANTIC_TYPE_KEY
+    )
+
+    semantic_domain_type: SemanticDomainTypes
+    return inferred_semantic_domain_type and all(
+        [
+            semantic_domain_type == SemanticDomainTypes.DATETIME
+            for semantic_domain_type in inferred_semantic_domain_type.values()
+        ]
+    )
+
+
 def get_false_positive_rate_from_rule_state(
     false_positive_rate: Union[str, float],
     domain: Domain,
@@ -577,31 +602,18 @@ def compute_quantiles(
     false_positive_rate: np.float64,
     quantile_statistic_interpolation_method: str,
 ) -> NumericRangeEstimationResult:
-    ndarray_is_datetime_type: bool
-    metric_values_converted: np.ndarray
-    (
-        ndarray_is_datetime_type,
-        metric_values_converted,
-    ) = convert_metric_values_to_float_dtype_best_effort(metric_values=metric_values)
-
     lower_quantile = numpy_quantile(
-        a=metric_values_converted,
+        a=metric_values,
         q=(false_positive_rate / 2.0),
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
     upper_quantile = numpy_quantile(
-        a=metric_values_converted,
+        a=metric_values,
         q=1.0 - (false_positive_rate / 2.0),
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
-
-    if ndarray_is_datetime_type:
-        lower_quantile, upper_quantile = convert_ndarray_float_to_datetime_tuple(
-            data=[lower_quantile, upper_quantile]
-        )
-
     return build_numeric_range_estimation_result(
         metric_values=metric_values,
         min_value=lower_quantile,
@@ -644,15 +656,8 @@ def compute_kde_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2.0)
 
-    ndarray_is_datetime_type: bool
-    metric_values_converted: np.ndarray
-    (
-        ndarray_is_datetime_type,
-        metric_values_converted,
-    ) = convert_metric_values_to_float_dtype_best_effort(metric_values=metric_values)
-
     metric_values_density_estimate: stats.gaussian_kde = stats.gaussian_kde(
-        metric_values_converted, bw_method=bw_method
+        metric_values, bw_method=bw_method
     )
 
     metric_values_gaussian_sample: np.ndarray
@@ -680,14 +685,6 @@ def compute_kde_quantiles_point_estimate(
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
-
-    if ndarray_is_datetime_type:
-        (
-            lower_quantile_point_estimate,
-            upper_quantile_point_estimate,
-        ) = convert_ndarray_float_to_datetime_tuple(
-            data=[lower_quantile_point_estimate, upper_quantile_point_estimate]
-        )
 
     return build_numeric_range_estimation_result(
         metric_values=metric_values,
@@ -762,20 +759,13 @@ def compute_bootstrap_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2.0
 
-    ndarray_is_datetime_type: bool
-    metric_values_converted: np.ndarray
-    (
-        ndarray_is_datetime_type,
-        metric_values_converted,
-    ) = convert_metric_values_to_float_dtype_best_effort(metric_values=metric_values)
-
     sample_lower_quantile: np.ndarray = numpy_quantile(
-        a=metric_values_converted,
+        a=metric_values,
         q=lower_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
     sample_upper_quantile: np.ndarray = numpy_quantile(
-        a=metric_values_converted,
+        a=metric_values,
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
@@ -786,11 +776,11 @@ def compute_bootstrap_quantiles_point_estimate(
             np.random.PCG64(random_seed)
         )
         bootstraps = random_state.choice(
-            metric_values_converted, size=(n_resamples, metric_values_converted.size)
+            metric_values, size=(n_resamples, metric_values.size)
         )
     else:
         bootstraps = np.random.choice(
-            metric_values_converted, size=(n_resamples, metric_values_converted.size)
+            metric_values, size=(n_resamples, metric_values.size)
         )
 
     lower_quantile_bias_corrected_point_estimate: Union[
@@ -813,17 +803,6 @@ def compute_bootstrap_quantiles_point_estimate(
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_upper_quantile,
     )
-
-    if ndarray_is_datetime_type:
-        (
-            lower_quantile_bias_corrected_point_estimate,
-            upper_quantile_bias_corrected_point_estimate,
-        ) = convert_ndarray_float_to_datetime_tuple(
-            data=[
-                lower_quantile_bias_corrected_point_estimate,
-                upper_quantile_bias_corrected_point_estimate,
-            ]
-        )
 
     return build_numeric_range_estimation_result(
         metric_values=metric_values,
@@ -855,14 +834,11 @@ def build_numeric_range_estimation_result(
         metric_values_converted,
     ) = convert_metric_values_to_float_dtype_best_effort(metric_values=metric_values)
 
-    ndarray_is_datetime_type: bool = is_ndarray_datetime_dtype(
-        data=metric_values, parse_strings_as_datetimes=True
-    )
-
     histogram: Tuple[np.ndarray, np.ndarray]
     bin_edges: np.ndarray
     if ndarray_is_datetime_type:
         histogram = np.histogram(a=metric_values_converted, bins=NUM_HISTOGRAM_BINS)
+        # Use "UTC" TimeZone normalization in "bin_edges" when "metric_values" consists of "datetime.datetime" objects.
         bin_edges = convert_ndarray_float_to_datetime_dtype(data=histogram[1])
     else:
         histogram = np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)
@@ -929,6 +905,8 @@ def convert_metric_values_to_float_dtype_best_effort(
     """
     Makes best effort attempt to discern element type of 1-D "np.ndarray" and convert it to "float" "np.ndarray" type.
 
+    Note: Conversion of "datetime.datetime" to "float" uses "UTC" TimeZone to normalize all "datetime.datetime" values.
+
     Return:
         Boolean flag -- True, if conversion of original "np.ndarray" to "datetime.datetime" occurred; False, otherwise.
     """
@@ -941,14 +919,16 @@ def convert_metric_values_to_float_dtype_best_effort(
         metric_values_converted,
     ) = convert_ndarray_to_datetime_dtype_best_effort(
         data=metric_values,
+        datetime_detected=False,
         parse_strings_as_datetimes=True,
+        fuzzy=False,
     )
     ndarray_is_datetime_type: bool = (
         original_ndarray_is_datetime_type
         or conversion_ndarray_to_datetime_type_performed
     )
     if ndarray_is_datetime_type:
-        metric_values_converted = convert_ndarray_datetime_to_float_dtype(
+        metric_values_converted = convert_ndarray_datetime_to_float_dtype_utc_timezone(
             data=metric_values_converted
         )
     else:

@@ -333,9 +333,10 @@ def test_cli_datasource_new_connection_string(
                 },
                 "default_configured_data_connector_name": {
                     "assets": {
-                        "YOUR_SCHEMA.YOUR_TABLE_NAME": {
+                        "YOUR_TABLE_NAME": {
                             "class_name": "Asset",
                             "module_name": "great_expectations.datasource.data_connector.asset",
+                            "schema_name": "YOUR_SCHEMA",
                         },
                     },
                     "class_name": "ConfiguredAssetSqlDataConnector",
