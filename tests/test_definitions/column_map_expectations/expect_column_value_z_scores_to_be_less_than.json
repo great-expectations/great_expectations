@@ -47,31 +47,31 @@
     },
     "tests": [
     {
-  "title": "basic_successful_test",
-  "include_in_gallery": true,
-  "exact_match_out": false,
-  "in":{
-    "column": "dist1",
-    "threshold": 1.96,
-    "double_sided": true
-  },
-  "out":{
-    "success": true
-  }
-},
-{
-  "title": "basic_unsuccessful_test",
-  "include_in_gallery": true,
-  "exact_match_out": false,
-  "in":{
-    "column": "dist1",
-    "threshold": 0.1,
-    "double_sided": true
-  },
-  "out":{
-    "success": false
-  }
-},
+      "title": "basic_successful_test",
+      "include_in_gallery": true,
+      "exact_match_out": false,
+      "in":{
+        "column": "dist1",
+        "threshold": 1.96,
+        "double_sided": true
+      },
+      "out":{
+      "success": true
+      }
+    },
+    {
+      "title": "basic_unsuccessful_test",
+      "include_in_gallery": true,
+      "exact_match_out": false,
+      "in":{
+        "column": "dist1",
+        "threshold": 0.1,
+        "double_sided": true
+      },
+      "out":{
+          "success": false
+        }
+      },
       {
         "title": "basic_test_with_outlier",
         "include_in_gallery": true,
