@@ -42,17 +42,17 @@ class MetricEdge:
 class ValidationGraph:
     def __init__(
         self,
+        execution_engine: ExecutionEngine,
         edges: Optional[List[MetricEdge]] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
     ) -> None:
+        self._execution_engine = execution_engine
+
         if edges:
             self._edges = edges
         else:
             self._edges = []
 
         self._edge_ids = {edge.id for edge in self._edges}
-
-        self._execution_engine = execution_engine
 
     @property
     def edges(self):
@@ -251,8 +251,8 @@ class ValidationGraph:
 class ExpectationValidationGraph:
     def __init__(
         self,
+        execution_engine: ExecutionEngine,
         configuration: ExpectationConfiguration,
-        execution_engine: Optional[ExecutionEngine] = None,
     ) -> None:
         self._configuration = configuration
         self._graph = ValidationGraph(execution_engine=execution_engine)
@@ -281,10 +281,10 @@ class ExpectationValidationGraph:
         metric_exception_info: Set[ExceptionInfo] = set()
         metric_id: Tuple[str, str, str]
         metric_info_item: Union[MetricConfiguration, Set[ExceptionInfo], int]
-        for metric_id, metric_info_item in metric_info.items():
+        for metric_id, metric_info_item in metric_info.items():  # type: ignore
             # noinspection PyUnresolvedReferences
             metric_exception_info.update(
-                cast(Set[ExceptionInfo], metric_info_item["exception_info"])
+                cast(Set[ExceptionInfo], metric_info_item["exception_info"])  # type: ignore
             )
 
         return metric_exception_info
