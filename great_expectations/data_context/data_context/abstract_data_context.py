@@ -499,7 +499,7 @@ class AbstractDataContext(ABC):
         return updated_datasource
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
         args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
@@ -1137,7 +1137,7 @@ class AbstractDataContext(ABC):
         )
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
     )
     def run_checkpoint(
         self,
@@ -1424,7 +1424,7 @@ class AbstractDataContext(ABC):
         return validator
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
         args_payload_fn=get_batch_list_usage_statistics,
     )
     def get_batch_list(
@@ -1679,7 +1679,7 @@ class AbstractDataContext(ABC):
         )
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
     )
     def run_profiler_with_dynamic_arguments(
         self,
@@ -1719,7 +1719,7 @@ class AbstractDataContext(ABC):
         )
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
     )
     def run_profiler_on_data(
         self,
@@ -2110,7 +2110,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return batch_kwargs
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
     )
     def open_data_docs(
         self,

@@ -416,7 +416,7 @@ def test_rule_based_profiler_run_message():
 
 def test_cloud_migrate_event():
     usage_stats_records_messages = [
-        UsageStatsEvents.CLOUD_MIGRATE.value,
+        UsageStatsEvents.CLOUD_MIGRATE,
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
