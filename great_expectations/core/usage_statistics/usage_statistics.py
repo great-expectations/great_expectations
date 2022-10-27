@@ -23,6 +23,7 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.execution_environment import (
     GEExecutionEnvironment,
     PackageInfo,
@@ -265,7 +266,7 @@ def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHa
 
 def usage_statistics_enabled_method(
     func: Optional[Callable] = None,
-    event_name: Optional[str] = None,
+    event_name: Optional[UsageStatsEvents] = None,
     args_payload_fn: Optional[Callable] = None,
     result_payload_fn: Optional[Callable] = None,
 ) -> Callable:

@@ -289,7 +289,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
             ):
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
-                    event=UsageStatsEvents.DATASOURCE_SQLALCHEMY_CONNECT.value,
+                    event=UsageStatsEvents.DATASOURCE_SQLALCHEMY_CONNECT,
                     event_payload={
                         "anonymized_name": handler.anonymizer.anonymize(obj=self.name),
                         "sqlalchemy_dialect": self.engine.name,
