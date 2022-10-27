@@ -361,8 +361,8 @@ stages:
 
           - script: |
               pip install \
-                --requirement reqs/requirements-dev-test.txt
-                --requirement reqs/requirements-dev-sqlalchemy.txt
+                --requirement reqs/requirements-dev-test.txt \
+                --requirement reqs/requirements-dev-sqlalchemy.txt \
                 --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
