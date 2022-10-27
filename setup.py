@@ -26,11 +26,12 @@ def get_extras_require():
         "snowflake",
         "teradata",
         "trino",
+        "vertica",
     )
     ignore_keys = (
         "sqlalchemy",
         "test",
-        "dev-tools",
+        "tools",
         "all-contrib-expectations",
     )
     requirements_dir = "reqs"
