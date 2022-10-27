@@ -204,27 +204,6 @@ stages:
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
-          - script: |
-              # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit and not e2e' --durations=10
-
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
-
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: 'Publish test results for Python $(python.version)'
-
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
-
       - job: comprehensive
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
         timeoutInMinutes: 120
@@ -232,8 +211,12 @@ stages:
         services:
           postgres: postgres
 
-        variables:
-          GE_pytest_opts: '--postgresql --spark'
+        strategy:
+          matrix:
+            std:
+              pytest_opts: "tests --ignore 'tests/rule_based_profiler'"
+            rbp:
+              pytest_opts: "tests/rule_based_profiler"
 
         steps:
           - task: UsePythonVersion@0
@@ -259,8 +242,15 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not e2e'
+              pytest $(pytest_opts)
+                --ignore 'tests/cli' \
+                --ignore 'tests/integration/usage_statistics' \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html \
+                -m 'not e2e'
 
             displayName: 'pytest'
             env:
