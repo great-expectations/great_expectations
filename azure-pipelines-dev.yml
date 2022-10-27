@@ -95,7 +95,7 @@ stages:
               pytest tests --trino --mark trino
 
               # Run all Expectation tests that may contain Trino
-              pytest tests/test_dataset_implementations tests/test_definitions
+              pytest tests/test_dataset_implementations tests/test_definitions tests/expectations --trino
 
             displayName: 'pytest'
             env:
