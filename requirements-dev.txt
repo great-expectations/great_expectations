@@ -1,10 +1,10 @@
---requirement requirements.txt
---requirement requirements-dev-lite.txt
---requirement requirements-dev-contrib.txt
---requirement requirements-dev-sqlalchemy.txt
+--requirement requirements/requirements.txt
+--requirement requirements/requirements-dev-lite.txt
+--requirement requirements/requirements-dev-contrib.txt
+--requirement requirements/requirements-dev-sqlalchemy.txt
 
---requirement requirements-dev-arrow.txt
---requirement requirements-dev-azure.txt
---requirement requirements-dev-excel.txt
---requirement requirements-dev-pagerduty.txt
---requirement requirements-dev-spark.txt
+--requirement requirements/requirements-dev-arrow.txt
+--requirement requirements/requirements-dev-azure.txt
+--requirement requirements/requirements-dev-excel.txt
+--requirement requirements/requirements-dev-pagerduty.txt
+--requirement requirements/requirements-dev-spark.txt
