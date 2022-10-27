@@ -353,7 +353,7 @@ def validate_pandas_datasource_configuration_inferred_snippets():
     full_inferred_multi_batch_config = get_full_pandas_inferred_datasource_multi_batch()
 
     # Snippet for adding the Data Connector configuration dictionary.
-    # <snippet name="datasource_configuration_add_inferred_data_connector">
+    # <snippet name="datasource_config add empty inferred_data_connector">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -372,7 +372,7 @@ def validate_pandas_datasource_configuration_inferred_snippets():
     datasource_config: dict = {
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
-                # <snippet name="datasource_configuration_data_connector_class_name_inferred">
+                # <snippet name="inferred data connector populate class_name">
                 "class_name": "InferredAssetFilesystemDataConnector",
                 # </snippet>
             }
@@ -385,7 +385,7 @@ def validate_pandas_datasource_configuration_inferred_snippets():
     datasource_config: dict = {
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
-                # <snippet name="datasource_configuration_filesystem_base_directory">
+                # <snippet name="inferred data connector add base_directory">
                 "base_directory": "../data",
                 # </snippet>
             }
@@ -409,6 +409,7 @@ def validate_pandas_datasource_configuration_inferred_snippets():
                 "class_name": "InferredAssetFilesystemDataConnector",
                 "base_directory": "../data",
                 "default_regex": {},
+                "batch_spec_passthrough": {},
             }
         },
     }
@@ -595,7 +596,7 @@ def validate_pandas_datasource_configuration_configured_snippets():
     )
 
     # Snippet: Add a dictionary for your configured data_connector
-    # <snippet name="datasource_configuration_add_configured_data_connector">
+    # <snippet name="datasource_configuration_add_empty_configured_data_connector">
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
@@ -641,6 +642,7 @@ def validate_pandas_datasource_configuration_configured_snippets():
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
                 "base_directory": "../data",
                 "assets": {},
+                "batch_spec_passthrough": {},
             }
         },
     }
@@ -898,6 +900,7 @@ def validate_pandas_datsource_configuration_runtime_snippets():
         "data_connectors": {
             "name_of_my_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
+                "batch_spec_passthrough": {},
                 "batch_identifiers": [],
             }
         },
@@ -930,12 +933,183 @@ def validate_pandas_datsource_configuration_runtime_snippets():
         "data_connectors": {
             "name_of_my_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
                 "batch_identifiers": ["batch_timestamp"],
             }
         },
     }
     # </snippet>
     is_subset(datasource_config, full_runtime_config)
+
+
+def validate_pandas_batch_spec_passthrough_config():
+    full_configs = (
+        get_full_pandas_inferred_datasource_single_batch(),
+        get_full_pandas_inferred_datasource_multi_batch(),
+        get_full_pandas_configured_datasource_single_batch(),
+        get_full_pandas_configured_datasource_multi_batch(),
+        get_full_pandas_runtime_datasource(),
+    )
+
+    datasource_config: dict = {
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                # <snippet name="empty batch_spec_passthrough">
+                "batch_spec_passthrough": {
+                    "reader_method": "",
+                    "reader_options": {},
+                    # </snippet>
+                },
+            }
+        },
+    }
+    for full_config in full_configs:
+        is_subset(datasource_config, full_config)
+
+    datasource_config: dict = {
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "batch_spec_passthrough": {
+                    # <snippet name="set reader_method to csv">
+                    "reader_method": "csv",
+                    # </snippet>
+                    # <snippet name="empty keys for reader_options">
+                    "reader_options": {
+                        "header": "",
+                        "inferSchema": "",
+                    },
+                    # </snippet>
+                },
+            }
+        },
+    }
+    for full_config in full_configs:
+        is_subset(datasource_config, full_config)
+
+    datasource_config: dict = {
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "batch_spec_passthrough": {
+                    "reader_options": {
+                        # <snippet name="populate header for reader_options as True">
+                        "header": True,
+                        # </snippet>
+                        # <snippet name="populate inferSchema for reader_options as True">
+                        "inferSchema": True,
+                        # </snippet>
+                    },
+                },
+            }
+        },
+    }
+    for full_config in full_configs:
+        is_subset(datasource_config, full_config)
+
+    datasource_config: dict = {
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                # <snippet name="fully populated batch_spec_passthrough configuration">
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
+                # </snippet>
+            }
+        },
+    }
+    for full_config in full_configs:
+        is_subset(datasource_config, full_config)
+
+    # <snippet name="inferred datasource_config up to batch_spec_passthrough">
+    datasource_config: dict = {
+        "name": "my_datasource_name",  # Preferably name it something relevant
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "base_directory": "../data",
+                "default_regex": {},
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
+            }
+        },
+    }
+    # </snippet>
+    is_subset(datasource_config, get_full_pandas_inferred_datasource_multi_batch())
+    is_subset(datasource_config, get_full_pandas_inferred_datasource_single_batch())
+
+    # <snippet name="configured datasource_config up to batch_spec_passthrough">
+    datasource_config: dict = {
+        "name": "my_datasource_name",  # Preferably name it something relevant
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_configured_data_connector": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "base_directory": "../data",
+                "default_regex": {},
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
+            }
+        },
+    }
+    # </snippet>
+    is_subset(datasource_config, get_full_pandas_configured_datasource_multi_batch())
+    is_subset(datasource_config, get_full_pandas_configured_datasource_single_batch())
+
+    # <snippet name="runtime datasource_config up to batch_spec_passthrough">
+    datasource_config: dict = {
+        "name": "my_datasource_name",  # Preferably name it something relevant
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_runtime_data_connector": {
+                "class_name": "RuntimeDataConnector",
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
+                "batch_identifiers": [],
+            }
+        },
+    }
+    # </snippet>
+    is_subset(datasource_config, get_full_pandas_runtime_datasource())
 
 
 validate_pandas_datasource_configuration_snippets()
@@ -949,6 +1123,8 @@ validate_pandas_datasource_configuration_configured_single_batch_snippets()
 validate_pandas_datasource_configuration_configured_multi_batch_snippets()
 
 validate_pandas_datsource_configuration_runtime_snippets()
+
+validate_pandas_batch_spec_passthrough_config()
 
 
 def test_pandas_inferred_single_batch_full_configuration():
@@ -1092,6 +1268,7 @@ def test_pandas_configured_multi_batch_full_configuration():
 
 def test_pandas_configured_runtime_full_configuration():
     datasource_config = get_full_pandas_runtime_datasource()
+
     test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
     datasource_check = test_result.self_check(max_examples=12)
 
@@ -1105,8 +1282,33 @@ def test_pandas_configured_runtime_full_configuration():
     )
 
 
+def test_adding_your_datasource_to_the_datacontext():
+    datasource_config = get_full_pandas_runtime_datasource()
+
+    # <snippet name="test your config with test_yaml_config">
+    data_context.test_yaml_config(yaml.dump(datasource_config))
+    # </snippet>
+
+    # <snippet name="add your datasource to your data_context">
+    data_context.add_datasource(**datasource_config)
+    # </snippet>
+
+    # <snippet name="add your datasource to your data_context only if it does not already exit">
+    # add_datasource only if it doesn't already exist in your Data Context
+    try:
+        data_context.get_datasource(datasource_config["name"])
+    except ValueError:
+        data_context.add_datasource(**datasource_config)
+    else:
+        print(
+            f"The datasource {datasource_config['name']} already exists in your Data Context!"
+        )
+    # </snippet>
+
+
 test_pandas_inferred_single_batch_full_configuration()
 test_pandas_inferred_multi_batch_full_configuration()
 test_pandas_configured_single_batch_full_configuration()
 test_pandas_configured_multi_batch_full_configuration()
 test_pandas_configured_runtime_full_configuration()
+test_adding_your_datasource_to_the_datacontext()

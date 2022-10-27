@@ -9,19 +9,7 @@ import TipCustomDataConnectorModuleName from '../components/_tip_custom_data_con
 
 At this point, your configuration should look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "PandasExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_runtime_data_connector": {}
-    }
-}
+```python name="add empty dictionary for runtime data connector"
 ```
 
 <PartDataConnectorKeysOverview data_connector_type="RuntimeDataConnector" data_connector_name="name_of_my_runtime_data_connector" runtime={true} batch_spec_passthrough={false} glob_directive={false} />
@@ -29,29 +17,12 @@ datasource_config: dict = {
 
 For this example, you will be using the `RuntimeDataConnector` as your `class_name`.  This key/value entry will therefore look like:
 
-```python
-    "class_name": "RuntimeDataConnector",
+```python name="class_name for pandas runtime data connector"
 ```
 
 After including an empty list for your `batch_identifiers` and an empty dictionary for `batch_spec_passthrough` your full configuration should now look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "PandasExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_runtime_data_connector": {
-            "class_name": "RuntimeDataConnector",
-            "batch_spec_passthrough": {},
-            "batch_identifiers": [],
-        }
-    }
-}
+```python name="full config for pandas runtime Datasource with blank data asset identifiers"
 ```
 
 <TipCustomDataConnectorModuleName />
