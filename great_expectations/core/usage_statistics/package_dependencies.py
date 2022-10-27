@@ -318,9 +318,10 @@ def main() -> None:
         ge_dependencies.get_required_dependency_names()
         == ge_dependencies.get_required_dependency_names_from_requirements_file()
     ), "Mismatch between required dependencies in requirements files and in GEDependencies"
-    assert (
-        ge_dependencies.get_dev_dependency_names()
-        == ge_dependencies.get_dev_dependency_names_from_requirements_file()
+    assert ge_dependencies.get_dev_dependency_names() == set(
+        ge_dependencies.get_dev_dependency_names_from_requirements_file()
+    ) - set(
+        GEDependencies.GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
     ), "Mismatch between dev dependencies in requirements files and in GEDependencies"
     print(
         "\n\nRequired and Dev dependencies in requirements files match those in GEDependencies"
