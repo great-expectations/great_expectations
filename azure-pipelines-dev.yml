@@ -256,13 +256,6 @@ stages:
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
-          - script: |
-              # These are tests that are specific to Great Expectations Cloud.
-              # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest tests --cloud -m "cloud and not e2e"
-
-            displayName: 'cloud-overrides'
-
           - task: PublishTestResults@2
             condition: succeededOrFailed()
             inputs:
