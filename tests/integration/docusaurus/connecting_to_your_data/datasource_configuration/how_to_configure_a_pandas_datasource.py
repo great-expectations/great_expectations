@@ -66,8 +66,11 @@ def is_subset(subset, superset):
     key_paths = gather_key_paths(subset)
     subset_items = [get_by_path(subset, key_path) for key_path in key_paths]
     # If the last value in key_paths leads to an empty placeholder, remove that entry from subset_items
-    if not get_by_path(subset, key_paths[-1])[1]:
-        subset_items.pop(-1)
+    subset_items = [x for x in subset_items if x[1]]
+    # if not subset_items[-1][1]:
+    #     subset_items.pop(-1)
+    # if not get_by_path(subset, key_paths[-1])[1]:
+    #     subset_items.pop(-1)
 
     superset_items = [get_by_path(superset, key_path) for key_path in key_paths]
     assert all(
@@ -948,13 +951,13 @@ def validate_pandas_datsource_configuration_runtime_snippets():
     is_subset(datasource_config, full_runtime_config)
 
 
-def validate_pandas_batch_spec_passthrough_config():
+def validate_pandas_batch_spec_passthrough_config_for_inferred():
     full_configs = (
         get_full_pandas_inferred_datasource_single_batch(),
         get_full_pandas_inferred_datasource_multi_batch(),
-        get_full_pandas_configured_datasource_single_batch(),
-        get_full_pandas_configured_datasource_multi_batch(),
-        get_full_pandas_runtime_datasource(),
+        # get_full_pandas_configured_datasource_single_batch(),
+        # get_full_pandas_configured_datasource_multi_batch(),
+        # get_full_pandas_runtime_datasource(),
     )
 
     datasource_config: dict = {
@@ -1070,7 +1073,6 @@ def validate_pandas_batch_spec_passthrough_config():
             "name_of_my_configured_data_connector": {
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
                 "base_directory": "../data",
-                "default_regex": {},
                 "batch_spec_passthrough": {
                     "reader_method": "csv",
                     "reader_options": {
@@ -1124,7 +1126,7 @@ validate_pandas_datasource_configuration_configured_multi_batch_snippets()
 
 validate_pandas_datsource_configuration_runtime_snippets()
 
-validate_pandas_batch_spec_passthrough_config()
+validate_pandas_batch_spec_passthrough_config_for_inferred()
 
 
 def test_pandas_inferred_single_batch_full_configuration():
