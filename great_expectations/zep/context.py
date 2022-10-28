@@ -81,9 +81,7 @@ class _SourceFactories:
             for t in asset_types
         ]
 
-        # NOTE: This check is a shortcut. What we need to protect against is different asset types
-        # that share the same name. But we might want a Datasource to be able to use/register a previously
-        # registered type ??
+        # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
         already_registered_assets = set(asset_type_names).intersection(
             cls.type_lookup.keys()
         )
