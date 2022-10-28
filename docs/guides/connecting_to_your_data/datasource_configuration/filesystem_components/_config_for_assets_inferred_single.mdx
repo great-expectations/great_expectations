@@ -9,8 +9,7 @@ For this example, lets assume we have the following files in our `data` director
 
 In this case you could define the `pattern` key as follows:
 
-```python
-"pattern": "(.*)\\.csv"
+```python name="datasource_configuration_inferred_single_batch_regex_pattern"
 ```
 
 This regex will match the full name of any file that has the `.csv` extension, and will put everything prior to `.csv` extension into a group.
@@ -19,8 +18,7 @@ Since each `.csv` file will necessarily have a unique name preceeding its extens
 
 To correspond to the single group that was defined in your regex, you will define a single entry in the list for the `group_names` key.  Since the first group in an Inferred Asset Data Connector is used to generate names for the inferred Data Assets, you should name that group as follows:
 
-```python
-    "group_names": ["data_asset_name"],
+```python name="datasource_configuration_inferred_single_batch_group_names"
 ```
 
 Looking back at our sample files, this regex will result in the `InferredAssetFilesystemDataConnector` providing three Data Assets, which can be accessed by the portion of the file that matches the first group in our regex.  In future workflows you will be able to refer to one of these Data Assets in a Batch Request py providing one of the following `data_asset_name`s:
@@ -36,13 +34,5 @@ Since we did not include `.csv` in the first group of the regex we defined, the 
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 
-```python
-        "name_of_my_inferred_data_connector": {
-            "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "../data",
-            "default_regex": {
-                "pattern": "(.*)\\.csv",
-                "group_names": ["data_asset_name"],
-            }
-        }
+```python name="data_connector_configuration_post_single_batch_regex"
 ```

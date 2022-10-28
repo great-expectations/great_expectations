@@ -14,35 +14,14 @@ import NoteExplicitConfiguredAssetsMulti from '../filesystem_components/_note_ex
   {label: 'Single Batch Configuration', value:'single'},
   {label: 'Multi-Batch Configuration', value:'multi'},
   ]}>
-    
+
   <TabItem value="single">
 
 <ConfigForAssetsConfiguredSingle />
 
 And the full configuration for your Datasource should look like:
 
-```python
-datasource_config = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "PandasExecutionEngine",  
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_configured_data_connector": {
-            "class_name": "ConfiguredAssetFilesystemDataConnector",
-            "base_directory": "../data",
-            "assets": {
-                "yellow_tripdata_jan": {
-                  "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
-                  "group_names": ["month"],
-                }
-            }
-        }
-    }
-}
+```python name="pandas_configured_datasource_single_batch_full_snippet"
 ```
 
 <NoteExplicitConfiguredAssetsSingle />
@@ -55,13 +34,13 @@ datasource_config = {
 
 And the full configuration for your Datasource should look like:
 
-```python
+```python name="pandas_configured_datasource_multi_batch_full_snippet"
 datasource_config = {
     "name": "my_datasource_name",
     "class_name": "Datasource",
     "module_name": "great_expectations.datasource",
     "execution_engine": {
-        "class_name": "PandasExecutionEngine",  
+        "class_name": "PandasExecutionEngine",
         "module_name": "great_expectations.execution_engine",
     },
     "data_connectors": {
