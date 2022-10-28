@@ -1297,9 +1297,12 @@ class AbstractDataContext(ABC):
             )
             > 1
         ):
+            ge_cloud_mode = getattr(  # attr not on AbstractDataContext
+                self, "ge_cloud_mode"
+            )
             raise ValueError(
-                "No more than one of expectation_suite_name,"  # type: ignore[attr-defined]
-                f"{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''}"
+                "No more than one of expectation_suite_name,"
+                f"{'expectation_suite_ge_cloud_id,' if ge_cloud_mode else ''}"
                 " expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
