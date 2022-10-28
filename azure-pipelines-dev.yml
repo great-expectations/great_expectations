@@ -166,7 +166,7 @@ stages:
       vmImage: 'ubuntu-18.04'
 
     jobs:
-      - job: compatibility_matrix
+      - job: minimal
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
         strategy:
           matrix:
@@ -210,8 +210,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest tests \
-                $(pytest_args) \
+              pytest $(pytest_args) \
                 --no-sqlalchemy \
                 --ignore 'tests/cli' \
                 --ignore 'contrib/cli/tests' \
@@ -277,8 +276,7 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest tests \
-                $(pytest_args) \
+              pytest $(pytest_args) \
                 --postgresql \
                 --spark \
                 --ignore 'tests/cli' \
