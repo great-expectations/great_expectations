@@ -246,7 +246,7 @@ class CloudDataContext(AbstractDataContext):
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
             )
-            or DEFAULT_BASE_URL
+            or cls.DEFAULT_BASE_URL
         )
         ge_cloud_organization_id = (
             ge_cloud_organization_id
