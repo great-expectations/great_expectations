@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type
 
 from great_expectations.util import camel_to_snake
 from great_expectations.zep.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
-    from great_expectations.zep.interfaces import Datasource
+    from great_expectations.zep.interfaces import DataAsset, Datasource
 
 SourceFactoryFn = Callable[..., "Datasource"]
 
@@ -47,7 +47,7 @@ class _SourceFactories:
         cls,
         ds_type: type,
         fn: SourceFactoryFn,
-        asset_types: Optional[List[type]] = None,
+        asset_types: List[Type[DataAsset]],
     ) -> None:
         """
         Add/Register a datasource factory function.
