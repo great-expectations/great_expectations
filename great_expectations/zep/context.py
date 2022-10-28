@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional
 
 from great_expectations.util import camel_to_snake
 from great_expectations.zep.type_lookup import TypeLookup
@@ -71,35 +71,34 @@ class _SourceFactories:
         )
 
         pre_existing = cls.__source_factories.get(method_name)
-        if not pre_existing:
-
-            # TODO: simplify or extract the following datasource & asset type registration logic
-            asset_types = asset_types or []
-            asset_type_names = [
-                _get_simplified_name_from_type(t, suffix_to_remove="_asset")
-                for t in asset_types
-            ]
-
-            # NOTE: This check is a shortcut. What we need to protect against is different asset types
-            # that share the same name. But we might want a Datasource to be able to use/register a previously
-            # registered type ??
-            already_registered_assets = set(asset_type_names).intersection(
-                cls.type_lookup.keys()
-            )
-            if already_registered_assets:
-                raise ValueError(
-                    f"The following names already have a registered type - {already_registered_assets} "
-                )
-
-            for type_, name in zip(asset_types, asset_type_names):
-                cls.type_lookup[type_] = name
-                LOGGER.debug(f"'{name}' added to `type_lookup`")
-
-            cls.type_lookup[ds_type] = simplified_name
-            LOGGER.debug(f"'{simplified_name}' added to `type_lookup`")
-            cls.__source_factories[method_name] = fn  # type: ignore[assignment]
-        else:
+        if pre_existing:
             raise ValueError(f"{simplified_name} factory already exists")
+
+        # TODO: simplify or extract the following datasource & asset type registration logic
+        asset_types = asset_types or []
+        asset_type_names = [
+            _get_simplified_name_from_type(t, suffix_to_remove="_asset")
+            for t in asset_types
+        ]
+
+        # NOTE: This check is a shortcut. What we need to protect against is different asset types
+        # that share the same name. But we might want a Datasource to be able to use/register a previously
+        # registered type ??
+        already_registered_assets = set(asset_type_names).intersection(
+            cls.type_lookup.keys()
+        )
+        if already_registered_assets:
+            raise ValueError(
+                f"The following names already have a registered type - {already_registered_assets} "
+            )
+
+        for type_, name in zip(asset_types, asset_type_names):
+            cls.type_lookup[type_] = name
+            LOGGER.debug(f"'{name}' added to `type_lookup`")
+
+        cls.type_lookup[ds_type] = simplified_name
+        LOGGER.debug(f"'{simplified_name}' added to `type_lookup`")
+        cls.__source_factories[method_name] = fn  # type: ignore[assignment]
 
     @property
     def factories(self) -> List[str]:
