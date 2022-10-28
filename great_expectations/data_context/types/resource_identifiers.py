@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import warnings
 from typing import TYPE_CHECKING, Optional, Union
@@ -203,7 +205,7 @@ class ValidationResultIdentifier(DataContextKey):
 class GeCloudIdentifier(DataContextKey):
     def __init__(
         self,
-        resource_type: "GeCloudRESTResource",
+        resource_type: GeCloudRESTResource,
         ge_cloud_id: Optional[str] = None,
         resource_name: Optional[str] = None,
     ) -> None:
