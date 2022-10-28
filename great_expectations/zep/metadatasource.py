@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Callable, List, Type
 from great_expectations.zep.context import _SourceFactories
 
 if TYPE_CHECKING:
-    from great_expectations.zep.interfaces import Datasource
+    from great_expectations.zep.interfaces import DataAsset, Datasource
 
 SourceFactoryFn = Callable[..., "Datasource"]
 
@@ -34,11 +34,6 @@ class MetaDatasource(type):
 
         asset_types: List[Type[DataAsset]] = cls_dict.get("asset_types")
         LOGGER.info(f"1b. Extracting Asset details - {asset_types}")
-        if asset_types:
-            # TODO: raise a TypeError here instead
-            assert all(
-                [isinstance(t, type) for t in asset_types]
-            ), f"Datasource `asset_types` must be a iterable of classes/types got {asset_types}"
 
         cls = type(cls_name, bases, cls_dict)
         LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
