@@ -173,7 +173,8 @@ stages:
           # This matrix is intended to split up our sizeable test suite into two distinct components.
           # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
           # at the cost of an additional Azure worker.
-          # To work as intendend, "standard" and "slow" should be equally performant
+          #
+          # To work as intended, "standard" and "slow" should be equally performant.
           matrix:
             standard:
               pytest_args: 'tests --ignore "tests/rule_based_profiler"'
@@ -251,7 +252,8 @@ stages:
           # This matrix is intended to split up our sizeable test suite into two distinct components.
           # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
           # at the cost of an additional Azure worker.
-          # To work as intendend, "standard" and "slow" should be equally performant
+          #
+          # To work as intended, "standard" and "slow" should be equally performant.
           matrix:
             standard:
               pytest_args: 'tests --ignore "tests/rule_based_profiler"'
