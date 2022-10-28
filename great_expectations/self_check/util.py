@@ -1565,6 +1565,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         if_exists="replace",
         method=sql_insert_method,
     )
+    engine.dispose()
     _end = time.time()
     _debug(
         f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
