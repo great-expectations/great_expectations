@@ -373,8 +373,8 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest tests --mysql -m 'mysql'
+              pytest tests/test_definitions tests/expectations --mysql
 
             displayName: 'pytest'
             env:
@@ -416,8 +416,8 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest tests --mssql -m 'mssql'
+              pytest tests/test_definitions tests/expectations --mssql
 
             displayName: 'pytest'
             env:
@@ -425,7 +425,6 @@ stages:
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
 
         services:
           trino: trino
@@ -465,8 +464,8 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest tests --trino -m 'trino'
+              pytest tests/test_definitions tests/expectations --trino
 
             displayName: 'pytest'
             env:
