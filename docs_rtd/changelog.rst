@@ -8,7 +8,7 @@ Changelog
 -----------------
 * [FEATURE] Add support to AWS Glue Data Catalog (#5123) (thanks @lccasagrande)
 * [FEATURE] / Added pairwise expectation 'expect_column_pair_values_to_be_in_set' (#6097) (thanks @Arnavkar)
-* [BUGFIX] Adjust condition in RenderedAtomicValueSchema.clean_null_attrs (#6168) (thanks @roblim)
+* [BUGFIX] Adjust condition in RenderedAtomicValueSchema.clean_null_attrs (#6168)
 * [BUGFIX] Add `py` to dev dependencies to circumvent compatability issues with `pytest==7.2.0` (#6202)
 * [BUGFIX] Fix `test_package_dependencies.py` to include `py` lib (#6204)
 * [BUGFIX] Fix logic in ExpectationDiagnostics._check_renderer_methods method (#6208)
