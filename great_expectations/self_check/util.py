@@ -1576,10 +1576,9 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
     if engine:
-        connection = engine.connect()
-        stmt = f"DROP TABLE IF EXISTS {table_name};"
-        connection.execute(stmt)
-        connection.close()
+        with engine.connect() as connection:
+            stmt = f"DROP TABLE IF EXISTS {table_name};"
+            connection.execute(stmt)
 
     return Validator(
         execution_engine=execution_engine,
