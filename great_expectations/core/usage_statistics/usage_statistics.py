@@ -40,7 +40,11 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
-    from great_expectations.data_context.data_context.data_context import DataContext
+    from great_expectations.data_context import (
+        AbstractDataContext,
+        BaseDataContext,
+        DataContext,
+    )
     from great_expectations.rule_based_profiler.rule_based_profiler import (
         RuleBasedProfiler,
     )
@@ -60,7 +64,7 @@ class UsageStatsExceptionPrefix(enum.Enum):
 class UsageStatisticsHandler:
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         data_context_id: str,
         usage_statistics_url: str,
     ) -> None:
@@ -583,7 +587,7 @@ def get_profiler_run_usage_statistics(
 
 
 def send_usage_message(
-    data_context: DataContext,
+    data_context: AbstractDataContext,
     event: str,
     event_payload: Optional[dict] = None,
     success: Optional[bool] = None,
