@@ -80,10 +80,9 @@ from great_expectations.rule_based_profiler.rule_state import RuleState
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
-    )
+    from great_expectations.data_context import AbstractDataContext, BaseDataContext
     from great_expectations.data_context.store.profiler_store import ProfilerStore
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -1054,7 +1053,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def run_profiler(
-        data_context: BaseDataContext,
+        data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -1084,7 +1083,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def run_profiler_on_data(
-        data_context: BaseDataContext,
+        data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -1118,7 +1117,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def add_profiler(
         config: RuleBasedProfilerConfig,
-        data_context: BaseDataContext,
+        data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
     ) -> RuleBasedProfiler:
         if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
@@ -1182,7 +1181,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def get_profiler(
-        data_context: BaseDataContext,
+        data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
