@@ -18,28 +18,12 @@ the snippets that are specified for use in documentation are maintained.  These 
 # The following imports are used as part of verifying that all example snippets are consistent.
 # Users may disregard them.
 
-from datasource_configuration_test_utilities import is_subset
+from datasource_configuration_test_utilities import (
+    get_full_universal_datasource_config_elements,
+    is_subset,
+)
 
 import great_expectations as gx
-
-# The following method is used to ensure that the dictionary that code snippets are tested against is always
-# the same.  Users may disregard it.
-
-
-def get_full_universal_datasource_config_elements() -> dict:
-    """Creates a dictionary containing the keys and values that are universally defined in
-    Spark, Pandas, and SQL Datasource configurations.
-
-    Returns:
-         a dictionary containing a partial configuration for a Datasource
-    """
-    datasource_config: dict = {
-        "name": "my_datasource_name",
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-    }
-    return datasource_config
-
 
 # The following methods correspond to the section headings in the how-to guide linked in the module docstring.
 
