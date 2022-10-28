@@ -11,31 +11,37 @@
       "spark": {
         "dist1": "IntegerType",
         "dist2": "LongType",
+        "mostly_zero": "IntegerType",
         "missing": "IntegerType"
       },
       "sqlite": {
         "dist1": "INTEGER",
         "dist2": "INTEGER",
+        "mostly_zero": "INTEGER",
         "missing": "INTEGER"
       },
       "postgresql": {
         "dist1": "INTEGER",
         "dist2": "BIGINT",
+        "mostly_zero": "INTEGER",
         "missing": "INTEGER"
       },
       "mysql": {
         "dist1": "INTEGER",
         "dist2": "BIGINT",
+        "mostly_zero": "INTEGER",
         "missing": "INTEGER"
       },
       "mssql": {
         "dist1": "INTEGER",
         "dist2": "BIGINT",
+        "mostly_zero": "BIGINT",
         "missing": "INTEGER"
       },
       "trino": {
         "dist1": "BIGINT",
         "dist2": "BIGINT",
+        "mostly_zero": "BIGINT",
         "missing": "REAL"
       }
     },
@@ -80,12 +86,12 @@
         }
       },
       {
-        "title": "basic_test_zero",
+        "title": "basic_test_mostly_zero",
         "suppress_test_for": ["pandas"],
         "include_in_gallery": true,
         "exact_match_out": false,
         "in":{
-          "column": "zero",
+          "column": "mostly_zero",
           "threshold": 1,
           "double_sided": true
         },
@@ -94,12 +100,12 @@
            }
       },
       {
-        "title": "basic_test_zero_pandas",
+        "title": "basic_test_mostly_zero_pandas",
         "only_for": ["pandas"],
         "include_in_gallery": true,
         "exact_match_out": false,
         "in":{
-          "column": "zero",
+          "column": "mostly_zero",
           "threshold": 1,
           "double_sided": true
         },
