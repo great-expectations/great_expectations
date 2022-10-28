@@ -42,25 +42,6 @@ class TestMetaDatasource:
             ds_factory_method_final
         ), f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
 
-    def test__new__injects_datasource_add_asset_method(
-        self, context_sources_clean: _SourceFactories
-    ):
-        expected_add_asset_method_name = "add_magic_asset"
-
-        class MagicAsset(DataAsset):
-            pass
-
-        class MyTestDatasource(metaclass=MetaDatasource):
-            asset_types = [MagicAsset]
-
-        my_datasource = MyTestDatasource()
-
-        asset_method = getattr(my_datasource, expected_add_asset_method_name, None)
-        assert asset_method, (
-            f"{MetaDatasource.__name__}.__new__"
-            " failed to inject `{expected_add_asset_method_name}()` method to the Datasource class"
-        )
-
     def test__new__updates_asset_type_lookup(
         self, context_sources_clean: _SourceFactories
     ):
@@ -106,6 +87,11 @@ def test_minimal_ds_to_asset_flow(context_sources_clean):
 
         def get_asset(self, asset_name: str) -> DataAsset:
             return self.assets[asset_name]
+
+        def add_red_asset(self, asset_name: str) -> RedAsset:
+            asset = RedAsset(asset_name)
+            self.assets[asset_name] = asset
+            return asset
 
     # 2. Get context
     context = get_context()

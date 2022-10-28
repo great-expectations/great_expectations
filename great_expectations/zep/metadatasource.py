@@ -5,13 +5,12 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable, Dict, List, Type
+from typing import TYPE_CHECKING, Callable, List, Type
 
 from great_expectations.zep.context import _SourceFactories
-from great_expectations.zep.util import _get_simplified_name_from_type
 
 if TYPE_CHECKING:
-    from great_expectations.zep.interfaces import DataAsset, Datasource
+    from great_expectations.zep.interfaces import Datasource
 
 SourceFactoryFn = Callable[..., "Datasource"]
 
@@ -36,9 +35,6 @@ class MetaDatasource(type):
         asset_types: List[type] = cls_dict.get("asset_types")
         LOGGER.info(f"1b. Extracting Asset details - {asset_types}")
         if asset_types:
-            for t in asset_types:
-                meta_cls._inject_asset_method(cls_dict, t)
-
             # TODO: raise a TypeError here instead
             assert all(
                 [isinstance(t, type) for t in asset_types]
@@ -63,29 +59,3 @@ class MetaDatasource(type):
         sources.register_factory(cls, _datasource_factory, asset_types=asset_types)
 
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
-
-    @classmethod
-    def _inject_asset_method(
-        cls: Type[MetaDatasource],
-        ds_cls_dict: Dict[str, Callable],
-        asset_type: Type[DataAsset],
-    ) -> None:
-        LOGGER.info(f"1c. Injecting `add_<ASSET_TYPE>` method for {asset_type}")
-        method_name = f"add_{_get_simplified_name_from_type(asset_type)}"
-
-        method_already_defined = ds_cls_dict.get(method_name)
-        if method_already_defined:
-            LOGGER.info(
-                f"  {asset_type.__name__} method `{method_name}()` already defined"
-            )
-        attr_annotations = asset_type.__dict__.get("__annotations__", "")
-
-        # TODO: update signature with `attr_annotations`
-        def _add_asset(self: Datasource, name: str, *args, **kwargs):
-            LOGGER.info(f"6. Creating `{asset_type.__name__}` '{name}' ...")
-            data_asset = asset_type(name, *args, **kwargs)
-            self.assets[name] = data_asset
-            return data_asset
-
-        ds_cls_dict[method_name] = _add_asset
-        LOGGER.info(f"  {method_name}({attr_annotations}) - injected")

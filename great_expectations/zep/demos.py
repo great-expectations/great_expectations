@@ -43,6 +43,12 @@ class PandasDatasource(metaclass=MetaDatasource):
     def get_asset(self, asset_name: str) -> DataAsset:
         return self.assets[asset_name]
 
+    def add_my_other_asset(self, asset_name: str) -> MyOtherAsset:
+        print(f"Adding {MyOtherAsset} - {asset_name}")
+        asset = MyOtherAsset(asset_name)
+        self.assets[asset_name] = asset
+        return asset
+
 
 # class TableAsset:
 #     pass
