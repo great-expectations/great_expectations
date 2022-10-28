@@ -166,6 +166,17 @@ def mocked_get_response(
 
 
 @pytest.fixture
+def mock_get_expectation_suite() -> mock.MagicMock:
+    """
+    Expects a return value to be set within the test function.
+    """
+    with mock.patch(
+        "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.get_expectation_suite",
+    ) as mock_method:
+        yield mock_method
+
+
+@pytest.fixture
 def mock_list_expectation_suite_names() -> mock.MagicMock:
     """
     Expects a return value to be set within the test function.
@@ -250,8 +261,8 @@ def test_create_expectation_suite_saves_suite_to_cloud(
 @pytest.mark.cloud
 def test_create_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
-    mocked_post_response: Callable[[], MockResponse],
     mock_list_expectation_suite_names: mock.MagicMock,
+    mock_get_expectation_suite: mock.MagicMock,
     suite_1: SuiteIdentifierTuple,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
@@ -261,9 +272,12 @@ def test_create_expectation_suite_overwrites_existing_suite(
     suite_id = suite_1.id
 
     with mock.patch(
-        "requests.Session.post", autospec=True, side_effect=mocked_post_response
+        "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.expectations_store"
     ):
         mock_list_expectation_suite_names.return_value = existing_suite_names
+        mock_get_expectation_suite.return_value = ExpectationSuite(
+            expectation_suite_name=suite_name, ge_cloud_id=suite_id
+        )
         suite = context.create_expectation_suite(
             expectation_suite_name=suite_name, overwrite_existing=True
         )

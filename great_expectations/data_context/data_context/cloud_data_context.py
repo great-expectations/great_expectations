@@ -400,23 +400,30 @@ class CloudDataContext(AbstractDataContext):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
+        expectation_suite = ExpectationSuite(
+            expectation_suite_name=expectation_suite_name, data_context=self
+        )
+
         existing_suite_names = self.list_expectation_suite_names()
+        ge_cloud_id: Optional[str] = None
         if expectation_suite_name in existing_suite_names and not overwrite_existing:
             raise ge_exceptions.DataContextError(
                 f"expectation_suite '{expectation_suite_name}' already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True."
             )
+        elif expectation_suite_name in existing_suite_names and overwrite_existing:
+            existing_expectation_suite: ExpectationSuite = self.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+            ge_cloud_id = existing_expectation_suite.ge_cloud_id
+            expectation_suite.ge_cloud_id = ge_cloud_id
 
-        expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
-        )
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+            ge_cloud_id=ge_cloud_id,
         )
 
-        response: Union[bool, GeCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
-        if isinstance(response, GeCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.ge_cloud_id
+        self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
 
         return expectation_suite
 
