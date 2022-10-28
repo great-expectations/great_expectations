@@ -281,7 +281,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         }
         send_usage_message(
             data_context=self.profile_dataset._data_context,
-            event=UsageStatsEvents.LEGACY_PROFILER_BUILD_SUITE.value,
+            event=UsageStatsEvents.LEGACY_PROFILER_BUILD_SUITE,
             event_payload=event_payload,
             api_version="v2",
             success=True,

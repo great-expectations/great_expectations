@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import json
@@ -91,7 +93,7 @@ class BaseCheckpoint(ConfigPeer):
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
     #  while run_name_template also undergoes strftime datetime substitution
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.CHECKPOINT_RUN.value,
+        event_name=UsageStatsEvents.CHECKPOINT_RUN,
         args_payload_fn=get_checkpoint_run_usage_statistics,
     )
     def run(
@@ -704,7 +706,7 @@ constructor arguments.
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
-    ) -> "Checkpoint":
+    ) -> Checkpoint:
         checkpoint_config: Union[CheckpointConfig, dict]
 
         # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
@@ -773,7 +775,7 @@ constructor arguments.
         checkpoint_config: CheckpointConfig,
         data_context: "DataContext",  # noqa: F821
         **runtime_kwargs,
-    ) -> "Checkpoint":
+    ) -> Checkpoint:
         config: dict = checkpoint_config.to_json_dict()
 
         key: str

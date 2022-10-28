@@ -621,7 +621,7 @@ class ExpectationSuite(SerializableDictDot):
         usage_stats_event_payload: dict = {}
         if self._data_context is not None:
             self._data_context.send_usage_message(
-                event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION.value,
+                event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION,
                 event_payload=usage_stats_event_payload,
                 success=success,
             )

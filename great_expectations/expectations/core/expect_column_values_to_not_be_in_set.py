@@ -8,8 +8,6 @@ from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
-)
-from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )

@@ -23,6 +23,7 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.execution_environment import (
     GEExecutionEnvironment,
     PackageInfo,
@@ -265,7 +266,7 @@ def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHa
 
 def usage_statistics_enabled_method(
     func: Optional[Callable] = None,
-    event_name: Optional[str] = None,
+    event_name: Optional[UsageStatsEvents] = None,
     args_payload_fn: Optional[Callable] = None,
     result_payload_fn: Optional[Callable] = None,
 ) -> Callable:
@@ -588,15 +589,37 @@ def send_usage_message(
         handler: UsageStatisticsHandler = getattr(
             data_context, "_usage_statistics_handler", None
         )
-        message: dict = {
-            "event": event,
-            "event_payload": event_payload,
-            "success": success,
-        }
         if handler is not None:
+            message: dict = {
+                "event": event,
+                "event_payload": event_payload,
+                "success": success,
+            }
             handler.emit(message)
     except Exception:
         pass
+
+
+def send_usage_message_from_handler(
+    event: str,
+    handler: Optional[UsageStatisticsHandler] = None,
+    event_payload: Optional[dict] = None,
+    success: Optional[bool] = None,
+) -> None:
+    """Send a usage statistics message using an already instantiated handler."""
+    # noinspection PyBroadException
+    try:
+        if handler:
+            message: dict = {
+                "event": event,
+                "event_payload": event_payload,
+                "success": success,
+            }
+            handler.emit(message)
+    except Exception as e:
+        logger.debug(
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, Exception encountered while running send_usage_message_from_handler()."
+        )
 
 
 # noinspection SpellCheckingInspection

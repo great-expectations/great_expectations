@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 from enum import Enum
@@ -370,6 +372,17 @@ class CloudDataContext(AbstractDataContext):
             )
         )
 
+    def delete_datasource(  # type: ignore[override]
+        self, datasource_name: str, save_changes: bool = True
+    ) -> None:
+        if save_changes is not True:
+            raise ValueError(
+                f"`save_changes` for `{self.__class__.__name__}.delete_datasource()` must be `True`"
+            )
+        super().delete_datasource(
+            datasource_name=datasource_name, save_changes=save_changes
+        )
+
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -389,18 +402,27 @@ class CloudDataContext(AbstractDataContext):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
+        expectation_suite = ExpectationSuite(
+            expectation_suite_name=expectation_suite_name, data_context=self
+        )
+
         existing_suite_names = self.list_expectation_suite_names()
+        ge_cloud_id: Optional[str] = None
         if expectation_suite_name in existing_suite_names and not overwrite_existing:
             raise ge_exceptions.DataContextError(
                 f"expectation_suite '{expectation_suite_name}' already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True."
             )
+        elif expectation_suite_name in existing_suite_names and overwrite_existing:
+            existing_expectation_suite: ExpectationSuite = self.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+            ge_cloud_id = existing_expectation_suite.ge_cloud_id
+            expectation_suite.ge_cloud_id = ge_cloud_id
 
-        expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
-        )
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+            ge_cloud_id=ge_cloud_id,
         )
 
         response: Union[bool, GeCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
@@ -575,7 +597,7 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
-    ) -> "Checkpoint":
+    ) -> Checkpoint:
         """
         See `AbstractDataContext.add_checkpoint` for more information.
         """

@@ -20,14 +20,14 @@ RUN git clone --filter=tree:0 --branch ${BRANCH} https://github.com/great-expect
 WORKDIR /great_expectations
 
 FROM build_${SOURCE} AS dev
-ARG GE_USAGE_STATISTICS_URL=""
+ARG GE_USAGE_STATISTICS_URL="https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 env GE_USAGE_STATISTICS_URL="${GE_USAGE_STATISTICS_URL}"
 RUN pip install --no-cache-dir --requirement requirements-dev.txt --constraint constraints-dev.txt
 RUN pip install .
 CMD [ "python", "--version"]
 
 FROM dev as test
-RUN pip install --no-cache-dir --requirement requirements-dev-test.txt --constraint constraints-dev.txt
+RUN pip install --no-cache-dir --requirement reqs/requirements-dev-test.txt --constraint constraints-dev.txt
 
 FROM dev as dev-tools
-RUN pip install --no-cache-dir --requirement requirements-dev-tools.txt --constraint constraints-dev.txt
+RUN pip install --no-cache-dir --requirement reqs/requirements-dev-tools.txt --constraint constraints-dev.txt
