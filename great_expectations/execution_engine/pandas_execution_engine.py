@@ -112,9 +112,9 @@ Notes:
         self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
-        boto3_options: dict = kwargs.pop("boto3_options", {})
-        azure_options: dict = kwargs.pop("azure_options", {})
-        gcs_options: dict = kwargs.pop("gcs_options", {})
+        boto3_options: Dict[str, dict] = kwargs.pop("boto3_options", {})
+        azure_options: Dict[str, dict] = kwargs.pop("azure_options", {})
+        gcs_options: Dict[str, dict] = kwargs.pop("gcs_options", {})
 
         # Instantiate cloud provider clients as None at first.
         # They will be instantiated if/when passed cloud-specific in BatchSpec is passed in
@@ -197,7 +197,7 @@ Notes:
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
-    def get_batch_data_and_markers(
+    def get_batch_data_and_markers(  # noqa: C901 - 22
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
@@ -257,7 +257,7 @@ Notes:
             logger.debug(
                 f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}"
             )
-            reader_fn = self._get_reader_fn(reader_method, s3_url.key)
+            reader_fn: Callable = self._get_reader_fn(reader_method, s3_url.key)
             buf = BytesIO(s3_object["Body"].read())
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
@@ -272,9 +272,9 @@ Notes:
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
             azure_engine = self._azure
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
+            path = batch_spec.path
             azure_url = AzureUrl(path)
             blob_client = azure_engine.get_blob_client(
                 container=azure_url.container, blob=azure_url.blob
@@ -299,8 +299,8 @@ Notes:
                 )
             gcs_engine = self._gcs
             gcs_url = GCSUrl(batch_spec.path)
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
             try:
                 gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
                 gcs_blob = gcs_bucket.blob(gcs_url.blob)
@@ -318,10 +318,10 @@ Bucket: {error}"""
             df = reader_fn(buf, **reader_options)
 
         elif isinstance(batch_spec, PathBatchSpec):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options
-            path: str = batch_spec.path
-            reader_fn: Callable = self._get_reader_fn(reader_method, path)
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options
+            path = batch_spec.path
+            reader_fn = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
 
         else:
@@ -449,7 +449,7 @@ not {batch_spec.__class__.__name__}"""
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         pass  # This method is NO-OP for PandasExecutionEngine (no bundling for direct execution computational backend).
 
-    def get_domain_records(
+    def get_domain_records(  # noqa: C901 - 17
         self,
         domain_kwargs: dict,
     ) -> pd.DataFrame:
