@@ -166,9 +166,14 @@ stages:
       vmImage: 'ubuntu-18.04'
 
     jobs:
+      # Runs pytest without any additional flags
       - job: minimal
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
         strategy:
+          # This matrix is intended to split up our sizeable test suite into two distinct components.
+          # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
+          # at the cost of an additional Azure worker.
+          # To work as intendend, "standard" and "slow" should be equally performant
           matrix:
             standard:
               pytest_args: 'tests --ignore "tests/rule_based_profiler"'
@@ -239,10 +244,14 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
+      # Runs pytest with Spark and Postgres enabled
       - job: comprehensive
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
         strategy:
+          # This matrix is intended to split up our sizeable test suite into two distinct components.
+          # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
+          # at the cost of an additional Azure worker.
+          # To work as intendend, "standard" and "slow" should be equally performant
           matrix:
             standard:
               pytest_args: 'tests --ignore "tests/rule_based_profiler"'
@@ -349,7 +358,6 @@ stages:
     jobs:
       - job: mysql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
 
         services:
           mysql: mysql
@@ -402,7 +410,6 @@ stages:
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
 
         services:
           mssql: mssql
@@ -445,7 +452,6 @@ stages:
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
 
         services:
           trino: trino
