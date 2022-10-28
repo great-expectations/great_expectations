@@ -65,7 +65,7 @@ def test_column_partition_metric(
     For standard numerical data, test set contains 12 evenly spaced integers.
     For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
 
-    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
     validator_with_data: Validator = get_test_validator_with_data(
         execution_engine=backend,
