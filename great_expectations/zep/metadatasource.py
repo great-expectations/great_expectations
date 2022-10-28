@@ -32,7 +32,7 @@ class MetaDatasource(type):
 
         # TODO: extract asset type details to build factory method signature etc. (pull args from __init__)
 
-        asset_types: List[type] = cls_dict.get("asset_types")
+        asset_types: List[Type[DataAsset]] = cls_dict.get("asset_types")
         LOGGER.info(f"1b. Extracting Asset details - {asset_types}")
         if asset_types:
             # TODO: raise a TypeError here instead
