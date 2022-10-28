@@ -532,6 +532,7 @@ stages:
 
           - script: |
               git checkout 2fb32e3a8246e85538bd74d4cdc765e510c14bd9
+              git tag -a 0.15.29 -m "0.15.29"
               pip install twine
               pip install wheel
               git config --global user.email "team@greatexpectations.io"
