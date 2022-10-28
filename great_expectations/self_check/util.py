@@ -1574,11 +1574,6 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
-    if engine:
-        with engine.connect() as connection:
-            stmt = f"DROP TABLE IF EXISTS {table_name};"
-            connection.execute(stmt)
-
     return Validator(
         execution_engine=execution_engine,
         batches=[
