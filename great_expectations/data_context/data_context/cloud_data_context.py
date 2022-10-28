@@ -423,7 +423,7 @@ class CloudDataContext(AbstractDataContext):
             ge_cloud_id=ge_cloud_id,
         )
 
-        self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        self.expectations_store.set(key, expectation_suite, **kwargs)
 
         return expectation_suite
 
