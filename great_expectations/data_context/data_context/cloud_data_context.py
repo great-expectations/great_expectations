@@ -370,6 +370,17 @@ class CloudDataContext(AbstractDataContext):
             )
         )
 
+    def delete_datasource(  # type: ignore[override]
+        self, datasource_name: str, save_changes: bool = True
+    ) -> None:
+        if save_changes is not True:
+            raise ValueError(
+                f"`save_changes` for `{self.__class__.__name__}.delete_datasource()` must be `True`"
+            )
+        super().delete_datasource(
+            datasource_name=datasource_name, save_changes=save_changes
+        )
+
     def create_expectation_suite(
         self,
         expectation_suite_name: str,

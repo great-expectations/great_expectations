@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import configparser
 import copy
+import datetime
 import errno
 import json
 import logging
@@ -9,6 +10,7 @@ import os
 import sys
 import uuid
 import warnings
+import webbrowser
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
@@ -23,6 +25,13 @@ from typing import (
     cast,
 )
 
+try:
+    from typing import Literal  # type: ignore[attr-defined]
+except ImportError:
+    # Fallback for python < 3.8
+    from typing_extensions import Literal  # type: ignore[misc]
+
+from dateutil.parser import parse
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
@@ -37,13 +46,18 @@ from great_expectations.core.batch import (
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
     DictConfigSerializer,
 )
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.config_validator.yaml_config_validator import (
+    _YamlConfigValidator,
+)
 from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
@@ -63,8 +77,10 @@ from great_expectations.data_context.types.base import (
     anonymizedUsageStatisticsSchema,
     datasourceConfigSchema,
 )
+from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
@@ -73,12 +89,14 @@ from great_expectations.data_context.util import (
     substitute_all_config_variables,
     substitute_config_variable,
 )
+from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
@@ -92,15 +110,21 @@ from great_expectations.validator.validator import BridgeValidator, Validator
 
 from great_expectations.core.usage_statistics.usage_statistics import (  # isort: skip
     UsageStatisticsHandler,
+    add_datasource_usage_statistics,
+    get_batch_list_usage_statistics,
     send_usage_message,
+    usage_statistics_enabled_method,
 )
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
+    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
     )
+    from great_expectations.render.renderer.site_builder import SiteBuilder
+    from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
         ValidationOperator,
     )
@@ -474,6 +498,10 @@ class AbstractDataContext(ABC):
         self._cached_datasources[datasource_name] = updated_datasource
         return updated_datasource
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
+        args_payload_fn=add_datasource_usage_statistics,
+    )
     def add_datasource(
         self,
         name: str,
@@ -1005,7 +1033,7 @@ class AbstractDataContext(ABC):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
-        if datasource_name is None:
+        if not datasource_name:
             raise ValueError("Datasource names must be a datasource name")
 
         datasource = self.get_datasource(datasource_name=datasource_name)
@@ -1014,7 +1042,8 @@ class AbstractDataContext(ABC):
             raise ValueError(f"Datasource {datasource_name} not found")
 
         if save_changes:
-            self._datasource_store.delete_by_name(datasource_name)  # type: ignore[attr-defined]
+            datasource_config = datasourceConfigSchema.load(datasource.config)
+            self._datasource_store.delete(datasource_config)  # type: ignore[attr-defined]
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
@@ -1106,6 +1135,76 @@ class AbstractDataContext(ABC):
         return self.checkpoint_store.delete_checkpoint(
             name=name, ge_cloud_id=ge_cloud_id
         )
+
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
+    )
+    def run_checkpoint(
+        self,
+        checkpoint_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        template_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        run_id: Optional[Union[str, int, float]] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[datetime.datetime] = None,
+        result_format: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ) -> CheckpointResult:
+        """
+        Validate against a pre-defined Checkpoint. (Experimental)
+        Args:
+            checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
+            template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
+            run_name_template: The template to use for run_name
+            expectation_suite_name: Expectation suite to be used by Checkpoint run
+            batch_request: Batch request to be used by Checkpoint run
+            action_list: List of actions to be performed by the Checkpoint
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            runtime_configuration: Runtime configuration override parameters
+            validations: Validations to be performed by the Checkpoint run
+            profilers: Profilers to be used by the Checkpoint run
+            run_id: The run_id for the validation; if None, a default value will be used
+            run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: One of several supported formatting directives for expectation validation results
+            ge_cloud_id: Great Expectations Cloud id for the checkpoint
+            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
+            **kwargs: Additional kwargs to pass to the validation operator
+
+        Returns:
+            CheckpointResult
+        """
+        checkpoint: Checkpoint = self.get_checkpoint(
+            name=checkpoint_name,
+            ge_cloud_id=ge_cloud_id,
+        )
+        result: CheckpointResult = checkpoint.run_with_runtime_args(
+            template_name=template_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            run_id=run_id,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            **kwargs,
+        )
+        return result
 
     def store_evaluation_parameters(
         self, validation_results, target_store_name=None
@@ -1324,6 +1423,10 @@ class AbstractDataContext(ABC):
         )
         return validator
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
+        args_payload_fn=get_batch_list_usage_statistics,
+    )
     def get_batch_list(
         self,
         datasource_name: Optional[str] = None,
@@ -1575,6 +1678,81 @@ class AbstractDataContext(ABC):
             ge_cloud_id=ge_cloud_id,
         )
 
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
+    )
+    def run_profiler_with_dynamic_arguments(
+        self,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        variables: Optional[dict] = None,
+        rules: Optional[dict] = None,
+    ) -> RuleBasedProfilerResult:
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
+
+        Args:
+            batch_list: Explicit list of Batch objects to supply data at runtime
+            batch_request: Explicit batch_request used to supply data at runtime
+            name: Identifier used to retrieve the profiler from a store.
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            variables: Attribute name/value pairs (overrides)
+            rules: Key-value pairs of name/configuration-dictionary (overrides)
+
+        Returns:
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
+
+        Raises:
+            AssertionError if both a `name` and `ge_cloud_id` are provided.
+            AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
+        """
+        return RuleBasedProfiler.run_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+            variables=variables,
+            rules=rules,
+        )
+
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
+    )
+    def run_profiler_on_data(
+        self,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> RuleBasedProfilerResult:
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
+
+        Args:
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            name: Identifier used to retrieve the profiler from a store.
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+
+        Returns:
+            Set of rule evaluation results in the form of an RuleBasedProfilerResult
+
+        Raises:
+            ProfilerConfigurationError is both "batch_list" and "batch_request" arguments are specified.
+            AssertionError if both a `name` and `ge_cloud_id` are provided.
+            AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
+        """
+        return RuleBasedProfiler.run_profiler_on_data(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
     ) -> ValidationOperator:
@@ -1627,6 +1805,193 @@ class AbstractDataContext(ABC):
             return []
 
         return list(self.validation_operators.keys())
+
+    def profile_data_asset(  # noqa: C901 - complexity 16
+        self,
+        datasource_name,
+        batch_kwargs_generator_name=None,
+        data_asset_name=None,
+        batch_kwargs=None,
+        expectation_suite_name=None,
+        profiler=BasicDatasetProfiler,
+        profiler_configuration=None,
+        run_id=None,
+        additional_batch_kwargs=None,
+        run_name=None,
+        run_time=None,
+    ):
+        """
+        Profile a data asset
+
+        :param datasource_name: the name of the datasource to which the profiled data asset belongs
+        :param batch_kwargs_generator_name: the name of the batch kwargs generator to use to get batches (only if batch_kwargs are not provided)
+        :param data_asset_name: the name of the profiled data asset
+        :param batch_kwargs: optional - if set, the method will use the value to fetch the batch to be profiled. If not passed, the batch kwargs generator (generator_name arg) will choose a batch
+        :param profiler: the profiler class to use
+        :param profiler_configuration: Optional profiler configuration dict
+        :param run_name: optional - if set, the validation result created by the profiler will be under the provided run_name
+        :param additional_batch_kwargs:
+        :returns
+            A dictionary::
+
+                {
+                    "success": True/False,
+                    "results": List of (expectation_suite, EVR) tuples for each of the data_assets found in the datasource
+                }
+
+            When success = False, the error details are under "error" key
+        """
+
+        assert not (run_id and run_name) and not (
+            run_id and run_time
+        ), "Please provide either a run_id or run_name and/or run_time."
+        if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
+            warnings.warn(
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
+                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
+                "and run_time (both optional). Instead of providing a run_id, you may also provide"
+                "run_name and run_time separately.",
+                DeprecationWarning,
+            )
+            try:
+                run_time = parse(run_id)
+            except (ValueError, TypeError):
+                pass
+            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
+        elif isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif not isinstance(run_id, RunIdentifier):
+            run_name = run_name or "profiling"
+            run_id = RunIdentifier(run_name=run_name, run_time=run_time)
+
+        logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
+
+        if not additional_batch_kwargs:
+            additional_batch_kwargs = {}
+
+        if batch_kwargs is None:
+            try:
+                generator = self.get_datasource(
+                    datasource_name=datasource_name
+                ).get_batch_kwargs_generator(name=batch_kwargs_generator_name)
+                batch_kwargs = generator.build_batch_kwargs(
+                    data_asset_name, **additional_batch_kwargs
+                )
+            except ge_exceptions.BatchKwargsError:
+                raise ge_exceptions.ProfilerError(
+                    "Unable to build batch_kwargs for datasource {}, using batch kwargs generator {} for name {}".format(
+                        datasource_name, batch_kwargs_generator_name, data_asset_name
+                    )
+                )
+            except ValueError:
+                raise ge_exceptions.ProfilerError(
+                    "Unable to find datasource {} or batch kwargs generator {}.".format(
+                        datasource_name, batch_kwargs_generator_name
+                    )
+                )
+        else:
+            batch_kwargs.update(additional_batch_kwargs)
+
+        profiling_results = {"success": False, "results": []}
+
+        total_columns, total_expectations, total_rows = 0, 0, 0
+        total_start_time = datetime.datetime.now()
+
+        name = data_asset_name
+        # logger.info("\tProfiling '%s'..." % name)
+
+        start_time = datetime.datetime.now()
+
+        if expectation_suite_name is None:
+            if batch_kwargs_generator_name is None and data_asset_name is None:
+                expectation_suite_name = (
+                    datasource_name
+                    + "."
+                    + profiler.__name__
+                    + "."
+                    + BatchKwargs(batch_kwargs).to_id()
+                )
+            else:
+                expectation_suite_name = (
+                    datasource_name
+                    + "."
+                    + batch_kwargs_generator_name
+                    + "."
+                    + data_asset_name
+                    + "."
+                    + profiler.__name__
+                )
+
+        self.create_expectation_suite(
+            expectation_suite_name=expectation_suite_name, overwrite_existing=True
+        )
+
+        # TODO: Add batch_parameters
+        batch = self.get_batch(
+            expectation_suite_name=expectation_suite_name,
+            batch_kwargs=batch_kwargs,
+        )
+
+        if not profiler.validate(batch):
+            raise ge_exceptions.ProfilerError(
+                f"batch '{name}' is not a valid batch for the '{profiler.__name__}' profiler"
+            )
+
+        # Note: This logic is specific to DatasetProfilers, which profile a single batch. Multi-batch profilers
+        # will have more to unpack.
+        expectation_suite, validation_results = profiler.profile(
+            batch, run_id=run_id, profiler_configuration=profiler_configuration
+        )
+        profiling_results["results"].append((expectation_suite, validation_results))
+
+        validation_ref = self.validations_store.set(
+            key=ValidationResultIdentifier(
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                    expectation_suite_name=expectation_suite_name
+                ),
+                run_id=run_id,
+                batch_identifier=batch.batch_id,
+            ),
+            value=validation_results,
+        )
+
+        if isinstance(validation_ref, GeCloudIdAwareRef):
+            ge_cloud_id = validation_ref.ge_cloud_id
+            validation_results.ge_cloud_id = uuid.UUID(ge_cloud_id)
+
+        if isinstance(batch, Dataset):
+            # For datasets, we can produce some more detailed statistics
+            row_count = batch.get_row_count()
+            total_rows += row_count
+            new_column_count = len(
+                {
+                    exp.kwargs["column"]
+                    for exp in expectation_suite.expectations
+                    if "column" in exp.kwargs
+                }
+            )
+            total_columns += new_column_count
+
+        new_expectation_count = len(expectation_suite.expectations)
+        total_expectations += new_expectation_count
+
+        self.save_expectation_suite(expectation_suite)
+        duration = (datetime.datetime.now() - start_time).total_seconds()
+        # noinspection PyUnboundLocalVariable
+        logger.info(
+            f"\tProfiled {new_column_count} columns using {row_count} rows from {name} ({duration:.3f} sec)"
+        )
+
+        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+        logger.info(
+            f"""
+Profiled the data asset, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
+Generated, evaluated, and stored {total_expectations} Expectations during profiling. Please review results using data-docs."""
+        )
+
+        profiling_results["success"] = True
+        return profiling_results
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -1743,6 +2108,120 @@ class AbstractDataContext(ABC):
             **kwargs,
         )
         return batch_kwargs
+
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
+    )
+    def open_data_docs(
+        self,
+        resource_identifier: Optional[str] = None,
+        site_name: Optional[str] = None,
+        only_if_exists: bool = True,
+    ) -> None:
+        """
+        A stdlib cross-platform way to open a file in a browser.
+
+        Args:
+            resource_identifier: ExpectationSuiteIdentifier,
+                ValidationResultIdentifier or any other type's identifier. The
+                argument is optional - when not supplied, the method returns the
+                URL of the index page.
+            site_name: Optionally specify which site to open. If not specified,
+                open all docs found in the project.
+            only_if_exists: Optionally specify flag to pass to "self.get_docs_sites_urls()".
+        """
+        data_docs_urls: List[Dict[str, str]] = self.get_docs_sites_urls(
+            resource_identifier=resource_identifier,
+            site_name=site_name,
+            only_if_exists=only_if_exists,
+        )
+        urls_to_open: List[str] = [site["site_url"] for site in data_docs_urls]
+
+        for url in urls_to_open:
+            if url is not None:
+                logger.debug(f"Opening Data Docs found here: {url}")
+                webbrowser.open(url)
+
+    def get_docs_sites_urls(
+        self,
+        resource_identifier=None,
+        site_name: Optional[str] = None,
+        only_if_exists=True,
+        site_names: Optional[List[str]] = None,
+    ) -> List[Dict[str, str]]:
+        """
+        Get URLs for a resource for all data docs sites.
+
+        This function will return URLs for any configured site even if the sites
+        have not been built yet.
+
+        Args:
+            resource_identifier (object): optional. It can be an identifier of
+                ExpectationSuite's, ValidationResults and other resources that
+                have typed identifiers. If not provided, the method will return
+                the URLs of the index page.
+            site_name: Optionally specify which site to open. If not specified,
+                return all urls in the project.
+            site_names: Optionally specify which sites are active. Sites not in
+                this list are not processed, even if specified in site_name.
+
+        Returns:
+            list: a list of URLs. Each item is the URL for the resource for a
+                data docs site
+        """
+        unfiltered_sites = self.variables.data_docs_sites
+
+        # Filter out sites that are not in site_names
+        sites = (
+            {k: v for k, v in unfiltered_sites.items() if k in site_names}  # type: ignore[union-attr]
+            if site_names
+            else unfiltered_sites
+        )
+
+        if not sites:
+            logger.debug("Found no data_docs_sites.")
+            return []
+        logger.debug(f"Found {len(sites)} data_docs_sites.")
+
+        if site_name:
+            if site_name not in sites.keys():
+                raise ge_exceptions.DataContextError(
+                    f"Could not find site named {site_name}. Please check your configurations"
+                )
+            site = sites[site_name]
+            site_builder = self._load_site_builder_from_site_config(site)
+            url = site_builder.get_resource_url(
+                resource_identifier=resource_identifier, only_if_exists=only_if_exists
+            )
+            return [{"site_name": site_name, "site_url": url}]
+
+        site_urls = []
+        for _site_name, site_config in sites.items():
+            site_builder = self._load_site_builder_from_site_config(site_config)
+            url = site_builder.get_resource_url(
+                resource_identifier=resource_identifier, only_if_exists=only_if_exists
+            )
+            site_urls.append({"site_name": _site_name, "site_url": url})
+
+        return site_urls
+
+    def _load_site_builder_from_site_config(self, site_config) -> SiteBuilder:
+        default_module_name = "great_expectations.render.renderer.site_builder"
+        site_builder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+            },
+            config_defaults={"module_name": default_module_name},
+        )
+        if not site_builder:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name=default_module_name,
+                package_name=None,
+                class_name=site_config["class_name"],
+            )
+        return site_builder
 
     def clean_data_docs(self, site_name=None) -> bool:
         """
@@ -2006,8 +2485,11 @@ class AbstractDataContext(ABC):
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
-                    res = dict(yaml.load(config_variables_file.read()))
-                    return res or {}
+                    contents = config_variables_file.read()
+
+                variables = yaml.load(contents) or {}
+                return dict(variables)
+
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
@@ -2412,6 +2894,88 @@ class AbstractDataContext(ABC):
 
         self._evaluation_parameter_dependencies_compiled = True
 
+    def get_validation_result(
+        self,
+        expectation_suite_name,
+        run_id=None,
+        batch_identifier=None,
+        validations_store_name=None,
+        failed_only=False,
+        include_rendered_content=None,
+    ):
+        """Get validation results from a configured store.
+
+        Args:
+            expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
+            run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
+            validations_store_name: the name of the store from which to get validation results
+            failed_only: if True, filter the result to return only failed expectations
+            include_rendered_content: whether to re-populate the validation_result rendered_content
+
+        Returns:
+            validation_result
+
+        """
+        if validations_store_name is None:
+            validations_store_name = self.validations_store_name
+        selected_store = self.stores[validations_store_name]
+
+        if run_id is None or batch_identifier is None:
+            # Get most recent run id
+            # NOTE : This method requires a (potentially very inefficient) list_keys call.
+            # It should probably move to live in an appropriate Store class,
+            # but when we do so, that Store will need to function as more than just a key-value Store.
+            key_list = selected_store.list_keys()
+            filtered_key_list = []
+            for key in key_list:
+                if run_id is not None and key.run_id != run_id:
+                    continue
+                if (
+                    batch_identifier is not None
+                    and key.batch_identifier != batch_identifier
+                ):
+                    continue
+                filtered_key_list.append(key)
+
+            # run_id_set = set([key.run_id for key in filtered_key_list])
+            if len(filtered_key_list) == 0:
+                logger.warning("No valid run_id values found.")
+                return {}
+
+            filtered_key_list = sorted(filtered_key_list, key=lambda x: x.run_id)
+
+            if run_id is None:
+                run_id = filtered_key_list[-1].run_id
+            if batch_identifier is None:
+                batch_identifier = filtered_key_list[-1].batch_identifier
+
+        if include_rendered_content is None:
+            include_rendered_content = (
+                self._determine_if_expectation_validation_result_include_rendered_content()
+            )
+
+        key = ValidationResultIdentifier(
+            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            ),
+            run_id=run_id,
+            batch_identifier=batch_identifier,
+        )
+        results_dict = selected_store.get(key)
+
+        validation_result = (
+            results_dict.get_failed_validation_results()
+            if failed_only
+            else results_dict
+        )
+
+        if include_rendered_content:
+            for expectation_validation_result in validation_result.results:
+                expectation_validation_result.render()
+                expectation_validation_result.expectation_config.render()
+
+        return validation_result
+
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
@@ -2523,3 +3087,63 @@ class AbstractDataContext(ABC):
             else:
                 return False
         return include_rendered_content
+
+    def test_yaml_config(  # noqa: C901 - complexity 17
+        self,
+        yaml_config: str,
+        name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        runtime_environment: Optional[dict] = None,
+        pretty_print: bool = True,
+        return_mode: Literal[
+            "instantiated_class", "report_object"
+        ] = "instantiated_class",
+        shorten_tracebacks: bool = False,
+    ):
+        """Convenience method for testing yaml configs
+
+        test_yaml_config is a convenience method for configuring the moving
+        parts of a Great Expectations deployment. It allows you to quickly
+        test out configs for system components, especially Datasources,
+        Checkpoints, and Stores.
+
+        For many deployments of Great Expectations, these components (plus
+        Expectations) are the only ones you'll need.
+
+        test_yaml_config is mainly intended for use within notebooks and tests.
+
+        --Public API--
+
+        --Documentation--
+            https://docs.greatexpectations.io/docs/terms/data_context
+            https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
+
+        Args:
+            yaml_config: A string containing the yaml config to be tested
+            name: (Optional) A string containing the name of the component to instantiate
+            pretty_print: Determines whether to print human-readable output
+            return_mode: Determines what type of object test_yaml_config will return.
+                Valid modes are "instantiated_class" and "report_object"
+            shorten_tracebacks:If true, catch any errors during instantiation and print only the
+                last element of the traceback stack. This can be helpful for
+                rapid iteration on configs in a notebook, because it can remove
+                the need to scroll up and down a lot.
+
+        Returns:
+            The instantiated component (e.g. a Datasource)
+            OR
+            a json object containing metadata from the component's self_check method.
+            The returned object is determined by return_mode.
+        """
+        yaml_config_validator = _YamlConfigValidator(
+            data_context=self,
+        )
+        return yaml_config_validator.test_yaml_config(
+            yaml_config=yaml_config,
+            name=name,
+            class_name=class_name,
+            runtime_environment=runtime_environment,
+            pretty_print=pretty_print,
+            return_mode=return_mode,
+            shorten_tracebacks=shorten_tracebacks,
+        )
