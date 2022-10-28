@@ -11,10 +11,8 @@ For this example, lets assume you have the following files in our `data` directo
 - `yellow_tripdata_sample_2020-02.csv`
 - `yellow_tripdata_sample_2020-03.csv`
 
-You can configure a Data Asset that groups these files together and differentiates each batch by month with the regex:
-
-```python
-    "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
+You can configure a Data Asset that groups these files together and differentiates each batch by month by defining a `pattern` in the dictionary for the `default_regex` key:
+```python name="datasource_configuration_inferred_multi_batch_regex_pattern"
 ```
 
 This regex will group together all files that match the content of the first group as a single Data Asset.  Since the first group does not include any special regex characters, this means that all of the `.csv` files that start with "yellow_tripdata_sample_2020" will be combined into one Data Asset, and that all other files will be ignored.
@@ -23,8 +21,7 @@ The second defined group consists of the numeric characters after the last dash 
 
 Since you have defined two groups in your regex, you will need to provide two corresponding group names in your `group_names` key.  Since the first group in an Inferred Asset Data Connector is used to generate the names for the inferred Data Assets provided by the Data Connector and the second group you defined corresponds to the month of data that each file contains, you should name those groups as follows:
 
-```python
-    "group_names": ["data_asset_name", "month"],
+```python name="group_names for inferred multi batch default_regex key"
 ```
 
 Looking back at our sample files, this regex will result in the `InferredAssetFilesystemDataConnector` providing a single Data Asset, which will contain three batches.  In future workflows you will be able to refer to a specific Batch in this Data Asset in a Batch Request py providing the  `data_asset_name` of `"yellow_tripdata_sample_2020"` and one of the following `month`s:
@@ -42,13 +39,6 @@ Any characters that are not included in a group when you define your regex will 
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 
-```python
-        "name_of_my_inferred_data_connector": {
-            "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "../data",
-            "default_regex": {
-                "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
-                "group_names": ["data_asset_name", "month"],
-            }
-        }
+```python name="data connector config for inferred filesystem data connector multi batch"
 ```
+
