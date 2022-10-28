@@ -1,10 +1,6 @@
-```python
-import great_expectations as gx
-from ruamel import yaml
-
-data_context: gx.DataContext = gx.get_context()
-
+```python name="filesystem_datasource_config_gx_imports"
 ```
+
 The `great_expectations` module will give you access to your Data Context, which is the entry point for working with a Great Expectations project.
 
 The `yaml` module from `ruamel` will be used in validating your Datasource's configuration.  Great Expectations will use a Python dictionary representation of your Datasource configuration when you add your Datasource to your Data Context.  However, Great Expectations saves configurations as `yaml` files, so when you validate your configuration you will need to convert it from a Python dictionary to a `yaml` string, first.

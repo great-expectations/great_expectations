@@ -2,8 +2,6 @@ import glob
 import json
 import logging
 import os
-import random
-import string
 from collections import OrderedDict
 
 import pandas as pd
@@ -12,8 +10,8 @@ import pytest
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.self_check.util import (
     BigQueryDialect,
-    candidate_test_is_on_temporary_notimplemented_list,
-    evaluate_json_test,
+    candidate_test_is_on_temporary_notimplemented_list_v2_api,
+    evaluate_json_test_v2_api,
     generate_sqlite_db_path,
     get_dataset,
     mssqlDialect,
@@ -21,7 +19,7 @@ from great_expectations.self_check.util import (
     postgresqlDialect,
     sqliteDialect,
 )
-from tests.conftest import build_test_backends_list
+from tests.conftest import build_test_backends_list_v2_api
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +40,7 @@ def pytest_generate_tests(metafunc):
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        backends = build_test_backends_list(metafunc)
+        backends = build_test_backends_list_v2_api(metafunc)
         for c in backends:
             if c in [
                 "trino",
@@ -66,7 +64,7 @@ def pytest_generate_tests(metafunc):
                     if suppress_test_for and not isinstance(suppress_test_for, list):
                         # coerce into list if passed in as string
                         suppress_test_for = [suppress_test_for]
-                    if candidate_test_is_on_temporary_notimplemented_list(
+                    if candidate_test_is_on_temporary_notimplemented_list_v2_api(
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
@@ -157,7 +155,7 @@ def pytest_generate_tests(metafunc):
                                 ):
                                     generate_test = True
                                 elif (
-                                    "bigquery_v2" in only_for
+                                    "bigquery_v2_api" in only_for
                                     and BigQueryDialect is not None
                                     and isinstance(data_asset, SqlAlchemyDataset)
                                     and hasattr(data_asset.engine.dialect, "name")
@@ -237,7 +235,23 @@ def pytest_generate_tests(metafunc):
                                     )
                                 )
                                 or (
+                                    "mssql_v2_api" in suppress_test_for
+                                    and mssqlDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and isinstance(
+                                        data_asset.engine.dialect, mssqlDialect
+                                    )
+                                )
+                                or (
                                     "bigquery" in suppress_test_for
+                                    and BigQueryDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and hasattr(data_asset.engine.dialect, "name")
+                                    and data_asset.engine.dialect.name.lower()
+                                    == "bigquery"
+                                )
+                                or (
+                                    "bigquery_v2_api" in suppress_test_for
                                     and BigQueryDialect is not None
                                     and isinstance(data_asset, SqlAlchemyDataset)
                                     and hasattr(data_asset.engine.dialect, "name")
@@ -287,13 +301,14 @@ def pytest_generate_tests(metafunc):
 @pytest.mark.order(index=1)
 @pytest.mark.integration
 @pytest.mark.slow  # 14.90s
-def test_case_runner(test_case):
+@pytest.mark.v2_api
+def test_case_runner_v2_api(test_case):
     if test_case["skip"]:
         pytest.skip()
 
     # Note: this should never be done in practice, but we are wiping expectations to reuse datasets during testing.
     test_case["dataset"]._initialize_expectations()
 
-    evaluate_json_test(
+    evaluate_json_test_v2_api(
         test_case["dataset"], test_case["expectation_type"], test_case["test"]
     )

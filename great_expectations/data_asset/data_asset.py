@@ -873,7 +873,7 @@ class DataAsset:
                 if getattr(data_context, "_usage_statistics_handler", None):
                     handler = data_context._usage_statistics_handler
                     handler.send_usage_message(
-                        event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
+                        event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                         event_payload=handler.anonymizer.anonymize(obj=self),
                         success=False,
                     )
@@ -1030,7 +1030,7 @@ class DataAsset:
             if getattr(data_context, "_usage_statistics_handler", None):
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
-                    event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
+                    event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                     event_payload=handler.anonymizer.anonymize(obj=self),
                     success=False,
                 )
@@ -1041,7 +1041,7 @@ class DataAsset:
         if getattr(data_context, "_usage_statistics_handler", None):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
+                event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                 event_payload=handler.anonymizer.anonymize(obj=self),
                 success=True,
             )

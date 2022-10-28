@@ -113,7 +113,7 @@ class SqlAlchemyBatchData(BatchData):
         try:
             dialect = GESqlDialect(dialect_name)
         except ValueError:
-            dialect: GESqlDialect = GESqlDialect.OTHER
+            dialect = GESqlDialect.OTHER
 
         self._dialect = dialect
 
@@ -202,7 +202,7 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(
+    def _create_temporary_table(  # noqa: C901 - 18
         self, temp_table_name, query, temp_table_schema_name=None
     ) -> None:
         """
@@ -276,6 +276,13 @@ class SqlAlchemyBatchData(BatchData):
             stmt = 'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 temp_table_name=temp_table_name, query=query
             )
+        elif dialect == GESqlDialect.VERTICA:
+            full_table_name = (
+                f"{temp_table_schema_name}.{temp_table_name}"
+                if temp_table_schema_name is not None
+                else f"{temp_table_name}"
+            )
+            stmt = f"CREATE TEMPORARY TABLE {full_table_name} ON COMMIT PRESERVE ROWS AS {query}"
         else:
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
         if dialect == GESqlDialect.ORACLE:
