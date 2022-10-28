@@ -1411,7 +1411,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional["DataContext"] = None,
+    context: Optional[DataContext] = None,
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
@@ -1572,13 +1572,6 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
-    yield Validator(
-        execution_engine=execution_engine,
-        batches=[
-            batch,
-        ],
-        data_context=context,
-    )
     engine.connect()
     connection = engine.raw_connection()
     cursor = connection.cursor()
@@ -1586,6 +1579,14 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     cursor.execute(command)
     connection.commit()
     cursor.close()
+
+    return Validator(
+        execution_engine=execution_engine,
+        batches=[
+            batch,
+        ],
+        data_context=context,
+    )
 
 
 def modify_locale(func):
