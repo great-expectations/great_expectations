@@ -309,7 +309,7 @@ stages:
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \""
               PYTEST+="mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < /script/mysql_setup.sql && "
               # The last \" closes the quote from bash -c \".
-              PYTEST+="pytest --mysql --random-order tests/test_definitions tests/expectations\"
+              PYTEST+="pytest --mysql --random-order tests/test_definitions tests/expectations\""
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest MySQL'
