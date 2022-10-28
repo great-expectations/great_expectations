@@ -423,7 +423,9 @@ class CloudDataContext(AbstractDataContext):
             ge_cloud_id=ge_cloud_id,
         )
 
-        self.expectations_store.set(key, expectation_suite, **kwargs)
+        response: Union[bool, GeCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        if isinstance(response, GeCloudResourceRef):
+            expectation_suite.ge_cloud_id = response.ge_cloud_id
 
         return expectation_suite
 
