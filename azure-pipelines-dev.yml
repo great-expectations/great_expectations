@@ -369,16 +369,12 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              # Install dependencies
-              pip install pytest-cov pytest-azurepipelines
-
-              # Run pytest
               pytest tests --mysql -m 'mysql'
-              pytest tests/test_definitions tests/expectations --mysql
+            displayName: 'pytest (1/2)'
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+          - script: |
+              pytest tests/test_definitions tests/expectations --mysql
+            displayName: 'pytest (2/2)'
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
@@ -412,16 +408,12 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              # Install dependencies
-              pip install pytest-cov pytest-azurepipelines
-
-              # Run pytest
               pytest tests --mssql -m 'mssql'
-              pytest tests/test_definitions tests/expectations --mssql
+            displayName: 'pytest (1/2)'
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+          - script: |
+              pytest tests/test_definitions tests/expectations --mssql
+            displayName: 'pytest (2/2)'
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
@@ -457,19 +449,16 @@ stages:
                 --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
+              pip install pytest-cov pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
-              # Install dependencies
-              pip install pytest-cov pytest-azurepipelines
-
-              # Run pytest
               pytest tests --trino -m 'trino'
-              pytest tests/test_definitions tests/expectations --trino
+            displayName: 'pytest (1/2)'
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+          - script: |
+              pytest tests/test_definitions tests/expectations --trino
+            displayName: 'pytest (2/2)'
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, import_ge, custom_checks]
