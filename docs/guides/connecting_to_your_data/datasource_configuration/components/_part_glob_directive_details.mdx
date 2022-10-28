@@ -12,8 +12,7 @@ To include all of these files, you would need to tell the Data connector to look
 
  You would do this by setting the `glob_directive` key in your Data Connector config to a value of `"*/*"`.  This value will cause the Data Connector to look for regex matches against the file names for all files found in any subfolder of your `base_directory`.  Such an entry would look like:
 
-```python
-    "glob_directive": "*/*",
+```python name="datasource_configuration_glob_directive"
 ```
 
 The `glob_directive` parameter works off of regex.  You can also use it to limit the files that will be compared against the Data Connector's `default_regex` for a match.  For example, to only permit `.csv` files to be checked for a match, you could specify the `glob_directive` as `"*.csv"`.  To only check for matches against the `.csv` files in subdirectories, you would use the value `*/*.csv`, and so forth.
