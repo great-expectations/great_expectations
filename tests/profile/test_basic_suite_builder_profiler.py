@@ -276,7 +276,10 @@ def test__create_expectations_for_string_column(non_numeric_high_card_dataset):
 @pytest.mark.filterwarnings(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
-@pytest.mark.trino
+@pytest.mark.skipif(
+    is_library_loadable(library_name="trino"),
+    reason="datetime doesnt exist in Trino",
+)
 def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset):
     columns = datetime_dataset.get_table_columns()
     column_cache = {}
@@ -308,7 +311,10 @@ def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset)
 @pytest.mark.filterwarnings(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
-@pytest.mark.trino
+@pytest.mark.skipif(
+    is_library_loadable(library_name="trino"),
+    reason="datetime doesnt exist in Trino",
+)
 def test__create_expectations_for_datetime_column(datetime_dataset):
     column = "datetime"
 

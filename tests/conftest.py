@@ -137,18 +137,6 @@ def pytest_configure(config):
         "markers",
         "cloud: runs GX Cloud tests that may be slow and requires credentials",
     )
-    config.addinivalue_line(
-        "markers",
-        "trino: runs Trino tests that may be slow and requires credentials",
-    )
-    config.addinivalue_line(
-        "markers",
-        "mssql runs MSSQL tests that may be slow and requires credentials",
-    )
-    config.addinivalue_line(
-        "markers",
-        "myssql: runs MySQL tests that may be slow and requires credentials",
-    )
 
 
 def pytest_addoption(parser):
@@ -329,9 +317,6 @@ def pytest_collection_modifyitems(config, items):
             reason="need --docs-tests option to run",
         ),
         Category(mark="cloud", flag="--cloud", reason="need --cloud option to run"),
-        Category(mark="trino", flag="--trino", reason="need --trino option to run"),
-        Category(mark="mssql", flag="--mssql", reason="need --mssql option to run"),
-        Category(mark="mysql", flag="--mysql", reason="need --mysql option to run"),
     )
 
     for category in categories:

@@ -53,8 +53,6 @@ def test_load_class_raises_error_when_module_name_is_not_string():
 @pytest.mark.filterwarnings(
     "ignore:SQLAlchemy is not installed*:UserWarning:great_expectations.data_context.util"
 )
-@pytest.mark.mssql
-@pytest.mark.mysql
 def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     """
     What does this test and why?
