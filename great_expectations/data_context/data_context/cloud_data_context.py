@@ -10,8 +10,8 @@ import requests
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.http import CLOUD_DEFAULT_BASE_URL
 from great_expectations.core.serializer import JsonConfigSerializer
+from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )

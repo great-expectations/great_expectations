@@ -2,9 +2,8 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.http import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context import BaseDataContext, DataContext
-from great_expectations.data_context.store import GeCloudStoreBackend
+from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.exceptions import DataContextError, GeCloudError
 
 

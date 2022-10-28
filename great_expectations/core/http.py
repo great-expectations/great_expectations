@@ -1,12 +1,9 @@
 import requests
 from requests.adapters import HTTPAdapter, Retry
-from typing_extensions import Final
 
 from great_expectations import __version__
 
-CLOUD_DEFAULT_BASE_URL: Final[str] = "https://api.greatexpectations.io/"
-
-DEFAULT_TIMEOUT: Final[int] = 20
+DEFAULT_TIMEOUT = 20
 
 
 class _TimeoutHTTPAdapter(HTTPAdapter):

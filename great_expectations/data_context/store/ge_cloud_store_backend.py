@@ -7,7 +7,8 @@ from urllib.parse import urljoin
 
 import requests
 
-from great_expectations.core.http import CLOUD_DEFAULT_BASE_URL, create_session
+from great_expectations.core.http import create_session
+from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
