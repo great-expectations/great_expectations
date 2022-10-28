@@ -18,7 +18,7 @@ A Parameterized <TechnicalTag tag="expectation" text="Expectation"/> is a capabi
 
 ### 1. Select an Expectation to inherit from
 
-For the purpose of this exercise, we will implement the Expectations `expect_column_mean_to_be_positive` and `expect_column_values_to_be_two_letter_country_code` - realistic Expectations 
+For the purpose of this exercise, we will implement the Expectations `expect_column_mean_to_be_positive` and `expect_column_values_to_be_two_letter_country_code` - realistic Expectations
 of the data that can easily inherit from `expect_column_mean_to_be_between` and `expect_column_values_to_be_in_set` respectively.
 
 ### 2. Select default values for your class
@@ -41,7 +41,7 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
 
 If you plan to contribute your Expectation to the public open source project, you should include a `library_metadata` object. For example:
 
-```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L28
+```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L26
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
@@ -66,14 +66,14 @@ Now for `expect_column_values_to_be_in_set`.
 
 In this case, we will only be changing our `value_set`:
 
-```python file=../../../../tests/expectations/core/test_expect_column_values_to_be_in_set.py#L15-L18
+```python file=../../../../tests/expectations/core/test_expect_column_values_to_be_in_set.py#L13-L18
 ```
 
 That's all there is to it - really!
 
-<div style={{"text-align":"center"}}>  
-<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>  
-Congratulations!<br/>&#127881; You've just built your first Parameterized Custom Expectation! &#127881;  
-</b></p>  
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've just built your first Parameterized Custom Expectation! &#127881;
+</b></p>
 </div>
 

@@ -3,7 +3,7 @@ import os
 import re
 from collections import defaultdict
 from dataclasses import asdict, dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -61,7 +61,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     # introspection alone, but in order to see what they return, we need to
     # instantiate the Expectation and actually run the method.
 
-    library_metadata: AugmentedLibraryMetadata
+    library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics]
     description: ExpectationDescriptionDiagnostics
     execution_engines: ExpectationExecutionEngineDiagnostics
 
@@ -95,7 +95,9 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_library_metadata(
-        library_metadata: AugmentedLibraryMetadata,
+        library_metadata: Union[
+            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
+        ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
         sub_messages = []
@@ -426,9 +428,9 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check if all statment renderers are defined"""
         passed = False
-        # For now, don't include the "question" and "descriptive" types since they are so
-        # sparsely implemented
-        # all_renderer_types = {"diagnostic", "prescriptive", "question", "descriptive"}
+        # For now, don't include the "question", "descriptive", or "answer"
+        # types since they are so sparsely implemented
+        # all_renderer_types = {"diagnostic", "prescriptive", "question", "descriptive", "answer"}
         all_renderer_types = {"diagnostic", "prescriptive"}
         renderer_names = [
             name
@@ -436,7 +438,7 @@ class ExpectationDiagnostics(SerializableDictDot):
             if name.endswith("renderer") and name.startswith("_")
         ]
         renderer_types = {name.split("_")[1] for name in renderer_names}
-        if renderer_types - {"question", "descriptive"} == all_renderer_types:
+        if all_renderer_types & renderer_types == all_renderer_types:
             passed = True
         return ExpectationDiagnosticCheckMessage(
             # message="Has all four statement Renderers: question, descriptive, prescriptive, diagnostic",
@@ -553,7 +555,9 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_full_test_suite(
-        library_metadata: AugmentedLibraryMetadata,
+        library_metadata: Union[
+            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
+        ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if Expectation has a full test suite"""
         return ExpectationDiagnosticCheckMessage(
@@ -563,7 +567,9 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_manual_code_review(
-        library_metadata: AugmentedLibraryMetadata,
+        library_metadata: Union[
+            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
+        ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if a manual code review has been performed"""
         return ExpectationDiagnosticCheckMessage(

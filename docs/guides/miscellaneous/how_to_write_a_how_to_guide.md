@@ -103,10 +103,10 @@ If the user has data in Mongo and wants to configure a Datasource, no additional
 
 - Most steps will include inline code, such as a bash command, or an example yml snippet or two. These can be referenced in the how-to-guide itself using relative imports.
 
-- The following snippet displays line 1- line 7 of the `script_example.py` file.  
+- The following snippet displays line 1- line 7 of the `script_example.py` file.
 
 ```markdown
-  ```python file=../../../tests/integration/docusaurus/template/script_example.py#L1-L7```
+  ```python file=../../../tests/integration/docusaurus/template/script_example.py#L1-L7
 ```
 
 :::warning
@@ -139,7 +139,7 @@ Once a draft of your guide is written, you can see it rendered on a `localhost` 
 5. Fill out the Prerequisites info box (see <a href="how_to_template">How-to guide template file</a>). The header of the info box says: “This how-to guide assumes you have already:”. Place each prerequisite under its own bullet and phrase it using the style in the template: “done something” (e.g. "Configured a Datasource").
 
 6. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
-    - These will typically be included in a separate file that is in the `great_expectations/test/integrations` folder and can be referenced in the how-to-doc. For additional details, please see the "Structure of a How-to-guide" section below.  
+    - These will typically be included in a separate file that is in the `great_expectations/test/integrations` folder and can be referenced in the how-to-doc. For additional details, please see the "Structure of a How-to-guide" section below.
 
 7. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
 

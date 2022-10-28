@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 from enum import Enum
@@ -84,11 +86,47 @@ class CloudDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-
         self._variables = self._init_variables()
         super().__init__(
             runtime_environment=runtime_environment,
         )
+
+    @classmethod
+    def is_ge_cloud_config_available(
+        cls,
+        ge_cloud_base_url: Optional[str] = None,
+        ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
+    ) -> bool:
+        """
+        Helper method called by gx.get_context() method to determine whether all the information needed
+        to build a ge_cloud_config is available.
+
+        If provided as explicit arguments, ge_cloud_base_url, ge_cloud_access_token and
+        ge_cloud_organization_id will use runtime values instead of environment variables or conf files.
+
+        If any of the values are missing, the method will return False. It will return True otherwise.
+
+        Args:
+            ge_cloud_base_url: Optional, you may provide this alternatively via
+                environment variable GE_CLOUD_BASE_URL or within a config file.
+            ge_cloud_access_token: Optional, you may provide this alternatively
+                via environment variable GE_CLOUD_ACCESS_TOKEN or within a config file.
+            ge_cloud_organization_id: Optional, you may provide this alternatively
+                via environment variable GE_CLOUD_ORGANIZATION_ID or within a config file.
+
+        Returns:
+            bool: Is all the information needed to build a ge_cloud_config is available?
+        """
+        ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
+            ge_cloud_base_url=ge_cloud_base_url,
+            ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
+        )
+        for key, val in ge_cloud_config_dict.items():
+            if not val:
+                return False
+        return True
 
     @classmethod
     def determine_context_root_directory(cls, context_root_dir: Optional[str]) -> str:
@@ -142,7 +180,24 @@ class CloudDataContext(AbstractDataContext):
     ) -> GeCloudConfig:
         """
         Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
-        runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
+        runtime, environment variables, or a global great_expectations.conf file (in order of precedence).
+
+        If provided as explicit arguments, ge_cloud_base_url, ge_cloud_access_token and
+        ge_cloud_organization_id will use runtime values instead of environment variables or conf files.
+
+        Args:
+            ge_cloud_base_url: Optional, you may provide this alternatively via
+                environment variable GE_CLOUD_BASE_URL or within a config file.
+            ge_cloud_access_token: Optional, you may provide this alternatively
+                via environment variable GE_CLOUD_ACCESS_TOKEN or within a config file.
+            ge_cloud_organization_id: Optional, you may provide this alternatively
+                via environment variable GE_CLOUD_ORGANIZATION_ID or within a config file.
+
+        Returns:
+            GeCloudConfig
+
+        Raises:
+            GeCloudError if a GE Cloud variable is missing
         """
         ge_cloud_config_dict = cls._get_ge_cloud_config_dict(
             ge_cloud_base_url=ge_cloud_base_url,
@@ -315,6 +370,17 @@ class CloudDataContext(AbstractDataContext):
             )
         )
 
+    def delete_datasource(  # type: ignore[override]
+        self, datasource_name: str, save_changes: bool = True
+    ) -> None:
+        if save_changes is not True:
+            raise ValueError(
+                f"`save_changes` for `{self.__class__.__name__}.delete_datasource()` must be `True`"
+            )
+        super().delete_datasource(
+            datasource_name=datasource_name, save_changes=save_changes
+        )
+
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -334,18 +400,27 @@ class CloudDataContext(AbstractDataContext):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
+        expectation_suite = ExpectationSuite(
+            expectation_suite_name=expectation_suite_name, data_context=self
+        )
+
         existing_suite_names = self.list_expectation_suite_names()
+        ge_cloud_id: Optional[str] = None
         if expectation_suite_name in existing_suite_names and not overwrite_existing:
             raise ge_exceptions.DataContextError(
                 f"expectation_suite '{expectation_suite_name}' already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True."
             )
+        elif expectation_suite_name in existing_suite_names and overwrite_existing:
+            existing_expectation_suite: ExpectationSuite = self.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+            ge_cloud_id = existing_expectation_suite.ge_cloud_id
+            expectation_suite.ge_cloud_id = ge_cloud_id
 
-        expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
-        )
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+            ge_cloud_id=ge_cloud_id,
         )
 
         response: Union[bool, GeCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
@@ -520,7 +595,7 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
-    ) -> "Checkpoint":
+    ) -> Checkpoint:
         """
         See `AbstractDataContext.add_checkpoint` for more information.
         """

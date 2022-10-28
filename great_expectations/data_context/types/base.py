@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import enum
@@ -107,7 +109,7 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def from_commented_map(
         cls, commented_map: Union[CommentedMap, Dict]
-    ) -> "BaseYamlConfig":
+    ) -> BaseYamlConfig:
         try:
             schema_instance: Schema = cls._get_schema_instance()
             config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
@@ -379,6 +381,20 @@ class AssetConfigSchema(Schema):
     max_keys = fields.Integer(required=False, allow_none=True)
     schema_name = fields.String(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
+
+    """
+    Necessary addition for AWS Glue Data Catalog assets.
+    By using AWS Glue Data Catalog, we need to have both database and table names.
+    The partitions are optional, it must match the partitions defined in the table
+    and it is used to create batch identifiers that allows the validation of a single
+    partition. Example: if we have two partitions (year, month), specifying these would
+    create one batch id per combination of year and month. The connector gets the partition
+    values from the AWS Glue Data Catalog.
+    """
+    database_name = fields.String(required=False, allow_none=True)
+    partitions = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
 
     # Necessary addition for Cloud assets
     table_name = fields.String(required=False, allow_none=True)
@@ -668,9 +684,16 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     introspection_directives = fields.Dict(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
+    # AWS Glue Data Catalog
+    glue_introspection_directives = fields.Dict(required=False, allow_none=True)
+    catalog_id = fields.String(required=False, allow_none=True)
+    partitions = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
+
     # noinspection PyUnusedLocal
-    @validates_schema
-    def validate_schema(self, data, **kwargs):
+    @validates_schema  # noqa: C901
+    def validate_schema(self, data, **kwargs):  # noqa: C901 - complexity 16
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
@@ -808,15 +831,11 @@ data connector. You must only select one between `filename` (from_service_accoun
 """
                 )
         if (
-            "data_asset_name_prefix" in data
-            or "data_asset_name_suffix" in data
-            or "include_schema_name" in data
+            "include_schema_name" in data
             or "splitter_method" in data
             or "splitter_kwargs" in data
             or "sampling_method" in data
             or "sampling_kwargs" in data
-            or "excluded_tables" in data
-            or "included_tables" in data
             or "skip_inapplicable_tables" in data
         ) and not (
             data["class_name"]
@@ -828,6 +847,44 @@ data connector. You must only select one between `filename` (from_service_accoun
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 SQL type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+        if (
+            "data_asset_name_prefix" in data
+            or "data_asset_name_suffix" in data
+            or "excluded_tables" in data
+            or "included_tables" in data
+        ) and not (
+            data["class_name"]
+            in [
+                "InferredAssetSqlDataConnector",
+                "ConfiguredAssetSqlDataConnector",
+                "InferredAssetAWSGlueDataCatalogDataConnector",
+                "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+SQL/GlueCatalog type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
+continue.
+                """
+            )
+
+        if (
+            "partitions" in data
+            or "catalog_id" in data
+            or "glue_introspection_directives" in data
+        ) and not (
+            data["class_name"]
+            in [
+                "InferredAssetAWSGlueDataCatalogDataConnector",
+                "ConfiguredAssetAWSGlueDataCatalogDataConnector",
+            ]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current configuration uses one or more keys in a data connector that are required only by an
+GlueCatalog type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
                 """
             )

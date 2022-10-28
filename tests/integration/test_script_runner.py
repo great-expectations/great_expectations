@@ -31,6 +31,7 @@ class BackendDependencies(enum.Enum):
     SPARK = "SPARK"
     SQLALCHEMY = "SQLALCHEMY"
     SNOWFLAKE = "SNOWFLAKE"
+    TRINO = "TRINO"
 
 
 @dataclass
@@ -156,6 +157,12 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/dataconnector_docs",
+    ),
+    IntegrationTestFixture(
+        name="how_to_configure_a_pandas_datasource",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
     ),
     IntegrationTestFixture(
         name="how_to_configure_a_runtimedataconnector",
@@ -319,6 +326,11 @@ local_tests = [
         name="expect_queried_table_row_count_to_be",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py",
         extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTestFixture(
+        name="expect_multicolumn_values_to_be_multiples_of_three",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py",
+        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="how_to_use_great_expectations_in_aws_glue",
@@ -804,6 +816,22 @@ dockerized_db_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.MYSQL,
+    ),
+    IntegrationTestFixture(
+        name="trino_yaml_example",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/trino_yaml_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        util_script="tests/test_utils.py",
+        extra_backend_dependencies=BackendDependencies.TRINO,
+    ),
+    IntegrationTestFixture(
+        name="trino_python_example",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        util_script="tests/test_utils.py",
+        extra_backend_dependencies=BackendDependencies.TRINO,
     ),
     IntegrationTestFixture(
         name="migration_guide_postgresql_v3_api",
