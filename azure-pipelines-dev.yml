@@ -369,8 +369,24 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest tests/test_definitions tests/expectations --mysql
+              # Install dependencies
+              pip install pytest-cov pytest-azurepipelines
+
+              # Run pytest
+              pytest tests/test_definitions tests/expectations \
+                --mysql \
+                --ignore 'tests/cli' \
+                --ignore 'contrib/cli/tests' \
+                --ignore 'tests/integration/usage_statistics' \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
+
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
@@ -404,11 +420,28 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest tests/test_definitions tests/expectations --mssql
+              # Install dependencies
+              pip install pytest-cov pytest-azurepipelines
+
+              # Run pytest
+              pytest tests/test_definitions tests/expectations \
+                --mssql \
+                --ignore 'tests/cli' \
+                --ignore 'contrib/cli/tests' \
+                --ignore 'tests/integration/usage_statistics' \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
+
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        timeoutInMinutes: 120
 
         services:
           trino: trino
@@ -441,12 +474,27 @@ stages:
                 --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
-              pip install pytest-cov pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
-              pytest tests/test_definitions tests/expectations --trino
+              # Install dependencies
+              pip install pytest-cov pytest-azurepipelines
+
+              # Run pytest
+              pytest tests/test_definitions tests/expectations \
+                --trino \
+                --ignore 'tests/cli' \
+                --ignore 'contrib/cli/tests' \
+                --ignore 'tests/integration/usage_statistics' \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
+
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, import_ge, custom_checks]
