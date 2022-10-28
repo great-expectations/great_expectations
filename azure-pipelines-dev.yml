@@ -375,9 +375,6 @@ stages:
               # Run pytest
               pytest tests/test_definitions tests/expectations \
                 --mysql \
-                --ignore 'tests/cli' \
-                --ignore 'contrib/cli/tests' \
-                --ignore 'tests/integration/usage_statistics' \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
                 --cov=. \
@@ -426,9 +423,6 @@ stages:
               # Run pytest
               pytest tests/test_definitions tests/expectations \
                 --mssql \
-                --ignore 'tests/cli' \
-                --ignore 'contrib/cli/tests' \
-                --ignore 'tests/integration/usage_statistics' \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
                 --cov=. \
@@ -483,9 +477,6 @@ stages:
               # Run pytest
               pytest tests/test_definitions tests/expectations \
                 --trino \
-                --ignore 'tests/cli' \
-                --ignore 'contrib/cli/tests' \
-                --ignore 'tests/integration/usage_statistics' \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
                 --cov=. \
