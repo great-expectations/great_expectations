@@ -35,7 +35,7 @@ def test_init(
     positional_mapping_arg: Optional[Mapping], kwargs: dict, expected_data: dict
 ):
     d = TypeLookup(positional_mapping_arg, **kwargs)
-    assert expected_data == d.data
+    assert expected_data == d
 
 
 @pytest.mark.parametrize(["key", "value"], [(str, "string"), ("integer", int)])
