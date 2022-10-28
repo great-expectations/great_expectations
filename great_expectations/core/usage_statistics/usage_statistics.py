@@ -40,11 +40,7 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
-    from great_expectations.data_context import (
-        AbstractDataContext,
-        BaseDataContext,
-        DataContext,
-    )
+    from great_expectations.data_context import AbstractDataContext, DataContext
     from great_expectations.rule_based_profiler.rule_based_profiler import (
         RuleBasedProfiler,
     )
