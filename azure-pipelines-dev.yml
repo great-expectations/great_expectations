@@ -369,12 +369,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest tests --mysql -m 'mysql'
-            displayName: 'pytest (1/2)'
-
-          - script: |
               pytest tests/test_definitions tests/expectations --mysql
-            displayName: 'pytest (2/2)'
+            displayName: 'pytest'
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
@@ -408,12 +404,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest tests --mssql -m 'mssql'
-            displayName: 'pytest (1/2)'
-
-          - script: |
               pytest tests/test_definitions tests/expectations --mssql
-            displayName: 'pytest (2/2)'
+            displayName: 'pytest'
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
@@ -453,12 +445,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest tests --trino -m 'trino'
-            displayName: 'pytest (1/2)'
-
-          - script: |
               pytest tests/test_definitions tests/expectations --trino
-            displayName: 'pytest (2/2)'
+            displayName: 'pytest'
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, import_ge, custom_checks]
