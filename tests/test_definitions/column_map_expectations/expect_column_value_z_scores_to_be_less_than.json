@@ -87,21 +87,6 @@
       },
       {
         "title": "basic_test_mostly_zero",
-        "suppress_test_for": ["pandas"],
-        "include_in_gallery": true,
-        "exact_match_out": false,
-        "in":{
-          "column": "mostly_zero",
-          "threshold": 1,
-          "double_sided": true
-        },
-        "out":{
-          "success": true
-           }
-      },
-      {
-        "title": "basic_test_mostly_zero_pandas",
-        "only_for": ["pandas"],
         "include_in_gallery": true,
         "exact_match_out": false,
         "in":{
