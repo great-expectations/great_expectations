@@ -1,5 +1,5 @@
 import abc
-from typing import List, MutableMapping, Type, Union
+from typing import Dict, List, Type, Union
 
 from typing_extensions import Protocol, runtime_checkable
 
@@ -14,15 +14,12 @@ class DataAsset(abc.ABC):
         self.name = name
 
 
-DataAssetType = Type[DataAsset]
-
-
 @runtime_checkable
 class Datasource(Protocol):
     execution_engine: ExecutionEngine
     asset_types: List[Type[DataAsset]]
     name: str
-    assets: MutableMapping[str, DataAsset]
+    assets: Dict[str, DataAsset]
 
     def get_batch_list_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
