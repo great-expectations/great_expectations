@@ -15,16 +15,14 @@ First, you need to add an empty dictionary entry into the `assets` dictionary.  
 
 At this point, your entry in the `assets dictionary will look like:
 
-```python
-  "yellow_trip_data_jan": {}
+```python name="empty_data_asset_configuration_configured_single_batch"
 ```
 
 Next, you will need to define the `pattern` value and `group_names` value for this Data Asset.
 
 Since you want this Data Asset to only match the file `yellow_tripdata_sample_2020-01.csv` value for the `pattern` key should be one that does not contain any regex special characters that can match on more than one value.  An example follows:
 
-```python
-"pattern": "yellow_tripdata_sample_2020-(01)\\.csv"
+```python name="pattern_for_single_batch_configured_data_asset_configuration"
 ```
 
 :::note
@@ -35,32 +33,17 @@ Since none of the characters in this regex can possibly match more than one valu
 
 To correspond to the single group that was defined in your regex, you will define a single entry in the list for the `group_names` key.  Since the `assets` dictionary key is used for this Data Asset's name, you can give this group a name relevant to what it is matching on:
 
-```python
-    "group_names": ["month"],
+```python name="group_names for single batch configured assets configuration"
 ```
 
 Put entirely together, your `assets` entry will look like:
 
-```python
-  "yellow_tripdata_jan": {
-    "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
-    "group_names": ["month"],
-  }
+```python name="full_data_asset_for_single_batch_configured_data_connector"
 ```
 
 Looking back at our sample files, this entry will result in the `ConfiguredAssetFilesystemDataConnector` providing one Data Asset, which can be accessed by the name `yellow_tripdata_jan`.  In future workflows you will be able to refer to this Data Asset and its single corresponding Batch by providing that name.
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 
-```python
-        "name_of_my_configured_data_connector": {
-            "class_name": "ConfiguredAssetFilesystemDataConnector",
-            "base_directory": "../data",
-            "assets": {
-                "yellow_tripdata_jan": {
-                  "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
-                  "group_names": ["month"],
-                }
-            }
-        }
+```python name="full_single_batch_configured_data_connector_configuration"
 ```

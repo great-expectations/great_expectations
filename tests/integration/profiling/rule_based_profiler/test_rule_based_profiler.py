@@ -173,10 +173,7 @@ def test_profile_includes_citations(
 
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert (
-        actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.RULE_BASED_PROFILER_RUN.value
-    )
+    assert actual_events[-1][0][0]["event"] == UsageStatsEvents.RULE_BASED_PROFILER_RUN
 
 
 @mock.patch(
@@ -230,5 +227,5 @@ def test_profile_get_expectation_suite(
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert (
         actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE.value
+        == UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE
     )
