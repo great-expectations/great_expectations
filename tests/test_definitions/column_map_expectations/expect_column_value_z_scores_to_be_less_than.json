@@ -11,37 +11,31 @@
       "spark": {
         "dist1": "IntegerType",
         "dist2": "LongType",
-        "zero": "IntegerType",
         "missing": "IntegerType"
       },
       "sqlite": {
         "dist1": "INTEGER",
         "dist2": "INTEGER",
-        "zero": "INTEGER",
         "missing": "INTEGER"
       },
       "postgresql": {
         "dist1": "INTEGER",
         "dist2": "BIGINT",
-        "zero": "INTEGER",
         "missing": "INTEGER"
       },
       "mysql": {
         "dist1": "INTEGER",
         "dist2": "BIGINT",
-        "zero": "INTEGER",
         "missing": "INTEGER"
       },
       "mssql": {
         "dist1": "INTEGER",
         "dist2": "BIGINT",
-        "zero": "INTEGER",
         "missing": "INTEGER"
       },
       "trino": {
         "dist1": "BIGINT",
         "dist2": "BIGINT",
-        "zero": "BIGINT",
         "missing": "REAL"
       }
     },
