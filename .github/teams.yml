@@ -20,3 +20,6 @@ devrel:
   - '@kyleaton'        # Kyle Eaton
   - '@rdodev'          # Ruben Orduz
   - '@talagluck'       # Tal Gluck
+
+cloud:
+  - '@roblim'          # Rob Lim
