@@ -62,7 +62,7 @@ from great_expectations.validation_operators.types.validation_operator_result im
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.data_context import DataContext
+    from great_expectations.data_context import AbstractDataContext, DataContext
 
 logger = logging.getLogger(__name__)
 
@@ -551,7 +551,7 @@ class Checkpoint(BaseCheckpoint):
     def __init__(
         self,
         name: str,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
@@ -683,7 +683,7 @@ constructor arguments.
 
     @staticmethod
     def construct_from_config_args(
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
         config_version: Optional[Union[int, float]] = None,
@@ -776,7 +776,7 @@ constructor arguments.
     @staticmethod
     def instantiate_from_config_with_runtime_args(
         checkpoint_config: CheckpointConfig,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         **runtime_kwargs,
     ) -> Checkpoint:
         config: dict = checkpoint_config.to_json_dict()
