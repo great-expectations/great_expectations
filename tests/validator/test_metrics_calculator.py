@@ -148,8 +148,8 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result():
     class DummyExecutionEngine:
         pass
 
-    dummy_execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
-    metrics_calculator = MetricsCalculator(execution_engine=dummy_execution_engine)
+    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+    metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
 
     metric_name = "my_metric_name"
     actual_metric_value = "my_metric_value"
