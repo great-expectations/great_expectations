@@ -38,12 +38,15 @@ class PandasDatasource(metaclass=MetaDatasource):
         return f"{self.__class__.__name__}(name='{self.name}')"
 
     def get_batch_list_from_batch_request(self, batch_request):
+        """TODO"""
         pass
 
     def get_asset(self, asset_name: str) -> DataAsset:
+        """Pull `self.assets`"""
         return self.assets[asset_name]
 
     def add_my_other_asset(self, asset_name: str) -> MyOtherAsset:
+        """Create `MyOtherAsset` add it to `self.assets` and return it."""
         print(f"Adding {MyOtherAsset} - {asset_name}")
         asset = MyOtherAsset(asset_name)
         self.assets[asset_name] = asset
@@ -63,6 +66,7 @@ class PandasDatasource(metaclass=MetaDatasource):
 
 
 def round_trip():
+    """Demo Creating Datasource -> Adding Assets -> Retrieving asset by name"""
     context = get_context()
 
     ds = context.sources.add_pandas("taxi")
@@ -77,8 +81,10 @@ def round_trip():
 
 
 def type_lookup():
-    # Demo the use of the `type_lookup` `BiDict`
-    # Alternatively use a Graph/Tree-like structure
+    """
+    Demo the use of the `type_lookup` `BiDict`
+    Alternatively use a Graph/Tree-like structure.
+    """
     sources = get_context().sources
     print("\n  Datasource & DataAsset lookups ...")
 

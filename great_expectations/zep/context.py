@@ -143,6 +143,7 @@ class DataContext:
 
 
 def get_context() -> DataContext:
+    """ZEP get_context placeholder function."""
     LOGGER.info("3. Getting context")
     context = DataContext.get_context()
     return context
