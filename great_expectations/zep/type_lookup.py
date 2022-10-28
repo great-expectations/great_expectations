@@ -2,6 +2,10 @@ from collections import UserDict
 from typing import Hashable, Iterable, Mapping, Optional
 
 
+class TypeLookupError(ValueError):
+    pass
+
+
 class TypeLookup(
     UserDict,
     Mapping[Hashable, Hashable],
@@ -33,9 +37,9 @@ class TypeLookup(
 
     def __setitem__(self, key: Hashable, value: Hashable):
         if key in self:
-            raise LookupError(f"`{key}` already set - key")
+            raise TypeLookupError(f"`{key}` already set - key")
         if value in self:
-            raise LookupError(f"`{value}` already set - value")
+            raise TypeLookupError(f"`{value}` already set - value")
         super().__setitem__(key, value)
         super().__setitem__(value, key)
 

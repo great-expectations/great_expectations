@@ -2,7 +2,7 @@ from typing import Hashable, Mapping, Optional, Tuple
 
 import pytest
 
-from great_expectations.zep.type_lookup import TypeLookup
+from great_expectations.zep.type_lookup import TypeLookup, TypeLookupError
 
 pytestmark = [pytest.mark.unit]
 param = pytest.param
@@ -56,7 +56,7 @@ def test_no_key_or_value_overwrites(
     initial: TypeLookup, kv_pair: Tuple[Hashable, Hashable]
 ):
     key, value = kv_pair
-    with pytest.raises(LookupError, match=r"`.*` already set"):
+    with pytest.raises(TypeLookupError, match=r"`.*` already set"):
         initial[key] = value
 
 
