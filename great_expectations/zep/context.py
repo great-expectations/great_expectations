@@ -5,7 +5,7 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
 
 from great_expectations.util import camel_to_snake
-from great_expectations.zep.bi_directional_dict import BiDict
+from great_expectations.zep.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     from great_expectations.zep.interfaces import Datasource
@@ -39,7 +39,7 @@ class _SourceFactories:
     or `DataAsset` types and a simplified name for those types.
     """
 
-    type_lookup: BiDict[Union[str, type]] = BiDict()
+    type_lookup = TypeLookup()
     __source_factories: Dict[str, SourceFactoryFn] = {}
 
     @classmethod
