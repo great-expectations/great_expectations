@@ -12,7 +12,7 @@
   {% set home_url = "#" -%}
 {% endif %}
 
-{% set static_images_dir = "https://company-visual-assets.s3.amazonaws.com/logos/" -%}
+{% set static_images_dir = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/" -%}
 
 <nav class="navbar navbar-expand-md sticky-top border-bottom" style="height: 70px">
   <div class="mr-auto">
@@ -21,7 +21,7 @@
         <a href="{{ home_url }}">
           <img
             class="NO-CACHE"
-            src="{{ static_images_dir + "great-expectations-long-logo.png" | add_data_context_id_to_url }}"
+            src="{{ static_images_dir + "logo-long.png" | add_data_context_id_to_url }}"
             alt="Great Expectations"
             style="width: auto; height: 50px"
           />
