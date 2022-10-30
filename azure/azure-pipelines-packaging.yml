@@ -41,7 +41,7 @@ stages:
     dependsOn: []
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
-      - template: azure/user-install-matrix.yml
+      - template: user-install-matrix.yml
         parameters:
           vmImage: "ubuntu-latest"
 
@@ -49,7 +49,7 @@ stages:
     dependsOn: user_install_linux
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
-      - template: azure/dev-install-matrix.yml
+      - template: dev-install-matrix.yml
         parameters:
           vmImage: "ubuntu-latest"
 
@@ -57,7 +57,7 @@ stages:
     dependsOn: []
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
-      - template: azure/user-install-matrix.yml
+      - template: user-install-matrix.yml
         parameters:
           vmImage: "macOS-latest"
 
@@ -65,7 +65,7 @@ stages:
     dependsOn: user_install_macOS
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
-      - template: azure/dev-install-matrix.yml
+      - template: dev-install-matrix.yml
         parameters:
           vmImage: "macOS-latest"
 
@@ -73,7 +73,7 @@ stages:
     dependsOn: []
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
-      - template: azure/user-install-matrix.yml
+      - template: user-install-matrix.yml
         parameters:
           vmImage: "windows-latest"
 
@@ -81,6 +81,6 @@ stages:
     dependsOn: user_install_windows
     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
     jobs:
-      - template: azure/dev-install-matrix.yml
+      - template: dev-install-matrix.yml
         parameters:
           vmImage: "windows-latest"
