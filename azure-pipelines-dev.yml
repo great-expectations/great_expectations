@@ -373,8 +373,13 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest tests/test_definitions tests/expectations \
+                --mysql \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
 
             displayName: 'pytest'
             env:
@@ -416,8 +421,13 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest tests/test_definitions tests/expectations \
+                --mssql \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
 
             displayName: 'pytest'
             env:
@@ -465,8 +475,13 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest tests/test_definitions tests/expectations \
+                --trino \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
 
             displayName: 'pytest'
             env:
