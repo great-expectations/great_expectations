@@ -412,11 +412,17 @@ class CloudDataContext(AbstractDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
-            existing_expectation_suite: ExpectationSuite = self.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-            ge_cloud_id = existing_expectation_suite.ge_cloud_id
-            expectation_suite.ge_cloud_id = ge_cloud_id
+            identifiers: Optional[
+                Union[List[str], List[GeCloudIdentifier]]
+            ] = self.list_expectation_suites()
+            if identifiers:
+                for ge_cloud_identifier in identifiers:
+                    if isinstance(ge_cloud_identifier, GeCloudIdentifier):
+                        ge_cloud_identifier_tuple = ge_cloud_identifier.to_tuple()
+                        name: str = ge_cloud_identifier_tuple[2]
+                        if name == expectation_suite_name:
+                            ge_cloud_id = ge_cloud_identifier_tuple[1]
+                            expectation_suite.ge_cloud_id = ge_cloud_id
 
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
