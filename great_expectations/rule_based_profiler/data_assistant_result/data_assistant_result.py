@@ -411,7 +411,7 @@ class DataAssistantResult(SerializableDictDot):
         return auxiliary_info
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value,
+        event_name=UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE,
         args_payload_fn=get_expectation_suite_usage_statistics,
     )
     def _get_expectation_suite_with_usage_statistics(

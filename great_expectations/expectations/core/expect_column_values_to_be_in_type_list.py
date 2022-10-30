@@ -18,12 +18,12 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
     _get_dialect_type_module,
     _native_type_type_map,
 )
-from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.expectations.util import (
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
+from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.render import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent

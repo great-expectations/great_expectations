@@ -151,7 +151,7 @@
       {
         "title": "negative_case_all_null_values_bigquery_nones",
         "exact_match_out": false,
-        "only_for": ["bigquery_cfe"],
+        "only_for": ["bigquery_v3_api"],
         "in": {
           "column": "null"
         },
