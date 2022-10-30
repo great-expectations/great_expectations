@@ -166,10 +166,20 @@ stages:
       vmImage: 'ubuntu-18.04'
 
     jobs:
-      - job: compatibility_matrix
+      # Runs pytest without any additional flags
+      - job: minimal
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        variables:
-          GE_pytest_opts: '--no-sqlalchemy'
+        strategy:
+          # This matrix is intended to split up our sizeable test suite into two distinct components.
+          # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
+          # at the cost of an additional Azure worker.
+          #
+          # To work as intended, "standard" and "slow" should be equally performant.
+          matrix:
+            standard:
+              pytest_args: 'tests --ignore "tests/rule_based_profiler"'
+            slow:
+              pytest_args: 'tests/rule_based_profiler'
 
         steps:
           - task: UsePythonVersion@0
@@ -206,8 +216,18 @@ stages:
 
           - script: |
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit and not e2e' --durations=10
+              pytest $(pytest_args) \
+                --no-sqlalchemy \
+                --ignore 'tests/cli' \
+                --ignore 'contrib/cli/tests' \
+                --ignore 'tests/integration/usage_statistics' \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html \
+                -m 'not unit and not e2e' \
+                --durations=10
 
             displayName: 'pytest'
             env:
@@ -225,15 +245,23 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
+      # Runs pytest with Spark and Postgres enabled
       - job: comprehensive
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
+        strategy:
+          # This matrix is intended to split up our sizeable test suite into two distinct components.
+          # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
+          # at the cost of an additional Azure worker.
+          #
+          # To work as intended, "standard" and "slow" should be equally performant.
+          matrix:
+            standard:
+              pytest_args: 'tests --ignore "tests/rule_based_profiler"'
+            slow:
+              pytest_args: 'tests/rule_based_profiler'
 
         services:
           postgres: postgres
-
-        variables:
-          GE_pytest_opts: '--postgresql --spark'
 
         steps:
           - task: UsePythonVersion@0
@@ -259,19 +287,22 @@ stages:
               pip install pytest-cov pytest-azurepipelines
 
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not e2e'
+              pytest $(pytest_args) \
+                --postgresql \
+                --spark \
+                --ignore 'tests/cli' \
+                --ignore 'contrib/cli/tests' \
+                --ignore 'tests/integration/usage_statistics' \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html \
+                -m 'not e2e'
 
             displayName: 'pytest'
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
-
-          - script: |
-              # These are tests that are specific to Great Expectations Cloud.
-              # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest tests --cloud -m "cloud and not e2e"
-
-            displayName: 'cloud-overrides'
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -329,7 +360,6 @@ stages:
     jobs:
       - job: mysql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
 
         services:
           mysql: mysql
@@ -387,7 +417,6 @@ stages:
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
 
         services:
           mssql: mssql
@@ -435,7 +464,6 @@ stages:
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
 
         services:
           trino: trino
