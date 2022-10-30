@@ -30,7 +30,7 @@ stages:
               python.version: '3.9'
         steps:
           - bash: |
-              TAG="greatexpectations:py$(python.version)" 
+              TAG="greatexpectations:py$(python.version)"
               BUILD="docker buildx build -f docker/Dockerfile.tests --tag ${TAG} "
               BUILD+="--target test --build-arg PYTHON_VERSION=$(python.version) ."
               echo ${BUILD}
@@ -47,4 +47,3 @@ stages:
               GE_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
               GE_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
             displayName: 'Cloud integration Tests'
-
