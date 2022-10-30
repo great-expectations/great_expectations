@@ -166,23 +166,23 @@ def mocked_get_response(
 
 
 @pytest.fixture
-def mock_get_expectation_suite() -> mock.MagicMock:
-    """
-    Expects a return value to be set within the test function.
-    """
-    with mock.patch(
-        "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.get_expectation_suite",
-    ) as mock_method:
-        yield mock_method
-
-
-@pytest.fixture
 def mock_list_expectation_suite_names() -> mock.MagicMock:
     """
     Expects a return value to be set within the test function.
     """
     with mock.patch(
         "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.list_expectation_suite_names",
+    ) as mock_method:
+        yield mock_method
+
+
+@pytest.fixture
+def mock_list_expectation_suites() -> mock.MagicMock:
+    """
+    Expects a return value to be set within the test function.
+    """
+    with mock.patch(
+        "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.list_expectation_suites",
     ) as mock_method:
         yield mock_method
 
@@ -262,7 +262,7 @@ def test_create_expectation_suite_saves_suite_to_cloud(
 def test_create_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: BaseDataContext,
     mock_list_expectation_suite_names: mock.MagicMock,
-    mock_get_expectation_suite: mock.MagicMock,
+    mock_list_expectation_suites: mock.MagicMock,
     suite_1: SuiteIdentifierTuple,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
@@ -275,9 +275,13 @@ def test_create_expectation_suite_overwrites_existing_suite(
         "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.expectations_store"
     ):
         mock_list_expectation_suite_names.return_value = existing_suite_names
-        mock_get_expectation_suite.return_value = ExpectationSuite(
-            expectation_suite_name=suite_name, ge_cloud_id=suite_id
-        )
+        mock_list_expectation_suites.return_value = [
+            GeCloudIdentifier(
+                resource_type=GeCloudRESTResource.EXPECTATION,
+                ge_cloud_id=suite_id,
+                resource_name=suite_name,
+            )
+        ]
         suite = context.create_expectation_suite(
             expectation_suite_name=suite_name, overwrite_existing=True
         )
