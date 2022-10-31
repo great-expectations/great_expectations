@@ -210,7 +210,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return True
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
     )
     def __init__(
         self,
@@ -463,7 +463,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self._synchronize_self_with_underlying_data_context()
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
         args_payload_fn=run_validation_operator_usage_statistics,
     )
     def run_validation_operator(
@@ -740,7 +740,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return res
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         args_payload_fn=save_expectation_suite_usage_statistics,
     )
     def save_expectation_suite(
@@ -785,7 +785,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         return None
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
     )
     def build_data_docs(
         self,
@@ -1196,7 +1196,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             ge_cloud_mode=self.ge_cloud_mode,
         )
 
-    def list_expectation_suites(self) -> Optional[List[str]]:
+    def list_expectation_suites(
+        self,
+    ) -> Optional[Union[List[str], List[GeCloudIdentifier]]]:
         """
         See parent 'AbstractDataContext.list_expectation_suites()` for more information.
         """

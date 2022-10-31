@@ -143,7 +143,6 @@ exclude = [
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
     'validator/exception_info\.py', # 1
-    'validator/validation_graph\.py',  # 2
     'validator/validator\.py', # 54
 ]
 

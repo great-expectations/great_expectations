@@ -1,4 +1,6 @@
-from typing import Dict, List, Optional, Set
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional, Set
 
 import numpy as np
 
@@ -20,6 +22,11 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.base_data_context import (
+        BaseDataContext,
+    )
 
 
 class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
@@ -46,7 +53,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[BaseDataContext] = None,
     ) -> None:
         """
         Args:

@@ -123,6 +123,9 @@ if TYPE_CHECKING:
         CheckpointStore,
         EvaluationParameterStore,
     )
+    from great_expectations.data_context.types.resource_identifiers import (
+        GeCloudIdentifier,
+    )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
@@ -499,7 +502,7 @@ class AbstractDataContext(ABC):
         return updated_datasource
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
         args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
@@ -1137,7 +1140,7 @@ class AbstractDataContext(ABC):
         )
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
     )
     def run_checkpoint(
         self,
@@ -1234,7 +1237,9 @@ class AbstractDataContext(ABC):
         sorted_expectation_suite_names.sort()
         return sorted_expectation_suite_names
 
-    def list_expectation_suites(self) -> Optional[List[str]]:
+    def list_expectation_suites(
+        self,
+    ) -> Optional[Union[List[str], List[GeCloudIdentifier]]]:
         """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
@@ -1297,9 +1302,12 @@ class AbstractDataContext(ABC):
             )
             > 1
         ):
+            ge_cloud_mode = getattr(  # attr not on AbstractDataContext
+                self, "ge_cloud_mode"
+            )
             raise ValueError(
-                "No more than one of expectation_suite_name,"  # type: ignore[attr-defined]
-                f"{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''}"
+                "No more than one of expectation_suite_name,"
+                f"{'expectation_suite_ge_cloud_id,' if ge_cloud_mode else ''}"
                 " expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
@@ -1424,7 +1432,7 @@ class AbstractDataContext(ABC):
         return validator
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
         args_payload_fn=get_batch_list_usage_statistics,
     )
     def get_batch_list(
@@ -1679,7 +1687,7 @@ class AbstractDataContext(ABC):
         )
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
     )
     def run_profiler_with_dynamic_arguments(
         self,
@@ -1719,7 +1727,7 @@ class AbstractDataContext(ABC):
         )
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
     )
     def run_profiler_on_data(
         self,
@@ -2110,7 +2118,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return batch_kwargs
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS.value,
+        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
     )
     def open_data_docs(
         self,
