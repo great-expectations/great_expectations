@@ -758,7 +758,7 @@ def mysql_engine(test_backend):
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
-        pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
+        pytest.skip("Skipping test designed for mysql on non-mysql backend.")
 
 
 @pytest.fixture(scope="function")
