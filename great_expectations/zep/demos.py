@@ -3,7 +3,7 @@ from typing import Dict, List
 
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.zep.context import get_context
-from great_expectations.zep.interfaces import DataAsset
+from great_expectations.zep.interfaces import DataAsset, Datasource
 from great_expectations.zep.metadatasource import MetaDatasource
 
 if __name__ == "__main__":
@@ -23,7 +23,7 @@ class MyOtherAsset(DataAsset):
     bar: List[int]
 
 
-class PandasDatasource(metaclass=MetaDatasource):
+class PandasDatasource(Datasource):
 
     execution_engine = PandasExecutionEngine()
     asset_types = [FileAsset, MyOtherAsset]
