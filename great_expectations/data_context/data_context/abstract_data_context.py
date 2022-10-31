@@ -550,8 +550,6 @@ class AbstractDataContext(ABC):
             initialize=initialize,
             save_changes=save_changes,
         )
-        if datasource:
-            datasource.update_config(original_config)
         return datasource
 
     def update_datasource(
@@ -2860,6 +2858,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 datasource = self._instantiate_datasource_from_config(
                     config=substituted_config
                 )
+                # Sanitize instantiated object's config attr to remove any credentials with their ${VARIABLES} counterparts
                 datasource.update_config(config)
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:

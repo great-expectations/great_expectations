@@ -2,11 +2,6 @@ import copy
 import logging
 import warnings
 
-from great_expectations.core.serializer import DictConfigSerializer
-from great_expectations.data_context.types.base import (
-    DatasourceConfig,
-    datasourceConfigSchema,
-)
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
@@ -200,14 +195,6 @@ class LegacyDatasource:
     @property
     def config(self):
         return copy.deepcopy(self._datasource_config)
-
-    def update_config(self, config: DatasourceConfig) -> None:
-        """
-        See `BaseDatasource.update_config()` for more information - duplicated for legacy parity.
-        """
-        substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        raw_config: dict = substitution_serializer.serialize(config)
-        self._datasource_config.update(raw_config)
 
     @property
     def data_context(self):
