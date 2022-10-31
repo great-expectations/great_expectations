@@ -413,7 +413,7 @@ class DataContext(BaseDataContext):
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = super().add_datasource(
-            name=name, save_changes=True, **kwargs  # type: ignore[arg-type]
+            name=name, **kwargs  # type: ignore[arg-type]
         )
         return new_datasource
 
@@ -431,12 +431,11 @@ class DataContext(BaseDataContext):
 
         super().update_datasource(
             datasource=datasource,
-            save_changes=True,
         )
 
     def delete_datasource(self, name: str) -> None:  # type: ignore[override]
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
-        super().delete_datasource(datasource_name=name, save_changes=True)
+        super().delete_datasource(datasource_name=name)
         self._save_project_config()
 
     def add_profiler(

@@ -449,7 +449,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             yaml.dump(config_variables, config_variables_file)
 
     def delete_datasource(  # type: ignore[override]
-        self, datasource_name: str, save_changes: bool = False
+        self, datasource_name: str, save_changes: Optional[bool] = None
     ) -> None:
         """Delete a data source
         Args:
@@ -632,7 +632,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         self,
         name: str,
         initialize: bool = True,
-        save_changes: bool = False,
+        save_changes: Optional[bool] = None,
         **kwargs: dict,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """
@@ -645,7 +645,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             name (str): Name of Datasource
             initialize (bool): Should GE add and initialize the Datasource? If true then current
                 method will return initialized Datasource
-            save_changes (bool): should GE save the Datasource config?
+            save_changes (Optional[bool]): should GE save the Datasource config?
             **kwargs Optional[dict]: Additional kwargs that define Datasource initialization kwargs
 
         Returns:

@@ -2836,7 +2836,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self,
         config: DatasourceConfig,
         initialize: bool = True,
-        save_changes: Optional[bool] = None,
+        save_changes: bool = False,  # Specifically deviate from other uses of this flag due to usage in `test_yaml_config`
     ) -> Optional[Datasource]:
         """Perform substitutions and optionally initialize the Datasource and/or store the config.
 
