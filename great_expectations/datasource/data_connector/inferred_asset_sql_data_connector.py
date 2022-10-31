@@ -10,10 +10,12 @@ from great_expectations.util import deep_filter_properties_iterable
 try:
     import sqlalchemy as sa
     from sqlalchemy.engine import Engine
+    from sqlalchemy.engine.reflection import Inspector
     from sqlalchemy.exc import OperationalError
 except ImportError:
     sa = None
     Engine = None
+    Inspector = None
     OperationalError = None
 
 
@@ -191,7 +193,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             system_tables = ["sqlite_master"]  # sqlite
 
         engine: Engine = self.execution_engine.engine
-        inspector = sa.inspect(engine)
+        inspector: Inspector = sa.inspect(engine)
 
         selected_schema_name = schema_name
 
@@ -207,7 +209,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             if selected_schema_name is not None and schema_name != selected_schema_name:
                 continue
 
-            for table_name in inspector.get_table_names(schema=schema_name):
+            table_names: List[str] = inspector.get_table_names(schema=schema_name)
+            for table_name in table_names:
                 if ignore_information_schemas_and_system_tables and (
                     table_name in system_tables
                 ):
