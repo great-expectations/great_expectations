@@ -14,7 +14,9 @@ not by itself.
             split_query_or_clause = splitter()
 """
 
-from typing import List, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
@@ -41,6 +43,11 @@ except ImportError:
     BooleanClauseList = None
     Label = None
     concat = None
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+        SqlAlchemyExecutionEngine,
+    )
 
 
 class SqlAlchemyDataSplitter(DataSplitter):
@@ -330,7 +337,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         splitter_method_name: str,
         splitter_kwargs: dict,
@@ -385,7 +392,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers_year(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
     ) -> List[dict]:
@@ -411,7 +418,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers_year_and_month(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
     ) -> List[dict]:
@@ -437,7 +444,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers_year_and_month_and_day(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
     ) -> List[dict]:
@@ -559,7 +566,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers_for_split_on_date_parts(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
         date_parts: Union[List[DatePart], List[str]],
@@ -596,8 +603,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     @staticmethod
     def _execute_split_query(
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
-        split_query: Selectable,  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
+        split_query: Selectable,
     ) -> List[LegacyRow]:
         """Use the provided execution engine to run the split query and fetch all of the results.
 
@@ -650,7 +657,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers_for_non_date_part_splitters(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         splitter_method_name: str,
         splitter_kwargs: dict,
@@ -703,7 +710,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
             return self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
                 processed_splitter_method_name
             ]
-        except ValueError as e:
+        except ValueError:
             raise ge_exceptions.InvalidConfigError(
                 f"Please provide a supported splitter method name, you provided: {splitter_method_name}"
             )

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import locale
 import logging
@@ -1209,7 +1211,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
     sqlite_db_path=None,
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional[DataContext] = None,
 ):
     """Utility to create datasets for json-formatted tests."""
 
@@ -1389,7 +1391,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
-    context: Optional["DataContext"] = None,  # noqa: F821
+    context: Optional[DataContext] = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
     return Validator(
@@ -1753,7 +1755,6 @@ def candidate_test_is_on_temporary_notimplemented_list_v2_api(
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_in_set",
             "expect_select_column_values_to_be_unique_within_record",
             "expect_compound_columns_to_be_unique",
             "expect_multicolumn_values_to_be_unique",

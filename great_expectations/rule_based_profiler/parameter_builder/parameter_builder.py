@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import decimal
 import itertools
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -47,6 +49,12 @@ from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.base_data_context import (
+        BaseDataContext,
+    )
+    from great_expectations.validator.validator import Validator
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -79,7 +87,7 @@ class ParameterBuilder(ABC, Builder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[BaseDataContext] = None,
     ) -> None:
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
@@ -183,7 +191,7 @@ class ParameterBuilder(ABC, Builder):
     @property
     def evaluation_parameter_builders(
         self,
-    ) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
+    ) -> Optional[List[ParameterBuilder]]:
         return self._evaluation_parameter_builders
 
     @property
@@ -227,7 +235,7 @@ class ParameterBuilder(ABC, Builder):
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Optional["Validator"]:  # noqa: F821
+    ) -> Optional[Validator]:
         return get_validator_using_batch_list_or_batch_request(
             purpose="parameter_builder",
             data_context=self.data_context,
@@ -396,7 +404,7 @@ specified (empty "metric_name" value detected)."""
         # Step-5: Resolve all metrics in one operation simultaneously.
 
         # The Validator object used for metric calculation purposes.
-        validator: "Validator" = self.get_validator(  # noqa: F821
+        validator: Validator = self.get_validator(
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -510,7 +518,7 @@ specified (empty "metric_name" value detected)."""
 
     @staticmethod
     def _sanitize_metric_computation(
-        parameter_builder: "ParameterBuilder",  # noqa: F821
+        parameter_builder: ParameterBuilder,
         metric_name: str,
         attributed_resolved_metrics: AttributedResolvedMetrics,
         enforce_numeric_metric: Union[str, bool] = False,
@@ -653,8 +661,8 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(t
 
 def init_rule_parameter_builders(
     parameter_builder_configs: Optional[List[dict]] = None,
-    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
+    data_context: Optional[BaseDataContext] = None,
+) -> Optional[List[ParameterBuilder]]:
     if parameter_builder_configs is None:
         return None
 
@@ -668,13 +676,13 @@ def init_rule_parameter_builders(
 
 
 def init_parameter_builder(
-    parameter_builder_config: Union["ParameterBuilderConfig", dict],  # noqa: F821
-    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-) -> "ParameterBuilder":  # noqa: F821
+    parameter_builder_config: Union[ParameterBuilderConfig, dict],
+    data_context: Optional[BaseDataContext] = None,
+) -> ParameterBuilder:
     if not isinstance(parameter_builder_config, dict):
         parameter_builder_config = parameter_builder_config.to_dict()
 
-    parameter_builder: "ParameterBuilder" = instantiate_class_from_config(  # noqa: F821
+    parameter_builder: ParameterBuilder = instantiate_class_from_config(
         config=parameter_builder_config,
         runtime_environment={"data_context": data_context},
         config_defaults={
@@ -685,7 +693,7 @@ def init_parameter_builder(
 
 
 def resolve_evaluation_dependencies(
-    parameter_builder: "ParameterBuilder",  # noqa: F821
+    parameter_builder: ParameterBuilder,
     domain: Domain,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -699,7 +707,7 @@ def resolve_evaluation_dependencies(
 
     # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
     evaluation_parameter_builders: List[
-        "ParameterBuilder"  # noqa: F821
+        ParameterBuilder
     ] = parameter_builder.evaluation_parameter_builders
 
     if not evaluation_parameter_builders:
@@ -718,7 +726,7 @@ def resolve_evaluation_dependencies(
 
     # Step-3: Check for presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
     # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
-    evaluation_parameter_builder: "ParameterBuilder"  # noqa: F821
+    evaluation_parameter_builder: ParameterBuilder
     for evaluation_parameter_builder in evaluation_parameter_builders:
         if (
             evaluation_parameter_builder.raw_fully_qualified_parameter_name

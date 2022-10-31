@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
@@ -150,14 +152,14 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
         _result_hash: int = hash(self.id)
         return _result_hash
 
-    def is_superset(self, other: "Domain") -> bool:  # noqa: F821
+    def is_superset(self, other: Domain) -> bool:
         """Determines if other "Domain" object (provided as argument) is contained within this "Domain" object."""
         if other is None:
             return True
 
         return other.is_subset(other=self)
 
-    def is_subset(self, other: "Domain") -> bool:  # noqa: F821
+    def is_subset(self, other: Domain) -> bool:
         """Determines if this "Domain" object is contained within other "Domain" object (provided as argument)."""
         if other is None:
             return False
@@ -205,7 +207,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 
     def _convert_dictionaries_to_domain_kwargs(
         self, source: Optional[Any] = None
-    ) -> Optional[Union[Any, "Domain"]]:  # noqa: F821
+    ) -> Optional[Union[Any, Domain]]:
         if source is None:
             return None
 

@@ -5,7 +5,7 @@ import datetime
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
@@ -61,6 +61,9 @@ from great_expectations.validation_operators.types.validation_operator_result im
 )
 from great_expectations.validator.validator import Validator
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext, DataContext
+
 logger = logging.getLogger(__name__)
 
 
@@ -73,7 +76,7 @@ class BaseCheckpoint(ConfigPeer):
     def __init__(
         self,
         checkpoint_config: CheckpointConfig,
-        data_context: "DataContext",  # noqa: F821
+        data_context: DataContext,
     ) -> None:
         from great_expectations.data_context.data_context.abstract_data_context import (
             AbstractDataContext,
@@ -93,7 +96,7 @@ class BaseCheckpoint(ConfigPeer):
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
     #  while run_name_template also undergoes strftime datetime substitution
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.CHECKPOINT_RUN.value,
+        event_name=UsageStatsEvents.CHECKPOINT_RUN,
         args_payload_fn=get_checkpoint_run_usage_statistics,
     )
     def run(
@@ -517,7 +520,7 @@ is run), with each validation having its own defined "action_list" attribute.
             return None
 
     @property
-    def data_context(self) -> "DataContext":  # noqa: F821
+    def data_context(self) -> DataContext:
         return self._data_context
 
     def __repr__(self) -> str:
@@ -548,7 +551,7 @@ class Checkpoint(BaseCheckpoint):
     def __init__(
         self,
         name: str,
-        data_context: "DataContext",  # noqa: F821
+        data_context: AbstractDataContext,
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
@@ -680,7 +683,7 @@ constructor arguments.
 
     @staticmethod
     def construct_from_config_args(
-        data_context: "DataContext",  # noqa: F821
+        data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
         config_version: Optional[Union[int, float]] = None,
@@ -773,7 +776,7 @@ constructor arguments.
     @staticmethod
     def instantiate_from_config_with_runtime_args(
         checkpoint_config: CheckpointConfig,
-        data_context: "DataContext",  # noqa: F821
+        data_context: AbstractDataContext,
         **runtime_kwargs,
     ) -> Checkpoint:
         config: dict = checkpoint_config.to_json_dict()

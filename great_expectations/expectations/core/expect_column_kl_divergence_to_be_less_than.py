@@ -1,4 +1,5 @@
-from typing import Any, Dict, Optional, Tuple
+import logging
+from typing import Any, Dict, Optional, Set, Tuple, Union
 
 import altair as alt
 import numpy as np
@@ -35,9 +36,12 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
-from great_expectations.validator.validator import Validator
+
+logger = logging.getLogger(__name__)
+logging.captureWarnings(True)
 
 
 class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
@@ -246,16 +250,27 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 # Note: 20201116 - JPC - the execution engine doesn't provide capability to evaluate
                 # dependencies, so we use a validator
                 #
-                validator = Validator(execution_engine=execution_engine)
-                graph = ValidationGraph()
-                validator.metrics_calculator.build_metric_dependency_graph(
-                    graph=graph,
+                graph = ValidationGraph(execution_engine=execution_engine)
+                graph.build_metric_dependency_graph(
                     metric_configuration=partition_metric_configuration,
                 )
+
                 resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
-                validator.metrics_calculator.resolve_validation_graph(
-                    graph=graph, metrics=resolved_metrics
+
+                # updates graph with aborted metrics
+                aborted_metrics_info: Dict[
+                    Tuple[str, str, str],
+                    Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+                ] = graph.resolve_validation_graph(
+                    metrics=resolved_metrics,
+                    runtime_configuration=None,
                 )
+
+                if aborted_metrics_info:
+                    logger.warning(
+                        f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
+                    )
+
                 bins = resolved_metrics[partition_metric_configuration.id]
                 hist_metric_configuration = MetricConfiguration(
                     "column.histogram",
