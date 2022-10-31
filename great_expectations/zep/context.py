@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type, Union, ClassVar
+from typing import TYPE_CHECKING, Callable, ClassVar, Dict, List, Optional, Type, Union
 
 from great_expectations.util import camel_to_snake
 from great_expectations.zep.interfaces import DataAsset, Datasource
@@ -133,7 +133,7 @@ class DataContext:
     Use `great_expectations.get_context()` for a real DataContext.
     """
 
-    _context: ClassVar[DataContext] = None
+    _context: ClassVar[Optional[DataContext]] = None
     _datasources: Dict[str, Datasource]
 
     @classmethod
