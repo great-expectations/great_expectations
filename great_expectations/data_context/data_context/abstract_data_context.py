@@ -532,14 +532,14 @@ class AbstractDataContext(ABC):
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
-        config: Union[CommentedMap, dict]
+        original_config: Union[CommentedMap, dict]
         if hasattr(datasource_class, "build_configuration"):
-            config = datasource_class.build_configuration(**kwargs)
+            original_config = datasource_class.build_configuration(**kwargs)
         else:
-            config = kwargs
+            original_config = kwargs
 
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
-            CommentedMap(**config)
+            CommentedMap(**original_config)
         )
         datasource_config.name = name
 
@@ -550,6 +550,8 @@ class AbstractDataContext(ABC):
             initialize=initialize,
             save_changes=save_changes,
         )
+        if datasource:
+            datasource.update_config(original_config)
         return datasource
 
     def update_datasource(
@@ -2858,7 +2860,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 datasource = self._instantiate_datasource_from_config(
                     config=substituted_config
                 )
-                datasource.replace_config(config)
+                datasource.update_config(config)
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.

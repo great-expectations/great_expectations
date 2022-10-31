@@ -190,10 +190,8 @@ class _YamlConfigValidator:
 
         usage_stats_event_name: str = "data_context.test_yaml_config"
 
-        # Chetan - 20221031 -   Based on the particular object type we are attempting to instantiate,
-        # we might need the original config or the substituted config. We should standardize this
-        # such that the various private helper methods below are responsible for substitutions
-        # whenever needed.
+        # Based on the particular object type we are attempting to instantiate,
+        # we may need the original config, the substituted config, or both.
         config = self._test_yaml_config_prepare_config(
             yaml_config=yaml_config, usage_stats_event_name=usage_stats_event_name
         )
@@ -432,8 +430,6 @@ class _YamlConfigValidator:
                 save_changes=False,
             ),
         )
-
-        instantiated_class.replace_config(datasource_config)
 
         anonymizer = Anonymizer(self._data_context.data_context_id)
 
