@@ -2409,7 +2409,6 @@ def test_include_schema_name_introspection_postgres(postgresql_sqlalchemy_dataso
         for table in my_data_connector._introspect_db()
         if table["type"] == "table"
     ]
-    assert len(introspected_tables) == 152
 
     introspected_schemas = {table.get("schema_name") for table in introspected_tables}
     assert introspected_schemas == {"connection_test", "public"}
