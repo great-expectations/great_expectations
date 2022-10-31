@@ -1196,7 +1196,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             ge_cloud_mode=self.ge_cloud_mode,
         )
 
-    def list_expectation_suites(self) -> Optional[List[str]]:
+    def list_expectation_suites(
+        self,
+    ) -> Optional[Union[List[str], List[GeCloudIdentifier]]]:
         """
         See parent 'AbstractDataContext.list_expectation_suites()` for more information.
         """

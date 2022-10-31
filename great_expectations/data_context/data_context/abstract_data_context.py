@@ -123,6 +123,9 @@ if TYPE_CHECKING:
         CheckpointStore,
         EvaluationParameterStore,
     )
+    from great_expectations.data_context.types.resource_identifiers import (
+        GeCloudIdentifier,
+    )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
@@ -1234,7 +1237,9 @@ class AbstractDataContext(ABC):
         sorted_expectation_suite_names.sort()
         return sorted_expectation_suite_names
 
-    def list_expectation_suites(self) -> Optional[List[str]]:
+    def list_expectation_suites(
+        self,
+    ) -> Optional[Union[List[str], List[GeCloudIdentifier]]]:
         """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()

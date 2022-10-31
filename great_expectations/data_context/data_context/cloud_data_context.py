@@ -11,6 +11,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.serializer import JsonConfigSerializer
+from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -246,7 +247,7 @@ class CloudDataContext(AbstractDataContext):
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
             )
-            or "https://app.greatexpectations.io/"
+            or CLOUD_DEFAULT_BASE_URL
         )
         ge_cloud_organization_id = (
             ge_cloud_organization_id
@@ -412,11 +413,17 @@ class CloudDataContext(AbstractDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
-            existing_expectation_suite: ExpectationSuite = self.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-            ge_cloud_id = existing_expectation_suite.ge_cloud_id
-            expectation_suite.ge_cloud_id = ge_cloud_id
+            identifiers: Optional[
+                Union[List[str], List[GeCloudIdentifier]]
+            ] = self.list_expectation_suites()
+            if identifiers:
+                for ge_cloud_identifier in identifiers:
+                    if isinstance(ge_cloud_identifier, GeCloudIdentifier):
+                        ge_cloud_identifier_tuple = ge_cloud_identifier.to_tuple()
+                        name: str = ge_cloud_identifier_tuple[2]
+                        if name == expectation_suite_name:
+                            ge_cloud_id = ge_cloud_identifier_tuple[1]
+                            expectation_suite.ge_cloud_id = ge_cloud_id
 
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
