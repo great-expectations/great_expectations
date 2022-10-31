@@ -3,10 +3,13 @@ POC for dynamically bootstrapping context.sources with Datasource factory method
 """
 from __future__ import annotations
 
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, TYPE_CHECKING
 
 from great_expectations.util import camel_to_snake
 from great_expectations.zep.interfaces import Datasource
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.data_context import DataContext as GXDataContext
 
 SourceFactoryFn = Callable[..., Datasource]
 
@@ -21,6 +24,9 @@ def _remove_suffix(s: str, suffix: str) -> str:
 class _SourceFactories:
 
     __source_factories: Dict[str, SourceFactoryFn] = {}
+
+    def __init__(self, data_context: GXDataContext):
+        self._data_context = data_context
 
     @classmethod
     def register_factory(
@@ -58,7 +64,13 @@ class _SourceFactories:
 
     def __getattr__(self, name):
         try:
-            return self.__source_factories[name]
+            fn = self.__source_factories[name]
+
+            def wrapped(*args, **kwargs):
+                datasource = fn(*args, **kwargs)
+                self._data_context.add_zep_datasource(datasource)
+                return datasource
+            return wrapped
         except KeyError:
             raise AttributeError(name)
 
@@ -66,8 +78,8 @@ class _SourceFactories:
         return ["register_factory", "factories", *self.factories]
 
 
-class MetaDatasouce(type):
-    def __new__(meta_cls, cls_name, bases, cls_dict) -> MetaDatasouce:
+class MetaDatasource(type):
+    def __new__(meta_cls, cls_name, bases, cls_dict) -> MetaDatasource:
         print(f"1. {meta_cls.__name__}.__new__() for `{cls_name}`")
 
         cls = type(cls_name, bases, cls_dict)
@@ -77,12 +89,11 @@ class MetaDatasouce(type):
             print(f"5. Adding `{args[0] if args else ''}` {cls_name}")
             return cls(*args, **kwargs)
 
-        sources = _SourceFactories()
         # TODO: generate schemas from `cls` if needed
 
         # TODO: extract asset type details
 
-        sources.register_factory(cls, _datasource_factory)
+        _SourceFactories.register_factory(cls, _datasource_factory)
 
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
 
@@ -91,7 +102,7 @@ class MetaDatasouce(type):
 #     pass
 
 
-# class PandasDatasource(metaclass=MetaDatasouce):
+# class PandasDatasource(metaclass=MetaDatasource):
 
 #     asset_types = [FileAsset]
 
@@ -111,7 +122,7 @@ class MetaDatasouce(type):
 #     pass
 
 
-# class PostgresDatasource(metaclass=MetaDatasouce):
+# class PostgresDatasource(metaclass=MetaDatasource):
 #     asset_types = [TableAsset]
 
 #     def __init__(self, name: str, connection_str: str):

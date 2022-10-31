@@ -1,11 +1,18 @@
+from __future__ import annotations
+
 import dataclasses
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.zep.interfaces import Batch, BatchRequestOptions, BatchRequest, DataAsset, Datasource
-from great_expectations.zep.metadatasource import MetaDatasouce
-
+from great_expectations.zep.interfaces import (
+    Batch,
+    BatchRequest,
+    BatchRequestOptions,
+    DataAsset,
+    Datasource,
+)
+from great_expectations.zep.metadatasource import MetaDatasource
 
 # DataAssets can be thought of as a way to connect to a datasource and a collection of templates. When the template
 # values are specified, this results in a batch. The possible templates are the Optional fields in the DataAsset
@@ -51,9 +58,9 @@ class TableAsset(DataAsset[TableAssetOptions]):
     def datasource(self):
         return self._datasource
 
-    def add_splitter(self, splitter):
+    def add_splitter(self, splitter) -> TableAsset:
         self.splitter = splitter
-        # Update self._meta?
+        return self
 
     def get_batch_request(self, options: Optional[TableAssetOptions]=None) -> BatchRequest[TableAssetOptions]:
         return BatchRequest[TableAssetOptions](
@@ -63,7 +70,7 @@ class TableAsset(DataAsset[TableAssetOptions]):
         )
 
 
-class PostgresDatasource(metaclass=MetaDatasouce):
+class PostgresDatasource(metaclass=MetaDatasource):
     asset_types = [TableAsset]
 
     def __init__(self, name: str, connection_str: str):

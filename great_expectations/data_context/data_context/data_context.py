@@ -33,6 +33,13 @@ from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
+# BDIRKS: All ZEP logic should be moved to abstract_data_context.py. However, the class
+# currently BaseDataContext doesn't call super().__init__().
+from great_expectations.zep.metadatasource import _SourceFactories, Datasource as ZepDatasource
+import great_expectations.zep.postgres_datasource
+
+
+
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -234,6 +241,8 @@ class DataContext(BaseDataContext):
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
+        # BDIRKS BDIRKS this should all move to abstract_data_context
+        self._sources: _SourceFactories = _SourceFactories(self)
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = self._init_ge_cloud_config(
             ge_cloud_mode=ge_cloud_mode,
@@ -259,6 +268,15 @@ class DataContext(BaseDataContext):
         # Save project config if data_context_id auto-generated
         if self._check_for_usage_stats_sync(project_config):
             self._save_project_config()
+
+    def add_zep_datasource(self, datasource: ZepDatasource):
+        # BDIRKS may need to normalize name, check for collisions, etc.
+        self.datasources[datasource.name] = datasource
+
+    @property
+    def sources(self) -> _SourceFactories:
+        return self._sources
+
 
     def _init_ge_cloud_config(
         self,
