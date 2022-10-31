@@ -2365,6 +2365,8 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
 
     assert datasource_from_yaml.name == datasource_name
     assert datasource_from_yaml.config == {
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "PandasExecutionEngine",
             "module_name": "great_expectations.execution_engine",
@@ -2905,6 +2907,8 @@ def test_add_datasource_from_yaml_with_substitution_variables(
 
     assert datasource_from_yaml.name == datasource_name
     assert datasource_from_yaml.config == {
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "PandasExecutionEngine",
             "module_name": "great_expectations.execution_engine",
@@ -2914,7 +2918,7 @@ def test_add_datasource_from_yaml_with_substitution_variables(
                 "class_name": "InferredAssetFilesystemDataConnector",
                 "module_name": "great_expectations.datasource.data_connector",
                 "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
-                "base_directory": "../data",
+                "base_directory": "${SUBSTITUTED_BASE_DIRECTORY}",
                 "name": "data_dir_example_data_connector",
             }
         },
