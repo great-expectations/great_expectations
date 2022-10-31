@@ -46,11 +46,11 @@ def test_cli_datasource_list(
         catch_exceptions=False,
     )
     expected_output = """\
-Using v3 (Batch Request) API\x1b[0m
-1 Datasource found:[0m
-[0m
- - [36mname:[0m wow_a_datasource[0m
-   [36mclass_name:[0m SqlAlchemyDatasource[0m
+Using v3 (Batch Request) API
+1 Datasource found:
+
+ - name: wow_a_datasource
+   class_name: SqlAlchemyDatasource
 """.strip()
     stdout = result.stdout.strip()
 

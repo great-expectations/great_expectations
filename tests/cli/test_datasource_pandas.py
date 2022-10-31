@@ -75,11 +75,11 @@ def test_cli_datasource_list_on_project_with_one_datasource(
         catch_exceptions=False,
     )
 
-    expected_output = """Using v3 (Batch Request) API\x1b[0m
-1 Datasource found:[0m
-[0m
- - [36mname:[0m my_datasource[0m
-   [36mclass_name:[0m Datasource[0m
+    expected_output = """Using v3 (Batch Request) API
+1 Datasource found:
+
+ - name: my_datasource
+   class_name: Datasource
 """.strip()
     stdout = result.stdout.strip()
     assert stdout == expected_output
