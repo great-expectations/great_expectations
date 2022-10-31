@@ -74,10 +74,10 @@ stages:
         strategy:
           matrix:
             expectations_cfe:
-              test_script: 'tests/test_definitions/test_expectations_cfe.py'
+              test_script: 'tests/test_definitions/test_expectations_v3_api.py'
               extra_args: ''
             expectations:
-              test_script: 'tests/test_definitions/test_expectations.py'
+              test_script: 'tests/test_definitions/test_expectations_v2_api.py'
               extra_args: ''
           maxParallel: 1
         steps:
