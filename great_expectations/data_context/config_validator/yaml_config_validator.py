@@ -190,13 +190,19 @@ class _YamlConfigValidator:
 
         usage_stats_event_name: str = "data_context.test_yaml_config"
 
-        # Based on the particular object type we are attempting to instantiate,
-        config, config_with_substitutions = self._test_yaml_config_prepare_config(
+        # Chetan - 20221031 -   Based on the particular object type we are attempting to instantiate,
+        # we might need the original config or the substituted config. We should standardize this
+        # such that the various private helper methods below are responsible for substitutions
+        # whenever needed.
+        config = self._test_yaml_config_prepare_config(
+            yaml_config=yaml_config, usage_stats_event_name=usage_stats_event_name
+        )
+        config_with_substitutions = self._test_yaml_config_prepare_substituted_config(
             yaml_config, runtime_environment, usage_stats_event_name
         )
 
-        if "class_name" in config_with_substitutions:
-            class_name = config_with_substitutions["class_name"]
+        if "class_name" in config:
+            class_name = config["class_name"]
 
         instantiated_class: Any = None
         usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
@@ -216,7 +222,9 @@ class _YamlConfigValidator:
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_datasource_from_yaml_config(
-                    name, class_name, config
+                    name,
+                    class_name,
+                    config,  # Uses original config as substitutions are done downstream
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
                 (
@@ -297,12 +305,37 @@ class _YamlConfigValidator:
                 raise e
 
     def _test_yaml_config_prepare_config(
+        self, yaml_config: str, usage_stats_event_name: str
+    ) -> CommentedMap:
+        config = self._load_config_string_as_commented_map(
+            config_str=yaml_config,
+            usage_stats_event_name=usage_stats_event_name,
+        )
+        return config
+
+    def _test_yaml_config_prepare_substituted_config(
         self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
-    ) -> Tuple[CommentedMap, CommentedMap]:
+    ) -> CommentedMap:
         """
         Performs variable substitution and conversion from YAML to CommentedMap.
         See `test_yaml_config` for more details.
         """
+        config_str_with_substituted_variables = (
+            self._prepare_config_string_with_substituted_variables(
+                yaml_config=yaml_config,
+                runtime_environment=runtime_environment,
+                usage_stats_event_name=usage_stats_event_name,
+            )
+        )
+        config = self._load_config_string_as_commented_map(
+            config_str=config_str_with_substituted_variables,
+            usage_stats_event_name=usage_stats_event_name,
+        )
+        return config
+
+    def _prepare_config_string_with_substituted_variables(
+        self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
+    ) -> str:
         try:
             substituted_config_variables: Union[
                 DataContextConfig, dict
@@ -317,12 +350,13 @@ class _YamlConfigValidator:
                 **runtime_environment,
             }
 
-            config_str_with_substituted_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                yaml_config,
-                substitutions,
+            config_str_with_substituted_variables: str = (
+                substitute_all_config_variables(
+                    yaml_config,
+                    substitutions,
+                )
             )
+            return config_str_with_substituted_variables
         except Exception as e:
             usage_stats_event_payload: dict = {
                 "diagnostic_info": ["__substitution_error__"],
@@ -335,10 +369,12 @@ class _YamlConfigValidator:
             )
             raise e
 
+    def _load_config_string_as_commented_map(
+        self, config_str: str, usage_stats_event_name: str
+    ) -> CommentedMap:
         try:
-            config: CommentedMap = yaml.load(yaml_config)  # type: ignore[arg-type]
-            substituted_config: CommentedMap = yaml.load(config_str_with_substituted_variables)  # type: ignore[arg-type]
-            return config, substituted_config
+            substituted_config: CommentedMap = yaml.load(config_str)  # type: ignore[arg-type]
+            return substituted_config
 
         except Exception as e:
             usage_stats_event_payload = {
