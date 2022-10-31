@@ -406,6 +406,16 @@ class BaseDatasource:
         return copy.deepcopy(self._datasource_config)
 
     def replace_config(self, config: DatasourceConfig) -> None:
+        """
+        Replace the self._datasource_config attr of the instantiated Datasource with the
+        dictionary representation of another config.
+
+        This is primarily used to sanitize substituted credentials that may have been used
+        to instantiate the given object.
+
+        Args:
+            config (DatasourceConfig): The config to convert and use as the new attr.
+        """
         # We convert from the type back to a dictionary for purposes of instantiation
         serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         config_dict = serializer.serialize(config)

@@ -453,11 +453,6 @@ class _YamlConfigValidator:
             )
         return instantiated_class, usage_stats_event_payload
 
-    def _sanitize_instantiated_datasource_config(
-        self, datasource: Datasource, original_config: CommentedMap
-    ) -> None:
-        pass
-
     def _test_instantiation_of_checkpoint_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
     ) -> Tuple[Checkpoint, dict]:
