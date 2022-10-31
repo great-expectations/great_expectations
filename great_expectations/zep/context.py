@@ -9,9 +9,7 @@ from great_expectations.zep.interfaces import DataAsset, Datasource
 from great_expectations.zep.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.data_context import (
-        DataContext as GXDataContext,
-    )
+    from great_expectations.data_context import DataContext as GXDataContext
 
 SourceFactoryFn = Callable[..., Datasource]
 
