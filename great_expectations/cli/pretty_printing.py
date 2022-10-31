@@ -2,33 +2,23 @@ import re
 import sys
 from typing import List, Optional
 
-from termcolor import colored
+import click
 
 
 def cli_message(string: str) -> None:
-    print(cli_colorize_string(string))
+    click.echo(cli_colorize_string(string))
 
 
 def cli_colorize_string(string: str) -> str:
-    # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
-    flags = re.DOTALL
-    mod_string = re.sub(
-        "<blue>(.*?)</blue>", colored(r"\g<1>", "blue"), string, flags=flags
-    )
-    mod_string = re.sub(
-        "<cyan>(.*?)</cyan>", colored(r"\g<1>", "cyan"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<green>(.*?)</green>", colored(r"\g<1>", "green"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<yellow>(.*?)</yellow>", colored(r"\g<1>", "yellow"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<red>(.*?)</red>", colored(r"\g<1>", "red"), mod_string, flags=flags
-    )
-
-    return colored(mod_string)
+    colors = ("blue", "cyan", "green", "yellow", "red")
+    for color in colors:
+        string = re.sub(
+            f"<{color}>(.*?)</{color}>",
+            click.style(r"\g<1>", fg=color),
+            string,
+            flags=re.DOTALL,  # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
+        )
+    return string
 
 
 def display_not_implemented_message_and_exit() -> None:
