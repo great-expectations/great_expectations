@@ -3112,7 +3112,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "As support will be removed in v0.18, please omit the argument moving forward.",
                 DeprecationWarning,
             )
-            return False
+            return save_changes
         return True
 
     def test_yaml_config(  # noqa: C901 - complexity 17
