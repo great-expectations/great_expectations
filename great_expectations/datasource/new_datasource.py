@@ -406,6 +406,20 @@ class BaseDatasource:
         return copy.deepcopy(self._datasource_config)
 
     def update_config(self, config: DatasourceConfig) -> None:
+        """
+        Update the Datasource's `self._datasource_config` attribute with values from another config object.
+
+        The primary usecase for this method is the sanitization of the object's config.
+
+        Ex: In the case that a user utilizes ${VARIABLES} in their object configuration,
+        those variables will be substituted and sensitive values will exist within the config.
+
+        If we call `update_config` with the unsubstituted config, we can ensure that no credentials
+        are sent over the wire / persisted to disk.
+
+        Args:
+            config (DatsourceConfig): The config object used to update the object's config attr
+        """
         substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         raw_config: dict = substitution_serializer.serialize(config)
         self._datasource_config.update(raw_config)
