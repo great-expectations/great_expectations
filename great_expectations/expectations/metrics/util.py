@@ -335,7 +335,10 @@ def get_sqlalchemy_column_metadata(
         try:
             # if a custom query was passed
             if isinstance(table_selectable, TextClause):
-                columns = table_selectable.selected_columns.columns
+                if hasattr(table_selectable, "selected_columns"):
+                    columns = table_selectable.selected_columns.columns
+                else:
+                    columns = table_selectable.columns().columns
             else:
                 columns = inspector.get_columns(
                     table_selectable,
