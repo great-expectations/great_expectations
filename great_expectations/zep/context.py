@@ -112,8 +112,8 @@ class _SourceFactories:
 
             def wrapped(*args, **kwargs):
                 datasource = fn(*args, **kwargs)
-                # TODO (bdirks): add_zep_datasource to the AbstractDataContext class
-                self._data_context.add_zep_datasource(datasource)
+                # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
+                self._data_context._attach_datasource_to_context(datasource)
                 return datasource
 
             return wrapped
@@ -133,7 +133,7 @@ class DataContext:
     Use `great_expectations.get_context()` for a real DataContext.
     """
 
-    _context = None
+    _context: DataContext = None
 
     @classmethod
     def get_context(cls) -> DataContext:
@@ -152,7 +152,7 @@ class DataContext:
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def add_zep_datasource(self, datasource: Datasource) -> None:
+    def _attach_datasource_to_context(self, datasource: Datasource) -> None:
         self._datasources[datasource.name] = datasource
 
 
