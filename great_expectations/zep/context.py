@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type, Union
 
 from great_expectations.util import camel_to_snake
+from great_expectations.zep.interfaces import DataAsset, Datasource
 from great_expectations.zep.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
-    from great_expectations.zep.interfaces import DataAsset, Datasource
+    from great_expectations.data_context.data_context.data_context import (
+        DataContext as GXDataContext,
+    )
 
-SourceFactoryFn = Callable[..., "Datasource"]
+SourceFactoryFn = Callable[..., Datasource]
 
 LOGGER = logging.getLogger(__name__)
 
@@ -41,6 +44,9 @@ class _SourceFactories:
 
     type_lookup = TypeLookup()
     __source_factories: Dict[str, SourceFactoryFn] = {}
+
+    def __init__(self, data_context: Union[DataContext, GXDataContext]):
+        self._data_context = data_context
 
     @classmethod
     def register_factory(
@@ -104,7 +110,15 @@ class _SourceFactories:
 
     def __getattr__(self, name):
         try:
-            return self.__source_factories[name]
+            fn = self.__source_factories[name]
+
+            def wrapped(*args, **kwargs):
+                datasource = fn(*args, **kwargs)
+                # TODO (bdirks): add_zep_datasource to the AbstractDataContext class
+                self._data_context.add_zep_datasource(datasource)
+                return datasource
+
+            return wrapped
         except KeyError:
             raise AttributeError(name)
 
@@ -131,13 +145,17 @@ class DataContext:
         return cls._context
 
     def __init__(self) -> None:
-        self._sources: _SourceFactories = _SourceFactories()
+        self._sources: _SourceFactories = _SourceFactories(self)
+        self._datasources: Dict[str, Datasource] = {}
         LOGGER.info(f"4a. Available Factories - {self._sources.factories}")
         LOGGER.info(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
 
     @property
     def sources(self) -> _SourceFactories:
         return self._sources
+
+    def add_zep_datasource(self, datasource: Datasource) -> None:
+        self._datasources[datasource.name] = datasource
 
 
 def get_context() -> DataContext:
