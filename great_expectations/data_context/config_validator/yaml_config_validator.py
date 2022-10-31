@@ -222,7 +222,7 @@ class _YamlConfigValidator:
                 ) = self._test_instantiation_of_datasource_from_yaml_config(
                     name=name,
                     class_name=class_name,
-                    config=config_with_substitutions,  # Uses original config as substitutions are done downstream
+                    config=config,  # Uses original config as substitutions are done downstream
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
                 (
