@@ -213,47 +213,50 @@ class _YamlConfigValidator:
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_store_from_yaml_config(
-                    name, class_name, config_with_substitutions
+                    name=name, class_name=class_name, config=config_with_substitutions
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_datasource_from_yaml_config(
-                    name,
-                    class_name,
-                    config,  # Uses original config as substitutions are done downstream
+                    name=name,
+                    class_name=class_name,
+                    config=config_with_substitutions,  # Uses original config as substitutions are done downstream
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_checkpoint_from_yaml_config(
-                    name, class_name, config_with_substitutions
+                    name=name, class_name=class_name, config=config_with_substitutions
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_data_connector_from_yaml_config(
-                    name, class_name, config_with_substitutions, runtime_environment
+                    name=name,
+                    class_name=class_name,
+                    config=config_with_substitutions,
+                    runtime_environment=runtime_environment,
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_profiler_from_yaml_config(
-                    name, class_name, config_with_substitutions
+                    name=name, class_name=class_name, config=config_with_substitutions
                 )
             else:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_misc_class_from_yaml_config(
-                    name,
-                    config_with_substitutions,
-                    runtime_environment,
-                    usage_stats_event_payload,
+                    name=name,
+                    config=config_with_substitutions,
+                    runtime_environment=runtime_environment,
+                    usage_stats_event_payload=usage_stats_event_payload,
                 )
 
             send_usage_message_from_handler(
