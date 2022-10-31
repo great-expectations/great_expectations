@@ -1487,7 +1487,7 @@ def test_test_yaml_config_supported_types_have_self_check():
 
 
 @pytest.mark.integration
-def test_test_yaml_config_datasource_sanitizes_objs_config(
+def test_test_yaml_config_on_datasource_sanitizes_instantiated_objs_config(
     empty_data_context_stats_enabled,
     monkeypatch,
 ):
