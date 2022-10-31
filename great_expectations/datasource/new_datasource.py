@@ -11,7 +11,12 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.data_context.types.base import ConcurrencyConfig
+from great_expectations.core.serializer import DictConfigSerializer
+from great_expectations.data_context.types.base import (
+    ConcurrencyConfig,
+    DatasourceConfig,
+    datasourceConfigSchema,
+)
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
 from great_expectations.execution_engine import ExecutionEngine
@@ -399,6 +404,12 @@ class BaseDatasource:
     @property
     def config(self) -> dict:
         return copy.deepcopy(self._datasource_config)
+
+    def replace_config(self, config: DatasourceConfig) -> None:
+        # We convert from the type back to a dictionary for purposes of instantiation
+        serializer = DictConfigSerializer(schema=datasourceConfigSchema)
+        config_dict = serializer.serialize(config)
+        self._datasource_config = config_dict
 
 
 class Datasource(BaseDatasource):
