@@ -509,7 +509,7 @@ class AbstractDataContext(ABC):
         self,
         name: str,
         initialize: bool = True,
-        save_changes: bool = False,
+        save_changes: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
@@ -523,6 +523,8 @@ class AbstractDataContext(ABC):
         Returns:
             datasource (Datasource)
         """
+        save_changes = self._determine_save_changes_flag(save_changes)
+
         logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
 
         module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
@@ -555,7 +557,7 @@ class AbstractDataContext(ABC):
     def update_datasource(
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
-        save_changes: bool = False,
+        save_changes: Optional[bool] = None,
     ) -> None:
         """
         Updates a DatasourceConfig that already exists in the store.
@@ -564,6 +566,8 @@ class AbstractDataContext(ABC):
             datasource_config: The config object to persist using the DatasourceStore.
             save_changes: do I save changes to disk?
         """
+        save_changes = self._determine_save_changes_flag(save_changes)
+
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
         datasource_name: str = datasource.name
@@ -1027,7 +1031,7 @@ class AbstractDataContext(ABC):
         return datasources
 
     def delete_datasource(
-        self, datasource_name: Optional[str], save_changes: bool = False
+        self, datasource_name: Optional[str], save_changes: Optional[bool] = None
     ) -> None:
         """Delete a datasource
         Args:
@@ -1036,6 +1040,8 @@ class AbstractDataContext(ABC):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
+        save_changes = self._determine_save_changes_flag(save_changes)
+
         if not datasource_name:
             raise ValueError("Datasource names must be a datasource name")
 
@@ -2830,7 +2836,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self,
         config: DatasourceConfig,
         initialize: bool = True,
-        save_changes: bool = False,
+        save_changes: Optional[bool] = None,
     ) -> Optional[Datasource]:
         """Perform substitutions and optionally initialize the Datasource and/or store the config.
 
@@ -3095,6 +3101,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             else:
                 return False
         return include_rendered_content
+
+    @staticmethod
+    def _determine_save_changes_flag(save_changes: Optional[bool]) -> bool:
+        if save_changes is not None:
+            # deprecated-v0.15.30
+            warnings.warn(
+                'The parameter "save_changes" is deprecated as of v0.15.30; moving forward, '
+                "changes made to datasources are always persisted by the underlying Store implementation. "
+                "As support will be removed in v0.18, please omit the argument moving forward.",
+                DeprecationWarning,
+            )
+            return False
+        return True
 
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,
