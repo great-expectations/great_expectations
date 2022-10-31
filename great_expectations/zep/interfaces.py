@@ -1,3 +1,4 @@
+import logging
 import abc
 from typing import Dict, List, Type, Union
 
@@ -5,6 +6,10 @@ from typing_extensions import Protocol, runtime_checkable
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.zep.metadatasource import MetaDatasource
+
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 class DataAsset(abc.ABC):
@@ -14,8 +19,8 @@ class DataAsset(abc.ABC):
         self.name = name
 
 
-@runtime_checkable
-class Datasource(Protocol):
+# @runtime_checkable
+class Datasource(metaclass=MetaDatasource):
     execution_engine: ExecutionEngine
     asset_types: List[Type[DataAsset]]
     name: str
