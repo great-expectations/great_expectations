@@ -15,7 +15,6 @@ class DataAsset(abc.ABC):
         self.name = name
 
 
-# @runtime_checkable
 class Datasource(metaclass=MetaDatasource):
     # class attrs
     execution_engine: ClassVar[ExecutionEngine]

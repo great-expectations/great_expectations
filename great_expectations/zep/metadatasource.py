@@ -43,11 +43,6 @@ class MetaDatasource(type):
             LOGGER.info(f"5. Adding `{args[0] if args else ''}` {cls_name}")
             return cls(*args, **kwargs)
 
-        # TODO: TypeError & expose the missing details
-        # assert isinstance(
-        #     cls, Datasource
-        # ), f"{cls.__name__} does not satisfy the {Datasource.__name__} protocol"
-
         # TODO: generate schemas from `cls` if needed
 
         _SourceFactories.register_factory(
