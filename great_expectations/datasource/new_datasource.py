@@ -8,6 +8,7 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
@@ -132,7 +133,8 @@ class BaseDatasource:
         )
 
     def get_batch_list_from_batch_request(
-        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
+        self,
+        batch_request: Union[BatchRequestBase, BatchRequest, RuntimeBatchRequest],
     ) -> List[Batch]:
         """
         Processes batch_request and returns the (possibly empty) list of batch objects.
@@ -356,7 +358,7 @@ class BaseDatasource:
         return report_object
 
     def _validate_batch_request(
-        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
+        self, batch_request: Union[BatchRequestBase, BatchRequest, RuntimeBatchRequest]
     ) -> None:
         if not (
             batch_request.datasource_name is None
