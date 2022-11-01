@@ -714,7 +714,7 @@ def get_batch_request_as_dict(
     if batch_request is None:
         return None
 
-    if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
+    if isinstance(batch_request, BatchRequestBase):
         batch_request = batch_request.to_dict()
 
     return batch_request
