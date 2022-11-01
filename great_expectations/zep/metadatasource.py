@@ -16,17 +16,6 @@ SourceFactoryFn = Callable[..., "Datasource"]
 
 LOGGER = logging.getLogger(__name__)
 
-_CALLS = 0
-_MAX_CALLS = 5
-
-
-def _recursion_check(log_message: str):
-    global _CALLS
-    _CALLS += 1
-    print(f"\n{_CALLS} {log_message}")
-    if _CALLS >= _MAX_CALLS:
-        raise RecursionError(f"Calls exceeded {_MAX_CALLS}")
-
 
 class MetaDatasource(type):
     def __new__(
@@ -39,8 +28,6 @@ class MetaDatasource(type):
 
         Also binds asset adding methods according to the declared `asset_types`.
         """
-        _recursion_check(f"{cls_name}\n  bases={bases}\n  meta_cls={meta_cls.__name__}")
-
         LOGGER.info(f"1a. {meta_cls.__name__}.__new__() for `{cls_name}`")
 
         # TODO: extract asset type details to build factory method signature etc. (pull args from __init__)
@@ -48,9 +35,6 @@ class MetaDatasource(type):
         asset_types: List[Type[DataAsset]] = cls_dict.get("asset_types")
         LOGGER.info(f"1b. Extracting Asset details - {asset_types}")
 
-        # TODO: fix max recursion error that happens here
-        # Bad solution - remove the base, extract & merge the __dict__ methods from the base
-        # cls = type(cls_name, (), cls_dict)
         cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
         LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
 
