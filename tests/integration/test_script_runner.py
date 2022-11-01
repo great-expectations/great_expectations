@@ -32,6 +32,7 @@ class BackendDependencies(enum.Enum):
     SQLALCHEMY = "SQLALCHEMY"
     SNOWFLAKE = "SNOWFLAKE"
     TRINO = "TRINO"
+    MAKE_ME_RUN = "MAKE_ME_RUN"
 
 
 @dataclass
