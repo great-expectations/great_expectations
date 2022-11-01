@@ -2393,7 +2393,7 @@ def test_introspect_db(
 
 
 @pytest.mark.integration
-def test_include_schema_name_introspection_mysql(mysql_sqlalchemy_datasource):
+def test_include_schema_name_introspection(mysql_sqlalchemy_datasource):
     my_data_connector = instantiate_class_from_config(
         config={
             "class_name": "InferredAssetSqlDataConnector",
