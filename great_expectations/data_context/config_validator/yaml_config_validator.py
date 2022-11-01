@@ -374,7 +374,7 @@ class _YamlConfigValidator:
         self, config_str: str, usage_stats_event_name: str
     ) -> CommentedMap:
         try:
-            substituted_config: CommentedMap = yaml.load(config_str)  # type: ignore[arg-type]
+            substituted_config: CommentedMap = yaml.load(config_str)
             return substituted_config
 
         except Exception as e:
