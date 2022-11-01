@@ -2393,41 +2393,6 @@ def test_introspect_db(
 
 
 @pytest.mark.integration
-def test_include_schema_name_introspection_postgres(postgresql_sqlalchemy_datasource):
-    my_data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "my_test_data_connector",
-        },
-        runtime_environment={
-            "execution_engine": postgresql_sqlalchemy_datasource,
-            "datasource_name": "my_test_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-
-    introspected_tables: List[str] = [
-        table
-        for table in my_data_connector._introspect_db()
-        if table["type"] == "table"
-    ]
-
-    introspected_schemas: Set[str] = {
-        table.get("schema_name") for table in introspected_tables
-    }
-    assert introspected_schemas == {"connection_test", "public"}
-
-    # ensure that tables with the same name are referenced by both schema_name and table_name
-    # test_df exists in both connection_test and public schemas
-    for schema_name in introspected_schemas:
-        assert {
-            "schema_name": schema_name,
-            "table_name": "test_df",
-            "type": "table",
-        } in introspected_tables
-
-
-@pytest.mark.integration
 def test_include_schema_name_introspection_mysql(mysql_sqlalchemy_datasource):
     my_data_connector = instantiate_class_from_config(
         config={
