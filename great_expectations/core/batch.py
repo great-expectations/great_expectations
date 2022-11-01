@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import datetime
 import json
 import logging
-from typing import Any, Callable, Dict, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Type, Union
 
 import pandas as pd
 
@@ -24,6 +26,9 @@ except ImportError:
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
 
 
 class BatchDefinition(SerializableDictDot):
@@ -521,18 +526,28 @@ BatchDataType = Union[BatchData, pd.DataFrame, SparkDataFrame]
 #  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
 # TODO: <Alex>See also "great_expectations/datasource/types/batch_spec.py".</Alex>
 class Batch(SerializableDictDot):
+    _data: BatchDataType
+    _batch_request: Union[BatchRequestBase, dict]
+    _batch_definition: Union[BatchDefinition, IDDict]
+    _batch_spec: BatchSpec
+    _batch_markers: BatchMarkers
+    _data_context: Optional[AbstractDataContext]
+    _datasource_name: Optional[str]
+    _batch_parameters: Any
+    _batch_kwargs = Union[Dict[str, Any], BatchKwargs]
+
     def __init__(
         self,
         data: BatchDataType,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        batch_definition: BatchDefinition = None,
-        batch_spec: BatchSpec = None,
-        batch_markers: BatchMarkers = None,
+        batch_request: Union[BatchRequestBase, dict, None] = None,
+        batch_definition: Union[BatchDefinition, IDDict, None] = None,
+        batch_spec: Optional[BatchSpec] = None,
+        batch_markers: Optional[BatchMarkers] = None,
         # The remaining parameters are for backward compatibility.
-        data_context=None,
-        datasource_name=None,
+        data_context: Optional[AbstractDataContext] = None,
+        datasource_name: Optional[str] = None,
         batch_parameters=None,
-        batch_kwargs=None,
+        batch_kwargs: Optional[Dict[str, Any]] = None,
     ) -> None:
         self._data = data
         if batch_request is None:
