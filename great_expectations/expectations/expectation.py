@@ -43,13 +43,14 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationMetricDiagnostics,
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
+    Maturity,
     RendererTestDiagnostics,
 )
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import convert_to_json_serializable, nested_update
+from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
     GreatExpectationsError,
@@ -1192,11 +1193,11 @@ class Expectation(metaclass=MetaExpectation):
         all_beta = all([check.passed for check in maturity_checklist.beta])
         all_production = all([check.passed for check in maturity_checklist.production])
         if all_production and all_beta and all_experimental:
-            library_metadata.maturity = "PRODUCTION"
+            library_metadata.maturity = Maturity.PRODUCTION
         elif all_beta and all_experimental:
-            library_metadata.maturity = "BETA"
+            library_metadata.maturity = Maturity.BETA
         else:
-            library_metadata.maturity = "EXPERIMENTAL"
+            library_metadata.maturity = Maturity.EXPERIMENTAL
 
         # Set the errors found when running tests
         errors = [
@@ -1758,7 +1759,7 @@ class Expectation(metaclass=MetaExpectation):
         """Introspect the Expectation's library_metadata object (if it exists), and augment it with additional information."""
 
         augmented_library_metadata = {
-            "maturity": "CONCEPT_ONLY",
+            "maturity": Maturity.CONCEPT_ONLY,
             "tags": [],
             "contributors": [],
             "requirements": [],
