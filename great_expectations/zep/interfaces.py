@@ -1,4 +1,3 @@
-import logging
 import abc
 from typing import Dict, List, Type, Union
 
@@ -7,9 +6,6 @@ from typing_extensions import Protocol, runtime_checkable
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.zep.metadatasource import MetaDatasource
-
-
-logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 class DataAsset(abc.ABC):
@@ -37,6 +33,9 @@ class Datasource(metaclass=MetaDatasource):
         Returns:
             A list of batches. The list may be empty.
         """
+        raise NotImplementedError(
+            f"{self.__class__.__name__} must implement `.get_batch_list_from_batch_request()`"
+        )
 
     def get_asset(self, asset_name: str) -> DataAsset:
         """Returns the DataAsset referred to by name"""

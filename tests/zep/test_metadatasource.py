@@ -84,9 +84,6 @@ def test_minimal_ds_to_asset_flow(context_sources_clean):
             self.name = name
             self.assets = {}
 
-        def get_asset(self, asset_name: str) -> DataAsset:
-            return self.assets[asset_name]
-
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(asset_name)
             self.assets[asset_name] = asset
@@ -102,7 +99,7 @@ def test_minimal_ds_to_asset_flow(context_sources_clean):
     red_asset: DataAsset = purple_ds.add_red_asset("my_asset_name")
     assert isinstance(red_asset, RedAsset)
 
-    # 5. Get an asset by name
+    # 5. Get an asset by name - (method defined in parent `Datasource`)
     assert red_asset is purple_ds.get_asset("my_asset_name")
 
 

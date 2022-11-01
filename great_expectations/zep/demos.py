@@ -41,10 +41,6 @@ class PandasDatasource(Datasource):
         """TODO"""
         pass
 
-    def get_asset(self, asset_name: str) -> DataAsset:
-        """Pull `self.assets`"""
-        return self.assets[asset_name]
-
     def add_my_other_asset(self, asset_name: str) -> MyOtherAsset:
         """Create `MyOtherAsset` add it to `self.assets` and return it."""
         print(f"Adding {MyOtherAsset} - {asset_name}")
