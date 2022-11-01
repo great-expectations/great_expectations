@@ -1,7 +1,7 @@
 import abc
 from typing import Dict, List, Type, Union
 
-from typing_extensions import Protocol, runtime_checkable
+from typing_extensions import ClassVar
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine import ExecutionEngine
@@ -17,8 +17,11 @@ class DataAsset(abc.ABC):
 
 # @runtime_checkable
 class Datasource(metaclass=MetaDatasource):
-    execution_engine: ExecutionEngine
-    asset_types: List[Type[DataAsset]]
+    # class attrs
+    execution_engine: ClassVar[ExecutionEngine]
+    asset_types: ClassVar[List[Type[DataAsset]]] = []
+
+    # instance attrs
     name: str
     assets: Dict[str, DataAsset]
 
