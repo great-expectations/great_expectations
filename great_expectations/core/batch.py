@@ -129,7 +129,7 @@ class BatchDefinition(SerializableDictDot):
         return self._batch_identifiers
 
     @property
-    def batch_spec_passthrough(self) -> dict:
+    def batch_spec_passthrough(self) -> Union[dict, None]:
         return self._batch_spec_passthrough
 
     @batch_spec_passthrough.setter
@@ -221,7 +221,7 @@ class BatchRequestBase(SerializableDictDot):
         self._data_asset_name = data_asset_name
 
     @property
-    def data_connector_query(self) -> dict:
+    def data_connector_query(self) -> Union[dict, None]:
         return self._data_connector_query
 
     @data_connector_query.setter
@@ -229,7 +229,7 @@ class BatchRequestBase(SerializableDictDot):
         self._data_connector_query = value
 
     @property
-    def limit(self) -> int:
+    def limit(self) -> Union[int, None]:
         return self._limit
 
     @limit.setter
@@ -237,7 +237,7 @@ class BatchRequestBase(SerializableDictDot):
         self._limit = value
 
     @property
-    def runtime_parameters(self) -> dict:
+    def runtime_parameters(self) -> Union[dict, None]:
         return self._runtime_parameters
 
     @runtime_parameters.setter
@@ -245,7 +245,7 @@ class BatchRequestBase(SerializableDictDot):
         self._runtime_parameters = value
 
     @property
-    def batch_identifiers(self) -> dict:
+    def batch_identifiers(self) -> Optional[dict]:
         return self._batch_identifiers
 
     @batch_identifiers.setter
@@ -253,7 +253,7 @@ class BatchRequestBase(SerializableDictDot):
         self._batch_identifiers = value
 
     @property
-    def batch_spec_passthrough(self) -> dict:
+    def batch_spec_passthrough(self) -> Optional[dict]:
         return self._batch_spec_passthrough
 
     @batch_spec_passthrough.setter
@@ -281,18 +281,18 @@ class BatchRequestBase(SerializableDictDot):
         # if batch_data appears in BatchRequest, temporarily replace it with
         # str placeholder before calling convert_to_json_serializable so that
         # batch_data is not serialized
-        if batch_request_contains_batch_data(batch_request=self):
-            batch_data: Union[BatchRequestBase, dict] = self.runtime_parameters[
-                "batch_data"
-            ]
-            self.runtime_parameters["batch_data"]: str = str(type(batch_data))
+        if batch_request_contains_batch_data(self):
+            batch_data = (
+                self.runtime_parameters[  # type: ignore[index] # attr could be None
+                    "batch_data"
+                ]
+            )
+            self.runtime_parameters["batch_data"] = str(type(batch_data))  # type: ignore[index]
             serializeable_dict: dict = convert_to_json_serializable(data=self.to_dict())
             # after getting serializable_dict, restore original batch_data
-            self.runtime_parameters["batch_data"]: Union[
-                BatchRequestBase, dict
-            ] = batch_data
+            self.runtime_parameters["batch_data"] = batch_data  # type: ignore[index]
         else:
-            serializeable_dict: dict = convert_to_json_serializable(data=self.to_dict())
+            serializeable_dict = convert_to_json_serializable(data=self.to_dict())
 
         return serializeable_dict
 
@@ -627,7 +627,7 @@ class Batch(SerializableDictDot):
     def batch_kwargs(self):
         return self._batch_kwargs
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         dict_obj: dict = {
             "data": str(self.data),
             "batch_request": self.batch_request.to_dict(),
@@ -671,16 +671,14 @@ class Batch(SerializableDictDot):
 
 
 def materialize_batch_request(
-    batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-) -> Optional[BatchRequestBase]:
-    effective_batch_request: dict = get_batch_request_as_dict(
-        batch_request=batch_request
-    )
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+) -> Union[RuntimeBatchRequest, BatchRequest, None]:
+    effective_batch_request = get_batch_request_as_dict(batch_request=batch_request)
 
     if not effective_batch_request:
         return None
 
-    batch_request_class: type
+    batch_request_class: Union[Type[RuntimeBatchRequest], Type[BatchRequest]]
     if batch_request_contains_runtime_parameters(batch_request=effective_batch_request):
         batch_request_class = RuntimeBatchRequest
     else:
@@ -694,7 +692,10 @@ def batch_request_contains_batch_data(
 ) -> bool:
     return (
         batch_request_contains_runtime_parameters(batch_request=batch_request)
-        and batch_request["runtime_parameters"].get("batch_data") is not None
+        and batch_request[  # type: ignore[index] # could be None
+            "runtime_parameters"
+        ].get("batch_data")
+        is not None
     )
 
 
@@ -725,7 +726,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     data_connector_name: Optional[str] = None,
     data_asset_name: Optional[str] = None,
     *,
-    batch_request: Optional[BatchRequestBase] = None,
+    batch_request: Union[None, BatchRequestBase] = None,
     batch_data: Optional[Any] = None,
     data_connector_query: Optional[dict] = None,
     batch_identifiers: Optional[dict] = None,
@@ -742,7 +743,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     path: Optional[str] = None,
     batch_filter_parameters: Optional[dict] = None,
     **kwargs,
-) -> Union[BatchRequest, RuntimeBatchRequest]:
+) -> Union[BatchRequest, RuntimeBatchRequest, BatchRequestBase]:
     """Obtain formal BatchRequest typed object from allowed attributes (supplied as arguments).
     This method applies only to the new (V3) Datasource schema.
 
@@ -814,7 +815,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
         # TODO: Raise a warning if any parameters besides batch_requests are specified
         return batch_request
 
-    batch_request_class: type
+    batch_request_class: Union[Type[RuntimeBatchRequest], Type[BatchRequest]]
     batch_request_as_dict: dict
 
     if any([batch_data is not None, query, path, runtime_parameters]):
@@ -893,7 +894,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
                     splitter_params["splitter_kwargs"] = splitter_kwargs
                 batch_spec_passthrough.update(splitter_params)
 
-        batch_request_as_dict: dict = {
+        batch_request_as_dict = {
             "datasource_name": datasource_name,
             "data_connector_name": data_connector_name,
             "data_asset_name": data_asset_name,
