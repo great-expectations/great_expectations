@@ -66,11 +66,6 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
-validator.expect_table_row_count_to_equal(10)
-
-data_assistant_result = context.assistants.onboarding.run(
-    batch_request=batch_request
-)
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
