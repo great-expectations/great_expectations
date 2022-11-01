@@ -1,7 +1,7 @@
 import copy
 import logging
 from enum import Enum
-from typing import Optional, Set
+from typing import Optional, Set, Union, overload
 
 import pandas as pd
 
@@ -244,7 +244,27 @@ class SerializableDictDot(DictDot):
         raise NotImplementedError
 
 
-def safe_deep_copy(data, memo=None):
+@overload
+def safe_deep_copy(data: dict, memo=...) -> dict:
+    ...
+
+
+@overload
+def safe_deep_copy(data: Union[list, tuple], memo=...) -> list:
+    ...
+
+
+@overload
+def safe_deep_copy(
+    data: Union[pd.DataFrame, pd.Series], memo=...
+) -> Union[pd.DataFrame, pd.Series]:
+    ...
+
+
+def safe_deep_copy(
+    data: Union[dict, list, tuple, pd.Series, pd.DataFrame],
+    memo: Optional[dict] = None,
+) -> Union[dict, list, pd.Series, pd.DataFrame]:
     """
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
     """
