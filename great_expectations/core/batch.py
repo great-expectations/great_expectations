@@ -906,9 +906,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
 def standardize_batch_request_display_ordering(
     batch_request: Dict[str, Union[str, int, Dict[str, Any]]]
 ) -> Dict[str, Union[str, Dict[str, Any]]]:
-    batch_request_as_dict: Union[str, Dict[str, Any]] = safe_deep_copy(
-        data=batch_request
-    )
+    batch_request_as_dict = safe_deep_copy(data=batch_request)
     datasource_name: str = batch_request_as_dict["datasource_name"]
     data_connector_name: str = batch_request_as_dict["data_connector_name"]
     data_asset_name: str = batch_request_as_dict["data_asset_name"]
