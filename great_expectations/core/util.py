@@ -215,7 +215,10 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
     if isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
 
-    if isinstance(data, (uuid.UUID, bytes)):
+    if isinstance(data, uuid.UUID):
+        return str(data)
+
+    if isinstance(data, bytes):
         return str(data)
 
     # noinspection PyTypeChecker
