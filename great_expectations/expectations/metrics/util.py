@@ -1,9 +1,9 @@
 import logging
+import re
 import warnings
 from typing import Any, Dict, List, Optional
 
 import numpy as np
-import re
 from dateutil.parser import parse
 from packaging import version
 
