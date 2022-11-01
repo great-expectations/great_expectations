@@ -1,15 +1,15 @@
 import logging
 from typing import Dict, List
 
-from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.zep.context import get_context
-from great_expectations.zep.interfaces import DataAsset, Datasource
-from great_expectations.zep.metadatasource import MetaDatasource
-
 if __name__ == "__main__":
     # don't setup the logger unless being run as a script
     # TODO: remove this before release
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.zep.context import get_context
+from great_expectations.zep.interfaces import DataAsset, Datasource
 
 
 class FileAsset(DataAsset):
