@@ -46,7 +46,7 @@ resources:
     ports:
       - 1433:1433
   - container: trino
-    image: trinodb/trino:379
+    image: trinodb/trino:400
     ports:
       - 8088:8080
 
@@ -190,8 +190,8 @@ stages:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               mkdir coverage
-              PYTEST="docker run -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} "
-              PYTEST+="-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} "
+              PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
+              PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
               # We don't run e2e because we don't want to test connections to external dependencies here.
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest -m 'not e2e' "
@@ -209,9 +209,9 @@ stages:
               eval ${PYTEST}
             displayName: 'Pytest $(python.version)'
             env:
-              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -303,21 +303,20 @@ stages:
               mkdir script
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > script/mysql_setup.sql
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PYTEST="docker run -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} "
-              PYTEST+="-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} "
+              PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
+              PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host --mount type=bind,source=${PWD}/script,target=/script "
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \""
               PYTEST+="mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < /script/mysql_setup.sql && "
-              PYTEST+="pytest --mysql --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistics "
               # The last \" closes the quote from bash -c \".
-              PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py\""
+              PYTEST+="pytest --mysql --random-order tests/test_definitions tests/expectations\""
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest MySQL'
             env:
-              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
       - job: test_trino
         dependsOn: [make_suffix, build_push]
@@ -342,18 +341,17 @@ stages:
             displayName: 'Wait for Trino'
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PYTEST="docker run -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} "
-              PYTEST+="-e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} "
+              PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
+              PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest --trino --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistics "
-              PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py"
+              PYTEST+="pytest --trino --random-order tests/test_definitions tests/expectations"
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest Trino'
             env:
-              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
       - job: test_cli
         dependsOn: [make_suffix, build_push]
@@ -401,7 +399,9 @@ stages:
         steps:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} bash -c \""
+              PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
+              PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
+              PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} bash -c \""
               PYTEST+="printf 'Y\nY\n' | pip uninstall numpy pandas && "
               PYTEST+="printf 'Y\nY\n' | pip install numpy==$(min_numpy) pandas==$(min_pandas) && "
               PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistic "
@@ -409,6 +409,10 @@ stages:
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest min versions'
+            env:
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
       - job: test_usage_stats
         dependsOn: [make_suffix, build_push]
@@ -496,16 +500,23 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install \
+                --requirement reqs/requirements-dev-test.txt \
+                --requirement reqs/requirements-dev-sqlalchemy.txt \
+                --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines pytest-random-order
-              pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml \
-                  --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics \
-                  --ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py
+              pytest tests/test_definitions tests/expectations \
+                --mssql \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
             displayName: 'Pytest mssql'
 
   - stage: deploy
