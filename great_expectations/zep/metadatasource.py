@@ -48,9 +48,10 @@ class MetaDatasource(type):
         #     cls, Datasource
         # ), f"{cls.__name__} does not satisfy the {Datasource.__name__} protocol"
 
-        sources = _SourceFactories()
         # TODO: generate schemas from `cls` if needed
 
-        sources.register_factory(cls, _datasource_factory, asset_types=asset_types)
+        _SourceFactories.register_factory(
+            cls, _datasource_factory, asset_types=asset_types
+        )
 
         return super().__new__(meta_cls, cls_name, bases, cls_dict)
