@@ -118,5 +118,5 @@ stages:
               GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
           # The pip freeze output could be helpful to reproduce performance test results.
-          - publish: pip-freeze.txt
-            artifact: PipFreeze
+          # - publish: pip-freeze.txt
+          #   artifact: PipFreeze
