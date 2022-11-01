@@ -51,7 +51,7 @@ class MetaDatasource(type):
         # TODO: fix max recursion error that happens here
         # Bad solution - remove the base, extract & merge the __dict__ methods from the base
         # cls = type(cls_name, (), cls_dict)
-        cls = type(cls_name, bases, cls_dict)
+        cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
         LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
 
         def _datasource_factory(*args, **kwargs) -> Datasource:
@@ -70,4 +70,4 @@ class MetaDatasource(type):
             cls, _datasource_factory, asset_types=asset_types
         )
 
-        return super().__new__(meta_cls, cls_name, bases, cls_dict)
+        return cls
