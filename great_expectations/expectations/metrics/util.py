@@ -3,6 +3,7 @@ import warnings
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+import re
 from dateutil.parser import parse
 from packaging import version
 
@@ -497,6 +498,11 @@ def column_reflection_fallback(
             table_name = selectable.name
         except AttributeError:
             table_name = selectable
+            if str(table_name).lower().startswith("select"):
+                rx = re.compile(r"^.* from ([\S]+)", re.I)
+                match = rx.match(str(table_name).replace("\n", ""))
+                if match:
+                    table_name = match.group(1)
 
         tables_table: sa.Table = sa.Table(
             "tables",
