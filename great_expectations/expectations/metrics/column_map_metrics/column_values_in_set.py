@@ -85,6 +85,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if (
             sa
             and "_dialect" in kwargs
+            and hasattr(kwargs["_dialect"], "__name__")
             and kwargs["_dialect"].__name__ == "sqlalchemy_bigquery"
             and "_metrics" in kwargs
             and "table.column_types" in kwargs["_metrics"]
