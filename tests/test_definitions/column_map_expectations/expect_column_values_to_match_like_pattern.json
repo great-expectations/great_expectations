@@ -290,7 +290,9 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "only_for": ["sqlite", "postgresql", "mysql", "trino", "snowflake", "redshift"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino", "snowflake", "redshift"],
+      "suppress_test_for": ["bigquery"]
+
     },
     {
       "title": "positive_test_all_missing_values_mostly",
@@ -305,7 +307,8 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "only_for": ["sqlite", "postgresql", "mysql", "trino", "snowflake", "redshift"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino", "snowflake", "redshift"],
+      "suppress_test_for": ["bigquery"]
     },
     {
       "title": "positive_test_match_characters_not_at_the_beginning_of_string",
@@ -320,7 +323,8 @@
         "unexpected_index_list": [0, 2, 3],
         "unexpected_list": ["aaa", "acc", "add"]
       },
-      "only_for": ["sqlite", "postgresql", "mysql", "trino", "snowflake", "redshift"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino", "snowflake", "redshift"],
+      "suppress_test_for": ["bigquery"]
     }
    ]
   }]
