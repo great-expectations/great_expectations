@@ -129,6 +129,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             ):
                 continue
 
+            schema_name: str = metadata["schema_name"]
             table_name: str = metadata["table_name"]
 
             data_asset_config: dict = deep_filter_properties_iterable(
@@ -138,7 +139,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     "data_asset_name_prefix": self.data_asset_name_prefix,
                     "data_asset_name_suffix": self.data_asset_name_suffix,
                     "include_schema_name": self.include_schema_name,
-                    "schema_name": metadata["schema_name"],
+                    "schema_name": schema_name,
                     "splitter_method": self.splitter_method,
                     "splitter_kwargs": self.splitter_kwargs,
                     "sampling_method": self.sampling_method,
@@ -168,9 +169,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     ) from e
 
             # Store an asset config for each introspected data asset.
-            introspected_assets[table_name] = data_asset_config
-
-        self._refresh_data_assets_cache(assets=introspected_assets)
+            introspected_assets[data_asset_name] = data_asset_config
+            self.add_data_asset(name=table_name, config=data_asset_config)
 
     def _introspect_db(  # noqa: C901 - 16
         self,
