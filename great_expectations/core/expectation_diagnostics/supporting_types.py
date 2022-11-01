@@ -75,7 +75,7 @@ class ExpectationDescriptionDiagnostics(SerializableDictDot):
     snake_name: str
     short_description: str
     docstring: str
-    maturity: str
+    maturity: Maturity
 
 
 @dataclass
