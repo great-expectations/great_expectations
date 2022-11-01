@@ -177,9 +177,9 @@ stages:
           # To work as intended, "standard" and "slow" should be equally performant.
           matrix:
             standard:
-              pytest_args: 'tests --ignore "tests/rule_based_profiler"'
+              pytest_args: 'tests --ignore "tests/rule_based_profiler" --ignore "tests/integration/profiling"'
             slow:
-              pytest_args: 'tests/rule_based_profiler'
+              pytest_args: 'tests/rule_based_profiler tests/integration/profiling'
 
         steps:
           - task: UsePythonVersion@0
@@ -256,9 +256,9 @@ stages:
           # To work as intended, "standard" and "slow" should be equally performant.
           matrix:
             standard:
-              pytest_args: 'tests --ignore "tests/rule_based_profiler"'
+              pytest_args: 'tests --ignore "tests/rule_based_profiler" --ignore "tests/integration/profiling"'
             slow:
-              pytest_args: 'tests/rule_based_profiler'
+              pytest_args: 'tests/rule_based_profiler tests/integration/profiling'
 
         services:
           postgres: postgres
