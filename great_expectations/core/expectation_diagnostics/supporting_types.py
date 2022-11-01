@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 import logging
 from dataclasses import dataclass, field
@@ -73,6 +75,7 @@ class ExpectationDescriptionDiagnostics(SerializableDictDot):
     snake_name: str
     short_description: str
     docstring: str
+    maturity: str
 
 
 @dataclass
@@ -150,9 +153,7 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     message: str
     passed: bool
     doc_url: Optional[str] = None
-    sub_messages: List["ExpectationDiagnosticCheckMessage"] = field(
-        default_factory=list
-    )
+    sub_messages: List[ExpectationDiagnosticCheckMessage] = field(default_factory=list)
 
 
 @dataclass
