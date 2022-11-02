@@ -1,6 +1,8 @@
 from pprint import pformat as pf
+from typing import List, Type
 
 import pytest
+from typing_extensions import ClassVar
 
 from great_expectations.zep.context import get_context
 from great_expectations.zep.interfaces import DataAsset, Datasource
@@ -15,21 +17,25 @@ def context_sources_clean():
     """Return the sources object and clear and registered types/factories on teardown"""
     # setup
     sources = get_context().sources
-    assert len(sources.factories) == 0
+    assert (
+        "add_datasource" not in sources.factories
+    ), "Datasource base class should not be registered as a source factory"
+
     yield sources
+
     _SourceFactories._SourceFactories__source_factories.clear()
     _SourceFactories.type_lookup.clear()
 
 
 class TestMetaDatasource:
-    def test__new__only_registers_expected_nunmber_of_datasources_factories_and_types(
+    def test__new__only_registers_expected_number_of_datasources_factories_and_types(
         self, context_sources_clean: _SourceFactories
     ):
         assert len(context_sources_clean.factories) == 0
         assert len(context_sources_clean.type_lookup) == 0
 
         class MyTestDatasource(Datasource):
-            pass
+            asset_types: ClassVar[List[Type[DataAsset]]] = []
 
         expected_registrants = 1
 
@@ -49,7 +55,7 @@ class TestMetaDatasource:
         assert ds_factory_method_initial is None, "Check test cleanup"
 
         class MyTestDatasource(Datasource):
-            pass
+            asset_types: ClassVar[List[Type[DataAsset]]] = []
 
         ds_factory_method_final = getattr(
             context_sources_clean, expected_method_name, None
