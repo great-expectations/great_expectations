@@ -117,7 +117,7 @@ class _SourceFactories:
 
             return wrapped
         except KeyError:
-            raise AttributeError(name)
+            raise AttributeError(f"No factory {name} in {self.factories}")
 
     def __dir__(self) -> List[str]:
         """Preserves autocompletion for dynamic attributes."""
