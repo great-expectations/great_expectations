@@ -16,7 +16,7 @@ from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
 try:
-    from typing import TypedDict  # type: ignore[attr-defined]
+    from typing import TypedDict
 except ImportError:
     from typing_extensions import TypedDict
 
@@ -530,7 +530,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to delete object in GE Cloud Store Backend: {e}"
             )
 
-    def _has_key(self, key: Tuple[str, ...]) -> bool:  # type: ignore[override]
+    def _has_key(self, key: Tuple[str, ...]) -> bool:
         # Due to list_keys being inconsistently sized (due to the possible of resource names),
         # we remove any resource names and assert against key ids.
 
