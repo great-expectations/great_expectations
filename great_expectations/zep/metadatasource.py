@@ -37,6 +37,11 @@ class MetaDatasource(type):
         cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
         LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
 
+        if cls_name == "Datasource":
+            # NOTE: the above check is brittle and must be kept in-line with the Datasource.__name__
+            LOGGER.info("1c. Skip factory registration of base `Datasource`")
+            return cls
+
         def _datasource_factory(*args, **kwargs) -> Datasource:
             # TODO: update signature to match Datasource __init__ (ex update __signature__)
             LOGGER.info(f"5. Adding `{args[0] if args else ''}` {cls_name}")
