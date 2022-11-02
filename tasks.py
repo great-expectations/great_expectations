@@ -138,6 +138,7 @@ def type_check(
     ctx,
     packages,
     install_types=False,
+    pretty=False,
     daemon=False,
     clear_cache=False,
     report=False,
@@ -169,6 +170,8 @@ def type_check(
         cmds.extend(["--follow-imports=normal"])
     if report:
         cmds.extend(["--txt-report", "type_cov", "--html-report", "type_cov"])
+    if pretty:
+        cmds.extend(["--pretty"])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
