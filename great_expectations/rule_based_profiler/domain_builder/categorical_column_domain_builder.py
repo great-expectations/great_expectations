@@ -1,4 +1,6 @@
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
@@ -19,6 +21,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.base_data_context import (
+        BaseDataContext,
+    )
+    from great_expectations.validator.validator import Validator
 
 
 class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
@@ -51,7 +59,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[BaseDataContext] = None,
     ) -> None:
         """Create column domains where cardinality is within the specified limit.
 
@@ -195,7 +203,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         """
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
 
-        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
+        validator: Validator = self.get_validator(variables=variables)
 
         effective_column_names: List[str] = self.get_effective_column_names(
             batch_ids=batch_ids,
@@ -345,7 +353,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
     def _column_names_meeting_cardinality_limit(
         self,
-        validator: "Validator",  # noqa: F821
+        validator: Validator,
         metrics_for_cardinality_check: Dict[str, List[MetricConfiguration]],
     ) -> List[str]:
         """Compute cardinality and return column names meeting cardinality limit.

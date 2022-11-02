@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from enum import Enum
 from inspect import Parameter, Signature, getattr_static, signature
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
 
 from makefun import create_function
 
@@ -29,6 +31,11 @@ from great_expectations.rule_based_profiler.helpers.runtime_environment import (
     build_variables_directives,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.base_data_context import (
+        BaseDataContext,
+    )
+
 
 class NumericRangeEstimatorType(Enum):
     EXACT = "exact"
@@ -45,8 +52,8 @@ class DataAssistantRunner:
 
     def __init__(
         self,
-        data_assistant_cls: Type["DataAssistant"],  # noqa: F821
-        data_context: "BaseDataContext",  # noqa: F821
+        data_assistant_cls: Type[DataAssistant],
+        data_context: BaseDataContext,
     ) -> None:
         """
         Args:
