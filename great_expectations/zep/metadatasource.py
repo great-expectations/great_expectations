@@ -5,14 +5,13 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable, List, Type
+from typing import TYPE_CHECKING, List, Type
 
-from great_expectations.zep.context import _SourceFactories
+from great_expectations.zep.sources import _SourceFactories
 
 if TYPE_CHECKING:
     from great_expectations.zep.interfaces import DataAsset, Datasource
 
-SourceFactoryFn = Callable[..., "Datasource"]
 
 LOGGER = logging.getLogger(__name__)
 
