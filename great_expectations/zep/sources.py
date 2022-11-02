@@ -79,7 +79,6 @@ class _SourceFactories:
             raise ValueError(f"{simplified_name} factory already exists")
 
         # TODO: simplify or extract the following datasource & asset type registration logic
-        asset_types = asset_types or []
         asset_type_names = [
             _get_simplified_name_from_type(t, suffix_to_remove="_asset")
             for t in asset_types
