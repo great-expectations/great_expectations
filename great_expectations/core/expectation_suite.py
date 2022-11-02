@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import json
 import logging
@@ -740,7 +742,7 @@ class ExpectationSuite(SerializableDictDot):
                     }
                 }
             )
-        pprint.pprint(  # type: ignore[call-arg]
+        pprint.pprint(
             object=pprint_objects,
             indent=2,
             sort_dicts=False,
@@ -819,7 +821,7 @@ class ExpectationSuite(SerializableDictDot):
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expectation_configurations:
-            expectation_configuration.kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            expectation_configuration.kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
 
@@ -838,7 +840,7 @@ class ExpectationSuite(SerializableDictDot):
         kwargs: dict
         column_name: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_name = kwargs.pop("column")
@@ -862,7 +864,7 @@ class ExpectationSuite(SerializableDictDot):
         column_A_name: str
         column_B_name: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_A_name = kwargs.pop("column_A")
@@ -889,7 +891,7 @@ class ExpectationSuite(SerializableDictDot):
         kwargs: dict
         column_list: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_list = kwargs.pop("column_list")
@@ -969,7 +971,7 @@ class ExpectationSuite(SerializableDictDot):
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """
         for expectation_configuration in self.expectations:
-            inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
+            inline_renderer_config: InlineRendererConfig = {
                 "class_name": "InlineRenderer",
                 "render_object": expectation_configuration,
             }
