@@ -8,7 +8,9 @@ except ImportError:
 
 def test_serialization_of_shapely_polygon():
     polygon = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
-    assert convert_to_json_serializable(polygon) == "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
+    assert (
+        convert_to_json_serializable(polygon) == "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
+    )
 
 
 def test_serialization_of_bytes():
