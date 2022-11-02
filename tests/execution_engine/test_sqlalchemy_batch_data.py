@@ -167,7 +167,7 @@ def test_instantiation_with_temp_table_schema():
     assert "test_schema" not in engine.execute.call_args.args[0]
 
     # supported
-    for dialect in ["snowflake", "vertica"]:
+    for dialect in ["bigquery", "snowflake", "vertica"]:
         engine.dialect.name = dialect
         SqlAlchemyBatchData(
             execution_engine=execution_engine,

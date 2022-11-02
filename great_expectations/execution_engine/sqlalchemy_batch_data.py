@@ -212,6 +212,10 @@ class SqlAlchemyBatchData(BatchData):
 
         dialect: GESqlDialect = self.dialect
 
+        # dialects that support temp schemas
+        if temp_table_schema_name is not None and dialect in [GESqlDialect.BIGQUERY, GESqlDialect.SNOWFLAKE, GESqlDialect.VERTICA]:
+            temp_table_name = f"{temp_table_schema_name}.{temp_table_name}"
+
         if dialect == GESqlDialect.BIGQUERY:
             # BigQuery Table is created using with an expiration of 24 hours using Google's Data Definition Language
             # https://stackoverflow.com/questions/20673986/how-to-create-temporary-table-in-google-bigquery
@@ -224,9 +228,6 @@ class SqlAlchemyBatchData(BatchData):
         elif dialect == GESqlDialect.DREMIO:
             stmt = f"CREATE OR REPLACE VDS {temp_table_name} AS {query}"
         elif dialect == GESqlDialect.SNOWFLAKE:
-            if temp_table_schema_name is not None:
-                temp_table_name = f"{temp_table_schema_name}.{temp_table_name}"
-
             stmt = f"CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}"
         elif dialect == GESqlDialect.MYSQL:
             stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS {query}"
@@ -277,12 +278,7 @@ class SqlAlchemyBatchData(BatchData):
                 temp_table_name=temp_table_name, query=query
             )
         elif dialect == GESqlDialect.VERTICA:
-            full_table_name = (
-                f"{temp_table_schema_name}.{temp_table_name}"
-                if temp_table_schema_name is not None
-                else f"{temp_table_name}"
-            )
-            stmt = f"CREATE TEMPORARY TABLE {full_table_name} ON COMMIT PRESERVE ROWS AS {query}"
+            stmt = f"CREATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}"
         else:
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
         if dialect == GESqlDialect.ORACLE:
