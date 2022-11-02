@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import requests
 
 from great_expectations.core.http import create_session
+from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -176,12 +177,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
-    DEFAULT_BASE_URL = "https://app.greatexpectations.io/"
-
     def __init__(
         self,
         ge_cloud_credentials: Dict,
-        ge_cloud_base_url: str = DEFAULT_BASE_URL,
+        ge_cloud_base_url: str = CLOUD_DEFAULT_BASE_URL,
         ge_cloud_resource_type: Optional[Union[str, GeCloudRESTResource]] = None,
         ge_cloud_resource_name: Optional[str] = None,
         suppress_store_backend_id: bool = True,

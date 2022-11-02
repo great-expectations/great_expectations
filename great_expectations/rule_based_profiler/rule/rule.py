@@ -79,8 +79,6 @@ class Rule(SerializableDictDot):
         self._parameter_builders = parameter_builders
         self._expectation_configuration_builders = expectation_configuration_builders
 
-        self._execution_time = None
-
     @measure_execution_time(
         execution_time_holder_object_reference_name="rule_state",
         execution_time_property_name="rule_execution_time",
@@ -207,13 +205,6 @@ class Rule(SerializableDictDot):
         self,
     ) -> Optional[List[ExpectationConfigurationBuilder]]:
         return self._expectation_configuration_builders
-
-    @property
-    def execution_time(self) -> Optional[float]:  # Execution time (in seconds).
-        """
-        Property that holds "execution_time" of this "Rule" (in seconds).
-        """
-        return self._execution_time
 
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None
