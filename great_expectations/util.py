@@ -76,7 +76,7 @@ except ImportError:
 try:
     import black
 except ImportError:
-    black = None  # type: ignore[assignment]
+    black = None
 
 try:
     # This library moved in python 3.8
@@ -364,7 +364,7 @@ def verify_dynamic_loading_support(
     """
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[assignment,attr-defined]
+        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
             module_name, package=package_name
         )
     except ModuleNotFoundError:
@@ -1514,8 +1514,8 @@ def isclose(
     return cast(
         bool,
         np.isclose(
-            a=np.float64(operand_a),  # type: ignore[arg-type]
-            b=np.float64(operand_b),  # type: ignore[arg-type]
+            a=np.float64(operand_a),
+            b=np.float64(operand_b),
             rtol=rtol,
             atol=atol,
             equal_nan=equal_nan,
@@ -1926,14 +1926,14 @@ def numpy_quantile(
     """
     quantile: np.ndarray
     if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(  # type: ignore[call-arg,call-overload]
+        quantile = np.quantile(
             a=a,
             q=q,
             axis=axis,
             method=method,
         )
     else:
-        quantile = np.quantile(  # type: ignore[call-overload]
+        quantile = np.quantile(
             a=a,
             q=q,
             axis=axis,
