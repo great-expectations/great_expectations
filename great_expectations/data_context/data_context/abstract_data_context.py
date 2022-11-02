@@ -497,7 +497,10 @@ class AbstractDataContext(ABC):
         )
         updated_datasource: Union[
             LegacyDatasource, BaseDatasource
-        ] = self._instantiate_datasource_from_config(config=substituted_config)
+        ] = self._instantiate_datasource_from_config(
+            raw_config=updated_datasource_config_from_store,
+            substituted_config=substituted_config,
+        )
         self._cached_datasources[datasource_name] = updated_datasource
         return updated_datasource
 
@@ -2742,7 +2745,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 pass
 
     def _instantiate_datasource_from_config(
-        self, config: DatasourceConfig
+        self,
+        raw_config: DatasourceConfig,
+        substituted_config: DatasourceConfig,
     ) -> Datasource:
         """Instantiate a new datasource.
         Args:
@@ -2755,14 +2760,18 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             DatasourceInitializationError
         """
         try:
-            datasource: Datasource = self._build_datasource_from_config(config=config)
+            datasource: Datasource = self._build_datasource_from_config(
+                raw_config=raw_config, substituted_config=substituted_config
+            )
         except Exception as e:
             raise ge_exceptions.DatasourceInitializationError(
-                datasource_name=config.name, message=str(e)
+                datasource_name=substituted_config.name, message=str(e)
             )
         return datasource
 
-    def _build_datasource_from_config(self, config: DatasourceConfig) -> Datasource:
+    def _build_datasource_from_config(
+        self, raw_config: DatasourceConfig, substituted_config: DatasourceConfig
+    ) -> Datasource:
         """Instantiate a Datasource from a config.
 
         Args:
@@ -2776,17 +2785,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         # We convert from the type back to a dictionary for purposes of instantiation
         serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        config_dict: dict = serializer.serialize(config)
+        raw_config_dict: dict = serializer.serialize(raw_config)
+        substituted_config_dict: dict = serializer.serialize(substituted_config)
+        substituted_config_dict["raw_config"] = raw_config_dict
 
         # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
-        if config_dict["class_name"] in [
+        if substituted_config_dict["class_name"] in [
             "BaseDatasource",
             "Datasource",
         ]:
-            config_dict.update({"data_context_root_directory": self.root_directory})  # type: ignore[union-attr]
+            substituted_config_dict.update({"data_context_root_directory": self.root_directory})  # type: ignore[union-attr]
         module_name: str = "great_expectations.datasource"
         datasource: Datasource = instantiate_class_from_config(
-            config=config_dict,
+            config=substituted_config_dict,
             runtime_environment={"data_context": self, "concurrency": self.concurrency},
             config_defaults={"module_name": module_name},
         )
@@ -2794,7 +2805,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=config["class_name"],
+                class_name=substituted_config_dict["class_name"],
             )
         return datasource
 
@@ -2856,10 +2867,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if initialize:
             try:
                 datasource = self._instantiate_datasource_from_config(
-                    config=substituted_config
+                    raw_config=config, substituted_config=substituted_config
                 )
-                # Sanitize instantiated object's config attr to remove any credentials with their ${VARIABLES} counterparts
-                datasource.update_config(config)
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.

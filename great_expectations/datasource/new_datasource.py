@@ -11,12 +11,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.core.serializer import DictConfigSerializer
-from great_expectations.data_context.types.base import (
-    ConcurrencyConfig,
-    DatasourceConfig,
-    datasourceConfigSchema,
-)
+from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
 from great_expectations.execution_engine import ExecutionEngine
@@ -34,7 +29,7 @@ class BaseDatasource:
     def __init__(
         self,
         name: str,
-        execution_engine=None,
+        execution_engine: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
@@ -405,25 +400,6 @@ class BaseDatasource:
     def config(self) -> dict:
         return copy.deepcopy(self._datasource_config)
 
-    def update_config(self, config: DatasourceConfig) -> None:
-        """
-        Update the Datasource's `self._datasource_config` attribute with values from another config object.
-
-        The primary usecase for this method is the sanitization of the object's config.
-
-        Ex: In the case that a user utilizes ${VARIABLES} in their object configuration,
-        those variables will be substituted and sensitive values will exist within the config.
-
-        If we call `update_config` with the unsubstituted config, we can ensure that no credentials
-        are sent over the wire / persisted to disk.
-
-        Args:
-            config (DatsourceConfig): The config object used to update the object's config attr
-        """
-        substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        raw_config: dict = substitution_serializer.serialize(config)
-        self._datasource_config.update(raw_config)
-
 
 class Datasource(BaseDatasource):
     """
@@ -435,11 +411,12 @@ class Datasource(BaseDatasource):
     def __init__(
         self,
         name: str,
-        execution_engine=None,
-        data_connectors=None,
+        execution_engine: Optional[dict] = None,
+        data_connectors: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
+        raw_config: Optional[dict] = None,
     ) -> None:
         """
         Build a new Datasource with data connectors.
@@ -468,6 +445,7 @@ class Datasource(BaseDatasource):
         self._datasource_config.update(
             {"data_connectors": copy.deepcopy(data_connectors)}
         )
+        self._raw_config = raw_config or self._datasource_config
         self._init_data_connectors(data_connector_configs=data_connectors)
 
     def _init_data_connectors(
@@ -479,3 +457,11 @@ class Datasource(BaseDatasource):
                 name=name,
                 config=config,
             )
+
+    @property
+    def raw_config(self) -> dict:
+        """
+        The config used to instantiate the Datasource.
+        Note that compared to `self.config`, this property does not include variable substitutions.
+        """
+        return self._raw_config
