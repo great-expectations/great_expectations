@@ -35,10 +35,11 @@ logger = logging.getLogger(__name__)
 
 
 try:
-    from shapely.geometry import LineString, Point, Polygon
+    from shapely.geometry import LineString, Point, Polygon, MultiPolygon
 except ImportError:
     Point = None
     Polygon = None
+    MultiPolygon = None
     LineString = None
 
 try:
@@ -222,7 +223,7 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
         return str(data)
 
     # noinspection PyTypeChecker
-    if Polygon and isinstance(data, (Point, Polygon, LineString)):
+    if Polygon and isinstance(data, (Point, Polygon, MultiPolygon, LineString)):
         return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
