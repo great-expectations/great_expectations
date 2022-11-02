@@ -50,8 +50,8 @@ from great_expectations.util import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
     from great_expectations.validator.validator import Validator
 
@@ -76,7 +76,7 @@ RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional[BaseDataContext] = None,
+    data_context: Optional[AbstractDataContext] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
@@ -131,7 +131,7 @@ def get_validator(
 
 
 def get_batch_ids(
-    data_context: Optional[BaseDataContext] = None,
+    data_context: Optional[AbstractDataContext] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     limit: Optional[int] = None,
@@ -946,7 +946,7 @@ def convert_metric_values_to_float_dtype_best_effort(
 
 
 def get_validator_with_expectation_suite(
-    data_context: BaseDataContext,
+    data_context: AbstractDataContext,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     expectation_suite: Optional[ExpectationSuite] = None,
@@ -980,7 +980,7 @@ def get_validator_with_expectation_suite(
 
 
 def get_or_create_expectation_suite(
-    data_context: BaseDataContext,
+    data_context: AbstractDataContext,
     expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
     component_name: Optional[str] = None,
