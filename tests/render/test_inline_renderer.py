@@ -32,13 +32,14 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "expectation_configuration,expected_serialized_expectation_configuration_rendered_atomic_content,expected_serialized_expectation_validation_result_rendered_atomic_content",
+    "expectation_configuration,result,expected_serialized_expectation_configuration_rendered_atomic_content,expected_serialized_expectation_validation_result_rendered_atomic_content",
     [
         pytest.param(
             ExpectationConfiguration(
                 expectation_type="expect_table_row_count_to_equal",
                 kwargs={"value": 3},
             ),
+            {"observed_value": 3},
             [
                 {
                     "value_type": "StringValueType",
@@ -72,6 +73,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 expectation_type="expect_column_min_to_be_between",
                 kwargs={"column": "event_type", "min_value": 3, "max_value": 20},
             ),
+            {"observed_value": 19},
             [
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
@@ -141,6 +143,13 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                     },
                 },
             ),
+            {
+                "observed_value": {
+                    "quantiles": [0.0, 0.5, 1.0],
+                    "values": [397433, 2388055, 9488404],
+                },
+                "details": {"success_details": [True, True, True]},
+            },
             [
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
@@ -232,6 +241,16 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                 expectation_type="expect_column_values_to_be_in_set",
                 kwargs={"column": "event_type", "value_set": [19, 22, 73]},
             ),
+            {
+                "element_count": 3,
+                "unexpected_count": 0,
+                "unexpected_percent": 0.0,
+                "partial_unexpected_list": [],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 0.0,
+                "unexpected_percent_nonmissing": 0.0,
+            },
             [
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
@@ -296,6 +315,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                     },
                 },
             ),
+            {},
             [
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
@@ -405,30 +425,24 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
         ),
     ],
 )
-@pytest.mark.slow  # 5.82s
+@pytest.mark.unit
 def test_inline_renderer_rendered_content_return_value(
-    alice_columnar_table_single_batch_context: DataContext,
     expectation_configuration: ExpectationConfiguration,
+    result: dict,
     expected_serialized_expectation_configuration_rendered_atomic_content: dict,
     expected_serialized_expectation_validation_result_rendered_atomic_content: dict,
 ):
-    context: DataContext = alice_columnar_table_single_batch_context
-    batch_request: BatchRequest = BatchRequest(
-        datasource_name="alice_columnar_table_single_batch_datasource",
-        data_connector_name="alice_columnar_table_single_batch_data_connector",
-        data_asset_name="alice_columnar_table_single_batch_data_asset",
-    )
-    suite: ExpectationSuite = context.create_expectation_suite("validating_alice_data")
 
-    validator: Validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite=suite,
-        include_rendered_content=True,
+    expectation_validation_result = ExpectationValidationResult(
+        exception_info={
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        expectation_config=expectation_configuration,
+        result=result,
+        success=True,
     )
-
-    expectation_validation_result: ExpectationValidationResult = (
-        validator.graph_validate(configurations=[expectation_configuration])
-    )[0]
 
     inline_renderer: InlineRenderer = InlineRenderer(
         render_object=expectation_validation_result
