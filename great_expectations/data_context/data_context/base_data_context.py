@@ -254,7 +254,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             self._data_context = CloudDataContext(
                 project_config=project_config,
                 runtime_environment=runtime_environment,
-                context_root_dir=context_root_dir,  # type: ignore[arg-type]
+                context_root_dir=context_root_dir,
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_access_token=ge_cloud_access_token,
                 ge_cloud_organization_id=ge_cloud_organization_id,
@@ -725,7 +725,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         )
         return res
 
-    def delete_expectation_suite(  # type: ignore[override]
+    def delete_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
@@ -1226,7 +1226,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             If initialize=True return an instantiated Datasource object, else None.
         """
-        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr,arg-type]
+        datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr]
             config=config,
             initialize=initialize,
             save_changes=save_changes,
