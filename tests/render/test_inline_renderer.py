@@ -440,7 +440,6 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
         ),
     ],
 )
-@pytest.mark.unit
 def test_inline_renderer_rendered_content_return_value(
     expectation_configuration: ExpectationConfiguration,
     result: dict,
