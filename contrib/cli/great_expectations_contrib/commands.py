@@ -4,7 +4,6 @@ import os
 import subprocess
 import sys
 from collections import namedtuple
-from dataclasses import asdict
 
 import click
 from cookiecutter.main import cookiecutter
