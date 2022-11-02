@@ -2,13 +2,11 @@ from typing import List
 
 import pytest
 
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.data_context import DataContext
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -16,7 +14,6 @@ from great_expectations.render import (
 )
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.inline_renderer import InlineRenderer
-from great_expectations.validator.validator import Validator
 
 
 @pytest.mark.integration
