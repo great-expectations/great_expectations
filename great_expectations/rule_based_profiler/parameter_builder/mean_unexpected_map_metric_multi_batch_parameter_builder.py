@@ -1,4 +1,6 @@
-from typing import Dict, List, Optional, Set, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -22,6 +24,11 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
@@ -52,7 +59,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -68,7 +75,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,

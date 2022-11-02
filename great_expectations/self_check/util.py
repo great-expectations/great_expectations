@@ -204,14 +204,14 @@ except ImportError:
             from collections import namedtuple
 
             BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc]
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)  # type: ignore[assignment]
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
             BIGQUERY_TYPES = {}
 
     except (ImportError, AttributeError):
         sqla_bigquery = None
-        bigquery_types_tuple = None  # type: ignore[assignment]
+        bigquery_types_tuple = None
         BigQueryDialect = None
-        pybigquery = None  # type: ignore[var-annotated]
+        pybigquery = None
         BIGQUERY_TYPES = {}
 
 

@@ -50,8 +50,8 @@ from great_expectations.util import is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
     from great_expectations.validator.validator import Validator
 
@@ -87,7 +87,7 @@ class ParameterBuilder(ABC, Builder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
@@ -99,7 +99,7 @@ class ParameterBuilder(ABC, Builder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with ParameterBuilder
+            data_context: AbstractDataContext associated with ParameterBuilder
         """
         super().__init__(data_context=data_context)
 
@@ -661,7 +661,7 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(t
 
 def init_rule_parameter_builders(
     parameter_builder_configs: Optional[List[dict]] = None,
-    data_context: Optional[BaseDataContext] = None,
+    data_context: Optional[AbstractDataContext] = None,
 ) -> Optional[List[ParameterBuilder]]:
     if parameter_builder_configs is None:
         return None
@@ -677,7 +677,7 @@ def init_rule_parameter_builders(
 
 def init_parameter_builder(
     parameter_builder_config: Union[ParameterBuilderConfig, dict],
-    data_context: Optional[BaseDataContext] = None,
+    data_context: Optional[AbstractDataContext] = None,
 ) -> ParameterBuilder:
     if not isinstance(parameter_builder_config, dict):
         parameter_builder_config = parameter_builder_config.to_dict()
