@@ -2724,23 +2724,31 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
-        config: DataContextConfig = self.get_config_with_variables_substituted(
-            self.config
-        )
+        config: DataContextConfig = self.config
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
         )
 
+        substitutions = self._determine_substitutions()
+
         for datasource_name, datasource_config in datasources.items():
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
-                config_dict = dict(datasourceConfigSchema.dump(config))
-                datasource_config = datasourceConfigSchema.load(config_dict)
-                datasource_config.name = datasource_name
-                # Our overall config has already undergone variable substituted here so
-                # there is no difference between raw_config and substituted_config arg values
+
+                raw_config_dict = dict(datasourceConfigSchema.dump(config))
+                substituted_config_dict: dict = substitute_all_config_variables(
+                    raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+                )
+
+                raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
+                substituted_datasource_config = datasourceConfigSchema.load(
+                    substituted_config_dict
+                )
+                substituted_datasource_config.name = datasource_name
+
                 datasource = self._instantiate_datasource_from_config(
-                    raw_config=datasource_config, substituted_config=datasource_config
+                    raw_config=raw_datasource_config,
+                    substituted_config=substituted_datasource_config,
                 )
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
