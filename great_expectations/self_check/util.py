@@ -1760,6 +1760,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v2_api(
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_multicolumn_sum_to_equal",
+            "expect_column_value_z_scores_to_be_less_than",
         ]
         if context in ["bigquery"]:
             ###
@@ -1801,10 +1802,12 @@ def candidate_test_is_on_temporary_notimplemented_list_v2_api(
             "expect_compound_columns_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_table_row_count_to_equal_other_table",
+            "expect_column_value_z_scores_to_be_less_than",
         ]
     if context == "PandasDataset":
         return expectation_type in [
             "expect_table_row_count_to_equal_other_table",
+            "expect_column_value_z_scores_to_be_less_than",
         ]
     return False
 
