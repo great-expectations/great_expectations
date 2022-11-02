@@ -183,52 +183,6 @@ class ParameterBuilder(ABC, Builder):
                 parameter_values=parameter_values,
             )
 
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def evaluation_parameter_builders(
-        self,
-    ) -> Optional[List[ParameterBuilder]]:
-        return self._evaluation_parameter_builders
-
-    @property
-    def evaluation_parameter_builder_configs(
-        self,
-    ) -> Optional[List[ParameterBuilderConfig]]:
-        return self._evaluation_parameter_builder_configs
-
-    @property
-    def raw_fully_qualified_parameter_name(self) -> str:
-        """
-        This fully-qualified parameter name references "raw" "ParameterNode" output (including "Numpy" "dtype" values).
-        """
-        return f"{RAW_PARAMETER_KEY}{self.name}"
-
-    @property
-    def json_serialized_fully_qualified_parameter_name(self) -> str:
-        """
-        This fully-qualified parameter name references "JSON-serialized" "ParameterNode" output.
-        """
-        return f"{PARAMETER_KEY}{self.name}"
-
-    @abstractmethod
-    def _build_parameters(
-        self,
-        domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
-    ) -> Attributes:
-        """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
-
-        Returns:
-            Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
-        pass
-
     def resolve_evaluation_dependencies(
         self,
         domain: Domain,
@@ -282,6 +236,52 @@ class ParameterBuilder(ABC, Builder):
                     parameters=parameters,
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
                 )
+
+    @abstractmethod
+    def _build_parameters(
+        self,
+        domain: Domain,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        recompute_existing_parameter_values: bool = False,
+    ) -> Attributes:
+        """
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
+
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
+        """
+        pass
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def evaluation_parameter_builders(
+        self,
+    ) -> Optional[List[ParameterBuilder]]:
+        return self._evaluation_parameter_builders
+
+    @property
+    def evaluation_parameter_builder_configs(
+        self,
+    ) -> Optional[List[ParameterBuilderConfig]]:
+        return self._evaluation_parameter_builder_configs
+
+    @property
+    def raw_fully_qualified_parameter_name(self) -> str:
+        """
+        This fully-qualified parameter name references "raw" "ParameterNode" output (including "Numpy" "dtype" values).
+        """
+        return f"{RAW_PARAMETER_KEY}{self.name}"
+
+    @property
+    def json_serialized_fully_qualified_parameter_name(self) -> str:
+        """
+        This fully-qualified parameter name references "JSON-serialized" "ParameterNode" output.
+        """
+        return f"{PARAMETER_KEY}{self.name}"
 
     def get_validator(
         self,
