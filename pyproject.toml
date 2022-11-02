@@ -18,7 +18,6 @@ files = [
     # "contrib" # ignore entire `contrib` package
     ]
 warn_unused_configs = true
-warn_unused_ignores = true
 ignore_missing_imports = true
 # TODO: change this to 'normal' once we have 'full' type coverage
 follow_imports = 'silent'
