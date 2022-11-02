@@ -1091,7 +1091,7 @@ class Expectation(metaclass=MetaExpectation):
             _debug = lambda x: x
             _error = lambda x: x
 
-        library_metadata: ExpectationDescriptionDiagnostics = (
+        library_metadata: AugmentedLibraryMetadata = (
             self._get_augmented_library_metadata()
         )
         examples: List[ExpectationTestDataCases] = self._get_examples(
