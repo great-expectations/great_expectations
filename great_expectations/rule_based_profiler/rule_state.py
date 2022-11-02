@@ -123,6 +123,7 @@ class RuleState:
 or call "RuleState.remove_domain_if_exists()" with Domain having ID equal to "{domain.id}" as argument first.
 """
             )
+
         self.domains.append(domain)
 
     def remove_domain_if_exists(self, domain: Domain) -> None:
