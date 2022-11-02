@@ -22,7 +22,7 @@ def context_sources_clean():
 
 
 class TestMetaDatasource:
-    def test__new__only_registers_expected_nunmber_of_datasources(
+    def test__new__only_registers_expected_nunmber_of_datasources_factories_and_types(
         self, context_sources_clean: _SourceFactories
     ):
         assert len(context_sources_clean.factories) == 0
