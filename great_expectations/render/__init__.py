@@ -263,7 +263,7 @@ class RenderedAtomicContent(RenderedContent):
 
 class RenderedAtomicContentSchema(Schema):
     class Meta:
-        unknown: INCLUDE  # type: ignore[valid-type]
+        unknown: INCLUDE
 
     name = fields.String(required=False, allow_none=True)
     value = fields.Nested(RenderedAtomicValueSchema(), required=True, allow_none=False)

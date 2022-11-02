@@ -218,7 +218,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
                 tables.append(
                     {
-                        "schema_name": schema_name,  # type: ignore[dict-item]
+                        "schema_name": schema_name,
                         "table_name": table_name,
                         "type": "table",
                     }
@@ -241,7 +241,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
                         tables.append(
                             {
-                                "schema_name": schema_name,  # type: ignore[dict-item]
+                                "schema_name": schema_name,
                                 "table_name": view_name,
                                 "type": "view",
                             }
