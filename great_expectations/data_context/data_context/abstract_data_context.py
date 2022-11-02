@@ -2737,6 +2737,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 config_dict = dict(datasourceConfigSchema.dump(config))
                 datasource_config = datasourceConfigSchema.load(config_dict)
                 datasource_config.name = datasource_name
+                # Our overall config has already undergone variable substituted here so
+                # there is no difference between raw_config and substituted_config arg values
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=datasource_config, substituted_config=datasource_config
                 )
