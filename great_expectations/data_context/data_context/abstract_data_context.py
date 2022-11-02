@@ -952,18 +952,20 @@ class AbstractDataContext(ABC):
             datasource_name=datasource_name
         )
 
-        raw_config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        raw_config = datasourceConfigSchema.load(raw_config_dict)
+
         substitutions: dict = self._determine_substitutions()
-        config = substitute_all_config_variables(
+        substituted_config = substitute_all_config_variables(
             raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-        datasource_config = datasourceConfigSchema.load(config)
+        datasource_config = datasourceConfigSchema.load(substituted_config)
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = self._instantiate_datasource_from_config(
-            raw_config=raw_config, substituted_config=config
+            raw_config=raw_config, substituted_config=substituted_config
         )
         self._cached_datasources[datasource_name] = datasource
         return datasource
