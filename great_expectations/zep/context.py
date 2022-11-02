@@ -100,7 +100,7 @@ class _SourceFactories:
 
         cls.type_lookup[ds_type] = simplified_name
         LOGGER.debug(f"'{simplified_name}' added to `type_lookup`")
-        cls.__source_factories[method_name] = fn  # type: ignore[assignment]
+        cls.__source_factories[method_name] = fn
 
     @property
     def factories(self) -> List[str]:
