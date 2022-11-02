@@ -17,11 +17,11 @@ class DataAsset(abc.ABC):
 
 class Datasource(metaclass=MetaDatasource):
     # class attrs
-    execution_engine: ClassVar[ExecutionEngine]
     asset_types: ClassVar[List[Type[DataAsset]]] = []
 
     # instance attrs
     name: str
+    execution_engine: ExecutionEngine
     assets: Dict[str, DataAsset]
 
     def get_batch_list_from_batch_request(
