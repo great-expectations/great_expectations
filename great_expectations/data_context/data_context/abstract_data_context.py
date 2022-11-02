@@ -477,8 +477,12 @@ class AbstractDataContext(ABC):
         Returns:
             The datasource, after storing and retrieving the stored config.
         """
+        if isinstance(datasource, LegacyDatasource):
+            config = datasource.config
+        else:
+            config = datasource.raw_config
 
-        datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
+        datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         # Manually need to add in class name to the config since it is not part of the runtime obj
         datasource_config_dict["class_name"] = datasource.__class__.__name__
 
