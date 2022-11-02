@@ -549,8 +549,8 @@ class AbstractDataContext(ABC):
             Union[LegacyDatasource, BaseDatasource]
         ] = self._instantiate_datasource_from_config_and_update_project_config(
             config=datasource_config,
-            save_changes=save_changes,
             initialize=initialize,
+            save_changes=save_changes,
         )
         return datasource
 
@@ -2835,8 +2835,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
         config: DatasourceConfig,
-        save_changes: bool,  # Specifically deviate from other uses of this flag due to usage in `test_yaml_config`
-        initialize: bool = True,
+        initialize: bool,
+        save_changes: bool,
     ) -> Optional[Datasource]:
         """Perform substitutions and optionally initialize the Datasource and/or store the config.
 

@@ -390,8 +390,8 @@ class _YamlConfigValidator:
             Datasource,
             self._data_context._instantiate_datasource_from_config_and_update_project_config(
                 config=datasource_config,
-                save_changes=False,
                 initialize=True,
+                save_changes=False,
             ),
         )
 

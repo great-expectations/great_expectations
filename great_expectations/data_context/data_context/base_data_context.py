@@ -1213,8 +1213,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
         config: DatasourceConfig,
+        initialize: bool,
         save_changes: bool,
-        initialize: bool = True,
     ) -> Optional[Datasource]:
         """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
 
@@ -1228,8 +1228,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         """
         datasource: Datasource = self._data_context._instantiate_datasource_from_config_and_update_project_config(  # type: ignore[assignment,union-attr,arg-type]
             config=config,
-            save_changes=save_changes,
             initialize=initialize,
+            save_changes=save_changes,
         )
         self._synchronize_self_with_underlying_data_context()
         return datasource
