@@ -315,7 +315,25 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                     },
                 },
             ),
-            {},
+            {
+                "observed_value": None,
+                "details": {
+                    "observed_partition": {
+                        "values": [2000000, 6000000, 397433, 2388055, 9488404],
+                        "weights": [
+                            0.0,
+                            0.0,
+                            0.3333333333333333,
+                            0.3333333333333333,
+                            0.3333333333333333,
+                        ],
+                    },
+                    "expected_partition": {
+                        "values": [2000000, 6000000, 397433, 2388055, 9488404],
+                        "weights": [0.3, 0.7, 0.0, 0.0, 0.0],
+                    },
+                },
+            },
             [
                 {
                     "name": AtomicPrescriptiveRendererType.SUMMARY,
