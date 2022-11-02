@@ -60,20 +60,20 @@ class RuleState:
         self._rule = value
 
     @property
-    def variables(self) -> Optional[ParameterContainer]:
-        return self._variables
-
-    @variables.setter
-    def variables(self, value: Optional[ParameterContainer]) -> None:
-        self._variables = value
-
-    @property
     def domains(self) -> List[Domain]:
         return self._domains
 
     @domains.setter
     def domains(self, value: Optional[List[Domain]]) -> None:
         self._domains = value
+
+    @property
+    def variables(self) -> Optional[ParameterContainer]:
+        return self._variables
+
+    @variables.setter
+    def variables(self, value: Optional[ParameterContainer]) -> None:
+        self._variables = value
 
     @property
     def parameters(self) -> Dict[str, ParameterContainer]:
