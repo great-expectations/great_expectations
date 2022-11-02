@@ -2365,8 +2365,6 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
 
     assert datasource_from_yaml.name == datasource_name
     assert datasource_from_yaml.config == {
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "PandasExecutionEngine",
             "module_name": "great_expectations.execution_engine",
@@ -2503,25 +2501,8 @@ def test_add_datasource_from_yaml_sql_datasource(
     assert mock_emit.call_args_list == expected_call_args_list
 
     # .config not implemented for SimpleSqlalchemyDatasource
-    expected_config = {
-        "class_name": "SimpleSqlalchemyDatasource",
-        "module_name": "great_expectations.datasource",
-        "introspection": {
-            "whole_table": {
-                "data_asset_name_suffix": "__whole_table",
-            }
-        },
-        "credentials": {
-            "drivername": "postgresql",
-            "host": "localhost",
-            "port": "5432",
-            "username": "postgres",
-            "password": "",
-            "database": "postgres",
-        },
-    }
-    assert datasource_from_test_yaml_config.config == expected_config
-    assert datasource_from_yaml.config == expected_config
+    assert datasource_from_test_yaml_config.config == {}
+    assert datasource_from_yaml.config == {}
 
     assert datasource_from_yaml.name == datasource_name
     assert isinstance(datasource_from_yaml, SimpleSqlalchemyDatasource)
@@ -2538,6 +2519,33 @@ def test_add_datasource_from_yaml_sql_datasource(
     assert isinstance(
         context.get_config()["datasources"][datasource_name], DatasourceConfig
     )
+
+    # As of 20210312 SimpleSqlalchemyDatasource returns an empty {} .config
+    # so here we check for each part of the config individually
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "SimpleSqlalchemyDatasource"
+    assert datasource_config.credentials == {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "postgres",
+    }
+    assert datasource_config.credentials == OrderedDict(
+        [
+            ("drivername", "postgresql"),
+            ("host", "localhost"),
+            ("port", "5432"),
+            ("username", "postgres"),
+            ("password", ""),
+            ("database", "postgres"),
+        ]
+    )
+    assert datasource_config.introspection == OrderedDict(
+        [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
+    )
+    assert datasource_config.module_name == "great_expectations.datasource"
 
     # Check that the datasource was written to disk as expected
     root_directory = context.root_directory
@@ -2556,6 +2564,32 @@ def test_add_datasource_from_yaml_sql_datasource(
         context.get_config()["datasources"][datasource_name], DatasourceConfig
     )
 
+    # As of 20210312 SimpleSqlalchemyDatasource returns an empty {} .config
+    # so here we check for each part of the config individually
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "SimpleSqlalchemyDatasource"
+    assert datasource_config.credentials == {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "postgres",
+    }
+    assert datasource_config.credentials == OrderedDict(
+        [
+            ("drivername", "postgresql"),
+            ("host", "localhost"),
+            ("port", "5432"),
+            ("username", "postgres"),
+            ("password", ""),
+            ("database", "postgres"),
+        ]
+    )
+    assert datasource_config.introspection == OrderedDict(
+        [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
+    )
+    assert datasource_config.module_name == "great_expectations.datasource"
     assert mock_emit.call_count == 3
     expected_call_args_list.extend(
         [
@@ -2708,8 +2742,6 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
         "name": "my_datasource",
     }
     assert datasource_from_yaml.config == {
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
             "credentials": {
@@ -2873,8 +2905,6 @@ def test_add_datasource_from_yaml_with_substitution_variables(
 
     assert datasource_from_yaml.name == datasource_name
     assert datasource_from_yaml.config == {
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "PandasExecutionEngine",
             "module_name": "great_expectations.execution_engine",
@@ -2884,7 +2914,7 @@ def test_add_datasource_from_yaml_with_substitution_variables(
                 "class_name": "InferredAssetFilesystemDataConnector",
                 "module_name": "great_expectations.datasource.data_connector",
                 "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
-                "base_directory": "${SUBSTITUTED_BASE_DIRECTORY}",
+                "base_directory": "../data",
                 "name": "data_dir_example_data_connector",
             }
         },

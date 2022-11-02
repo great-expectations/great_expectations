@@ -1,5 +1,6 @@
 import copy
 import logging
+from typing import Optional
 
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
@@ -30,6 +31,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         engine=None,  # sqlalchemy.engine.Engine
         introspection: dict = None,
         tables: dict = None,
+        raw_config: Optional[dict] = None,
         **kwargs
     ) -> None:
         introspection = introspection or {}
@@ -45,7 +47,11 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         }
         self._execution_engine_config.update(**kwargs)
 
-        super().__init__(name=name, execution_engine=self._execution_engine_config)
+        super().__init__(
+            name=name,
+            execution_engine=self._execution_engine_config,
+            raw_config=raw_config,
+        )
 
         self._data_connectors: dict = {}
 

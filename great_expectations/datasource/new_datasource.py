@@ -33,6 +33,7 @@ class BaseDatasource:
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
+        raw_config: Optional[dict] = None,
     ) -> None:
         """
         Build a new Datasource.
@@ -43,6 +44,7 @@ class BaseDatasource:
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
             id: Identifier specific to this datasource.
+            raw_config: The configuration used to instantiate the obj (before variable substitution)
         """
         self._name = name
         self._id = id
@@ -59,13 +61,15 @@ class BaseDatasource:
                 runtime_environment={"concurrency": concurrency},
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
-            self._datasource_config: dict = {
-                "execution_engine": execution_engine,
-                "id": id,
-                "name": name,
-            }
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
+
+        self._datasource_config: dict = {
+            "execution_engine": execution_engine,
+            "id": id,
+            "name": name,
+        }
+        self._raw_config = raw_config or self._datasource_config
 
         self._data_connectors: dict = {}
 
@@ -437,6 +441,7 @@ class Datasource(BaseDatasource):
             data_context_root_directory=data_context_root_directory,
             concurrency=concurrency,
             id=id,
+            raw_config=raw_config,
         )
 
         if data_connectors is None:
@@ -445,7 +450,6 @@ class Datasource(BaseDatasource):
         self._datasource_config.update(
             {"data_connectors": copy.deepcopy(data_connectors)}
         )
-        self._raw_config = raw_config or self._datasource_config
         self._init_data_connectors(data_connector_configs=data_connectors)
 
     def _init_data_connectors(
