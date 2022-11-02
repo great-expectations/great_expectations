@@ -859,7 +859,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return gcs_object_key
 
     def _move(self, source_key, dest_key, **kwargs) -> None:
-        from google.cloud import storage  # type: ignore
+        from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
