@@ -10,6 +10,7 @@ import click
 from cookiecutter.main import cookiecutter
 
 from great_expectations.core.util import convert_to_json_serializable
+
 from .package import GreatExpectationsContribPackageManifest
 
 logger = logging.getLogger(__name__)

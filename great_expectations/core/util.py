@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 try:
-    from shapely.geometry import LineString, Point, Polygon, MultiPolygon
+    from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 except ImportError:
     Point = None
     Polygon = None
