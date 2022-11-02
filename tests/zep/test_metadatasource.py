@@ -2,9 +2,10 @@ from pprint import pformat as pf
 
 import pytest
 
-from great_expectations.zep.context import _SourceFactories, get_context
+from great_expectations.zep.context import get_context
 from great_expectations.zep.interfaces import DataAsset, Datasource
 from great_expectations.zep.metadatasource import MetaDatasource
+from great_expectations.zep.sources import _SourceFactories
 
 param = pytest.param
 
@@ -14,12 +15,29 @@ def context_sources_clean():
     """Return the sources object and clear and registered types/factories on teardown"""
     # setup
     sources = get_context().sources
+    assert len(sources.factories) == 0
     yield sources
     _SourceFactories._SourceFactories__source_factories.clear()
     _SourceFactories.type_lookup.clear()
 
 
 class TestMetaDatasource:
+    def test__new__only_registers_expected_nunmber_of_datasources(
+        self, context_sources_clean: _SourceFactories
+    ):
+        assert len(context_sources_clean.factories) == 0
+        assert len(context_sources_clean.type_lookup) == 0
+
+        class MyTestDatasource(Datasource):
+            pass
+
+        expected_registrants = 1
+
+        print(f"Factories -> {context_sources_clean.factories}")
+        print(f"TypeLookup -> {list(context_sources_clean.type_lookup.keys())}")
+        assert len(context_sources_clean.factories) == expected_registrants
+        assert len(context_sources_clean.type_lookup) == 2 * expected_registrants
+
     def test__new__registers_sources_factory_method(
         self, context_sources_clean: _SourceFactories
     ):
