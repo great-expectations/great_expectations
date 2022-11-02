@@ -137,7 +137,7 @@ class _YamlConfigValidator:
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: Union[  # type: ignore[name-defined]
+        return_mode: Union[
             Literal["instantiated_class"], Literal["report_object"]
         ] = "instantiated_class",
         shorten_tracebacks: bool = False,
@@ -406,7 +406,7 @@ class _YamlConfigValidator:
             ),
         )
         store_name = instantiated_class.store_name or store_name
-        self._data_context.config["stores"][store_name] = config  # type: ignore[index]
+        self._data_context.config["stores"][store_name] = config
 
         anonymizer = Anonymizer(self._data_context.data_context_id)
         usage_stats_event_payload = anonymizer.anonymize(
