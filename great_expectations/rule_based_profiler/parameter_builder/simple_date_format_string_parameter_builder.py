@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Dict, Iterable, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
@@ -22,6 +24,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +113,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Configure this SimpleDateFormatStringParameterBuilder
@@ -120,7 +128,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
