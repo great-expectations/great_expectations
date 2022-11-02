@@ -175,7 +175,7 @@ class MetaExpectation(ABCMeta):
     attribute, or, if that is not set, by snake-casing the name of the class.
     """
 
-    default_kwarg_values: Dict[str, Optional[Any]] = {}
+    default_kwarg_values: Dict[str, object] = {}
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
@@ -239,7 +239,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
-    default_kwarg_values: Dict[str, Optional[Any]] = {
+    default_kwarg_values = {
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
@@ -992,7 +992,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration: ExpectationConfiguration,
         runtime_configuration: dict = None,
     ) -> Union[Dict[str, Union[str, int, bool]], str]:
-        default_result_format: Optional[str] = self.default_kwarg_values.get(
+        default_result_format: Optional[Any] = self.default_kwarg_values.get(
             "result_format"
         )
         configuration_result_format: Union[
