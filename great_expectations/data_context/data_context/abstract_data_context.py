@@ -535,14 +535,14 @@ class AbstractDataContext(ABC):
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
-        original_config: Union[CommentedMap, dict]
+        config: Union[CommentedMap, dict]
         if hasattr(datasource_class, "build_configuration"):
-            original_config = datasource_class.build_configuration(**kwargs)
+            config = datasource_class.build_configuration(**kwargs)
         else:
-            original_config = kwargs
+            config = kwargs
 
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
-            CommentedMap(**original_config)
+            CommentedMap(**config)
         )
         datasource_config.name = name
 
