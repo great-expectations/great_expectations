@@ -2808,7 +2808,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             "BaseDatasource",
             "Datasource",
         ]:
-            substituted_config_dict.update({"data_context_root_directory": self.root_directory})  # type: ignore[union-attr]
+            substituted_config_dict.update(
+                {"data_context_root_directory": self.root_directory}
+            )
         module_name: str = "great_expectations.datasource"
         datasource: Datasource = instantiate_class_from_config(
             config=substituted_config_dict,
