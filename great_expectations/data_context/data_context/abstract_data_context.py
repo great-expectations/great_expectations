@@ -952,17 +952,19 @@ class AbstractDataContext(ABC):
             datasource_name=datasource_name
         )
 
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        raw_config: dict = dict(datasourceConfigSchema.dump(datasource_config))
         substitutions: dict = self._determine_substitutions()
         config = substitute_all_config_variables(
-            config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
         datasource_config = datasourceConfigSchema.load(config)
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = self._instantiate_datasource_from_config(config=datasource_config)
+        ] = self._instantiate_datasource_from_config(
+            raw_config=raw_config, substituted_config=config
+        )
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
@@ -2734,7 +2736,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 datasource_config = datasourceConfigSchema.load(config_dict)
                 datasource_config.name = datasource_name
                 datasource = self._instantiate_datasource_from_config(
-                    config=datasource_config
+                    raw_config=datasource_config, substituted_config=datasource_config
                 )
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
