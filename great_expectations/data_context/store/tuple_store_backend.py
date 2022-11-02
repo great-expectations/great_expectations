@@ -859,7 +859,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return gcs_object_key
 
     def _move(self, source_key, dest_key, **kwargs) -> None:
-        from google.cloud import storage  # type: ignore
+        from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
@@ -878,7 +878,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
-        from google.cloud import storage  # type: ignore
+        from google.cloud import storage
 
         gcs = storage.Client(self.project)
 
@@ -1002,7 +1002,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self.container = container
         self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
 
-    @property  # type: ignore[misc] # Decorated property not supported
+    @property
     @functools.lru_cache()
     def _container_client(self) -> Any:
 

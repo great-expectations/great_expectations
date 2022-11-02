@@ -66,6 +66,8 @@ stages:
 
                 [GEChanged]
                 great_expectations/**/*.py
+                pyproject.toml
+                setup.cfg
                 tests/**
                 /*.txt
                 /*.yml

@@ -26,7 +26,7 @@ from typing import (
 )
 
 try:
-    from typing import Literal  # type: ignore[attr-defined]
+    from typing import Literal
 except ImportError:
     # Fallback for python < 3.8
     from typing_extensions import Literal  # type: ignore[misc]
@@ -768,7 +768,7 @@ class AbstractDataContext(ABC):
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
-        datasource = self.get_datasource(batch_kwargs.get("datasource"))  # type: ignore[union-attr,arg-type]
+        datasource = self.get_datasource(batch_kwargs.get("datasource"))  # type: ignore[arg-type]
         batch = datasource.get_batch(  # type: ignore[union-attr]
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
@@ -1013,7 +1013,7 @@ class AbstractDataContext(ABC):
         datasource_config: Union[dict, DatasourceConfig]
         serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
-        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr,assignment]
+        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
             if isinstance(datasource_config, dict):
                 datasource_config = DatasourceConfig(**datasource_config)
             datasource_config.name = datasource_name
@@ -1354,7 +1354,7 @@ class AbstractDataContext(ABC):
                 batch_request_list = [batch_request]  # type: ignore[list-item]
 
             for batch_request in batch_request_list:
-                batch_list.extend(  # type: ignore[union-attr]
+                batch_list.extend(
                     self.get_batch_list(
                         datasource_name=datasource_name,
                         data_connector_name=data_connector_name,
@@ -1381,7 +1381,7 @@ class AbstractDataContext(ABC):
 
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,  # type: ignore[arg-type]
-            batch_list=batch_list,  # type: ignore[arg-type]
+            batch_list=batch_list,
             include_rendered_content=include_rendered_content,
         )
 
@@ -1567,7 +1567,7 @@ class AbstractDataContext(ABC):
                     expectation_suite_name
                 )
             )
-        self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[arg-type]
+        self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
 
     def delete_expectation_suite(
@@ -2783,7 +2783,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             "BaseDatasource",
             "Datasource",
         ]:
-            config_dict.update({"data_context_root_directory": self.root_directory})  # type: ignore[union-attr]
+            config_dict.update({"data_context_root_directory": self.root_directory})
         module_name: str = "great_expectations.datasource"
         datasource: Datasource = instantiate_class_from_config(
             config=config_dict,
