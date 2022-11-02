@@ -24,7 +24,7 @@ class StubDatasourceStore(DatasourceStore):
 
 
 class FakeAbstractDataContext(AbstractDataContext):
-    def __init__(self, substitutions: Optional[dict] = None):
+    def __init__(self, substitutions: Optional[dict] = None) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
