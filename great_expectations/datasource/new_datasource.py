@@ -73,6 +73,14 @@ class BaseDatasource:
 
         self._data_connectors: dict = {}
 
+    @property
+    def raw_config(self) -> dict:
+        """
+        The config used to instantiate the Datasource.
+        Note that compared to `self.config`, this property does not include variable substitutions.
+        """
+        return self._raw_config
+
     def get_batch_from_batch_definition(
         self,
         batch_definition: BatchDefinition,
@@ -461,11 +469,3 @@ class Datasource(BaseDatasource):
                 name=name,
                 config=config,
             )
-
-    @property
-    def raw_config(self) -> dict:
-        """
-        The config used to instantiate the Datasource.
-        Note that compared to `self.config`, this property does not include variable substitutions.
-        """
-        return self._raw_config
