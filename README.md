@@ -7,7 +7,7 @@
 
 
 
-<img align="right" src="./generic_dickens_protagonist.png">
+<img align="right" src="./static/img/generic_dickens_protagonist.png">
 
 Great Expectations
 ================================================================================
