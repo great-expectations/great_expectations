@@ -23,8 +23,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
     from great_expectations.validator.validator import Validator
 
@@ -59,7 +59,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """Create column domains where cardinality is within the specified limit.
 
@@ -95,7 +95,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
                 cardinality limit to use when filtering columns.
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
-            data_context: BaseDataContext associated with this DomainBuilder
+            data_context: AbstractDataContext associated with this DomainBuilder
         """
         if exclude_column_names is None:
             exclude_column_names = [

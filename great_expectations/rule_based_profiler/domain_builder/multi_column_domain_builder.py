@@ -15,8 +15,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
     from great_expectations.validator.validator import Validator
 
@@ -29,12 +29,12 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
     def __init__(
         self,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
             include_column_names: Explicitly specified desired columns
-            data_context: BaseDataContext associated with this DomainBuilder
+            data_context: AbstractDataContext associated with this DomainBuilder
         """
         super().__init__(
             include_column_names=include_column_names,

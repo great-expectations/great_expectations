@@ -9,8 +9,8 @@ from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner
 )
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
 
 logger = logging.getLogger(__name__)
@@ -24,10 +24,10 @@ class DataAssistantDispatcher:
 
     _registered_data_assistants: Dict[str, Type[DataAssistant]] = {}
 
-    def __init__(self, data_context: BaseDataContext) -> None:
+    def __init__(self, data_context: AbstractDataContext) -> None:
         """
         Args:
-            data_context: BaseDataContext associated with DataAssistantDispatcher
+            data_context: AbstractDataContext associated with DataAssistantDispatcher
         """
         self._data_context = data_context
 

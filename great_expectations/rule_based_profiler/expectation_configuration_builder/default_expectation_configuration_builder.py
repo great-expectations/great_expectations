@@ -32,8 +32,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
 
 
@@ -81,7 +81,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         validation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
         **kwargs,
     ) -> None:
         """
@@ -93,7 +93,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
             fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance
             These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
-            data_context: BaseDataContext associated with this ExpectationConfigurationBuilder
+            data_context: AbstractDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
         """
 

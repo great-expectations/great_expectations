@@ -32,8 +32,8 @@ from great_expectations.rule_based_profiler.helpers.runtime_environment import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
 
 
@@ -53,12 +53,12 @@ class DataAssistantRunner:
     def __init__(
         self,
         data_assistant_cls: Type[DataAssistant],
-        data_context: BaseDataContext,
+        data_context: AbstractDataContext,
     ) -> None:
         """
         Args:
             data_assistant_cls: DataAssistant class associated with this DataAssistantRunner
-            data_context: BaseDataContext associated with this DataAssistantRunner
+            data_context: AbstractDataContext associated with this DataAssistantRunner
         """
         self._data_assistant_cls = data_assistant_cls
         self._data_context = data_context

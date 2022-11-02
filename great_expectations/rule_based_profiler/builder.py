@@ -15,8 +15,8 @@ from great_expectations.types import SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
 
 
@@ -33,11 +33,11 @@ class Builder(SerializableDictDot):
 
     def __init__(
         self,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
-            data_context: BaseDataContext associated with this Builder
+            data_context: AbstractDataContext associated with this Builder
         """
         self._batch_list = None
         self._batch_request = None
@@ -67,7 +67,7 @@ class Builder(SerializableDictDot):
         self._batch_request = value
 
     @property
-    def data_context(self) -> Optional[BaseDataContext]:
+    def data_context(self) -> Optional[AbstractDataContext]:
         return self._data_context
 
     def set_batch_list_if_null_batch_request(
