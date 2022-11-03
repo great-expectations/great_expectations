@@ -477,10 +477,9 @@ class AbstractDataContext(ABC):
         Returns:
             The datasource, after storing and retrieving the stored config.
         """
-        if isinstance(datasource, LegacyDatasource):
-            config = datasource.config
-        else:
-            config = datasource.raw_config
+        # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.
+        config = datasource._raw_config
 
         datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         # Manually need to add in class name to the config since it is not part of the runtime obj
@@ -2803,9 +2802,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         # We convert from the type back to a dictionary for purposes of instantiation
         serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        raw_config_dict: dict = serializer.serialize(raw_config)
         substituted_config_dict: dict = serializer.serialize(substituted_config)
-        substituted_config_dict["raw_config"] = raw_config_dict
 
         # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
         if substituted_config_dict["class_name"] in [
@@ -2827,6 +2824,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 package_name=None,
                 class_name=substituted_config_dict["class_name"],
             )
+
+        raw_config_dict: dict = serializer.serialize(raw_config)
+        datasource._raw_config = raw_config_dict
+
         return datasource
 
     def _perform_substitutions_on_datasource_config(
@@ -2889,6 +2890,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
+                datasource._raw_config = config
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.

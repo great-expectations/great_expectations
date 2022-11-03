@@ -185,6 +185,8 @@ class LegacyDatasource:
         if batch_kwargs_generators is not None:
             self._datasource_config["batch_kwargs_generators"] = batch_kwargs_generators
 
+        self._raw_config = self._datasource_config
+
     @property
     def name(self):
         """

@@ -33,7 +33,6 @@ class BaseDatasource:
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
-        raw_config: Optional[dict] = None,
     ) -> None:
         """
         Build a new Datasource.
@@ -44,7 +43,6 @@ class BaseDatasource:
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
             id: Identifier specific to this datasource.
-            raw_config: The configuration used to instantiate the obj (before variable substitution)
         """
         self._name = name
         self._id = id
@@ -69,17 +67,10 @@ class BaseDatasource:
             "id": id,
             "name": name,
         }
-        self._raw_config = raw_config or self._datasource_config
+
+        self._raw_config = self._datasource_config
 
         self._data_connectors: dict = {}
-
-    @property
-    def raw_config(self) -> dict:
-        """
-        The config used to instantiate the Datasource.
-        Note that compared to `self.config`, this property does not include variable substitutions.
-        """
-        return self._raw_config
 
     def get_batch_from_batch_definition(
         self,
@@ -428,7 +419,6 @@ class Datasource(BaseDatasource):
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
-        raw_config: Optional[dict] = None,
     ) -> None:
         """
         Build a new Datasource with data connectors.
@@ -449,7 +439,6 @@ class Datasource(BaseDatasource):
             data_context_root_directory=data_context_root_directory,
             concurrency=concurrency,
             id=id,
-            raw_config=raw_config,
         )
 
         if data_connectors is None:
