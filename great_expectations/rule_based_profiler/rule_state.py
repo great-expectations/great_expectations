@@ -23,25 +23,25 @@ class RuleState:
     def __init__(
         self,
         rule: Optional[Rule] = None,
-        variables: Optional[ParameterContainer] = None,
         domains: Optional[List[Domain]] = None,
+        variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> None:
         """
         Args:
             rule: Rule object for which present RuleState object corresponds (needed for various Rule properties).
-            variables: attribute name/value pairs (part of state, relevant for associated Rule).
             domains: List of Domain objects, which DomainBuilder of associated Rule generated.
+            variables: attribute name/value pairs (part of state, relevant for associated Rule).
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
         """
         self._rule = rule
-
-        self._variables = variables
 
         if domains is None:
             domains = []
 
         self._domains = domains
+
+        self._variables = variables
 
         if parameters is None:
             parameters = {}
@@ -60,20 +60,20 @@ class RuleState:
         self._rule = value
 
     @property
-    def variables(self) -> Optional[ParameterContainer]:
-        return self._variables
-
-    @variables.setter
-    def variables(self, value: Optional[ParameterContainer]) -> None:
-        self._variables = value
-
-    @property
     def domains(self) -> List[Domain]:
         return self._domains
 
     @domains.setter
     def domains(self, value: Optional[List[Domain]]) -> None:
         self._domains = value
+
+    @property
+    def variables(self) -> Optional[ParameterContainer]:
+        return self._variables
+
+    @variables.setter
+    def variables(self, value: Optional[ParameterContainer]) -> None:
+        self._variables = value
 
     @property
     def parameters(self) -> Dict[str, ParameterContainer]:
@@ -123,6 +123,7 @@ class RuleState:
 or call "RuleState.remove_domain_if_exists()" with Domain having ID equal to "{domain.id}" as argument first.
 """
             )
+
         self.domains.append(domain)
 
     def remove_domain_if_exists(self, domain: Domain) -> None:
