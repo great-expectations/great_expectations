@@ -1,14 +1,19 @@
 from collections import UserDict
-from typing import Hashable, Iterable, Mapping, Optional
+from typing import Hashable, Iterable, Mapping, Optional, Type, Union
+
+from typing_extensions import TypeAlias
 
 
 class TypeLookupError(ValueError):
     pass
 
 
+ValidTypes: TypeAlias = Union[Hashable, Type]
+
+
 class TypeLookup(
     UserDict,
-    Mapping[Hashable, Hashable],
+    Mapping[ValidTypes, ValidTypes],
 ):
     """
     Dict-like Mapping object that creates keys from values and values from keys.
@@ -22,20 +27,20 @@ class TypeLookup(
 
     def __init__(
         self,
-        __dict: Optional[Mapping[Hashable, Hashable]] = None,
+        __dict: Optional[Mapping[ValidTypes, ValidTypes]] = None,
         **kwargs: Hashable,
     ):
         __dict = __dict or {}
         super().__init__(__dict, **kwargs)
 
-    def __getitem__(self, key: Hashable) -> Hashable:
+    def __getitem__(self, key: ValidTypes) -> ValidTypes:
         return super().__getitem__(key)
 
-    def __delitem__(self, key: Hashable):
+    def __delitem__(self, key: ValidTypes):
         value = self.data.pop(key)
         super().pop(value, None)
 
-    def __setitem__(self, key: Hashable, value: Hashable):
+    def __setitem__(self, key: ValidTypes, value: ValidTypes):
         if key in self:
             raise TypeLookupError(f"`{key}` already set - key")
         if value in self:
@@ -49,5 +54,5 @@ class TypeLookup(
     def __str__(self) -> str:
         return str(self.data)
 
-    def contains_anyof(self, collection_: Iterable[Hashable]) -> bool:
+    def contains_anyof(self, collection_: Iterable[ValidTypes]) -> bool:
         return bool(set(collection_).intersection(self.keys()))
