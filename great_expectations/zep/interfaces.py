@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Mapping, Optional, Type
 
 from typing_extensions import ClassVar, TypeAlias
 
@@ -21,16 +21,16 @@ class BatchRequest:
 
 
 class DataAsset(abc.ABC):
-    def __init__(self, name: str):
+    _name: str
+
+    def __init__(self, name: str) -> None:
         self._name = name
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
-    def get_batch_request(
-        self, **options: Optional[BatchRequestOptions]
-    ) -> BatchRequest:
+    def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         ...
 
 
@@ -41,7 +41,7 @@ class Datasource(metaclass=MetaDatasource):
     # instance attrs
     name: str
     execution_engine: ExecutionEngine
-    assets: Dict[str, DataAsset]
+    assets: Mapping[str, DataAsset]
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -65,15 +65,22 @@ class Datasource(metaclass=MetaDatasource):
 
 
 class Batch:
+    # Instance variable declarations
+    _datasource: Datasource
+    _data_asset: DataAsset
+    _batch_request: BatchRequest
+    _data: BatchDataType
+    _id: str
+
     def __init__(
         self,
         datasource: Datasource,
         data_asset: DataAsset,
         batch_request: BatchRequest,
-        # BatchDataType is the current type of data in a pre-zep Batch. We might need to define an explicit
-        # interface if we think Datasource implementers will use this as a point of extension.
+        # BatchDataType is Union[core.batch.BatchData, pd.DataFrame, SparkDataFrame].  core.batch.Batchdata is the
+        # implicit interface that Datasource implementers can use. We can make this explicit if needed.
         data: BatchDataType,
-    ):
+    ) -> None:
         """This represents a batch of data.
 
         This is usually not the data itself but a hook to the data on an external datastore such as
@@ -110,5 +117,5 @@ class Batch:
         return self._data
 
     @property
-    def execution_engine(self):
+    def execution_engine(self) -> ExecutionEngine:
         return self.datasource.execution_engine
