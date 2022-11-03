@@ -76,7 +76,7 @@ class RuleState:
         self._variables = value
 
     @property
-    def parameters(self) -> Dict[str, ParameterContainer]:
+    def parameters(self) -> Optional[Dict[str, ParameterContainer]]:
         return self._parameters
 
     @parameters.setter
