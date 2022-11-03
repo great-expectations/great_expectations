@@ -1581,7 +1581,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     import uuid
 
     import great_expectations as ge
-    from great_expectations.data_context import BaseDataContext
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.validator.validator import Validator
     from great_expectations.rule_based_profiler.data_assistant import (
         DataAssistant,

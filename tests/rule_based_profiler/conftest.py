@@ -441,6 +441,7 @@ def rule_state_with_domains_and_parameters(
             column_Age_domain,
             column_Date_domain,
         ],
+        variables=None,
         parameters={
             column_Age_domain.id: single_part_name_parameter_container,
             column_Date_domain.id: multi_part_name_parameter_container,
