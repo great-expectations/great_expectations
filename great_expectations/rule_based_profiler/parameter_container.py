@@ -217,6 +217,7 @@ class ParameterContainer(SerializableDictDot):
     def get_parameter_node(self, parameter_name_root: str) -> Optional[ParameterNode]:
         if self.parameter_nodes is None:
             return None
+
         return self.parameter_nodes.get(parameter_name_root)
 
     def to_dict(self) -> dict:
@@ -230,6 +231,7 @@ def _convert_dictionary_to_parameter_node(source: dict) -> ParameterNode:
     for key, value in source.items():
         if isinstance(value, dict):
             source[key] = _convert_dictionary_to_parameter_node(value)
+
     return ParameterNode(source)
 
 
@@ -238,6 +240,7 @@ def convert_dictionary_to_parameter_node(
 ) -> Union[T, ParameterNode]:
     if not isinstance(source, dict):
         return source
+
     return _convert_dictionary_to_parameter_node(source)
 
 
@@ -277,6 +280,7 @@ def build_parameter_container_for_variables(
             FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
         )
         _build_parameter_node_tree_for_one_parameter(parameter_node, key_parts, value)
+
     # We only want to set the ParameterContainer key PARAMETER_NAME_ROOT_FOR_VARIABLES if
     # parameter_node is non-empty since there is downstream logic that depends on this.
     return (
@@ -373,6 +377,7 @@ def _build_parameter_node_tree_for_one_parameter(
         parameter_value: value pertaining to the last part of the fully-qualified parameter name ("leaf node")
     """
     node: ParameterNode = parameter_node
+    parameter_name: str
     for parameter_name in parameter_name_as_list[:-1]:
         # This conditional is functionally equivalent to `node = node.setdefault(parameter_name, ParameterNode({})).`
         # However, setdefault always evaluates its second argument which is much slower in this hot code path.
@@ -381,6 +386,7 @@ def _build_parameter_node_tree_for_one_parameter(
         else:
             node[parameter_name] = ParameterNode({})
             node = node[parameter_name]
+
     node[parameter_name_as_list[-1]] = convert_dictionary_to_parameter_node(
         parameter_value
     )
