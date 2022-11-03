@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
+
+from pydantic import DirectoryPath, validate_arguments
 
 from great_expectations.zep.sources import _SourceFactories
 
@@ -21,16 +23,21 @@ class DataContext:
     """
 
     _context: ClassVar[Optional[DataContext]] = None
+
     _datasources: Dict[str, Datasource]
+    root_directory: Union[DirectoryPath, str, None]
 
     @classmethod
-    def get_context(cls) -> DataContext:
+    def get_context(
+        cls, context_root_dir: Optional[DirectoryPath] = None
+    ) -> DataContext:
         if not cls._context:
-            cls._context = DataContext()
+            cls._context = DataContext(context_root_dir=context_root_dir)
 
         return cls._context
 
-    def __init__(self) -> None:
+    def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
+        self.root_directory = context_root_dir
         self._sources: _SourceFactories = _SourceFactories(self)
         self._datasources: Dict[str, Datasource] = {}
         LOGGER.info(f"4a. Available Factories - {self._sources.factories}")
@@ -44,8 +51,9 @@ class DataContext:
         self._datasources[datasource.name] = datasource
 
 
-def get_context() -> DataContext:
+@validate_arguments
+def get_context(context_root_dir: Optional[DirectoryPath] = None) -> DataContext:
     """ZEP get_context placeholder function."""
-    LOGGER.info("3. Getting context")
+    LOGGER.info(f"3. Getting context {context_root_dir or ''}")
     context = DataContext.get_context()
     return context
