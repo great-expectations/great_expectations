@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union, cast
 
 from pydantic import DirectoryPath, validate_arguments
 
@@ -34,8 +34,13 @@ class DataContext:
         if not cls._context:
             cls._context = DataContext(context_root_dir=context_root_dir)
 
-        return cls._context
+        if cls._context.root_directory:  # type: ignore[union-attr]
+            # TODO (kilo59): load config and add/instantiate Datasources & Assets
+            pass
 
+        return cast(DataContext, cls._context)
+
+    @validate_arguments
     def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
         self.root_directory = context_root_dir
         self._sources: _SourceFactories = _SourceFactories(self)
@@ -51,9 +56,8 @@ class DataContext:
         self._datasources[datasource.name] = datasource
 
 
-@validate_arguments
 def get_context(context_root_dir: Optional[DirectoryPath] = None) -> DataContext:
     """ZEP get_context placeholder function."""
     LOGGER.info(f"3. Getting context {context_root_dir or ''}")
-    context = DataContext.get_context()
+    context = DataContext.get_context(context_root_dir=context_root_dir)
     return context
