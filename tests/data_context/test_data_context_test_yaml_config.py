@@ -1524,7 +1524,7 @@ data_connectors:
 
     # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)
     assert (
-        instantiated_class.raw_config["data_connectors"][data_connector_name][
+        instantiated_class._raw_config["data_connectors"][data_connector_name][
             "base_directory"
         ]
         == f"${variable}"
