@@ -2892,7 +2892,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
-                datasource._raw_config = config
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
