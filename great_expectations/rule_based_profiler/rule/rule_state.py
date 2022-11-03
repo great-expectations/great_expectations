@@ -60,11 +60,11 @@ class RuleState:
         self._rule = value
 
     @property
-    def domains(self) -> Optional[List[Domain]]:
+    def domains(self) -> List[Domain]:
         return self._domains
 
     @domains.setter
-    def domains(self, value: Optional[List[Domain]]) -> None:
+    def domains(self, value: List[Domain]) -> None:
         self._domains = value
 
     @property
