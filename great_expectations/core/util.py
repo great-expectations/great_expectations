@@ -162,15 +162,24 @@ def determine_progress_bar_method_by_environment() -> Callable:
     return tqdm
 
 
-def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
+def convert_to_json_serializable(data) -> dict:  # noqa: C901 - complexity 28
     """
     Helper function to convert an object to one that is json serializable
+
     Args:
         data: an object to attempt to convert a corresponding json-serializable object
     Returns:
-        (dict) A converted test_object
+        converted object
     Warning:
-        test_obj may also be converted in place.
+        data may also be converted in place
+    Examples:
+        >>> convert_to_json_serializable(1) == 1
+
+        >>> convert_to_json_serializable("hello") == "hello"
+
+        >>> convert_to_json_serializable(Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])) == "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
+
+
     """
 
     # If it's one of our types, we use our own conversion; this can move to full schema
