@@ -960,7 +960,7 @@ class AbstractDataContext(ABC):
 
         substitutions: dict = self._determine_substitutions()
         substituted_config = substitute_all_config_variables(
-            raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
