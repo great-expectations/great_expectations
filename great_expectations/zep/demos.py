@@ -1,6 +1,8 @@
 import logging
 from typing import Dict
 
+from pydantic import FilePath, ValidationError
+
 if __name__ == "__main__":
     # don't setup the logger unless being run as a script
     # TODO: remove this before release
@@ -13,8 +15,8 @@ from great_expectations.zep.interfaces import DataAsset, Datasource
 
 
 class FileAsset(DataAsset):
-    file_path: str
-    delimiter: str
+    file_path: FilePath
+    delimiter: str = ","
     ...
 
 
@@ -42,8 +44,15 @@ class PandasDatasource(Datasource):
 
     def add_my_other_asset(self, asset_name: str) -> MyOtherAsset:
         """Create `MyOtherAsset` add it to `self.assets` and return it."""
-        print(f"Adding {MyOtherAsset} - {asset_name}")
+        print(f"Adding {MyOtherAsset.__name__} - {asset_name}")
         asset = MyOtherAsset(name=asset_name)
+        self.assets[asset_name] = asset
+        return asset
+
+    def add_file_asset(self, asset_name: str, **kwargs) -> FileAsset:
+        """Create `FileAsset` add it to `self.assets` and return it."""
+        print(f"Adding {FileAsset.__name__} - {asset_name}")
+        asset = FileAsset(name=asset_name, **kwargs)
         self.assets[asset_name] = asset
         return asset
 
@@ -62,6 +71,7 @@ class PandasDatasource(Datasource):
 
 def round_trip():
     """Demo Creating Datasource -> Adding Assets -> Retrieving asset by name"""
+    print("\n  Adding and round tripping a toy DataAsset ...")
     context = get_context()
 
     ds = context.sources.add_pandas("taxi")
@@ -72,7 +82,7 @@ def round_trip():
 
     assert asset1 is asset2
 
-    print("Successful Asset Roundtrip")
+    print("Successful Asset Roundtrip\n")
 
 
 def type_lookup():
@@ -80,8 +90,8 @@ def type_lookup():
     Demo the use of the `type_lookup` `BiDict`
     Alternatively use a Graph/Tree-like structure.
     """
-    sources = get_context().sources
     print("\n  Datasource & DataAsset lookups ...")
+    sources = get_context().sources
 
     s = "pandas"
     pd_ds: PandasDatasource = sources.type_lookup[s]
@@ -97,6 +107,23 @@ def type_lookup():
     print(f"\n{pd_ds_asset_names} -> {pd_ds_assets_from_names}")
 
 
+def add_real_asset():
+    print("\n  Add a 'real' asset ...")
+    context = get_context()
+
+    ds: PandasDatasource = context.sources.add_pandas("my_pandas_datasource")
+
+    try:
+        ds.add_file_asset("my_file_1", file_path="not_a_file")
+    except ValidationError as exc:
+        print(f"\n  Pydantic Validation catches problems\n{exc}\n")
+        ds.add_file_asset("my_file_2", file_path=__file__)
+
+    my_asset = ds.get_asset("my_file_2")
+    print(my_asset)
+
+
 if __name__ == "__main__":
-    round_trip()
-    type_lookup()
+    # round_trip()
+    # type_lookup()
+    add_real_asset()
