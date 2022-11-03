@@ -459,7 +459,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             },
             [
                 {
-                    "name": "atomic.prescriptive.summary",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
                     "value": {
                         "header": None,
                         "params": {
@@ -505,7 +505,18 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                     "value_type": "StringValueType",
                 }
             ],
-            [],
+            [
+                {
+                    "name": AtomicDiagnosticRendererType.OBSERVED_VALUE,
+                    "value": {
+                        "header": None,
+                        "params": {},
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "template": "0% unexpected",
+                    },
+                    "value_type": "StringValueType",
+                }
+            ],
             id="expect_column_values_to_be_between_evaluation_parameters",
         ),
     ],
@@ -564,6 +575,11 @@ def test_inline_renderer_rendered_content_return_value(
             "graph"
         ].pop("datasets")
 
+    assert (
+        actual_serialized_expectation_configuration_rendered_atomic_content
+        == expected_serialized_expectation_configuration_rendered_atomic_content
+    )
+
     actual_serialized_expectation_validation_result_rendered_atomic_content: List[
         dict
     ] = [
@@ -586,10 +602,6 @@ def test_inline_renderer_rendered_content_return_value(
             "value"
         ]["graph"].pop("datasets")
 
-    assert (
-        actual_serialized_expectation_configuration_rendered_atomic_content
-        == expected_serialized_expectation_configuration_rendered_atomic_content
-    )
     assert (
         actual_serialized_expectation_validation_result_rendered_atomic_content
         == expected_serialized_expectation_validation_result_rendered_atomic_content
