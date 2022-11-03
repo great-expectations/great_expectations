@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type, Union
 
+from typing_extensions import ClassVar
+
 from great_expectations.util import camel_to_snake
 from great_expectations.zep.type_lookup import TypeLookup
 
@@ -40,8 +42,10 @@ class _SourceFactories:
     or `DataAsset` types and a simplified name for those types.
     """
 
-    type_lookup = TypeLookup()
-    __source_factories: Dict[str, SourceFactoryFn] = {}
+    type_lookup: ClassVar = TypeLookup()
+    __source_factories: ClassVar[Dict[str, SourceFactoryFn]] = {}
+
+    _data_context: Union[DataContext, GXDataContext]
 
     def __init__(self, data_context: Union[DataContext, GXDataContext]):
         self._data_context = data_context
