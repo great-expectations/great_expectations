@@ -421,11 +421,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                                 "params": {
                                     "observed_value": {
                                         "schema": {"type": "string"},
-                                        "value": "None "
-                                        "(-infinity, "
-                                        "infinity, "
-                                        "or "
-                                        "NaN)",
+                                        "value": "None (-infinity, infinity, or NaN)",
                                     }
                                 },
                                 "template": "KL Divergence: $observed_value",
@@ -473,15 +469,11 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
                             },
                             "max_value": {
                                 "schema": {"type": "number"},
-                                "value": {
-                                    "$PARAMETER": "now() - " "timedelta(weeks=1)"
-                                },
+                                "value": {"$PARAMETER": "now() - timedelta(weeks=1)"},
                             },
                             "min_value": {
                                 "schema": {"type": "number"},
-                                "value": {
-                                    "$PARAMETER": "now() - " "timedelta(weeks=208)"
-                                },
+                                "value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
                             },
                             "mostly": {"schema": {"type": "number"}, "value": None},
                             "mostly_pct": {"schema": {"type": "string"}, "value": None},
