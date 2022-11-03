@@ -50,8 +50,8 @@ from great_expectations.util import is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.base_data_context import (
-        BaseDataContext,
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
     )
     from great_expectations.validator.validator import Validator
 
@@ -87,7 +87,7 @@ class ParameterBuilder(ABC, Builder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
@@ -99,7 +99,7 @@ class ParameterBuilder(ABC, Builder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with ParameterBuilder
+            data_context: AbstractDataContext associated with ParameterBuilder
         """
         super().__init__(data_context=data_context)
 
@@ -153,8 +153,7 @@ class ParameterBuilder(ABC, Builder):
                 batch_request=batch_request,
             )
 
-            resolve_evaluation_dependencies(
-                parameter_builder=self,
+            self.resolve_evaluation_dependencies(
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
@@ -183,6 +182,76 @@ class ParameterBuilder(ABC, Builder):
                 parameter_container=parameters[domain.id],
                 parameter_values=parameter_values,
             )
+
+    def resolve_evaluation_dependencies(
+        self,
+        domain: Domain,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        fully_qualified_parameter_names: Optional[List[str]] = None,
+        recompute_existing_parameter_values: bool = False,
+    ) -> None:
+        """
+        This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
+        "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to operate.
+        """
+
+        # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
+        evaluation_parameter_builders: List[
+            ParameterBuilder
+        ] = self.evaluation_parameter_builders
+
+        if not evaluation_parameter_builders:
+            return
+
+        # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
+        # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
+        # when "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name");
+        # this list contains "raw" (for internal calculations) and "JSON-serialized" fully-qualified parameter names.
+        if fully_qualified_parameter_names is None:
+            fully_qualified_parameter_names = get_fully_qualified_parameter_names(
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
+
+        # Step-3: Check presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
+        # over evaluation dependencies.  Execute "ParameterBuilder.build_parameters()" if not in "Domain" scoped list.
+        evaluation_parameter_builder: ParameterBuilder
+        for evaluation_parameter_builder in evaluation_parameter_builders:
+            if (
+                evaluation_parameter_builder.raw_fully_qualified_parameter_name
+                not in fully_qualified_parameter_names
+                or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
+                not in fully_qualified_parameter_names
+            ):
+                evaluation_parameter_builder.set_batch_list_if_null_batch_request(
+                    batch_list=self.batch_list,
+                    batch_request=self.batch_request,
+                )
+
+                evaluation_parameter_builder.build_parameters(
+                    domain=domain,
+                    variables=variables,
+                    parameters=parameters,
+                    recompute_existing_parameter_values=recompute_existing_parameter_values,
+                )
+
+    @abstractmethod
+    def _build_parameters(
+        self,
+        domain: Domain,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        recompute_existing_parameter_values: bool = False,
+    ) -> Attributes:
+        """
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
+
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
+        """
+        pass
 
     @property
     def name(self) -> str:
@@ -213,22 +282,6 @@ class ParameterBuilder(ABC, Builder):
         This fully-qualified parameter name references "JSON-serialized" "ParameterNode" output.
         """
         return f"{PARAMETER_KEY}{self.name}"
-
-    @abstractmethod
-    def _build_parameters(
-        self,
-        domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
-    ) -> Attributes:
-        """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
-
-        Returns:
-            Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
-        pass
 
     def get_validator(
         self,
@@ -661,7 +714,7 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(t
 
 def init_rule_parameter_builders(
     parameter_builder_configs: Optional[List[dict]] = None,
-    data_context: Optional[BaseDataContext] = None,
+    data_context: Optional[AbstractDataContext] = None,
 ) -> Optional[List[ParameterBuilder]]:
     if parameter_builder_configs is None:
         return None
@@ -677,7 +730,7 @@ def init_rule_parameter_builders(
 
 def init_parameter_builder(
     parameter_builder_config: Union[ParameterBuilderConfig, dict],
-    data_context: Optional[BaseDataContext] = None,
+    data_context: Optional[AbstractDataContext] = None,
 ) -> ParameterBuilder:
     if not isinstance(parameter_builder_config, dict):
         parameter_builder_config = parameter_builder_config.to_dict()
@@ -690,58 +743,3 @@ def init_parameter_builder(
         },
     )
     return parameter_builder
-
-
-def resolve_evaluation_dependencies(
-    parameter_builder: ParameterBuilder,
-    domain: Domain,
-    variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
-    fully_qualified_parameter_names: Optional[List[str]] = None,
-    recompute_existing_parameter_values: bool = False,
-) -> None:
-    """
-    This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
-    "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to fulfill its goals.
-    """
-
-    # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
-    evaluation_parameter_builders: List[
-        ParameterBuilder
-    ] = parameter_builder.evaluation_parameter_builders
-
-    if not evaluation_parameter_builders:
-        return
-
-    # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
-    # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
-    # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name");
-    # this list contains both, "raw" (for internal calculations) and "JSON-serialized" fully-qualified parameter names.
-    if fully_qualified_parameter_names is None:
-        fully_qualified_parameter_names = get_fully_qualified_parameter_names(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
-    # Step-3: Check for presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
-    # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
-    evaluation_parameter_builder: ParameterBuilder
-    for evaluation_parameter_builder in evaluation_parameter_builders:
-        if (
-            evaluation_parameter_builder.raw_fully_qualified_parameter_name
-            not in fully_qualified_parameter_names
-            or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
-            not in fully_qualified_parameter_names
-        ):
-            evaluation_parameter_builder.set_batch_list_if_null_batch_request(
-                batch_list=parameter_builder.batch_list,
-                batch_request=parameter_builder.batch_request,
-            )
-
-            evaluation_parameter_builder.build_parameters(
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
-            )

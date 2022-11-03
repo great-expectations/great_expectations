@@ -55,7 +55,7 @@ class DataContextVariableSchema(str, enum.Enum):
         return value in cls._value2member_map_
 
 
-@dataclass  # type: ignore[misc]
+@dataclass
 class DataContextVariables(ABC):
     """
     Wrapper object around data context variables set in the `great_expectations.yml` config file.
