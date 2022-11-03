@@ -157,7 +157,7 @@ class SqlAlchemyBatchData(BatchData):
                         compile_kwargs={"literal_binds": True},
                     )
 
-            self._create_temporary_table(
+            self._create_temporary_table_from_query(
                 temp_table_name=generated_table_name,
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
@@ -202,7 +202,7 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(  # noqa: C901 - 18
+    def _create_temporary_table_from_query(  # noqa: C901 - 18
         self, temp_table_name, query, temp_table_schema_name=None
     ) -> None:
         """
