@@ -438,6 +438,76 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
             ],
             id="expect_column_kl_divergence_to_be_less_than",
         ),
+        pytest.param(
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_between",
+                kwargs={
+                    "column": "event_datetime",
+                    "min_value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
+                    "max_value": {"$PARAMETER": "now() - timedelta(weeks=1)"},
+                },
+            ),
+            {
+                "element_count": 2834,
+                "unexpected_count": 0,
+                "unexpected_percent": 0.0,
+                "partial_unexpected_list": [],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 0.0,
+                "unexpected_percent_nonmissing": 0.0,
+            },
+            [
+                {
+                    "name": "atomic.prescriptive.summary",
+                    "value": {
+                        "header": None,
+                        "params": {
+                            "column": {
+                                "schema": {"type": "string"},
+                                "value": "event_datetime",
+                            },
+                            "condition_parser": {
+                                "schema": {"type": "string"},
+                                "value": None,
+                            },
+                            "max_value": {
+                                "schema": {"type": "number"},
+                                "value": {
+                                    "$PARAMETER": "now() - " "timedelta(weeks=1)"
+                                },
+                            },
+                            "min_value": {
+                                "schema": {"type": "number"},
+                                "value": {
+                                    "$PARAMETER": "now() - " "timedelta(weeks=208)"
+                                },
+                            },
+                            "mostly": {"schema": {"type": "number"}, "value": None},
+                            "mostly_pct": {"schema": {"type": "string"}, "value": None},
+                            "row_condition": {
+                                "schema": {"type": "string"},
+                                "value": None,
+                            },
+                            "strict_max": {
+                                "schema": {"type": "boolean"},
+                                "value": None,
+                            },
+                            "strict_min": {
+                                "schema": {"type": "boolean"},
+                                "value": None,
+                            },
+                        },
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "template": "$column values must be greater than or equal to "
+                        "$min_value and less than or equal to $max_value.",
+                    },
+                    "value_type": "StringValueType",
+                }
+            ],
+            [],
+            id="expect_column_values_to_be_between_evaluation_parameters",
+        ),
     ],
 )
 def test_inline_renderer_rendered_content_return_value(
