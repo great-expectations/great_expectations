@@ -2825,6 +2825,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 class_name=substituted_config_dict["class_name"],
             )
 
+        # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.
         raw_config_dict: dict = serializer.serialize(raw_config)
         datasource._raw_config = raw_config_dict
 
