@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict
 
 if __name__ == "__main__":
     # don't setup the logger unless being run as a script
@@ -19,8 +19,7 @@ class FileAsset(DataAsset):
 
 
 class MyOtherAsset(DataAsset):
-    foo: str
-    bar: List[int]
+    ...
 
 
 class PandasDatasource(Datasource):
@@ -44,7 +43,7 @@ class PandasDatasource(Datasource):
     def add_my_other_asset(self, asset_name: str) -> MyOtherAsset:
         """Create `MyOtherAsset` add it to `self.assets` and return it."""
         print(f"Adding {MyOtherAsset} - {asset_name}")
-        asset = MyOtherAsset(asset_name)
+        asset = MyOtherAsset(name=asset_name)
         self.assets[asset_name] = asset
         return asset
 

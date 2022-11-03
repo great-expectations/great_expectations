@@ -1,6 +1,7 @@
-import abc
+# import abc
 from typing import Dict, List, Type, Union
 
+from pydantic import BaseModel
 from typing_extensions import ClassVar
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
@@ -8,11 +9,8 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.zep.metadatasource import MetaDatasource
 
 
-class DataAsset(abc.ABC):
+class DataAsset(BaseModel):
     name: str
-
-    def __init__(self, name: str) -> None:
-        self.name = name
 
 
 class Datasource(metaclass=MetaDatasource):

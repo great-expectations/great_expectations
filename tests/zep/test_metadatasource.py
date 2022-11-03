@@ -109,7 +109,7 @@ def test_minimal_ds_to_asset_flow(context_sources_clean):
             self.assets = {}
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
-            asset = RedAsset(asset_name)
+            asset = RedAsset(name=asset_name)
             self.assets[asset_name] = asset
             return asset
 
