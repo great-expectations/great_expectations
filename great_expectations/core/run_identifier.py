@@ -29,7 +29,8 @@ class RunIdentifier(DataContextKey):
                     f'Unable to parse provided run_time str ("{run_time}") to datetime. Defaulting '
                     f"run_time to current time."
                 )
-                run_time = datetime.datetime.now(datetime.timezone.utc)
+                # This should include local timezone
+                run_time = datetime.datetime.now()
 
         if not run_time:
             try:
@@ -37,7 +38,8 @@ class RunIdentifier(DataContextKey):
             except (ValueError, TypeError):
                 run_time = None
 
-        run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
+        # This should include local timezone
+        run_time = run_time or datetime.datetime.now()
         if not run_time.tzinfo:
             # this takes the given time and just adds timezone (no conversion)
             run_time = run_time.replace(tzinfo=datetime.timezone.utc)
