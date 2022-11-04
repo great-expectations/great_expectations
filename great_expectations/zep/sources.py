@@ -10,6 +10,7 @@ from great_expectations.zep.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     from great_expectations.data_context import DataContext as GXDataContext
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.zep.context import DataContext
     from great_expectations.zep.interfaces import DataAsset, Datasource
 
@@ -42,7 +43,9 @@ class _SourceFactories:
     or `DataAsset` types and a simplified name for those types.
     """
 
+    # TODO (kilo59): split DataAsset & Datasource lookups
     type_lookup: ClassVar = TypeLookup()
+    engine_lookup: ClassVar = TypeLookup()
     __source_factories: ClassVar[Dict[str, SourceFactoryFn]] = {}
 
     _data_context: Union[DataContext, GXDataContext]
@@ -53,7 +56,7 @@ class _SourceFactories:
     @classmethod
     def register_factory(
         cls,
-        ds_type: type,
+        ds_type: Type[Datasource],
         fn: SourceFactoryFn,
         asset_types: List[Type[DataAsset]],
     ) -> None:
@@ -105,6 +108,8 @@ class _SourceFactories:
         LOGGER.debug(f"'{simplified_name}' added to `type_lookup`")
         cls.__source_factories[method_name] = fn
 
+        cls._register_engine(ds_type)
+
     @property
     def factories(self) -> List[str]:
         return list(self.__source_factories.keys())
@@ -126,3 +131,18 @@ class _SourceFactories:
     def __dir__(self) -> List[str]:
         """Preserves autocompletion for dynamic attributes."""
         return [*self.factories, *super().__dir__()]
+
+    @classmethod
+    def _register_engine(cls, ds_type: Type[Datasource]):
+        exec_engine_type: Type[ExecutionEngine] = ds_type.execution_engine.__class__
+
+        class_name: str = exec_engine_type.__name__
+        engine_simple_name: str = _get_simplified_name_from_type(
+            exec_engine_type, suffix_to_remove="_execution_engine"
+        )
+
+        LOGGER.info(
+            f"2b. Registering engine type `{class_name}` as '{engine_simple_name}'"
+        )
+        cls.engine_lookup[engine_simple_name] = exec_engine_type
+        LOGGER.info(list(cls.engine_lookup.keys()))
