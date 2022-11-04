@@ -68,11 +68,6 @@ class BaseDatasource:
             "name": name,
         }
 
-        # Chetan - 20221103 - This attribute is meant to represent the config args used to instantiate the object (before ${VARIABLE} substitution).
-        # While downstream logic should override this value, we default to `self._datasource_config` as a backup.
-        # This is to be removed once substitution logic is migrated from the context to the individual object level.
-        self._raw_config = self._datasource_config
-
         self._data_connectors: dict = {}
 
     def get_batch_from_batch_definition(

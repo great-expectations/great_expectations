@@ -149,14 +149,9 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
         data_connector_name
     ].base_directory.endswith(value_associated_with_variable)
 
-    # Config attached to object should mirror the runtime object
-    assert instantiated_datasource.config["data_connectors"][data_connector_name][
-        "base_directory"
-    ].endswith(value_associated_with_variable)
-
-    # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)
+    # Config attached to object should reflect what needs to be persisted (no sensitive credentials!)
     assert (
-        instantiated_datasource._raw_config["data_connectors"][data_connector_name][
+        instantiated_datasource.config["data_connectors"][data_connector_name][
             "base_directory"
         ]
         == f"${variable}"

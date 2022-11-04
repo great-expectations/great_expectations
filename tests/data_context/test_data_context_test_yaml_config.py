@@ -1517,14 +1517,9 @@ data_connectors:
         data_connector_name
     ].base_directory.endswith(value_associated_with_variable)
 
-    # Config attached to object should mirror the runtime object
-    assert instantiated_class.config["data_connectors"][data_connector_name][
-        "base_directory"
-    ].endswith(value_associated_with_variable)
-
-    # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)
+    # Config attached to object should reflect what needs to be persisted (no sensitive credentials!)
     assert (
-        instantiated_class._raw_config["data_connectors"][data_connector_name][
+        instantiated_class.config["data_connectors"][data_connector_name][
             "base_directory"
         ]
         == f"${variable}"
