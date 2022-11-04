@@ -20,7 +20,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
-from great_expectations.rule_based_profiler.rule_state import RuleState
+from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 
 yaml = YAML()
 
