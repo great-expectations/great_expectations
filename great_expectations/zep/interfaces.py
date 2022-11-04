@@ -1,12 +1,17 @@
 # import abc
+import logging
+from pprint import pformat as pf
 from typing import Dict, List, Type, Union
 
-from pydantic import BaseModel, constr, validator
+from pydantic import BaseModel, constr, root_validator
 from typing_extensions import ClassVar, TypeAlias
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.zep.metadatasource import MetaDatasource
+from great_expectations.zep.sources import _SourceFactories
+
+LOGGER = logging.getLogger(__name__)
 
 LowerStr: TypeAlias = constr(to_lower=True, strict=True)  # type: ignore[misc]
 
@@ -27,12 +32,22 @@ class Datasource(metaclass=MetaDatasource):
         execution_engine: ExecutionEngine
         assets: Dict[str, DataAsset]
 
-        @validator("engine", pre=True)
-        def load_execution_engine(cls, v, values):
-            print("\n\nvalidating engine")
-            print(v)
-            print(values)
-            return v
+        @root_validator(pre=True)
+        def load_execution_engine(cls, values: dict):
+            """
+            Lookup and instantiate an ExecutionEngine based on the 'engine' string.
+            Assign this ExecutionEngine instance to the `execution_engine` field.
+            """
+            LOGGER.info(
+                f"Loading & validating `Datasource.execution_engine'\n {pf(values, depth=1)}"
+            )
+            # TODO (kilo59): catch key errors
+            engine_name: str = values["engine"]
+            engine_type: Type[ExecutionEngine] = _SourceFactories.engine_lookup[
+                engine_name
+            ]
+            values["execution_engine"] = engine_type()
+            return values
 
         class Config:
             # TODO: revisit this
