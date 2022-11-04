@@ -84,7 +84,7 @@ When in doubt, the next step to implement is the first one that doesn't have a â
 
 ### 4. Change the Expectation class name and add a docstring
 
-By convention, your <TechnicalTag tag="metric" text="Metric"> class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
+By convention, your <TechnicalTag tag="metric" text="Metric"/> class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
 
 Let's start by updating your Expectation's name and docstring.
 
@@ -180,7 +180,7 @@ see our guide on [creating example cases for a Custom Expectation](../features_c
 ### 6. Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation. 
-To do so, you'll need to implement a function within a <TechnicalTag tag="metric" text="Metric"> class, and link it to your Expectation.
+To do so, you'll need to implement a function within a <TechnicalTag tag="metric" text="Metric"/> class, and link it to your Expectation.
 By the time your Expectation is complete, your Metric will have functions for all three Execution Engines (Pandas, Spark, and SQLAlchemy) supported by Great Expectations. For now, we're only going to define one.
 
 :::note
