@@ -1,7 +1,7 @@
 datasources:
   my_demo_datasource:
     engine: pandas
-    execution_engine: pandas
+    version: 2.0
     name: my_demo_datasource
     assets:
       my_demo_file_asset:

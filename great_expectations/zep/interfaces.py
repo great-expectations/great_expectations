@@ -3,7 +3,7 @@ import logging
 from pprint import pformat as pf
 from typing import Dict, List, Type, Union
 
-from pydantic import BaseModel, constr, root_validator
+from pydantic import BaseModel, confloat, constr, root_validator
 from typing_extensions import ClassVar, TypeAlias
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
@@ -29,6 +29,7 @@ class Datasource(metaclass=MetaDatasource):
     class Datasource(BaseModel):
         name: str
         engine: str
+        version: confloat(ge=2.0, lt=3.0) = 2.0
         execution_engine: ExecutionEngine
         assets: Dict[str, DataAsset]
 
