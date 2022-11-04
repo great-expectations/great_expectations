@@ -227,14 +227,6 @@ class ParameterContainer(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-def _convert_dictionary_to_parameter_node(source: dict) -> ParameterNode:
-    for key, value in source.items():
-        if isinstance(value, dict):
-            source[key] = _convert_dictionary_to_parameter_node(value)
-
-    return ParameterNode(source)
-
-
 def convert_dictionary_to_parameter_node(
     source: Union[T, dict]
 ) -> Union[T, ParameterNode]:
@@ -242,6 +234,16 @@ def convert_dictionary_to_parameter_node(
         return source
 
     return _convert_dictionary_to_parameter_node(source)
+
+
+def _convert_dictionary_to_parameter_node(source: dict) -> ParameterNode:
+    key: str
+    value: Any
+    for key, value in source.items():
+        if isinstance(value, dict):
+            source[key] = _convert_dictionary_to_parameter_node(value)
+
+    return ParameterNode(source)
 
 
 def convert_parameter_node_to_dictionary(
