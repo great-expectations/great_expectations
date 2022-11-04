@@ -3,7 +3,7 @@ import TabItem from '@theme/TabItem';
 
 # Migration Guide
 
-While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including [data docs](../../reference/data_docs.md) and [profilers](../../reference/profilers.md) as well as [validation](../../reference/validation.md).
+While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including [data docs](../../reference/data_docs.md) and [profilers](../../reference/profilers.md) as well as [validation](../../terms/checkpoint.md).
 
 The Batch Request (V3) API was introduced as part of the 0.13 major release of Great Expectations, with an improved Checkpoints feature introduced as part of the 0.13.7 release. The Batch Request (V3) API includes a group of new features based on "new style" Datasources and Modular Expectations, as well as a deprecation of Validation Operators.  These offer a number of advantages including an improved experience around deploying and maintaining Great Expectations in production.
 

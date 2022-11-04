@@ -444,7 +444,7 @@ Finally we save our Expectation Suite (all of the unique Expectation Configurati
   ]}>
   <TabItem value="file-yaml">
 
-Here we will create and store a [Checkpoint](../reference/checkpoints_and_actions.md) for our batch, which we can use to [Validate](../reference/validation.md) and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
+Here we will create and store a [Checkpoint](../reference/checkpoints_and_actions.md) for our batch, which we can use to Validate and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
 
 First we create the Checkpoint configuration mirroring our `batch_request` configuration above and using the Expectation Suite we created:
 
@@ -467,7 +467,7 @@ Finally we run the Checkpoint:
 
   <TabItem value="file-python">
 
-Here we will create and store a [Checkpoint](../reference/checkpoints_and_actions.md) for our batch, which we can use to [Validate](../reference/validation.md) and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
+Here we will create and store a [Checkpoint](../reference/checkpoints_and_actions.md) for our batch, which we can use to Validate and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
 
 First we create the Checkpoint configuration mirroring our `batch_request` configuration above and using the Expectation Suite we created:
 

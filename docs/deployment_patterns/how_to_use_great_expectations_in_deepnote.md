@@ -221,7 +221,7 @@ context.build_data_docs();
 #!python -m http.server 8080 --directory great_expectations/uncommitted/data_docs/local_site
 ```
 
-When served, the Data Docs site provides the details of each [Validation](../reference/validation.md) we've run and Expectation Suite we've created.
+When served, the Data Docs site provides the details of each [Validation](../terms/validation_result.md) we've run and Expectation Suite we've created.
 
 For example, the following image shows a run where three Expectations were validated against our DataFrame and two of them failed.
 

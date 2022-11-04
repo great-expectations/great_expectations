@@ -21,7 +21,7 @@ This guide will help you integrate Great Expectations (GE) with [Google Cloud Pl
 We recommend that you use Great Expectations in GCP by using the following services:
   - [Google Cloud Composer](https://cloud.google.com/composer) (GCC) for managing workflow orchestration including validating your data. GCC is built on [Apache Airflow](https://airflow.apache.org/).
   - [BigQuery](https://cloud.google.com/bigquery) or files in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) as your [Datasource](../reference/datasources.md)
-  - [GCS](https://cloud.google.com/storage) for storing metadata ([Expectation Suites](../reference/expectations/expectations.md), [Validation Results](../reference/validation.md), [Data Docs](../reference/data_docs.md))
+  - [GCS](https://cloud.google.com/storage) for storing metadata ([Expectation Suites](../reference/expectations/expectations.md), [Validation Results](../terms/validation_result.md), [Data Docs](../reference/data_docs.md))
   - [Google App Engine](https://cloud.google.com/appengine) (GAE) for hosting and controlling access to [Data Docs](../reference/data_docs.md).
 
 We also recommend that you deploy Great Expectations to GCP in two steps:

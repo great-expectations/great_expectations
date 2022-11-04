@@ -53,7 +53,7 @@ of the main concepts and classes you will encounter while using Great Expectatio
 * [Expectation Suite operations](./expectation_suite_operations.md)
 * [Metrics](./metrics.md)
 * [Profilers](./profilers.md)
-* [Validation](./validation.md)
+* [Validation](../terms/validation_result.md)
 
 
 ## Design decisions
