@@ -1,6 +1,7 @@
 from ruamel import yaml
 
 import great_expectations as ge
+from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from tests.test_utils import load_data_into_test_database
 
@@ -36,6 +37,16 @@ datasource_config = {
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetSqlDataConnector",
             "include_schema_name": True,
+        },
+        "default_configured_data_connector_name": {
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "module_name": "great_expectations.datasource.data_connector",
+            "assets": {
+                "taxi_data": {
+                    # "include_schema_name": False,
+                    # # "schema_name": "schema2",
+                },
+            },
         },
     },
 }
@@ -98,3 +109,76 @@ assert "schema.taxi_data" in set(
 )
 
 # data_assistant_result = context.assistants.onboarding.run(batch_request=runtime_batch_request)
+
+# Some Configured Asset stuff
+
+# Here is a BatchRequest naming a table
+configured_batch_request = BatchRequest(
+    datasource_name="my_trino_datasource",
+    data_connector_name="default_configured_data_connector_name",
+    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
+)
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+validator = context.get_validator(
+    batch_request=configured_batch_request, expectation_suite_name="test_suite"
+)
+print(validator.head())
+
+# Trying column_max Expectation
+validator_result = validator.expect_column_max_to_be_between(
+    column="fare_amount", min_value=1, max_value=30
+)
+print(f"\n\nvalidator_result (column_max_between):\n{validator_result}\n\n")
+
+context.create_expectation_suite(
+    expectation_suite_name="onboarding_suite", overwrite_existing=True
+)
+
+exclude_column_names = [
+    "VendorID",
+    "pickup_datetime",
+    "dropoff_datetime",
+    "RatecodeID",
+    "PULocationID",
+    "DOLocationID",
+    "payment_type",
+    "fare_amount",
+    "extra",
+    "mta_tax",
+    "tip_amount",
+    "tolls_amount",
+    "improvement_surcharge",
+    "congestion_surcharge",
+]
+# Run onboarding assistant with configured
+data_assistant_result = context.assistants.onboarding.run(
+    batch_request=configured_batch_request,
+    exclude_column_names=exclude_column_names,
+)
+# data_assistant_result.metrics_by_domain
+print(f"\n\ndata_assistant_result.metrics_by_domain :\n{data_assistant_result.metrics_by_domain}\n\n")
+expectation_suite = data_assistant_result.get_expectation_suite(
+    expectation_suite_name="onboarding_suite"
+)
+context.save_expectation_suite(
+    expectation_suite=expectation_suite, discard_failed_expectations=False
+)
+
+checkpoint_config = {
+    "class_name": "SimpleCheckpoint",
+    "validations": [
+        {
+            "batch_request": configured_batch_request,
+            "expectation_suite_name": "onboarding_suite",
+        }
+    ],
+}
+checkpoint = SimpleCheckpoint(
+    "yellow_tripdata_sample_onboarding_suite",
+    context,
+    **checkpoint_config,
+)
+checkpoint_result = checkpoint.run()
+print(f"\n\ncheckpoint_result:\n{checkpoint_result}\n\n")
