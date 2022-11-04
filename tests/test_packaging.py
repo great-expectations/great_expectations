@@ -108,6 +108,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-redshift.txt"]
         | req_set_dict["requirements-dev-snowflake.txt"]
         | req_set_dict["requirements-dev-teradata.txt"]
+        | req_set_dict["requirements-dev-clickhouse.txt"]
         | req_set_dict["requirements-dev-trino.txt"]
         | req_set_dict["requirements-dev-hive.txt"]
         | req_set_dict["requirements-dev-vertica.txt"]
@@ -145,6 +146,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-redshift.txt"]
         | req_set_dict["requirements-dev-snowflake.txt"]
         | req_set_dict["requirements-dev-teradata.txt"]
+        | req_set_dict["requirements-dev-clickhouse.txt"]
         | req_set_dict["requirements-dev-trino.txt"]
         | req_set_dict["requirements-dev-vertica.txt"]
     ) <= {"numpy>=1.21.0", "scipy>=1.7.0"}

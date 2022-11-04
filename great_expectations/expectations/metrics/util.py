@@ -56,6 +56,10 @@ try:
     import trino
 except ImportError:
     trino = None
+try:
+    import clickhouse_sqlalchemy
+except ImportError:
+    clickhouse = None
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
@@ -212,6 +216,21 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
+    try:
+        # Clickhouse
+        # noinspection PyUnresolvedReferences
+        if hasattr(dialect, "ClickHouseDialect") or isinstance(
+            dialect, clickhouse_sqlalchemy.drivers.base.ClickHouseDialect
+        ):
+            if positive:
+                return sa.func.regexp_like(column, sqlalchemy.literal(regex))
+            else:
+                return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
+        pass
     try:
         # Dremio
         if hasattr(dialect, "DremioDialect"):
@@ -817,6 +836,14 @@ def get_dialect_like_pattern_expression(  # noqa: C901 - 28
     except (AttributeError, TypeError):
         pass
 
+    try:
+        # noinspection PyUnresolvedReferences
+        if isinstance(dialect, trino.drivers.base.ClickhouseDialect) or hasattr(
+            dialect, "ClickhouseDialect"
+        ):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
     try:
         if hasattr(dialect, "SnowflakeDialect"):
             dialect_supported = True

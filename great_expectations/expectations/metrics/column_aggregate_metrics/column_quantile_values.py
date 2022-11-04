@@ -104,6 +104,13 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )
+        elif dialect.name.lower() == GXSqlDialect.CLICKHOUSE:
+            return _get_column_quantiles_clickhouse(
+                column=column,
+                quantiles=quantiles,
+                selectable=selectable,
+                sqlalchemy_engine=sqlalchemy_engine,
+            )
         elif dialect.name.lower() == GXSqlDialect.TRINO:
             return _get_column_quantiles_trino(
                 column=column,
@@ -302,6 +309,32 @@ def _get_column_quantiles_trino(
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)[0]
     except (sqlalchemy.ProgrammingError, TrinoUserError) as pe:
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe
+
+
+def _get_column_quantiles_clickhouse(
+    column: str, quantiles: Iterable, selectable, sqlalchemy_engine
+) -> list:
+
+    quantiles_list = list(quantiles)
+    sql_approx: str = (
+        f"quantilesExact({', '.join([str(x) for x in quantiles_list])})({column})"
+    )
+    selects_approx: List[sqlalchemy.TextClause] = [sa.text(sql_approx)]
+    quantiles_query: sqlalchemy.Select = sa.select(selects_approx).select_from(
+        selectable
+    )
+    try:
+        quantiles_results = sqlalchemy_engine.execute(quantiles_query).fetchone()[0]
+        return quantiles_results
+
+    except (sqlalchemy.ProgrammingError) as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (

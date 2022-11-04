@@ -40,6 +40,7 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.util import (
+    get_clickhouse_sqlalchemy_potential_type,
     get_pyathena_potential_type,
     get_trino_potential_type,
 )
@@ -409,6 +410,14 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     elif type_module.__name__ == "trino.sqlalchemy.datatype":
                         potential_type = get_trino_potential_type(type_module, type_)
                         types.append(type(potential_type))
+                    elif type_module.__name__ == "clickhouse_sqlalchemy.drivers.base":
+                        actual_column_type = get_clickhouse_sqlalchemy_potential_type(
+                            type_module, actual_column_type
+                        )()
+                        potential_type = get_clickhouse_sqlalchemy_potential_type(
+                            type_module, type_
+                        )
+                        types.append(potential_type)
                     else:
                         potential_type = getattr(type_module, type_)
                         types.append(potential_type)
