@@ -194,3 +194,5 @@
 /docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_airflow
 
 /docs/guides/expectations/how_to_create_and_edit_expectations_in_bulk https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file
+
+/docs/guides/validation/advanced/how_to_implement_custom_notifications https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions
