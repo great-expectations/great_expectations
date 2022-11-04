@@ -2717,8 +2717,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             Dict[str, DatasourceConfig], config.datasources
         )
 
-        substitutions = self._determine_substitutions()
-
         for datasource_name, datasource_config in datasources.items():
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
