@@ -56,6 +56,11 @@ class DataContext:
     def _attach_datasource_to_context(self, datasource: Datasource) -> None:
         self._datasources[datasource.name] = datasource
 
+    def get_datasource(self, datasource_name: str) -> Datasource:
+        # NOTE: this same method exists on AbstractDataContext
+        # TODO (kilo59): implement as __getitem__ ?
+        return self._datasources[datasource_name]
+
 
 def get_context(context_root_dir: Optional[DirectoryPath] = None) -> DataContext:
     """ZEP get_context placeholder function."""
