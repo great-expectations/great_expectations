@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
 
 from pydantic import DirectoryPath, validate_arguments
 
+from great_expectations.zep.config import GxConfig
 from great_expectations.zep.sources import _SourceFactories
 
 if TYPE_CHECKING:
@@ -36,8 +38,13 @@ class DataContext:
 
         assert cls._context
         if cls._context.root_directory:
-            # TODO (kilo59): load config and add/instantiate Datasources & Assets
-            pass
+            # load config and add/instantiate Datasources & Assets
+            config_path = pathlib.Path(cls._context.root_directory) / "config.yaml"
+            loaded_config = GxConfig.parse_yaml(config_path)
+            for ds_name, datasource in loaded_config.datasources.items():
+                LOGGER.info(f"Loaded '{ds_name}' from config")
+                cls._context._attach_datasource_to_context(datasource)
+                # TODO: add assets?
 
         return cls._context
 
