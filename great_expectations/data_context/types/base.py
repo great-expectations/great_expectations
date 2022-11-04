@@ -238,19 +238,19 @@ class SorterConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="great_expectations.datasource.data_connector.sorter",
+        missing="great_expectations.datasource.data_connector.sorter",
     )
     orderby = fields.String(
         required=False,
         allow_none=True,
-        load_default="asc",
+        missing="asc",
     )
 
     # allow_none = True because it is only used by some Sorters
     reference_list = fields.List(
         cls_or_instance=fields.Str(),
         required=False,
-        load_default=None,
+        missing=None,
         allow_none=True,
     )
     order_keys_by = fields.String(
@@ -260,12 +260,12 @@ class SorterConfigSchema(Schema):
     key_reference_list = fields.List(
         cls_or_instance=fields.Str(),
         required=False,
-        load_default=None,
+        missing=None,
         allow_none=True,
     )
     datetime_format = fields.String(
         required=False,
-        load_default=None,
+        missing=None,
         allow_none=True,
     )
 
@@ -362,12 +362,12 @@ class AssetConfigSchema(Schema):
     class_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="Asset",
+        missing="Asset",
     )
     module_name = fields.String(
         required=False,
         all_none=True,
-        load_default="great_expectations.datasource.data_connector.asset",
+        missing="great_expectations.datasource.data_connector.asset",
     )
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
@@ -614,7 +614,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="great_expectations.datasource.data_connector",
+        missing="great_expectations.datasource.data_connector",
     )
 
     assets = fields.Dict(
@@ -1153,12 +1153,12 @@ class DatasourceConfigSchema(AbstractConfigSchema):
     class_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="Datasource",
+        missing="Datasource",
     )
     module_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="great_expectations.datasource",
+        missing="great_expectations.datasource",
     )
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
@@ -1396,9 +1396,9 @@ class NotebookConfig(DictDot):
 
 
 class NotebookConfigSchema(Schema):
-    class_name = fields.String(load_default="SuiteEditNotebookRenderer")
+    class_name = fields.String(missing="SuiteEditNotebookRenderer")
     module_name = fields.String(
-        load_default="great_expectations.render.renderer.v3.suite_edit_notebook_renderer"
+        missing="great_expectations.render.renderer.v3.suite_edit_notebook_renderer"
     )
     custom_templates_module = fields.String(allow_none=True)
 
@@ -2551,7 +2551,7 @@ class CheckpointConfigSchema(Schema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        load_default="great_expectations.checkpoint",
+        missing="great_expectations.checkpoint",
     )
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)

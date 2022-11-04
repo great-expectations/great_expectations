@@ -76,11 +76,11 @@ from great_expectations.rule_based_profiler.parameter_container import (
     build_parameter_container_for_variables,
 )
 from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
-from great_expectations.rule_based_profiler.rule_state import RuleState
+from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext, BaseDataContext
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.data_context.store.profiler_store import ProfilerStore
 
 
@@ -102,7 +102,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def __init__(
         self,
         profiler_config: RuleBasedProfilerConfig,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
         usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
     ) -> None:
         """
@@ -114,7 +114,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         Args:
             profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration
-            data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
+            data_context: AbstractDataContext object that defines full runtime environment (data access, etc.)
         """
         name: str = profiler_config.name
         id: Optional[str] = None
@@ -222,7 +222,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def _init_rule_domain_builder(
         domain_builder_config: dict,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
     ) -> DomainBuilder:
         domain_builder: DomainBuilder = instantiate_class_from_config(
             config=domain_builder_config,
@@ -1127,7 +1127,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store.store_name}"'
             )
 
-        # Chetan - 20220204 - BaseDataContext to be removed once it can be decoupled from RBP
+        # Chetan - 20220204 - AbstractDataContext to be removed once it can be decoupled from RBP
         new_profiler: RuleBasedProfiler = instantiate_class_from_config(
             config=config.to_json_dict(),
             runtime_environment={
@@ -1271,7 +1271,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def self_check(self, pretty_print: bool = True) -> dict:
         """
-        Necessary to enable integration with `BaseDataContext.test_yaml_config`
+        Necessary to enable integration with `AbstractDataContext.test_yaml_config`
         Args:
             pretty_print: flag to turn on verbose output
         Returns:
@@ -1428,7 +1428,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         config_version: float,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[AbstractDataContext] = None,
         id: Optional[str] = None,
     ) -> None:
         """
@@ -1444,7 +1444,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             variables: Any variables to be substituted within the rules
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
             expectation_configuration_builders configuration components
-            data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
+            data_context: AbstractDataContext object that defines full runtime environment (data access, etc.)
         """
         profiler_config = RuleBasedProfilerConfig(
             name=name,
