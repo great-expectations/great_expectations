@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Union
 
 from pydantic import DirectoryPath, validate_arguments
 
@@ -34,11 +34,12 @@ class DataContext:
         if not cls._context:
             cls._context = DataContext(context_root_dir=context_root_dir)
 
-        if cls._context.root_directory:  # type: ignore[union-attr]
+        assert cls._context
+        if cls._context.root_directory:
             # TODO (kilo59): load config and add/instantiate Datasources & Assets
             pass
 
-        return cast(DataContext, cls._context)
+        return cls._context
 
     @validate_arguments
     def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
