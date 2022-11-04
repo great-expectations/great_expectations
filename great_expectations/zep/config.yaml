@@ -1,17 +1,9 @@
 datasources:
-  taxi_datasource:
-    version: 2.0
+  my_demo_datasource:
     engine: pandas
-    connection_str: "foo//bar"
+    execution_engine: pandas
+    name: my_demo_datasource
     assets:
-      yellow_trip_data:
+      my_demo_file_asset:
         type: file
-        base_directory: "great_expectations/zap"
-        separators: \t
-        has_headers: false
-      yellow_trip_data_but_sql:
-        type: sql
-        query: "SELECT * FROM TAXI"
-      # sql_but_wrong:
-      #   type: sql
-      #   weary: "SELECT * FROM TAXI"
+        name: my_demo_file_asset

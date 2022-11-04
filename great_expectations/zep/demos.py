@@ -132,7 +132,7 @@ def from_yaml_config():
     context = get_context(context_root_dir=root_dir)
     print(f"Context loaded at {root_dir}")
 
-    ds = context.get_datasource("demo_datasource")
+    ds = context.get_datasource("my_demo_datasource")
     print(f"Retried Datasource {ds}")
     assert ds
 
@@ -140,5 +140,5 @@ def from_yaml_config():
 if __name__ == "__main__":
     # round_trip()
     # type_lookup()
-    add_real_asset()
+    # add_real_asset()
     from_yaml_config()
