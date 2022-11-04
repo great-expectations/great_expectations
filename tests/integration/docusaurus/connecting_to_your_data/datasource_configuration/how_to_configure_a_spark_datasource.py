@@ -15,214 +15,464 @@ the snippets that are specified for use in documentation are maintained.  These 
 # The following imports are used as part of verifying that all example snippets are consistent.
 # Users may disregard them.
 
-from datasource_configuration_test_utilities import (
-    get_full_universal_datasource_config_elements,
-    is_subset,
+from datasource_configuration_test_utilities import is_subset
+from full_datasource_configurations import (
+    get_full_config_spark_configured_datasource_multi_batch,
+    get_full_config_spark_configured_datasource_single_batch,
+    get_full_config_spark_inferred_datasource_multi_batch,
+    get_full_config_spark_inferred_datasource_single_batch,
+    get_full_config_spark_runtime_datasource,
+    get_partial_config_universal_datasource_config_elements,
 )
-
-import great_expectations as gx
-
-# The following imports are used as part of verifying that all example snippets are consistent.
-# Users may disregard them.
-
-
-def get_full_spark_inferred_datasource_single_batch() -> dict:
-    """Creates a dictionary configuration for a spark Datasource using an
-     inferred data connector that only returns single item batches.
-
-    Returns:
-         a dictionary containing a full configuration for a Spark Datasource
-    """
-    # <snippet name="full datasource_config for spark inferred singlebatch Datasource">
-    datasource_config: dict = {
-        "name": "my_datasource_name",  # Preferably name it something relevant
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-        "execution_engine": {
-            "class_name": "SparkExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        "data_connectors": {
-            "name_of_my_inferred_data_connector": {
-                "class_name": "InferredAssetFilesystemDataConnector",
-                "base_directory": "../data",
-                "default_regex": {
-                    "pattern": "(.*)\\.csv",
-                    "group_names": ["data_asset_name"],
-                },
-                "batch_spec_passthrough": {
-                    "reader_method": "csv",
-                    "reader_options": {
-                        "header": True,
-                        "inferSchema": True,
-                    },
-                },
-            }
-        },
-    }
-    # </snippet>
-    return datasource_config
-
-
-def get_full_spark_inferred_datasource_multi_batch() -> dict:
-    """Creates a dictionary configuration for a spark Datasource using an
-     inferred data connector that can returns multiple item batches.
-
-    Returns:
-         a dictionary containing a full configuration for a Spark Datasource
-    """
-    # <snippet name="full datasource_config for spark inferred multibatch Datasource">
-    datasource_config: dict = {
-        "name": "my_datasource_name",  # Preferably name it something relevant
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-        "execution_engine": {
-            "class_name": "SparkExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        "data_connectors": {
-            "name_of_my_inferred_data_connector": {
-                "class_name": "InferredAssetFilesystemDataConnector",
-                "base_directory": "../data",
-                "default_regex": {
-                    "pattern": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv",
-                    "group_names": ["data_asset_name", "month"],
-                },
-                "batch_spec_passthrough": {
-                    "reader_method": "csv",
-                    "reader_options": {
-                        "header": True,
-                        "inferSchema": True,
-                    },
-                },
-            }
-        },
-    }
-    # </snippet>
-    return datasource_config
-
-
-def get_full_spark_configured_datasource_single_batch() -> dict:
-    """Creates a dictionary configuration for a spark Datasource using an
-     inferred data connector that only returns single item batches.
-
-    Returns:
-         a dictionary containing a full configuration for a Spark Datasource
-    """
-    # <snippet name="full datasource_config for spark configured singlebatch Datasource">
-    datasource_config: dict = {
-        "name": "my_datasource_name",  # Preferably name it something relevant
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-        "execution_engine": {
-            "class_name": "SparkExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        "data_connectors": {
-            "name_of_my_configured_data_connector": {
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "base_directory": "../data",
-                "assets": {
-                    "yellow_tripdata_jan": {
-                        "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
-                        "group_names": ["month"],
-                    }
-                },
-                "batch_spec_passthrough": {
-                    "reader_method": "csv",
-                    "reader_options": {
-                        "header": True,
-                        "inferSchema": True,
-                    },
-                },
-            }
-        },
-    }
-    # </snippet>
-    return datasource_config
-
-
-def get_full_spark_configured_datasource_multi_batch() -> dict:
-    """Creates a dictionary configuration for a spark Datasource using a
-     configured data connector that can return multiple item batches.
-
-    Returns:
-         a dictionary containing a full configuration for a Spark Datasource
-    """
-    # <snippet name="full datasource_config for spark configured multibatch Datasource">
-    datasource_config: dict = {
-        "name": "my_datasource_name",  # Preferably name it something relevant
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-        "execution_engine": {
-            "class_name": "SparkExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        "data_connectors": {
-            "name_of_my_configured_data_connector": {
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "base_directory": "../data",
-                "assets": {
-                    "yellow_tripdata_2020": {
-                        "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
-                        "group_names": ["month"],
-                    }
-                },
-                "batch_spec_passthrough": {
-                    "reader_method": "csv",
-                    "reader_options": {
-                        "header": True,
-                        "inferSchema": True,
-                    },
-                },
-            }
-        },
-    }
-    # </snippet>
-    return datasource_config
-
-
-def get_full_spark_runtime_datasource() -> dict:
-    """Creates a dictionary configuration for a spark Datasource using a
-     runtime data connector.
-
-    Returns:
-         a dictionary containing a full configuration for a Spark Datasource
-    """
-    # <snippet name="full datasource_config for spark runtime Datasource">
-    datasource_config: dict = {
-        "name": "my_datasource_name",  # Preferably name it something relevant
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-        "execution_engine": {
-            "class_name": "SparkExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        "data_connectors": {
-            "name_of_my_runtime_data_connector": {
-                "class_name": "RuntimeDataConnector",
-                "batch_spec_passthrough": {
-                    "reader_method": "csv",
-                    "reader_options": {
-                        "header": True,
-                        "inferSchema": True,
-                    },
-                },
-                "batch_identifiers": ["batch_timestamp"],
-            }
-        },
-    }
-    # </snippet>
-    return datasource_config
 
 
 def validate_universal_config_elements():
     """Validates that the 'universal' configuration keys and values are in fact identical to the keys and values
     in all the full Spark configurations.
     """
-    universal_elements = get_full_universal_datasource_config_elements()
-    is_subset(universal_elements, get_full_spark_configured_datasource_single_batch())
-    is_subset(universal_elements, get_full_spark_configured_datasource_multi_batch())
-    is_subset(universal_elements, get_full_spark_inferred_datasource_single_batch())
-    is_subset(universal_elements, get_full_spark_inferred_datasource_multi_batch())
-    is_subset(universal_elements, get_full_spark_runtime_datasource())
+    universal_elements = get_partial_config_universal_datasource_config_elements()
+    is_subset(
+        universal_elements, get_full_config_spark_configured_datasource_single_batch()
+    )
+    is_subset(
+        universal_elements, get_full_config_spark_configured_datasource_multi_batch()
+    )
+    is_subset(
+        universal_elements, get_full_config_spark_inferred_datasource_single_batch()
+    )
+    is_subset(
+        universal_elements, get_full_config_spark_inferred_datasource_multi_batch()
+    )
+    is_subset(universal_elements, get_full_config_spark_runtime_datasource())
+
+
+# The following methods correspond to the section headings in the how-to guide linked in the module docstring.
+
+
+def section_5_add_the_spark_execution_engine_to_your_datasource_configuration():
+    """Provides and tests the snippets for section 5 of the Spark Datasource configuration guide."""
+
+    # <snippet name="spark datasource_config up to definition of Spark execution engine">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+    }
+    # </snippet>
+
+    execution_engine_snippet: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        # <snippet name="define spark execution engine">
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        }
+        # </snippet>
+    }
+
+    assert datasource_config == execution_engine_snippet
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_single_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_multi_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_single_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_multi_batch()
+    )
+    is_subset(datasource_config, get_full_config_spark_runtime_datasource())
+
+
+def section_6_add_a_dictionary_as_the_value_of_the_data_connectors_key():
+    """Provides and tests the snippets for section 6 of the Spark Datasource configuration guide."""
+
+    # <snippet name="spark datasource_config up to adding an empty data_connectors dictionary">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {},
+    }
+    # </snippet>
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_single_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_multi_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_single_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_multi_batch()
+    )
+    is_subset(datasource_config, get_full_config_spark_runtime_datasource())
+
+
+def section_7_configure_your_individual_data_connectors__inferred():
+    """Provides and tests the InferredAssetFilesystemDataConnector snippets for section 7 of the
+    Spark Datasource configuration guide.
+
+    """
+    # <script name="spark Datasource configuration up to adding an empty inferred data connector">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {"name_of_my_inferred_data_connector": {}},
+    }
+    # </snippet>
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_single_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_multi_batch()
+    )
+
+    # </snippet name="inferred spark datasource_config up to adding empty default_regex and batch_spec_passthrough dictionaries">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "base_directory": "./data",
+                "default_regex": {},
+                "batch_spec_passthrough": {},
+            }
+        },
+    }
+    # </snippet>
+
+    smaller_snippets: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                # <snippet name="inferred data connector define class_name as InferredAssetFilesystemDataConnector">
+                "class_name": "InferredAssetFilesystemDataConnector",
+                # </snippet>
+                # <snippet name="inferred data connector define base_directory">
+                "base_directory": "./data",
+                # </snippet>
+                "default_regex": {},
+                "batch_spec_passthrough": {},
+            }
+        },
+    }
+    assert datasource_config == smaller_snippets
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_single_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_multi_batch()
+    )
+
+    glob_directive: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "base_directory": "./data",
+                # <snippet name="define glob_directive">
+                "glob_directive": "*/*",
+                # </snippet>
+                "default_regex": {},
+                "batch_spec_passthrough": {},
+            }
+        },
+    }
+    is_subset(datasource_config, glob_directive)
+
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "base_directory": "./data",
+                "glob_directive": "*/*",
+                "default_regex": {},
+                "batch_spec_passthrough": {},
+            }
+        },
+    }
+    assert datasource_config == glob_directive
+
+
+def section_7_configure_your_individual_data_connectors__configured():
+    """Provides and tests the ConfiguredAssetFilesystemDataConnector snippets for section 7 of the
+    Spark Datasource configuration guide.
+
+    """
+    # <script name="spark Datasource configuration up to adding an empty configured data connector">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {"name_of_my_configured_data_connector": {}},
+    }
+    # </snippet>
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_single_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_multi_batch()
+    )
+
+    # </snippet name="configured spark datasource_config up to adding empty assets and batch_spec_passthrough dictionaries">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_configured_data_connector": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "base_directory": "./data",
+                "assets": {},
+                "batch_spec_passthrough": {},
+            }
+        },
+    }
+    # </snippet>
+
+    smaller_snippets: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_configured_data_connector": {
+                # <snippet name="configured data connector define class_name as ConfiguredAssetFilesystemDataConnector">
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                # </snippet>
+                # <snippet name="configured data connector define base_directory">
+                "base_directory": "./data",
+                # </snippet>
+                "assets": {},
+                "batch_spec_passthrough": {},
+            }
+        },
+    }
+    assert datasource_config == smaller_snippets
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_single_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_multi_batch()
+    )
+
+
+def section_7_configure_your_individual_data_connectors__runtime():
+    """Provides and tests the RuntimeDataConnector snippets for section 7 of the
+    Spark Datasource configuration guide.
+
+    """
+    # <script name="spark Datasource configuration up to adding an empty runtime data connector">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {"name_of_my_runtime_data_connector": {}},
+    }
+    # </snippet>
+    is_subset(datasource_config, get_full_config_spark_runtime_datasource())
+
+    # </snippet name="runtime spark datasource_config up to adding empty batch_identifiers and batch_spec_passthrough dictionaries">
+    datasource_config: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_runtime_data_connector": {
+                "class_name": "RuntimeDataConnector",
+                "batch_spec_passthrough": {},
+                "batch_identifiers": [],
+            }
+        },
+    }
+    # </snippet>
+
+    smaller_snippets: dict = {
+        "name": "my_datasource_name",
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_runtime_data_connector": {
+                # <snippet name="runtime data connector define class_name as RuntimeDataConnector">
+                "class_name": "RuntimeDataConnector",
+                # </snippet>
+                "batch_spec_passthrough": {},
+                "batch_identifiers": [],
+            }
+        },
+    }
+    assert datasource_config == smaller_snippets
+    is_subset(datasource_config, get_full_config_spark_runtime_datasource())
+
+
+def section_8_configure_the_values_for_batch_spec_passthrough__universal():
+    """Provides and tests the RuntimeDataConnector snippets for section 7 of the
+    Spark Datasource configuration guide.
+
+    """
+    empty_batch_spec_passthrough: dict = {
+        # <snippet name="populate batch_spec_passthrough with empty reader_method and reader_options">
+        "batch_spec_passthrough": {"reader_method": "", "reader_options": {}}
+        # </snippet>
+    }
+    smaller_snippets: dict = {
+        "batch_spec_passthrough": {
+            # <snippet name="populate reader_method with csv">
+            "reader_method": "csv",
+            # </snippet>
+            # <snippet name = "populate reader_options with empty header and inferSchema keys">
+            "reader_options": {"header": "", "inferSchema": ""}
+            # </snippet>
+        }
+    }
+    even_smaller_snippets: dict = {
+        "batch_spec_passthrough": {
+            "reader_method": "csv",
+            "reader_options": {
+                # <snippet name="define header as True for reader_options">
+                "header": True,
+                # </snippet>
+                # <snippet name="define inferSchema as True for reader_options">
+                "inferSchema": True
+                # </snippet>
+            },
+        }
+    }
+    is_subset(empty_batch_spec_passthrough, even_smaller_snippets)
+    is_subset(smaller_snippets, even_smaller_snippets)
+    is_subset(
+        even_smaller_snippets,
+        get_full_config_spark_configured_datasource_single_batch()["data_connectors"][
+            "name_of_my_configured_data_connector"
+        ],
+    )
+    is_subset(
+        even_smaller_snippets,
+        get_full_config_spark_configured_datasource_multi_batch()["data_connectors"][
+            "name_of_my_configured_data_connector"
+        ],
+    )
+    is_subset(
+        even_smaller_snippets,
+        get_full_config_spark_inferred_datasource_single_batch()["data_connectors"][
+            "name_of_my_inferred_data_connector"
+        ],
+    )
+    is_subset(
+        even_smaller_snippets,
+        get_full_config_spark_inferred_datasource_multi_batch()["data_connectors"][
+            "name_of_my_inferred_data_connector"
+        ],
+    )
+    is_subset(
+        even_smaller_snippets,
+        get_full_config_spark_runtime_datasource()["data_connectors"][
+            "name_of_my_runtime_data_connector"
+        ],
+    )
+    assert (
+        even_smaller_snippets["batch_spec_passthrough"]
+        == get_full_config_spark_configured_datasource_single_batch()[
+            "data_connectors"
+        ]["name_of_my_configured_data_connector"]["batch_spec_passthrough"]
+    )
+    assert (
+        even_smaller_snippets["batch_spec_passthrough"]
+        == get_full_config_spark_configured_datasource_multi_batch()["data_connectors"][
+            "name_of_my_configured_data_connector"
+        ]["batch_spec_passthrough"]
+    )
+    assert (
+        even_smaller_snippets["batch_spec_passthrough"]
+        == get_full_config_spark_inferred_datasource_single_batch()["data_connectors"][
+            "name_of_my_inferred_data_connector"
+        ]["batch_spec_passthrough"]
+    )
+    assert (
+        even_smaller_snippets["batch_spec_passthrough"]
+        == get_full_config_spark_inferred_datasource_multi_batch()["data_connectors"][
+            "name_of_my_inferred_data_connector"
+        ]["batch_spec_passthrough"]
+    )
+    assert (
+        even_smaller_snippets["batch_spec_passthrough"]
+        == get_full_config_spark_runtime_datasource()["data_connectors"][
+            "name_of_my_runtime_data_connector"
+        ]["batch_spec_passthrough"]
+    )
+
+
+validate_universal_config_elements()
+section_5_add_the_spark_execution_engine_to_your_datasource_configuration()
+section_6_add_a_dictionary_as_the_value_of_the_data_connectors_key()
+section_7_configure_your_individual_data_connectors__inferred()
+section_7_configure_your_individual_data_connectors__configured()
+section_7_configure_your_individual_data_connectors__runtime()
+section_8_configure_the_values_for_batch_spec_passthrough__universal()

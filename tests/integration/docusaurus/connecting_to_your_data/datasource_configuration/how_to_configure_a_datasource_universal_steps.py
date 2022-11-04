@@ -18,9 +18,9 @@ the snippets that are specified for use in documentation are maintained.  These 
 # The following imports are used as part of verifying that all example snippets are consistent.
 # Users may disregard them.
 
-from datasource_configuration_test_utilities import (
-    get_full_universal_datasource_config_elements,
-    is_subset,
+from datasource_configuration_test_utilities import is_subset
+from full_datasource_configurations import (
+    get_partial_config_universal_datasource_config_elements,
 )
 
 import great_expectations as gx
@@ -51,7 +51,9 @@ def section_2_create_new_datasource_configuration():
     # <snippet name="create empty datasource_config dictionary">
     datasource_config: dict = {}
     # </snippet>
-    is_subset(datasource_config, get_full_universal_datasource_config_elements())
+    is_subset(
+        datasource_config, get_partial_config_universal_datasource_config_elements()
+    )
 
 
 def section_3_name_your_datasource():
@@ -66,7 +68,9 @@ def section_3_name_your_datasource():
         # </snippet>
     }
     assert name_snippet == datasource_config
-    is_subset(datasource_config, get_full_universal_datasource_config_elements())
+    is_subset(
+        datasource_config, get_partial_config_universal_datasource_config_elements()
+    )
 
 
 def section_4_specify_the_datasource_class_and_module():
@@ -78,8 +82,12 @@ def section_4_specify_the_datasource_class_and_module():
         "module_name": "great_expectations.datasource",
     }
     # </snippet>
-    assert datasource_config == get_full_universal_datasource_config_elements()
-    is_subset(datasource_config, get_full_universal_datasource_config_elements())
+    assert (
+        datasource_config == get_partial_config_universal_datasource_config_elements()
+    )
+    is_subset(
+        datasource_config, get_partial_config_universal_datasource_config_elements()
+    )
 
 
 section_1_import_necessary_modules_and_initialize_your_data_context()

@@ -6,21 +6,6 @@ from typing import List, Tuple
 # remains the same in all the configuration tests.  Users may disregard it.
 
 
-def get_full_universal_datasource_config_elements() -> dict:
-    """Creates a dictionary containing the keys and values that are universally defined in
-    Spark, Pandas, and SQL Datasource configurations.
-
-    Returns:
-         a dictionary containing a partial configuration for a Datasource
-    """
-    datasource_config: dict = {
-        "name": "my_datasource_name",
-        "class_name": "Datasource",
-        "module_name": "great_expectations.datasource",
-    }
-    return datasource_config
-
-
 def _get_items_by_path(root_dictionary: dict, keys: Tuple[str]) -> Tuple:
     try:
         return "/".join(keys), reduce(operator.getitem, keys, root_dictionary)
