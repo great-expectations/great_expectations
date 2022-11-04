@@ -439,7 +439,7 @@ class DataContext(BaseDataContext):
         self._save_project_config()
 
     @classmethod
-    def find_context_root_dir(cls):
+    def find_context_root_dir(cls) -> str:
         result = None
         yml_path = None
         ge_home_environment = os.getenv("GE_HOME")
@@ -461,7 +461,9 @@ class DataContext(BaseDataContext):
         return result
 
     @classmethod
-    def get_ge_config_version(cls, context_root_dir=None):
+    def get_ge_config_version(
+        cls, context_root_dir: Optional[str] = None
+    ) -> Optional[float]:
         yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
         if yml_path is None:
             return
@@ -474,8 +476,11 @@ class DataContext(BaseDataContext):
 
     @classmethod
     def set_ge_config_version(
-        cls, config_version, context_root_dir=None, validate_config_version=True
-    ):
+        cls,
+        config_version: Union[int, float],
+        context_root_dir: Optional[str] = None,
+        validate_config_version: bool = True,
+    ) -> bool:
         if not isinstance(config_version, (int, float)):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "The argument `config_version` must be a number.",
@@ -509,7 +514,7 @@ class DataContext(BaseDataContext):
         return True
 
     @classmethod
-    def find_context_yml_file(cls, search_start_dir=None):
+    def find_context_yml_file(cls, search_start_dir: Optional[str] = None) -> str:
         """Search for the yml file starting here and moving upward."""
         yml_path = None
         if search_start_dir is None:
@@ -534,12 +539,12 @@ class DataContext(BaseDataContext):
         return yml_path
 
     @classmethod
-    def does_config_exist_on_disk(cls, context_root_dir):
+    def does_config_exist_on_disk(cls, context_root_dir: str) -> bool:
         """Return True if the great_expectations.yml exists on disk."""
         return os.path.isfile(os.path.join(context_root_dir, cls.GE_YML))
 
     @classmethod
-    def is_project_initialized(cls, ge_dir):
+    def is_project_initialized(cls, ge_dir: str) -> bool:
         """
         Return True if the project is initialized.
 
@@ -559,27 +564,27 @@ class DataContext(BaseDataContext):
         )
 
     @classmethod
-    def does_project_have_a_datasource_in_config_file(cls, ge_dir):
+    def does_project_have_a_datasource_in_config_file(cls, ge_dir: str) -> bool:
         if not cls.does_config_exist_on_disk(ge_dir):
             return False
         return cls._does_context_have_at_least_one_datasource(ge_dir)
 
     @classmethod
-    def _does_context_have_at_least_one_datasource(cls, ge_dir):
+    def _does_context_have_at_least_one_datasource(cls, ge_dir: str) -> bool:
         context = cls._attempt_context_instantiation(ge_dir)
         if not isinstance(context, DataContext):
             return False
         return len(context.list_datasources()) >= 1
 
     @classmethod
-    def _does_context_have_at_least_one_suite(cls, ge_dir):
+    def _does_context_have_at_least_one_suite(cls, ge_dir: str) -> bool:
         context = cls._attempt_context_instantiation(ge_dir)
         if not isinstance(context, DataContext):
             return False
         return len(context.list_expectation_suites()) >= 1
 
     @classmethod
-    def _attempt_context_instantiation(cls, ge_dir):
+    def _attempt_context_instantiation(cls, ge_dir: str) -> Optional[DataContext]:
         try:
             context = DataContext(ge_dir)
             return context
