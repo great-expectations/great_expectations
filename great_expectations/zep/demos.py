@@ -1,4 +1,5 @@
 import logging
+import pathlib
 from typing import Dict
 
 from pydantic import FilePath, ValidationError
@@ -123,7 +124,19 @@ def add_real_asset():
     print(my_asset)
 
 
+def from_yaml_config():
+    print("\n  Load from a yaml config file")
+    root_dir = pathlib.Path(__file__).parent
+    context = get_context(context_root_dir=root_dir)
+    print(f"Context loaded at {root_dir}")
+
+    ds = context.get_datasource("demo_datasource")
+    print(f"Retried Datasource {ds}")
+    assert ds
+
+
 if __name__ == "__main__":
     # round_trip()
     # type_lookup()
     add_real_asset()
+    from_yaml_config()
