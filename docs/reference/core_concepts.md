@@ -40,11 +40,10 @@ of the main concepts and classes you will encounter while using Great Expectatio
 
 * [Checkpoints and Actions](./checkpoints_and_actions.md)
 * [Data Context](./data_context.md)
-* [Data discovery](./data_discovery.md)
 * [Data Docs](./data_docs.md)
 * [Datasources](./datasources.md)
 * [Dividing Data Assets into Batches](./dividing_data_assets_into_batches.md)
-* [Evaluation Parameters](./evaluation_parameters.md)
+* [Evaluation Parameters](../terms/evaluation_parameter.md)
 * [Expectations](./expectations/expectations.md)
   * [Conditional Expectations](./expectations/conditional_expectations.md)
   * [Distributional Expectations](./expectations/distributional_expectations.md)

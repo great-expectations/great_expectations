@@ -29,7 +29,7 @@ class BaseDatasource:
     def __init__(
         self,
         name: str,
-        execution_engine=None,
+        execution_engine: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
@@ -59,13 +59,19 @@ class BaseDatasource:
                 runtime_environment={"concurrency": concurrency},
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
-            self._datasource_config: dict = {
-                "execution_engine": execution_engine,
-                "id": id,
-                "name": name,
-            }
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
+
+        self._datasource_config: dict = {
+            "execution_engine": execution_engine,
+            "id": id,
+            "name": name,
+        }
+
+        # Chetan - 20221103 - This attribute is meant to represent the config args used to instantiate the object (before ${VARIABLE} substitution).
+        # While downstream logic should override this value, we default to `self._datasource_config` as a backup.
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.
+        self._raw_config = self._datasource_config
 
         self._data_connectors: dict = {}
 
@@ -411,8 +417,8 @@ class Datasource(BaseDatasource):
     def __init__(
         self,
         name: str,
-        execution_engine=None,
-        data_connectors=None,
+        execution_engine: Optional[dict] = None,
+        data_connectors: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,

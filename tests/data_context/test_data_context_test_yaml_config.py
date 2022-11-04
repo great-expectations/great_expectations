@@ -628,7 +628,7 @@ introspection:
     assert report_object["data_connectors"]["count"] == 1
     assert set(report_object["data_connectors"].keys()) == {
         "count",
-        "my_very_awesome_data_connector",
+        "${data_connector_name}",
     }
     assert mock_emit.call_count == 2
     expected_call_args_list.append(
@@ -1484,3 +1484,48 @@ def test_test_yaml_config_supported_types_have_self_check():
             assert hasattr(class_, "self_check") and callable(
                 class_.self_check
             ), f"Class '{class_}' is missing the required `self_check()` method"
+
+
+@pytest.mark.integration
+def test_test_yaml_config_on_datasource_sanitizes_instantiated_objs_config(
+    empty_data_context_stats_enabled,
+    monkeypatch,
+):
+    context = empty_data_context_stats_enabled
+    validator = _YamlConfigValidator(context)
+
+    variable = "DATA_DIR"
+    value_associated_with_variable = "a/b/c"
+    data_connector_name = "my_data_connector"
+
+    monkeypatch.setenv(variable, value_associated_with_variable)
+
+    yaml_config = f"""
+name: my_datasource
+class_name: Datasource
+execution_engine:
+  class_name: PandasExecutionEngine
+data_connectors:
+  {data_connector_name}:
+    class_name: InferredAssetFilesystemDataConnector
+    base_directory: ${variable}
+"""
+    instantiated_class = validator.test_yaml_config(yaml_config=yaml_config)
+
+    # Runtime object should have the substituted value for downstream usage
+    assert instantiated_class.data_connectors[
+        data_connector_name
+    ].base_directory.endswith(value_associated_with_variable)
+
+    # Config attached to object should mirror the runtime object
+    assert instantiated_class.config["data_connectors"][data_connector_name][
+        "base_directory"
+    ].endswith(value_associated_with_variable)
+
+    # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)
+    assert (
+        instantiated_class._raw_config["data_connectors"][data_connector_name][
+            "base_directory"
+        ]
+        == f"${variable}"
+    )

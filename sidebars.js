@@ -217,7 +217,6 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
             'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
-            // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
             {
               type: 'category',
               label: 'Adding Features to Custom Expectations',
@@ -370,7 +369,6 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
             { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/data_discovery' },
             { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         },
