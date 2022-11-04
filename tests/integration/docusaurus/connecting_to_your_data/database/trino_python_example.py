@@ -158,7 +158,9 @@ data_assistant_result = context.assistants.onboarding.run(
     exclude_column_names=exclude_column_names,
 )
 # data_assistant_result.metrics_by_domain
-print(f"\n\ndata_assistant_result.metrics_by_domain :\n{data_assistant_result.metrics_by_domain}\n\n")
+print(
+    f"\n\ndata_assistant_result.metrics_by_domain :\n{data_assistant_result.metrics_by_domain}\n\n"
+)
 expectation_suite = data_assistant_result.get_expectation_suite(
     expectation_suite_name="onboarding_suite"
 )
