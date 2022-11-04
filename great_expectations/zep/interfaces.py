@@ -33,11 +33,14 @@ class Datasource(metaclass=MetaDatasource):
         assets: Dict[str, DataAsset]
 
         @root_validator(pre=True)
-        def load_execution_engine(cls, values: dict):
+        @classmethod
+        def _load_execution_engine(cls, values: dict):
             """
             Lookup and instantiate an ExecutionEngine based on the 'engine' string.
             Assign this ExecutionEngine instance to the `execution_engine` field.
             """
+            # NOTE (kilo59): this method is only ever called by the Pydantic framework.
+            # Should we use name mangling? `__load_execution_engine`?
             LOGGER.info(
                 f"Loading & validating `Datasource.execution_engine'\n {pf(values, depth=1)}"
             )
