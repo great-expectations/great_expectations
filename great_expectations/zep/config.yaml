@@ -2,10 +2,10 @@ datasources:
   my_demo_datasource:
     engine: pandas
     version: 2.0
-    name: my_demo_datasource
+    name: my_demo_datasource # TODO: remove name
     assets:
       my_demo_file_asset:
         type: file
-        name: my_demo_file_asset
+        name: my_demo_file_asset # TODO: remove name
         # TODO: combine root dir with this value in code
         file_path: great_expectations/zep/my_file.csv

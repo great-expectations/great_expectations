@@ -33,6 +33,10 @@ class Datasource(metaclass=MetaDatasource):
         execution_engine: ExecutionEngine
         assets: Dict[str, DataAsset]
 
+        # TODO (kil59): remove name duplication
+        # 1. user a root_validator to pull the name for the `assets` keys
+        # 2. Update the structure to be a list of `DataAssets`
+
         @root_validator(pre=True)
         @classmethod
         def _load_execution_engine(cls, values: dict):
