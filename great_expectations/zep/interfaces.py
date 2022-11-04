@@ -21,7 +21,7 @@ class DataAsset(BaseModel):
     type: str
 
 
-class DatasourceCfg(BaseModel):
+class Datasource_(BaseModel):
     name: str
     engine: str
     version: confloat(ge=2.0, lt=3.0) = 2.0
@@ -43,7 +43,7 @@ class DatasourceCfg(BaseModel):
         # NOTE (kilo59): this method is only ever called by the Pydantic framework.
         # Should we use name mangling? `__load_execution_engine`?
         LOGGER.info(
-            f"Loading & validating `Datasource.execution_engine'\n {pf(values, depth=1)}"
+            f"Loading & validating `Datasource.execution_engine' ->\n {pf(values, depth=2)}"
         )
         # TODO (kilo59): catch key errors
         engine_name: str = values["engine"]
@@ -55,7 +55,7 @@ class DatasourceCfg(BaseModel):
     @validator("assets", pre=True)
     @classmethod
     def _load_asset_subtype(cls, v: Dict[str, dict]):
-        LOGGER.info(f"Loading 'assets'\n{pf(v, depth=3)} ->")
+        LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
         loaded_assets: Dict[str, DataAsset] = {}
 
         # TODO (kilo59): catch key errors
@@ -65,7 +65,7 @@ class DatasourceCfg(BaseModel):
             LOGGER.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
             loaded_assets[asset_name] = asset_type(**config)
 
-        LOGGER.info(f"Loaded 'assets' ->\n{pf(loaded_assets)}")
+        LOGGER.info(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
 
     class Config:

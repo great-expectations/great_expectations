@@ -41,6 +41,7 @@ class PandasDatasource(Datasource):
     def __init__(self, name: str):
         self.name = name
         self.assets = {}
+        # self.execution_engine = PandasExecutionEngine()
 
     def __repr__(self):
         return f"{self.__class__.__name__}(name='{self.name}')"
@@ -134,11 +135,16 @@ def from_yaml_config():
     print(f"\n  Load from a yaml config file\n{SEPARATOR}")
     root_dir = pathlib.Path(__file__).parent
     context = get_context(context_root_dir=root_dir)
-    print(f"  Context loaded from {root_dir}")
+    print(f"\n  Context loaded from {root_dir}")
 
-    ds = context.get_datasource("my_demo_datasource")
-    print(f"  Retried '{ds.name}'->\n{repr(ds)}")
-    assert ds
+    my_ds = context.get_datasource("my_demo_datasource")
+    print(f"\n  Retrieved '{my_ds.name}'->\n{repr(my_ds)}")
+    assert my_ds
+
+    my_asset = my_ds.assets["my_demo_file_asset"]
+
+    print(f"\n Retrieved '{my_asset.name}'->\n{repr(my_asset)}")
+    assert my_asset.file_path.exists()
 
 
 if __name__ == "__main__":
