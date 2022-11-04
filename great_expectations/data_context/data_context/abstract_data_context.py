@@ -2756,7 +2756,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             datasource: Datasource = self._build_datasource_from_config(config=config)
         except Exception as e:
             raise ge_exceptions.DatasourceInitializationError(
-                datasource_name=substituted_config.name, message=str(e)
+                datasource_name=config.name, message=str(e)
             )
         return datasource
 
