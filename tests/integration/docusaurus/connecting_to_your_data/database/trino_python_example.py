@@ -20,15 +20,18 @@ context = ge.get_context()
 # <snippet>
 datasource_config = {
     "name": "my_trino_datasource",
+    "module_name": "great_expectations.datasource",  # in shared config
     "class_name": "Datasource",
     "execution_engine": {
+        "module_name": "great_expectations.execution_engine",  # in shared config
         "class_name": "SqlAlchemyExecutionEngine",
         "connection_string": "trino://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<CATALOG>/<SCHEMA>",
     },
     "data_connectors": {
         "default_runtime_data_connector_name": {
             "class_name": "RuntimeDataConnector",
-            "batch_identifiers": ["default_identifier_name"],
+            # "batch_identifiers": ["default_identifier_name"],
+            "batch_identifiers": ["query_string"],
         },
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetSqlDataConnector",
@@ -51,19 +54,20 @@ context.add_datasource(**datasource_config)
 # </snippet>
 
 # Here is a RuntimeBatchRequest using a query
-batch_request = RuntimeBatchRequest(
+runtime_batch_request = RuntimeBatchRequest(
     datasource_name="my_trino_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
-    batch_identifiers={"default_identifier_name": "default_identifier"},
+    # batch_identifiers={"default_identifier_name": "default_identifier"},
+    batch_identifiers={"query_string": "whatever"},
 )
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_suite"
+    batch_request=runtime_batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 
@@ -92,3 +96,5 @@ assert "schema.taxi_data" in set(
         "default_inferred_data_connector_name"
     ]
 )
+
+# data_assistant_result = context.assistants.onboarding.run(batch_request=runtime_batch_request)
