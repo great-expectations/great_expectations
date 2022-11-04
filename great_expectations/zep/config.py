@@ -9,17 +9,16 @@ from typing import Dict, Union
 from pydantic import BaseModel
 from ruamel.yaml import YAML
 
-from great_expectations.zep import interfaces
+from great_expectations.zep.interfaces import DatasourceCfg
 
 yaml = YAML(typ="safe")
 
-Datasource = interfaces.Datasource.Datasource
 
 LOGGER = logging.getLogger(__name__)
 
 
 class GxConfig(BaseModel):
-    datasources: Dict[str, Datasource]
+    datasources: Dict[str, DatasourceCfg]
 
     @classmethod
     def parse_yaml(cls, f: Union[pathlib.Path, str]) -> GxConfig:
