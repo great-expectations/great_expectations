@@ -24,5 +24,5 @@ class GxConfig(BaseModel):
     @classmethod
     def parse_yaml(cls, f: Union[pathlib.Path, str]) -> GxConfig:
         loaded = yaml.load(f)
-        LOGGER.info(f"loaded from yaml ->\n{pf(loaded)}\n")
+        LOGGER.debug(f"loaded from yaml ->\n{pf(loaded)}\n")
         return cls(**loaded)

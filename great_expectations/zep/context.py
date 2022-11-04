@@ -56,7 +56,7 @@ class DataContext:
         self._sources: _SourceFactories = _SourceFactories(self)
         self._datasources: Dict[str, Datasource] = {}
         LOGGER.info(f"4a. Available Factories - {self._sources.factories}")
-        LOGGER.info(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
+        LOGGER.debug(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
 
     @property
     def sources(self) -> _SourceFactories:
