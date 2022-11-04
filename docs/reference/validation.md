@@ -146,4 +146,4 @@ Useful Reference Architectures for validation include:
   problem is resolved. Alternatively, you can implement Expectations that raise warnings without halting the DAG.
 
 For certain Reference Architectures, it may be useful to parameterize Expectations, and supply Evaluation Parameters at
-validation time. See [Evaluation Parameters](./evaluation_parameters.md) for more information.
+validation time. See [Evaluation Parameters](../terms/evaluation_parameter.md) for more information.
