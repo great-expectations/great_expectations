@@ -213,7 +213,11 @@ class SqlAlchemyBatchData(BatchData):
         dialect: GESqlDialect = self.dialect
 
         # dialects that support temp schemas
-        if temp_table_schema_name is not None and dialect in [GESqlDialect.BIGQUERY, GESqlDialect.SNOWFLAKE, GESqlDialect.VERTICA]:
+        if temp_table_schema_name is not None and dialect in [
+            GESqlDialect.BIGQUERY,
+            GESqlDialect.SNOWFLAKE,
+            GESqlDialect.VERTICA,
+        ]:
             temp_table_name = f"{temp_table_schema_name}.{temp_table_name}"
 
         if dialect == GESqlDialect.BIGQUERY:
