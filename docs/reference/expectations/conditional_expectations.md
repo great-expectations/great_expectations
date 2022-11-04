@@ -150,4 +150,4 @@ nature and therefore do not take the `row_condition` argument:
 * ```expect_table_column_count_to_be_between```
 * ```expect_table_column_count_to_equal```
 
-For more information, see the [Data Docs](../data_docs.md) feature guide.
+For more information, see the [Data Docs](../../terms/data_docs.md) feature guide.
