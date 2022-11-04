@@ -1,6 +1,6 @@
 import logging
 import pathlib
-from typing import Dict
+from typing import Dict, Literal
 
 from pydantic import FilePath, ValidationError
 
@@ -16,17 +16,19 @@ from great_expectations.zep.interfaces import DataAsset, Datasource
 
 
 class FileAsset(DataAsset):
+    type: Literal["file"] = "file"
     file_path: FilePath
     delimiter: str = ","
     ...
 
 
 class MyOtherAsset(DataAsset):
+    type: Literal["file"] = "file"
     ...
 
 
 class PandasDatasource(Datasource):
-
+    engine: Literal["pandas"] = "pandas"
     execution_engine = PandasExecutionEngine()
     asset_types = [FileAsset, MyOtherAsset]
     name: str
