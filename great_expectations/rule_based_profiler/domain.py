@@ -88,8 +88,8 @@ not supported).
         if details is None:
             details = {}
 
-        inferred_semantic_domain_type: Dict[
-            str, Union[str, SemanticDomainTypes]
+        inferred_semantic_domain_type: Optional[
+            Dict[str, Union[str, SemanticDomainTypes]]
         ] = details.get(INFERRED_SEMANTIC_TYPE_KEY)
         if inferred_semantic_domain_type:
             semantic_domain_key: str
@@ -149,7 +149,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
     def __ne__(self, other):
         return not self.__eq__(other=other)
 
-    def __hash__(self) -> int:
+    def __hash__(self) -> int:  # type: ignore[override]
         """Overrides the default implementation"""
         _result_hash: int = hash(self.id)
         return _result_hash
