@@ -477,9 +477,7 @@ class AbstractDataContext(ABC):
         Returns:
             The datasource, after storing and retrieving the stored config.
         """
-        # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.
-        # This is to be removed once substitution logic is migrated from the context to the individual object level.
-        config = datasource._raw_config
+        config = datasource.config
 
         datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         # Manually need to add in class name to the config since it is not part of the runtime obj
@@ -494,15 +492,10 @@ class AbstractDataContext(ABC):
         # Use the updated datasource config, since the store may populate additional info on update.
         self.config.datasources[datasource_name] = updated_datasource_config_from_store  # type: ignore[index,assignment]
 
-        # Also use the updated config to initialize a datasource for the cache and overwrite the existing datasource.
-        substituted_config = self._perform_substitutions_on_datasource_config(
-            updated_datasource_config_from_store
-        )
         updated_datasource: Union[
             LegacyDatasource, BaseDatasource
         ] = self._instantiate_datasource_from_config(
-            raw_config=updated_datasource_config_from_store,
-            substituted_config=substituted_config,
+            config=updated_datasource_config_from_store,
         )
         self._cached_datasources[datasource_name] = updated_datasource
         return updated_datasource
@@ -955,21 +948,13 @@ class AbstractDataContext(ABC):
             datasource_name=datasource_name
         )
 
-        raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
-        raw_config = datasourceConfigSchema.load(raw_config_dict)
-
-        substitutions: dict = self._determine_substitutions()
-        substituted_config = substitute_all_config_variables(
-            raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
+        config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        config = datasourceConfigSchema.load(config_dict)
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-        datasource_config = datasourceConfigSchema.load(substituted_config)
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
-        ] = self._instantiate_datasource_from_config(
-            raw_config=raw_config, substituted_config=substituted_config
-        )
+        ] = self._instantiate_datasource_from_config(config=config)
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
@@ -2738,20 +2723,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
 
-                raw_config_dict = dict(datasourceConfigSchema.dump(config))
-                substituted_config_dict: dict = substitute_all_config_variables(
-                    raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-                )
-
-                raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
-                substituted_datasource_config = datasourceConfigSchema.load(
-                    substituted_config_dict
-                )
-                substituted_datasource_config.name = datasource_name
+                config_dict = dict(datasourceConfigSchema.dump(config))
+                datasource_config = datasourceConfigSchema.load(config_dict)
+                datasource_config.name = datasource_name
 
                 datasource = self._instantiate_datasource_from_config(
-                    raw_config=raw_datasource_config,
-                    substituted_config=substituted_datasource_config,
+                    config=datasource_config,
                 )
                 self._cached_datasources[datasource_name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
@@ -2763,8 +2740,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _instantiate_datasource_from_config(
         self,
-        raw_config: DatasourceConfig,
-        substituted_config: DatasourceConfig,
+        config: DatasourceConfig,
     ) -> Datasource:
         """Instantiate a new datasource.
         Args:
@@ -2777,18 +2753,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             DatasourceInitializationError
         """
         try:
-            datasource: Datasource = self._build_datasource_from_config(
-                raw_config=raw_config, substituted_config=substituted_config
-            )
+            datasource: Datasource = self._build_datasource_from_config(config=config)
         except Exception as e:
             raise ge_exceptions.DatasourceInitializationError(
                 datasource_name=substituted_config.name, message=str(e)
             )
         return datasource
 
-    def _build_datasource_from_config(
-        self, raw_config: DatasourceConfig, substituted_config: DatasourceConfig
-    ) -> Datasource:
+    def _build_datasource_from_config(self, config: DatasourceConfig) -> Datasource:
         """Instantiate a Datasource from a config.
 
         Args:
@@ -2802,19 +2774,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         # We convert from the type back to a dictionary for purposes of instantiation
         serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        substituted_config_dict: dict = serializer.serialize(substituted_config)
+        config_dict: dict = serializer.serialize(config)
 
         # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
-        if substituted_config_dict["class_name"] in [
+        if config_dict["class_name"] in [
             "BaseDatasource",
             "Datasource",
         ]:
-            substituted_config_dict.update(
-                {"data_context_root_directory": self.root_directory}
-            )
+            config_dict.update({"data_context_root_directory": self.root_directory})
         module_name: str = "great_expectations.datasource"
         datasource: Datasource = instantiate_class_from_config(
-            config=substituted_config_dict,
+            config=config_dict,
             runtime_environment={"data_context": self, "concurrency": self.concurrency},
             config_defaults={"module_name": module_name},
         )
@@ -2822,43 +2792,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             raise ge_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
-                class_name=substituted_config_dict["class_name"],
+                class_name=config_dict["class_name"],
             )
 
-        # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.
-        # This is to be removed once substitution logic is migrated from the context to the individual object level.
-        raw_config_dict: dict = serializer.serialize(raw_config)
-        datasource._raw_config = raw_config_dict
-
         return datasource
-
-    def _perform_substitutions_on_datasource_config(
-        self, config: DatasourceConfig
-    ) -> DatasourceConfig:
-        """Substitute variables in a datasource config e.g. from env vars, config_vars.yml
-
-        Config must be persisted with ${VARIABLES} syntax but hydrated at time of use.
-
-        Args:
-            config: Datasource Config
-
-        Returns:
-            Datasource Config with substitutions performed.
-        """
-        substitutions: dict = self._determine_substitutions()
-
-        substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        raw_config: dict = substitution_serializer.serialize(config)
-
-        substituted_config_dict: dict = substitute_all_config_variables(
-            raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
-
-        substituted_config: DatasourceConfig = datasourceConfigSchema.load(
-            substituted_config_dict
-        )
-
-        return substituted_config
 
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
@@ -2884,14 +2821,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         self.config.datasources[config.name] = config  # type: ignore[index,assignment]
 
-        substituted_config = self._perform_substitutions_on_datasource_config(config)
-
         datasource: Optional[Datasource] = None
         if initialize:
             try:
-                datasource = self._instantiate_datasource_from_config(
-                    raw_config=config, substituted_config=substituted_config
-                )
+                datasource = self._instantiate_datasource_from_config(config=config)
                 self._cached_datasources[config.name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
