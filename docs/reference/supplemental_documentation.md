@@ -8,5 +8,4 @@ In this section you will find documents that don't necessarily fit in any specif
  - [How to use the Great Expectations command line interface (CLI)](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md)
  - [How to use the project check-config command](../guides/miscellaneous/how_to_use_the_project_check_config_command.md)
  - [Customize your deployment](./customize_your_deployment.md)
- - [Data Discovery](./data_discovery.md)
  - [Usage Statistics](./anonymous_usage_statistics.md)
