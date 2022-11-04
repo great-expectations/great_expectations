@@ -199,6 +199,7 @@
 # Redirects for deprecated workflows and codepaths
 /docs/reference/data_discovery/ https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant/
 /docs/reference/evaluation_parameters/ https://docs.greatexpectations.io/docs/terms/evaluation_parameter
+/docs/guides/validation/advanced/how_to_implement_custom_notifications https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions
 /docs/guides/expectations/creating_custom_expectations/how_to_create_custom_metrics https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
 /docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
 /docs/guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
@@ -216,4 +217,4 @@
 /docs/reference/profilers.md https://docs.greatexpectations.io/docs/terms/profiler
 /docs/reference/supporting_resources.md https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
 /docs/reference/validation.md https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview
-/
+/docs/guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook https://greatexpectations.io/expectations/
