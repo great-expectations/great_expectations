@@ -1,8 +1,12 @@
 import logging
 import pathlib
+import shutil
 from typing import Dict, Literal
 
 from pydantic import FilePath, ValidationError
+
+TERM_WIDTH = shutil.get_terminal_size()[1]
+SEPARATOR = "-" * TERM_WIDTH
 
 if __name__ == "__main__":
     # don't setup the logger unless being run as a script
@@ -74,7 +78,7 @@ class PandasDatasource(Datasource):
 
 def round_trip():
     """Demo Creating Datasource -> Adding Assets -> Retrieving asset by name"""
-    print("\n  Adding and round tripping a toy DataAsset ...")
+    print(f"\n  Adding and round tripping a toy DataAsset ...\n{SEPARATOR}")
     context = get_context()
 
     ds = context.sources.add_pandas("taxi")
@@ -93,7 +97,7 @@ def type_lookup():
     Demo the use of the `type_lookup` `BiDict`
     Alternatively use a Graph/Tree-like structure.
     """
-    print("\n  Datasource & DataAsset lookups ...")
+    print(f"\n . Datasource & DataAsset lookups ...\n{SEPARATOR}")
     sources = get_context().sources
 
     s = "pandas"
@@ -111,7 +115,7 @@ def type_lookup():
 
 
 def add_real_asset():
-    print("\n  Add a 'real' asset ...")
+    print(f"\n  Add a 'real' asset ...\n{SEPARATOR}")
     context = get_context()
 
     ds: PandasDatasource = context.sources.add_pandas("my_pandas_datasource")
@@ -127,13 +131,13 @@ def add_real_asset():
 
 
 def from_yaml_config():
-    print("\n  Load from a yaml config file")
+    print(f"\n  Load from a yaml config file\n{SEPARATOR}")
     root_dir = pathlib.Path(__file__).parent
     context = get_context(context_root_dir=root_dir)
-    print(f"Context loaded at {root_dir}")
+    print(f"  Context loaded from {root_dir}")
 
     ds = context.get_datasource("my_demo_datasource")
-    print(f"Retried Datasource {ds}")
+    print(f"  Retried '{ds.name}'->\n{repr(ds)}")
     assert ds
 
 
