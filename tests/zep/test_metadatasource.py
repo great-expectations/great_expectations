@@ -96,10 +96,10 @@ def test_minimal_ds_to_asset_flow(context_sources_clean):
     # 1. Define Datasource & Assets
 
     class RedAsset(DataAsset):
-        pass
+        type = "red"
 
     class BlueAsset(DataAsset):
-        pass
+        type = "blue"
 
     class PurpleDatasource(Datasource):
         asset_types = [RedAsset, BlueAsset]

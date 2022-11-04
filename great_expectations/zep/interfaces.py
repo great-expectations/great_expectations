@@ -18,7 +18,7 @@ LowerStr: TypeAlias = constr(to_lower=True, strict=True)  # type: ignore[misc]
 
 class DataAsset(BaseModel):
     name: str
-    type: LowerStr
+    type: str
 
 
 # TODO: resolve metaclass conflict with pydantic BaseModel
