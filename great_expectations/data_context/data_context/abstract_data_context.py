@@ -1174,6 +1174,7 @@ class AbstractDataContext(ABC):
     ) -> CheckpointResult:
         """
         Validate against a pre-defined Checkpoint. (Experimental)
+
         Args:
             checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
             template_name: The name of a Checkpoint template to retrieve from the CheckpointStore

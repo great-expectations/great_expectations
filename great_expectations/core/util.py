@@ -173,11 +173,14 @@ def convert_to_json_serializable(data) -> dict:  # noqa: C901 - complexity 28
     Warning:
         data may also be converted in place
     Examples:
-        >>> convert_to_json_serializable(1) == 1
+        >>> convert_to_json_serializable(1)
+        1
 
-        >>> convert_to_json_serializable("hello") == "hello"
+        >>> convert_to_json_serializable("hello")
+        "hello"
 
-        >>> convert_to_json_serializable(Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])) == "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
+        >>> convert_to_json_serializable(Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]))
+        "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
 
 
     """

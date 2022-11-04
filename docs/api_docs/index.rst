@@ -22,7 +22,7 @@ A class
 ####################################
 
 
-.. autoclass:: great_expectations.DataContext
+.. autoclass:: great_expectations.data_context.data_context.AbstractDataContext
    :members:
 
 
@@ -35,6 +35,15 @@ A module
    :members:
 
 
+####################################
+An autosummary
+####################################
+
+.. autosummary::
+   :recursive:
+   :toctree: modules
+
+   great_expectations.data_context.data_context
 
 
 Indices and tables

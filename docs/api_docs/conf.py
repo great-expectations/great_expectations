@@ -3,6 +3,19 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+
+# -- Update syspath
+import os
+import sys
+
+
+def _prepend_base_repository_dir_to_sys_path():
+    """Add great_expectations base repo dir to the front of sys path. Used for docs processing."""
+    sys.path.insert(0, os.path.abspath("../../"))
+
+
+_prepend_base_repository_dir_to_sys_path()
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
