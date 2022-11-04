@@ -31,7 +31,9 @@ class DataContext:
 
     @classmethod
     def get_context(
-        cls, context_root_dir: Optional[DirectoryPath] = None
+        cls,
+        context_root_dir: Optional[DirectoryPath] = None,
+        _config_file: str = "config.yaml",  # for ease of use during POC
     ) -> DataContext:
         if not cls._context:
             cls._context = DataContext(context_root_dir=context_root_dir)
@@ -39,7 +41,7 @@ class DataContext:
         assert cls._context
         if cls._context.root_directory:
             # load config and add/instantiate Datasources & Assets
-            config_path = pathlib.Path(cls._context.root_directory) / "config.yaml"
+            config_path = pathlib.Path(cls._context.root_directory) / _config_file
             loaded_config = GxConfig.parse_yaml(config_path)
             for ds_name, datasource in loaded_config.datasources.items():
                 LOGGER.info(f"Loaded '{ds_name}' from config")
@@ -69,8 +71,10 @@ class DataContext:
         return self._datasources[datasource_name]
 
 
-def get_context(context_root_dir: Optional[DirectoryPath] = None) -> DataContext:
+def get_context(
+    context_root_dir: Optional[DirectoryPath] = None, **kwargs
+) -> DataContext:
     """ZEP get_context placeholder function."""
     LOGGER.info(f"3. Getting context {context_root_dir or ''}")
-    context = DataContext.get_context(context_root_dir=context_root_dir)
+    context = DataContext.get_context(context_root_dir=context_root_dir, **kwargs)
     return context
