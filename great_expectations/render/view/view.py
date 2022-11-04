@@ -560,33 +560,3 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         return pTemplate(template.get("template")).safe_substitute(
             template.get("params", {})
         )
-
-    @contextfilter
-    def render_content_block(
-        self,
-        jinja_context,
-        content_block,
-        index=None,
-        content_block_id=None,
-        render_to_markdown: bool = True,
-    ):
-        """
-        Render a content block to markdown using jinja templates.
-        Args:
-            jinja_context:
-            content_block:
-            index:
-            content_block_id:
-            render_to_markdown: Default of True here instead of parent class default of False
-
-        Returns:
-
-        """
-
-        return super().render_content_block(
-            jinja_context=jinja_context,
-            content_block=content_block,
-            index=index,
-            content_block_id=content_block_id,
-            render_to_markdown=render_to_markdown,
-        )
