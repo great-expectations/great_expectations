@@ -3,7 +3,7 @@ import logging
 from pprint import pformat as pf
 from typing import Dict, List, Type, Union
 
-from pydantic import BaseModel, confloat, constr, root_validator
+from pydantic import BaseModel, confloat, constr, root_validator, validator
 from typing_extensions import ClassVar, TypeAlias
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
@@ -53,8 +53,27 @@ class Datasource(metaclass=MetaDatasource):
             values["execution_engine"] = engine_type()
             return values
 
+        @validator("assets", pre=True)
+        @classmethod
+        def _load_asset_subtype(cls, v: Dict[str, dict]):
+            LOGGER.info(f"Loading 'assets'\n{pf(v, depth=3)} ->")
+            loaded_assets: Dict[str, DataAsset] = {}
+
+            # TODO (kilo59): catch key errors
+            for asset_name, config in v.items():
+                asset_type_name: str = config["type"]
+                asset_type: Type[DataAsset] = _SourceFactories.type_lookup[
+                    asset_type_name
+                ]
+                LOGGER.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
+                loaded_assets[asset_name] = asset_type(**config)
+
+            LOGGER.info(f"Loaded 'assets' ->\n{pf(loaded_assets)}")
+            return loaded_assets
+
         class Config:
-            # TODO: revisit this
+            # TODO: revisit this (1 option - define __get_validator__ on ExecutionEngine)
+            # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
             arbitrary_types_allowed = True
 
     # instance attrs

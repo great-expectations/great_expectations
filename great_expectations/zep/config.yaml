@@ -7,3 +7,5 @@ datasources:
       my_demo_file_asset:
         type: file
         name: my_demo_file_asset
+        # TODO: combine root dir with this value in code
+        file_path: great_expectations/zep/my_file.csv
