@@ -380,18 +380,18 @@ def test_resolve_metric_bundle():
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    mean.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    stdev.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     desired_metrics = (mean, stdev)
     results = engine.resolve_metrics(
         metrics_to_resolve=desired_metrics, metrics=metrics

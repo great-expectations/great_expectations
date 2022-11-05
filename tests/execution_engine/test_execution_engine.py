@@ -187,18 +187,18 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    mean.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    stdev.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     desired_metrics = (mean, stdev)
     results = engine.resolve_metrics(
         metrics_to_resolve=desired_metrics, metrics=metrics
@@ -209,12 +209,12 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "column.standard_deviation": stdev,
-            "column.mean": mean,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "column.standard_deviation": stdev,
+        "column.mean": mean,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -224,11 +224,11 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_name="column_values.z_score.under_threshold.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={
-            "column_values.z_score.map": desired_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "column_values.z_score.map": desired_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -239,8 +239,10 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_name="column_values.z_score.under_threshold.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"unexpected_condition": desired_metric},
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": desired_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -265,19 +267,19 @@ def test_resolve_metrics_with_extraneous_value_key():
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    mean.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     # Ensuring that an unused value key will not mess up computation
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3, 4, 5]},
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    stdev.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     desired_metrics = (mean, stdev)
     results = engine.resolve_metrics(
@@ -311,11 +313,11 @@ def test_resolve_metrics_with_incomplete_metric_input():
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "column.standard_deviation": stdev,
-            "column.mean": mean,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "column.standard_deviation": stdev,
+        "column.mean": mean,
+    }
 
     # Ensuring that incomplete metrics given raises a GreatExpectationsError
     with pytest.raises(ge_exceptions.GreatExpectationsError) as error:
