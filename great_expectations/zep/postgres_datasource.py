@@ -25,7 +25,7 @@ class PostgresDatasourceError(Exception):
 class ColumnSplitter:
     method_name: str
     column_name: str
-    namespace: str
+    name: str
     template_params: List[str]
 
 
@@ -66,14 +66,25 @@ class TableAsset(DataAsset):
             options=options or {},
         )
 
+    def batch_request_template(
+        self,
+    ) -> Union[Dict[str, str], Dict[str, Dict[str, str]]]:
+        if not self.column_splitter:
+            return {}
+        params_dict: Union[Dict[str, str], Dict[str, Dict[str, str]]]
+        params_dict = {p: "<value>" for p in self.column_splitter.template_params}
+        if self.column_splitter.name:
+            params_dict = {self.column_splitter.name: params_dict}
+        return params_dict
+
     # This asset type will support a variety of splitters
     def add_year_and_month_splitter(
-        self, column_name: str, namespace: str = ""
+        self, column_name: str, name: str = ""
     ) -> TableAsset:
         self.column_splitter = ColumnSplitter(
             method_name="split_on_year_and_month",
             column_name=column_name,
-            namespace=namespace,
+            name=name,
             template_params=["year", "month"],
         )
         return self
@@ -129,25 +140,26 @@ class PostgresDatasource(Datasource):
             batch_spec_kwargs["splitter_kwargs"] = {
                 "column_name": column_splitter.column_name
             }
-
-            ns = column_splitter.namespace
-            param_lookup = batch_request.options[ns] if ns else batch_request.options
-            column_splitter_kwargs = {}
             try:
-                for param_name in column_splitter.template_params:
-                    column_splitter_kwargs[param_name] = param_lookup[param_name]
+                param_lookup = (
+                    batch_request.options[column_splitter.name]
+                    if column_splitter.name
+                    else batch_request.options
+                )
+            except KeyError as e:
+                raise PostgresDatasourceError(
+                    "One must specify the batch request options in this form: "
+                    f"{pf(data_asset.batch_request_template())}. It was specified like {pf(batch_request.options)}"
+                ) from e
+
+            column_splitter_kwargs = {}
+            for param_name in column_splitter.template_params:
+                column_splitter_kwargs[param_name] = (
+                    param_lookup[param_name] if param_name in param_lookup else None
+                )
                 batch_spec_kwargs["batch_identifiers"].update(
                     {column_splitter.column_name: column_splitter_kwargs}
                 )
-            except KeyError as e:
-                params_dict: Union[Dict[str, str], Dict[str, Dict[str, str]]]
-                params_dict = {p: "<value>" for p in column_splitter.template_params}
-                if ns:
-                    params_dict = {ns: params_dict}
-                raise PostgresDatasourceError(
-                    "\nYou must specify the batch request splitter options as a dictionary that looks like "
-                    f"this: {pf(params_dict)}\nYou've specified {pf(batch_request.options)}"
-                ) from e
 
         # Now, that we've verified the arguments, we can create the batch_spec and then the batch.
         batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)

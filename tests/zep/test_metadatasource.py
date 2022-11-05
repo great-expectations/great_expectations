@@ -1,3 +1,4 @@
+import copy
 from pprint import pformat as pf
 from typing import List, Type
 
@@ -9,48 +10,57 @@ from great_expectations.zep.interfaces import DataAsset, Datasource
 from great_expectations.zep.metadatasource import MetaDatasource
 from great_expectations.zep.sources import _SourceFactories
 
-param = pytest.param
+
+@pytest.fixture(scope="function")
+def context_sources_cleanup() -> _SourceFactories:
+    """Return the sources object and reset types/factories on teardown"""
+    try:
+        # setup
+        sources_copy = copy.deepcopy(
+            _SourceFactories._SourceFactories__source_factories
+        )
+        type_lookup_copy = copy.deepcopy(_SourceFactories.type_lookup)
+        sources = get_context().sources
+
+        assert (
+            "add_datasource" not in sources.factories
+        ), "Datasource base class should not be registered as a source factory"
+
+        yield sources
+    finally:
+        _SourceFactories._SourceFactories__source_factories = sources_copy
+        _SourceFactories.type_lookup = type_lookup_copy
 
 
 @pytest.fixture(scope="function")
-def context_sources_clean():
-    """Return the sources object and clear and registered types/factories on teardown"""
-    # setup
-    sources = get_context().sources
-    assert (
-        "add_datasource" not in sources.factories
-    ), "Datasource base class should not be registered as a source factory"
-
-    yield sources
-
+def empty_sources(context_sources_cleanup) -> _SourceFactories:
     _SourceFactories._SourceFactories__source_factories.clear()
     _SourceFactories.type_lookup.clear()
+    yield context_sources_cleanup
 
 
 class TestMetaDatasource:
     def test__new__only_registers_expected_number_of_datasources_factories_and_types(
-        self, context_sources_clean: _SourceFactories
+        self, empty_sources: _SourceFactories
     ):
-        assert len(context_sources_clean.factories) == 0
-        assert len(context_sources_clean.type_lookup) == 0
+        assert len(empty_sources.factories) == 0
+        assert len(empty_sources.type_lookup) == 0
 
         class MyTestDatasource(Datasource):
             asset_types: ClassVar[List[Type[DataAsset]]] = []
 
         expected_registrants = 1
 
-        print(f"Factories -> {context_sources_clean.factories}")
-        print(f"TypeLookup -> {list(context_sources_clean.type_lookup.keys())}")
-        assert len(context_sources_clean.factories) == expected_registrants
-        assert len(context_sources_clean.type_lookup) == 2 * expected_registrants
+        assert len(empty_sources.factories) == expected_registrants
+        assert len(empty_sources.type_lookup) == 2 * expected_registrants
 
     def test__new__registers_sources_factory_method(
-        self, context_sources_clean: _SourceFactories
+        self, context_sources_cleanup: _SourceFactories
     ):
         expected_method_name = "add_my_test"
 
         ds_factory_method_initial = getattr(
-            context_sources_clean, expected_method_name, None
+            context_sources_cleanup, expected_method_name, None
         )
         assert ds_factory_method_initial is None, "Check test cleanup"
 
@@ -58,7 +68,7 @@ class TestMetaDatasource:
             asset_types: ClassVar[List[Type[DataAsset]]] = []
 
         ds_factory_method_final = getattr(
-            context_sources_clean, expected_method_name, None
+            context_sources_cleanup, expected_method_name, None
         )
 
         assert (
@@ -66,9 +76,9 @@ class TestMetaDatasource:
         ), f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
 
     def test__new__updates_asset_type_lookup(
-        self, context_sources_clean: _SourceFactories
+        self, context_sources_cleanup: _SourceFactories
     ):
-        type_lookup = context_sources_clean.type_lookup
+        type_lookup = context_sources_cleanup.type_lookup
 
         class FooAsset(DataAsset):
             pass
@@ -92,7 +102,7 @@ class TestMetaDatasource:
         assert len(asset_types) == len(registered_type_names)
 
 
-def test_minimal_ds_to_asset_flow(context_sources_clean):
+def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 
     class RedAsset(DataAsset):
