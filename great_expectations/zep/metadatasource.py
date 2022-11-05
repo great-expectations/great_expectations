@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from great_expectations.zep.interfaces import DataAsset, Datasource
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
 
 
 class MetaDatasource(type):

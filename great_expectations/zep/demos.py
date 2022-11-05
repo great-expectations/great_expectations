@@ -1,4 +1,3 @@
-import logging
 import pathlib
 import shutil
 from typing import Dict, Literal
@@ -11,7 +10,9 @@ SEPARATOR = "-" * TERM_WIDTH
 if __name__ == "__main__":
     # don't setup the logger unless being run as a script
     # TODO: remove this before release
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    from great_expectations.zep.logger import init_logger
+
+    init_logger()
 
 
 from great_expectations.execution_engine import PandasExecutionEngine

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 SourceFactoryFn = Callable[..., "Datasource"]
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
 
 
 def _remove_suffix(s: str, suffix: str) -> str:

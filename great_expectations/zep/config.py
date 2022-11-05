@@ -14,7 +14,7 @@ from great_expectations.zep.interfaces import Datasource_
 yaml = YAML(typ="safe")
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
 
 
 class GxConfig(BaseModel):

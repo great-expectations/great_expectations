@@ -13,7 +13,7 @@ from great_expectations.zep.sources import _SourceFactories
 if TYPE_CHECKING:
     from great_expectations.zep.interfaces import Datasource
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
 
 
 class DataContext:
