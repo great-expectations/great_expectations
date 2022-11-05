@@ -205,35 +205,39 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     )
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
+    desired_map_metric = MetricConfiguration(
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric.metric_dependencies = {
+    desired_map_metric.metric_dependencies = {
         "column.standard_deviation": stdev,
         "column.mean": mean,
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
+        metrics_to_resolve=(desired_map_metric,), metrics=metrics
     )
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
+    desired_threshold_condition_metric = MetricConfiguration(
         metric_name="column_values.z_score.under_threshold.condition",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
-    desired_metric.metric_dependencies = {
-        "column_values.z_score.map": desired_metric,
+    desired_threshold_condition_metric.metric_dependencies = {
+        "column_values.z_score.map": desired_map_metric,
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
+        metrics_to_resolve=(desired_threshold_condition_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert list(results[desired_metric.id][0]) == [False, False, False]
+    assert list(results[desired_threshold_condition_metric.id][0]) == [
+        False,
+        False,
+        False,
+    ]
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.z_score.under_threshold.unexpected_count",
@@ -241,7 +245,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
     desired_metric.metric_dependencies = {
-        "unexpected_condition": desired_metric,
+        "unexpected_condition": desired_threshold_condition_metric,
     }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics

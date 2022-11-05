@@ -595,7 +595,6 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
             "batch_id": validator_latest.active_batch_id,
         },
         "metric_value_kwargs": None,
-        "metric_dependencies": None,
     }
     metric_value: int = validator_latest.get_metric(
         metric=MetricConfiguration(**metric_configuration_arguments)
