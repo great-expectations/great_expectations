@@ -369,6 +369,7 @@ def docs(
     clean=True,
     api_docs=False,
 ):
+    """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
     curdir = os.path.realpath(os.getcwd())
     if filedir != curdir:
