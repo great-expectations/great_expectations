@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-from typing import Any, Dict, List, Mapping, Optional, Type, Union
+from typing import Any, Dict, List, Mapping, Optional, Type
 
 from typing_extensions import ClassVar, TypeAlias
 
