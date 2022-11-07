@@ -10,7 +10,7 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.zep.interfaces import BatchRequest, BatchRequestOptions
+from great_expectations.zep.interfaces import BatchRequestOptions
 
 
 def _source() -> postgres_datasource.PostgresDatasource:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from pprint import pformat as pf
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type
 
 from typing_extensions import ClassVar
 
@@ -60,6 +60,17 @@ class TableAsset(DataAsset):
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
+        """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            options: A dict that can be used to limit the number of batches returned from the asset.
+                The dict structure depends on the asset type. A template of the dict can be obtained by
+                calling batch_request_template.
+
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -68,10 +79,17 @@ class TableAsset(DataAsset):
 
     def batch_request_template(
         self,
-    ) -> Union[Dict[str, str], Dict[str, Dict[str, str]]]:
+    ) -> BatchRequestOptions:
+        """A BatchRequestOptions template that can be used when calling get_batch_request.
+
+        Returns:
+            A BatchRequestOptions dictionary with the correct shape that get_batch_request
+            will understand. All the option values will be filled in with the placeholder "value".
+        """
         if not self.column_splitter:
-            return {}
-        params_dict: Union[Dict[str, str], Dict[str, Dict[str, str]]]
+            template: BatchRequestOptions = {}
+            return template
+        params_dict: BatchRequestOptions
         params_dict = {p: "<value>" for p in self.column_splitter.template_params}
         if self.column_splitter.name:
             params_dict = {self.column_splitter.name: params_dict}
@@ -81,6 +99,16 @@ class TableAsset(DataAsset):
     def add_year_and_month_splitter(
         self, column_name: str, name: str = ""
     ) -> TableAsset:
+        """Associates a year month splitter with this DataAsset
+
+        Args:
+            column_name: A column name of the date column where year and month will be parsed out.
+            name: A name for the splitter that will be used to namespace the batch request options.
+                Leaving this empty, "", will add the options to the global namespace.
+
+        Returns:
+            This TableAsset so we can use this method fluently.
+        """
         self.column_splitter = ColumnSplitter(
             method_name="split_on_year_and_month",
             column_name=column_name,
@@ -102,6 +130,15 @@ class PostgresDatasource(Datasource):
         self.assets: Dict[str, TableAsset] = {}
 
     def add_table_asset(self, name: str, table_name: str) -> TableAsset:
+        """Adds a table asset to this datasource.
+
+        Args:
+            name: The name of this table asset.
+            table_name: The table where the data resides.
+
+        Returns:
+            The TableAsset that is added to the datasource.
+        """
         asset = TableAsset(name=name, datasource=self, table_name=table_name)
         self.assets[name] = asset
         return asset
@@ -121,6 +158,15 @@ class PostgresDatasource(Datasource):
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
+        """A list of batches that match the BatchRequest.
+
+        Args:
+            batch_request: A batch request for this asset. Usually obtained by calling
+                get_batch_request on the asset.
+
+        Returns:
+            A list of batches that match the options specified in the batch request.
+        """
         # We translate the batch_request into a BatchSpec to hook into GX core.
         # NOTE: We only produce 1 batch right now
         data_asset = self.get_asset(batch_request.data_asset_name)

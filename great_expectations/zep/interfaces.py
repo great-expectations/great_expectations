@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-from typing import Any, Dict, List, Mapping, Optional, Type
+from typing import Any, Dict, List, Mapping, Optional, Type, Union
 
 from typing_extensions import ClassVar, TypeAlias
 
@@ -10,6 +10,17 @@ from great_expectations.core.batch import BatchDataType
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.zep.metadatasource import MetaDatasource
 
+# BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
+# Batches one wants returned. In the simple case the keys represent dimensions one can
+# slice the data along and the values are the values. One can also namespace these key/value
+# pairs, hence the Dict[str, BatchRequestValue], allowed values. For example:
+#   options = {
+#       "month": "3"
+#       "year_splitter": {
+#           "year": "2020"
+#       }
+#    }
+# The month key is in the global namespace while the year key is in the year_splitter namespace.
 BatchRequestOptions: TypeAlias = Dict[str, Any]
 
 
