@@ -1051,11 +1051,11 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
                     name=az_blob_key,
                     data=value,
                     encoding=content_encoding,
-                    overwrite=True,
+                    overwrite=False,
                 )
         else:
             self._container_client.upload_blob(
-                name=az_blob_key, data=value, overwrite=True
+                name=az_blob_key, data=value, overwrite=False
             )
         return az_blob_key
 
