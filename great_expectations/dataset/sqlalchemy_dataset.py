@@ -2358,7 +2358,7 @@ WHERE
         if len(parsed_value_set) == 0:
             return False
 
-        try:
+        if hasattr(sa.column(column_A), "is_not"):
             conditions: List[BinaryExpression] = [
                 sa.and_(
                     sa.and_(
@@ -2372,7 +2372,7 @@ WHERE
                 )
                 for value in parsed_value_set
             ]
-        except AttributeError:
+        else:
             conditions: List[BinaryExpression] = [
                 sa.and_(
                     sa.and_(
