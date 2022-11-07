@@ -146,10 +146,10 @@ class BatchFilter:
 
     def __init__(
         self,
-        custom_filter_function: Callable = None,
+        custom_filter_function: Optional[Callable] = None,
         batch_filter_parameters: Optional[IDDict] = None,
         index: Optional[Union[int, slice]] = None,
-        limit: int = None,
+        limit: Optional[int] = None,
     ) -> None:
         self._custom_filter_function = custom_filter_function
         self._batch_filter_parameters = batch_filter_parameters
