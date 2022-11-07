@@ -532,9 +532,9 @@ class Batch(SerializableDictDot):
         self,
         data: BatchDataType,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        batch_definition: BatchDefinition = None,
-        batch_spec: BatchSpec = None,
-        batch_markers: BatchMarkers = None,
+        batch_definition: Optional[BatchDefinition] = None,
+        batch_spec: Optional[BatchSpec] = None,
+        batch_markers: Optional[BatchMarkers] = None,
         # The remaining parameters are for backward compatibility.
         data_context=None,
         datasource_name=None,
