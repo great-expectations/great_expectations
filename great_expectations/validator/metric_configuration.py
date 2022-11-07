@@ -12,7 +12,7 @@ class MetricConfiguration:
         self,
         metric_name: str,
         metric_domain_kwargs: dict,
-        metric_value_kwargs: dict = None,
+        metric_value_kwargs: Optional[dict] = None,
     ) -> None:
         self._metric_name: str = metric_name
 
