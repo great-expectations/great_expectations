@@ -355,8 +355,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         bucketize_data = configuration.kwargs.get(
             "bucketize_data", self.default_kwarg_values["bucketize_data"]

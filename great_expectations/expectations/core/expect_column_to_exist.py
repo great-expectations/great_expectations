@@ -200,8 +200,8 @@ class ExpectColumnToExist(TableExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         actual_columns = metrics.get("table.columns")
         expected_column_name = self.get_success_kwargs().get("column")

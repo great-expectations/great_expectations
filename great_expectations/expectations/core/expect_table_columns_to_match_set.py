@@ -273,8 +273,8 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         # Obtaining columns and ordered list for sake of comparison
         expected_column_set = self.get_success_kwargs(configuration).get("column_set")
