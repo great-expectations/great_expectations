@@ -154,7 +154,8 @@ exclude_column_names = [
 ]
 # Run onboarding assistant with configured
 data_assistant_result = context.assistants.onboarding.run(
-    batch_request=configured_batch_request,
+    # batch_request=configured_batch_request,
+    batch_request=runtime_batch_request,
     exclude_column_names=exclude_column_names,
 )
 # data_assistant_result.metrics_by_domain
