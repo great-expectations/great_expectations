@@ -5,6 +5,7 @@ import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you integrate Great Expectations (GE) with [Google Cloud Platform](https://cloud.google.com/gcp) (GCP) using our recommended workflow.
 
@@ -20,9 +21,9 @@ This guide will help you integrate Great Expectations (GE) with [Google Cloud Pl
 
 We recommend that you use Great Expectations in GCP by using the following services:
   - [Google Cloud Composer](https://cloud.google.com/composer) (GCC) for managing workflow orchestration including validating your data. GCC is built on [Apache Airflow](https://airflow.apache.org/).
-  - [BigQuery](https://cloud.google.com/bigquery) or files in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) as your [Datasource](../reference/datasources.md)
-  - [GCS](https://cloud.google.com/storage) for storing metadata ([Expectation Suites](../reference/expectations/expectations.md), [Validation Results](../reference/validation.md), [Data Docs](../reference/data_docs.md))
-  - [Google App Engine](https://cloud.google.com/appengine) (GAE) for hosting and controlling access to [Data Docs](../reference/data_docs.md).
+  - [BigQuery](https://cloud.google.com/bigquery) or files in [Google Cloud Storage](https://cloud.google.com/storage) (GCS) as your <TechnicalTag tag="datasource" text="Datasource"/>
+  - [GCS](https://cloud.google.com/storage) for storing metadata (<TechnicalTag tag="expectation_suite" text="Expectation Suites"/>, <TechnicalTag tag="validation_result" text="Validation Results"/>, <TechnicalTag tag="data_docs" text="Data Docs"/>)
+  - [Google App Engine](https://cloud.google.com/appengine) (GAE) for hosting and controlling access to <TechnicalTag tag="data_docs" text="Data Docs"/>.
 
 We also recommend that you deploy Great Expectations to GCP in two steps:
 1. [Developing a local configuration for GE that uses GCP services to connect to your data, store Great Expectations metadata, and run a Checkpoint.](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform)
@@ -117,7 +118,7 @@ If successful, the `gcloud` CLI will provide the URL to your app and launch it i
 
 ### 3. Connect to your Data
 
-The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a [Checkpoint](../reference/checkpoints_and_actions.md) that will be migrated to Cloud Composer. The following code can be run either in an interactive Python session or Jupyter Notebook that is in your `great_expectations/` folder.
+The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that will be migrated to Cloud Composer. The following code can be run either in an interactive Python session or Jupyter Notebook that is in your `great_expectations/` folder.
 More details can be found in the corresponding How to Guides, which have been linked.
 
 <Tabs

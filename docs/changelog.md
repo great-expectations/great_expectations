@@ -2,6 +2,17 @@
 title: Changelog
 ---
 
+### 0.15.31
+* [BUGFIX] Include all requirement files in the sdist (#6292) (thanks @xhochy)
+* [DOCS] Updates outdated batch_request snippet in Terms (#6283)
+* [DOCS] Update Conditional Expectations doc w/ current availability  (#6279)
+* [DOCS] Remove outdated Data Discovery page and all references (#6288)
+* [DOCS] Remove reference/evaluation_parameters page and all references (#6294)
+* [DOCS] Removing deprecated Custom Metrics doc (#6282)
+* [DOCS] Re-writes "how to implement custom notifications" as "How to get Data Docs URLs for use in custom Validation Actions" (#6281)
+* [DOCS] Removes deprecated expectation notebook exploration doc (#6298)
+* [MAINTENANCE] Move RuleState into rule directory. (#6284)
+
 ### 0.15.30
 * [FEATURE] Add zep datasources to data context. (#6255)
 * [BUGFIX] Iterate through `GeCloudIdentifiers` to find the suite ID from the name (#6243)
