@@ -100,6 +100,25 @@ class TestMetaDatasource:
 
         assert len(asset_types) == len(registered_type_names)
 
+    def test__new__updates_engine_lookup(self, context_sources_clean: _SourceFactories):
+        engine_lookup = context_sources_clean.engine_lookup
+        num_engines_initial = len(engine_lookup)
+
+        class FooAsset(DataAsset):
+            pass
+
+        class BarAsset(DataAsset):
+            pass
+
+        class FooBarDatasource(Datasource):
+            asset_types = []
+            execution_engine = DummyExecutionEngine()
+
+        print(f" engine_lookup ->\n{pf(engine_lookup)}\n")
+
+        assert DummyExecutionEngine in engine_lookup
+        assert len(engine_lookup) == num_engines_initial + 2
+
 
 def test_minimal_ds_to_asset_flow(context_sources_clean):
     # 1. Define Datasource & Assets
