@@ -158,7 +158,7 @@ class BatchFilter:
 
     @property
     def custom_filter_function(self) -> Optional[Callable]:
-        return self._custom_filter_function  # type: ignore[return-value]
+        return self._custom_filter_function
 
     @property
     def batch_filter_parameters(self) -> Optional[IDDict]:

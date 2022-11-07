@@ -443,9 +443,9 @@ not {batch_spec.__class__.__name__}"""
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
-    def resolve_metric_bundle(
+    def resolve_metric_bundle(  # type: ignore[empty-body]
         self, metric_fn_bundle
-    ) -> Dict[Tuple[str, str, str], Any]:  # type: ignore[empty-body]
+    ) -> Dict[Tuple[str, str, str], Any]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         pass  # This method is NO-OP for PandasExecutionEngine (no bundling for direct execution computational backend).
 
