@@ -42,7 +42,7 @@ def build_batch_filter(
 "{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
             """
         )
-    custom_filter_function: Callable = data_connector_query_dict.get(  # type: ignore[assignment]
+    custom_filter_function: Optional[Callable] = data_connector_query_dict.get(  # type: ignore[assignment]
         "custom_filter_function"
     )
     if custom_filter_function and not isinstance(custom_filter_function, Callable):  # type: ignore[arg-type]
@@ -157,7 +157,7 @@ class BatchFilter:
         self._limit = limit
 
     @property
-    def custom_filter_function(self) -> Callable:
+    def custom_filter_function(self) -> Optional[Callable]:
         return self._custom_filter_function  # type: ignore[return-value]
 
     @property

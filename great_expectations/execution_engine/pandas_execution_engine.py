@@ -445,7 +445,7 @@ not {batch_spec.__class__.__name__}"""
 
     def resolve_metric_bundle(
         self, metric_fn_bundle
-    ) -> Dict[Tuple[str, str, str], Any]:
+    ) -> Dict[Tuple[str, str, str], Any]:  # type: ignore[empty-body]
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         pass  # This method is NO-OP for PandasExecutionEngine (no bundling for direct execution computational backend).
 
