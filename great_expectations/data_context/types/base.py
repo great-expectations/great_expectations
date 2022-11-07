@@ -1838,9 +1838,9 @@ class BaseStoreBackendDefaults(DictDot):
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
-        validation_operators: dict = None,
-        stores: dict = None,
-        data_docs_sites: dict = None,
+        validation_operators: Optional[dict] = None,
+        stores: Optional[dict] = None,
+        data_docs_sites: Optional[dict] = None,
     ) -> None:
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name

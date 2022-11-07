@@ -171,8 +171,8 @@ class ExpectTableRowCountToEqual(TableExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         expected_table_row_count = self.get_success_kwargs().get("value")
         actual_table_row_count = metrics.get("table.row_count")
