@@ -1,5 +1,5 @@
 import json
-from typing import Tuple
+from typing import Optional, Tuple
 
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import convert_to_json_serializable
