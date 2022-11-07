@@ -86,24 +86,8 @@ class _SourceFactories:
         if pre_existing:
             raise ValueError(f"{simplified_name} factory already exists")
 
-        # TODO: simplify or extract the following datasource & asset type registration logic
-        asset_type_names = [
-            _get_simplified_name_from_type(t, suffix_to_remove="_asset")
-            for t in asset_types
-        ]
-
         # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
-        already_registered_assets = set(asset_type_names).intersection(
-            cls.type_lookup.keys()
-        )
-        if already_registered_assets:
-            raise ValueError(
-                f"The following names already have a registered type - {already_registered_assets} "
-            )
-
-        for type_, name in zip(asset_types, asset_type_names):
-            cls.type_lookup[type_] = name
-            LOGGER.debug(f"'{name}' added to `type_lookup`")
+        cls._register_assets(ds_type)
 
         cls.type_lookup[ds_type] = simplified_name
         LOGGER.debug(f"'{simplified_name}' added to `type_lookup`")
@@ -157,3 +141,17 @@ class _SourceFactories:
         )
         cls.engine_lookup[engine_simple_name] = exec_engine_type
         LOGGER.info(list(cls.engine_lookup.keys()))
+
+    @classmethod
+    def _register_assets(cls, ds_type: Type[Datasource]):
+        asset_types: List[Type[DataAsset]] = ds_type.asset_types
+        asset_type_names: List[str] = [
+            _get_simplified_name_from_type(t, suffix_to_remove="_asset")
+            for t in asset_types
+        ]
+
+        cls.type_lookup.raise_if_contains([*asset_types, *asset_type_names])
+
+        for type_, name in zip(asset_types, asset_type_names):
+            cls.type_lookup[type_] = name
+            LOGGER.debug(f"'{name}' added to `type_lookup`")

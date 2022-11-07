@@ -1,5 +1,5 @@
 from collections import UserDict
-from typing import Hashable, Iterable, Mapping, Optional, Type, Union
+from typing import Hashable, Iterable, Mapping, Optional, Set, Type, Union
 
 from typing_extensions import TypeAlias
 
@@ -54,5 +54,15 @@ class TypeLookup(
     def __str__(self) -> str:
         return str(self.data)
 
-    def contains_anyof(self, collection_: Iterable[ValidTypes]) -> bool:
-        return bool(set(collection_).intersection(self.keys()))
+    def intersection(self, collection_: Iterable[ValidTypes]) -> Set[ValidTypes]:
+        """
+        Returns the intersection of a list (or other iterable) and the keys/values of
+        the `TypeLookup` instance.
+        """
+        return set(collection_).intersection(self.keys())
+
+    def raise_if_contains(self, collection_: Iterable[ValidTypes]):
+        """Raise a TypeLookup error if the passed iterable contains any overlapping items."""
+        intersection = self.intersection(collection_)
+        if intersection:
+            raise TypeLookupError(f"Items are already present - {intersection}")
