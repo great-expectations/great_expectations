@@ -1,14 +1,26 @@
 import copy
 from pprint import pformat as pf
-from typing import List, Type
+from typing import List, Optional, Type
 
 import pytest
 from typing_extensions import ClassVar
 
 from great_expectations.zep.context import get_context
-from great_expectations.zep.interfaces import DataAsset, Datasource
+from great_expectations.zep.interfaces import (
+    BatchRequest,
+    BatchRequestOptions,
+    DataAsset,
+    Datasource,
+)
 from great_expectations.zep.metadatasource import MetaDatasource
 from great_expectations.zep.sources import _SourceFactories
+
+
+class DummyDataAsset(DataAsset):
+    """Minimal Concrete DataAsset Implementation"""
+
+    def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
+        return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 
 @pytest.fixture(scope="function")
@@ -80,10 +92,10 @@ class TestMetaDatasource:
     ):
         type_lookup = context_sources_cleanup.type_lookup
 
-        class FooAsset(DataAsset):
+        class FooAsset(DummyDataAsset):
             pass
 
-        class BarAsset(DataAsset):
+        class BarAsset(DummyDataAsset):
             pass
 
         class FooBarDatasource(Datasource):
@@ -105,10 +117,10 @@ class TestMetaDatasource:
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 
-    class RedAsset(DataAsset):
+    class RedAsset(DummyDataAsset):
         pass
 
-    class BlueAsset(DataAsset):
+    class BlueAsset(DummyDataAsset):
         pass
 
     class PurpleDatasource(Datasource):
