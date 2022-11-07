@@ -64,7 +64,7 @@ class RuleState:
         return self._domains
 
     @domains.setter
-    def domains(self, value: Optional[List[Domain]]) -> None:
+    def domains(self, value: List[Domain]) -> None:
         self._domains = value
 
     @property
@@ -80,7 +80,7 @@ class RuleState:
         return self._parameters
 
     @parameters.setter
-    def parameters(self, value: Optional[Dict[str, ParameterContainer]]) -> None:
+    def parameters(self, value: Dict[str, ParameterContainer]) -> None:
         self._parameters = value
 
     @property
