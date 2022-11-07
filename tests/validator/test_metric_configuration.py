@@ -18,7 +18,7 @@ def test_metric_configuration_metric_dependencies_property_and_setter(
 ) -> None:
     assert table_head_metric_config.metric_dependencies == {}
 
-    table_head_metric_config._metric_dependencies = {"e": "f"}
+    table_head_metric_config.metric_dependencies = {"e": "f"}
 
     assert table_head_metric_config.metric_dependencies == {"e": "f"}
 

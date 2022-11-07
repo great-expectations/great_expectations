@@ -29,7 +29,7 @@ class MetricConfiguration:
 
         self._metric_value_kwargs: IDDict = metric_value_kwargs
 
-        self._metric_dependencies: Optional[Dict[str, MetricConfiguration]] = None
+        self.metric_dependencies: Dict[str, MetricConfiguration] = {}
 
     def __repr__(self):
         return json.dumps(self.to_json_dict(), indent=2)
@@ -56,10 +56,6 @@ class MetricConfiguration:
     @property
     def metric_value_kwargs_id(self) -> str:
         return self.metric_value_kwargs.to_id()
-
-    @property
-    def metric_dependencies(self) -> Dict[str, MetricConfiguration]:
-        return self._metric_dependencies or {}
 
     @property
     def id(self) -> Tuple[str, str, str]:

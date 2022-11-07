@@ -735,7 +735,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_1._metric_dependencies = {
+    desired_aggregate_fn_metric_1.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_2 = MetricConfiguration(
@@ -743,7 +743,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_2._metric_dependencies = {
+    desired_aggregate_fn_metric_2.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_3 = MetricConfiguration(
@@ -751,7 +751,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_3._metric_dependencies = {
+    desired_aggregate_fn_metric_3.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_4 = MetricConfiguration(
@@ -759,7 +759,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_4._metric_dependencies = {
+    desired_aggregate_fn_metric_4.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -778,7 +778,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric_1._metric_dependencies = {
+    desired_metric_1.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_1,
         "table.columns": table_columns_metric,
     }
@@ -787,7 +787,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric_2._metric_dependencies = {
+    desired_metric_2.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_2,
         "table.columns": table_columns_metric,
     }
@@ -796,7 +796,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_metric_3._metric_dependencies = {
+    desired_metric_3.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_3,
         "table.columns": table_columns_metric,
     }
@@ -805,7 +805,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_metric_4._metric_dependencies = {
+    desired_metric_4.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_4,
         "table.columns": table_columns_metric,
     }
@@ -1173,7 +1173,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
         },
         metric_value_kwargs=None,
     )
-    aggregate_fn_metric._metric_dependencies = {
+    aggregate_fn_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -1189,7 +1189,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
         },
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric,
     }
 

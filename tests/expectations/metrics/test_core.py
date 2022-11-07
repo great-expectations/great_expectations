@@ -51,7 +51,7 @@ def test_basic_metric_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -78,7 +78,7 @@ def test_mean_metric_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -104,7 +104,7 @@ def test_stdev_metric_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -145,7 +145,7 @@ def test_column_value_lengths_min_metric_pd():
         metric_domain_kwargs={"column": "names"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -189,7 +189,7 @@ def test_column_value_lengths_min_metric_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    aggregate_fn_metric._metric_dependencies = {
+    aggregate_fn_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
@@ -199,7 +199,7 @@ def test_column_value_lengths_min_metric_sa(sa):
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric,
     }
     results = engine.resolve_metrics(
@@ -244,7 +244,7 @@ def test_column_value_lengths_min_metric_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    aggregate_fn_metric._metric_dependencies = {
+    aggregate_fn_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
@@ -254,7 +254,7 @@ def test_column_value_lengths_min_metric_spark(spark_session):
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric,
     }
     results = engine.resolve_metrics(
@@ -295,7 +295,7 @@ def test_column_value_lengths_max_metric_pd():
         metric_domain_kwargs={"column": "names"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -339,7 +339,7 @@ def test_column_value_lengths_max_metric_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    aggregate_fn_metric._metric_dependencies = {
+    aggregate_fn_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
@@ -349,7 +349,7 @@ def test_column_value_lengths_max_metric_sa(sa):
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric,
     }
     results = engine.resolve_metrics(
@@ -394,7 +394,7 @@ def test_column_value_lengths_max_metric_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    aggregate_fn_metric._metric_dependencies = {
+    aggregate_fn_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
@@ -404,7 +404,7 @@ def test_column_value_lengths_max_metric_spark(spark_session):
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric,
     }
     results = engine.resolve_metrics(
@@ -433,7 +433,7 @@ def test_quantiles_metric_pd():
             "allow_relative_error": "linear",
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -470,7 +470,7 @@ def test_quantiles_metric_sa(sa):
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    table_row_count_metric._metric_dependencies = {
+    table_row_count_metric.metric_dependencies = {
         "metric_partial_fn": partial_metric,
     }
     results = engine.resolve_metrics(
@@ -485,7 +485,7 @@ def test_quantiles_metric_sa(sa):
             "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "table.row_count": table_row_count_metric,
     }
@@ -518,7 +518,7 @@ def test_quantiles_metric_spark(spark_session):
             "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -563,7 +563,7 @@ def test_column_histogram_metric_pd():
             "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -621,7 +621,7 @@ def test_column_histogram_metric_sa(sa):
             "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -637,7 +637,7 @@ def test_column_histogram_metric_sa(sa):
             "bins": [0.0],
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -684,7 +684,7 @@ def test_column_histogram_metric_spark(spark_session):
             "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -759,7 +759,7 @@ def test_column_partition_metric_pd():
             "parse_strings_as_datetimes": False,
         },
     )
-    column_min_metric._metric_dependencies = {
+    column_min_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     column_max_metric: MetricConfiguration = MetricConfiguration(
@@ -769,7 +769,7 @@ def test_column_partition_metric_pd():
             "parse_strings_as_datetimes": False,
         },
     )
-    column_max_metric._metric_dependencies = {
+    column_max_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -790,7 +790,7 @@ def test_column_partition_metric_pd():
             "allow_relative_error": False,
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "column.min": column_min_metric,
         "column.max": column_max_metric,
@@ -819,7 +819,7 @@ def test_column_partition_metric_pd():
             "parse_strings_as_datetimes": True,
         },
     )
-    column_min_metric._metric_dependencies = {
+    column_min_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     column_max_metric: MetricConfiguration = MetricConfiguration(
@@ -829,7 +829,7 @@ def test_column_partition_metric_pd():
             "parse_strings_as_datetimes": True,
         },
     )
-    column_max_metric._metric_dependencies = {
+    column_max_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -850,7 +850,7 @@ def test_column_partition_metric_pd():
             "allow_relative_error": False,
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "column.min": column_min_metric,
         "column.max": column_max_metric,
@@ -937,7 +937,7 @@ def test_column_partition_metric_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    partial_column_min_metric._metric_dependencies = {
+    partial_column_min_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     partial_column_max_metric = MetricConfiguration(
@@ -945,7 +945,7 @@ def test_column_partition_metric_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    partial_column_max_metric._metric_dependencies = {
+    partial_column_max_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -964,7 +964,7 @@ def test_column_partition_metric_sa(sa):
             "parse_strings_as_datetimes": False,
         },
     )
-    column_min_metric._metric_dependencies = {
+    column_min_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_min_metric,
         "table.columns": table_columns_metric,
     }
@@ -975,7 +975,7 @@ def test_column_partition_metric_sa(sa):
             "parse_strings_as_datetimes": False,
         },
     )
-    column_max_metric._metric_dependencies = {
+    column_max_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_max_metric,
         "table.columns": table_columns_metric,
     }
@@ -997,7 +997,7 @@ def test_column_partition_metric_sa(sa):
             "allow_relative_error": False,
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "column.min": column_min_metric,
         "column.max": column_max_metric,
@@ -1024,7 +1024,7 @@ def test_column_partition_metric_sa(sa):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    partial_column_min_metric._metric_dependencies = {
+    partial_column_min_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     partial_column_max_metric = MetricConfiguration(
@@ -1032,7 +1032,7 @@ def test_column_partition_metric_sa(sa):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    partial_column_max_metric._metric_dependencies = {
+    partial_column_max_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -1051,7 +1051,7 @@ def test_column_partition_metric_sa(sa):
             "parse_strings_as_datetimes": True,
         },
     )
-    column_min_metric._metric_dependencies = {
+    column_min_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_min_metric,
         "table.columns": table_columns_metric,
     }
@@ -1062,7 +1062,7 @@ def test_column_partition_metric_sa(sa):
             "parse_strings_as_datetimes": True,
         },
     )
-    column_max_metric._metric_dependencies = {
+    column_max_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_max_metric,
         "table.columns": table_columns_metric,
     }
@@ -1084,7 +1084,7 @@ def test_column_partition_metric_sa(sa):
             "allow_relative_error": False,
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "column.min": column_min_metric,
         "column.max": column_max_metric,
@@ -1180,7 +1180,7 @@ def test_column_partition_metric_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    partial_column_min_metric._metric_dependencies = {
+    partial_column_min_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     partial_column_max_metric = MetricConfiguration(
@@ -1188,7 +1188,7 @@ def test_column_partition_metric_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    partial_column_max_metric._metric_dependencies = {
+    partial_column_max_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -1207,7 +1207,7 @@ def test_column_partition_metric_spark(spark_session):
             "parse_strings_as_datetimes": False,
         },
     )
-    column_min_metric._metric_dependencies = {
+    column_min_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_min_metric,
         "table.columns": table_columns_metric,
     }
@@ -1218,7 +1218,7 @@ def test_column_partition_metric_spark(spark_session):
             "parse_strings_as_datetimes": False,
         },
     )
-    column_max_metric._metric_dependencies = {
+    column_max_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_max_metric,
         "table.columns": table_columns_metric,
     }
@@ -1240,7 +1240,7 @@ def test_column_partition_metric_spark(spark_session):
             "allow_relative_error": False,
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "column.min": column_min_metric,
         "column.max": column_max_metric,
@@ -1267,7 +1267,7 @@ def test_column_partition_metric_spark(spark_session):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    partial_column_min_metric._metric_dependencies = {
+    partial_column_min_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     partial_column_max_metric = MetricConfiguration(
@@ -1275,7 +1275,7 @@ def test_column_partition_metric_spark(spark_session):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    partial_column_max_metric._metric_dependencies = {
+    partial_column_max_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -1294,7 +1294,7 @@ def test_column_partition_metric_spark(spark_session):
             "parse_strings_as_datetimes": True,
         },
     )
-    column_min_metric._metric_dependencies = {
+    column_min_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_min_metric,
         "table.columns": table_columns_metric,
     }
@@ -1305,7 +1305,7 @@ def test_column_partition_metric_spark(spark_session):
             "parse_strings_as_datetimes": True,
         },
     )
-    column_max_metric._metric_dependencies = {
+    column_max_metric.metric_dependencies = {
         "metric_partial_fn": partial_column_max_metric,
         "table.columns": table_columns_metric,
     }
@@ -1327,7 +1327,7 @@ def test_column_partition_metric_spark(spark_session):
             "allow_relative_error": False,
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "column.min": column_min_metric,
         "column.max": column_max_metric,
@@ -1367,7 +1367,7 @@ def test_max_metric_column_exists_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -1395,7 +1395,7 @@ def test_max_metric_column_does_not_exist_pd():
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -1427,7 +1427,7 @@ def test_max_metric_column_exists_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    partial_metric._metric_dependencies = {
+    partial_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -1441,7 +1441,7 @@ def test_max_metric_column_exists_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": partial_metric,
         "table.columns": table_columns_metric,
     }
@@ -1469,7 +1469,7 @@ def test_max_metric_column_does_not_exist_sa(sa):
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
-    partial_metric._metric_dependencies = {
+    partial_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -1505,7 +1505,7 @@ def test_max_metric_column_exists_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    partial_metric._metric_dependencies = {
+    partial_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -1519,7 +1519,7 @@ def test_max_metric_column_exists_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": partial_metric,
         "table.columns": table_columns_metric,
     }
@@ -1551,7 +1551,7 @@ def test_max_metric_column_does_not_exist_spark(spark_session):
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
-    partial_metric._metric_dependencies = {
+    partial_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -1583,7 +1583,7 @@ def test_map_value_set_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     metrics = engine.resolve_metrics(
@@ -1596,7 +1596,7 @@ def test_map_value_set_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-    aggregate_partial._metric_dependencies = {
+    aggregate_partial.metric_dependencies = {
         "unexpected_condition": desired_metric,
     }
 
@@ -1608,7 +1608,7 @@ def test_map_value_set_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_partial,
     }
     results = engine.resolve_metrics(
@@ -1664,7 +1664,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
             "value_set": [1, 2, 3],
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -1682,7 +1682,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
             "value_set": [1, 2, 3],
         },
     )
-    aggregate_partial._metric_dependencies = {
+    aggregate_partial.metric_dependencies = {
         "unexpected_condition": condition_metric,
     }
     results = engine.resolve_metrics(
@@ -1698,7 +1698,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
             "value_set": [1, 2, 3],
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_partial,
     }
 
@@ -1720,7 +1720,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -1734,7 +1734,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-    aggregate_partial._metric_dependencies = {
+    aggregate_partial.metric_dependencies = {
         "unexpected_condition": condition_metric,
     }
     results = engine.resolve_metrics(
@@ -1746,7 +1746,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_partial,
     }
 
@@ -1775,7 +1775,7 @@ def test_map_column_value_lengths_between_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -1822,7 +1822,7 @@ def test_map_column_values_increasing_pd():
             "parse_strings_as_datetimes": True,
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     with pytest.warns(DeprecationWarning) as record:
@@ -1841,7 +1841,7 @@ def test_map_column_values_increasing_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -1868,7 +1868,7 @@ def test_map_column_values_increasing_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -1923,7 +1923,7 @@ def test_map_column_values_increasing_spark(spark_session):
             "parse_strings_as_datetimes": True,
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "table.column_types": table_column_types,
     }
@@ -1943,7 +1943,7 @@ def test_map_column_values_increasing_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -1961,7 +1961,7 @@ def test_map_column_values_increasing_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2011,7 +2011,7 @@ def test_map_column_values_decreasing_pd():
             "parse_strings_as_datetimes": True,
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     with pytest.warns(DeprecationWarning) as record:
@@ -2030,7 +2030,7 @@ def test_map_column_values_decreasing_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2057,7 +2057,7 @@ def test_map_column_values_decreasing_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2112,7 +2112,7 @@ def test_map_column_values_decreasing_spark(spark_session):
             "parse_strings_as_datetimes": True,
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "table.column_types": table_column_types,
     }
@@ -2132,7 +2132,7 @@ def test_map_column_values_decreasing_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2150,7 +2150,7 @@ def test_map_column_values_decreasing_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2178,7 +2178,7 @@ def test_map_unique_column_exists_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -2192,7 +2192,7 @@ def test_map_unique_column_exists_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2211,7 +2211,7 @@ def test_map_unique_column_exists_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2240,7 +2240,7 @@ def test_map_unique_column_does_not_exist_pd():
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -2276,7 +2276,7 @@ def test_map_unique_column_exists_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -2289,7 +2289,7 @@ def test_map_unique_column_exists_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2307,7 +2307,7 @@ def test_map_unique_column_exists_sa(sa):
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2324,7 +2324,7 @@ def test_map_unique_column_exists_sa(sa):
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2340,7 +2340,7 @@ def test_map_unique_column_exists_sa(sa):
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2372,7 +2372,7 @@ def test_map_unique_column_does_not_exist_sa(sa):
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
@@ -2402,7 +2402,7 @@ def test_map_unique_empty_query_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -2415,7 +2415,7 @@ def test_map_unique_empty_query_sa(sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2451,7 +2451,7 @@ def test_map_unique_column_exists_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -2465,7 +2465,7 @@ def test_map_unique_column_exists_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2482,7 +2482,7 @@ def test_map_unique_column_exists_spark(spark_session):
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2499,7 +2499,7 @@ def test_map_unique_column_exists_spark(spark_session):
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2518,7 +2518,7 @@ def test_map_unique_column_exists_spark(spark_session):
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
     }
     results = engine.resolve_metrics(
@@ -2553,7 +2553,7 @@ def test_map_unique_column_does_not_exist_spark(spark_session):
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -2585,7 +2585,7 @@ def test_z_score_under_threshold_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    mean._metric_dependencies = {
+    mean.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     stdev = MetricConfiguration(
@@ -2593,7 +2593,7 @@ def test_z_score_under_threshold_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    stdev._metric_dependencies = {
+    stdev.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_metrics = (mean, stdev)
@@ -2607,7 +2607,7 @@ def test_z_score_under_threshold_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_values_z_score_map_metric._metric_dependencies = {
+    column_values_z_score_map_metric.metric_dependencies = {
         "column.standard_deviation": stdev,
         "column.mean": mean,
         "table.columns": table_columns_metric,
@@ -2621,7 +2621,7 @@ def test_z_score_under_threshold_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
-    column_values_z_score_under_threshold_condition_metric._metric_dependencies = {
+    column_values_z_score_under_threshold_condition_metric.metric_dependencies = {
         "column_values.z_score.map": column_values_z_score_map_metric,
         "table.columns": table_columns_metric,
     }
@@ -2638,7 +2638,7 @@ def test_z_score_under_threshold_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "unexpected_condition": column_values_z_score_under_threshold_condition_metric,
     }
     results = engine.resolve_metrics(
@@ -2669,7 +2669,7 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_mean_aggregate_fn_metric._metric_dependencies = {
+    column_mean_aggregate_fn_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     column_standard_deviation_aggregate_fn_metric = MetricConfiguration(
@@ -2677,7 +2677,7 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_standard_deviation_aggregate_fn_metric._metric_dependencies = {
+    column_standard_deviation_aggregate_fn_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_metrics = (
@@ -2694,7 +2694,7 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    mean._metric_dependencies = {
+    mean.metric_dependencies = {
         "metric_partial_fn": column_mean_aggregate_fn_metric,
     }
     stdev = MetricConfiguration(
@@ -2702,7 +2702,7 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    stdev._metric_dependencies = {
+    stdev.metric_dependencies = {
         "metric_partial_fn": column_standard_deviation_aggregate_fn_metric,
         "table.columns": table_columns_metric,
     }
@@ -2717,7 +2717,7 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_values_z_score_map_metric._metric_dependencies = {
+    column_values_z_score_map_metric.metric_dependencies = {
         "column.standard_deviation": stdev,
         "column.mean": mean,
         "table.columns": table_columns_metric,
@@ -2731,7 +2731,7 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "column_values.z_score.map": column_values_z_score_map_metric,
         "table.columns": table_columns_metric,
     }
@@ -2745,7 +2745,7 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
-    aggregate_fn_metric._metric_dependencies = {
+    aggregate_fn_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
     }
     results = engine.resolve_metrics(
@@ -2758,7 +2758,7 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric,
     }
     results = engine.resolve_metrics(
@@ -2828,7 +2828,7 @@ def test_map_column_pairs_equal_metric_pd():
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -2845,7 +2845,7 @@ def test_map_column_pairs_equal_metric_pd():
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2868,7 +2868,7 @@ def test_map_column_pairs_equal_metric_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2890,7 +2890,7 @@ def test_map_column_pairs_equal_metric_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2915,7 +2915,7 @@ def test_map_column_pairs_equal_metric_pd():
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -2932,7 +2932,7 @@ def test_map_column_pairs_equal_metric_pd():
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2955,7 +2955,7 @@ def test_map_column_pairs_equal_metric_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -2985,7 +2985,7 @@ def test_map_column_pairs_equal_metric_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3013,7 +3013,7 @@ def test_table_metric_sa(sa):
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric,
     }
     results = engine.resolve_metrics(
@@ -3069,7 +3069,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3086,7 +3086,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3107,7 +3107,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3128,7 +3128,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3153,7 +3153,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3170,7 +3170,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3191,7 +3191,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3216,7 +3216,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3276,7 +3276,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3293,7 +3293,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3315,7 +3315,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3336,7 +3336,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3361,7 +3361,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3378,7 +3378,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3400,7 +3400,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3425,7 +3425,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3465,7 +3465,7 @@ def test_map_column_pairs_greater_metric_pd():
             },
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3495,7 +3495,7 @@ def test_map_column_pairs_greater_metric_pd():
             },
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3542,7 +3542,7 @@ def test_map_column_pairs_greater_metric_sa(sa):
             },
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3566,7 +3566,7 @@ def test_map_column_pairs_greater_metric_sa(sa):
             },
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3614,7 +3614,7 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
             },
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3638,7 +3638,7 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
             },
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3674,7 +3674,7 @@ def test_map_column_pairs_in_set_metric_pd():
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3721,7 +3721,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
             },
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3745,7 +3745,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
             },
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3772,7 +3772,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
             },
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3796,7 +3796,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
             },
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3845,7 +3845,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
             },
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3869,7 +3869,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
             },
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3896,7 +3896,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
             },
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -3920,7 +3920,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
             },
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -3958,7 +3958,7 @@ def test_table_metric_spark(spark_session):
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric,
     }
     results = engine.resolve_metrics(
@@ -3988,7 +3988,7 @@ def test_column_median_metric_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -4041,7 +4041,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    table_row_count_metric._metric_dependencies = {
+    table_row_count_metric.metric_dependencies = {
         "metric_partial_fn": partial_metric,
     }
     results = engine.resolve_metrics(
@@ -4054,7 +4054,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_values_null_condition_metric._metric_dependencies = {
+    column_values_null_condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -4067,7 +4067,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_values_nonnull_count_metric._metric_dependencies = {
+    column_values_nonnull_count_metric.metric_dependencies = {
         "unexpected_condition": column_values_null_condition_metric,
         "metric_partial_fn": partial_metric,
         "table.columns": table_columns_metric,
@@ -4082,7 +4082,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
         "table.row_count": table_row_count_metric,
         "column_values.nonnull.count": column_values_nonnull_count_metric,
@@ -4115,7 +4115,7 @@ def test_column_median_metric_spark(spark_session):
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    row_count._metric_dependencies = {
+    row_count.metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric,
     }
     metrics = engine.resolve_metrics(metrics_to_resolve=(row_count,), metrics=metrics)
@@ -4125,7 +4125,7 @@ def test_column_median_metric_spark(spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.row_count": row_count,
     }
     results = engine.resolve_metrics(
@@ -4151,7 +4151,7 @@ def test_value_counts_metric_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"sort": "value", "collate": None},
     )
-    desired_metric._metric_dependencies = {
+    desired_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -4267,7 +4267,7 @@ def test_distinct_metric_spark(
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_distinct_values_metric._metric_dependencies = {
+    column_distinct_values_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -4283,7 +4283,7 @@ def test_distinct_metric_spark(
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_distinct_values_count_metric_partial_fn._metric_dependencies = {
+    column_distinct_values_count_metric_partial_fn.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -4302,7 +4302,7 @@ def test_distinct_metric_spark(
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_distinct_values_count_metric._metric_dependencies = {
+    column_distinct_values_count_metric.metric_dependencies = {
         "metric_partial_fn": column_distinct_values_count_metric_partial_fn
     }
 
@@ -4317,7 +4317,7 @@ def test_distinct_metric_spark(
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"threshold": 5},
     )
-    column_distinct_values_count_threshold_metric._metric_dependencies = {
+    column_distinct_values_count_threshold_metric.metric_dependencies = {
         "column.distinct_values.count": column_distinct_values_count_metric,
     }
 
@@ -4355,7 +4355,7 @@ def test_distinct_metric_sa(
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_distinct_values_metric._metric_dependencies = {
+    column_distinct_values_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -4371,7 +4371,7 @@ def test_distinct_metric_sa(
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_distinct_values_count_metric_partial_fn._metric_dependencies = {
+    column_distinct_values_count_metric_partial_fn.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -4390,7 +4390,7 @@ def test_distinct_metric_sa(
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_distinct_values_count_metric._metric_dependencies = {
+    column_distinct_values_count_metric.metric_dependencies = {
         "metric_partial_fn": column_distinct_values_count_metric_partial_fn
     }
 
@@ -4405,7 +4405,7 @@ def test_distinct_metric_sa(
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"threshold": 5},
     )
-    column_distinct_values_count_threshold_metric._metric_dependencies = {
+    column_distinct_values_count_threshold_metric.metric_dependencies = {
         "column.distinct_values.count": column_distinct_values_count_metric,
     }
 
@@ -4434,7 +4434,7 @@ def test_distinct_metric_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_distinct_values_metric._metric_dependencies = {
+    column_distinct_values_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -4449,7 +4449,7 @@ def test_distinct_metric_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    column_distinct_values_count_metric._metric_dependencies = {
+    column_distinct_values_count_metric.metric_dependencies = {
         "column.distinct_values": column_distinct_values_metric,
         "table.columns": table_columns_metric,
     }
@@ -4465,7 +4465,7 @@ def test_distinct_metric_pd():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"threshold": 5},
     )
-    column_distinct_values_count_threshold_metric._metric_dependencies = {
+    column_distinct_values_count_threshold_metric.metric_dependencies = {
         "column.distinct_values.count": column_distinct_values_count_metric,
         "table.columns": table_columns_metric,
     }
@@ -4521,7 +4521,7 @@ def test_batch_aggregate_metrics_pd():
             "parse_strings_as_datetimes": True,
         },
     )
-    desired_metric_1._metric_dependencies = {
+    desired_metric_1.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_metric_2 = MetricConfiguration(
@@ -4531,7 +4531,7 @@ def test_batch_aggregate_metrics_pd():
             "parse_strings_as_datetimes": True,
         },
     )
-    desired_metric_2._metric_dependencies = {
+    desired_metric_2.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_metric_3 = MetricConfiguration(
@@ -4541,7 +4541,7 @@ def test_batch_aggregate_metrics_pd():
             "parse_strings_as_datetimes": True,
         },
     )
-    desired_metric_3._metric_dependencies = {
+    desired_metric_3.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_metric_4 = MetricConfiguration(
@@ -4551,7 +4551,7 @@ def test_batch_aggregate_metrics_pd():
             "parse_strings_as_datetimes": True,
         },
     )
-    desired_metric_4._metric_dependencies = {
+    desired_metric_4.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -4600,7 +4600,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_1._metric_dependencies = {
+    desired_aggregate_fn_metric_1.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_2 = MetricConfiguration(
@@ -4608,7 +4608,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_2._metric_dependencies = {
+    desired_aggregate_fn_metric_2.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_3 = MetricConfiguration(
@@ -4616,7 +4616,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_3._metric_dependencies = {
+    desired_aggregate_fn_metric_3.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_4 = MetricConfiguration(
@@ -4624,7 +4624,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_4._metric_dependencies = {
+    desired_aggregate_fn_metric_4.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -4643,7 +4643,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric_1._metric_dependencies = {
+    desired_metric_1.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_1,
         "table.columns": table_columns_metric,
     }
@@ -4652,7 +4652,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric_2._metric_dependencies = {
+    desired_metric_2.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_2,
         "table.columns": table_columns_metric,
     }
@@ -4661,7 +4661,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_metric_3._metric_dependencies = {
+    desired_metric_3.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_3,
         "table.columns": table_columns_metric,
     }
@@ -4670,7 +4670,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_metric_4._metric_dependencies = {
+    desired_metric_4.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_4,
         "table.columns": table_columns_metric,
     }
@@ -4730,7 +4730,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_1._metric_dependencies = {
+    desired_aggregate_fn_metric_1.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_2 = MetricConfiguration(
@@ -4738,7 +4738,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_2._metric_dependencies = {
+    desired_aggregate_fn_metric_2.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_3 = MetricConfiguration(
@@ -4746,7 +4746,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_3._metric_dependencies = {
+    desired_aggregate_fn_metric_3.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_4 = MetricConfiguration(
@@ -4754,7 +4754,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_aggregate_fn_metric_4._metric_dependencies = {
+    desired_aggregate_fn_metric_4.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -4773,7 +4773,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric_1._metric_dependencies = {
+    desired_metric_1.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_1,
     }
     desired_metric_2 = MetricConfiguration(
@@ -4781,7 +4781,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric_2._metric_dependencies = {
+    desired_metric_2.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_2,
     }
     desired_metric_3 = MetricConfiguration(
@@ -4789,7 +4789,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_metric_3._metric_dependencies = {
+    desired_metric_3.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_3,
     }
     desired_metric_4 = MetricConfiguration(
@@ -4797,7 +4797,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_metric_4._metric_dependencies = {
+    desired_metric_4.metric_dependencies = {
         "metric_partial_fn": desired_aggregate_fn_metric_4,
     }
     start = datetime.datetime.now()
@@ -4872,7 +4872,7 @@ def test_map_multicolumn_sum_equal_pd():
             "sum_total": 5,
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -4888,7 +4888,7 @@ def test_map_multicolumn_sum_equal_pd():
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -4910,7 +4910,7 @@ def test_map_multicolumn_sum_equal_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -4931,7 +4931,7 @@ def test_map_multicolumn_sum_equal_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -4957,7 +4957,7 @@ def test_map_multicolumn_sum_equal_pd():
             "sum_total": 5,
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -4973,7 +4973,7 @@ def test_map_multicolumn_sum_equal_pd():
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -4995,7 +4995,7 @@ def test_map_multicolumn_sum_equal_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5021,7 +5021,7 @@ def test_map_multicolumn_sum_equal_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5075,7 +5075,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
             "sum_total": 5,
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5091,7 +5091,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5111,7 +5111,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5131,7 +5131,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5157,7 +5157,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
             "sum_total": 5,
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5173,7 +5173,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5193,7 +5193,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5214,7 +5214,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5269,7 +5269,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
             "sum_total": 5,
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5285,7 +5285,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5306,7 +5306,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5326,7 +5326,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5352,7 +5352,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
             "sum_total": 5,
         },
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5368,7 +5368,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5389,7 +5389,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5410,7 +5410,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5460,7 +5460,7 @@ def test_map_compound_columns_unique_pd():
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5476,7 +5476,7 @@ def test_map_compound_columns_unique_pd():
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5498,7 +5498,7 @@ def test_map_compound_columns_unique_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5519,7 +5519,7 @@ def test_map_compound_columns_unique_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5543,7 +5543,7 @@ def test_map_compound_columns_unique_pd():
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5559,7 +5559,7 @@ def test_map_compound_columns_unique_pd():
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5581,7 +5581,7 @@ def test_map_compound_columns_unique_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5607,7 +5607,7 @@ def test_map_compound_columns_unique_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5652,7 +5652,7 @@ def test_map_compound_columns_unique_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    prerequisite_function_metric._metric_dependencies = {
+    prerequisite_function_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5676,7 +5676,7 @@ def test_map_compound_columns_unique_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "compound_columns.count.map": prerequisite_function_metric,
         "table.columns": table_columns_metric,
     }
@@ -5693,7 +5693,7 @@ def test_map_compound_columns_unique_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5714,7 +5714,7 @@ def test_map_compound_columns_unique_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5734,7 +5734,7 @@ def test_map_compound_columns_unique_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5757,7 +5757,7 @@ def test_map_compound_columns_unique_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    prerequisite_function_metric._metric_dependencies = {
+    prerequisite_function_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5773,7 +5773,7 @@ def test_map_compound_columns_unique_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "compound_columns.count.map": prerequisite_function_metric,
         "table.columns": table_columns_metric,
     }
@@ -5790,7 +5790,7 @@ def test_map_compound_columns_unique_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5811,7 +5811,7 @@ def test_map_compound_columns_unique_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5831,7 +5831,7 @@ def test_map_compound_columns_unique_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5883,7 +5883,7 @@ def test_map_compound_columns_unique_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5899,7 +5899,7 @@ def test_map_compound_columns_unique_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5920,7 +5920,7 @@ def test_map_compound_columns_unique_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5940,7 +5940,7 @@ def test_map_compound_columns_unique_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -5964,7 +5964,7 @@ def test_map_compound_columns_unique_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -5980,7 +5980,7 @@ def test_map_compound_columns_unique_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6001,7 +6001,7 @@ def test_map_compound_columns_unique_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6021,7 +6021,7 @@ def test_map_compound_columns_unique_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6070,7 +6070,7 @@ def test_map_select_column_values_unique_within_record_pd():
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -6087,7 +6087,7 @@ def test_map_select_column_values_unique_within_record_pd():
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6118,7 +6118,7 @@ def test_map_select_column_values_unique_within_record_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 8}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6148,7 +6148,7 @@ def test_map_select_column_values_unique_within_record_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6184,7 +6184,7 @@ def test_map_select_column_values_unique_within_record_pd():
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -6201,7 +6201,7 @@ def test_map_select_column_values_unique_within_record_pd():
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6231,7 +6231,7 @@ def test_map_select_column_values_unique_within_record_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6260,7 +6260,7 @@ def test_map_select_column_values_unique_within_record_pd():
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6313,7 +6313,7 @@ def test_map_select_column_values_unique_within_record_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -6330,7 +6330,7 @@ def test_map_select_column_values_unique_within_record_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6352,7 +6352,7 @@ def test_map_select_column_values_unique_within_record_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 8}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6377,7 +6377,7 @@ def test_map_select_column_values_unique_within_record_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6405,7 +6405,7 @@ def test_map_select_column_values_unique_within_record_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -6422,7 +6422,7 @@ def test_map_select_column_values_unique_within_record_sa(sa):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6444,7 +6444,7 @@ def test_map_select_column_values_unique_within_record_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6465,7 +6465,7 @@ def test_map_select_column_values_unique_within_record_sa(sa):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6519,7 +6519,7 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -6536,7 +6536,7 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6558,7 +6558,7 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 8}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6583,7 +6583,7 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6619,7 +6619,7 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    condition_metric._metric_dependencies = {
+    condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -6636,7 +6636,7 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         },
         metric_value_kwargs=None,
     )
-    unexpected_count_metric._metric_dependencies = {
+    unexpected_count_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6658,7 +6658,7 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_rows_metric._metric_dependencies = {
+    unexpected_rows_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
@@ -6679,7 +6679,7 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
     )
-    unexpected_values_metric._metric_dependencies = {
+    unexpected_values_metric.metric_dependencies = {
         "unexpected_condition": condition_metric,
         "table.columns": table_columns_metric,
     }
