@@ -7,6 +7,8 @@ import logging
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, List, Type
 
+import pydantic
+
 from great_expectations.zep.sources import _SourceFactories
 
 if TYPE_CHECKING:
@@ -16,7 +18,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
 
 
-class MetaDatasource(type):
+class MetaDatasource(pydantic.main.ModelMetaclass):
     def __new__(
         meta_cls: Type[MetaDatasource], cls_name: str, bases: tuple[type], cls_dict
     ) -> MetaDatasource:

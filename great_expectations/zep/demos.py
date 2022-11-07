@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # TODO: remove this before release
     from great_expectations.zep.logger import init_logger
 
-    init_logger()
+    init_logger(level=10)
 
 
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -34,15 +34,16 @@ class MyOtherAsset(DataAsset):
 
 class PandasDatasource(Datasource):
     engine: Literal["pandas"] = "pandas"
-    execution_engine = PandasExecutionEngine()
-    asset_types = [FileAsset, MyOtherAsset]
+    execution_engine = PandasExecutionEngine()  # ClassVar??
+    asset_types = [FileAsset, MyOtherAsset]  # ClassVar??
     name: str
     assets: Dict[str, DataAsset]
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, **kwargs):
         self.name = name
         self.assets = {}
         # self.execution_engine = PandasExecutionEngine()
+        super().__init__(name=name, **kwargs)
 
     def __repr__(self):
         return f"{self.__class__.__name__}(name='{self.name}')"

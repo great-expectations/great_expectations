@@ -21,17 +21,15 @@ class DataAsset(BaseModel):
     type: str
 
 
-class Datasource_(BaseModel):
+class Datasource(BaseModel, metaclass=MetaDatasource):
+    # class attrs
+    asset_types: ClassVar[List[Type[DataAsset]]] = []
+    execution_engine: ClassVar[ExecutionEngine]
+
+    # instance attrs
     name: str
     engine: str
-    version: confloat(ge=2.0, lt=3.0) = 2.0
-    execution_engine: ExecutionEngine
     assets: Dict[str, DataAsset]
-
-    # TODO (kil59): remove name duplication
-    #   1. user a root_validator to pull the name for the `assets` keys
-    #   2. Update the structure to be a list of `DataAssets`
-    # TODO: Instantiate a real Datasource. Execution engine is created in the Datasource init method
 
     @root_validator(pre=True)
     @classmethod
@@ -72,22 +70,6 @@ class Datasource_(BaseModel):
         # TODO: revisit this (1 option - define __get_validator__ on ExecutionEngine)
         # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
         arbitrary_types_allowed = True
-
-    def get_asset(self, asset_name: str) -> DataAsset:
-        """Returns the DataAsset referred to by name"""
-        # This default implementation will be used if protocol is inherited
-        return self.assets[asset_name]
-
-
-# TODO: resolve metaclass conflict with pydantic BaseModel
-class Datasource(metaclass=MetaDatasource):
-    # class attrs
-    asset_types: ClassVar[List[Type[DataAsset]]] = []
-
-    # instance attrs
-    name: str
-    execution_engine: ExecutionEngine
-    assets: Dict[str, DataAsset]
 
     def get_batch_list_from_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
