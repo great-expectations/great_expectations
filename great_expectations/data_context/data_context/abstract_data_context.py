@@ -25,6 +25,13 @@ from typing import (
     cast,
 )
 
+from great_expectations.core.config_provider import (
+    ConfigurationProvider,
+    ConfigurationVariablesConfigurationProvider,
+    EnvironmentConfigurationProvider,
+    RuntimeEnvironmentConfigurationProvider,
+)
+
 try:
     from typing import Literal
 except ImportError:
@@ -164,7 +171,9 @@ class AbstractDataContext(ABC):
         """
         if runtime_environment is None:
             runtime_environment = {}
-        self.runtime_environment = runtime_environment
+        self._config_provider = self._init_config_provider(
+            runtime_environment=runtime_environment
+        )
 
         # These attributes that are set downstream.
         self._variables: Optional[DataContextVariables] = None
@@ -207,6 +216,23 @@ class AbstractDataContext(ABC):
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
+
+    def _init_config_provider(self, runtime_environment: dict) -> ConfigurationProvider:
+        config_provider = ConfigurationProvider()
+        config_provider.register_provider(
+            RuntimeEnvironmentConfigurationProvider(
+                runtime_environment=runtime_environment
+            )
+        )
+        config_provider.register_provider(EnvironmentConfigurationProvider())
+        config_variables_file_path = self.variables.config_variables_file_path
+        if config_variables_file_path:
+            config_provider.register_provider(
+                ConfigurationVariablesConfigurationProvider(
+                    config_variables_file_path, self.root_directory
+                )
+            )
+        return config_provider
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
@@ -2690,25 +2716,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self._config_variables = self._load_config_variables()
 
     def _determine_substitutions(self) -> Dict:
-        """Aggregates substitutions from the project's config variables file, any environment variables, and
-        the runtime environment.
-
-        Returns: A dictionary containing all possible substitutions that can be applied to a given object
-                 using `substitute_all_config_variables`.
-        """
-        substituted_config_variables: dict = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-
-        substitutions: dict = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
-
-        return substitutions
+        return self._config_provider.get_values()
 
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
