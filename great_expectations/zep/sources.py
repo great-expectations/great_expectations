@@ -122,14 +122,9 @@ class _SourceFactories:
         try:
             exec_engine_type: Type[ExecutionEngine] = ds_type.execution_engine.__class__
         except AttributeError as exc:
-            LOGGER.warning(exc)
-            warnings.warn(
-                f"No `execution_engine` found for {ds_type.__name__} unable to register `ExecutionEngine` type",
-                RuntimeWarning,
-            )
-            # TODO (kilo59): don't proceed without an execution_engine.
-            # this is a cheat to prevent updating a bunch of tests.
-            return
+            raise TypeError(
+                f"No `execution_engine` found for {ds_type.__name__} unable to register `ExecutionEngine` type"
+            ) from exc
 
         class_name: str = exec_engine_type.__name__
         engine_simple_name: str = _get_simplified_name_from_type(

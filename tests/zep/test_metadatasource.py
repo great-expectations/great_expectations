@@ -4,6 +4,7 @@ from typing import List, Type
 import pytest
 from typing_extensions import ClassVar
 
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.zep.context import get_context
 from great_expectations.zep.interfaces import DataAsset, Datasource
 from great_expectations.zep.metadatasource import MetaDatasource
@@ -25,6 +26,12 @@ def context_sources_clean():
 
     _SourceFactories._SourceFactories__source_factories.clear()
     _SourceFactories.type_lookup.clear()
+    _SourceFactories.engine_lookup.clear()
+
+
+class DummyExecutionEngine(ExecutionEngine):
+    def get_batch_data_and_markers(self, batch_spec):
+        raise NotImplementedError
 
 
 class TestMetaDatasource:
@@ -36,6 +43,7 @@ class TestMetaDatasource:
 
         class MyTestDatasource(Datasource):
             asset_types: ClassVar[List[Type[DataAsset]]] = []
+            execution_engine = DummyExecutionEngine()
 
         expected_registrants = 1
 
@@ -56,6 +64,7 @@ class TestMetaDatasource:
 
         class MyTestDatasource(Datasource):
             asset_types: ClassVar[List[Type[DataAsset]]] = []
+            execution_engine = DummyExecutionEngine()
 
         ds_factory_method_final = getattr(
             context_sources_clean, expected_method_name, None
@@ -78,9 +87,9 @@ class TestMetaDatasource:
 
         class FooBarDatasource(Datasource):
             asset_types = [FooAsset, BarAsset]
+            execution_engine = DummyExecutionEngine()
 
         print(f" type_lookup ->\n{pf(type_lookup)}\n")
-
         asset_types = FooBarDatasource.asset_types
         assert asset_types, "No asset types have been declared"
 
@@ -103,10 +112,12 @@ def test_minimal_ds_to_asset_flow(context_sources_clean):
 
     class PurpleDatasource(Datasource):
         asset_types = [RedAsset, BlueAsset]
+        execution_engine = DummyExecutionEngine()
 
         def __init__(self, name: str) -> None:
             self.name = name
             self.assets = {}
+            # self.execution_engine = DummyExecutionEngine()
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)
