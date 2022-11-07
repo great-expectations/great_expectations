@@ -1,5 +1,5 @@
 import json
-from typing import Tuple
+from typing import Optional, Tuple
 
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import convert_to_json_serializable
@@ -10,8 +10,8 @@ class MetricConfiguration:
         self,
         metric_name: str,
         metric_domain_kwargs: dict,
-        metric_value_kwargs: dict = None,
-        metric_dependencies: dict = None,
+        metric_value_kwargs: Optional[dict] = None,
+        metric_dependencies: Optional[dict] = None,
     ) -> None:
         self._metric_name = metric_name
         if not isinstance(metric_domain_kwargs, IDDict):

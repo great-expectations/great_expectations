@@ -319,7 +319,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         metrics: Dict,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         filter_column_isnull: bool = True,
     ):
         value_set = metric_value_kwargs["value_set"]

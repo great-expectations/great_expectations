@@ -1396,8 +1396,8 @@ class ExpectationConfiguration(SerializableDictDot):
     def metrics_validate(
         self,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,
     ):
         expectation_impl: Expectation = self._get_expectation_impl()

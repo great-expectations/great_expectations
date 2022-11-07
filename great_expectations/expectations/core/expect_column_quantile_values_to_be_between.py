@@ -147,6 +147,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     metric_dependencies = ("column.quantile_values",)
@@ -734,8 +736,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         quantile_vals = metrics.get("column.quantile_values")
         quantile_ranges = configuration.kwargs.get("quantile_ranges")

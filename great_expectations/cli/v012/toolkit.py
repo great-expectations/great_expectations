@@ -381,7 +381,9 @@ def load_checkpoint(
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
-def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
+def select_datasource(
+    context: DataContext, datasource_name: Optional[str] = None
+) -> Datasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
     data_source = None
