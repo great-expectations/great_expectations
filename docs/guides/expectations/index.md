@@ -33,9 +33,7 @@ title: "Create Expectations: Index"
 
 ### Adding Features to Custom Expectations
 - [How to add comments to Expectations and display them in Data Docs](../../guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs.md)
-- [How to add data visualization renderers for custom Expectations](../../guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation.md)
 - [How to create example cases for a Custom Expectation](../../guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation.md)
 - [How to add input validation and type checking for a Custom Expectation](../../guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation.md)
-- [How to add Statement Renderers for Custom Expectations](../../guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation.md)
 - [How to add Spark support for Custom Expectations](../../guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation.md)
 - [How to add SQLAlchemy support for Custom Expectations](../../guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation.md)
