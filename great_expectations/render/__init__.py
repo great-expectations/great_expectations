@@ -30,3 +30,5 @@ from .components import (
     ValueListContent,
 )
 from .view import DefaultJinjaPageView
+
+renderedAtomicValueSchema = RenderedAtomicValueSchema()
