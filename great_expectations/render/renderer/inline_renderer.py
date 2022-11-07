@@ -19,7 +19,7 @@ from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.renderer import Renderer
 
 try:
-    from typing import TypedDict  # type: ignore[attr-defined]
+    from typing import TypedDict
 except ImportError:
     from typing_extensions import TypedDict
 

@@ -4,6 +4,53 @@
 Changelog
 #########
 
+0.15.31
+-----------------
+* [BUGFIX] Include all requirement files in the sdist (#6292) (thanks @xhochy)
+* [DOCS] Updates outdated batch_request snippet in Terms (#6283)
+* [DOCS] Update Conditional Expectations doc w/ current availability  (#6279)
+* [DOCS] Remove outdated Data Discovery page and all references (#6288)
+* [DOCS] Remove reference/evaluation_parameters page and all references (#6294)
+* [DOCS] Removing deprecated Custom Metrics doc (#6282)
+* [DOCS] Re-writes "how to implement custom notifications" as "How to get Data Docs URLs for use in custom Validation Actions" (#6281)
+* [DOCS] Removes deprecated expectation notebook exploration doc (#6298)
+* [MAINTENANCE] Move RuleState into rule directory. (#6284)
+
+0.15.30
+-----------------
+* [FEATURE] Add zep datasources to data context. (#6255)
+* [BUGFIX] Iterate through `GeCloudIdentifiers` to find the suite ID from the name (#6243)
+* [BUGFIX] Update default base url for cloud API (#6176)
+* [BUGFIX] Pin `termcolor` to below `2.1.0` due to breaking changes in lib's TTY parsing logic (#6257)
+* [BUGFIX] `InferredAssetSqlDataConnector` `include_schema_name` introspection of identical table names in different schemas (#6166)
+* [BUGFIX] Fix`docs-integration` tests, and temporarily pin `sqlalchemy` (#6268)
+* [BUGFIX] Fix serialization for contrib packages (#6266)
+* [BUGFIX] Ensure that `Datasource` credentials are not persisted to Cloud/disk (#6254)
+* [DOCS] Updates package contribution references (#5885)
+* [MAINTENANCE] Maintenance/great 1103/great 1318/alexsherstinsky/validation graph/refactor validation graph usage 2022 10 20 248 (#6228)
+* [MAINTENANCE] Refactor instances of `noqa: F821` Flake8 directive (#6220)
+* [MAINTENANCE] Logo URI ref in `data_docs` (#6246)
+* [MAINTENANCE] fix typos in docstrings (#6247)
+* [MAINTENANCE] Isolate Trino/MSSQL/MySQL tests in `dev` CI (#6231)
+* [MAINTENANCE] Split up `compatability` and `comprehensive` stages in `dev` CI to improve performance (#6245)
+* [MAINTENANCE] ZEP POC - Asset Type Registration (#6194)
+* [MAINTENANCE] Add Trino CLI support and bump Trino version (#6215) (thanks @hovaesco)
+* [MAINTENANCE] Delete unneeded Rule attribute property (#6264)
+* [MAINTENANCE] Small clean-up of `Marshmallow` warnings (`missing` parameter changed to `load_default` as of 3.13) (#6213)
+* [MAINTENANCE] Move `.png` files out of project root (#6249)
+* [MAINTENANCE] Cleanup `expectation.py` attributes (#6265)
+* [MAINTENANCE] Further parallelize test runs in `dev` CI (#6267)
+* [MAINTENANCE] GCP Integration Pipeline fix (#6259)
+* [MAINTENANCE] mypy `warn_unused_ignores` (#6270)
+* [MAINTENANCE] ZEP - Datasource base class (#6263)
+* [MAINTENANCE] Reverting `marshmallow` version bump (#6271)
+* [MAINTENANCE] type hints cleanup in Rule-Based Profiler (#6272)
+* [MAINTENANCE] Remove unused f-strings (#6248)
+* [MAINTENANCE] Make ParameterBuilder.resolve_evaluation_dependencies() into instance (rather than utility) method (#6273)
+* [MAINTENANCE] Test definition for `ExpectColumnValueZScoresToBeLessThan` (#6229)
+* [MAINTENANCE] Make RuleState constructor argument ordering consistent with standard pattern. (#6275)
+* [MAINTENANCE] [REQUEST] Please allow Rachel to unblock blockers (#6253)
+
 0.15.29
 -----------------
 * [FEATURE] Add support to AWS Glue Data Catalog (#5123) (thanks @lccasagrande)

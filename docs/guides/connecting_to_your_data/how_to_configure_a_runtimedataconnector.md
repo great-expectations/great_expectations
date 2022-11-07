@@ -10,12 +10,12 @@ This guide demonstrates how to configure a RuntimeDataConnector and only applies
 
 <Prerequisites>
 
-- [Understand the basics of Datasources in the V3 (Batch Request) API](../../reference/datasources.md)
+- [Understand the basics of Datasources in the V3 (Batch Request) API](../../terms/datasource.md)
 - Learned how to configure a [Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
 </Prerequisites>
 
-A RuntimeDataConnector is a special kind of [Data Connector](../../reference/datasources.md) that enables you to use a RuntimeBatchRequest to provide a [Batch's](../../reference/datasources.md#batches) data directly at runtime. The RuntimeBatchRequest can wrap an in-memory dataframe, a filepath, or a SQL query, and must include batch identifiers that uniquely identify the data (e.g. a `run_id` from an AirFlow DAG run). The batch identifiers that must be passed in at runtime are specified in the RuntimeDataConnector's configuration.
+A RuntimeDataConnector is a special kind of [Data Connector](../../terms/datasource.md) that enables you to use a RuntimeBatchRequest to provide a [Batch's](../../terms/batch.md) data directly at runtime. The RuntimeBatchRequest can wrap an in-memory dataframe, a filepath, or a SQL query, and must include batch identifiers that uniquely identify the data (e.g. a `run_id` from an AirFlow DAG run). The batch identifiers that must be passed in at runtime are specified in the RuntimeDataConnector's configuration.
 
 ## Steps
 

@@ -1,10 +1,11 @@
 import abc
 from typing import Dict, List, Type, Union
 
-from typing_extensions import Protocol, runtime_checkable
+from typing_extensions import ClassVar
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.zep.metadatasource import MetaDatasource
 
 
 class DataAsset(abc.ABC):
@@ -14,11 +15,13 @@ class DataAsset(abc.ABC):
         self.name = name
 
 
-@runtime_checkable
-class Datasource(Protocol):
-    execution_engine: ExecutionEngine
-    asset_types: List[Type[DataAsset]]
+class Datasource(metaclass=MetaDatasource):
+    # class attrs
+    asset_types: ClassVar[List[Type[DataAsset]]] = []
+
+    # instance attrs
     name: str
+    execution_engine: ExecutionEngine
     assets: Dict[str, DataAsset]
 
     def get_batch_list_from_batch_request(
@@ -32,6 +35,9 @@ class Datasource(Protocol):
         Returns:
             A list of batches. The list may be empty.
         """
+        raise NotImplementedError(
+            f"{self.__class__.__name__} must implement `.get_batch_list_from_batch_request()`"
+        )
 
     def get_asset(self, asset_name: str) -> DataAsset:
         """Returns the DataAsset referred to by name"""

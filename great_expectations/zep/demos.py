@@ -1,15 +1,15 @@
 import logging
 from typing import Dict, List
 
-from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.zep.context import get_context
-from great_expectations.zep.interfaces import DataAsset
-from great_expectations.zep.metadatasource import MetaDatasource
-
 if __name__ == "__main__":
     # don't setup the logger unless being run as a script
     # TODO: remove this before release
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.zep.context import get_context
+from great_expectations.zep.interfaces import DataAsset, Datasource
 
 
 class FileAsset(DataAsset):
@@ -23,7 +23,7 @@ class MyOtherAsset(DataAsset):
     bar: List[int]
 
 
-class PandasDatasource(metaclass=MetaDatasource):
+class PandasDatasource(Datasource):
 
     execution_engine = PandasExecutionEngine()
     asset_types = [FileAsset, MyOtherAsset]
@@ -40,10 +40,6 @@ class PandasDatasource(metaclass=MetaDatasource):
     def get_batch_list_from_batch_request(self, batch_request):
         """TODO"""
         pass
-
-    def get_asset(self, asset_name: str) -> DataAsset:
-        """Pull `self.assets`"""
-        return self.assets[asset_name]
 
     def add_my_other_asset(self, asset_name: str) -> MyOtherAsset:
         """Create `MyOtherAsset` add it to `self.assets` and return it."""
