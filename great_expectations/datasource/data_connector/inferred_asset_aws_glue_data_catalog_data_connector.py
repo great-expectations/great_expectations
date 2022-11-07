@@ -138,7 +138,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
             for db in page["DatabaseList"]:
                 yield db["Name"]
 
-    def _introspect_catalog(self, database_name: str = None) -> List[dict]:
+    def _introspect_catalog(self, database_name: Optional[str] = None) -> List[dict]:
         paginator = self.glue_client.get_paginator("get_tables")
         paginator_kwargs = self._get_glue_paginator_kwargs()
 
