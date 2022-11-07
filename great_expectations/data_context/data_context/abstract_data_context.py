@@ -3139,10 +3139,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @staticmethod
     def _determine_save_changes_flag(save_changes: Optional[bool]) -> bool:
         if save_changes is not None:
-            # deprecated-v0.15.30
+            # deprecated-v0.15.32
             warnings.warn(
-                'The parameter "save_changes" is deprecated as of v0.15.30; moving forward, '
-                "changes made to datasources are always persisted by the underlying Store implementation. "
+                'The parameter "save_changes" is deprecated as of v0.15.32; moving forward, '
+                "changes made to Datasources are always persisted by the underlying Store implementation. "
+                "This is part of an ongoing effort to standardized the behavior of our APIs. "
                 "As support will be removed in v0.18, please omit the argument moving forward.",
                 DeprecationWarning,
             )
