@@ -346,7 +346,7 @@ def get_expectation_impl(expectation_name: str):
 
 
 def list_registered_expectation_implementations(
-    expectation_root: Type[Expectation] = None,
+    expectation_root: Optional[Type[Expectation]] = None,
 ) -> List[str]:
     registered_expectation_implementations = []
     for (

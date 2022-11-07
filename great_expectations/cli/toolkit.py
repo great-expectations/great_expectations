@@ -342,7 +342,7 @@ def load_checkpoint(
 
 
 def select_datasource(
-    context: DataContext, datasource_name: str = None
+    context: DataContext, datasource_name: Optional[str] = None
 ) -> BaseDatasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
