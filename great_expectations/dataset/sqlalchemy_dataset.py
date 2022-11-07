@@ -2358,19 +2358,34 @@ WHERE
         if len(parsed_value_set) == 0:
             return False
 
-        conditions: List[BinaryExpression] = [
-            sa.and_(
+        if hasattr(sa.column(column_A), "is_not"):
+            conditions: List[BinaryExpression] = [
                 sa.and_(
-                    sa.column(column_A) == value[0],
-                    (sa.column(column_A) == value[0]).is_not(None),
-                ),
+                    sa.and_(
+                        sa.column(column_A) == value[0],
+                        (sa.column(column_A) == value[0]).is_not(None),
+                    ),
+                    sa.and_(
+                        sa.column(column_B) == value[1],
+                        (sa.column(column_B) == value[1]).is_not(None),
+                    ),
+                )
+                for value in parsed_value_set
+            ]
+        else:
+            conditions: List[BinaryExpression] = [
                 sa.and_(
-                    sa.column(column_B) == value[1],
-                    (sa.column(column_B) == value[1]).is_not(None),
-                ),
-            )
-            for value in parsed_value_set
-        ]
+                    sa.and_(
+                        sa.column(column_A) == value[0],
+                        (sa.column(column_A) == value[0]).isnot(None),
+                    ),
+                    sa.and_(
+                        sa.column(column_B) == value[1],
+                        (sa.column(column_B) == value[1]).isnot(None),
+                    ),
+                )
+                for value in parsed_value_set
+            ]
         return sa.or_(*conditions)
 
     def _get_dialect_regex_expression(self, column, regex, positive=True):
