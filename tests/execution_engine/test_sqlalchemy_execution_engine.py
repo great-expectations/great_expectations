@@ -172,7 +172,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    aggregate_fn_metric_1.metric_dependencies = {
+    aggregate_fn_metric_1._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_2 = MetricConfiguration(
@@ -180,7 +180,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    aggregate_fn_metric_2.metric_dependencies = {
+    aggregate_fn_metric_2._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_3 = MetricConfiguration(
@@ -188,7 +188,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    aggregate_fn_metric_3.metric_dependencies = {
+    aggregate_fn_metric_3._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     aggregate_fn_metric_4 = MetricConfiguration(
@@ -196,7 +196,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    aggregate_fn_metric_4.metric_dependencies = {
+    aggregate_fn_metric_4._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -215,7 +215,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric_1.metric_dependencies = {
+    desired_metric_1._metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric_1,
         "table.columns": table_columns_metric,
     }
@@ -224,7 +224,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric_2.metric_dependencies = {
+    desired_metric_2._metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric_2,
         "table.columns": table_columns_metric,
     }
@@ -233,7 +233,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_metric_3.metric_dependencies = {
+    desired_metric_3._metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric_3,
         "table.columns": table_columns_metric,
     }
@@ -242,7 +242,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
-    desired_metric_4.metric_dependencies = {
+    desired_metric_4._metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric_4,
         "table.columns": table_columns_metric,
     }
@@ -864,7 +864,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
         },
         metric_value_kwargs=None,
     )
-    aggregate_fn_metric.metric_dependencies = {
+    aggregate_fn_metric._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -880,7 +880,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
         },
         metric_value_kwargs=None,
     )
-    desired_metric.metric_dependencies = {
+    desired_metric._metric_dependencies = {
         "metric_partial_fn": aggregate_fn_metric,
     }
 
@@ -944,7 +944,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    condition_metric.metric_dependencies = {
+    condition_metric._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     results = engine.resolve_metrics(
@@ -959,7 +959,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric.metric_dependencies = {
+    desired_metric._metric_dependencies = {
         "unexpected_condition": condition_metric,
     }
     # noinspection PyUnusedLocal

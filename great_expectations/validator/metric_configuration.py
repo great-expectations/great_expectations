@@ -61,12 +61,6 @@ class MetricConfiguration:
     def metric_dependencies(self) -> Dict[str, MetricConfiguration]:
         return self._metric_dependencies or {}
 
-    @metric_dependencies.setter
-    def metric_dependencies(
-        self, value: Optional[Dict[str, MetricConfiguration]]
-    ) -> None:
-        self._metric_dependencies = value
-
     @property
     def id(self) -> Tuple[str, str, str]:
         return (

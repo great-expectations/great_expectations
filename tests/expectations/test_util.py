@@ -78,7 +78,7 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
         metric_domain_kwargs=dict(),
         metric_value_kwargs=None,
     )
-    table_columns_metric.metric_dependencies = {
+    table_columns_metric._metric_dependencies = {
         "table.column_types": table_column_types_metric,
     }
     results = engine.resolve_metrics(

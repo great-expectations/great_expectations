@@ -188,7 +188,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    mean.metric_dependencies = {
+    mean._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     stdev = MetricConfiguration(
@@ -196,7 +196,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    stdev.metric_dependencies = {
+    stdev._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_metrics = (mean, stdev)
@@ -210,7 +210,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_map_metric.metric_dependencies = {
+    desired_map_metric._metric_dependencies = {
         "column.standard_deviation": stdev,
         "column.mean": mean,
         "table.columns": table_columns_metric,
@@ -225,7 +225,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
-    desired_threshold_condition_metric.metric_dependencies = {
+    desired_threshold_condition_metric._metric_dependencies = {
         "column_values.z_score.map": desired_map_metric,
         "table.columns": table_columns_metric,
     }
@@ -244,7 +244,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
-    desired_metric.metric_dependencies = {
+    desired_metric._metric_dependencies = {
         "unexpected_condition": desired_threshold_condition_metric,
     }
     results = engine.resolve_metrics(
@@ -272,7 +272,7 @@ def test_resolve_metrics_with_extraneous_value_key():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    mean.metric_dependencies = {
+    mean._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     # Ensuring that an unused value key will not mess up computation
@@ -281,7 +281,7 @@ def test_resolve_metrics_with_extraneous_value_key():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3, 4, 5]},
     )
-    stdev.metric_dependencies = {
+    stdev._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
 
@@ -318,7 +318,7 @@ def test_resolve_metrics_with_incomplete_metric_input():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    desired_metric.metric_dependencies = {
+    desired_metric._metric_dependencies = {
         "column.standard_deviation": stdev,
         "column.mean": mean,
     }

@@ -91,7 +91,7 @@ class ValidationGraph:
                 )
             )
         else:
-            metric_configuration.metric_dependencies = metric_dependencies
+            metric_configuration._metric_dependencies = metric_dependencies
             for metric_dependency in metric_dependencies.values():
                 # TODO: <Alex>In the future, provide a more robust cycle detection mechanism.</Alex>
                 if metric_dependency.id == metric_configuration.id:

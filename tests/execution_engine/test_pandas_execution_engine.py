@@ -381,7 +381,7 @@ def test_resolve_metric_bundle():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    mean.metric_dependencies = {
+    mean._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     stdev = MetricConfiguration(
@@ -389,7 +389,7 @@ def test_resolve_metric_bundle():
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    stdev.metric_dependencies = {
+    stdev._metric_dependencies = {
         "table.columns": table_columns_metric,
     }
     desired_metrics = (mean, stdev)
