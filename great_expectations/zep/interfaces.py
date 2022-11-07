@@ -41,6 +41,7 @@ class DataAsset(abc.ABC):
     def name(self) -> str:
         return self._name
 
+    @abc.abstractmethod
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         ...
 
