@@ -243,6 +243,19 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
     except AttributeError:
         pass
 
+    try:
+        # MSSQL
+        if isinstance(dialect, sa.dialects.mssql.dialect):
+            if positive:
+                return BinaryExpression(column, literal(regex), custom_op("LIKE"))
+            else:
+                return BinaryExpression(column, literal(regex), custom_op("NOT LIKE"))
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
+        pass
+
     return None
 
 
