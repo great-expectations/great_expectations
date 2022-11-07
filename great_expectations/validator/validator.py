@@ -1894,8 +1894,8 @@ class Validator:
 
     def _initialize_expectations(
         self,
-        expectation_suite: ExpectationSuite = None,
-        expectation_suite_name: str = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
     ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
@@ -1936,7 +1936,7 @@ class Validator:
                     **expectation_suite_dict, data_context=self._data_context
                 )
             else:
-                expectation_suite: ExpectationSuite = copy.deepcopy(expectation_suite)
+                expectation_suite = copy.deepcopy(expectation_suite)
             self._expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:
