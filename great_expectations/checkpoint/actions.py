@@ -1081,20 +1081,24 @@ class UpdateDataDocsAction(ValidationAction):
                 expectation_suite_identifier,
             ],
         )
-
+        # <snippet>
         data_docs_validation_results = {}
+        # </snippet>
         if self.data_context.ge_cloud_mode:
             return data_docs_validation_results
 
         # get the URL for the validation result
+        # <snippet>
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
             site_names=self._site_names,
         )
+        # </snippet>
         # process payload
+        # <snippet>
         for sites in docs_site_urls_list:
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
-
+        # <snippet>
         return data_docs_validation_results
 
 
