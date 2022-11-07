@@ -195,8 +195,8 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         table_row_count_self = metrics["table.row_count.self"]
         table_row_count_other = metrics["table.row_count.other"]
