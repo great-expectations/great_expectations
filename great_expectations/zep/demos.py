@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 if __name__ == "__main__":
     # don't setup the logger unless being run as a script
@@ -9,18 +9,28 @@ if __name__ == "__main__":
 
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.zep.context import get_context
-from great_expectations.zep.interfaces import DataAsset, Datasource
+from great_expectations.zep.interfaces import (
+    BatchRequest,
+    BatchRequestOptions,
+    DataAsset,
+    Datasource,
+)
 
 
 class FileAsset(DataAsset):
     file_path: str
     delimiter: str
-    ...
+
+    def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
+        return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 
 class MyOtherAsset(DataAsset):
     foo: str
     bar: List[int]
+
+    def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
+        return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 
 class PandasDatasource(Datasource):
