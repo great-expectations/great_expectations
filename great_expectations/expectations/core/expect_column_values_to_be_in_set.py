@@ -5,13 +5,14 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
 )
-from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    LegacyRendererType,
     RenderedBulletListContent,
     RenderedStringTemplateContent,
     ValueListContent,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,

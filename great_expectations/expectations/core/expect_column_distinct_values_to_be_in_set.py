@@ -12,12 +12,13 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.util import parse_value_set
-from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    LegacyRendererType,
     RenderedGraphContent,
     RenderedStringTemplateContent,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
