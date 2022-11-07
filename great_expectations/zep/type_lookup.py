@@ -56,3 +56,9 @@ class TypeLookup(
 
     def contains_anyof(self, collection_: Iterable[ValidTypes]) -> bool:
         return bool(set(collection_).intersection(self.keys()))
+
+    def raise_if_contains(self, collection_: Iterable[ValidTypes]):
+        """Raise a TypeLookup error if the passed iterable contains any overlapping items."""
+        intersection = set(collection_).intersection(self.keys())
+        if intersection:
+            raise TypeLookupError(f"Items are already present - {intersection}")

@@ -1,8 +1,8 @@
-from typing import Hashable, Mapping, Optional, Tuple
+from typing import Hashable, Iterable, Mapping, Optional, Tuple
 
 import pytest
 
-from great_expectations.zep.type_lookup import TypeLookup, TypeLookupError
+from great_expectations.zep.type_lookup import TypeLookup, TypeLookupError, ValidTypes
 
 pytestmark = [pytest.mark.unit]
 param = pytest.param
@@ -58,6 +58,33 @@ def test_no_key_or_value_overwrites(
     key, value = kv_pair
     with pytest.raises(TypeLookupError, match=r"`.*` already set"):
         initial[key] = value
+
+
+@pytest.mark.parametrize(
+    "collection_to_check",
+    [
+        ["a_list"],
+        {"not_present", "a_dict", list},
+    ],
+)
+def test_raise_if_contains_raises(collection_to_check: Iterable[ValidTypes]):
+    type_lookup = TypeLookup(a_list=list, a_dict=dict)
+
+    with pytest.raises(TypeLookupError, match=r"Items are already present .*"):
+        type_lookup.raise_if_contains(collection_to_check)
+
+
+@pytest.mark.parametrize(
+    "collection_to_check",
+    [
+        ["not_present"],
+        {"not_present", "a_tuple", set},
+    ],
+)
+def test_raise_if_contains_does_not_raise(collection_to_check: Iterable[ValidTypes]):
+    type_lookup = TypeLookup(a_list=list, a_dict=dict)
+
+    type_lookup.raise_if_contains(collection_to_check)
 
 
 if __name__ == "__main__":
