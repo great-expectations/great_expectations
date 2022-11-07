@@ -1,27 +1,23 @@
 import warnings
 
 from great_expectations.render import (
-    RenderedAtomicContent as rendered_atomic_content_render,
+    RenderedAtomicContent as RenderedAtomicContentRender,
 )
 from great_expectations.render import (
-    RenderedBulletListContent as rendered_bullet_list_content_render,
+    RenderedBulletListContent as RenderedBulletListContentRender,
 )
 from great_expectations.render import (
-    RenderedComponentContent as rendered_component_content_render,
+    RenderedComponentContent as RenderedComponentContentRender,
 )
-from great_expectations.render import RenderedContent as rendered_content_render
+from great_expectations.render import RenderedContent as RenderedContentRender
+from great_expectations.render import RenderedGraphContent as RenderedGraphContentRender
 from great_expectations.render import (
-    RenderedGraphContent as rendered_graph_content_render,
+    RenderedStringTemplateContent as RenderedStringTemplateContentRender,
 )
-from great_expectations.render import (
-    RenderedStringTemplateContent as rendered_string_template_content_render,
-)
-from great_expectations.render import (
-    RenderedTableContent as rendered_table_content_render,
-)
+from great_expectations.render import RenderedTableContent as RenderedTableContentRender
 
 
-class RenderedAtomicContent(rendered_atomic_content_render):
+class RenderedAtomicContent(RenderedAtomicContentRender):
     # deprecated-v0.15.32
     warnings.warn(
         """Importing the class RenderedAtomicContent from great_expectations.render is deprecated as of v0.15.32\
@@ -31,7 +27,7 @@ in v0.18. Please import class RenderedAtomicContent from great_expectations.rend
     )
 
 
-class RenderedBulletListContent(rendered_bullet_list_content_render):
+class RenderedBulletListContent(RenderedBulletListContentRender):
     # deprecated-v0.15.32
     warnings.warn(
         """Importing the class RenderedBulletListContent from great_expectations.render is deprecated as of v0.15.32\
@@ -41,7 +37,7 @@ in v0.18. Please import class RenderedBulletListContent from great_expectations.
     )
 
 
-class RenderedComponentContent(rendered_component_content_render):
+class RenderedComponentContent(RenderedComponentContentRender):
     # deprecated-v0.15.32
     warnings.warn(
         """Importing the class RenderedComponentContent from great_expectations.render is deprecated as of v0.15.32\
@@ -51,7 +47,7 @@ in v0.18. Please import class RenderedComponentContent from great_expectations.r
     )
 
 
-class RenderedContent(rendered_content_render):
+class RenderedContent(RenderedContentRender):
     # deprecated-v0.15.32
     warnings.warn(
         """Importing the class RenderedContent from great_expectations.render is deprecated as of v0.15.32\
@@ -61,7 +57,7 @@ in v0.18. Please import class RenderedContent from great_expectations.render.
     )
 
 
-class RenderedGraphContent(rendered_graph_content_render):
+class RenderedGraphContent(RenderedGraphContentRender):
     # deprecated-v0.15.32
     warnings.warn(
         """Importing the class RenderedGraphContent from great_expectations.render is deprecated as of v0.15.32\
@@ -71,7 +67,7 @@ in v0.18. Please import class RenderedGraphContent from great_expectations.rende
     )
 
 
-class RenderedStringTemplateContent(rendered_string_template_content_render):
+class RenderedStringTemplateContent(RenderedStringTemplateContentRender):
     # deprecated-v0.15.32
     warnings.warn(
         """Importing the class RenderedStringTemplateContent from great_expectations.render is deprecated as of v0.15.32\
@@ -81,7 +77,7 @@ in v0.18. Please import class RenderedStringTemplateContent from great_expectati
     )
 
 
-class RenderedTableContent(rendered_table_content_render):
+class RenderedTableContent(RenderedTableContentRender):
     # deprecated-v0.15.32
     warnings.warn(
         """Importing the class RenderedTableContent from great_expectations.render is deprecated as of v0.15.32\
