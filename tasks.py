@@ -357,3 +357,40 @@ def docker(
         )
 
     ctx.run(" ".join(cmds), echo=True, pty=True)
+
+@invoke.task(
+    help={
+        "clean": "Clean out existing documentation first. Defaults to True.",
+        "api_docs": "Build api docs stubs. Defaults to False.",
+    }
+)
+def docs(
+    ctx,
+    clean=True,
+    api_docs=False,
+):
+    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    curdir = os.path.realpath(os.getcwd())
+    if filedir != curdir:
+        raise invoke.Exit(
+            "The docs task must be invoked from the same directory as the task.py file at the top of the repo.",
+            code=1,
+        )
+
+    os.chdir("docs/api_docs")
+
+    # Remove existing sphinx api docs
+    if clean:
+        cmds = ["make clean"]
+        ctx.run(" ".join(cmds), echo=True, pty=True)
+
+    # Build fresh api doc stubs
+    if api_docs:
+        cmds = ["sphinx-apidoc -o . ../../great_expectations"]
+        ctx.run(" ".join(cmds), echo=True, pty=True)
+
+    # Build html api documentation
+    cmds = ["make html"]
+    ctx.run(" ".join(cmds), echo=True, pty=True)
+
+    os.chdir(curdir)
