@@ -1,6 +1,7 @@
 datasources:
   my_demo_datasource:
-    engine: pandas
+    type: pandas
+    engine: pandas # TODO: remove this in favor of `type`??
     version: 2.0
     name: my_demo_datasource # TODO: remove name
     assets:
