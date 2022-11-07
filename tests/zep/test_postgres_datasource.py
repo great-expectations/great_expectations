@@ -285,26 +285,28 @@ def test_datasource_gets_batch_list_named_splitter():
 
 
 def test_datasource_gets_batch_list_using_invalid_splitter_name():
-    source = _source()
-    asset = source.add_table_asset(name="my_asset", table_name="my_table")
-    asset.add_year_and_month_splitter(column_name="my_col", name="splitter_name")
-    assert_table_asset(
-        asset,
-        "my_asset",
-        "my_table",
-        source,
-        {"splitter_name": {"month": "<value>", "year": "<value>"}},
-    )
-    with pytest.raises(postgres_datasource.PostgresDatasourceError):
-        # This raises because we've named the splitter but we didn't specify the name in the batch request options
-        # The batch_request_options should look like {"splitter": {"month": 1, "year": 2}} but instead looks like
-        # {"month": 1, "year": 2}
-        source.get_batch_list_from_batch_request(
-            asset.get_batch_request({"month": 1, "year": 2})
+    with sqlachemy_execution_engine_mock(lambda x: None):
+        source = _source()
+        asset = source.add_table_asset(name="my_asset", table_name="my_table")
+        asset.add_year_and_month_splitter(column_name="my_col", name="splitter_name")
+        assert_table_asset(
+            asset,
+            "my_asset",
+            "my_table",
+            source,
+            {"splitter_name": {"month": "<value>", "year": "<value>"}},
         )
+        with pytest.raises(postgres_datasource.PostgresDatasourceError):
+            # This raises because we've named the splitter but we didn't specify the name in the batch request options
+            # The batch_request_options should look like {"splitter": {"month": 1, "year": 2}} but instead looks like
+            # {"month": 1, "year": 2}
+            source.get_batch_list_from_batch_request(
+                asset.get_batch_request({"month": 1, "year": 2})
+            )
 
 
 def test_datasource_gets_nonexistent_asset():
-    source = _source()
-    with pytest.raises(postgres_datasource.PostgresDatasourceError):
-        source.get_asset("my_asset")
+    with sqlachemy_execution_engine_mock(lambda x: None):
+        source = _source()
+        with pytest.raises(postgres_datasource.PostgresDatasourceError):
+            source.get_asset("my_asset")
