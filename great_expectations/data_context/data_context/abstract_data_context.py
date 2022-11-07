@@ -3138,6 +3138,15 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     @staticmethod
     def _determine_save_changes_flag(save_changes: Optional[bool]) -> bool:
+        """
+        This method is meant to enable the gradual deprecation of the `save_changes` boolean
+        flag on various Datasource CRUD methods. Moving forward, we will always persist changes
+        made by these CRUD methods (a.k.a. the behavior created by save_changes=True).
+
+        As part of this effort, `save_changes` has been set to `None` as a default value
+        and will be automatically converted to `True` within this method. If a user passes in a boolean
+        value (thereby bypassing the default arg of `None`), a deprecation warning will be raised.
+        """
         if save_changes is not None:
             # deprecated-v0.15.32
             warnings.warn(
