@@ -153,14 +153,14 @@ class CloudDataContext(AbstractDataContext):
 
         :return: the configuration object retrieved from the Cloud API
         """
-        base_url = ge_cloud_config.base_url  # type: ignore[union-attr]
-        organization_id = ge_cloud_config.organization_id  # type: ignore[union-attr]
+        base_url = ge_cloud_config.base_url
+        organization_id = ge_cloud_config.organization_id
         ge_cloud_url = (
             f"{base_url}/organizations/{organization_id}/data-context-configuration"
         )
         headers = {
             "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {ge_cloud_config.access_token}",  # type: ignore[union-attr]
+            "Authorization": f"Bearer {ge_cloud_config.access_token}",
             "Gx-Version": __version__,
         }
 
@@ -311,7 +311,7 @@ class CloudDataContext(AbstractDataContext):
 
     def _init_variables(self) -> CloudDataContextVariables:
         ge_cloud_base_url: str = self._ge_cloud_config.base_url
-        ge_cloud_organization_id: str = self._ge_cloud_config.organization_id  # type: ignore[union-attr,assignment]
+        ge_cloud_organization_id: str = self._ge_cloud_config.organization_id  # type: ignore[assignment]
         ge_cloud_access_token: str = self._ge_cloud_config.access_token
 
         variables = CloudDataContextVariables(

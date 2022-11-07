@@ -74,6 +74,8 @@ stages:
 
                 [GEChanged]
                 great_expectations/**/*.py
+                pyproject.toml
+                setup.cfg
                 tests/**
                 /*.txt
                 /*.yml
@@ -119,7 +121,7 @@ stages:
       steps:
       - script: |
           pip install mypy invoke
-          invoke type-check --install-types
+          invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
     - job: docstring_checker
@@ -177,9 +179,9 @@ stages:
           # To work as intended, "standard" and "slow" should be equally performant.
           matrix:
             standard:
-              pytest_args: 'tests --ignore "tests/rule_based_profiler"'
+              pytest_args: 'tests --ignore "tests/rule_based_profiler" --ignore "tests/integration"'
             slow:
-              pytest_args: 'tests/rule_based_profiler'
+              pytest_args: 'tests/rule_based_profiler tests/integration'
 
         steps:
           - task: UsePythonVersion@0
@@ -219,7 +221,6 @@ stages:
               pytest $(pytest_args) \
                 --no-sqlalchemy \
                 --ignore 'tests/cli' \
-                --ignore 'contrib/cli/tests' \
                 --ignore 'tests/integration/usage_statistics' \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -256,9 +257,9 @@ stages:
           # To work as intended, "standard" and "slow" should be equally performant.
           matrix:
             standard:
-              pytest_args: 'tests --ignore "tests/rule_based_profiler"'
+              pytest_args: 'tests --ignore "tests/rule_based_profiler" --ignore "tests/integration"'
             slow:
-              pytest_args: 'tests/rule_based_profiler'
+              pytest_args: 'tests/rule_based_profiler tests/integration'
 
         services:
           postgres: postgres
@@ -291,7 +292,6 @@ stages:
                 --postgresql \
                 --spark \
                 --ignore 'tests/cli' \
-                --ignore 'contrib/cli/tests' \
                 --ignore 'tests/integration/usage_statistics' \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \

@@ -10,7 +10,7 @@ This guide demonstrates how to choose which <TechnicalTag tag="data_connector" t
 
 <Prerequisites>
 
-- [Understand the basics of Datasources in the V3 (Batch Request) API](../../reference/datasources.md)
+- [Understand the basics of Datasources in the V3 (Batch Request) API](../../terms/datasource.md)
 - Learned how to configure a [Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
 </Prerequisites>

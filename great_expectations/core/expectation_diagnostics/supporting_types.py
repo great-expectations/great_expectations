@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 import logging
 from dataclasses import dataclass, field
@@ -10,7 +12,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.types import SerializableDictDot
 
 
-class Maturity(Enum):
+class Maturity(str, Enum):
     """The four levels of maturity for features within Great Expectations"""
 
     CONCEPT_ONLY = "CONCEPT_ONLY"
@@ -150,9 +152,7 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     message: str
     passed: bool
     doc_url: Optional[str] = None
-    sub_messages: List["ExpectationDiagnosticCheckMessage"] = field(
-        default_factory=list
-    )
+    sub_messages: List[ExpectationDiagnosticCheckMessage] = field(default_factory=list)
 
 
 @dataclass
