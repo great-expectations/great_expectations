@@ -2659,15 +2659,22 @@ def cloud_data_context_with_datasource_pandas_engine(
                 - default_identifier_name
         """,
     )
+
+    # DatasourceStore.set() in a Cloud-back env usually makes an external HTTP request
+    # and returns the config it persisted. This side effect enables us to mimick that
+    # behavior while avoiding requests.
+    def mock_set_side_effect(key, value):
+        return value
+
     with mock.patch(
         "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
     ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
-    ), pytest.deprecated_call():
+        "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
+        side_effect=mock_set_side_effect,
+    ):
         context.add_datasource(
             "my_datasource",
             **config,
-            save_changes=False,
         )
     return context
 
