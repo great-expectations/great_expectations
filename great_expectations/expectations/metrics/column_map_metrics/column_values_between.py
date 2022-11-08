@@ -2,7 +2,6 @@ import datetime
 import warnings
 from typing import Optional, Union
 
-import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
@@ -89,9 +88,9 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 temp_column, min_value, max_value, strict_min, strict_max
             )
         elif (
-            column.dtype == np.dtype("datetime64[ns]")
-            and not allow_cross_type_comparisons
-        ):
+            isinstance(column.dtype, pd.DatetimeTZDtype)
+            or pd.api.types.is_datetime64_ns_dtype(column.dtype)
+        ) and (not allow_cross_type_comparisons):
             # NOTE: 20220818 - JPC
             # we parse the *parameters* that we will be comparing here because it is possible
             # that the user could have started with a true datetime, but that was converted to a string

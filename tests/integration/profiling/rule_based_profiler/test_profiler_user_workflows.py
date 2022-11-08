@@ -416,7 +416,7 @@ def test_alice_profiler_user_workflow_single_batch(
 
 
 @freeze_time(TIMESTAMP)
-@pytest.mark.slow  # 1.39s
+@pytest.mark.slow  # 0.86s
 @pytest.mark.integration
 def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     alice_validator: Validator,
@@ -439,13 +439,12 @@ def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_con
         "column": "id",
         "include_config": True,
         "mostly": 1.0,
-        "regex": "(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",
+        "regex": "-?\\d+",
         "result_format": "SUMMARY",
     }
 
 
 @freeze_time(TIMESTAMP)
-@pytest.mark.slow  # 1.33s
 @pytest.mark.integration
 def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     alice_validator: Validator,
@@ -470,7 +469,7 @@ def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler
         "column": "id",
         "include_config": True,
         "mostly": 1.0,
-        "regex": "(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",
+        "regex": "-?\\d+",
         "result_format": "SUMMARY",
     }
 
@@ -596,7 +595,6 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
             "batch_id": validator_latest.active_batch_id,
         },
         "metric_value_kwargs": None,
-        "metric_dependencies": None,
     }
     metric_value: int = validator_latest.get_metric(
         metric=MetricConfiguration(**metric_configuration_arguments)

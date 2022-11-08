@@ -87,7 +87,6 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
                     my_first_data_asset:
                         table_name: table_1
                     my_second_data_asset:
-                        include_schema_name: True
                         schema_name: main
                         table_name: table_2
                     table_1: {{}}
@@ -794,331 +793,6 @@ def test_basic_instantiation_with_bigquery_creds_failure_pkey(sa):
         )
 
 
-# Note: Abe 2020111: this test belongs with the data_connector tests, not here.
-@pytest.mark.integration
-def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine):
-    # Note: Abe 2020111: this test currently only uses a sqlite fixture.
-    # We should extend this to at least include postgresql in the unit tests.
-    # Other DBs can be run as integration tests.
-
-    my_data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "InferredAssetSqlDataConnector",
-            "name": "my_test_data_connector",
-        },
-        runtime_environment={
-            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
-            "datasource_name": "my_test_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-
-    assert my_data_connector._introspect_db() == [
-        {
-            "schema_name": "main",
-            "table_name": "table_containing_id_spacers_for_D",
-            "type": "table",
-        },
-        {"schema_name": "main", "table_name": "table_full__I", "type": "table"},
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_date_column__A",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_foreign_key__F",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_incrementing_batch_id__E",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_multiple_columns__G",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_timestamp_column__B",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_that_should_be_partitioned_by_random_hash__H",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_with_fk_reference_from_F",
-            "type": "table",
-        },
-        {"schema_name": "main", "table_name": "view_by_date_column__A", "type": "view"},
-        {
-            "schema_name": "main",
-            "table_name": "view_by_incrementing_batch_id__E",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_multiple_columns__G",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_regularly_spaced_incrementing_id_column__C",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_timestamp_column__B",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_containing_id_spacers_for_D",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_partitioned_by_foreign_key__F",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_that_should_be_partitioned_by_random_hash__H",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_with_fk_reference_from_F",
-            "type": "view",
-        },
-    ]
-
-    assert my_data_connector._introspect_db(schema_name="main") == [
-        {
-            "schema_name": "main",
-            "table_name": "table_containing_id_spacers_for_D",
-            "type": "table",
-        },
-        {"schema_name": "main", "table_name": "table_full__I", "type": "table"},
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_date_column__A",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_foreign_key__F",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_incrementing_batch_id__E",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_multiple_columns__G",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_timestamp_column__B",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_that_should_be_partitioned_by_random_hash__H",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_with_fk_reference_from_F",
-            "type": "table",
-        },
-        {"schema_name": "main", "table_name": "view_by_date_column__A", "type": "view"},
-        {
-            "schema_name": "main",
-            "table_name": "view_by_incrementing_batch_id__E",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_multiple_columns__G",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_regularly_spaced_incrementing_id_column__C",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_timestamp_column__B",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_containing_id_spacers_for_D",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_partitioned_by_foreign_key__F",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_that_should_be_partitioned_by_random_hash__H",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_with_fk_reference_from_F",
-            "type": "view",
-        },
-    ]
-
-    assert my_data_connector._introspect_db(schema_name="waffle") == []
-
-    # This is a weak test, since this db doesn't have any additional schemas or system tables to show.
-    assert my_data_connector._introspect_db(
-        ignore_information_schemas_and_system_tables=False
-    ) == [
-        {
-            "schema_name": "main",
-            "table_name": "table_containing_id_spacers_for_D",
-            "type": "table",
-        },
-        {"schema_name": "main", "table_name": "table_full__I", "type": "table"},
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_date_column__A",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_foreign_key__F",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_incrementing_batch_id__E",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_multiple_columns__G",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_partitioned_by_timestamp_column__B",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_that_should_be_partitioned_by_random_hash__H",
-            "type": "table",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "table_with_fk_reference_from_F",
-            "type": "table",
-        },
-        {"schema_name": "main", "table_name": "view_by_date_column__A", "type": "view"},
-        {
-            "schema_name": "main",
-            "table_name": "view_by_incrementing_batch_id__E",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_multiple_columns__G",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_regularly_spaced_incrementing_id_column__C",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_by_timestamp_column__B",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_containing_id_spacers_for_D",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_partitioned_by_foreign_key__F",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_that_should_be_partitioned_by_random_hash__H",
-            "type": "view",
-        },
-        {
-            "schema_name": "main",
-            "table_name": "view_with_fk_reference_from_F",
-            "type": "view",
-        },
-    ]
-
-
 @pytest.mark.integration
 def test_skip_inapplicable_tables(empty_data_context):
     context = empty_data_context
@@ -1259,7 +933,7 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_second_data_asset)
 
-    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_1" (implicitly).
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "my_first_data_asset" (implicitly).
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",
@@ -1274,11 +948,11 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
 
-    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_2" (implicitly).
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "my_second_data_asset" (implicitly).
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",
-        "data_asset_name": "main.my_second_data_asset",
+        "data_asset_name": "my_second_data_asset",
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
@@ -1304,7 +978,7 @@ def test_batch_request_sql_with_schema(
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
 
-    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_2" (explicitly).
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "main.table_2" (explicitly).
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",

@@ -18,7 +18,7 @@ class ProfilerStore(ConfigurationStore):
     A ProfilerStore manages Profilers for the DataContext.
     """
 
-    _configuration_class = RuleBasedProfilerConfig  # type: ignore[assignment]
+    _configuration_class = RuleBasedProfilerConfig
 
     def serialization_self_check(self, pretty_print: bool) -> None:
         """

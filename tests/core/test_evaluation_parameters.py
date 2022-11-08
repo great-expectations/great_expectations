@@ -337,7 +337,9 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
         batch_request=RuntimeBatchRequest(**batch_request),
         expectation_suite_name=expectation_suite_name,
     )
-    column_names = [f'"{column_name}"' for column_name in validator.columns()]
+    column_names = [
+        f'"{column_name}"' for column_name in validator.metrics_calculator.columns()
+    ]
     print(f"Columns: {', '.join(column_names)}.")
 
     validator.set_evaluation_parameter("my_min", 1)

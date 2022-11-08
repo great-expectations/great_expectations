@@ -12,7 +12,7 @@ By the end of this guide, you will know when it will be most beneficial to be wo
 
 <Prerequisites>
 
-- [Understand the basics of Datasources in the V3 (Batch Request) API](../../reference/datasources.md)
+- [Understand the basics of Datasources in the V3 (Batch Request) API](../../terms/datasource.md)
 - [Understand the basics of requesting data with a Batch Requests](./how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 
 </Prerequisites>

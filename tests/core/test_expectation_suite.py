@@ -623,19 +623,6 @@ def empty_suite(empty_data_context) -> ExpectationSuite:
 
 
 @pytest.fixture
-def single_expectation_suite(
-    expect_column_values_to_be_in_set_col_a_with_meta, empty_data_context
-) -> ExpectationSuite:
-    context: DataContext = empty_data_context
-    return ExpectationSuite(
-        expectation_suite_name="warning",
-        expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
-        meta={"notes": "This is an expectation suite."},
-        data_context=context,
-    )
-
-
-@pytest.fixture
 def suite_with_table_and_column_expectations(
     expect_column_values_to_be_in_set_col_a_with_meta,
     exp2,
@@ -684,47 +671,6 @@ def baseline_suite(
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp2],
-        meta={"notes": "This is an expectation suite."},
-        data_context=context,
-    )
-
-
-@pytest.fixture
-def identical_suite(
-    expect_column_values_to_be_in_set_col_a_with_meta, exp3, empty_data_context
-) -> ExpectationSuite:
-    context: DataContext = empty_data_context
-    return ExpectationSuite(
-        expectation_suite_name="warning",
-        expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp3],
-        meta={"notes": "This is an expectation suite."},
-        data_context=context,
-    )
-
-
-@pytest.fixture
-def equivalent_suite(
-    expect_column_values_to_be_in_set_col_a_with_meta, exp3, empty_data_context
-) -> ExpectationSuite:
-    context: DataContext = empty_data_context
-    return ExpectationSuite(
-        expectation_suite_name="danger",
-        expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp3],
-        meta={
-            "notes": "This is another expectation suite, with a different name and meta"
-        },
-        data_context=context,
-    )
-
-
-@pytest.fixture
-def different_suite(
-    expect_column_values_to_be_in_set_col_a_with_meta, exp4, empty_data_context
-) -> ExpectationSuite:
-    context: DataContext = empty_data_context
-    return ExpectationSuite(
-        expectation_suite_name="warning",
-        expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp4],
         meta={"notes": "This is an expectation suite."},
         data_context=context,
     )
@@ -1089,7 +1035,7 @@ def test_expectation_suite_send_usage_message(success: bool):
     assert dc_message_spy.messages
     assert len(dc_message_spy.messages) == 1
     assert dc_message_spy.messages[0] == {
-        "event": UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION.value,
+        "event": UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION,
         "event_payload": {},
         "success": success,
     }

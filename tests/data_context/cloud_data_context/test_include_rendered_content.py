@@ -13,7 +13,7 @@ from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
 from great_expectations.data_context.types.refs import GeCloudResourceRef
-from great_expectations.render.types import RenderedAtomicContent
+from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
 

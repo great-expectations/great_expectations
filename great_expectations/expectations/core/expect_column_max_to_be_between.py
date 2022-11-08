@@ -2,7 +2,10 @@ from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.expectation import (
+    render_evaluation_parameter_string,
+)
+from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
@@ -302,7 +305,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -375,7 +378,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.stats_table.max_row")
+    @renderer(renderer_type=LegacyDescriptiveRendererType.STATS_TABLE_MAX_ROW)
     def _descriptive_stats_table_max_row_renderer(
         cls,
         configuration=None,
@@ -400,8 +403,8 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.max",

@@ -185,6 +185,11 @@ class LegacyDatasource:
         if batch_kwargs_generators is not None:
             self._datasource_config["batch_kwargs_generators"] = batch_kwargs_generators
 
+        # Chetan - 20221103 - This attribute is meant to represent the config args used to instantiate the object (before ${VARIABLE} substitution).
+        # While downstream logic should override this value, we default to `self._datasource_config` as a backup.
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.
+        self._raw_config = self._datasource_config
+
     @property
     def name(self):
         """

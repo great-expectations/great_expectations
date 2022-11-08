@@ -1,5 +1,6 @@
 import json
 import random
+from typing import List, Set
 from unittest import mock
 
 import pytest
@@ -12,7 +13,7 @@ from great_expectations.datasource.data_connector import (
     ConfiguredAssetSqlDataConnector,
     InferredAssetSqlDataConnector,
 )
-from great_expectations.datasource.data_connector.sorter import DictionarySorter
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
 
 try:
@@ -2067,3 +2068,389 @@ def test_ConfiguredAssetSqlDataConnector_return_all_batch_definitions_sorted(
     ]
 
     assert expected == sorted_batch_definition_list
+
+
+@pytest.mark.integration
+def test_introspect_db(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "my_test_data_connector",
+        },
+        runtime_environment={
+            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    assert my_data_connector._introspect_db() == [
+        {
+            "schema_name": "main",
+            "table_name": "table_containing_id_spacers_for_D",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "table_full__I", "type": "table"},
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_date_column__A",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_foreign_key__F",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_incrementing_batch_id__E",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_multiple_columns__G",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_timestamp_column__B",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_that_should_be_partitioned_by_random_hash__H",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_with_fk_reference_from_F",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "view_by_date_column__A", "type": "view"},
+        {
+            "schema_name": "main",
+            "table_name": "view_by_incrementing_batch_id__E",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_multiple_columns__G",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_regularly_spaced_incrementing_id_column__C",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_timestamp_column__B",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_containing_id_spacers_for_D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_partitioned_by_foreign_key__F",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_that_should_be_partitioned_by_random_hash__H",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_with_fk_reference_from_F",
+            "type": "view",
+        },
+    ]
+
+    assert my_data_connector._introspect_db(schema_name="main") == [
+        {
+            "schema_name": "main",
+            "table_name": "table_containing_id_spacers_for_D",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "table_full__I", "type": "table"},
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_date_column__A",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_foreign_key__F",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_incrementing_batch_id__E",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_multiple_columns__G",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_timestamp_column__B",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_that_should_be_partitioned_by_random_hash__H",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_with_fk_reference_from_F",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "view_by_date_column__A", "type": "view"},
+        {
+            "schema_name": "main",
+            "table_name": "view_by_incrementing_batch_id__E",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_multiple_columns__G",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_regularly_spaced_incrementing_id_column__C",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_timestamp_column__B",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_containing_id_spacers_for_D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_partitioned_by_foreign_key__F",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_that_should_be_partitioned_by_random_hash__H",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_with_fk_reference_from_F",
+            "type": "view",
+        },
+    ]
+
+    assert my_data_connector._introspect_db(schema_name="waffle") == []
+
+    # This is a weak test, since this db doesn't have any additional schemas or system tables to show.
+    assert my_data_connector._introspect_db(
+        ignore_information_schemas_and_system_tables=False
+    ) == [
+        {
+            "schema_name": "main",
+            "table_name": "table_containing_id_spacers_for_D",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "table_full__I", "type": "table"},
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_date_column__A",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_foreign_key__F",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_incrementing_batch_id__E",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_multiple_columns__G",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_partitioned_by_timestamp_column__B",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_that_should_be_partitioned_by_random_hash__H",
+            "type": "table",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "table_with_fk_reference_from_F",
+            "type": "table",
+        },
+        {"schema_name": "main", "table_name": "view_by_date_column__A", "type": "view"},
+        {
+            "schema_name": "main",
+            "table_name": "view_by_incrementing_batch_id__E",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_multiple_columns__G",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_regularly_spaced_incrementing_id_column__C",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_by_timestamp_column__B",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_containing_id_spacers_for_D",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_partitioned_by_foreign_key__F",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_that_should_be_partitioned_by_random_hash__H",
+            "type": "view",
+        },
+        {
+            "schema_name": "main",
+            "table_name": "view_with_fk_reference_from_F",
+            "type": "view",
+        },
+    ]
+
+
+@pytest.mark.integration
+def test_include_schema_name_introspection(mysql_sqlalchemy_datasource):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "my_test_data_connector",
+        },
+        runtime_environment={
+            "execution_engine": mysql_sqlalchemy_datasource,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    introspected_tables: List[str] = [
+        table
+        for table in my_data_connector._introspect_db()
+        if table["type"] == "table"
+    ]
+
+    introspected_schemas: Set[str] = {
+        table.get("schema_name") for table in introspected_tables
+    }
+    assert introspected_schemas == {"test_ci", "test_connection"}
+
+    # ensure that tables with the same name are referenced by both schema_name and table_name
+    # test_df exists in both connection_test and public schemas
+    for schema_name in introspected_schemas:
+        assert {
+            "schema_name": schema_name,
+            "table_name": "test_df",
+            "type": "table",
+        } in introspected_tables
+
+
+@pytest.mark.integration
+def test_include_schema_name_get_available_data_assets(
+    mysql_engine,
+):
+    execution_engine = SqlAlchemyExecutionEngine(
+        name="test_sql_execution_engine",
+        engine=mysql_engine,
+    )
+
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "inferred_data_connector",
+            "include_schema_name": True,
+        },
+        runtime_environment={
+            "execution_engine": execution_engine,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    actual_data_asset_names = my_data_connector.get_available_data_asset_names()
+
+    expected_data_asset_names = ["test_ci.test_df", "test_connection.test_df"]
+
+    assert actual_data_asset_names == expected_data_asset_names

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
@@ -39,10 +39,29 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.validator.validator import Validator
 
+if TYPE_CHECKING:
+    from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+
 
 class OnboardingDataAssistant(DataAssistant):
     """
     OnboardingDataAssistant provides dataset exploration and validation to help with Great Expectations "Onboarding".
+
+    OnboardingDataAssistant.run() Args:
+        - batch_request (BatchRequestBase or dict): The Batch Request to be passed to the Data Assistant.
+        - estimation (str): One of "exact" (default) or "flag_outliers" indicating the type of data you believe the
+            Batch Request to contain. Valid or trusted data should use "exact", while Expectations produced with data
+            that is suspected to have quality issues may benefit from "flag_outliers".
+        - include_column_names (list): A list containing the column names you wish to include.
+        - exclude_column_names (list): A list containing the column names you with to exclude.
+        - include_column_name_suffixes (list): A list containing the column name suffixes you wish to include.
+        - exclude_column_name_suffixes (list): A list containing the column name suffixes you wish to exclude.
+        - cardinality_limit_mode (str): A string defined by the CardinalityLimitMode Enum, which limits the maximum
+            unique value count allowable in column distinct value count Metrics and Expectations.
+            Some examples: "very_few", "few", and "some"; corresponding to 10, 100, and 1,000 respectively.
+
+    OnboardingDataAssistant.run() Returns:
+        OnboardingDataAssistantResult
     """
 
     __alias__: str = "onboarding"
@@ -167,7 +186,7 @@ class OnboardingDataAssistant(DataAssistant):
         """
         # Step-1: Instantiate "TableDomainBuilder" object.
 
-        table_domain_builder = TableDomainBuilder(
+        table_domain_builder: DomainBuilder = TableDomainBuilder(
             data_context=None,
         )
 
@@ -282,7 +301,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting numeric columns (but not "ID-type" columns).
 
-        numeric_column_type_domain_builder = ColumnDomainBuilder(
+        numeric_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -598,7 +617,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper datetime columns (not "datetime-looking" text).
 
-        datetime_column_type_domain_builder = ColumnDomainBuilder(
+        datetime_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -721,12 +740,8 @@ class OnboardingDataAssistant(DataAssistant):
             "strict_min": False,
             "strict_max": False,
             "false_positive_rate": 0.05,
-            "estimator": "bootstrap",
-            "n_resamples": 9999,
-            "random_seed": None,
+            "estimator": "quantiles",
             "quantile_statistic_interpolation_method": "nearest",
-            "quantile_bias_correction": False,
-            "quantile_bias_std_error_ratio_threshold": None,
             "include_estimator_samples_histogram_in_details": False,
             "truncate_values": {
                 "lower_bound": None,
@@ -758,7 +773,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
-        text_column_type_domain_builder = ColumnDomainBuilder(
+        text_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
@@ -907,7 +922,7 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.
 
-        categorical_column_type_domain_builder: CategoricalColumnDomainBuilder = (
+        categorical_column_type_domain_builder: DomainBuilder = (
             CategoricalColumnDomainBuilder(
                 include_column_names=None,
                 exclude_column_names=None,
@@ -951,16 +966,6 @@ class OnboardingDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        value_set_multi_batch_parameter_builder_for_validations: ParameterBuilder = (
-            ValueSetMultiBatchParameterBuilder(
-                name="value_set_estimator",
-                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs=None,
-                evaluation_parameter_builder_configs=None,
-                data_context=None,
-            )
-        )
-
         evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         evaluation_parameter_builder_configs = [
@@ -983,6 +988,15 @@ class OnboardingDataAssistant(DataAssistant):
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
+        value_set_multi_batch_parameter_builder_for_validations: ParameterBuilder = (
+            ValueSetMultiBatchParameterBuilder(
+                name="value_set_estimator",
+                metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                metric_value_kwargs=None,
+                evaluation_parameter_builder_configs=None,
+                data_context=None,
+            )
+        )
         validation_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **value_set_multi_batch_parameter_builder_for_validations.to_json_dict(),

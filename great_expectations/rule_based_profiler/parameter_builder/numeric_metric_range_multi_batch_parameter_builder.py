@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import itertools
+import logging
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -31,6 +34,7 @@ from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_e
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     build_numeric_range_estimation_result,
+    datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
     integer_semantic_domain_type,
 )
@@ -55,6 +59,15 @@ from great_expectations.util import (
     is_ndarray_decimal_dtype,
     is_numeric,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 MAX_DECIMALS: int = 9
 
@@ -120,7 +133,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -164,7 +177,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
                 ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
                 These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -297,7 +310,7 @@ detected.
             Attributes object, containing computed parameter values and parameter computation details metadata.
 
          The algorithm operates according to the following steps:
-         1. Obtain batch IDs of interest using BaseDataContext and BatchRequest (unless passed explicitly as argument).
+         1. Obtain batch IDs of interest using AbstractDataContext and BatchRequest (unless passed explicitly as argument).
          2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
          3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
             order to have access to all Batch objects, on each of which the specified metric_name will be computed.
@@ -433,6 +446,9 @@ detected.
 """
             )
 
+        if estimator == "exact":
+            return ExactNumericRangeEstimator()
+
         if estimator == "quantiles":
             return QuantilesNumericRangeEstimator(
                 configuration=Attributes(
@@ -444,8 +460,20 @@ detected.
                 )
             )
 
-        if estimator == "exact":
-            return ExactNumericRangeEstimator()
+        # Since complex numerical calculations do not support DateTime/TimeStamp data types, use "quantiles" estimator.
+        if datetime_semantic_domain_type(domain=domain):
+            logger.info(
+                f'Estimator "{estimator}" does not support DateTime/TimeStamp data types (downgrading to "quantiles").'
+            )
+            return QuantilesNumericRangeEstimator(
+                configuration=Attributes(
+                    {
+                        "false_positive_rate": self.false_positive_rate,
+                        "round_decimals": round_decimals,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                    }
+                )
+            )
 
         if estimator == "bootstrap":
             return BootstrapNumericRangeEstimator(
@@ -534,7 +562,10 @@ detected.
             2,
             NUM_HISTOGRAM_BINS + 1,
         )
-        datetime_detected: bool = self._is_metric_values_ndarray_datetime_dtype(
+
+        datetime_detected: bool = datetime_semantic_domain_type(
+            domain=domain
+        ) or self._is_metric_values_ndarray_datetime_dtype(
             metric_values=metric_values,
             metric_value_vector_indices=metric_value_vector_indices,
         )
@@ -659,7 +690,9 @@ detected.
         for metric_value_idx in metric_value_vector_indices:
             metric_value_vector = metric_values[metric_value_idx]
             if not is_ndarray_datetime_dtype(
-                data=metric_value_vector, parse_strings_as_datetimes=True
+                data=metric_value_vector,
+                parse_strings_as_datetimes=True,
+                fuzzy=False,
             ):
                 return False
 

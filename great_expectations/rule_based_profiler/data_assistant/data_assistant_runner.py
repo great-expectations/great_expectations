@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from enum import Enum
 from inspect import Parameter, Signature, getattr_static, signature
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
 
 from makefun import create_function
 
@@ -29,6 +31,11 @@ from great_expectations.rule_based_profiler.helpers.runtime_environment import (
     build_variables_directives,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class NumericRangeEstimatorType(Enum):
     EXACT = "exact"
@@ -45,13 +52,13 @@ class DataAssistantRunner:
 
     def __init__(
         self,
-        data_assistant_cls: Type["DataAssistant"],  # noqa: F821
-        data_context: "BaseDataContext",  # noqa: F821
+        data_assistant_cls: Type[DataAssistant],
+        data_context: AbstractDataContext,
     ) -> None:
         """
         Args:
             data_assistant_cls: DataAssistant class associated with this DataAssistantRunner
-            data_context: BaseDataContext associated with this DataAssistantRunner
+            data_context: AbstractDataContext associated with this DataAssistantRunner
         """
         self._data_assistant_cls = data_assistant_cls
         self._data_context = data_context
@@ -193,6 +200,8 @@ class DataAssistantRunner:
         func_sig = Signature(
             parameters=parameters, return_annotation=DataAssistantResult
         )
+        # override the runner docstring with the docstring defined in the implemented DataAssistant child-class
+        run.__doc__ = self._data_assistant_cls.__doc__
         gen_func: Callable = create_function(func_signature=func_sig, func_impl=run)
 
         return gen_func
@@ -301,8 +310,9 @@ class DataAssistantRunner:
                         annotation=accessor_method_return_type,
                     )
                     domain_type_attribute_name_to_parameter_map[key] = parameter
-                elif parameter.default != property_value:
-                    # For now, prevent customization if default values conflict.  In the future, enable at "Rule" level.
+                elif parameter.default != property_value and property_value is not None:
+                    # For now, prevent customization if default values conflict unless the default DomainBuilder value
+                    # is None. In the future, enable at "Rule" level.
                     domain_type_attribute_name_to_parameter_map.pop(key)
                     conflicting_domain_type_attribute_names.append(key)
 
