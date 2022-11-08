@@ -283,7 +283,6 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
         metric_value_kwargs={
             "parse_strings_as_datetimes": False,
         },
-        metric_dependencies=None,
     )
 
     class PandasExecutionEngineFake:

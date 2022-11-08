@@ -1,7 +1,4 @@
-import json
-from typing import Callable, Dict, Optional
-
-from numpy import array
+from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -29,11 +26,6 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     CollapseContent,
     RenderedStringTemplateContent,
-)
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -108,7 +100,6 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
 
         return dependencies
