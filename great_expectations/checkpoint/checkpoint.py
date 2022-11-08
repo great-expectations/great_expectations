@@ -5,6 +5,7 @@ import datetime
 import json
 import logging
 import os
+from types import NoneType
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from uuid import UUID
 
@@ -126,6 +127,7 @@ class BaseCheckpoint(ConfigPeer):
         run_time = run_time or datetime.datetime.now()
         runtime_configuration = runtime_configuration or {}
         result_format = result_format or runtime_configuration.get("result_format")
+        assert isinstance(result_format, (NoneType, str, dict))
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
         validations = get_validations_with_batch_request_as_dict(
