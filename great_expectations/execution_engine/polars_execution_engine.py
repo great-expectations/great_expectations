@@ -442,13 +442,6 @@ Notes:
                 f'Unable to find reader_method "{reader_method}" in polars.'
             )
 
-    @abc.abstractmethod
-    def resolve_metric_bundle(
-        self, metric_fn_bundle
-    ) -> Dict[Tuple[str, str, str], Any]:
-        """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
-        pass  # This method is NO-OP for PolarsExecutionEngine (no bundling for direct execution computational backend).
-
     def get_domain_records(  # noqa: C901
         self,
         domain_kwargs: dict,
