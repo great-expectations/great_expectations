@@ -1,5 +1,10 @@
 import warnings
+from typing import List, Optional, Union
 
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+)
 from great_expectations.render import CollapseContent as CollapseContentRender
 from great_expectations.render import (
     RenderedAtomicContent as RenderedAtomicContentRender,
@@ -86,11 +91,21 @@ class CollapseContent(CollapseContentRender):
 
 class RenderedAtomicContent(RenderedAtomicContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedAtomicContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        name: Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType],
+        value: RenderedAtomicValueRender,
+        value_type: Optional[str] = None,
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            name=name,
+            value=value,
+            value_type=value_type,
+        )
 
 
 class RenderedAtomicContentSchema(RenderedAtomicContentSchemaRender):
@@ -104,20 +119,44 @@ class RenderedAtomicContentSchema(RenderedAtomicContentSchemaRender):
 
 class RenderedAtomicValue(RenderedAtomicValueRender):
     # deprecated-v0.15.32
-    classname = "RenderedAtomicValue"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        schema: Optional[dict] = None,
+        header: Optional[RenderedAtomicValueRender] = None,
+        template: Optional[str] = None,
+        params: Optional[dict] = None,
+        header_row: Optional[List[RenderedAtomicValueRender]] = None,
+        table: Optional[List[List[RenderedAtomicValueRender]]] = None,
+        graph: Optional[dict] = None,
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            schema=schema,
+            header=header,
+            template=template,
+            params=params,
+            header_row=header_row,
+            table=table,
+            graph=graph,
+        )
 
 
 class RenderedAtomicValueGraph(RenderedAtomicValueGraphRender):
     # deprecated-v0.15.32
-    classname = "RenderedAtomicValueGraph"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        graph: Optional[dict] = None,
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            graph=graph,
+        )
 
 
 class RenderedAtomicValueSchema(RenderedAtomicValueSchemaRender):
@@ -131,29 +170,67 @@ class RenderedAtomicValueSchema(RenderedAtomicValueSchemaRender):
 
 class RenderedBootstrapTableContent(RenderedBootstrapTableContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedBootstrapTableContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        table_data,
+        table_columns,
+        title_row=None,
+        table_options=None,
+        header=None,
+        subheader=None,
+        styling=None,
+        content_block_type="bootstrap_table",
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            table_data=table_data,
+            table_columns=table_columns,
+            title_row=title_row,
+            table_options=table_options,
+            header=header,
+            subheader=subheader,
+            styling=styling,
+            content_block_type=content_block_type,
+        )
 
 
 class RenderedBulletListContent(RenderedBulletListContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedBulletListContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        bullet_list,
+        header=None,
+        subheader=None,
+        styling=None,
+        content_block_type="bullet_list",
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            bullet_list=bullet_list,
+            header=header,
+            subheader=subheader,
+            styling=styling,
+            content_block_type=content_block_type,
+        )
 
 
 class RenderedComponentContent(RenderedComponentContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedComponentContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(self, content_block_type, styling=None):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            content_block_type=content_block_type,
+            styling=styling,
+        )
 
 
 class RenderedContent(RenderedContentRender):
@@ -167,98 +244,227 @@ class RenderedContent(RenderedContentRender):
 
 class RenderedContentBlockContainer(RenderedContentBlockContainerRender):
     # deprecated-v0.15.32
-    classname = "RenderedContentBlockContainer"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self, content_blocks, styling=None, content_block_type="content_block_container"
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            content_blocks=content_blocks,
+            styling=styling,
+            content_block_type=content_block_type,
+        )
 
 
 class RenderedDocumentContent(RenderedDocumentContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedDocumentContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        sections,
+        data_asset_name=None,
+        full_data_asset_identifier=None,
+        renderer_type=None,
+        page_title=None,
+        utm_medium=None,
+        cta_footer=None,
+        expectation_suite_name=None,
+        batch_kwargs=None,
+        batch_spec=None,
+        ge_cloud_id=None,
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            sections=sections,
+            data_asset_name=data_asset_name,
+            full_data_asset_identifier=full_data_asset_identifier,
+            renderer_type=renderer_type,
+            page_title=page_title,
+            utm_medium=utm_medium,
+            cta_footer=cta_footer,
+            expectation_suite_name=expectation_suite_name,
+            batch_kwargs=batch_kwargs,
+            batch_spec=batch_spec,
+            ge_cloud_id=ge_cloud_id,
+        )
 
 
 class RenderedGraphContent(RenderedGraphContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedGraphContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        graph,
+        header=None,
+        subheader=None,
+        styling=None,
+        content_block_type="graph",
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            graph=graph,
+            header=header,
+            subheader=subheader,
+            styling=styling,
+            content_block_type=content_block_type,
+        )
 
 
 class RenderedHeaderContent(RenderedHeaderContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedHeaderContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        header,
+        subheader=None,
+        header_row=None,
+        styling=None,
+        content_block_type="header",
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            header=header,
+            subheader=subheader,
+            header_row=header_row,
+            styling=styling,
+            content_block_type=content_block_type,
+        )
 
 
 class RenderedMarkdownContent(RenderedMarkdownContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedMarkdownContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(self, markdown, styling=None, content_block_type="markdown"):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            markdown=markdown,
+            styling=styling,
+            content_block_type=content_block_type,
+        )
 
 
 class RenderedSectionContent(RenderedSectionContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedSectionContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(self, content_blocks, section_name=None):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            content_blocks=content_blocks,
+            section_name=section_name,
+        )
 
 
 class RenderedStringTemplateContent(RenderedStringTemplateContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedStringTemplateContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self, string_template, styling=None, content_block_type="string_template"
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            string_template=string_template,
+            styling=styling,
+            content_block_type=content_block_type,
+        )
 
 
 class RenderedTableContent(RenderedTableContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedTableContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        table,
+        header=None,
+        subheader=None,
+        header_row=None,
+        styling=None,
+        content_block_type="table",
+        table_options=None,
+        header_row_options=None,
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            table=table,
+            header=header,
+            subheader=subheader,
+            header_row=header_row,
+            styling=styling,
+            content_block_type=content_block_type,
+            table_options=table_options,
+            header_row_options=header_row_options,
+        )
 
 
 class RenderedTabsContent(RenderedTabsContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedTabsContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            tabs=tabs,
+            header=header,
+            subheader=subheader,
+            styling=styling,
+            content_block_type=content_block_type,
+        )
 
 
 class TextContent(TextContentRender):
     # deprecated-v0.15.32
-    classname = "TextContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self, text, header=None, subheader=None, styling=None, content_block_type="text"
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            text=text,
+            header=header,
+            subheader=subheader,
+            styling=styling,
+            content_block_type=content_block_type,
+        )
 
 
 class ValueListContent(ValueListContentRender):
     # deprecated-v0.15.32
-    classname = "ValueListContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        value_list,
+        header=None,
+        subheader=None,
+        styling=None,
+        content_block_type="value_list",
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            value_list=value_list,
+            header=header,
+            subheader=subheader,
+            styling=styling,
+            content_block_type=content_block_type,
+        )
