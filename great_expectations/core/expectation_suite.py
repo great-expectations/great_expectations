@@ -35,7 +35,6 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
-    get_datetime_string_from_strftime_format,
     nested_update,
     parse_string_to_datetime,
 )
@@ -134,10 +133,7 @@ class ExpectationSuite(SerializableDictDot):
 
         citation_date = citation_date or datetime.datetime.now(datetime.timezone.utc)
         citation: Dict[str, Any] = {
-            "citation_date": get_datetime_string_from_strftime_format(
-                format_str="%Y-%m-%dT%H:%M:%S.%fZ",
-                datetime_obj=citation_date,  # type: ignore[arg-type]
-            ),
+            "citation_date": citation_date.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "batch_request": batch_request,
             "batch_definition": batch_definition,
             "batch_spec": batch_spec,

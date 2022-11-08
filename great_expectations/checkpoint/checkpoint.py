@@ -37,7 +37,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
@@ -161,9 +160,7 @@ class BaseCheckpoint(ConfigPeer):
             )
 
         if run_name is None and run_name_template is not None:
-            run_name = get_datetime_string_from_strftime_format(
-                format_str=run_name_template, datetime_obj=run_time
-            )
+            run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 

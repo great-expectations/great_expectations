@@ -422,20 +422,9 @@ def substitute_all_strftime_format_strings(
             for el in data
         ]
     elif isinstance(data, str):
-        return get_datetime_string_from_strftime_format(data, datetime_obj=datetime_obj)
+        return datetime_obj.strftime(data)
     else:
         return data
-
-
-def get_datetime_string_from_strftime_format(
-    format_str: str, datetime_obj: Optional[datetime.datetime] = None
-) -> str:
-    """
-    This utility function takes a string with strftime format elements and substitutes those elements using
-    either the provided datetime_obj or current datetime
-    """
-    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
-    return datetime_obj.strftime(format_str)
 
 
 def parse_string_to_datetime(
