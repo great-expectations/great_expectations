@@ -207,7 +207,7 @@ def test_configuration_driven_site_builder(
     site_builder = SiteBuilder(
         data_context=context,
         runtime_environment={"root_directory": context.root_directory},
-        **local_site_config
+        **local_site_config,
     )
     res = site_builder.build()
 
@@ -331,7 +331,7 @@ def test_configuration_driven_site_builder(
     team_site_builder = SiteBuilder(
         data_context=context,
         runtime_environment={"root_directory": context.root_directory},
-        **team_site_config
+        **team_site_config,
     )
     team_site_builder.clean_site()
     obs = [
@@ -355,7 +355,7 @@ def test_configuration_driven_site_builder(
     site_builder = SiteBuilder(
         data_context=context,
         runtime_environment={"root_directory": context.root_directory},
-        **local_site_config
+        **local_site_config,
     )
     res = site_builder.build()
 
@@ -439,7 +439,7 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
     site_builder = SiteBuilder(
         data_context=context,
         runtime_environment={"root_directory": context.root_directory},
-        **local_site_config
+        **local_site_config,
     )
     site_builder.build()
 
@@ -575,7 +575,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
     site_builder = SiteBuilder(
         data_context=context,
         runtime_environment={"root_directory": context.root_directory},
-        **local_site_config
+        **local_site_config,
     )
     res = site_builder.build()
 
@@ -669,7 +669,14 @@ def test_site_builder_usage_statistics_enabled(
         [index_page_path] + expectation_suite_pages + profiling_results_pages
     )
 
-    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z&dataContextId=f43d4897-385f-4366-82b0-1a8eda2bf79c"
+    data_context_id = "f43d4897-385f-4366-82b0-1a8eda2bf79c"
+    tz_data = "20190924T231836.000000Z"
+    static_logos_dir = "https://company-visual-assets.s3.amazonaws.com/logos"
+    static_logo_file = "great-expectations-long-logo.png"
+    static_logo_path = f"{static_images_dir}/{static_logo_file}"
+    expected_logo_url = (
+        f"{static_logo_path}?d={tz_data}&dataContextId={data_context_id}"
+    )
 
     for page_path in page_paths_to_check:
         with open(page_path[7:]) as f:
