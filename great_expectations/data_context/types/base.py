@@ -3010,7 +3010,8 @@ class CheckpointConfig(BaseYamlConfig):
             )
 
         if run_name is None and run_name_template is not None:
-            run_name = run_time.strftime(run_name_template)
+            if isinstance(run_time, datetime.datetime):
+                run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
