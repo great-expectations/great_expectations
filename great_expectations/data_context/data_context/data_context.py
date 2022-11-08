@@ -514,7 +514,9 @@ class DataContext(BaseDataContext):
         return True
 
     @classmethod
-    def find_context_yml_file(cls, search_start_dir: Optional[str] = None) -> str:
+    def find_context_yml_file(
+        cls, search_start_dir: Optional[str] = None
+    ) -> Optional[str]:
         """Search for the yml file starting here and moving upward."""
         yml_path = None
         if search_start_dir is None:
@@ -581,7 +583,8 @@ class DataContext(BaseDataContext):
         context = cls._attempt_context_instantiation(ge_dir)
         if not isinstance(context, DataContext):
             return False
-        return len(context.list_expectation_suites()) >= 1
+        suites = context.list_expectation_suites() or []
+        return len(suites) >= 1
 
     @classmethod
     def _attempt_context_instantiation(cls, ge_dir: str) -> Optional[DataContext]:
@@ -593,3 +596,4 @@ class DataContext(BaseDataContext):
             ge_exceptions.InvalidDataContextConfigError,
         ) as e:
             logger.debug(e)
+        return None
