@@ -1,4 +1,7 @@
-import polars as pl
+try:
+    import polars as pl
+except ImportError:
+    polars = None
 
 from great_expectations.execution_engine.execution_engine import BatchData
 
