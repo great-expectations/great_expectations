@@ -1,3 +1,4 @@
+import abc
 import datetime
 import hashlib
 import logging
@@ -441,6 +442,7 @@ Notes:
                 f'Unable to find reader_method "{reader_method}" in polars.'
             )
 
+    @abc.abstractmethod
     def resolve_metric_bundle(
         self, metric_fn_bundle
     ) -> Dict[Tuple[str, str, str], Any]:

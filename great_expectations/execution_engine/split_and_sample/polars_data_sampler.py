@@ -53,7 +53,7 @@ class PolarsDataSampler(DataSampler):
         Raises:
             SamplerError
         """
-        p: float = self.get_sampling_kwargs_value_or_default(
+        p = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec, sampling_kwargs_key="p", default_value=0.1
         )
 
@@ -80,11 +80,11 @@ class PolarsDataSampler(DataSampler):
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("mod", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("value", batch_spec)
-        column_name: str = self.get_sampling_kwargs_value_or_default(
+        column_name = self.get_sampling_kwargs_value_or_default(
             batch_spec, "column_name"
         )
-        mod: int = self.get_sampling_kwargs_value_or_default(batch_spec, "mod")
-        value: int = self.get_sampling_kwargs_value_or_default(batch_spec, "value")
+        mod = self.get_sampling_kwargs_value_or_default(batch_spec, "mod")
+        value = self.get_sampling_kwargs_value_or_default(batch_spec, "value")
 
         return df[df[column_name].apply(lambda x: x % mod == value)]
 
@@ -109,12 +109,10 @@ class PolarsDataSampler(DataSampler):
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("value_list", batch_spec)
 
-        column_name: str = self.get_sampling_kwargs_value_or_default(
+        column_name = self.get_sampling_kwargs_value_or_default(
             batch_spec, "column_name"
         )
-        value_list: int = self.get_sampling_kwargs_value_or_default(
-            batch_spec, "value_list"
-        )
+        value_list = self.get_sampling_kwargs_value_or_default(batch_spec, "value_list")
 
         return df[df[column_name].is_in(value_list)]
 
@@ -139,17 +137,17 @@ class PolarsDataSampler(DataSampler):
         """
         self.verify_batch_spec_sampling_kwargs_exists(batch_spec)
         self.verify_batch_spec_sampling_kwargs_key_exists("column_name", batch_spec)
-        column_name: str = self.get_sampling_kwargs_value_or_default(
+        column_name = self.get_sampling_kwargs_value_or_default(
             batch_spec, "column_name"
         )
-        hash_digits: int = self.get_sampling_kwargs_value_or_default(
+        hash_digits = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec, sampling_kwargs_key="hash_digits", default_value=1
         )
-        hash_value: str = self.get_sampling_kwargs_value_or_default(
+        hash_value = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec, sampling_kwargs_key="hash_value", default_value="f"
         )
 
-        hash_function_name: str = self.get_sampling_kwargs_value_or_default(
+        hash_function_name = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec,
             sampling_kwargs_key="hash_function_name",
             default_value="md5",
