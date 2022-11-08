@@ -23,7 +23,12 @@ if __name__ == "__main__":
 
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.zep.context import get_context
-from great_expectations.zep.interfaces import DataAsset, Datasource
+from great_expectations.zep.interfaces import (
+    BatchRequest,
+    BatchRequestOptions,
+    DataAsset,
+    Datasource,
+)
 
 
 class FileAsset(DataAsset):
@@ -32,10 +37,16 @@ class FileAsset(DataAsset):
     delimiter: str = ","
     ...
 
+    def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
+        return BatchRequest("datasource_name", "data_asset_name", options or {})
+
 
 class MyOtherAsset(DataAsset):
     type: Literal["file"] = "file"
     ...
+
+    def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
+        return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 
 class PandasDatasource(Datasource):
