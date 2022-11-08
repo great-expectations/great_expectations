@@ -33,6 +33,7 @@ def context_sources_cleanup() -> _SourceFactories:
             _SourceFactories._SourceFactories__source_factories
         )
         type_lookup_copy = copy.deepcopy(_SourceFactories.type_lookup)
+        engine_lookup_copy = copy.deepcopy(_SourceFactories.engine_lookup)
         sources = get_context().sources
 
         assert (
@@ -43,6 +44,7 @@ def context_sources_cleanup() -> _SourceFactories:
     finally:
         _SourceFactories._SourceFactories__source_factories = sources_copy
         _SourceFactories.type_lookup = type_lookup_copy
+        _SourceFactories.engine_lookup = engine_lookup_copy
 
 
 @pytest.fixture(scope="function")
@@ -122,8 +124,10 @@ class TestMetaDatasource:
 
         assert len(asset_types) == len(registered_type_names)
 
-    def test__new__updates_engine_lookup(self, context_sources_clean: _SourceFactories):
-        engine_lookup = context_sources_clean.engine_lookup
+    def test__new__updates_engine_lookup(
+        self, context_sources_cleanup: _SourceFactories
+    ):
+        engine_lookup = context_sources_cleanup.engine_lookup
         num_engines_initial = len(engine_lookup)
 
         class FooAsset(DataAsset):
@@ -142,7 +146,7 @@ class TestMetaDatasource:
         assert len(engine_lookup) == num_engines_initial + 2
 
 
-def test_minimal_ds_to_asset_flow(context_sources_clean):
+def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
 
     class RedAsset(DataAsset):
