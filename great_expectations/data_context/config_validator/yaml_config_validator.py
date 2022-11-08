@@ -48,7 +48,7 @@ try:
     from typing import Literal
 except ImportError:
     # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[misc]
+    from typing_extensions import Literal  # type: ignore[assignment]
 
 # TODO: check if this can be refactored to use YAMLHandler class
 yaml = YAML()

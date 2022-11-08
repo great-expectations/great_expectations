@@ -1,9 +1,10 @@
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 # Migration Guide
 
-While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including [data docs](../../reference/data_docs.md) and [profilers](../../reference/profilers.md) as well as [validation](../../reference/validation.md).
+While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including <TechnicalTag tag="data_docs" text="Data Docs"/> and <TechnicalTag tag="profiler" text="Profilers"/> as well as <TechnicalTag tag="validation" text="Validations"/>.
 
 The Batch Request (V3) API was introduced as part of the 0.13 major release of Great Expectations, with an improved Checkpoints feature introduced as part of the 0.13.7 release. The Batch Request (V3) API includes a group of new features based on "new style" Datasources and Modular Expectations, as well as a deprecation of Validation Operators.  These offer a number of advantages including an improved experience around deploying and maintaining Great Expectations in production.
 
@@ -317,7 +318,7 @@ The example V2-style Checkpoint contains:
 
 The example V3-style Checkpoint contains:
   - A `Checkpoint` class with `config_version` populated (`1.0` in our example below).
-  - A list of `validations`, which contain [BatchRequests](../../reference/datasources.md#batches) that will be used to run the Checkpoint.
+  - A list of `validations`, which contain <TechnicalTag tag="batch_request" text="Batch Requests"/> that will be used to run the Checkpoint.
   - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
 
 :::note Migrating ExpectationSuites
@@ -397,7 +398,7 @@ The example V2-style Checkpoint contains:
 
 The example V3-style Checkpoint contains:
   - A `Checkpoint` class with `config_version` populated (`1.0` in our example below).
-  - A list of `validations`, which contain [BatchRequests](../../reference/datasources.md#batches) that will be used to run the Checkpoint.
+  - A list of `validations`, which contain <TechnicalTag tag="batch_request" text="Batch Requests"/> that will be used to run the Checkpoint.
   - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
 
 :::note Migrating ExpectationSuites
@@ -476,7 +477,7 @@ The example V2-style Checkpoint contains:
 
 The example V3-style Checkpoint contains:
   - A `Checkpoint` class with `config_version` populated (`1.0` in our example below).
-  - A list of `validations`, which contain [BatchRequests](../../reference/datasources.md#batches) that will be used to run the Checkpoint.
+  - A list of `validations`, which contain <TechnicalTag tag="batch_request" text="Batch Requests"/> that will be used to run the Checkpoint.
   - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
 
 :::note Migrating ExpectationSuites
@@ -1029,9 +1030,9 @@ If you run into any issues, please ask for help on [Slack](https://greatexpectat
 
 In version 0.7, GE introduced several new features, and significantly changed the way DataContext objects work:
 
- - A [DataContext](../../reference/data_context.md) object manages access to expectation suites and other configuration in addition to data assets.
+ - A <TechnicalTag tag="data_context" text="Data Context"/> object manages access to expectation suites and other configuration in addition to data assets.
    - It provides a flexible but opinionated structure for creating and storing configuration and expectations in version control.
 
- - When upgrading from prior versions, the new [datasource](../../reference/datasources.md) objects provide the same functionality that compute-environment-specific data context objects provided before, but with significantly more flexibility.
+ - When upgrading from prior versions, the new <TechnicalTag tag="datasource" text="Datasource"/> objects provide the same functionality that compute-environment-specific data context objects provided before, but with significantly more flexibility.
 
- - The term "autoinspect" is no longer used directly, having been replaced by a much more flexible [profiler](../../reference/profilers.md) feature.
+ - The term "autoinspect" is no longer used directly, having been replaced by a much more flexible <TechnicalTag tag="profiler" text="Profiler"/> feature.
