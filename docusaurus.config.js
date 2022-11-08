@@ -30,6 +30,8 @@ module.exports = {
       indexName: 'docs-greatexpectations',
 
       searchPagePath: 'search',
+      
+      schedule: 'every 1 day',
 
       // Optional: see doc section below
       // contextualSearch: true,
