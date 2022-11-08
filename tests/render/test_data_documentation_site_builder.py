@@ -673,7 +673,7 @@ def test_site_builder_usage_statistics_enabled(
     tz_data = "20190924T231836.000000Z"
     static_logos_dir = "https://company-visual-assets.s3.amazonaws.com/logos"
     static_logo_file = "great-expectations-long-logo.png"
-    static_logo_path = f"{static_images_dir}/{static_logo_file}"
+    static_logo_path = f"{static_logos_dir}/{static_logo_file}"
     expected_logo_url = (
         f"{static_logo_path}?d={tz_data}&dataContextId={data_context_id}"
     )
