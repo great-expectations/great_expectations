@@ -875,7 +875,6 @@ def test_ConfigOnlyDataContext__initialization(
     config_path = str(
         tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
     )
-    breakpoint()
     context = BaseDataContext(
         basic_data_context_config,
         config_path,
