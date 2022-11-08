@@ -244,7 +244,6 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         pass
 
     try:
-        breakpoint()
         # MSSQL
         if isinstance(dialect.dialect, sa.dialects.mssql.dialect):
             if positive:
