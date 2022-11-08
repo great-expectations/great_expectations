@@ -466,7 +466,7 @@ class DataContext(BaseDataContext):
     ) -> Optional[float]:
         yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
         if yml_path is None:
-            return
+            return None
 
         with open(yml_path) as f:
             config_commented_map_from_yaml = yaml.load(f)
@@ -583,8 +583,7 @@ class DataContext(BaseDataContext):
         context = cls._attempt_context_instantiation(ge_dir)
         if not isinstance(context, DataContext):
             return False
-        suites = context.list_expectation_suites() or []
-        return len(suites) >= 1
+        return bool(context.list_expectation_suites())
 
     @classmethod
     def _attempt_context_instantiation(cls, ge_dir: str) -> Optional[DataContext]:
