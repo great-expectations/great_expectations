@@ -1,5 +1,5 @@
 from collections import UserDict
-from typing import Hashable, Iterable, Mapping, Optional, Set, Type, Union
+from typing import Hashable, Iterable, Mapping, Optional, Set, Type, Union, overload
 
 from typing_extensions import TypeAlias
 
@@ -32,6 +32,14 @@ class TypeLookup(
     ):
         __dict = __dict or {}
         super().__init__(__dict, **kwargs)
+
+    @overload
+    def __getitem__(self, key: str) -> Type:
+        ...
+
+    @overload
+    def __getitem__(self, key: Type) -> str:
+        ...
 
     def __getitem__(self, key: ValidTypes) -> ValidTypes:
         return super().__getitem__(key)
