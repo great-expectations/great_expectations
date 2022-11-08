@@ -291,6 +291,7 @@ stages:
               pytest $(pytest_args) \
                 --postgresql \
                 --spark \
+                --polars \
                 --ignore 'tests/cli' \
                 --ignore 'tests/integration/usage_statistics' \
                 --napoleon-docstrings \
