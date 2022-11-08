@@ -28,7 +28,6 @@ from typing import (
 
 import numpy as np
 import pandas as pd
-import polars as pl
 from dateutil.parser import parse
 
 from great_expectations.core import (
@@ -78,6 +77,27 @@ if TYPE_CHECKING:
     from sqlalchemy.engine import Connection
 
     from great_expectations.data_context import DataContext
+
+try:
+    import polars as pl
+
+    DataFrame = pl.DataFrame
+    from_numpy = pl.from_numpy
+    Datetime = pl.Datetime
+    Date = pl.Date
+    datatypes = pl.datatypes
+    lit = pl.lit
+    Series = pl.Series
+except ImportError:
+    polars = None
+    DataFrame = None
+    from_numpy = None
+    Datetime = None
+    Date = None
+    datatypes = None
+    lit = None
+    Series = None
+
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
@@ -1255,7 +1275,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         return build_pandas_validator_with_data(df=df, context=context)
 
     elif execution_engine == "polars":
-        df = pl.from_numpy(df.to_numpy(), list(df.columns))
+        df = from_numpy(df.to_numpy(), list(df.columns))
         if schemas and "polars" in schemas:
             schema = schemas["polars"]
             polars_schema = {}
@@ -1266,26 +1286,26 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 
                 # We will use timestamp for timezone-aware (UTC only) dates in our tests
                 if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
-                    df[key] = df[key].str.strptime(pl.Datetime)
+                    df[key] = df[key].str.strptime(Datetime)
                     continue
                 elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
-                    df[key] = df[key].str.strptime(pl.Datetime)
+                    df[key] = df[key].str.strptime(Datetime)
                     continue
                 elif value.lower() in ["date"]:
-                    df[key] = df[key].str.strptime(pl.Date)
+                    df[key] = df[key].str.strptime(Date)
                     value = "object"
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
                     # noinspection PyUnresolvedReferences
-                    type_ = getattr(pl.datatypes, value)
+                    type_ = getattr(datatypes, value)
                     # If this raises AttributeError it's okay: it means someone built a bad test
                 polars_schema[key] = type_
             # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
-            typed_df = pl.DataFrame()
+            typed_df = DataFrame()
             for x in df.columns:
                 typed_df = typed_df.with_column(
-                    pl.lit(pl.Series(df[x].name, df[x].to_list()))
+                    lit(Series(df[x].name, df[x].to_list()))
                 )
                 typed_df[x] = typed_df[x].cast(polars_schema[x], strict=False)
 
@@ -1449,7 +1469,7 @@ def build_pandas_validator_with_data(
 
 
 def build_polars_validator_with_data(
-    df: pl.DataFrame,
+    df: DataFrame,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> Validator:
     batch: Batch = Batch(data=df, batch_definition=batch_definition)
