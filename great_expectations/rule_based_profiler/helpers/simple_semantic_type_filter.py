@@ -97,7 +97,6 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                 metric_value_kwargs={
                     "include_nested": True,
                 },
-                metric_dependencies=None,
             )
         )
 

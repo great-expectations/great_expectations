@@ -72,13 +72,13 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name: str,
-        data_context: "AbstractDataContext" = None,
-        expectations: List[Union[dict, ExpectationConfiguration]] = None,
-        evaluation_parameters: dict = None,
-        data_asset_type: str = None,
-        execution_engine_type: Type["ExecutionEngine"] = None,
-        meta: dict = None,
-        ge_cloud_id: str = None,
+        data_context: Optional[AbstractDataContext] = None,
+        expectations: Optional[List[Union[dict, ExpectationConfiguration]]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        data_asset_type: Optional[str] = None,
+        execution_engine_type: Optional[Type[ExecutionEngine]] = None,
+        meta: Optional[dict] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
@@ -375,7 +375,7 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
-        ge_cloud_id: str = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> List[int]:
         """
         Find indexes of Expectations matching the given ExpectationConfiguration on the given match_type.

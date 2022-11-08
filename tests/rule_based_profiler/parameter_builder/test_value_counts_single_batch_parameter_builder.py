@@ -81,7 +81,6 @@ def test_value_counts_single_batch_parameter_builder_alice(
                 "metric_name": "column.value_counts",
                 "domain_kwargs": {"column": "event_type"},
                 "metric_value_kwargs": {"sort": "value"},
-                "metric_dependencies": None,
             },
             "num_batches": 1,
         },

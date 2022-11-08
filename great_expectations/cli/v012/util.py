@@ -123,7 +123,9 @@ CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
 
 
 def verify_library_dependent_modules(
-    python_import_name: str, pip_library_name: str, module_names_to_reload: list = None
+    python_import_name: str,
+    pip_library_name: str,
+    module_names_to_reload: Optional[list] = None,
 ) -> bool:
     library_status_code: Optional[int]
 

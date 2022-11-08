@@ -67,7 +67,7 @@ class BatchIdentifier(DataContextKey):
     def __init__(
         self,
         batch_identifier: Union[BatchKwargs, dict, str],
-        data_asset_name: str = None,
+        data_asset_name: Optional[str] = None,
     ) -> None:
         super().__init__()
         # if isinstance(batch_identifier, (BatchKwargs, dict)):
