@@ -140,14 +140,14 @@ class PolarsDataSampler(DataSampler):
         column_name = self.get_sampling_kwargs_value_or_default(
             batch_spec, "column_name"
         )
-        hash_digits = self.get_sampling_kwargs_value_or_default(
+        hash_digits: int = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec, sampling_kwargs_key="hash_digits", default_value=1
         )
         hash_value = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec, sampling_kwargs_key="hash_value", default_value="f"
         )
 
-        hash_function_name = self.get_sampling_kwargs_value_or_default(
+        hash_function_name: str = self.get_sampling_kwargs_value_or_default(
             batch_spec=batch_spec,
             sampling_kwargs_key="hash_function_name",
             default_value="md5",
