@@ -1,7 +1,10 @@
 import hashlib
 from typing import List, Union
 
-import polars as pl
+try:
+    import polars as pl
+except ImportError:
+    polars = None
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (

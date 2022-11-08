@@ -7,8 +7,6 @@ from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast
 
-import polars as pl
-
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
@@ -65,6 +63,10 @@ except ImportError:
         "Unable to load GCS connection object; install optional google dependency for support"
     )
 
+try:
+    import polars as pl
+except ImportError:
+    polars = None
 
 HASH_THRESHOLD = 1e9
 

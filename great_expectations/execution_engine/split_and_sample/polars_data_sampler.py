@@ -1,7 +1,10 @@
 import hashlib
 import random  # noqa: F401
 
-import polars as pl
+try:
+    import polars as pl
+except ImportError:
+    polars = None
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec
