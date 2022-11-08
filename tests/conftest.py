@@ -2663,10 +2663,11 @@ def cloud_data_context_with_datasource_pandas_engine(
         "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
     ), mock.patch(
         "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
-    ):
+    ), pytest.deprecated_call():
         context.add_datasource(
             "my_datasource",
             **config,
+            save_changes=False,
         )
     return context
 
