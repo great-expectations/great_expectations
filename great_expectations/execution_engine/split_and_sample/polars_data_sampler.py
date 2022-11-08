@@ -1,5 +1,5 @@
 import hashlib
-import random
+import random # noqa: F401
 
 import polars as pl
 
