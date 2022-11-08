@@ -1,8 +1,9 @@
 import pathlib
 import shutil
-from typing import Dict, Literal
+from typing import Dict, List, Literal, Type
 
 from pydantic import FilePath, ValidationError
+from typing_extensions import ClassVar
 
 TERM_WIDTH = shutil.get_terminal_size()[1]
 SEPARATOR = "-" * TERM_WIDTH
@@ -34,16 +35,13 @@ class MyOtherAsset(DataAsset):
 
 class PandasDatasource(Datasource):
     engine: Literal["pandas"] = "pandas"
-    execution_engine = PandasExecutionEngine()  # ClassVar??
-    asset_types = [FileAsset, MyOtherAsset]  # ClassVar??
+    execution_engine: ClassVar = PandasExecutionEngine()  # ClassVar??
+    asset_types: ClassVar[List[Type[DataAsset]]] = [
+        FileAsset,
+        MyOtherAsset,
+    ]  # ClassVar??
     name: str
     assets: Dict[str, DataAsset]
-
-    def __init__(self, name: str, **kwargs):
-        self.name = name
-        self.assets = {}
-        # self.execution_engine = PandasExecutionEngine()
-        super().__init__(name=name, **kwargs)
 
     def __repr__(self):
         return f"{self.__class__.__name__}(name='{self.name}')"
