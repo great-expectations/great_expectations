@@ -268,7 +268,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
                         "batch_id": batch_id,
                     },
                     metric_value_kwargs=None,
-                    metric_dependencies=None,
                 )
                 for batch_id in batch_ids
             ]

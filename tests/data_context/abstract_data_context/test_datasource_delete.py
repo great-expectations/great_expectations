@@ -47,7 +47,9 @@ def test_datasource_delete_removes_from_cache_and_config_cloud_data_context(
 
     assert len(context.datasources) == 0
     datasource_config["name"] = datasource_name
-    context.add_datasource(**datasource_config.to_dict())
+
+    with pytest.deprecated_call():
+        context.add_datasource(**datasource_config.to_dict(), save_changes=False)
 
     # ensure datasource is accessible
     assert len(context.datasources) == 1

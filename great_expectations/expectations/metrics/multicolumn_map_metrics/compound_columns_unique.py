@@ -180,7 +180,6 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
                     metric_name="compound_columns.count.map",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=None,
-                    metric_dependencies=None,
                 )
 
         return dependencies

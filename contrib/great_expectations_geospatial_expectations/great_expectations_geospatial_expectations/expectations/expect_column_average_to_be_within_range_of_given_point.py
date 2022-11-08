@@ -19,13 +19,13 @@ from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedBulletListContent,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import substitute_none_for_missing
 
 

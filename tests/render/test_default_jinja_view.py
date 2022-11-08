@@ -5,8 +5,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.render.renderer import ProfilingResultsPageRenderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedGraphContent,
     RenderedHeaderContent,
     RenderedSectionContent,
@@ -15,6 +14,7 @@ from great_expectations.render.types import (
     TextContent,
     ValueListContent,
 )
+from great_expectations.render.renderer import ProfilingResultsPageRenderer
 from great_expectations.render.view import DefaultJinjaPageView
 
 
