@@ -377,10 +377,10 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration: ExpectationConfiguration = None,
-        result: ExpectationValidationResult = None,
-        language: str = None,
-        runtime_configuration: dict = None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> List[
         Union[

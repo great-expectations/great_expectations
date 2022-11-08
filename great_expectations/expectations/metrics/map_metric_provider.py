@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 
 def column_function_partial(
     engine: Type[ExecutionEngine],
-    partial_fn_type: str = None,
+    partial_fn_type: Optional[str] = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -510,7 +510,7 @@ def column_condition_partial(
 
 
 def column_pair_function_partial(
-    engine: Type[ExecutionEngine], partial_fn_type: str = None, **kwargs
+    engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
@@ -946,7 +946,7 @@ def column_pair_condition_partial(
 
 
 def multicolumn_function_partial(
-    engine: Type[ExecutionEngine], partial_fn_type: str = None, **kwargs
+    engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 

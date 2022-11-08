@@ -962,7 +962,7 @@ class Expectation(metaclass=MetaExpectation):
     def get_runtime_kwargs(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> dict:
         if not configuration:
             configuration = self.configuration
@@ -988,7 +988,7 @@ class Expectation(metaclass=MetaExpectation):
     def get_result_format(
         self,
         configuration: ExpectationConfiguration,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Union[Dict[str, Union[str, int, bool]], str]:
         default_result_format: Optional[Any] = self.default_kwarg_values.get(
             "result_format"
@@ -2315,7 +2315,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
@@ -2535,7 +2535,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[

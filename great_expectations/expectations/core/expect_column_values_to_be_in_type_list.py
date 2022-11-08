@@ -539,8 +539,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         column_name = configuration.kwargs.get("column")
         expected_types_list = configuration.kwargs.get("type_list")

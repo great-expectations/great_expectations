@@ -69,6 +69,8 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.not_match_regex_list"

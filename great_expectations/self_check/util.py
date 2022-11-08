@@ -1686,7 +1686,7 @@ def build_sa_engine(
 def build_spark_engine(
     spark: SparkSession,
     df: Union[pd.DataFrame, SparkDataFrame],
-    schema: StructType = None,
+    schema: Optional[StructType] = None,
     batch_id: Optional[str] = None,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:

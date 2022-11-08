@@ -55,7 +55,7 @@ class ValidationAction:
             ValidationResultIdentifier, GeCloudIdentifier
         ],
         data_asset,
-        expectation_suite_identifier: ExpectationSuiteIdentifier = None,
+        expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
         **kwargs,
     ):

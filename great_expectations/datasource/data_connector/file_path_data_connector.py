@@ -213,7 +213,7 @@ class FilePathDataConnector(DataConnector):
         return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(
-        self, data_reference: str, data_asset_name: str = None
+        self, data_reference: str, data_asset_name: Optional[str] = None
     ) -> Optional[List[BatchDefinition]]:
         regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
         pattern: str = regex_config["pattern"]

@@ -26,7 +26,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
-        "manually_reviewed_code": False,
+        "manually_reviewed_code": True,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -260,8 +260,8 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
             "parse_strings_as_datetimes"
