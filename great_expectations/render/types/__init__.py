@@ -59,11 +59,29 @@ def _get_deprecation_warning_message(classname: str) -> str:
 
 class CollapseContent(CollapseContentRender):
     # deprecated-v0.15.32
-    classname = "CollapseContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __init__(
+        self,
+        collapse,
+        collapse_toggle_link=None,
+        header=None,
+        subheader=None,
+        styling=None,
+        content_block_type="collapse",
+        inline_link=False,
+    ):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=self.__class__.__name__),
+            DeprecationWarning,
+        )
+        super().__init__(
+            collapse=collapse,
+            collapse_toggle_link=collapse_toggle_link,
+            header=header,
+            subheader=subheader,
+            styling=styling,
+            content_block_type=content_block_type,
+            inline_link=inline_link,
+        )
 
 
 class RenderedAtomicContent(RenderedAtomicContentRender):
