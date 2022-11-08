@@ -615,6 +615,7 @@ Please use "neither" instead.
 
 
 def hash_polars_dataframe(df):
+    """Converts df to an md5-hashed object"""
     try:
         obj = str(df.hash_rows()).encode()
     except TypeError:
