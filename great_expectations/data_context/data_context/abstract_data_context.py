@@ -3151,8 +3151,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             # deprecated-v0.15.32
             warnings.warn(
                 'The parameter "save_changes" is deprecated as of v0.15.32; moving forward, '
-                "changes made to Datasources are always persisted by the underlying Store implementation. "
-                "This is part of an ongoing effort to standardized the behavior of our APIs. "
+                "changes made to Datasources will always be persisted by Store implementations. "
                 "As support will be removed in v0.18, please omit the argument moving forward.",
                 DeprecationWarning,
             )
