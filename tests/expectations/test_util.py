@@ -69,7 +69,6 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
         metric_value_kwargs={
             "include_nested": True,
         },
-        metric_dependencies=None,
     )
     results = engine.resolve_metrics(metrics_to_resolve=(table_column_types_metric,))
     resolved_metrics.update(results)
@@ -78,10 +77,10 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
         metric_name="table.columns",
         metric_domain_kwargs=dict(),
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.column_types": table_column_types_metric,
-        },
     )
+    table_columns_metric.metric_dependencies = {
+        "table.column_types": table_column_types_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
     )

@@ -111,7 +111,6 @@ class DomainBuilder(ABC, Builder):
                     metric_value_kwargs={
                         "include_nested": True,
                     },
-                    metric_dependencies=None,
                 )
             ]
             for batch_id in batch_ids
