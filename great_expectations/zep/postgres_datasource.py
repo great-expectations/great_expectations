@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import dataclasses
 from pprint import pformat as pf
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, MutableMapping, Optional, Type
 
-from typing_extensions import ClassVar
+from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -31,31 +31,11 @@ class ColumnSplitter:
 
 class TableAsset(DataAsset):
     # Instance variables
+    type: Literal["table"] = "table"
     table_name: str
-    column_splitter: Optional[ColumnSplitter]
-    _name: str
-    _datasource: Datasource
-
-    def __init__(
-        self,
-        name: str,
-        datasource: Datasource,
-        table_name: str,
-        column_splitter: Optional[ColumnSplitter] = None,
-    ) -> None:
-        super().__init__(name)
-        self.table_name = table_name
-        self._datasource = datasource
-        self._name = name
-        self.column_splitter: Optional[ColumnSplitter] = column_splitter
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def datasource(self) -> Datasource:
-        return self._datasource
+    column_splitter: Optional[ColumnSplitter] = None
+    name: str
+    datasource: Datasource
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -122,12 +102,12 @@ class PostgresDatasource(Datasource):
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset]
 
-    def __init__(self, name: str, connection_str: str) -> None:
-        self.name = name
-        self.execution_engine = SqlAlchemyExecutionEngine(
-            connection_string=connection_str
-        )
-        self.assets: Dict[str, TableAsset] = {}
+    type: Literal["postgres"] = "postgres"
+    engine: Literal["sql_alchemy"] = "sql_alchemy"
+    connection_str: str
+    assets: MutableMapping[str, TableAsset]
+    # TODO: should be instance attr
+    execution_engine: ClassVar[SqlAlchemyExecutionEngine]
 
     def add_table_asset(self, name: str, table_name: str) -> TableAsset:
         """Adds a table asset to this datasource.

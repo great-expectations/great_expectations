@@ -1,6 +1,6 @@
 import pathlib
 import shutil
-from typing import Dict, List, Literal, Type
+from typing import Dict, List, Literal, Optional, Type
 
 from pydantic import FilePath, ValidationError
 from typing_extensions import ClassVar
@@ -35,7 +35,6 @@ class FileAsset(DataAsset):
     type: Literal["file"] = "file"
     file_path: FilePath
     delimiter: str = ","
-    ...
 
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
@@ -43,7 +42,6 @@ class FileAsset(DataAsset):
 
 class MyOtherAsset(DataAsset):
     type: Literal["file"] = "file"
-    ...
 
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})

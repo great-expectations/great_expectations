@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import abc
 import dataclasses
-from typing import Any, Dict, List, Mapping, Optional, Type
 import logging
 from pprint import pformat as pf
+from typing import Any, Dict, List, Mapping, Optional, Type
 
-from typing_extensions import ClassVar, TypeAlias
 from pydantic import BaseModel, root_validator, validator
+from typing_extensions import ClassVar, TypeAlias
 
 from great_expectations.core.batch import BatchDataType
 from great_expectations.execution_engine import ExecutionEngine
@@ -37,20 +36,15 @@ class BatchRequest:
     options: BatchRequestOptions
 
 
-class DataAsset(abc.ABC):
-    _name: str
+class DataAsset(BaseModel):
+    name: str
+    type: str
 
-    def __init__(self, name: str) -> None:
-        self._name = name
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @abc.abstractmethod
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
-        ...
+        raise NotImplementedError
 
+
+class Datasource(BaseModel, metaclass=MetaDatasource):
 
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
@@ -59,7 +53,7 @@ class DataAsset(abc.ABC):
     # instance attrs
     name: str
     engine: str
-    assets: Dict[str, DataAsset]
+    assets: Mapping[str, DataAsset]
 
     @root_validator(pre=True)
     @classmethod
