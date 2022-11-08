@@ -197,7 +197,7 @@ Notes:
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
-    def get_batch_data_and_markers(
+    def get_batch_data_and_markers(  # noqa: C901
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
@@ -447,7 +447,7 @@ Notes:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         pass  # This method is NO-OP for PolarsExecutionEngine (no bundling for direct execution computational backend).
 
-    def get_domain_records(
+    def get_domain_records(  # noqa: C901
         self,
         domain_kwargs: dict,
     ) -> pl.DataFrame:
@@ -551,8 +551,6 @@ Please use "neither" instead.
             return data
 
         if "column_list" in domain_kwargs and "ignore_row_if" in domain_kwargs:
-            column_list = domain_kwargs["column_list"]
-
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
                 data = data.filter(

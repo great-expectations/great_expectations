@@ -2030,7 +2030,7 @@ def build_test_backends_list(  # noqa: C901 - 48
 
     if include_polars:
         try:
-            import polars
+            import polars  # noqa: F401
         except ImportError:
             if raise_exceptions_for_backends is True:
                 raise ValueError(
