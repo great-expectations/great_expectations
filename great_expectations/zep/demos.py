@@ -5,6 +5,11 @@ from typing import Dict, List, Literal, Type
 from pydantic import FilePath, ValidationError
 from typing_extensions import ClassVar
 
+try:
+    from devtools import debug
+except ImportError:
+    from pprint import pformat as debug  # type: ignore[assignment]
+
 TERM_WIDTH = shutil.get_terminal_size()[1]
 SEPARATOR = "-" * TERM_WIDTH
 
@@ -93,7 +98,7 @@ def round_trip():
     print("Successful Asset Roundtrip\n")
 
 
-def type_lookup():
+def type_lookup() -> None:
     """
     Demo the use of the `type_lookup` `BiDict`
     Alternatively use a Graph/Tree-like structure.
@@ -115,7 +120,7 @@ def type_lookup():
     print(f"\n{pd_ds_asset_names} -> {pd_ds_assets_from_names}")
 
 
-def add_real_asset():
+def add_real_asset() -> None:
     print(f"\n  Add a 'real' asset ...\n{SEPARATOR}")
     context = get_context()
 
@@ -128,7 +133,7 @@ def add_real_asset():
         ds.add_file_asset("my_file_2", file_path=__file__)
 
     my_asset = ds.get_asset("my_file_2")
-    print(my_asset)
+    debug(my_asset)
 
 
 def from_yaml_config():
@@ -138,12 +143,14 @@ def from_yaml_config():
     print(f"\n  Context loaded from {root_dir}")
 
     my_ds = context.get_datasource("my_demo_datasource")
-    print(f"\n  Retrieved '{my_ds.name}'->\n{repr(my_ds)}")
+    print(f"\n  Retrieved '{my_ds.name}'->")
+    debug(my_ds)
     assert my_ds
 
     my_asset = my_ds.assets["my_demo_file_asset"]
 
-    print(f"\n Retrieved '{my_asset.name}'->\n{repr(my_asset)}")
+    print(f"\n Retrieved '{my_asset.name}'->")
+    debug(my_asset)
     assert my_asset.file_path.exists()
 
 

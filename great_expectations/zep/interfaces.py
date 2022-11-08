@@ -3,8 +3,8 @@ import logging
 from pprint import pformat as pf
 from typing import Dict, List, Type, Union
 
-from pydantic import BaseModel, confloat, constr, root_validator, validator
-from typing_extensions import ClassVar, TypeAlias
+from pydantic import BaseModel, root_validator, validator
+from typing_extensions import ClassVar
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine import ExecutionEngine
@@ -12,8 +12,6 @@ from great_expectations.zep.metadatasource import MetaDatasource
 from great_expectations.zep.sources import _SourceFactories
 
 LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
-
-LowerStr: TypeAlias = constr(to_lower=True, strict=True)  # type: ignore[misc]
 
 
 class DataAsset(BaseModel):
