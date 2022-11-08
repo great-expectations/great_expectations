@@ -344,7 +344,7 @@ def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
     """
     What does this test and why?
 
-    For persistence-disabled contexts, we should only update the cache upon
+    When save_changes is set to False, we should only update the cache upon
     updating an existing datasource.
     """
     context = in_memory_runtime_context
@@ -359,8 +359,9 @@ def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
     cached_datasource = context.datasources[name]
     assert cached_datasource.data_connectors.keys() != data_connectors.keys()
 
-    # Ensure that our cache value is updated to reflect changes
-    context.update_datasource(datasource)
+    with pytest.deprecated_call():
+        # Ensure that our cache value is updated to reflect changes
+        context.update_datasource(datasource, save_changes=False)
 
     assert name in context.datasources
     cached_datasource = context.datasources[name]
@@ -378,7 +379,7 @@ def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
     """
     What does this test and why?
 
-    For persistence-disabled contexts, we should only update the cache upon
+    When save_changes is set to False, we should only update the cache upon
     using update to create a new datasource.
     """
     context = in_memory_runtime_context
@@ -390,7 +391,8 @@ def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
     assert name not in context.datasources
 
     # Ensure that a brand new cache value is added to reflect changes
-    context.update_datasource(datasource)
+    with pytest.deprecated_call():
+        context.update_datasource(datasource, save_changes=False)
 
     assert name in context.datasources
 
@@ -402,7 +404,7 @@ def test_BaseDataContext_delete_datasource_updates_cache(
     """
     What does this test and why?
 
-    For persistence-disabled contexts, we should only delete the value from
+    When save_changes is set to False, we should only delete the value from
     the cache.
     """
     context = in_memory_runtime_context
@@ -412,8 +414,8 @@ def test_BaseDataContext_delete_datasource_updates_cache(
     # If the value is in the cache, no store methods should be invoked
     with mock.patch(
         "great_expectations.data_context.store.DatasourceStore.remove_key"
-    ) as mock_delete:
-        context.delete_datasource(name)
+    ) as mock_delete, pytest.deprecated_call():
+        context.delete_datasource(name, save_changes=False)
 
     assert not mock_delete.called
     assert name not in context.datasources
