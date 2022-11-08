@@ -82,13 +82,11 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
                 metric_name="column.mean",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
                 metric_value_kwargs=None,
-                metric_dependencies=None,
             )
             dependencies["column_values.null.unexpected_count"] = MetricConfiguration(
                 metric_name="column_values.null.unexpected_count",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
                 metric_value_kwargs=None,
-                metric_dependencies=None,
             )
 
         return dependencies
