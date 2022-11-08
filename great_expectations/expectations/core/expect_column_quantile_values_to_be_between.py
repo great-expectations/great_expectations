@@ -16,13 +16,11 @@ from great_expectations.render import (
     LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
     renderedAtomicValueSchema,
 )
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-)
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
