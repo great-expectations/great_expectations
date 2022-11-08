@@ -110,11 +110,11 @@ class RenderedAtomicContent(RenderedAtomicContentRender):
 
 class RenderedAtomicContentSchema(RenderedAtomicContentSchemaRender):
     # deprecated-v0.15.32
-    classname = "RenderedAtomicContentSchema"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __new__(cls):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=cls.__name__),
+            DeprecationWarning,
+        )
 
 
 class RenderedAtomicValue(RenderedAtomicValueRender):
@@ -161,11 +161,11 @@ class RenderedAtomicValueGraph(RenderedAtomicValueGraphRender):
 
 class RenderedAtomicValueSchema(RenderedAtomicValueSchemaRender):
     # deprecated-v0.15.32
-    classname = "RenderedAtomicValueSchema"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __new__(cls):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=cls.__name__),
+            DeprecationWarning,
+        )
 
 
 class RenderedBootstrapTableContent(RenderedBootstrapTableContentRender):
@@ -235,11 +235,11 @@ class RenderedComponentContent(RenderedComponentContentRender):
 
 class RenderedContent(RenderedContentRender):
     # deprecated-v0.15.32
-    classname = "RenderedContent"
-    warnings.warn(
-        _get_deprecation_warning_message(classname=classname),
-        DeprecationWarning,
-    )
+    def __new__(cls):
+        warnings.warn(
+            _get_deprecation_warning_message(classname=cls.__name__),
+            DeprecationWarning,
+        )
 
 
 class RenderedContentBlockContainer(RenderedContentBlockContainerRender):
