@@ -228,6 +228,11 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run performance tests (which might also require additional arguments like --bigquery)",
     )
+    parser.addoption(
+        "--polars",
+        action="store_true",
+        help="If set, execute tests against Polars",
+    )
 
 
 def build_test_backends_list_v2_api(metafunc):
@@ -260,6 +265,7 @@ def build_test_backends_list_v3_api(metafunc):
             DeprecationWarning,
         )
     include_pandas: bool = True
+    include_polars: bool = metafunc.config.getoption("--polars")
     include_spark: bool = metafunc.config.getoption("--spark")
     include_sqlalchemy: bool = not metafunc.config.getoption("--no-sqlalchemy")
     include_postgresql: bool = metafunc.config.getoption("--postgresql")
@@ -274,6 +280,7 @@ def build_test_backends_list_v3_api(metafunc):
     include_snowflake: bool = metafunc.config.getoption("--snowflake")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
+        include_polars=include_polars,
         include_spark=include_spark,
         include_sqlalchemy=include_sqlalchemy,
         include_postgresql=include_postgresql,
@@ -317,6 +324,7 @@ def pytest_collection_modifyitems(config, items):
             reason="need --docs-tests option to run",
         ),
         Category(mark="cloud", flag="--cloud", reason="need --cloud option to run"),
+        Category(mark="polars", flag="--polars", reason="need --polars option to run"),
     )
 
     for category in categories:

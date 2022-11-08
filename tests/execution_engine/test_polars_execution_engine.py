@@ -23,6 +23,13 @@ from great_expectations.util import is_library_loadable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
+try:
+    polars = pytest.importorskip("polars")
+except ImportError:
+    polars = None
+
+pytestmark = pytest.mark.polars
+
 
 def test_constructor_with_boto3_options():
     # default instantiation

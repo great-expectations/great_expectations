@@ -10,6 +10,13 @@ from great_expectations.execution_engine.polars_execution_engine import (
     PolarsExecutionEngine,
 )
 
+try:
+    polars = pytest.importorskip("polars")
+except ImportError:
+    polars = None
+
+pytestmark = pytest.mark.polars
+
 
 @pytest.mark.parametrize(
     "underscore_prefix",

@@ -31,6 +31,13 @@ from tests.execution_engine.split_and_sample.split_and_sample_test_cases import 
     SINGLE_DATE_PART_DATE_PARTS,
 )
 
+try:
+    polars = pytest.importorskip("polars")
+except ImportError:
+    polars = None
+
+pytestmark = pytest.mark.polars
+
 # Here we add PolarsDataSplitter specific test cases to the generic test cases:
 SINGLE_DATE_PART_DATE_PARTS += [
     pytest.param(

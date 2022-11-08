@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import DataContext
@@ -49,6 +50,7 @@ def test_expect_column_mean_to_be_positive(data_context_with_datasource_pandas_e
     assert result.success is True
 
 
+@pytest.mark.polars
 def test_expect_column_mean_to_be_positive_polars(
     data_context_with_datasource_polars_engine,
 ):
