@@ -8,3 +8,4 @@
 --requirement reqs/requirements-dev-excel.txt
 --requirement reqs/requirements-dev-pagerduty.txt
 --requirement reqs/requirements-dev-spark.txt
+--requirement reqs/requirements-dev-polars.txt
