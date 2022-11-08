@@ -390,15 +390,10 @@ def docs(
     # Build fresh api doc stubs
     if api_docs:
         cmds = ["sphinx-apidoc -o . ../../great_expectations"]
-        ctx.run(" ".join(cmds), echo=True, pty= True)
+        ctx.run(" ".join(cmds), echo=True, pty=True)
 
     # Build html api documentation in docusaurus static folder
     cmds = ["make html"]
     ctx.run(" ".join(cmds), echo=True, pty=True)
-
-    # Start local docusaurus site
-    if start_server:
-        cmds = ["yarn start"]
-        ctx.run(" ".join(cmds), echo=True, pty=True)
 
     os.chdir(curdir)
