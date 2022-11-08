@@ -50,12 +50,11 @@ from great_expectations.render import ValueListContent as ValueListContentRender
 
 
 # TODO: Remove this entire module for release 0.18.0
-def _get_deprecation_warning_message(classname: str):
-    warning_message = (
+def _get_deprecation_warning_message(classname: str) -> str:
+    return (
         f"Importing the class {classname} from great_expectations.render is deprecated as of v0.15.32 "
         f"in v0.18. Please import class {classname} from great_expectations.render."
     )
-    return warning_message
 
 
 class CollapseContent(CollapseContentRender):
