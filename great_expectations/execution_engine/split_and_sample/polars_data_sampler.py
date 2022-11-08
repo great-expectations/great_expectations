@@ -3,8 +3,11 @@ import random  # noqa: F401
 
 try:
     import polars as pl
+
+    DataFrame = pl.DataFrame
 except ImportError:
     polars = None
+    DataFrame = None
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec
@@ -16,9 +19,7 @@ from great_expectations.execution_engine.split_and_sample.data_sampler import (
 class PolarsDataSampler(DataSampler):
     """Methods for sampling a polars dataframe."""
 
-    def sample_using_limit(
-        self, df: pl.DataFrame, batch_spec: BatchSpec
-    ) -> pl.DataFrame:
+    def sample_using_limit(self, df: DataFrame, batch_spec: BatchSpec) -> DataFrame:
         """Sample the first n rows of data.
 
         Args:
@@ -40,9 +41,9 @@ class PolarsDataSampler(DataSampler):
 
     def sample_using_random(
         self,
-        df: pl.DataFrame,
+        df: DataFrame,
         batch_spec: BatchSpec,
-    ) -> pl.DataFrame:
+    ) -> DataFrame:
         """Take a random sample of rows, retaining proportion p.
 
         Args:
@@ -64,9 +65,9 @@ class PolarsDataSampler(DataSampler):
 
     def sample_using_mod(
         self,
-        df: pl.DataFrame,
+        df: DataFrame,
         batch_spec: BatchSpec,
-    ) -> pl.DataFrame:
+    ) -> DataFrame:
         """Take the mod of named column, and only keep rows that match the given value.
 
         Args:
@@ -93,9 +94,9 @@ class PolarsDataSampler(DataSampler):
 
     def sample_using_a_list(
         self,
-        df: pl.DataFrame,
+        df: DataFrame,
         batch_spec: BatchSpec,
-    ) -> pl.DataFrame:
+    ) -> DataFrame:
         """Match the values in the named column against value_list, and only keep the matches.
 
         Args:
@@ -121,9 +122,9 @@ class PolarsDataSampler(DataSampler):
 
     def sample_using_hash(
         self,
-        df: pl.DataFrame,
+        df: DataFrame,
         batch_spec: BatchSpec,
-    ) -> pl.DataFrame:
+    ) -> DataFrame:
         """Hash the values in the named column, and only keep rows that match the given hash_value.
 
         Args:

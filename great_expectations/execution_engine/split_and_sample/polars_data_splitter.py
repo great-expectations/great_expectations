@@ -3,8 +3,11 @@ from typing import List, Union
 
 try:
     import polars as pl
+
+    DataFrame = pl.DataFrame
 except ImportError:
     polars = None
+    DataFrame = None
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
@@ -22,10 +25,10 @@ class PolarsDataSplitter(DataSplitter):
 
     def split_on_year(
         self,
-        df: pl.DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> pl.DataFrame:
+    ) -> DataFrame:
         """Split on year values in column_name.
 
         Args:
@@ -48,10 +51,10 @@ class PolarsDataSplitter(DataSplitter):
 
     def split_on_year_and_month(
         self,
-        df: pl.DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> pl.DataFrame:
+    ) -> DataFrame:
         """Split on year and month values in column_name.
 
         Args:
@@ -74,10 +77,10 @@ class PolarsDataSplitter(DataSplitter):
 
     def split_on_year_and_month_and_day(
         self,
-        df: pl.DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> pl.DataFrame:
+    ) -> DataFrame:
         """Split on year and month and day values in column_name.
 
         Args:
@@ -100,11 +103,11 @@ class PolarsDataSplitter(DataSplitter):
 
     def split_on_date_parts(
         self,
-        df: pl.DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
         date_parts: Union[List[DatePart], List[str]],
-    ) -> pl.DataFrame:
+    ) -> DataFrame:
         """Split on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
@@ -143,8 +146,8 @@ class PolarsDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_whole_table(
-        df: pl.DataFrame,
-    ) -> pl.DataFrame:
+        df: DataFrame,
+    ) -> DataFrame:
         """No op. Return the same data that is passed in.
 
         Args:
@@ -157,8 +160,8 @@ class PolarsDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_column_value(
-        df: pl.DataFrame, column_name: str, batch_identifiers: dict
-    ) -> pl.DataFrame:
+        df: DataFrame, column_name: str, batch_identifiers: dict
+    ) -> DataFrame:
         """Return a dataframe where rows are filtered based on the specified column value.
 
         Args:
@@ -173,11 +176,11 @@ class PolarsDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_converted_datetime(
-        df: pl.DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
         date_format_string: str = "%Y-%m-%d",
-    ) -> pl.DataFrame:
+    ) -> DataFrame:
         """Convert the values in the named column to the given date_format, and split on that"""
 
         stringified_datetime_series = df[column_name].apply(
@@ -188,8 +191,8 @@ class PolarsDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_divided_integer(
-        df: pl.DataFrame, column_name: str, divisor: int, batch_identifiers: dict
-    ) -> pl.DataFrame:
+        df: DataFrame, column_name: str, divisor: int, batch_identifiers: dict
+    ) -> DataFrame:
         """Divide the values in the named column by `divisor`, and split on that"""
 
         matching_divisor = batch_identifiers[column_name]
@@ -201,8 +204,8 @@ class PolarsDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_mod_integer(
-        df: pl.DataFrame, column_name: str, mod: int, batch_identifiers: dict
-    ) -> pl.DataFrame:
+        df: DataFrame, column_name: str, mod: int, batch_identifiers: dict
+    ) -> DataFrame:
         """Divide the values in the named column by `divisor`, and split on that"""
 
         matching_mod_value = batch_identifiers[column_name]
@@ -212,8 +215,8 @@ class PolarsDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_multi_column_values(
-        df: pl.DataFrame, column_names: List[str], batch_identifiers: dict
-    ) -> pl.DataFrame:
+        df: DataFrame, column_names: List[str], batch_identifiers: dict
+    ) -> DataFrame:
         """Split on the joint values in the named columns"""
 
         subset_df = df.clone()
@@ -230,12 +233,12 @@ class PolarsDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_hashed_column(
-        df: pl.DataFrame,
+        df: DataFrame,
         column_name: str,
         hash_digits: int,
         batch_identifiers: dict,
         hash_function_name: str = "md5",
-    ) -> pl.DataFrame:
+    ) -> DataFrame:
         """Split on the hashed value of the named column"""
         try:
             hash_method = getattr(hashlib, hash_function_name)
