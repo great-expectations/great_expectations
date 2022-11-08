@@ -306,20 +306,13 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             )
         ]
 
-    # @PandasExecutionEngine.column_map_metric(
-    #     metric_name="column_values.not_in_set",
-    #     metric_domain_keys=ColumnMapExpectation.domain_keys,
-    #     metric_value_keys=("value_set",),
-    #     metric_dependencies=tuple(),
-    #     filter_column_isnull=True,
-    # )
     def _pandas_column_values_not_in_set(
         self,
         series: pd.Series,
         metrics: Dict,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         filter_column_isnull: bool = True,
     ):
         value_set = metric_value_kwargs["value_set"]

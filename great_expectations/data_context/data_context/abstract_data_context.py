@@ -36,7 +36,7 @@ try:
     from typing import Literal
 except ImportError:
     # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[misc]
+    from typing_extensions import Literal  # type: ignore[assignment]
 
 from dateutil.parser import parse
 from ruamel.yaml.comments import CommentedMap
