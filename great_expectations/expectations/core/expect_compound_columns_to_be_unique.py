@@ -27,7 +27,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         ],
         "requirements": [],
         "has_full_test_suite": True,
-        "manually_reviewed_code": False,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "compound_columns.unique"

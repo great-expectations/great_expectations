@@ -29,7 +29,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
-        "manually_reviewed_code": False,
+        "manually_reviewed_code": True,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\

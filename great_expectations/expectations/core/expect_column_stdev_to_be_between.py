@@ -94,6 +94,8 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     metric_dependencies = ("column.standard_deviation",)

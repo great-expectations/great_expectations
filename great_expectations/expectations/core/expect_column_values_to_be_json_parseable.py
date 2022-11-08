@@ -68,6 +68,8 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.json_parseable"
