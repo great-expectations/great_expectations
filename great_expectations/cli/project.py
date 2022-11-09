@@ -1,5 +1,5 @@
 import sys
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import click
 
@@ -66,13 +66,15 @@ def project_upgrade(ctx: click.Context) -> None:
         sys.exit(1)
 
 
-def do_config_check(target_directory: str) -> Tuple[bool, str, Optional[DataContext]]:
+def do_config_check(
+    target_directory: Union[str, None]
+) -> Tuple[bool, str, Optional[DataContext]]:
     is_config_ok: bool = True
     upgrade_message: str = ""
     context: Optional[DataContext]
     try:
         context = DataContext(context_root_dir=target_directory)
-        ge_config_version: int = context.get_config().config_version
+        ge_config_version: int = context.get_config().config_version  # type: ignore[union-attr] # could be dict, str
         if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
             is_config_ok = False
             upgrade_message = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.

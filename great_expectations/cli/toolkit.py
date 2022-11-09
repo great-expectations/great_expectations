@@ -386,7 +386,7 @@ def select_datasource(
 
 
 def load_data_context_with_error_handling(
-    directory: str, from_cli_upgrade_command: bool = False
+    directory: Union[str, None], from_cli_upgrade_command: bool = False
 ) -> Optional[DataContext]:
     """Return a DataContext with good error handling and exit codes."""
     context: Optional[DataContext]
