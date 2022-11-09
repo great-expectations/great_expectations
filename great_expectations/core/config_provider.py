@@ -64,10 +64,6 @@ class ConfigurationProvider(AbstractConfigurationProvider):
             # In the case a provider's values use ${VARIABLE} syntax, look at existing values
             # and perform substitutions before adding to the result obj.
             provider_values = provider.get_values()
-            if values:
-                provider_values = cast(
-                    dict, substitute_all_config_variables(provider_values, values)
-                )
             values.update(provider_values)
         return values
 
@@ -105,23 +101,25 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
         self._root_directory = root_directory
 
     def get_values(self) -> Dict[str, str]:
+        env_vars = dict(os.environ)
         try:
             # If the user specifies the config variable path with an environment variable, we want to substitute it
             defined_path: str = substitute_config_variable(  # type: ignore[assignment]
-                self._config_variables_file_path, dict(os.environ)
+                self._config_variables_file_path, env_vars
             )
             if not os.path.isabs(defined_path):
-                # A BaseDataContext will not have a root directory; in that case use the current directory
-                # for any non-absolute path
                 root_directory: str = self._root_directory or os.curdir
             else:
                 root_directory = ""
+
             var_path = os.path.join(root_directory, defined_path)
             with open(var_path) as config_variables_file:
                 contents = config_variables_file.read()
 
-            variables = yaml.load(contents) or {}
-            return dict(variables)
+            variables = dict(yaml.load(contents)) or {}
+            return cast(
+                Dict[str, str], substitute_all_config_variables(variables, env_vars)
+            )
 
         except OSError as e:
             if e.errno != errno.ENOENT:

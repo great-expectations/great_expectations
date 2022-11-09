@@ -171,7 +171,7 @@ class AbstractDataContext(ABC):
         self.runtime_environment = runtime_environment
 
         self._config_provider = self._init_config_provider()
-        self._config_variables: Optional[dict] = self._load_config_variables()
+        self._config_variables = self._load_config_variables()
 
         # These attributes that are set downstream.
         self._variables: Optional[DataContextVariables] = None
@@ -220,8 +220,6 @@ class AbstractDataContext(ABC):
         return config_provider
 
     def _register_providers(self, config_provider: ConfigurationProvider) -> None:
-        config_provider.register_provider(EnvironmentConfigurationProvider())
-
         config_variables_file_path = self._project_config.config_variables_file_path
         if config_variables_file_path:
             config_provider.register_provider(
@@ -230,7 +228,7 @@ class AbstractDataContext(ABC):
                     root_directory=self.root_directory,
                 )
             )
-
+        config_provider.register_provider(EnvironmentConfigurationProvider())
         config_provider.register_provider(
             RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
         )
