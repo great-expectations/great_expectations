@@ -376,27 +376,17 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Testing api inclusion',
-          link: { type: 'doc', id: 'reference/api_reference' },
-          items: [
-            { label: 'test_static_html_file', type: 'link', href: '/test_static.html' },
-            { label: 'Sphinx API Docs', type: 'link', href: '/api_docs/html/index.html' }
-          ]
-        },
-        {
-          type: 'category',
           label: 'API documentation',
           link: { type: 'doc', id: 'reference/api_reference' },
           items: [
+            { label: 'Sphinx API Docs', type: 'link', href: '/api_docs/html/index.html' },
             {
               type: 'category',
               label: 'Class DataContext',
               link: { type: 'doc', id: 'api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext' },
               items: [
                 { label: '  .create(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create' },
-                { label: '  .test_yaml_config(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config' },
-                { label: 'Sphinx API Docs', type: 'link', href: '/api_docs/html/index.html' }
-                // { label: 'sphinx api docs', type: 'link', href: 'test_static.html' }
+                { label: '  .test_yaml_config(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config' }
               ]
             }
           ]
