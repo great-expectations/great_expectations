@@ -43,6 +43,7 @@ from great_expectations.core.batch import (
     IDDict,
     get_batch_request_from_acceptable_arguments,
 )
+from great_expectations.core.config_provider import ConfigurationProvider
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
@@ -119,7 +120,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.core.config_provider import ConfigurationProvider
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
