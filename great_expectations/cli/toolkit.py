@@ -68,7 +68,7 @@ When you run this notebook, Great Expectations will store these expectations in 
 
 
 def get_or_create_expectation_suite(
-    expectation_suite_name: str,
+    expectation_suite_name: Union[str, None],
     data_context: DataContext,
     data_asset_name: Optional[str] = None,
     usage_event: Optional[str] = None,
@@ -119,7 +119,7 @@ def get_or_create_expectation_suite(
 
 
 def get_default_expectation_suite_name(
-    data_asset_name: str,
+    data_asset_name: Union[str, None],
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = None,
@@ -128,7 +128,7 @@ def get_default_expectation_suite_name(
     if data_asset_name:
         suite_name = f"{data_asset_name}.warning"
     elif batch_request:
-        suite_name = f"batch-{BatchRequest(**batch_request).id}"
+        suite_name = f"batch-{BatchRequest(**batch_request).id}"  # type: ignore[arg-type] # cannot unpack str
     else:
         suite_name = "warning"
     return suite_name
