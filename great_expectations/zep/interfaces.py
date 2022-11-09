@@ -43,6 +43,9 @@ class DataAsset(BaseModel):
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         raise NotImplementedError
 
+    class Config:
+        extra = "forbid"
+
 
 class Datasource(BaseModel, metaclass=MetaDatasource):
 

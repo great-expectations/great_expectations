@@ -5,6 +5,8 @@ datasources:
     assets:
       - type: file
         name: my_demo_file_asset
-        # TODO: combine root dir with this value in code
         file_path: great_expectations/zep/my_file.csv
         delimiter: "|"
+      - type: other
+        name: another_asset
+        food: "pizza"
