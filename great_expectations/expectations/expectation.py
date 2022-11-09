@@ -2498,7 +2498,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
 
-        if result_format_str in ["BASIC", "SUMMARY"]:
+        if result_format_str in ["BASIC"]:
             return dependencies
 
         if include_unexpected_rows:
@@ -2553,6 +2553,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         unexpected_index_list: Optional[List[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
+        print(f"this is running: {unexpected_index_list}")
         filtered_row_count: Optional[int] = metrics.get(
             f"{self.map_metric}.filtered_row_count"
         )
@@ -2707,8 +2708,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
-
-        if result_format_str in ["BASIC", "SUMMARY"]:
+        # this is the bug
+        # summary will return without calculating the unexpected rows
+        if result_format_str in ["BASIC"]:
             return dependencies
 
         if include_unexpected_rows:
@@ -2738,7 +2740,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
-
+            print("I am registered")
         return dependencies
 
     def _validate(
@@ -2761,6 +2763,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         unexpected_index_list: Optional[List[int]] = metrics.get(
             f"{self.map_metric}.unexpected_index_list"
         )
+        print("hello")
         filtered_row_count: Optional[int] = metrics.get(
             f"{self.map_metric}.filtered_row_count"
         )
