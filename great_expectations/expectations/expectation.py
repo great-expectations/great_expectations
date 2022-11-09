@@ -2278,7 +2278,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
-        if result_format_str in ["BASIC", "SUMMARY"]:
+        if result_format_str in ["BASIC"]:
             return dependencies
 
         if include_unexpected_rows:
