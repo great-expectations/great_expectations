@@ -181,13 +181,13 @@ def get_validator(
     return validator
 
 
-def load_expectation_suite(
+def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
     data_context: DataContext,
     expectation_suite_name: str,
     usage_event: str,
     suppress_usage_message: bool = False,
     create_if_not_exist: bool = True,
-) -> Optional[ExpectationSuite]:
+) -> ExpectationSuite:
     """
     Load an expectation suite from a given context.
 
