@@ -8,17 +8,17 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     InvalidExpectationConfigurationError,
-)
-from great_expectations.expectations.metrics.util import parse_value_set
-from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.expectations.metrics.util import parse_value_set
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    LegacyRendererType,
     RenderedGraphContent,
     RenderedStringTemplateContent,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -210,7 +210,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -278,7 +278,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.value_counts_bar_chart")
+    @renderer(renderer_type=LegacyDescriptiveRendererType.VALUE_COUNTS_BAR_CHART)
     def _descriptive_value_counts_bar_chart_renderer(
         cls,
         configuration=None,
@@ -381,8 +381,8 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
             "parse_strings_as_datetimes"

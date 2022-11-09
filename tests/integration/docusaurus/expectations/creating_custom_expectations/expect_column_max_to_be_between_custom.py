@@ -13,6 +13,7 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     ExpectationValidationResult,
+    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
@@ -23,9 +24,8 @@ from great_expectations.expectations.metrics import (
     metric_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,

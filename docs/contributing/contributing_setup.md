@@ -63,7 +63,7 @@ pip install -c constraints-dev.txt -e ".[test]"
 
 > Note: You may specify other "extras" in the square brackets next to "test" if you separate with a comma (i.e. `-e ".[test,postgresql,trino]"`)
 >
-> Allowed extras currently include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `sqlalchemy`, `teradata`, `test`, `trino`
+> Allowed extras currently include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `dev`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `sqlalchemy`, `teradata`, `test`, `trino`, `vertica`
 >
 > Before `pip install`, you may need to install some system packages.
 

@@ -29,6 +29,7 @@ from great_expectations.expectations.expectation import (
     Expectation,
     ExpectationConfiguration,
     TableExpectation,
+    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -46,9 +47,8 @@ from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator

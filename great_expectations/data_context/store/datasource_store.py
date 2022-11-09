@@ -74,7 +74,7 @@ class DatasourceStore(Store):
         """
         See parent 'Store.serialize()' for more information
         """
-        return self._serializer.serialize(value)  # type: ignore[return-value]
+        return self._serializer.serialize(value)
 
     def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
         """
@@ -125,17 +125,6 @@ class DatasourceStore(Store):
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
         return datasource_config
 
-    def delete_by_name(self, datasource_name: str) -> None:
-        """Deletes a DatasourceConfig persisted in the store by it's given name.
-
-        Args:
-            datasource_name: The name of the Datasource to retrieve.
-        """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
-        self.remove_key(datasource_key)
-
     def delete(self, datasource_config: DatasourceConfig) -> None:
         """Deletes a DatasourceConfig persisted in the store using its config.
 
@@ -183,7 +172,7 @@ class DatasourceStore(Store):
 
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GeCloudResourceRef]] = super().set(key, value)  # type: ignore[func-returns-value]
+        ref: Optional[Union[bool, GeCloudResourceRef]] = super().set(key, value)
         if ref and isinstance(ref, GeCloudResourceRef):
             key.ge_cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
 
@@ -193,7 +182,7 @@ class DatasourceStore(Store):
             # configs and can be refactored (e.g. into `get()`)
             return_value.name = key.resource_name
 
-        return return_value  # type: ignore[return-value]
+        return return_value
 
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig

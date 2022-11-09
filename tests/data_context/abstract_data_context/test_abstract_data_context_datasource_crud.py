@@ -24,11 +24,13 @@ class StubDatasourceStore(DatasourceStore):
 
 
 class FakeAbstractDataContext(AbstractDataContext):
-    def __init__(self):
+    def __init__(self, substitutions: Optional[dict] = None) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
         self._cached_datasources: dict = {}
+        self._usage_statistics_handler = None
+        self._substitutions = substitutions or {}
 
     def _init_variables(self):
         """Using EphemeralDataContextVariables to store in memory."""
@@ -36,7 +38,7 @@ class FakeAbstractDataContext(AbstractDataContext):
 
     def _determine_substitutions(self):
         """No substitutions required for these tests."""
-        return {}
+        return self._substitutions
 
     def save_expectation_suite(self):
         """Abstract method. Only a stub is needed."""
@@ -119,3 +121,43 @@ def test_save_datasource_overwrites_on_name_collision(
         assert len(context._cached_datasources) == 1
 
     assert mock_set.call_count == 2
+
+
+@pytest.mark.unit
+def test_add_datasource_sanitizes_instantiated_objs_config(
+    datasource_config_with_names: DatasourceConfig,
+):
+    # Set up fake with desired env var
+    variable = "DATA_DIR"
+    value_associated_with_variable = "a/b/c"
+    substitutions = {variable: value_associated_with_variable}
+    context = FakeAbstractDataContext(substitutions=substitutions)
+
+    # Ensure that config references the above env var
+    data_connector_name = tuple(datasource_config_with_names.data_connectors.keys())[0]
+    datasource_config_dict = datasource_config_with_names.to_json_dict()
+    datasource_config_dict["data_connectors"][data_connector_name][
+        "base_directory"
+    ] = f"${variable}"
+
+    instantiated_datasource = context.add_datasource(
+        **datasource_config_dict, save_changes=False
+    )
+
+    # Runtime object should have the substituted value for downstream usage
+    assert instantiated_datasource.data_connectors[
+        data_connector_name
+    ].base_directory.endswith(value_associated_with_variable)
+
+    # Config attached to object should mirror the runtime object
+    assert instantiated_datasource.config["data_connectors"][data_connector_name][
+        "base_directory"
+    ].endswith(value_associated_with_variable)
+
+    # Raw config attached to object should reflect what needs to be persisted (no sensitive credentials!)
+    assert (
+        instantiated_datasource._raw_config["data_connectors"][data_connector_name][
+            "base_directory"
+        ]
+        == f"${variable}"
+    )

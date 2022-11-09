@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import json
 import logging
@@ -33,7 +35,6 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
-    get_datetime_string_from_strftime_format,
     nested_update,
     parse_string_to_datetime,
 )
@@ -41,7 +42,12 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
     ClassInstantiationError,
     DataContextError,
+    GreatExpectationsTypeError,
     InvalidExpectationConfigurationError,
+)
+from great_expectations.render import (
+    AtomicPrescriptiveRendererType,
+    RenderedAtomicContent,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
@@ -66,13 +72,13 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name: str,
-        data_context: "AbstractDataContext" = None,
-        expectations: List[Union[dict, ExpectationConfiguration]] = None,
-        evaluation_parameters: dict = None,
-        data_asset_type: str = None,
-        execution_engine_type: Type["ExecutionEngine"] = None,
-        meta: dict = None,
-        ge_cloud_id: str = None,
+        data_context: Optional[AbstractDataContext] = None,
+        expectations: Optional[List[Union[dict, ExpectationConfiguration]]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        data_asset_type: Optional[str] = None,
+        execution_engine_type: Optional[Type[ExecutionEngine]] = None,
+        meta: Optional[dict] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
@@ -123,15 +129,22 @@ class ExpectationSuite(SerializableDictDot):
         if "citations" not in self.meta:
             self.meta["citations"] = []
 
-        if isinstance(citation_date, str):
-            citation_date = parse_string_to_datetime(datetime_string=citation_date)  # type: ignore[assignment]
+        citation_date_obj: datetime.datetime
+        _citation_date_types = (type(None), str, datetime.datetime)
 
-        citation_date = citation_date or datetime.datetime.now(datetime.timezone.utc)
+        if citation_date is None:
+            citation_date_obj = datetime.datetime.now(datetime.timezone.utc)
+        elif isinstance(citation_date, str):
+            citation_date_obj = parse_string_to_datetime(datetime_string=citation_date)
+        elif isinstance(citation_date, datetime.datetime):
+            citation_date_obj = citation_date
+        else:
+            raise GreatExpectationsTypeError(
+                f"citation_date should be of type - {' '.join(str(t) for t in _citation_date_types)}"
+            )
+
         citation: Dict[str, Any] = {
-            "citation_date": get_datetime_string_from_strftime_format(
-                format_str="%Y-%m-%dT%H:%M:%S.%fZ",
-                datetime_obj=citation_date,  # type: ignore[arg-type]
-            ),
+            "citation_date": citation_date_obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "batch_request": batch_request,
             "batch_definition": batch_definition,
             "batch_spec": batch_spec,
@@ -369,7 +382,7 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
-        ge_cloud_id: str = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> List[int]:
         """
         Find indexes of Expectations matching the given ExpectationConfiguration on the given match_type.
@@ -617,7 +630,7 @@ class ExpectationSuite(SerializableDictDot):
         usage_stats_event_payload: dict = {}
         if self._data_context is not None:
             self._data_context.send_usage_message(
-                event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION.value,
+                event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION,
                 event_payload=usage_stats_event_payload,
                 success=success,
             )
@@ -736,7 +749,7 @@ class ExpectationSuite(SerializableDictDot):
                     }
                 }
             )
-        pprint.pprint(  # type: ignore[call-arg]
+        pprint.pprint(
             object=pprint_objects,
             indent=2,
             sort_dicts=False,
@@ -815,7 +828,7 @@ class ExpectationSuite(SerializableDictDot):
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expectation_configurations:
-            expectation_configuration.kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            expectation_configuration.kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
 
@@ -834,7 +847,7 @@ class ExpectationSuite(SerializableDictDot):
         kwargs: dict
         column_name: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_name = kwargs.pop("column")
@@ -858,7 +871,7 @@ class ExpectationSuite(SerializableDictDot):
         column_A_name: str
         column_B_name: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_A_name = kwargs.pop("column_A")
@@ -885,7 +898,7 @@ class ExpectationSuite(SerializableDictDot):
         kwargs: dict
         column_list: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_list = kwargs.pop("column_list")
@@ -965,7 +978,7 @@ class ExpectationSuite(SerializableDictDot):
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """
         for expectation_configuration in self.expectations:
-            inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
+            inline_renderer_config: InlineRendererConfig = {
                 "class_name": "InlineRenderer",
                 "render_object": expectation_configuration,
             }
@@ -982,8 +995,14 @@ class ExpectationSuite(SerializableDictDot):
                     class_name=inline_renderer_config["class_name"],
                 )
 
-            expectation_configuration.rendered_content = (
-                inline_renderer.get_rendered_content()
+            rendered_content: List[
+                RenderedAtomicContent
+            ] = inline_renderer.get_rendered_content()
+
+            expectation_configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
+                existing_rendered_content=expectation_configuration.rendered_content,
+                new_rendered_content=rendered_content,
+                failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
             )
 
 

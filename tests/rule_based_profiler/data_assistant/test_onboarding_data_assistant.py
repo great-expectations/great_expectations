@@ -144,7 +144,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
     import uuid
 
     import great_expectations as ge
-    from great_expectations.data_context import BaseDataContext
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.validator.validator import Validator
     from great_expectations.rule_based_profiler.data_assistant import (
         DataAssistant,
@@ -255,7 +255,7 @@ def test_onboarding_data_assistant_result_get_expectation_suite(
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert (
         actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE.value
+        == UsageStatsEvents.DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE
     )
 
 

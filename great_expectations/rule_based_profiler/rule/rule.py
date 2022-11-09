@@ -30,7 +30,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     build_parameter_container_for_variables,
 )
-from great_expectations.rule_based_profiler.rule_state import RuleState
+from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -78,8 +78,6 @@ class Rule(SerializableDictDot):
         self._domain_builder = domain_builder
         self._parameter_builders = parameter_builders
         self._expectation_configuration_builders = expectation_configuration_builders
-
-        self._execution_time = None
 
     @measure_execution_time(
         execution_time_holder_object_reference_name="rule_state",
@@ -207,13 +205,6 @@ class Rule(SerializableDictDot):
         self,
     ) -> Optional[List[ExpectationConfigurationBuilder]]:
         return self._expectation_configuration_builders
-
-    @property
-    def execution_time(self) -> Optional[float]:  # Execution time (in seconds).
-        """
-        Property that holds "execution_time" of this "Rule" (in seconds).
-        """
-        return self._execution_time
 
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None

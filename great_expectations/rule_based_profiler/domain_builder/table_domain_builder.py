@@ -1,4 +1,6 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, List, Optional
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain import Domain
@@ -7,15 +9,20 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class TableDomainBuilder(DomainBuilder):
     def __init__(
         self,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
-            data_context: BaseDataContext associated with this DomainBuilder
+            data_context: AbstractDataContext associated with this DomainBuilder
         """
         super().__init__(data_context=data_context)
 
