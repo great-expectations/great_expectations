@@ -47,7 +47,6 @@ exclude = [
     'cli/toolkit\.py',  # 27
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
-    'cli/util\.py',  # 1
     'core/batch\.py', # 29
     'core/expectation_configuration\.py', # 21
     'core/expectation_diagnostics', # 20
