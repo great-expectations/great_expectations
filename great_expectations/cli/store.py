@@ -48,7 +48,7 @@ def store_list(ctx: click.Context):
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
