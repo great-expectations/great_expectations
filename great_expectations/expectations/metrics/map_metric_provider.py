@@ -1700,7 +1700,7 @@ def _pandas_map_condition_index(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-):
+) -> Union[List[int], List[Dict[str, Any]]]:
     (
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
@@ -1744,24 +1744,27 @@ def _pandas_map_condition_index(
                 )
 
     result_format = metric_value_kwargs["result_format"]
+
     df = df[boolean_mapped_unexpected_values]
 
     if "unexpected_index_columns" in result_format:
-        unexpected_index_list: Optional[List[dict]] = []
 
-        unexpected_index_column_names = result_format["unexpected_index_columns"]
-        unexpected_indices = list(df.index)
+        unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+        unexpected_index_column_names: List[str] = result_format[
+            "unexpected_index_columns"
+        ]
+        unexpected_indices: List[int] = list(df.index)
         for index in unexpected_indices:
-            temp = dict()
+            primary_key_dict: Dict[str, Any] = {}
             for column_name in unexpected_index_column_names:
                 if column_name not in metrics["table.columns"]:
                     raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in Dataframe. '
                         f"Please check your configuration and try again."
                     )
-                temp[column_name] = df.at[index, column_name]
-            unexpected_index_list.append(temp)
-            return unexpected_index_list
+                primary_key_dict[column_name] = df.at[index, column_name]
+            unexpected_index_list.append(primary_key_dict)
+        return unexpected_index_list
     else:
         return list(df.index)
 

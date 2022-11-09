@@ -2497,6 +2497,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
+
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
 
