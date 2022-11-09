@@ -10,6 +10,12 @@ import requests
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.config_provider import (
+    ConfigurationProvider,
+    ConfigurationVariablesConfigurationProvider,
+    EnvironmentConfigurationProvider,
+    RuntimeEnvironmentConfigurationProvider,
+)
 from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -308,6 +314,24 @@ class CloudDataContext(AbstractDataContext):
     @property
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
+
+    def _register_config_providers(
+        self, config_provider: ConfigurationProvider
+    ) -> None:
+        config_provider.register_provider(EnvironmentConfigurationProvider())
+
+        config_variables_file_path = self._project_config.config_variables_file_path
+        if config_variables_file_path:
+            config_provider.register_provider(
+                ConfigurationVariablesConfigurationProvider(
+                    config_variables_file_path=config_variables_file_path,
+                    root_directory=self.root_directory,
+                )
+            )
+
+        config_provider.register_provider(
+            RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
+        )
 
     def _init_variables(self) -> CloudDataContextVariables:
         ge_cloud_base_url: str = self._ge_cloud_config.base_url

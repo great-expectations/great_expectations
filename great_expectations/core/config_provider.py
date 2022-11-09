@@ -1,9 +1,10 @@
 import errno
 import os
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.types.base import GeCloudConfig
 from great_expectations.data_context.util import substitute_config_variable
 
 yaml = YAMLHandler()
@@ -61,7 +62,7 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
             defined_path: str = substitute_config_variable(  # type: ignore[assignment]
                 self._config_variables_file_path, dict(os.environ)
             )
-            if not os.path.isabs(defined_path) and hasattr(self, "root_directory"):
+            if not os.path.isabs(defined_path):
                 # A BaseDataContext will not have a root directory; in that case use the current directory
                 # for any non-absolute path
                 root_directory: str = self._root_directory or os.curdir
@@ -78,3 +79,26 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
             if e.errno != errno.ENOENT:
                 raise
             return {}
+
+
+class CloudConfigurationProvider(AbstractConfigurationProvider):
+    def __init__(self, cloud_config: GeCloudConfig) -> None:
+        self._cloud_config = cloud_config
+
+    def get_values(self) -> Dict[str, str]:
+
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            GECloudEnvironmentVariable,
+        )
+
+        values = {
+            GECloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
+            GECloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
+        }
+
+        if self._cloud_config.organization_id:
+            values[
+                GECloudEnvironmentVariable.ORGANIZATION_ID
+            ] = self._cloud_config.organization_id
+
+        return cast(Dict[str, str], values)
