@@ -61,10 +61,7 @@ class ConfigurationProvider(AbstractConfigurationProvider):
         """
         values: Dict[str, str] = {}
         for provider in self._providers.values():
-            # In the case a provider's values use ${VARIABLE} syntax, look at existing values
-            # and perform substitutions before adding to the result obj.
-            provider_values = provider.get_values()
-            values.update(provider_values)
+            values.update(provider.get_values())
         return values
 
 
