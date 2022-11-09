@@ -6,10 +6,13 @@ from __future__ import annotations
 import errno
 import os
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Type
+from typing import Dict, Optional, Type, cast
 
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.util import substitute_config_variable
+from great_expectations.data_context.util import (
+    substitute_all_config_variables,
+    substitute_config_variable,
+)
 
 yaml = YAMLHandler()
 
@@ -42,7 +45,14 @@ class ConfigurationProvider(AbstractConfigurationProvider):
     def get_values(self) -> Dict[str, str]:
         values = {}
         for provider in self._providers.values():
-            values.update(provider.get_values())
+            # In the case a provider's values use ${VARIABLE} syntax, look at existing values
+            # and perform substitutions before adding to the result obj.
+            provider_values = provider.get_values()
+            if values:
+                provider_values = cast(
+                    dict, substitute_all_config_variables(provider_values, values)
+                )
+            values.update(provider_values)
         return values
 
 
