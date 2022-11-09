@@ -12,6 +12,11 @@ from ruamel.yaml import YAML
 from great_expectations.zep.interfaces import Datasource
 from great_expectations.zep.sources import _SourceFactories
 
+try:
+    from devtools import debug as pp
+except ImportError:
+    from pprint import pprint as pp  # type: ignore[assignment]
+
 yaml = YAML(typ="safe")
 
 
@@ -25,7 +30,9 @@ class GxConfig(BaseModel):
     def parse_yaml(cls, f: Union[pathlib.Path, str]) -> GxConfig:
         loaded = yaml.load(f)
         LOGGER.debug(f"loaded from yaml ->\n{pf(loaded)}\n")
-        return cls(**loaded)
+        config = cls(**loaded)
+        pp(config)
+        return config
 
     @validator("datasources", pre=True)
     @classmethod

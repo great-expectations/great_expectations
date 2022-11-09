@@ -6,9 +6,9 @@ from pydantic import FilePath, ValidationError
 from typing_extensions import ClassVar
 
 try:
-    from devtools import debug
+    from devtools import debug as pp
 except ImportError:
-    from pprint import pformat as debug  # type: ignore[assignment]
+    from pprint import pprint as pp  # type: ignore[assignment]
 
 TERM_WIDTH = shutil.get_terminal_size()[1]
 SEPARATOR = "-" * TERM_WIDTH
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # TODO: remove this before release
     from great_expectations.zep.logger import init_logger
 
-    init_logger(level=10)
+    init_logger(level=30)
 
 
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -142,7 +142,7 @@ def add_real_asset() -> None:
         ds.add_file_asset("my_file_2", file_path=__file__)
 
     my_asset = ds.get_asset("my_file_2")
-    debug(my_asset)
+    pp(my_asset)
 
 
 def from_yaml_config():
@@ -153,13 +153,13 @@ def from_yaml_config():
 
     my_ds = context.get_datasource("my_demo_datasource")
     print(f"\n  Retrieved '{my_ds.name}'->")
-    debug(my_ds)
+    pp(my_ds)
     assert my_ds
 
     my_asset = my_ds.assets["my_demo_file_asset"]
 
     print(f"\n Retrieved '{my_asset.name}'->")
-    debug(my_asset)
+    pp(my_asset)
     assert my_asset.file_path.exists()
 
 

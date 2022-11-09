@@ -98,7 +98,7 @@ class TableAsset(DataAsset):
         return self
 
 
-class PostgresDatasource(Datasource):
+class PostgresDatasource:
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset]
 
