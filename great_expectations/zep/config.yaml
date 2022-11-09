@@ -11,3 +11,9 @@ datasources:
         # TODO: combine root dir with this value in code
         file_path: great_expectations/zep/my_file.csv
         delimiter: "|"
+      another_asset:
+        type: file
+        name: another_asset # TODO: remove name
+        # TODO: combine root dir with this value in code
+        file_path: setup.py
+        delimiter: "\t"
