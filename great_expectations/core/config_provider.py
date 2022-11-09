@@ -6,6 +6,7 @@ from __future__ import annotations
 import errno
 import os
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from typing import Dict, Optional, Type, cast
 
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -32,17 +33,31 @@ class ConfigurationProvider(AbstractConfigurationProvider):
     """
 
     def __init__(self) -> None:
-        self._providers: Dict[
+        self._providers: OrderedDict[
             Type[AbstractConfigurationProvider], AbstractConfigurationProvider
-        ] = {}
+        ] = OrderedDict()
 
     def register_provider(self, provider: AbstractConfigurationProvider):
+        """
+        TODO
+        """
         type_ = type(provider)
         if type_ in self._providers:
             raise ValueError(f"Provider of type {type_} has already been registered!")
         self._providers[type_] = provider
 
+    def get_provider(
+        self, type_: Type[AbstractConfigurationProvider]
+    ) -> Optional[AbstractConfigurationProvider]:
+        """
+        TODO
+        """
+        return self._providers.get(type_)
+
     def get_values(self) -> Dict[str, str]:
+        """
+        TODO
+        """
         values = {}
         for provider in self._providers.values():
             # In the case a provider's values use ${VARIABLE} syntax, look at existing values
