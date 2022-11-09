@@ -33,6 +33,7 @@ from great_expectations.zep.interfaces import (
 
 class FileAsset(DataAsset):
     type: Literal["file"] = "file"
+
     file_path: FilePath
     delimiter: str = ","
 
@@ -68,8 +69,8 @@ class PandasDatasource(Datasource):
 
     def add_my_other_asset(self, asset_name: str) -> OtherAsset:
         """Create `MyOtherAsset` add it to `self.assets` and return it."""
-        print(f"Adding {MyOtherAsset.__name__} - {asset_name}")
-        asset = MyOtherAsset(name=asset_name)
+        print(f"Adding {OtherAsset.__name__} - {asset_name}")
+        asset = OtherAsset(name=asset_name)
         self.assets[asset_name] = asset
         return asset
 
