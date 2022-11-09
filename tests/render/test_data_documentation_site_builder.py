@@ -727,7 +727,11 @@ def test_site_builder_usage_statistics_disabled(
         [index_page_path] + expectation_suite_pages + profiling_results_pages
     )
 
-    expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z"
+    tz_data = "20190924T231836.000000Z"
+    static_logos_dir = "https://company-visual-assets.s3.amazonaws.com/logos"
+    static_logo_file = "great-expectations-long-logo.png"
+    static_logo_path = f"{static_logos_dir}/{static_logo_file}"
+    expected_logo_url = f"{static_logo_path}?d={tz_data}"
 
     for page_path in page_paths_to_check:
         with open(page_path[7:]) as f:
