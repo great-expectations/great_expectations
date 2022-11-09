@@ -25,13 +25,6 @@ from typing import (
     cast,
 )
 
-from great_expectations.core.config_provider import (
-    AbstractConfigurationProvider,
-    ConfigurationProvider,
-    EnvironmentConfigurationProvider,
-    RuntimeEnvironmentConfigurationProvider,
-)
-
 try:
     from typing import Literal
 except ImportError:
@@ -126,6 +119,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.core.config_provider import ConfigurationProvider
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
@@ -226,6 +220,9 @@ class AbstractDataContext(ABC):
     def _register_config_providers(
         self, config_provider: ConfigurationProvider
     ) -> None:
+        """
+        TODO
+        """
         raise NotImplementedError
 
     @abstractmethod
@@ -2715,6 +2712,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         self._config_variables = self._load_config_variables()
 
+    # TODO(cdkini): Remove this method entirely and just use the call to config_provider
     def _determine_substitutions(self) -> Dict:
         return self._config_provider.get_values()
 

@@ -1,10 +1,12 @@
+"""
+TODO
+"""
 import errno
 import os
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, cast
+from typing import Dict, Optional
 
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.types.base import GeCloudConfig
 from great_expectations.data_context.util import substitute_config_variable
 
 yaml = YAMLHandler()
@@ -20,6 +22,10 @@ class AbstractConfigurationProvider(ABC):
 
 
 class ConfigurationProvider(AbstractConfigurationProvider):
+    """
+    TODO
+    """
+
     def __init__(self) -> None:
         self._providers = {}
 
@@ -37,6 +43,10 @@ class ConfigurationProvider(AbstractConfigurationProvider):
 
 
 class RuntimeEnvironmentConfigurationProvider(AbstractConfigurationProvider):
+    """
+    TODO
+    """
+
     def __init__(self, runtime_environment: Dict[str, str]) -> None:
         self._runtime_environment = runtime_environment
 
@@ -45,11 +55,19 @@ class RuntimeEnvironmentConfigurationProvider(AbstractConfigurationProvider):
 
 
 class EnvironmentConfigurationProvider(AbstractConfigurationProvider):
+    """
+    TODO
+    """
+
     def get_values(self) -> Dict[str, str]:
         return dict(os.environ)
 
 
 class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider):
+    """
+    TODO
+    """
+
     def __init__(
         self, config_variables_file_path: str, root_directory: Optional[str] = None
     ) -> None:
@@ -79,26 +97,3 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
             if e.errno != errno.ENOENT:
                 raise
             return {}
-
-
-class CloudConfigurationProvider(AbstractConfigurationProvider):
-    def __init__(self, cloud_config: GeCloudConfig) -> None:
-        self._cloud_config = cloud_config
-
-    def get_values(self) -> Dict[str, str]:
-
-        from great_expectations.data_context.data_context.cloud_data_context import (
-            GECloudEnvironmentVariable,
-        )
-
-        values = {
-            GECloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
-            GECloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
-        }
-
-        if self._cloud_config.organization_id:
-            values[
-                GECloudEnvironmentVariable.ORGANIZATION_ID
-            ] = self._cloud_config.organization_id
-
-        return cast(Dict[str, str], values)
