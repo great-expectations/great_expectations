@@ -10,6 +10,7 @@ from collections import OrderedDict
 from typing import Dict, Optional, Type, cast
 
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.types.base import GeCloudConfig
 from great_expectations.data_context.util import (
     substitute_all_config_variables,
     substitute_config_variable,
@@ -126,3 +127,18 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
             if e.errno != errno.ENOENT:
                 raise
             return {}
+
+
+class CloudConfigurationProvider(AbstractConfigurationProvider):
+    def __init__(self, cloud_config: GeCloudConfig) -> None:
+        self._cloud_config = cloud_config
+
+    def get_values(self) -> Dict[str, str]:
+        return cast(
+            Dict[str, str],
+            {
+                "GE_CLOUD_BASE_URL": self._cloud_config.base_url,
+                "GE_CLOUD_ACCESS_TOKEN": self._cloud_config.access_token,
+                "GE_CLOUD_ORGANIZATION_ID": self._cloud_config.organization_id,
+            },
+        )

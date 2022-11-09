@@ -216,6 +216,10 @@ class AbstractDataContext(ABC):
 
     def _init_config_provider(self) -> ConfigurationProvider:
         config_provider = ConfigurationProvider()
+        self._register_providers(config_provider)
+        return config_provider
+
+    def _register_providers(self, config_provider: ConfigurationProvider) -> None:
         config_provider.register_provider(EnvironmentConfigurationProvider())
 
         config_variables_file_path = self._project_config.config_variables_file_path
@@ -230,7 +234,6 @@ class AbstractDataContext(ABC):
         config_provider.register_provider(
             RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
         )
-        return config_provider
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
