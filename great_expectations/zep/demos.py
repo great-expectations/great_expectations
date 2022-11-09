@@ -41,19 +41,21 @@ class FileAsset(DataAsset):
 
 
 class MyOtherAsset(DataAsset):
-    type: Literal["file"] = "file"
+    type: Literal["other"] = "other"
+
+    food: Literal["pizza", "bad pizza"]
 
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 
 class PandasDatasource(Datasource):
-    engine: Literal["pandas"] = "pandas"
-    execution_engine: ClassVar = PandasExecutionEngine()  # ClassVar??
+    execution_engine: ClassVar = PandasExecutionEngine()
     asset_types: ClassVar[List[Type[DataAsset]]] = [
         FileAsset,
         MyOtherAsset,
-    ]  # ClassVar??
+    ]
+    engine: Literal["pandas"] = "pandas"
     name: str
     assets: Dict[str, DataAsset]
 
@@ -71,24 +73,12 @@ class PandasDatasource(Datasource):
         self.assets[asset_name] = asset
         return asset
 
-    def add_file_asset(self, asset_name: str, **kwargs) -> FileAsset:
+    def add_file_asset(self, name: str, **kwargs) -> FileAsset:
         """Create `FileAsset` add it to `self.assets` and return it."""
-        print(f"Adding {FileAsset.__name__} - {asset_name}")
-        asset = FileAsset(name=asset_name, **kwargs)
-        self.assets[asset_name] = asset
+        print(f"Adding {FileAsset.__name__} - {name}")
+        asset = FileAsset(name=name, **kwargs)
+        self.assets[name] = asset
         return asset
-
-
-# class TableAsset:
-#     pass
-
-
-# class PostgresDatasource(metaclass=MetaDatasource):
-#     asset_types = [TableAsset]
-
-#     def __init__(self, name: str, connection_str: str):
-#         self.name = name
-#         self.connection_str = connection_str
 
 
 def round_trip():
@@ -151,7 +141,7 @@ def from_yaml_config():
     context = get_context(context_root_dir=root_dir)
     print(f"\n  Context loaded from {root_dir}")
 
-    my_ds = context.get_datasource("my_demo_datasource")
+    my_ds: PandasDatasource = context.get_datasource("my_demo_datasource")
     print(f"\n  Retrieved '{my_ds.name}'->")
     pp(my_ds)
     assert my_ds
