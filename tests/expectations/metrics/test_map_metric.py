@@ -323,7 +323,6 @@ def test_pandas_single_unexpected_index_columns_complete_result_format(
             "result_format": {
                 "result_format": "COMPLETE",
                 "unexpected_index_columns": ["pk_1"],  # Single column
-                # renamed into something else?
             },
         },
     )
