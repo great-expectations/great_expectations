@@ -48,7 +48,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         InferredAssetS3DataConnector for connecting to S3.
@@ -70,7 +70,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             default_regex=default_regex,

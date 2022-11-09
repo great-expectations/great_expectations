@@ -13,12 +13,12 @@ access to features of new package versions.
 import enum
 import sys
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Iterable, List, Optional
 
+from marshmallow import Schema, fields
 from packaging import version
 
 from great_expectations.core.usage_statistics.package_dependencies import GEDependencies
-from great_expectations.marshmallow__shade import Schema, fields
 
 if sys.version_info < (3, 8):
     # Note: importlib_metadata is included in the python standard library as importlib
@@ -60,10 +60,10 @@ class GEExecutionEnvironment:
 
     def __init__(self) -> None:
         self._ge_dependencies = GEDependencies()
-        self._all_installed_packages = None
+        self._all_installed_packages: List[str] = []
         self._get_all_installed_packages()
 
-        self._dependencies = []
+        self._dependencies: List[PackageInfo] = []
         self._build_required_dependencies()
         self._build_dev_dependencies()
 
@@ -98,7 +98,7 @@ class GEExecutionEnvironment:
         Returns:
             list of string names of packages that are installed
         """
-        if self._all_installed_packages is None:
+        if not self._all_installed_packages:
             # Only retrieve once
             self._all_installed_packages = [
                 item.metadata.get("Name")
@@ -108,7 +108,9 @@ class GEExecutionEnvironment:
         return self._all_installed_packages
 
     def _build_dependencies_info(
-        self, dependency_names: List[str], install_environment: InstallEnvironment
+        self,
+        dependency_names: Iterable[str],
+        install_environment: InstallEnvironment,
     ) -> List[PackageInfo]:
         """Build list of info about dependencies including version and install status.
 
@@ -127,7 +129,7 @@ class GEExecutionEnvironment:
             installed: bool
             if dependency_name in self._get_all_installed_packages():
                 installed = True
-                package_version = version.parse(metadata.version(dependency_name))
+                package_version = version.parse(metadata.version(dependency_name))  # type: ignore[assignment]
             else:
                 installed = False
                 package_version = None

@@ -1,5 +1,7 @@
 from typing import List
 
+import pytest
+
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -9,6 +11,8 @@ from great_expectations.rule_based_profiler.domain_builder import (
 )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.20s
 def test_column_values_unique_single_batch(alice_columnar_table_single_batch_context):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
@@ -64,6 +68,7 @@ def test_column_values_unique_single_batch(alice_columnar_table_single_batch_con
     assert domains == alice_expected_column_domains
 
 
+@pytest.mark.integration
 def test_column_values_nonnull_multi_batch_one_column_not_emitted(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -134,6 +139,7 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted(
     assert domains == bobby_expected_column_domains
 
 
+@pytest.mark.integration
 def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpected_values(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -205,6 +211,8 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
     assert domains == bobby_expected_column_domains
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 2.66s
 def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_unexpected_values_proportion(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -276,6 +284,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_une
     assert domains == bobby_expected_column_domains
 
 
+@pytest.mark.integration
 def test_column_values_nonnull_multi_batch_one_column_not_emitted_tight_max_unexpected_ratio(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -346,6 +355,7 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted_tight_max_unex
     assert domains == bobby_expected_column_domains
 
 
+@pytest.mark.integration
 def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpected_ratio(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):

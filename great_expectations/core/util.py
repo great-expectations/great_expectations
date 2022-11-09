@@ -26,14 +26,21 @@ from great_expectations.types.base import SerializableDotDict
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from great_expectations.util import convert_decimal_to_float
 
+try:
+    from pyspark.sql.types import StructType
+except ImportError:
+    StructType = None  # type: ignore
+
 logger = logging.getLogger(__name__)
 
 
 try:
-    from shapely.geometry import Point, Polygon
+    from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 except ImportError:
     Point = None
     Polygon = None
+    MultiPolygon = None
+    LineString = None
 
 try:
     import sqlalchemy
@@ -209,11 +216,14 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
     if isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
 
-    if isinstance(data, (uuid.UUID, bytes)):
+    if isinstance(data, uuid.UUID):
+        return str(data)
+
+    if isinstance(data, bytes):
         return str(data)
 
     # noinspection PyTypeChecker
-    if Polygon and isinstance(data, (Point, Polygon)):
+    if Polygon and isinstance(data, (Point, Polygon, MultiPolygon, LineString)):
         return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
@@ -254,7 +264,7 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
                 index_name: convert_to_json_serializable(idx),
                 value_name: convert_to_json_serializable(val),
             }
-            for idx, val in data.iteritems()
+            for idx, val in data.items()
         ]
 
     if isinstance(data, pd.DataFrame):
@@ -276,6 +286,11 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
 
     if isinstance(data, RunIdentifier):
         return data.to_json_dict()
+
+    # PySpark schema serialization
+    if StructType is not None:
+        if isinstance(data, StructType):
+            return dict(data.jsonValue())
 
     else:
         raise TypeError(
@@ -361,7 +376,7 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
                 index_name: ensure_json_serializable(idx),
                 value_name: ensure_json_serializable(val),
             }
-            for idx, val in data.iteritems()
+            for idx, val in data.items()
         ]
         return
 
@@ -407,25 +422,14 @@ def substitute_all_strftime_format_strings(
             for el in data
         ]
     elif isinstance(data, str):
-        return get_datetime_string_from_strftime_format(data, datetime_obj=datetime_obj)
+        return datetime_obj.strftime(data)
     else:
         return data
 
 
-def get_datetime_string_from_strftime_format(
-    format_str: str, datetime_obj: Optional[datetime.datetime] = None
-) -> str:
-    """
-    This utility function takes a string with strftime format elements and substitutes those elements using
-    either the provided datetime_obj or current datetime
-    """
-    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
-    return datetime_obj.strftime(format_str)
-
-
 def parse_string_to_datetime(
     datetime_string: str, datetime_format_string: Optional[str] = None
-) -> datetime.date:
+) -> datetime.datetime:
     if not isinstance(datetime_string, str):
         raise ge_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").

@@ -249,6 +249,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.04s
 def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_ge_config_v2(
     mock_emit,
     caplog,
@@ -350,6 +351,7 @@ batches:
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.05s
 def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     mock_emit,
     caplog,
@@ -753,6 +755,7 @@ def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.40s
 def test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -799,6 +802,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.40s
 def test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -851,6 +855,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.01s
 def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -894,6 +899,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.01s
 def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -949,6 +955,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.03s
 def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -1002,6 +1009,7 @@ def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
     )
 
 
+@pytest.mark.slow  # 6.96s
 def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_config_v2(
     caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -1055,6 +1063,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     assert "Validation succeeded!" in output
 
 
+@pytest.mark.slow  # 8.31s
 def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_config_v2(
     caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):

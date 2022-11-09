@@ -65,6 +65,7 @@ coverage.xml
 *.cover
 .hypothesis/
 src/dgtest/
+type_cov/
 
 # Translations
 *.mo

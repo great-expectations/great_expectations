@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import itertools
-from typing import Any, Collection, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Collection, Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -9,6 +11,7 @@ from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
+    datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
@@ -25,6 +28,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import is_ndarray_datetime_dtype
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
@@ -50,6 +59,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         str
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "metric_name",
+        "single_batch_mode",
         "enforce_numeric_metric",
         "replace_nan_with_zero",
         "reduce_scalar_metric",
@@ -63,7 +73,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -75,7 +85,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -124,15 +134,28 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
                 FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
             ]
         )
+        details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
+
+        unique_values: Set[Any] = _get_unique_values_from_nested_collection_of_sets(
+            collection=metric_values
+        )
+
+        unique_values_as_array: np.ndarray = np.asarray(unique_values)
+        if unique_values_as_array.ndim == 0:
+            unique_values_as_array = np.asarray([unique_values])
+
+        details["parse_strings_as_datetimes"] = datetime_semantic_domain_type(
+            domain=domain
+        ) or is_ndarray_datetime_dtype(
+            data=unique_values_as_array,
+            parse_strings_as_datetimes=False,
+            fuzzy=False,
+        )
 
         return Attributes(
             {
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: _get_unique_values_from_nested_collection_of_sets(
-                    collection=metric_values
-                ),
-                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ],
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: unique_values,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
             }
         )
 
@@ -158,7 +181,7 @@ def _get_unique_values_from_nested_collection_of_sets(
         flattened = set().union(*flattened)
 
     """
-    In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to
+    In multi-batch data analysis, values can be empty and missing, resulting in "None" added to set.  However, due to
     reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
     """

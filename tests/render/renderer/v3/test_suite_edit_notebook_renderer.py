@@ -899,6 +899,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
     assert obs == expected
 
 
+@pytest.mark.slow  # 9.72s
 def test_notebook_execution_with_pandas_backend(
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1206,6 +1207,7 @@ def test_notebook_execution_with_custom_notebooks(
         """,
     ],
 )
+@pytest.mark.slow  # 1.36s
 def test_raise_exception_quotes_or_space_with_row_condition(
     row_condition,
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,

@@ -80,13 +80,17 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             )  # Average center values
         else:
             # An odd number of column values, we can just take the center value
-            column_median = column_values[1][0]  # True center value
+            if len(column_values) == 1:
+                column_median = column_values[0][0]  # The only value
+            else:
+                column_median = column_values[1][0]  # True center value
+
         return column_median
 
     @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     def _spark(
         cls,
-        execution_engine: SqlAlchemyExecutionEngine,
+        execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],

@@ -64,7 +64,7 @@ class ConfigPeer(ABC):
         if mode == ConfigOutputModes.DICT:
             config_kwargs: dict = config.to_dict()
         elif mode == ConfigOutputModes.JSON_DICT:
-            config_kwargs: dict = config.to_json_dict()
+            config_kwargs: dict = config.to_json_dict()  # type: ignore[no-redef]
         else:
             raise ValueError(f'Unknown mode {mode} in "BaseCheckpoint.get_config()".')
 

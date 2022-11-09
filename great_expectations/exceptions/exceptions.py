@@ -4,7 +4,7 @@ import json
 from collections.abc import Iterable
 from typing import Any, Dict, List, Union
 
-from great_expectations.marshmallow__shade import ValidationError
+from marshmallow import ValidationError
 
 
 class GreatExpectationsError(Exception):
@@ -434,10 +434,16 @@ class GeCloudError(GreatExpectationsError):
     Generic error used to provide additional context around Cloud-specific issues.
     """
 
-    pass
+
+class GeCloudConfigurationError(GreatExpectationsError):
+    """
+    Error finding and verifying the required configuration values when preparing to connect to GX Cloud
+    """
 
 
 class DatabaseConnectionError(GreatExpectationsError):
     """Error connecting to a database including during an integration test."""
 
-    pass
+
+class MigrationError(GreatExpectationsError):
+    """Error when using the migration tool."""

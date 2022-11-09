@@ -29,10 +29,10 @@ class BaseDatasource:
     def __init__(
         self,
         name: str,
-        execution_engine=None,
+        execution_engine: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Build a new Datasource.
@@ -42,10 +42,10 @@ class BaseDatasource:
             execution_engine (ClassConfig): the type of compute engine to produce
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
-            id_: Identifier specific to this datasource.
+            id: Identifier specific to this datasource.
         """
         self._name = name
-        self._id_ = id_
+        self._id = id
 
         self._data_context_root_directory = data_context_root_directory
         if execution_engine is None:
@@ -59,13 +59,19 @@ class BaseDatasource:
                 runtime_environment={"concurrency": concurrency},
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
-            self._datasource_config: dict = {
-                "execution_engine": execution_engine,
-                "id_": id_,
-                "name": name,
-            }
         except Exception as e:
             raise ge_exceptions.ExecutionEngineError(message=str(e))
+
+        self._datasource_config: dict = {
+            "execution_engine": execution_engine,
+            "id": id,
+            "name": name,
+        }
+
+        # Chetan - 20221103 - This attribute is meant to represent the config args used to instantiate the object (before ${VARIABLE} substitution).
+        # While downstream logic should override this value, we default to `self._datasource_config` as a backup.
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.
+        self._raw_config = self._datasource_config
 
         self._data_connectors: dict = {}
 
@@ -169,7 +175,7 @@ class BaseDatasource:
                 batch_data,
                 batch_spec,
                 batch_markers,
-            ) = data_connector.get_batch_data_and_metadata(
+            ) = data_connector.get_batch_data_and_metadata(  # type: ignore[call-arg]
                 batch_definition=batch_definition,
                 runtime_parameters=runtime_parameters,
             )
@@ -189,9 +195,9 @@ class BaseDatasource:
                 batch_definition.batch_spec_passthrough = (
                     batch_request.batch_spec_passthrough
                 )
-                batch_data: Any
-                batch_spec: PathBatchSpec
-                batch_markers: BatchMarkers
+                batch_data: Any  # type: ignore[no-redef]
+                batch_spec: PathBatchSpec  # type: ignore[no-redef]
+                batch_markers: BatchMarkers  # type: ignore[no-redef]
                 (
                     batch_data,
                     batch_spec,
@@ -227,7 +233,7 @@ class BaseDatasource:
             },
         )
         new_data_connector.data_context_root_directory = (
-            self._data_context_root_directory
+            self._data_context_root_directory  # type: ignore[assignment]
         )
 
         self.data_connectors[name] = new_data_connector
@@ -259,11 +265,11 @@ class BaseDatasource:
         """
         available_data_asset_names: dict = {}
         if data_connector_names is None:
-            data_connector_names = self.data_connectors.keys()
+            data_connector_names = self.data_connectors.keys()  # type: ignore[assignment]
         elif isinstance(data_connector_names, str):
             data_connector_names = [data_connector_names]
 
-        for data_connector_name in data_connector_names:
+        for data_connector_name in data_connector_names:  # type: ignore[union-attr]
             data_connector: DataConnector = self.data_connectors[data_connector_name]
             available_data_asset_names[
                 data_connector_name
@@ -298,11 +304,11 @@ class BaseDatasource:
 
         available_data_asset_names_and_types: dict = {}
         if data_connector_names is None:
-            data_connector_names = self.data_connectors.keys()
+            data_connector_names = self.data_connectors.keys()  # type: ignore[assignment]
         elif isinstance(data_connector_names, str):
             data_connector_names = [data_connector_names]
 
-        for data_connector_name in data_connector_names:
+        for data_connector_name in data_connector_names:  # type: ignore[union-attr]
             data_connector: DataConnector = self.data_connectors[data_connector_name]
             available_data_asset_names_and_types[
                 data_connector_name
@@ -382,11 +388,11 @@ class BaseDatasource:
         return self._name
 
     @property
-    def id_(self) -> str:
+    def id(self) -> str:
         """
-        Property for datasource id_
+        Property for datasource id
         """
-        return self._id_
+        return self._id  # type: ignore[return-value]
 
     @property
     def execution_engine(self) -> ExecutionEngine:
@@ -411,11 +417,11 @@ class Datasource(BaseDatasource):
     def __init__(
         self,
         name: str,
-        execution_engine=None,
-        data_connectors=None,
+        execution_engine: Optional[dict] = None,
+        data_connectors: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Build a new Datasource with data connectors.
@@ -426,7 +432,7 @@ class Datasource(BaseDatasource):
             data_connectors: DataConnectors to add to the datasource
             data_context_root_directory: Installation directory path (if installed on a filesystem).
             concurrency: Concurrency config used to configure the execution engine.
-            id_: Identifier specific to this datasource.
+            id: Identifier specific to this datasource.
         """
         self._name = name
 
@@ -435,7 +441,7 @@ class Datasource(BaseDatasource):
             execution_engine=execution_engine,
             data_context_root_directory=data_context_root_directory,
             concurrency=concurrency,
-            id_=id_,
+            id=id,
         )
 
         if data_connectors is None:

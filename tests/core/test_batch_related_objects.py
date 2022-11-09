@@ -14,6 +14,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchSpecError
 
 
+@pytest.mark.unit
 def test_id_dict_structure():
     data: dict = {
         "a0": 1,
@@ -47,6 +48,7 @@ def test_id_dict_structure():
     assert isinstance(nested_id_dictionary["a1"]["b2"], int)
 
 
+@pytest.mark.unit
 def test_iddict_is_hashable():
     data_0: dict = {
         "a0": 1,
@@ -91,6 +93,7 @@ def test_iddict_is_hashable():
         assert False, "IDDict.__hash__() failed."
 
 
+@pytest.mark.unit
 def test_batch_definition_id():
     # noinspection PyUnusedLocal,PyPep8Naming
     A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
@@ -103,6 +106,7 @@ def test_batch_definition_id():
     assert A.id != B.id
 
 
+@pytest.mark.unit
 def test_batch_definition_instantiation():
     with pytest.raises(TypeError):
         # noinspection PyTypeChecker,PyUnusedLocal,PyPep8Naming
@@ -113,6 +117,7 @@ def test_batch_definition_instantiation():
     print(A.id)
 
 
+@pytest.mark.unit
 def test_batch_definition_equality():
     # noinspection PyUnusedLocal,PyPep8Naming
     A = BatchDefinition("A", "a", "aaa", batch_identifiers=IDDict({"id": "A"}))
@@ -128,6 +133,7 @@ def test_batch_definition_equality():
     assert A == A2
 
 
+@pytest.mark.unit
 def test_batch__str__method():
     batch = Batch(
         data=None,
@@ -172,6 +178,7 @@ def test_batch__str__method():
     )
 
 
+@pytest.mark.unit
 def test_batch_request_instantiation():
     BatchRequest(
         datasource_name="A",
@@ -211,6 +218,7 @@ def test_batch_request_instantiation():
     BatchRequest(datasource_name="A", data_connector_name="a", data_asset_name="aaa")
 
 
+@pytest.mark.unit
 def test_RuntimeDataBatchSpec():
     with pytest.raises(InvalidBatchSpecError):
         RuntimeDataBatchSpec()

@@ -1002,7 +1002,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self.container = container
         self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
 
-    @property  # type: ignore[misc] # Decorated property not supported
+    @property
     @functools.lru_cache()
     def _container_client(self) -> Any:
 
@@ -1010,8 +1010,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         from azure.storage.blob import BlobServiceClient
 
         if self.connection_string:
-            blob_service_client = BlobServiceClient.from_connection_string(
-                self.connection_string
+            blob_service_client: BlobServiceClient = (
+                BlobServiceClient.from_connection_string(self.connection_string)
             )
         elif self.account_url:
             blob_service_client = BlobServiceClient(

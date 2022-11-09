@@ -37,7 +37,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         glob_directive: str = "*",
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
@@ -57,7 +57,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
 
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             default_regex=default_regex,

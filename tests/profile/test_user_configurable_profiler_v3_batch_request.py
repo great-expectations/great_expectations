@@ -416,6 +416,7 @@ def test__validate_config(cardinality_validator):
     assert e.typename == "AssertionError"
 
 
+@pytest.mark.slow  # 1.18s
 def test__validate_semantic_types_dict(cardinality_validator):
     """
     What does this test do and why?
@@ -460,6 +461,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.76s
 def test_build_suite_no_config(
     mock_emit,
     titanic_validator,
@@ -511,6 +513,7 @@ def test_build_suite_no_config(
     assert actual_events == expected_events
 
 
+@pytest.mark.slow  # 1.32s
 def test_all_table_columns_populates(taxi_validator_pandas):
     taxi_profiler = UserConfigurableProfiler(taxi_validator_pandas)
 
@@ -558,6 +561,7 @@ def test_profiler_works_with_batch_object(cardinality_validator):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.37s
 def test_build_suite_with_config_and_no_semantic_types_dict(
     mock_emit, titanic_validator, possible_expectations_set
 ):
@@ -621,6 +625,7 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.18s
 def test_build_suite_with_semantic_types_dict(
     mock_emit,
     cardinality_validator,
@@ -773,6 +778,7 @@ def test_build_suite_when_suite_already_exists(
     assert actual_events == expected_events
 
 
+@pytest.mark.slow  # 1.01s
 def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
     """
     What does this test do and why?
@@ -806,6 +812,7 @@ like to use it as a primary_or_compound_key.
     assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
 
 
+@pytest.mark.slow  # 1.28s
 def test_config_with_not_null_only(nulls_validator, possible_expectations_set):
     """
     What does this test do and why?
@@ -859,6 +866,7 @@ def test_nullity_expectations_mostly_tolerance(
         assert i["kwargs"]["mostly"] == 0.66
 
 
+@pytest.mark.slow  # 2.44s
 def test_profiled_dataset_passes_own_validation(
     cardinality_validator, titanic_data_context
 ):
@@ -911,6 +919,7 @@ def test_column_cardinality_functions(cardinality_validator):
     assert cardinality_with_large_pct_and_no_num.name == "NONE"
 
 
+@pytest.mark.slow  # 1.94s
 def test_profiler_all_expectation_types_pandas(
     titanic_data_context_modular_api,
     taxi_validator_pandas,
@@ -1035,6 +1044,7 @@ def test_profiler_all_expectation_types_spark(
     not is_library_loadable(library_name="sqlalchemy"),
     reason="requires sqlalchemy to be installed",
 )
+@pytest.mark.slow  # 4.70s
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
     taxi_validator_sqlalchemy,
@@ -1188,6 +1198,7 @@ def test_expect_compound_columns_to_be_unique(
 
 
 @mock.patch("great_expectations.profile.user_configurable_profiler.tqdm")
+@pytest.mark.slow  # 1.28s
 def test_user_configurable_profiler_progress_bar_config_enabled(
     mock_tqdm, cardinality_validator
 ):
@@ -1208,6 +1219,7 @@ def test_user_configurable_profiler_progress_bar_config_enabled(
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
+@pytest.mark.slow  # 1.34s
 def test_user_configurable_profiler_progress_bar_config_disabled(
     mock_tqdm, cardinality_validator
 ):

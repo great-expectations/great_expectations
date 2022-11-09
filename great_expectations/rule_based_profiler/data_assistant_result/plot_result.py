@@ -24,3 +24,6 @@ class PlotResult:
     """
 
     charts: List[alt.Chart]
+
+    def __repr__(self):
+        return ""

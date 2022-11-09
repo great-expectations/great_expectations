@@ -26,11 +26,22 @@ def get_extras_require():
         "snowflake",
         "teradata",
         "trino",
+        "vertica",
     )
-    ignore_keys = ("sqlalchemy", "test", "test-pipeline")
-    rx_fname_part = re.compile(r"requirements-dev-(.*).txt")
-    for fname in sorted(glob("requirements-dev-*.txt")):
-        key = rx_fname_part.match(fname).group(1)
+    ignore_keys = (
+        "sqlalchemy",
+        "test",
+        "tools",
+        "all-contrib-expectations",
+    )
+    requirements_dir = "reqs"
+    rx_fname_part = re.compile(rf"{requirements_dir}/requirements-dev-(.*).txt")
+    for fname in glob(f"{requirements_dir}/*.txt"):
+        match = rx_fname_part.match(fname)
+        assert (
+            match is not None
+        ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
+        key = match.group(1)
         if key in ignore_keys:
             continue
         with open(fname) as f:
@@ -49,6 +60,9 @@ def get_extras_require():
         results[key] += results["sqlalchemy"]
 
     results.pop("boto")
+    all_requirements_set = set()
+    [all_requirements_set.update(vals) for vals in results.values()]
+    results["dev"] = sorted(all_requirements_set)
     return results
 
 

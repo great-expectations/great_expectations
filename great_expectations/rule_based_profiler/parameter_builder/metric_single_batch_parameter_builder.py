@@ -1,4 +1,6 @@
-from typing import Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Union
 
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.domain import Domain
@@ -16,12 +18,23 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types.attributes import Attributes
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
     A Single-Batch-only implementation for obtaining a resolved (evaluated) metric, using domain_kwargs, value_kwargs,
     and metric_name as arguments.
     """
+
+    exclude_field_names: Set[
+        str
+    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "single_batch_mode",
+    }
 
     def __init__(
         self,
@@ -35,7 +48,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -52,13 +65,14 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
             metric_name=metric_name,
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
+            single_batch_mode=True,
             enforce_numeric_metric=enforce_numeric_metric,
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
@@ -101,7 +115,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             {
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: None
                 if parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] is None
-                else parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][0],
+                else parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY][-1],
                 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
                     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
                 ],

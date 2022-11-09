@@ -14,12 +14,12 @@ The SQL database introspection and partitioning are useful for:
 - Exploring the schema and column metadata of the tables in your SQL database, and
 - Organizing the tables into <TechnicalTag tag="data_asset" text="Data Assets" /> according to the partitioning considerations informed by this exploration.
 
-Partitioning enables you to select the desired subsets of your dataset for [Validation](../../reference/validation.md).
+Partitioning enables you to select the desired subsets of your dataset for <TechnicalTag tag="validation" text="Validation"/>.
 
 <Prerequisites>
 
 - [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
-- [Configured a Datasource and Data Connector](../../reference/datasources.md)
+- [Configured a Datasource and Data Connector](../../terms/datasource.md)
 
 </Prerequisites>
 
@@ -33,7 +33,7 @@ achieve the introspection of your SQL database with the semantics consistent wit
 Only `introspection` and `tables` are the legal top-level keys in the `SimpleSqlalchemyDatasource` configuration.
 :::
 
-To learn more about <TechnicalTag tag="datasource" text="Datasources" />, <TechnicalTag tag="data_connector" text="Data Connectors" />, and <TechnicalTag tag="batch" text="Batch(es)" />, please see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md).
+To learn more about <TechnicalTag tag="datasource" text="Datasources" />, <TechnicalTag tag="data_connector" text="Data Connectors" />, and <TechnicalTag tag="batch" text="Batch(es)" />, please see our [Datasources Guide](../../terms/datasource.md).
 
 ## Preliminary Steps
 
@@ -41,7 +41,7 @@ To learn more about <TechnicalTag tag="datasource" text="Datasources" />, <Techn
 
 Import Great Expectations.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L4
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L4-L5
 ```
 
 ### 2. Obtain DataContext

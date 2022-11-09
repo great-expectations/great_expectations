@@ -7,14 +7,16 @@ WARNING: This module is experimental.
 
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import AbstractContextManager
-from typing import Any, Optional
+from typing import Generic, Optional, TypeVar
 
 from urllib3 import connectionpool, poolmanager
 
 from great_expectations.data_context.types.base import ConcurrencyConfig
 
+T = TypeVar("T")
 
-class AsyncResult:
+
+class AsyncResult(Generic[T]):
     """Wrapper around Future to facilitate single code path
     for both when concurrency is enabled and disabled.
 
@@ -22,13 +24,13 @@ class AsyncResult:
     """
 
     def __init__(
-        self, future: Optional[Future] = None, value: Optional[Any] = None
+        self, future: Optional[Future] = None, value: Optional[T] = None
     ) -> None:
         """AsyncResult instances are created by AsyncExecutor.submit() and should not otherwise be created directly."""
         self._future = future
         self._value = value
 
-    def result(self):
+    def result(self) -> T:
         """Return the value corresponding to the AsyncExecutor.submit() call, blocking if necessary until the execution
         finishes.
         """
@@ -96,7 +98,7 @@ class AsyncExecutor(AbstractContextManager):
         """
         if self._execute_concurrently:
             return AsyncResult(
-                future=self._thread_pool_executor.submit(fn, *args, **kwargs)
+                future=self._thread_pool_executor.submit(fn, *args, **kwargs)  # type: ignore[union-attr]
             )
         else:
             return AsyncResult(value=fn(*args, **kwargs))
@@ -137,4 +139,4 @@ def patch_https_connection_pool(concurrency_config: ConcurrencyConfig) -> None:
             kwargs.update(maxsize=concurrency_config.max_database_query_concurrency)
             super().__init__(*args, **kwargs)
 
-    poolmanager.pool_classes_by_scheme["https"] = HTTPSConnectionPoolWithHigherMaxSize
+    poolmanager.pool_classes_by_scheme["https"] = HTTPSConnectionPoolWithHigherMaxSize  # type: ignore[attr-defined]

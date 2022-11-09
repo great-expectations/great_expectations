@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 from collections import OrderedDict
+from typing import Dict, List, Union
 
 import pandas as pd
 import pytest
@@ -42,6 +43,14 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
+from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.render import (
+    AtomicPrescriptiveRendererType,
+    AtomicRendererType,
+    RenderedAtomicContent,
+    renderedAtomicValueSchema,
+)
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
@@ -57,18 +66,6 @@ except ImportError:
 yaml = YAML()
 
 parameterized_expectation_suite_name = "my_dag_node.default"
-
-
-@pytest.fixture()
-def parameterized_expectation_suite():
-    fixture_path = file_relative_path(
-        __file__,
-        "../test_fixtures/expectation_suites/parameterized_expectation_suite_fixture.json",
-    )
-    with open(
-        fixture_path,
-    ) as suite:
-        return json.load(suite)
 
 
 @pytest.fixture(scope="function")
@@ -279,6 +276,81 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
+@pytest.mark.integration
+def test_save_expectation_suite_include_rendered_content(
+    data_context_parameterized_expectation_suite,
+):
+    expectation_suite: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.create_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
+    )
+    expectation_suite.expectations.append(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    for expectation in expectation_suite.expectations:
+        assert expectation.rendered_content is None
+    data_context_parameterized_expectation_suite.save_expectation_suite(
+        expectation_suite,
+        include_rendered_content=True,
+    )
+    expectation_suite_saved: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
+    )
+    for expectation in expectation_suite_saved.expectations:
+        for rendered_content_block in expectation.rendered_content:
+            assert isinstance(
+                rendered_content_block,
+                RenderedAtomicContent,
+            )
+
+
+@pytest.mark.integration
+def test_get_expectation_suite_include_rendered_content(
+    data_context_parameterized_expectation_suite,
+):
+    expectation_suite: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.create_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
+    )
+    expectation_suite.expectations.append(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    for expectation in expectation_suite.expectations:
+        assert expectation.rendered_content is None
+    data_context_parameterized_expectation_suite.save_expectation_suite(
+        expectation_suite,
+    )
+    expectation_suite_saved: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "this_data_asset_config_does_not_exist.default"
+        )
+    )
+    for expectation in expectation_suite.expectations:
+        assert expectation.rendered_content is None
+
+    expectation_suite_retrieved: ExpectationSuite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            "this_data_asset_config_does_not_exist.default",
+            include_rendered_content=True,
+        )
+    )
+
+    for expectation in expectation_suite_retrieved.expectations:
+        for rendered_content_block in expectation.rendered_content:
+            assert isinstance(
+                rendered_content_block,
+                RenderedAtomicContent,
+            )
+
+
 def test_compile_evaluation_parameter_dependencies(
     data_context_parameterized_expectation_suite: DataContext,
 ):
@@ -306,7 +378,8 @@ def test_compile_evaluation_parameter_dependencies(
     )
 
 
-def test_list_datasources(data_context_parameterized_expectation_suite):
+@pytest.mark.v2_api
+def test_list_datasources_v2_api(data_context_parameterized_expectation_suite):
     datasources = data_context_parameterized_expectation_suite.list_datasources()
 
     assert datasources == [
@@ -549,6 +622,7 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
+@pytest.mark.slow  # 1.02s
 def test_render_full_static_site_from_empty_project(tmp_path, filesystem_csv_3):
 
     # TODO : Use a standard test fixture
@@ -1805,6 +1879,7 @@ data_connectors:
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 
 
+@pytest.mark.slow  # 8.13s
 def test_get_validator_without_expectation_suite(in_memory_runtime_context):
     context = in_memory_runtime_context
 
@@ -1826,6 +1901,7 @@ def test_get_validator_without_expectation_suite(in_memory_runtime_context):
     assert my_validator.expectation_suite_name == "default"
 
 
+@pytest.mark.slow  # 1.35s
 def test_get_validator_with_batch(in_memory_runtime_context):
     context = in_memory_runtime_context
 
@@ -2299,9 +2375,10 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
                 "module_name": "great_expectations.datasource.data_connector",
                 "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
                 "base_directory": "../data",
+                "name": "data_dir_example_data_connector",
             }
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)
@@ -2652,14 +2729,16 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "default_inferred_data_connector_name": {
                 "class_name": "InferredAssetSqlDataConnector",
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_inferred_data_connector_name",
             },
             "default_runtime_data_connector_name": {
                 "class_name": "RuntimeDataConnector",
                 "batch_identifiers": ["default_identifier_name"],
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_runtime_data_connector_name",
             },
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert datasource_from_yaml.config == {
@@ -2679,14 +2758,16 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
             "default_inferred_data_connector_name": {
                 "class_name": "InferredAssetSqlDataConnector",
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_inferred_data_connector_name",
             },
             "default_runtime_data_connector_name": {
                 "class_name": "RuntimeDataConnector",
                 "batch_identifiers": ["default_identifier_name"],
                 "module_name": "great_expectations.datasource.data_connector",
+                "name": "default_runtime_data_connector_name",
             },
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
 
@@ -2834,9 +2915,10 @@ def test_add_datasource_from_yaml_with_substitution_variables(
                 "module_name": "great_expectations.datasource.data_connector",
                 "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
                 "base_directory": "../data",
+                "name": "data_dir_example_data_connector",
             }
         },
-        "id_": None,
+        "id": None,
         "name": "my_datasource",
     }
     assert isinstance(datasource_from_yaml, Datasource)
@@ -3001,3 +3083,192 @@ def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
 
     res = context._check_for_usage_stats_sync(project_config=project_config)
     assert res is False
+
+
+class ExpectSkyToBeColor(TableExpectation):
+    metric_dependencies = ("table.color",)
+    success_keys = ("color",)
+    args_keys = ("color",)
+
+    @classmethod
+    @renderer(
+        renderer_type=".".join(
+            [AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]
+        )
+    )
+    def _prescriptive_renderer_custom(
+        cls,
+        **kwargs: dict,
+    ) -> None:
+        raise ValueError("This renderer is broken!")
+
+    def _validate(
+        self,
+        **kwargs: dict,
+    ) -> Dict[str, Union[bool, dict]]:
+        return {
+            "success": True,
+            "result": {"observed_value": "blue"},
+        }
+
+
+@pytest.mark.integration
+def test_unrendered_and_failed_prescriptive_renderer_behavior(
+    empty_data_context: DataContext,
+):
+    context: DataContext = empty_data_context
+
+    expectation_suite_name: str = "test_suite"
+
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name,
+        data_context=context,
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal", kwargs={"value": 0}
+            ),
+        ],
+    )
+    context.save_expectation_suite(expectation_suite=expectation_suite)
+
+    # Without include_rendered_content set, all legacy rendered_content was None.
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert not any(
+        [
+            expectation_configuration.rendered_content
+            for expectation_configuration in expectation_suite.expectations
+        ]
+    )
+
+    # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.
+    context.variables.include_rendered_content.expectation_suite = True
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    for expectation_configuration in expectation_suite.expectations:
+        assert all(
+            [
+                isinstance(rendered_content_block, RenderedAtomicContent)
+                for rendered_content_block in expectation_configuration.rendered_content
+            ]
+        )
+
+    # If we change the ExpectationSuite to use an Expectation that has two content block renderers, one of which is
+    # broken, we should get the failure message for one of the content blocks.
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name,
+        data_context=context,
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}
+            ),
+        ],
+    )
+    context.save_expectation_suite(expectation_suite=expectation_suite)
+    expectation_suite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    expected_rendered_content: List[RenderedAtomicContent] = [
+        RenderedAtomicContent(
+            name=AtomicPrescriptiveRendererType.FAILED,
+            value=renderedAtomicValueSchema.load(
+                {
+                    "template": "Rendering of Expectation Configuration failed for $expectation_type(**$kwargs).",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                }
+            ),
+            value_type="StringValueType",
+        ),
+        RenderedAtomicContent(
+            name=AtomicPrescriptiveRendererType.SUMMARY,
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "$expectation_type(**$kwargs)",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+    ]
+
+    actual_rendered_content: List[RenderedAtomicContent] = []
+    for expectation_configuration in expectation_suite.expectations:
+        actual_rendered_content.extend(expectation_configuration.rendered_content)
+
+    assert actual_rendered_content == expected_rendered_content
+
+    # If we have a legacy ExpectationSuite with successful rendered_content blocks, but the new renderer is broken,
+    # we should not update the existing rendered_content.
+    legacy_rendered_content = [
+        RenderedAtomicContent(
+            name=".".join([AtomicRendererType.PRESCRIPTIVE, "custom_renderer_type"]),
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "This is a working renderer for $expectation_type(**$kwargs).",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+        RenderedAtomicContent(
+            name=AtomicPrescriptiveRendererType.SUMMARY,
+            value=renderedAtomicValueSchema.load(
+                {
+                    "schema": {"type": "com.superconductive.rendered.string"},
+                    "template": "$expectation_type(**$kwargs)",
+                    "params": {
+                        "expectation_type": {
+                            "schema": {"type": "string"},
+                            "value": "expect_sky_to_be_color",
+                        },
+                        "kwargs": {
+                            "schema": {"type": "string"},
+                            "value": {"color": "blue"},
+                        },
+                    },
+                }
+            ),
+            value_type="StringValueType",
+        ),
+    ]
+
+    expectation_suite.expectations[0].rendered_content = legacy_rendered_content
+
+    actual_rendered_content: List[RenderedAtomicContent] = []
+    for expectation_configuration in expectation_suite.expectations:
+        actual_rendered_content.extend(expectation_configuration.rendered_content)
+
+    assert actual_rendered_content == legacy_rendered_content

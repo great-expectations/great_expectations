@@ -1,0 +1,19 @@
+import PartAddADictionaryAsTheValueOfTheDataConnectorsKey from '../components/_part_add_a_dictionary_as_the_value_of_the_data_connectors_key.mdx'
+
+<PartAddADictionaryAsTheValueOfTheDataConnectorsKey />
+
+Your current configuration should look like:
+
+```python
+datasource_config: dict = {
+    "name": "my_datasource_name",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "class_name": "SqlAlchemyExecutionEngine",
+        "module_name": "great_expectations.execution_engine",
+        "connection_string": CONNECTION_STRING,
+    },
+    "data_connectors": {}
+}
+```

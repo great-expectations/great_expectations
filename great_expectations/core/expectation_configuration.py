@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import copy
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import jsonpatch
+from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from pyparsing import ParseResults
 
 from great_expectations.core.evaluation_parameters import (
@@ -19,24 +22,24 @@ from great_expectations.core.util import (
     ensure_json_serializable,
     nested_update,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
+    ClassInstantiationError,
+    ExpectationNotFoundError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
     ParserError,
 )
 from great_expectations.expectations.registry import get_expectation_impl
-from great_expectations.marshmallow__shade import (
-    Schema,
-    ValidationError,
-    fields,
-    post_dump,
-    post_load,
-)
-from great_expectations.render.types import (
-    RenderedAtomicContent,
-    RenderedAtomicContentSchema,
-)
+from great_expectations.render import RenderedAtomicContent, RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation import Expectation
+    from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
+    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -982,9 +985,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self,
         evaluation_parameters,
         interactive_evaluation: bool = True,
-        data_context: Optional[
-            Any
-        ] = None,  # Can't type as DataContext due to import cycle
+        data_context: Optional[DataContext] = None,
     ) -> None:
         if self._raw_kwargs is not None:
             logger.debug(
@@ -1003,7 +1004,7 @@ class ExpectationConfiguration(SerializableDictDot):
         if len(substituted_parameters) > 0:
             self.meta["substituted_parameters"] = substituted_parameters
 
-    def get_raw_configuration(self) -> "ExpectationConfiguration":
+    def get_raw_configuration(self) -> ExpectationConfiguration:
         # return configuration without substituted evaluation parameters
         raw_config = deepcopy(self)
         if raw_config._raw_kwargs is not None:
@@ -1012,7 +1013,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
         return raw_config
 
-    def patch(self, op: str, path: str, value: Any) -> "ExpectationConfiguration":
+    def patch(self, op: str, path: str, value: Any) -> ExpectationConfiguration:
         """
 
         Args:
@@ -1124,16 +1125,17 @@ class ExpectationConfiguration(SerializableDictDot):
             self.expectation_type, None
         )
         if expectation_kwargs_dict is None:
-            impl = get_expectation_impl(self.expectation_type)
-            if impl is not None:
-                domain_keys = impl.domain_keys
-                default_kwarg_values = impl.default_kwarg_values
-            else:
+            try:
+                impl = get_expectation_impl(self.expectation_type)
+            except ExpectationNotFoundError:
                 expectation_kwargs_dict = self._get_default_custom_kwargs()
                 default_kwarg_values = expectation_kwargs_dict.get(
                     "default_kwarg_values", {}
                 )
                 domain_keys = expectation_kwargs_dict["domain_kwargs"]
+            else:
+                domain_keys = impl.domain_keys
+                default_kwarg_values = impl.default_kwarg_values
         else:
             default_kwarg_values = expectation_kwargs_dict.get(
                 "default_kwarg_values", {}
@@ -1157,16 +1159,17 @@ class ExpectationConfiguration(SerializableDictDot):
             self.expectation_type, None
         )
         if expectation_kwargs_dict is None:
-            impl = get_expectation_impl(self.expectation_type)
-            if impl is not None:
-                success_keys = impl.success_keys
-                default_kwarg_values = impl.default_kwarg_values
-            else:
+            try:
+                impl = get_expectation_impl(self.expectation_type)
+            except ExpectationNotFoundError:
                 expectation_kwargs_dict = self._get_default_custom_kwargs()
                 default_kwarg_values = expectation_kwargs_dict.get(
                     "default_kwarg_values", {}
                 )
                 success_keys = expectation_kwargs_dict["success_kwargs"]
+            else:
+                success_keys = impl.success_keys
+                default_kwarg_values = impl.default_kwarg_values
         else:
             default_kwarg_values = expectation_kwargs_dict.get(
                 "default_kwarg_values", {}
@@ -1187,16 +1190,17 @@ class ExpectationConfiguration(SerializableDictDot):
             self.expectation_type, None
         )
         if expectation_kwargs_dict is None:
-            impl = get_expectation_impl(self.expectation_type)
-            if impl is not None:
-                runtime_keys = impl.runtime_keys
-                default_kwarg_values = impl.default_kwarg_values
-            else:
+            try:
+                impl = get_expectation_impl(self.expectation_type)
+            except ExpectationNotFoundError:
                 expectation_kwargs_dict = self._get_default_custom_kwargs()
                 default_kwarg_values = expectation_kwargs_dict.get(
                     "default_kwarg_values", {}
                 )
                 runtime_keys = self.runtime_kwargs
+            else:
+                runtime_keys = impl.runtime_keys
+                default_kwarg_values = impl.default_kwarg_values
         else:
             default_kwarg_values = expectation_kwargs_dict.get(
                 "default_kwarg_values", {}
@@ -1220,7 +1224,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return runtime_kwargs
 
     def applies_to_same_domain(
-        self, other_expectation_configuration: "ExpectationConfiguration"  # noqa: F821
+        self, other_expectation_configuration: ExpectationConfiguration
     ) -> bool:
         if (
             not self.expectation_type
@@ -1235,7 +1239,7 @@ class ExpectationConfiguration(SerializableDictDot):
     # noinspection PyPep8Naming
     def isEquivalentTo(
         self,
-        other: Union[dict, "ExpectationConfiguration"],  # noqa: F821
+        other: Union[dict, ExpectationConfiguration],
         match_type: str = "success",
     ) -> bool:
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
@@ -1380,10 +1384,10 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def validate(
         self,
-        validator: Any,  # Can't type as Validator due to import cycle
+        validator: Validator,
         runtime_configuration=None,
     ):
-        expectation_impl: "Expectation" = self._get_expectation_impl()  # noqa: F821
+        expectation_impl: Expectation = self._get_expectation_impl()
         return expectation_impl(self).validate(
             validator=validator,
             runtime_configuration=runtime_configuration,
@@ -1392,13 +1396,13 @@ class ExpectationConfiguration(SerializableDictDot):
     def metrics_validate(
         self,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: "ExecutionEngine" = None,  # noqa: F821
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
         **kwargs: dict,
     ):
-        expectation_impl: "Expectation" = self._get_expectation_impl()  # noqa: F821
+        expectation_impl: Expectation = self._get_expectation_impl()
         return expectation_impl(self).metrics_validate(
-            metrics,
+            metrics=metrics,
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
         )
@@ -1420,6 +1424,30 @@ class ExpectationConfiguration(SerializableDictDot):
         raise ValueError(
             'Unable to determine "domain_type" of this "ExpectationConfiguration" object from "kwargs" and heuristics.'
         )
+
+    def render(self) -> None:
+        """
+        Renders content using the atomic prescriptive renderer for this Expectation Configuration to
+            ExpectationConfiguration.rendered_content.
+        """
+        inline_renderer_config: InlineRendererConfig = {
+            "class_name": "InlineRenderer",
+            "render_object": self,
+        }
+        module_name = "great_expectations.render.renderer.inline_renderer"
+        inline_renderer = instantiate_class_from_config(
+            config=inline_renderer_config,
+            runtime_environment={},
+            config_defaults={"module_name": module_name},
+        )
+        if not inline_renderer:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=inline_renderer_config["class_name"],
+            )
+
+        self.rendered_content = inline_renderer.get_rendered_content()
 
 
 class ExpectationConfigurationSchema(Schema):

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -19,6 +21,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.validator.validator import Validator
+
 
 class DomainBuilder(ABC, Builder):
     """
@@ -27,11 +35,11 @@ class DomainBuilder(ABC, Builder):
 
     def __init__(
         self,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
-            data_context: BaseDataContext associated with DomainBuilder
+            data_context: AbstractDataContext associated with DomainBuilder
         """
         super().__init__(data_context=data_context)
 
@@ -55,7 +63,7 @@ class DomainBuilder(ABC, Builder):
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
         """
-        self.set_batch_list_or_batch_request(
+        self.set_batch_list_if_null_batch_request(
             batch_list=batch_list,
             batch_request=batch_request,
         )
@@ -81,7 +89,7 @@ class DomainBuilder(ABC, Builder):
 
     def get_table_row_counts(
         self,
-        validator: Optional["Validator"] = None,  # noqa: F821
+        validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         variables: Optional[ParameterContainer] = None,
     ) -> Dict[str, int]:
@@ -103,7 +111,6 @@ class DomainBuilder(ABC, Builder):
                     metric_value_kwargs={
                         "include_nested": True,
                     },
-                    metric_dependencies=None,
                 )
             ]
             for batch_id in batch_ids
@@ -133,7 +140,7 @@ class DomainBuilder(ABC, Builder):
     def get_validator(
         self,
         variables: Optional[ParameterContainer] = None,
-    ) -> Optional["Validator"]:  # noqa: F821
+    ) -> Optional[Validator]:
         return get_validator_using_batch_list_or_batch_request(
             purpose="domain_builder",
             data_context=self.data_context,

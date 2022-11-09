@@ -5,6 +5,7 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.data_context.types.resource_identifiers import DataContextKey
 from great_expectations.exceptions import InvalidKeyError
 from great_expectations.util import filter_properties_dict
 
@@ -65,6 +66,8 @@ class InMemoryStoreBackend(StoreBackend):
         return key in self._store
 
     def remove_key(self, key) -> None:
+        if isinstance(key, DataContextKey):
+            key = key.to_tuple()
         del self._store[key]
 
     @property
@@ -74,10 +77,10 @@ class InMemoryStoreBackend(StoreBackend):
     def build_key(  # type: ignore[override]
         self,
         resource_type: Optional[DataContextVariableSchema] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         name: Optional[str] = None,
     ) -> DataContextVariableKey:
-        """Get the store backend specific implementation of the key. id_ included for super class compatibility."""
+        """Get the store backend specific implementation of the key. id included for super class compatibility."""
         return DataContextVariableKey(
             resource_name=name,
         )

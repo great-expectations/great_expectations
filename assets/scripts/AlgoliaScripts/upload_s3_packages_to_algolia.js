@@ -1,3 +1,5 @@
+// load .env file (used while development) for env variables
+require('dotenv').config();
 const fetch = require('node-fetch');
 const removeMd = require('remove-markdown');
 const packageS3URL = "https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/package_manifests.json";
@@ -18,6 +20,28 @@ function removeMarkdown(str) {
     });
     return plainText;
 }
+
+// Replica expectation Index Names And Sorting Order Settings 
+const expecReplicaIndexAndSettings = [
+    {
+        replica: `${process.env.ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_ASC_INDEX}`, ranking: ['asc(description.snake_name)']
+    },
+    {
+        replica: `${process.env.ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_DSC_INDEX}`, ranking: ['desc(description.snake_name)']
+    },
+    {
+        replica: `${process.env.ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_ASC_INDEX}`, ranking: ['asc(coverage_score)']
+    },
+    {
+        replica: `${process.env.ALGOLIA_PACK_EXPEC_REPLICA_COVERAGE_DSC_INDEX}`, ranking: ['desc(coverage_score)']
+    },
+]
+
+// Main Packages' Expectations Index setSettings 
+const expecAttributesForFaceting = ["searchable(library_metadata.tags)", "searchable(engineSupported)", "searchable(exp_type)", "searchable(package)"];
+const maxFacetHits = 100;
+const epxecSearchableAttributes = ["description.snake_name", "description.short_description"]
+const mainExpecIndexRanking = ['asc(description.snake_name)']
 
 let packageDataset = [];
 let expectationDataset = [];
@@ -60,7 +84,7 @@ function formatPackageData(data) {
         pdata["description"] = removeMarkdown(package.description);
         packageDataset.push(pdata);
         const expecKeys = Object.keys(package.expectations);
-        expecKeys.forEach(key => {
+        expecKeys.forEach((key) => {
             const expectation = package.expectations[key];
             let expecData = {
                 "objectID": key,
@@ -71,28 +95,32 @@ function formatPackageData(data) {
                 "execution_engines": expectation.execution_engines,
                 "package": package.package_name,
                 "backend_test_result_counts": expectation.backend_test_result_counts,
+                "coverage_score": expectation.coverage_score,
+                "exp_type": expectation.exp_type,
             };
             expectationDataset.push(expecData);
         });
     });
 }
 
+//Upload package data to package index
 function uploadPackageToAlgolia(dataset) {
     packageIndex.saveObjects(dataset)
         .then(() => {
             console.log("data uploaded to package index", packageAlgoliaIndex);
             packageIndexSetting();
         })
-        .catch(err => console.log(err))
+        .catch(err => console.log("Error uploading data to Package Index !!",err))
 }
 
+//Upload package expectation data to package expectation index
 function uploadPackageExpecToAlgolia(dataset) {
     packageExpecIndex.saveObjects(dataset)
         .then(() => {
             console.log("data uploaded to package expectations index", packageExpecAlgoliaIndex);
-            expecIndexSetting();
+            mainExpecIndexSetting();
         })
-        .catch(err => console.log(err))
+        .catch(err => console.log("Error uploading data to Package Expectatiions Index !!",err))
 }
 
 function packageIndexSetting() {
@@ -102,19 +130,43 @@ function packageIndexSetting() {
             'asc(package_name)',
         ]
     })
-        .then(() => { });
+        .then(() => {
+            console.log("Package index settings done.")
+        })
+        .catch(err => console.log("Error creating settings for Package Index !!",err));
 }
 
-function expecIndexSetting() {
-    console.log("Creating package expectations facets and search settings");
+function mainExpecIndexSetting() {
+    console.log("Creating package expectations replicas, facets and search settings");
     packageExpecIndex.setSettings({
-        attributesForFaceting: ["searchable(library_metadata.tags)",
-            "searchable(package)", "searchable(engineSupported)"],
-        maxFacetHits: 100,
-        searchableAttributes: ["description.snake_name", "description.short_description"],
-        customRanking: [
-            'asc(description.snake_name)',
-        ]
+        attributesForFaceting: expecAttributesForFaceting,
+        maxFacetHits: maxFacetHits,
+        searchableAttributes: epxecSearchableAttributes,
+        customRanking: mainExpecIndexRanking,
+        // Creating replica index 
+        replicas: expecReplicaIndexAndSettings.map(replica => replica.replica)
     })
-        .then(() => { });
+        .then(() => {
+            console.log('facets and replicas created. Now configuring expectation replica indices');
+            // Creating replica index setsettings 
+            setExpecIndexReplicaSettings();
+        })
+        .catch(err => console.log("Error creating setting for Package Expectation Index !!", err));;
+}
+
+//Replica Index for expectations Settings
+function setExpecIndexReplicaSettings() {
+    expecReplicaIndexAndSettings.map((repli) => {
+        const { replica, ranking } = repli;
+        client.initIndex(replica).setSettings({
+            attributesForFaceting: expecAttributesForFaceting,
+            maxFacetHits: maxFacetHits,
+            searchableAttributes: epxecSearchableAttributes,
+            customRanking: ranking
+        })
+            .then(() => {
+                console.log(`Replica: ${replica} configured !!`)
+            })
+            .catch(err => console.log(`Error creating settings for Packages' Expectation replica Index !! ${replica}`,err));
+    })
 }

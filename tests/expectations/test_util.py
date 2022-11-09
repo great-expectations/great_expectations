@@ -22,9 +22,11 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.expectation import (
+    render_evaluation_parameter_string,
+)
 from great_expectations.expectations.metrics.util import column_reflection_fallback
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.self_check.util import build_sa_validator_with_data
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
@@ -67,7 +69,6 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
         metric_value_kwargs={
             "include_nested": True,
         },
-        metric_dependencies=None,
     )
     results = engine.resolve_metrics(metrics_to_resolve=(table_column_types_metric,))
     resolved_metrics.update(results)
@@ -76,10 +77,10 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
         metric_name="table.columns",
         metric_domain_kwargs=dict(),
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.column_types": table_column_types_metric,
-        },
     )
+    table_columns_metric.metric_dependencies = {
+        "table.column_types": table_column_types_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
     )

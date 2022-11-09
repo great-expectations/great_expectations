@@ -1,9 +1,11 @@
 import pytest
 
+from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context.store import DatasourceStore
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudRESTResource,
 )
+from great_expectations.data_context.types.base import datasourceConfigSchema
 
 
 @pytest.fixture
@@ -27,5 +29,6 @@ def datasource_store_ge_cloud_backend(
     store = DatasourceStore(
         store_name=datasource_store_name,
         store_backend=ge_cloud_store_backend_config,
+        serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
     )
     return store

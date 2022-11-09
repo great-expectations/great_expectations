@@ -1,10 +1,37 @@
+from __future__ import annotations
+
 import logging
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
+from great_expectations.render import (
+    AtomicDiagnosticRendererType,
+    AtomicPrescriptiveRendererType,
+    AtomicRendererType,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.core import ExpectationConfiguration
+    from great_expectations.execution_engine.execution_engine import (
+        ExecutionEngine,
+        MetricFunctionTypes,
+        MetricPartialFunctionTypes,
+    )
+    from great_expectations.expectations.expectation import Expectation
+    from great_expectations.expectations.metrics.metric_provider import MetricProvider
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +53,7 @@ _registered_renderers = {}
 
 def register_renderer(
     object_name: str,
-    parent_class: Type[Union["Expectation", "Metric"]],  # noqa: F821
+    parent_class: Type[Union[Expectation, Metric]],
     renderer_fn: Callable,
 ):
     # noinspection PyUnresolvedReferences
@@ -64,34 +91,37 @@ def register_renderer(
         return
 
 
-def get_renderer_names(object_name: str) -> List[str]:
+def get_renderer_names(expectation_or_metric_type: str) -> List[str]:
     """Gets renderer names for a given Expectation or Metric.
 
     Args:
-        object_name: The name of an Expectation or Metric for which to get renderer names.
+        expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
 
     Returns:
         A list of renderer names for the Expectation or Metric.
     """
-    return list(_registered_renderers.get(object_name, {}).keys())
+    return list(_registered_renderers.get(expectation_or_metric_type, {}).keys())
 
 
-def get_renderer_names_with_renderer_prefix(
-    object_name: str, renderer_prefix: str
-) -> List[str]:
-    """Gets renderer names, with a given prefix, for a given Expectation or Metric.
+def get_renderer_names_with_renderer_type(
+    expectation_or_metric_type: str,
+    renderer_type: AtomicRendererType,
+) -> List[Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]]:
+    """Gets renderer names of a given type, for a given Expectation or Metric.
 
     Args:
-        object_name: The name of an Expectation or Metric for which to get renderer names.
-        renderer_prefix: The prefix of the renderers for which to return.
+        expectation_or_metric_type: The type of an Expectation or Metric for which to get renderer names.
+        renderer_type: The type of the renderers for which to return names.
 
     Returns:
         A list of renderer names for the given prefix and Expectation or Metric.
     """
     return [
         renderer_name
-        for renderer_name in get_renderer_names(object_name=object_name)
-        if renderer_name.startswith(renderer_prefix)
+        for renderer_name in get_renderer_names(
+            expectation_or_metric_type=expectation_or_metric_type
+        )
+        if renderer_name.startswith(renderer_type)
     ]
 
 
@@ -103,7 +133,7 @@ def get_renderer_impl(object_name, renderer_type):
     return _registered_renderers.get(object_name, {}).get(renderer_type)
 
 
-def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F821
+def register_expectation(expectation: Type[Expectation]) -> None:
     expectation_type = expectation.expectation_type
     # TODO: add version to key
     if expectation_type in _registered_expectations:
@@ -133,11 +163,11 @@ def register_metric(
     metric_name: str,
     metric_domain_keys: Tuple[str, ...],
     metric_value_keys: Tuple[str, ...],
-    execution_engine: Type["ExecutionEngine"],  # noqa: F821
-    metric_class: Type["MetricProvider"],  # noqa: F821
+    execution_engine: Type[ExecutionEngine],
+    metric_class: Type[MetricProvider],
     metric_provider: Optional[Callable],
     metric_fn_type: Optional[
-        Union["MetricFunctionTypes", "MetricPartialFunctionTypes"]  # noqa: F821
+        Union[MetricFunctionTypes, MetricPartialFunctionTypes]
     ] = None,
 ) -> dict:
     res = {}
@@ -208,8 +238,8 @@ def register_metric(
 
 
 def get_metric_provider(
-    metric_name: str, execution_engine: "ExecutionEngine"  # noqa: F821
-) -> Tuple["MetricProvider", Callable]:  # noqa: F821
+    metric_name: str, execution_engine: ExecutionEngine
+) -> Tuple[MetricProvider, Callable]:
     try:
         metric_definition = _registered_metrics[metric_name]
         return metric_definition["providers"][type(execution_engine).__name__]
@@ -220,8 +250,8 @@ def get_metric_provider(
 
 
 def get_metric_function_type(
-    metric_name: str, execution_engine: "ExecutionEngine"  # noqa: F821
-) -> Optional[Union["MetricPartialFunctionTypes", "MetricFunctionTypes"]]:  # noqa: F821
+    metric_name: str, execution_engine: ExecutionEngine
+) -> Optional[Union[MetricPartialFunctionTypes, MetricFunctionTypes]]:
     try:
         metric_definition = _registered_metrics[metric_name]
         provider_fn, provider_class = metric_definition["providers"][
@@ -236,7 +266,7 @@ def get_metric_function_type(
 
 def get_metric_kwargs(
     metric_name: str,
-    configuration: Optional["ExpectationConfiguration"] = None,  # noqa: F821
+    configuration: Optional[ExpectationConfiguration] = None,
     runtime_configuration: Optional[dict] = None,
 ) -> Dict:
     try:
@@ -309,11 +339,14 @@ def get_expectation_impl(expectation_name: str):
         )
         expectation_name = renamed[expectation_name]
 
+    if expectation_name not in _registered_expectations:
+        raise ge_exceptions.ExpectationNotFoundError(f"{expectation_name} not found")
+
     return _registered_expectations.get(expectation_name)
 
 
 def list_registered_expectation_implementations(
-    expectation_root: Type["Expectation"] = None,  # noqa: F821
+    expectation_root: Optional[Type[Expectation]] = None,
 ) -> List[str]:
     registered_expectation_implementations = []
     for (

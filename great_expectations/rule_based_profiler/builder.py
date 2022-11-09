@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import Any, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -11,6 +13,11 @@ from great_expectations.core.batch import (
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class Builder(SerializableDictDot):
@@ -26,11 +33,11 @@ class Builder(SerializableDictDot):
 
     def __init__(
         self,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
-            data_context: BaseDataContext associated with this Builder
+            data_context: AbstractDataContext associated with this Builder
         """
         self._batch_list = None
         self._batch_request = None
@@ -60,14 +67,18 @@ class Builder(SerializableDictDot):
         self._batch_request = value
 
     @property
-    def data_context(self) -> Optional["BaseDataContext"]:  # noqa: F821
+    def data_context(self) -> Optional[AbstractDataContext]:
         return self._data_context
 
-    def set_batch_list_or_batch_request(
+    def set_batch_list_if_null_batch_request(
         self,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> None:
+        """
+        If "batch_request" is already set on "Builder" object, then it is not overwritten.  However, if "batch_request"
+        is absent, then "batch_list" is accepted to support scenarios, where "Validator" already loaded "Batch" objects.
+        """
         if self.batch_request is None:
             self.set_batch_data(
                 batch_list=batch_list,

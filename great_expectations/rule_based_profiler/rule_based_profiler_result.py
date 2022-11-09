@@ -20,10 +20,10 @@ from great_expectations.types import SerializableDictDot
 @dataclass(frozen=True)
 class RuleBasedProfilerResult(SerializableDictDot):
     """
-    RuleBasedProfilerResult is an immutable "dataclass" object, designed to hold results of executing
-    "RuleBasedProfiler.run()" method.  Available properties are: "fully_qualified_parameter_names_by_domain",
+    "RuleBasedProfilerResult" is an immutable "dataclass" object, designed to hold results with auxiliary information of
+    executing "RuleBasedProfiler.run()" method.  Principal properties are: "fully_qualified_parameter_names_by_domain",
     "parameter_values_for_fully_qualified_parameter_names_by_domain", "expectation_configurations", and "citation"
-    (which represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled").
+    (which represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled).
     """
 
     fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]]
@@ -32,7 +32,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
     ]
     expectation_configurations: List[ExpectationConfiguration]
     citation: dict
-    execution_time: float
+    rule_domain_builder_execution_time: Dict[str, float]
     rule_execution_time: Dict[str, float]
     # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
@@ -71,7 +71,6 @@ class RuleBasedProfilerResult(SerializableDictDot):
                 for expectation_configuration in self.expectation_configurations
             ],
             "citation": self.citation,
-            "execution_time": self.execution_time,
         }
 
     def to_json_dict(self) -> dict:
@@ -81,7 +80,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
         return self.to_dict()
 
     @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE.value,
+        event_name=UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE,
         args_payload_fn=get_expectation_suite_usage_statistics,
     )
     def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:

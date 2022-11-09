@@ -64,6 +64,7 @@ def sample_rule_dict():
     }
 
 
+@pytest.mark.unit
 def test_reconcile_profiler_variables_no_overrides(
     profiler_with_placeholder_args,
     variables_multi_part_name_parameter_container,
@@ -75,6 +76,7 @@ def test_reconcile_profiler_variables_no_overrides(
     assert effective_variables == variables_multi_part_name_parameter_container
 
 
+@pytest.mark.unit
 def test_reconcile_profiler_variables_with_overrides(
     profiler_with_placeholder_args,
 ):
@@ -95,6 +97,7 @@ def test_reconcile_profiler_variables_with_overrides(
     }
 
 
+@pytest.mark.unit
 def test_reconcile_profiler_rules_no_overrides(
     profiler_with_placeholder_args,
 ):
@@ -106,6 +109,7 @@ def test_reconcile_profiler_rules_no_overrides(
     assert effective_rules == profiler_with_placeholder_args.rules
 
 
+@pytest.mark.unit
 def test_reconcile_profiler_rules_new_rule_override(
     profiler_with_placeholder_args,
 ):
@@ -177,6 +181,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
@@ -239,6 +244,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
@@ -277,6 +283,7 @@ def test_reconcile_profiler_rules_new_rule_override(
     assert effective_rule_configs_actual == expected_rules
 
 
+@pytest.mark.unit
 def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
     profiler_with_placeholder_args,
 ):
@@ -309,6 +316,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
@@ -347,6 +355,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
     assert effective_rule_configs_actual == expected_rules
 
 
+@pytest.mark.unit
 def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
     profiler_with_placeholder_args,
 ):
@@ -358,6 +367,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_special_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
@@ -391,6 +401,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_special_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
@@ -444,6 +455,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
     assert effective_rule_configs_actual == expected_rules
 
 
+@pytest.mark.unit
 def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builder_overrides(
     profiler_with_placeholder_args,
 ):
@@ -494,6 +506,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
@@ -544,6 +557,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
     assert effective_rule_configs_actual == expected_rules
 
 
+@pytest.mark.unit
 def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update(
     profiler_with_placeholder_args,
 ):
@@ -615,6 +629,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
@@ -689,6 +704,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
     assert effective_rule_configs_actual == expected_rules
 
 
+@pytest.mark.unit
 def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
     profiler_with_placeholder_args,
 ):
@@ -789,6 +805,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
     assert effective_rule_configs_actual == expected_rules
 
 
+@pytest.mark.unit
 def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
     profiler_with_placeholder_args,
 ):
@@ -860,6 +877,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "single_batch_mode": False,
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
@@ -926,7 +944,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
 
 
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_run_profiler_without_dynamic_args(
     mock_data_context: mock.MagicMock,
     mock_profiler_run: mock.MagicMock,
@@ -959,7 +978,8 @@ def test_run_profiler_without_dynamic_args(
 
 
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_run_profiler_with_dynamic_args(
     mock_data_context: mock.MagicMock,
     mock_profiler_run: mock.MagicMock,
@@ -1001,7 +1021,8 @@ def test_run_profiler_with_dynamic_args(
 
 
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_run_profiler_on_data_creates_suite_with_dict_arg(
     mock_data_context: mock.MagicMock,
     mock_rule_based_profiler_run: mock.MagicMock,
@@ -1028,7 +1049,8 @@ def test_run_profiler_on_data_creates_suite_with_dict_arg(
 
 
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
     mock_data_context: mock.MagicMock,
     mock_rule_based_profiler_run: mock.MagicMock,
@@ -1059,7 +1081,8 @@ def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
     assert resulting_batch_request == expected_batch_request
 
 
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_get_profiler_with_too_many_args_raises_error(
     mock_data_context: mock.MagicMock,
     populated_profiler_store: ProfilerStore,
@@ -1075,7 +1098,8 @@ def test_get_profiler_with_too_many_args_raises_error(
     assert "either name or ge_cloud_id" in str(e.value)
 
 
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_serialize_profiler_config(
     mock_data_context: mock.MagicMock,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
@@ -1105,6 +1129,7 @@ def test_serialize_profiler_config(
         "metric_name": "my_metric",
         "metric_domain_kwargs": None,
         "metric_value_kwargs": None,
+        "single_batch_mode": False,
         "enforce_numeric_metric": False,
         "replace_nan_with_zero": False,
         "reduce_scalar_metric": True,
@@ -1135,7 +1160,8 @@ def test_serialize_profiler_config(
     }
 
 
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_add_profiler(
     mock_data_context: mock.MagicMock,
     profiler_key: ConfigurationIdentifier,
@@ -1155,8 +1181,9 @@ def test_add_profiler(
     )
 
 
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 @pytest.mark.cloud
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@pytest.mark.unit
 def test_add_profiler_ge_cloud_mode(
     mock_data_context: mock.MagicMock,
     ge_cloud_profiler_id: str,
@@ -1168,7 +1195,6 @@ def test_add_profiler_ge_cloud_mode(
         profiler_config_with_placeholder_args,
         data_context=mock_data_context,
         profiler_store=mock_data_context.profiler_store,
-        ge_cloud_id=ge_cloud_profiler_id,
     )
 
     assert isinstance(profiler, RuleBasedProfiler)
@@ -1178,7 +1204,8 @@ def test_add_profiler_ge_cloud_mode(
     )
 
 
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
     mock_data_context: mock.MagicMock,
 ):
@@ -1222,7 +1249,8 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
     assert "batch_data found in batch_request" in str(e.value)
 
 
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_get_profiler(
     mock_data_context: mock.MagicMock,
     populated_profiler_store: ProfilerStore,
@@ -1242,7 +1270,8 @@ def test_get_profiler(
     assert isinstance(profiler, RuleBasedProfiler)
 
 
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_get_profiler_non_existent_profiler_raises_error(
     mock_data_context: mock.MagicMock, empty_profiler_store: ProfilerStore
 ):
@@ -1257,6 +1286,7 @@ def test_get_profiler_non_existent_profiler_raises_error(
     assert "Non-existent Profiler" in str(e.value)
 
 
+@pytest.mark.unit
 def test_delete_profiler(
     populated_profiler_store: ProfilerStore,
 ):
@@ -1275,6 +1305,7 @@ def test_delete_profiler(
     )
 
 
+@pytest.mark.unit
 def test_delete_profiler_with_too_many_args_raises_error(
     populated_profiler_store: ProfilerStore,
 ):
@@ -1288,6 +1319,7 @@ def test_delete_profiler_with_too_many_args_raises_error(
     assert "either name or ge_cloud_id" in str(e.value)
 
 
+@pytest.mark.unit
 def test_delete_profiler_non_existent_profiler_raises_error(
     populated_profiler_store: ProfilerStore,
 ):
@@ -1302,6 +1334,7 @@ def test_delete_profiler_non_existent_profiler_raises_error(
 
 
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
+@pytest.mark.unit
 def test_list_profilers(mock_profiler_store: mock.MagicMock):
     store = mock_profiler_store()
     keys = ["a", "b", "c"]
@@ -1312,8 +1345,9 @@ def test_list_profilers(mock_profiler_store: mock.MagicMock):
     assert store.list_keys.called
 
 
-@pytest.mark.cloud
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
+@pytest.mark.cloud
+@pytest.mark.unit
 def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
     store = mock_profiler_store()
     keys = ["a", "b", "c"]
@@ -1324,11 +1358,12 @@ def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
     assert store.list_keys.called
 
 
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 @mock.patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
 @mock.patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
+@pytest.mark.unit
 def test_add_single_rule(
     mock_expectation_configuration_builder: mock.MagicMock,
     mock_domain_builder: mock.MagicMock,
@@ -1361,11 +1396,12 @@ def test_add_single_rule(
     assert len(profiler.rules) == 1
 
 
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 @mock.patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
 @mock.patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
+@pytest.mark.unit
 def test_add_rule_overwrite_first_rule(
     mock_expectation_configuration_builder: mock.MagicMock,
     mock_domain_builder: mock.MagicMock,
@@ -1389,11 +1425,12 @@ def test_add_rule_overwrite_first_rule(
     assert len(profiler.rules) == 1
 
 
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 @mock.patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
 @mock.patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
+@pytest.mark.unit
 def test_add_rule_add_second_rule(
     mock_expectation_configuration_builder: mock.MagicMock,
     mock_domain_builder: mock.MagicMock,
@@ -1426,7 +1463,8 @@ def test_add_rule_add_second_rule(
     assert len(profiler.rules) == 2
 
 
-@mock.patch("great_expectations.data_context.data_context.BaseDataContext")
+@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
+@pytest.mark.unit
 def test_add_rule_bad_rule(
     mock_data_context: mock.MagicMock,
 ):

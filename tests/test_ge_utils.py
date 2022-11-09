@@ -12,7 +12,7 @@ import great_expectations as ge
 from great_expectations.core.util import nested_update
 from great_expectations.util import (
     convert_json_string_to_be_python_compliant,
-    convert_ndarray_datetime_to_float_dtype,
+    convert_ndarray_datetime_to_float_dtype_utc_timezone,
     convert_ndarray_float_to_datetime_tuple,
     convert_ndarray_to_datetime_dtype_best_effort,
     deep_filter_properties_iterable,
@@ -71,6 +71,7 @@ def numeric_array():
     return [idx for idx in range(4)]
 
 
+@pytest.mark.unit
 def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
     with pytest.raises(
         ValueError, match=r"The validate util method only supports dataset validations"
@@ -86,6 +87,7 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
             )
 
 
+@pytest.mark.unit
 def test_validate_dataset(dataset, basic_expectation_suite):
     res = ge.validate(dataset, basic_expectation_suite)
     # assert res.success is True  # will not be true for mysql, where "infinities" column is missing
@@ -168,6 +170,7 @@ def test_validate_dataset(dataset, basic_expectation_suite):
             )
 
 
+@pytest.mark.unit
 def test_validate_using_data_context(
     dataset, data_context_parameterized_expectation_suite
 ):
@@ -195,6 +198,7 @@ def test_validate_using_data_context(
     assert res.statistics["evaluated_expectations"] == 2
 
 
+@pytest.mark.unit
 def test_validate_using_data_context_path(
     dataset, data_context_parameterized_expectation_suite
 ):
@@ -210,6 +214,8 @@ def test_validate_using_data_context_path(
     assert res["statistics"]["evaluated_expectations"] == 2
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.61s
 def test_validate_invalid_parameters(
     dataset, basic_expectation_suite, data_context_parameterized_expectation_suite
 ):
@@ -220,6 +226,7 @@ def test_validate_invalid_parameters(
         ge.validate(dataset)
 
 
+@pytest.mark.unit
 def test_gen_directory_tree_str(tmpdir):
     project_dir = str(tmpdir.mkdir("project_dir"))
     os.mkdir(os.path.join(project_dir, "BBB"))
@@ -246,6 +253,7 @@ project_dir/
     )
 
 
+@pytest.mark.unit
 def test_nested_update():
     # nested_update is useful for update nested dictionaries (such as batch_kwargs with reader_options as a dictionary)
     batch_kwargs = {
@@ -263,6 +271,7 @@ def test_nested_update():
     }
 
 
+@pytest.mark.unit
 def test_nested_update_lists():
     # nested_update is useful for update nested dictionaries (such as batch_kwargs with reader_options as a dictionary)
     dependencies = {
@@ -288,21 +297,25 @@ def test_nested_update_lists():
     }
 
 
+@pytest.mark.unit
 def test_linter_raises_error_on_non_string_input():
     with pytest.raises(TypeError):
         lint_code(99)
 
 
+@pytest.mark.unit
 def test_linter_changes_dirty_code():
     code = "foo = [1,2,3]"
     assert lint_code(code) == "foo = [1, 2, 3]\n"
 
 
+@pytest.mark.unit
 def test_linter_leaves_clean_code():
     code = "foo = [1, 2, 3]\n"
     assert lint_code(code) == "foo = [1, 2, 3]\n"
 
 
+@pytest.mark.unit
 def test_convert_json_string_to_be_python_compliant_null_replacement(caplog):
     text = """
     "ge_cloud_id": null,
@@ -327,6 +340,7 @@ def test_convert_json_string_to_be_python_compliant_null_replacement(caplog):
     )
 
 
+@pytest.mark.unit
 def test_convert_json_string_to_be_python_compliant_bool_replacement(caplog):
     text = """
     "meta": {},
@@ -363,6 +377,7 @@ def test_convert_json_string_to_be_python_compliant_bool_replacement(caplog):
     )
 
 
+@pytest.mark.unit
 def test_convert_json_string_to_be_python_compliant_no_replacement():
     text = """
     "kwargs": {"max_value": 10000, "min_value": 10000},
@@ -373,6 +388,7 @@ def test_convert_json_string_to_be_python_compliant_no_replacement():
     assert res == text
 
 
+@pytest.mark.unit
 def test_get_currently_executing_function_call_arguments(a=None, *args, **kwargs):
     if a is None:
         test_get_currently_executing_function_call_arguments(0, 1, 2, 3, b=5)
@@ -395,6 +411,7 @@ def test_get_currently_executing_function_call_arguments(a=None, *args, **kwargs
         assert params["additional_param_2"] == "xyz_2"
 
 
+@pytest.mark.unit
 def test_filter_properties_dict():
     source_dict: dict = {
         "integer_zero": 0,
@@ -506,6 +523,7 @@ def test_filter_properties_dict():
     assert d7_end == d7_end_expected
 
 
+@pytest.mark.unit
 def test_deep_filter_properties_iterable():
     source_dict: dict = {
         "integer_zero": 0,
@@ -615,6 +633,7 @@ def test_deep_filter_properties_iterable():
     assert d1_end == d1_end_expected
 
 
+@pytest.mark.unit
 def test_deep_filter_properties_iterable_on_batch_request_dict():
     batch_request: dict = {
         "datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
@@ -636,38 +655,40 @@ def test_deep_filter_properties_iterable_on_batch_request_dict():
     }
 
 
+@pytest.mark.unit
 def test_is_ndarray_datetime_dtype(
     datetime_array,
     datetime_string_array,
     numeric_array,
 ):
     assert is_ndarray_datetime_dtype(
-        data=datetime_array, parse_strings_as_datetimes=False
+        data=datetime_array, parse_strings_as_datetimes=False, fuzzy=False
     )
     assert is_ndarray_datetime_dtype(
-        data=datetime_array, parse_strings_as_datetimes=True
+        data=datetime_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
     assert not is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=False
+        data=datetime_string_array, parse_strings_as_datetimes=False, fuzzy=False
     )
     assert is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=True
+        data=datetime_string_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
     assert not is_ndarray_datetime_dtype(
-        data=numeric_array, parse_strings_as_datetimes=False
+        data=numeric_array, parse_strings_as_datetimes=False, fuzzy=False
     )
     assert not is_ndarray_datetime_dtype(
-        data=numeric_array, parse_strings_as_datetimes=True
+        data=numeric_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
     datetime_string_array[-1] = "malformed_datetime_string"
     assert not is_ndarray_datetime_dtype(
-        data=datetime_string_array, parse_strings_as_datetimes=True
+        data=datetime_string_array, parse_strings_as_datetimes=True, fuzzy=False
     )
 
 
+@pytest.mark.unit
 def test_convert_ndarray_to_datetime_dtype_best_effort(
     datetime_array,
     datetime_string_array,
@@ -792,35 +813,43 @@ def test_convert_ndarray_to_datetime_dtype_best_effort(
     assert values_converted == numeric_array
 
 
-def test_convert_ndarray_datetime_to_float_dtype(
+@pytest.mark.unit
+def test_convert_ndarray_datetime_to_float_dtype_utc_timezone(
     datetime_array,
     datetime_string_array,
     numeric_array,
 ):
     element: Any
-
-    assert convert_ndarray_datetime_to_float_dtype(data=datetime_array).tolist() == [
-        element.timestamp() for element in datetime_array
+    assert convert_ndarray_datetime_to_float_dtype_utc_timezone(
+        data=datetime_array
+    ).tolist() == [
+        element.replace(tzinfo=datetime.timezone.utc).timestamp()
+        for element in datetime_array
     ]
 
     with pytest.raises(AttributeError) as e:
-        _ = convert_ndarray_datetime_to_float_dtype(data=numeric_array)
+        _ = convert_ndarray_datetime_to_float_dtype_utc_timezone(data=numeric_array)
 
-    assert str(e.value) == "'int' object has no attribute 'timestamp'"
+    assert "'int' object has no attribute 'replace'" in str(e.value)
 
-    with pytest.raises(AttributeError) as e:
-        _ = convert_ndarray_datetime_to_float_dtype(data=datetime_string_array)
+    with pytest.raises(TypeError) as e:
+        _ = convert_ndarray_datetime_to_float_dtype_utc_timezone(
+            data=datetime_string_array
+        )
 
-    assert str(e.value) == "'str' object has no attribute 'timestamp'"
+    assert "replace() takes no keyword arguments" in str(e.value)
 
 
+@pytest.mark.unit
 def test_convert_ndarray_float_to_datetime_tuple(
     datetime_array,
 ):
     element: Any
-
     assert convert_ndarray_float_to_datetime_tuple(
-        data=[element.timestamp() for element in datetime_array]
+        data=[
+            element.replace(tzinfo=datetime.timezone.utc).timestamp()
+            for element in datetime_array
+        ]
     ) == tuple([element for element in datetime_array])
 
     with pytest.raises(TypeError) as e:
@@ -829,6 +858,7 @@ def test_convert_ndarray_float_to_datetime_tuple(
     assert str(e.value) == "an integer is required (got type datetime.datetime)"
 
 
+@pytest.mark.unit
 def test_hyphen():
     txt: str = "validation_result"
     assert hyphen(txt=txt) == "validation-result"

@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, TypeVar, Union
 
 from great_expectations.core import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -13,6 +15,8 @@ from great_expectations.util import (
 )
 
 INFERRED_SEMANTIC_TYPE_KEY: str = "inferred_semantic_domain_type"
+
+T = TypeVar("T")
 
 
 class SemanticDomainTypes(Enum):
@@ -77,15 +81,15 @@ not supported).
         elif isinstance(domain_kwargs, dict):
             domain_kwargs = DomainKwargs(domain_kwargs)
 
-        domain_kwargs_dot_dict: DomainKwargs = (
-            self._convert_dictionaries_to_domain_kwargs(source=domain_kwargs)
+        domain_kwargs_dot_dict: DomainKwargs = convert_dictionary_to_domain_kwargs(
+            source=domain_kwargs
         )
 
         if details is None:
             details = {}
 
-        inferred_semantic_domain_type: Dict[
-            str, Union[str, SemanticDomainTypes]
+        inferred_semantic_domain_type: Optional[
+            Dict[str, Union[str, SemanticDomainTypes]]
         ] = details.get(INFERRED_SEMANTIC_TYPE_KEY)
         if inferred_semantic_domain_type:
             semantic_domain_key: str
@@ -145,19 +149,19 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
     def __ne__(self, other):
         return not self.__eq__(other=other)
 
-    def __hash__(self) -> int:
+    def __hash__(self) -> int:  # type: ignore[override]
         """Overrides the default implementation"""
         _result_hash: int = hash(self.id)
         return _result_hash
 
-    def is_superset(self, other: "Domain") -> bool:  # noqa: F821
+    def is_superset(self, other: Domain) -> bool:
         """Determines if other "Domain" object (provided as argument) is contained within this "Domain" object."""
         if other is None:
             return True
 
         return other.is_subset(other=self)
 
-    def is_subset(self, other: "Domain") -> bool:  # noqa: F821
+    def is_subset(self, other: Domain) -> bool:
         """Determines if this "Domain" object is contained within other "Domain" object (provided as argument)."""
         if other is None:
             return False
@@ -203,20 +207,21 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 
         return deep_filter_properties_iterable(properties=json_dict, clean_falsy=True)
 
-    def _convert_dictionaries_to_domain_kwargs(
-        self, source: Optional[Any] = None
-    ) -> Optional[Union[Any, "Domain"]]:  # noqa: F821
-        if source is None:
-            return None
 
-        if isinstance(source, dict):
-            if not isinstance(source, Domain):
-                deep_filter_properties_iterable(properties=source, inplace=True)
-                source = DomainKwargs(source)
-
-            key: str
-            value: Any
-            for key, value in source.items():
-                source[key] = self._convert_dictionaries_to_domain_kwargs(source=value)
-
+def convert_dictionary_to_domain_kwargs(
+    source: Union[T, dict]
+) -> Union[T, DomainKwargs]:
+    if not isinstance(source, dict):
         return source
+
+    return _convert_dictionary_to_domain_kwargs(source)
+
+
+def _convert_dictionary_to_domain_kwargs(source: dict) -> DomainKwargs:
+    key: str
+    value: Any
+    for key, value in source.items():
+        if isinstance(value, dict):
+            source[key] = _convert_dictionary_to_domain_kwargs(value)
+
+    return DomainKwargs(source)

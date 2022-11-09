@@ -12,6 +12,7 @@ from great_expectations.rule_based_profiler.estimators.numeric_range_estimator i
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     compute_quantiles,
+    datetime_semantic_domain_type,
     get_false_positive_rate_from_rule_state,
     get_quantile_statistic_interpolation_method_from_rule_state,
 )
@@ -19,6 +20,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effort
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -68,8 +70,20 @@ class QuantilesNumericRangeEstimator(NumericRangeEstimator):
                 DEFAULT_QUANTILES_QUANTILE_STATISTIC_INTERPOLATION_METHOD
             )
 
+        datetime_detected: bool = datetime_semantic_domain_type(domain=domain)
+        metric_values_converted: np.ndaarray
+        (
+            _,
+            _,
+            metric_values_converted,
+        ) = convert_ndarray_to_datetime_dtype_best_effort(
+            data=metric_values,
+            datetime_detected=datetime_detected,
+            parse_strings_as_datetimes=True,
+            fuzzy=False,
+        )
         return compute_quantiles(
-            metric_values=metric_values,
+            metric_values=metric_values_converted,
             false_positive_rate=false_positive_rate,
             quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
         )

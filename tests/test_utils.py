@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import uuid
 import warnings
 from contextlib import contextmanager
@@ -15,20 +16,14 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import (
     CheckpointStore,
+    ConfigurationStore,
     ProfilerStore,
     StoreBackend,
 )
-from great_expectations.data_context.store.util import (
-    build_checkpoint_store_using_store_backend,
-    build_configuration_store,
-    delete_checkpoint_config_from_store_backend,
-    delete_config_from_store_backend,
-    load_checkpoint_config_from_store_backend,
-    load_config_from_store_backend,
-    save_checkpoint_config_to_store_backend,
-    save_config_to_store_backend,
-)
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+)
 from great_expectations.data_context.util import (
     build_store_from_config,
     instantiate_class_from_config,
@@ -36,6 +31,7 @@ from great_expectations.data_context.util import (
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
+
 
 try:
     import sqlalchemy as sa
@@ -104,42 +100,6 @@ def safe_remove(path):
             print(e)
 
 
-def create_files_for_regex_partitioner(
-    root_directory_path: str, directory_paths: list = None, test_file_names: list = None
-):
-    if not directory_paths:
-        return
-
-    if not test_file_names:
-        test_file_names: list = [
-            "alex_20200809_1000.csv",
-            "eugene_20200809_1500.csv",
-            "james_20200811_1009.csv",
-            "abe_20200809_1040.csv",
-            "will_20200809_1002.csv",
-            "james_20200713_1567.csv",
-            "eugene_20201129_1900.csv",
-            "will_20200810_1001.csv",
-            "james_20200810_1003.csv",
-            "alex_20200819_1300.csv",
-        ]
-
-    base_directories = []
-    for dir_path in directory_paths:
-        if dir_path is None:
-            base_directories.append(dir_path)
-        else:
-            data_dir_path = os.path.join(root_directory_path, dir_path)
-            os.makedirs(data_dir_path, exist_ok=True)
-            base_dir = str(data_dir_path)
-            # Put test files into the directories.
-            for file_name in test_file_names:
-                file_path = os.path.join(base_dir, file_name)
-                with open(file_path, "w") as fp:
-                    fp.writelines([f'The name of this file is: "{file_path}".\n'])
-            base_directories.append(base_dir)
-
-
 def create_files_in_directory(
     directory: str, file_name_list: List[str], file_content_fn=lambda: "x,y\n1,2\n2,3"
 ):
@@ -157,15 +117,6 @@ def create_files_in_directory(
         file_path = os.path.join(directory, file_name)
         with open(file_path, "w") as f_:
             f_.write(file_content_fn())
-
-
-def create_fake_data_frame():
-    return pd.DataFrame(
-        {
-            "x": range(10),
-            "y": list("ABCDEFGHIJ"),
-        }
-    )
 
 
 def validate_uuid4(uuid_string: str) -> bool:
@@ -224,21 +175,6 @@ FROM
     return {row[0] for row in rows}
 
 
-def build_in_memory_store_backend(
-    module_name: str = "great_expectations.data_context.store",
-    class_name: str = "InMemoryStoreBackend",
-    **kwargs,
-) -> StoreBackend:
-    logger.debug("Starting data_context/store/util.py#build_in_memory_store_backend")
-    store_backend_config: dict = {"module_name": module_name, "class_name": class_name}
-    store_backend_config.update(**kwargs)
-    return build_store_from_config(
-        store_config=store_backend_config,
-        module_name=module_name,
-        runtime_environment=None,
-    )
-
-
 def build_tuple_filesystem_store_backend(
     base_directory: str,
     *,
@@ -254,30 +190,6 @@ def build_tuple_filesystem_store_backend(
         "module_name": module_name,
         "class_name": class_name,
         "base_directory": base_directory,
-    }
-    store_backend_config.update(**kwargs)
-    return build_store_from_config(
-        store_config=store_backend_config,
-        module_name=module_name,
-        runtime_environment=None,
-    )
-
-
-def build_tuple_s3_store_backend(
-    bucket: str,
-    *,
-    module_name: str = "great_expectations.data_context.store",
-    class_name: str = "TupleS3StoreBackend",
-    **kwargs,
-) -> StoreBackend:
-    logger.debug(
-        f"""Starting data_context/store/util.py#build_tuple_s3_store_backend using bucket: {bucket}
-        """
-    )
-    store_backend_config: dict = {
-        "module_name": module_name,
-        "class_name": class_name,
-        "bucket": bucket,
     }
     store_backend_config.update(**kwargs)
     return build_store_from_config(
@@ -337,56 +249,6 @@ def build_profiler_store_using_filesystem(
     return store
 
 
-def save_checkpoint_config_to_filesystem(
-    store_name: str,
-    base_directory: str,
-    checkpoint_name: str,
-    checkpoint_configuration: CheckpointConfig,
-):
-    store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
-    save_checkpoint_config_to_store_backend(
-        store_name=store_name,
-        store_backend=store_backend_obj,
-        checkpoint_name=checkpoint_name,
-        checkpoint_configuration=checkpoint_configuration,
-    )
-
-
-def load_checkpoint_config_from_filesystem(
-    store_name: str,
-    base_directory: str,
-    checkpoint_name: str,
-) -> CheckpointConfig:
-    store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
-    return load_checkpoint_config_from_store_backend(
-        store_name=store_name,
-        store_backend=store_backend_obj,
-        checkpoint_name=checkpoint_name,
-    )
-
-
-def delete_checkpoint_config_from_filesystem(
-    store_name: str,
-    base_directory: str,
-    checkpoint_name: str,
-):
-    store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
-        **store_config
-    )
-    delete_checkpoint_config_from_store_backend(
-        store_name=store_name,
-        store_backend=store_backend_obj,
-        checkpoint_name=checkpoint_name,
-    )
-
-
 def save_config_to_filesystem(
     configuration_store_class_name: str,
     configuration_store_module_name: str,
@@ -427,6 +289,157 @@ def load_config_from_filesystem(
         store_backend=store_backend_obj,
         configuration_key=configuration_key,
     )
+
+
+def build_configuration_store(
+    class_name: str,
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    *,
+    module_name: str = "great_expectations.data_context.store",
+    overwrite_existing: bool = False,
+    **kwargs,
+) -> ConfigurationStore:
+    logger.debug(
+        f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}"
+    )
+
+    if store_backend is not None and isinstance(store_backend, StoreBackend):
+        store_backend = store_backend.config
+    elif not isinstance(store_backend, dict):
+        raise ge_exceptions.DataContextError(
+            "Invalid configuration: A store_backend needs to be a dictionary or inherit from the StoreBackend class."
+        )
+
+    store_backend.update(**kwargs)
+
+    store_config: dict = {
+        "store_name": store_name,
+        "module_name": module_name,
+        "class_name": class_name,
+        "overwrite_existing": overwrite_existing,
+        "store_backend": store_backend,
+    }
+    configuration_store: ConfigurationStore = build_store_from_config(  # type: ignore[assignment]
+        store_config=store_config,
+        module_name=module_name,
+        runtime_environment=None,
+    )
+    return configuration_store
+
+
+def delete_config_from_store_backend(
+    class_name: str,
+    module_name: str,
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    configuration_key: str,
+) -> None:
+    config_store: ConfigurationStore = build_configuration_store(
+        class_name=class_name,
+        module_name=module_name,
+        store_name=store_name,
+        store_backend=store_backend,
+        overwrite_existing=True,
+    )
+    key = ConfigurationIdentifier(
+        configuration_key=configuration_key,
+    )
+    config_store.remove_key(key=key)
+
+
+def load_checkpoint_config_from_store_backend(
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    checkpoint_name: str,
+) -> CheckpointConfig:
+    config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
+        store_name=store_name,
+        store_backend=store_backend,
+    )
+    key = ConfigurationIdentifier(
+        configuration_key=checkpoint_name,
+    )
+    try:
+        return config_store.get(key=key)  # type: ignore[return-value]
+    except ge_exceptions.InvalidBaseYamlConfigError as exc:
+        logger.error(exc.messages)
+        raise ge_exceptions.InvalidCheckpointConfigError(
+            "Error while processing DataContextConfig.", exc
+        )
+
+
+def delete_checkpoint_config_from_store_backend(
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    checkpoint_name: str,
+) -> None:
+    config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
+        store_name=store_name,
+        store_backend=store_backend,
+    )
+    key = ConfigurationIdentifier(
+        configuration_key=checkpoint_name,
+    )
+    config_store.remove_key(key=key)
+
+
+def build_checkpoint_store_using_store_backend(
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    overwrite_existing: bool = False,
+) -> CheckpointStore:
+    return cast(
+        CheckpointStore,
+        build_configuration_store(
+            class_name="CheckpointStore",
+            module_name="great_expectations.data_context.store",
+            store_name=store_name,
+            store_backend=store_backend,
+            overwrite_existing=overwrite_existing,
+        ),
+    )
+
+
+def save_config_to_store_backend(
+    class_name: str,
+    module_name: str,
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    configuration_key: str,
+    configuration: BaseYamlConfig,
+) -> None:
+    config_store: ConfigurationStore = build_configuration_store(
+        class_name=class_name,
+        module_name=module_name,
+        store_name=store_name,
+        store_backend=store_backend,
+        overwrite_existing=True,
+    )
+    key = ConfigurationIdentifier(
+        configuration_key=configuration_key,
+    )
+    config_store.set(key=key, value=configuration)
+
+
+def load_config_from_store_backend(
+    class_name: str,
+    module_name: str,
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    configuration_key: str,
+) -> BaseYamlConfig:
+    config_store: ConfigurationStore = build_configuration_store(
+        class_name=class_name,
+        module_name=module_name,
+        store_name=store_name,
+        store_backend=store_backend,
+        overwrite_existing=False,
+    )
+    key = ConfigurationIdentifier(
+        configuration_key=configuration_key,
+    )
+    return config_store.get(key=key)  # type: ignore[return-value]
 
 
 def delete_config_from_filesystem(
@@ -585,6 +598,7 @@ def convert_string_columns_to_datetime(
 def load_data_into_test_database(
     table_name: str,
     connection_string: str,
+    schema_name: Optional[str] = None,
     csv_path: Optional[str] = None,
     csv_paths: Optional[List[str]] = None,
     load_full_dataset: bool = False,
@@ -600,6 +614,7 @@ def load_data_into_test_database(
     Args:
         table_name: name of the table to write to.
         connection_string: used to connect to the database.
+        schema_name: optional name of schema
         csv_path: path of a single csv to write.
         csv_paths: list of paths of csvs to write.
         load_full_dataset: if False, load only the first 10 rows.
@@ -674,6 +689,7 @@ def load_data_into_test_database(
             all_dfs_concatenated.to_sql(
                 name=table_name,
                 con=engine,
+                schema=schema_name,
                 index=False,
                 if_exists="append",
                 method=to_sql_method,
@@ -970,3 +986,18 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
         logger.info(f"Could not find the following target strings: {strings}")
 
     return success
+
+
+@contextmanager
+def working_directory(directory: Union[str, Path]):
+    """
+    Resets working directory to cwd() after changing to 'directory' passed in as parameter.
+    Reference:
+    https://stackoverflow.com/questions/431684/equivalent-of-shell-cd-command-to-change-the-working-directory/431747#431747
+    """
+    owd = os.getcwd()
+    try:
+        os.chdir(directory)
+        yield directory
+    finally:
+        os.chdir(owd)

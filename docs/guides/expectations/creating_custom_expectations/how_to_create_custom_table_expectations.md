@@ -2,8 +2,9 @@
 title: How to create a Custom Table Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-**`TableExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
+**`TableExpectations`** are one of the most common types of <TechnicalTag tag="expectation" text="Expectation"/>. 
 They are evaluated for an entire table, and answer a semantic question about the table itself. For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer how many columns and rows are in your table.
 
 This guide will walk you through the process of creating your own custom `TableExpectation`.
@@ -83,7 +84,7 @@ When in doubt, the next step to implement is the first one that doesn't have a â
 
 ### 4. Change the Expectation class name and add a docstring
 
-By convention, your [**Metric**](../../../reference/metrics.md) class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
+By convention, your <TechnicalTag tag="metric" text="Metric"/> class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
 
 Let's start by updating your Expectation's name and docstring.
 
@@ -142,7 +143,7 @@ Your examples will look something like this:
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
 
-* `data`: defines the input data of the example as a table/data frame. In this example the table has one column named `x` and a second column named `y`. Both columns have 5 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
+* `data`: defines the input data of the example as a table/data frame. In these examples the table has three columns (`col1`, `col2` and `col3`). These columns have 5 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
 * `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
 	* `include_in_gallery`: This must be set to `True` if you want this test case to be visible in the Gallery as an example.
@@ -179,7 +180,7 @@ see our guide on [creating example cases for a Custom Expectation](../features_c
 ### 6. Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation. 
-To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your Expectation.
+To do so, you'll need to implement a function within a <TechnicalTag tag="metric" text="Metric"/> class, and link it to your Expectation.
 By the time your Expectation is complete, your Metric will have functions for all three Execution Engines (Pandas, Spark, and SQLAlchemy) supported by Great Expectations. For now, we're only going to define one.
 
 :::note

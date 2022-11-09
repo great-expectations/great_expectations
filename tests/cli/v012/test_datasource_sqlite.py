@@ -1,6 +1,7 @@
 import os
 from collections import OrderedDict
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -256,6 +257,7 @@ def test_cli_datasource_profile_on_empty_database(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.slow  # 1.05s
 def test_cli_datasource_profile_with_datasource_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -313,6 +315,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert_no_tracebacks(result)
 
 
+@pytest.mark.slow  # 1.07s
 def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -372,6 +375,7 @@ def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
     assert_no_tracebacks(result)
 
 
+@pytest.mark.slow  # 1.07s
 def test_cli_datasource_profile_with_no_datasource_args(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -423,6 +427,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert_no_tracebacks(result)
 
 
+@pytest.mark.slow  # 1.12s
 def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with_limit(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -501,6 +506,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     assert_no_tracebacks(result)
 
 
+@pytest.mark.slow  # 1.06s
 def test_cli_datasource_profile_with_valid_data_asset_arg(
     empty_data_context, titanic_sqlite_db, caplog
 ):

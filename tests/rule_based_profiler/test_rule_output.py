@@ -1,11 +1,14 @@
 from typing import Dict, List
 
+import pytest
+
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.rule_based_profiler.rule import RuleOutput
 
 
+@pytest.mark.unit
 def test_rule_output_get_get_expectation_configurations(
     rule_output_for_rule_state_with_domains_and_parameters,
 ):
@@ -38,6 +41,7 @@ def test_rule_output_get_get_expectation_configurations(
     assert expectation_configurations == expected_expectation_configurations
 
 
+@pytest.mark.unit
 def test_rule_output_get_fully_qualified_parameter_names_by_domain(
     rule_output_for_rule_state_with_domains_and_parameters,
 ):
@@ -87,6 +91,7 @@ def test_rule_output_get_fully_qualified_parameter_names_by_domain(
 
 
 # noinspection PyPep8Naming
+@pytest.mark.unit
 def test_rule_output_get_fully_qualified_parameter_names_for_domain_id(
     rule_output_for_rule_state_with_domains_and_parameters,
     column_Age_domain,
@@ -105,6 +110,7 @@ def test_rule_output_get_fully_qualified_parameter_names_for_domain_id(
     assert fully_qualified_parameter_names == expected_fully_qualified_parameter_names
 
 
+@pytest.mark.unit
 def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_by_domain(
     rule_output_for_rule_state_with_domains_and_parameters,
 ):
@@ -487,6 +493,7 @@ def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_by
 
 
 # noinspection PyPep8Naming
+@pytest.mark.unit
 def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
     rule_output_for_rule_state_with_domains_and_parameters,
     column_Age_domain,

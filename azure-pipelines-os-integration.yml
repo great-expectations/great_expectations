@@ -36,7 +36,7 @@ resources:
     ports:
       - 1433:1433
   - container: trino
-    image: trinodb/trino:379
+    image: trinodb/trino:400
     ports:
       - 8088:8080
 
@@ -65,7 +65,9 @@ stages:
                 docs/**
 
                 [GEChanged]
-                great_expectations/**
+                great_expectations/**/*.py
+                pyproject.toml
+                setup.cfg
                 tests/**
                 /*.txt
                 /*.yml
@@ -73,7 +75,7 @@ stages:
   - stage: os_integration
     variables:
       python.version: '3.x'
-      GE_pytest_pip_opts: '--requirement requirements-dev-test.txt'
+      GE_pytest_pip_opts: '--requirement reqs/requirements-dev-test.txt'
       GE_pytest_opts: '--no-sqlalchemy'
 
     jobs:
@@ -163,7 +165,9 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install \
+                --requirement reqs/requirements-dev-test.txt \
+                --requirement reqs/requirements-dev-sqlalchemy.txt
               # Install latest sqlalchemy version
               pip install --upgrade SQLAlchemy
               pip install --requirement requirements.txt
@@ -198,7 +202,9 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install \
+                --requirement reqs/requirements-dev-test.txt \
+                --requirement reqs/requirements-dev-sqlalchemy.txt
               # Install latest sqlalchemy version
               pip install --upgrade SQLAlchemy
               pip install --requirement requirements.txt
@@ -229,7 +235,9 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install \
+                --requirement reqs/requirements-dev-test.txt \
+                --requirement reqs/requirements-dev-sqlalchemy.txt
               # Install latest sqlalchemy version
               pip install --upgrade SQLAlchemy
               pip install --requirement requirements.txt
@@ -269,7 +277,9 @@ stages:
             displayName: Wait for database to initialise
 
           - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install \
+                --requirement reqs/requirements-dev-test.txt \
+                --requirement reqs/requirements-dev-sqlalchemy.txt
               # Install latest sqlalchemy version
               pip install --upgrade SQLAlchemy
               pip install --requirement requirements.txt

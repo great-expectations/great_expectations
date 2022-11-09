@@ -41,8 +41,11 @@ class MockTeamsResponse:
 class MockSlackResponse:
     def __init__(self, status_code):
         self.status_code = status_code
-        self.text = "test_text"
+        self.text = "ok"
         self.content = json.dumps({"ok": "True"})
+
+    def json(self):
+        return {"ok": "True"}
 
 
 class MockCloudResponse:

@@ -9,6 +9,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 # noinspection PyPep8Naming
+@pytest.mark.unit
 def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter_name(
     column_Age_domain,
     variables_multi_part_name_parameter_container,
@@ -290,6 +291,8 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
         ),
     ],
 )
+@pytest.mark.unit
+@pytest.mark.slow  # 1.92s
 def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_name(
     column_Age_domain,
     column_Date_domain,

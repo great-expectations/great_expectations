@@ -28,6 +28,7 @@ class ExpectColumnValuesToBeValidScientificNotation(RegexBasedColumnMapExpectati
                 "invalid": ["11.e-12", "0E+5", "007"],
                 "empty": ["", None, False],
             },
+            "suppress_test_for": ["mssql", "bigquery"],
             "tests": [
                 {
                     "title": "basic_positive_test",

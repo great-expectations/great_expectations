@@ -33,6 +33,7 @@ def yaml_handler() -> YAMLHandler:
     return YAMLHandler()
 
 
+@pytest.mark.unit
 def test_load_correct_input(
     simple_yaml: str, simple_dict: dict, yaml_handler: YAMLHandler
 ) -> None:
@@ -41,11 +42,13 @@ def test_load_correct_input(
     assert res == simple_dict
 
 
+@pytest.mark.unit
 def test_load_incorrect_input(yaml_handler: YAMLHandler) -> None:
     with pytest.raises(TypeError):
         yaml_handler.load(12345)
 
 
+@pytest.mark.integration
 def test_file_output(tmp_path: Path, yaml_handler: YAMLHandler) -> None:
     simplest_yaml: str = "abc: 1"
     test_file: str = os.path.join(tmp_path, "out.yaml")
@@ -62,6 +65,7 @@ def test_file_output(tmp_path: Path, yaml_handler: YAMLHandler) -> None:
     assert data_from_file == data
 
 
+@pytest.mark.unit
 def test_dump_default_behavior_with_no_stream_specified(
     yaml_handler: YAMLHandler,
 ) -> None:
@@ -71,6 +75,7 @@ def test_dump_default_behavior_with_no_stream_specified(
     assert dumped == "abc: 1\n"
 
 
+@pytest.mark.unit
 def test_dump_stdout_specified(capsys, yaml_handler: YAMLHandler) -> None:
     # ruamel documentation recommends that we specify the stream as stdout when we are using YAML to return a string.
     simplest_dict: dict = dict(abc=1)

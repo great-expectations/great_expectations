@@ -205,7 +205,7 @@ class StoreBackend(metaclass=ABCMeta):
 
     def build_key(
         self,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
         name: Optional[str] = None,
     ) -> Any:
         """Build a key specific to the store backend implementation."""

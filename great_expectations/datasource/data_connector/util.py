@@ -8,7 +8,7 @@ import sre_constants
 import sre_parse
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
@@ -17,6 +17,9 @@ from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.sorter import Sorter
+
+if TYPE_CHECKING:
+    from great_expectations.datasource import DataConnector
 
 logger = logging.getLogger(__name__)
 
@@ -261,7 +264,7 @@ def _invert_regex_to_data_reference_template(
 
     # print("-"*80)
     parsed_sre = sre_parse.parse(regex_pattern)
-    for token, value in parsed_sre:
+    for token, value in parsed_sre:  # type: ignore[attr-defined]
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
             data_reference_template += chr(value)
@@ -294,7 +297,7 @@ def _invert_regex_to_data_reference_template(
             )
 
     # Collapse adjacent wildcards into a single wildcard
-    data_reference_template: str = re.sub("\\*+", "*", data_reference_template)
+    data_reference_template: str = re.sub("\\*+", "*", data_reference_template)  # type: ignore[no-redef]
     return data_reference_template
 
 
@@ -431,7 +434,7 @@ def list_gcs_keys(
 
 def list_s3_keys(
     s3, query_options: dict, iterator_dict: dict, recursive: bool = False
-) -> str:
+) -> Generator[str, None, None]:
     """
     For InferredAssetS3DataConnector, we take bucket and prefix and search for files using RegEx at and below the level
     specified by that bucket and prefix.  However, for ConfiguredAssetS3DataConnector, we take bucket and prefix and
@@ -526,12 +529,14 @@ def _build_asset_from_config(
     runtime_environment: "DataConnector", config: dict
 ) -> Asset:
     """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""
-    runtime_environment: dict = {"data_connector": runtime_environment}
+    runtime_environment_dict: Dict[str, "DataConnector"] = {
+        "data_connector": runtime_environment
+    }
     config = assetConfigSchema.load(config)
     config = assetConfigSchema.dump(config)
     asset: Asset = instantiate_class_from_config(
         config=config,
-        runtime_environment=runtime_environment,
+        runtime_environment=runtime_environment_dict,
         config_defaults={},
     )
     if not asset:

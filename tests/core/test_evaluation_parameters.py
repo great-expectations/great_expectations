@@ -16,6 +16,7 @@ from great_expectations.core.evaluation_parameters import (
 from great_expectations.exceptions import DataContextError, EvaluationParameterError
 
 
+@pytest.mark.unit
 def test_parse_evaluation_parameter():
     # Substitution alone is ok
     assert parse_evaluation_parameter("a", {"a": 1}) == 1
@@ -118,6 +119,7 @@ def test_parse_evaluation_parameter():
     )
 
 
+@pytest.mark.integration
 def test_query_store_results_in_evaluation_parameters(data_context_with_query_store):
     TITANIC_ROW_COUNT = 1313  # taken from the titanic db conftest
     DISTINCT_TITANIC_ROW_COUNT = 4
@@ -171,6 +173,7 @@ def test_query_store_results_in_evaluation_parameters(data_context_with_query_st
     assert res6 == TITANIC_ROW_COUNT + DISTINCT_TITANIC_ROW_COUNT
 
 
+@pytest.mark.unit
 def test_parser_timing():
     """We currently reuse the parser, clearing the stack between calls, which is about 10 times faster than not
     doing so. But these operations are really quick, so this may not be necessary."""
@@ -184,12 +187,14 @@ def test_parser_timing():
     )
 
 
+@pytest.mark.unit
 def test_math_evaluation_paramaters():
     assert parse_evaluation_parameter("sin(2*PI)") == math.sin(math.pi * 2)
     assert parse_evaluation_parameter("cos(2*PI)") == math.cos(math.pi * 2)
     assert parse_evaluation_parameter("tan(2*PI)") == math.tan(math.pi * 2)
 
 
+@pytest.mark.unit
 def test_temporal_evaluation_parameters():
     # allow 1 second for "now" tolerance
     now = datetime.now()
@@ -202,6 +207,7 @@ def test_temporal_evaluation_parameters():
     )
 
 
+@pytest.mark.unit
 def test_temporal_evaluation_parameters_complex():
     # allow 1 second for "now" tolerance
     now = datetime.now()
@@ -215,6 +221,7 @@ def test_temporal_evaluation_parameters_complex():
     )
 
 
+@pytest.mark.unit
 def test_find_evaluation_parameter_dependencies():
     parameter_expression = "(-3 * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm) + urn:great_expectations:validations:profile:expect_column_mean_to_be_between.result.observed_value:column=norm"
     dependencies = find_evaluation_parameter_dependencies(parameter_expression)
@@ -248,6 +255,7 @@ def test_find_evaluation_parameter_dependencies():
     assert dependencies == {"urns": set(), "other": set()}
 
 
+@pytest.mark.unit
 def test_deduplicate_evaluation_parameter_dependencies():
     dependencies = {
         "profile": [
@@ -289,6 +297,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
     } == deduplicated
 
 
+@pytest.mark.integration
 def test_evaluation_parameters_for_between_expectations_parse_correctly(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -328,7 +337,9 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
         batch_request=RuntimeBatchRequest(**batch_request),
         expectation_suite_name=expectation_suite_name,
     )
-    column_names = [f'"{column_name}"' for column_name in validator.columns()]
+    column_names = [
+        f'"{column_name}"' for column_name in validator.metrics_calculator.columns()
+    ]
     print(f"Columns: {', '.join(column_names)}.")
 
     validator.set_evaluation_parameter("my_min", 1)
@@ -363,6 +374,7 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
     )
 
 
+@pytest.mark.unit
 def test_now_evaluation_parameter():
     """
     now() is unique in the fact that it is the only evaluation param built-in that has zero arity (takes no arguments).

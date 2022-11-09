@@ -38,7 +38,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id_: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Base class for DataConnectors that connect to filesystem-like data by taking in
@@ -57,7 +57,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         logger.debug(f'Constructing ConfiguredAssetFilePathDataConnector "{name}".')
         super().__init__(
             name=name,
-            id_=id_,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             default_regex=default_regex,
@@ -108,7 +108,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             ):
                 mapped_batch_definition_list: List[
                     BatchDefinition
-                ] = self._map_data_reference_to_batch_definition_list(
+                ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
                     data_reference=data_reference,
                     data_asset_name=data_asset_name,
                 )
@@ -191,14 +191,14 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
                 regex_config["group_names"] = asset.group_names
         return regex_config
 
-    def _get_asset(self, data_asset_name: str) -> Asset:
+    def _get_asset(self, data_asset_name: Optional[str]) -> Union[Asset, None]:
         asset: Optional[Asset] = None
         if (
             data_asset_name is not None
             and self.assets
             and data_asset_name in self.assets
         ):
-            asset = self.assets[data_asset_name]
+            asset = self.assets[data_asset_name]  # type: ignore[assignment]
         return asset
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
@@ -221,12 +221,12 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         data_asset_name: str = batch_definition.data_asset_name
         if (
             data_asset_name in self.assets
-            and self.assets[data_asset_name].batch_spec_passthrough
-            and isinstance(self.assets[data_asset_name].batch_spec_passthrough, dict)
+            and self.assets[data_asset_name].batch_spec_passthrough  # type: ignore[union-attr]
+            and isinstance(self.assets[data_asset_name].batch_spec_passthrough, dict)  # type: ignore[union-attr]
         ):
             # batch_spec_passthrough from data_asset
             batch_spec_passthrough = deepcopy(
-                self.assets[data_asset_name]["batch_spec_passthrough"]
+                self.assets[data_asset_name]["batch_spec_passthrough"]  # type: ignore[index]
             )
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}

@@ -2,6 +2,8 @@ import copy
 import json
 from typing import Dict, List, Optional, Union
 
+from marshmallow import Schema, fields, post_load, pre_dump
+
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -12,7 +14,6 @@ from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
 from great_expectations.types import SerializableDictDot, safe_deep_copy
 
 
@@ -204,7 +205,7 @@ class CheckpointResult(SerializableDictDot):
         return self._validation_results_by_data_asset_name
 
     def list_data_assets_validated(
-        self, group_by: str = None
+        self, group_by: Optional[str] = None
     ) -> Union[List[dict], dict]:
         if group_by is None:
             if self._data_assets_validated is None:

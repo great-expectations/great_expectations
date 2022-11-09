@@ -179,11 +179,16 @@ class LegacyDatasource:
             )
         self._data_asset_type = data_asset_type
         self._datasource_config = kwargs
-        self._batch_kwargs_generators = {}
+        self._batch_kwargs_generators: dict = {}
 
         self._datasource_config["data_asset_type"] = data_asset_type
         if batch_kwargs_generators is not None:
             self._datasource_config["batch_kwargs_generators"] = batch_kwargs_generators
+
+        # Chetan - 20221103 - This attribute is meant to represent the config args used to instantiate the object (before ${VARIABLE} substitution).
+        # While downstream logic should override this value, we default to `self._datasource_config` as a backup.
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.
+        self._raw_config = self._datasource_config
 
     @property
     def name(self):

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
@@ -27,6 +27,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 
 
 class VolumeDataAssistant(DataAssistant):
@@ -73,11 +76,11 @@ class VolumeDataAssistant(DataAssistant):
             _batch_id_to_batch_identifier_display_name_map=data_assistant_result._batch_id_to_batch_identifier_display_name_map,
             profiler_config=data_assistant_result.profiler_config,
             profiler_execution_time=data_assistant_result.profiler_execution_time,
+            rule_domain_builder_execution_time=data_assistant_result.rule_domain_builder_execution_time,
             rule_execution_time=data_assistant_result.rule_execution_time,
             metrics_by_domain=data_assistant_result.metrics_by_domain,
             expectation_configurations=data_assistant_result.expectation_configurations,
             citation=data_assistant_result.citation,
-            execution_time=data_assistant_result.execution_time,
             _usage_statistics_handler=data_assistant_result._usage_statistics_handler,
         )
 
@@ -88,7 +91,7 @@ class VolumeDataAssistant(DataAssistant):
         """
         # Step-1: Instantiate "TableDomainBuilder" object.
 
-        table_domain_builder = TableDomainBuilder(
+        table_domain_builder: DomainBuilder = TableDomainBuilder(
             data_context=None,
         )
 
@@ -168,7 +171,7 @@ class VolumeDataAssistant(DataAssistant):
         """
         # Step-1: Instantiate "CategoricalColumnDomainBuilder" for selecting columns containing "FEW" discrete values.
 
-        categorical_column_type_domain_builder: CategoricalColumnDomainBuilder = (
+        categorical_column_type_domain_builder: DomainBuilder = (
             CategoricalColumnDomainBuilder(
                 include_column_names=None,
                 exclude_column_names=None,
@@ -244,7 +247,7 @@ class VolumeDataAssistant(DataAssistant):
                 "lower_bound": 0.0,
                 "upper_bound": None,
             },
-            "round_decimals": 15,
+            "round_decimals": None,
         }
         parameter_builders: List[ParameterBuilder] = [
             column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics,

@@ -3,6 +3,7 @@ import datetime
 import boto3
 import pytest
 from freezegun import freeze_time
+from marshmallow import ValidationError
 from moto import mock_s3
 
 from great_expectations.data_context.store import HtmlSiteStore
@@ -13,11 +14,10 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
     validationResultIdentifierSchema,
 )
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.util import gen_directory_tree_str
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
     full_test_dir = tmp_path_factory.mktemp(
@@ -95,6 +95,7 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
 
 @freeze_time("09/26/2019 13:42:41")
 @mock_s3
+@pytest.mark.integration
 def test_HtmlSiteStore_S3_backend():
     bucket = "test_validation_store_bucket"
     prefix = "test/prefix"

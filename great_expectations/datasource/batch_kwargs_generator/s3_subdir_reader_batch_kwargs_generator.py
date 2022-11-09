@@ -2,6 +2,7 @@ import logging
 import os
 import warnings
 from pathlib import Path
+from typing import Dict, Iterable
 from urllib.parse import urlparse, urlunparse
 
 try:
@@ -47,7 +48,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     by this generator.
     """
 
-    _default_reader_options = {}
+    _default_reader_options: Dict = {}
     recognized_batch_parameters = {"data_asset_name", "partition_id"}
 
     def __init__(
@@ -279,7 +280,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
     def _build_batch_kwargs_path_iter(
         self, path_list, reader_options=None, limit=None
-    ) -> None:
+    ) -> Iterable[S3BatchKwargs]:
         for path in path_list:
             yield self._build_batch_kwargs_from_path(
                 path, reader_options=reader_options, limit=limit
@@ -287,7 +288,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
     def _build_batch_kwargs_from_path(
         self, path, reader_method=None, reader_options=None, limit=None
-    ):
+    ) -> S3BatchKwargs:
         batch_kwargs = self._datasource.process_batch_parameters(
             reader_method=reader_method or self.reader_method,
             reader_options=reader_options or self.reader_options,

@@ -22,7 +22,15 @@ try:
     pyspark = pytest.importorskip("pyspark")
     # noinspection PyPep8Naming
     import pyspark.sql.functions as F
-    from pyspark.sql.types import IntegerType, LongType, Row, StringType
+    from pyspark.sql.types import (
+        DoubleType,
+        IntegerType,
+        LongType,
+        Row,
+        StringType,
+        StructField,
+        StructType,
+    )
 except ImportError:
     pyspark = None
     F = None
@@ -30,6 +38,9 @@ except ImportError:
     LongType = None
     StringType = None
     Row = None
+    DoubleType = None
+    StructType = None
+    StructField = None
 
 
 @pytest.fixture
@@ -72,6 +83,7 @@ def test_reader_fn(spark_session, basic_spark_df_execution_engine):
     assert "<bound method DataFrameReader.csv" in str(fn_new)
 
 
+@pytest.mark.integration
 def test_reader_fn_parameters(
     spark_session, basic_spark_df_execution_engine, tmp_path_factory
 ):
@@ -87,6 +99,11 @@ def test_reader_fn_parameters(
     fn = engine._get_reader_fn(reader=spark_session.read, path=test_df_small_csv_path)
     assert "<bound method DataFrameReader.csv" in str(fn)
 
+    test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(
+        PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
+    ).dataframe
+    assert test_sparkdf_with_no_header_param.head() == Row(_c0="x", _c1="y")
+
     test_sparkdf_with_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
             path=test_df_small_csv_path,
@@ -100,6 +117,27 @@ def test_reader_fn_parameters(
         PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
     ).dataframe
     assert test_sparkdf_with_no_header_param.head() == Row(_c0="x", _c1="y")
+
+    # defining schema
+    schema: pyspark.sql.types.StructType = StructType(
+        [
+            StructField("x", IntegerType(), True),
+            StructField("y", IntegerType(), True),
+        ]
+    )
+    schema_dict: dict = schema
+
+    test_sparkdf_with_header_param_and_schema = (
+        basic_spark_df_execution_engine.get_batch_data(
+            PathBatchSpec(
+                path=test_df_small_csv_path,
+                data_asset_name="DATA_ASSET",
+                reader_options={"header": True, "schema": schema_dict},
+            )
+        ).dataframe
+    )
+    assert test_sparkdf_with_header_param_and_schema.head() == Row(x=1, y=2)
+    assert test_sparkdf_with_header_param_and_schema.schema == schema_dict
 
 
 def test_get_domain_records_with_column_domain(
@@ -692,44 +730,44 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
 
     metrics.update(results)
 
-    desired_metric_1 = MetricConfiguration(
+    desired_aggregate_fn_metric_1 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_2 = MetricConfiguration(
+    desired_aggregate_fn_metric_1.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_2 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_3 = MetricConfiguration(
+    desired_aggregate_fn_metric_2.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_3 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_4 = MetricConfiguration(
+    desired_aggregate_fn_metric_3.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_4 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_aggregate_fn_metric_4.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
-            desired_metric_1,
-            desired_metric_2,
-            desired_metric_3,
-            desired_metric_4,
+            desired_aggregate_fn_metric_1,
+            desired_aggregate_fn_metric_2,
+            desired_aggregate_fn_metric_3,
+            desired_aggregate_fn_metric_4,
         ),
         metrics=metrics,
     )
@@ -739,38 +777,38 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_1,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_1.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_1,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_2,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_2.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_2,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_3,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_3.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_3,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_4,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_4.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_4,
+        "table.columns": table_columns_metric,
+    }
     start = datetime.datetime.now()
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
@@ -1094,6 +1132,76 @@ def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
         print(e)
 
 
+def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
+    spark_session,
+):
+    """
+    Insures that even when "compute_domain_kwargs" has multiple keys, it will be JSON-serialized for "IDDict.to_id()".
+    """
+    engine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {
+                "names": [
+                    "Ada Lovelace",
+                    "Alan Kay",
+                    "Donald Knuth",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                    "John McCarthy",
+                    "Marvin Minsky",
+                    "Ray Ozzie",
+                ]
+            }
+        ),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name="column_values.length.max.aggregate_fn",
+        metric_domain_kwargs={
+            "column": "names",
+            "batch_id": "my_id",
+        },
+        metric_value_kwargs=None,
+    )
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+
+    try:
+        results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
+    except ge_exceptions.MetricProviderError as e:
+        assert False, str(e)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.length.max",
+        metric_domain_kwargs={
+            "batch_id": "my_id",
+        },
+        metric_value_kwargs=None,
+    )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
+
+    try:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(desired_metric,), metrics=results
+        )
+        assert results == {desired_metric.id: 16}
+    except ge_exceptions.MetricProviderError as e:
+        assert False, str(e)
+
+
 # Making sure dataframe property is functional
 def test_dataframe_property_given_loaded_batch(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
@@ -1107,3 +1215,23 @@ def test_dataframe_property_given_loaded_batch(spark_session):
 
     # Ensuring Data not distorted
     assert engine.dataframe == df
+
+
+@pytest.mark.integration
+def test_schema_properly_added(spark_session):
+
+    schema: pyspark.sql.types.StructType = StructType(
+        [
+            StructField("a", IntegerType(), True),
+        ]
+    )
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {"a": [1, 5, 22, 3, 5, 10]},
+        ),
+        batch_id="1234",
+        schema=schema,
+    )
+    df = engine.dataframe
+    assert df.schema == schema

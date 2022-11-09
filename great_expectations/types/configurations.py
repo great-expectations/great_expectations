@@ -1,4 +1,4 @@
-from great_expectations.marshmallow__shade import Schema, fields
+from marshmallow import Schema, fields
 
 
 class ClassConfig:

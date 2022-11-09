@@ -77,6 +77,14 @@
         ]
       },
       "schemas": {
+        "pandas": {
+          "x": "int",
+          "y": "str",
+          "z": "Int64Dtype",
+          "ts": "datetime",
+          "alpha": "object",
+          "numeric": "int"
+        },
         "spark": {
           "x": "IntegerType",
           "y": "StringType",
@@ -161,7 +169,7 @@
           "in": {
             "column": "ts",
             "min_value": {
-              "$PARAMETER": "now() - timedelta(weeks=52*1000)"
+              "$PARAMETER": "now() - timedelta(weeks=52*100)"
             }
           }
         },
@@ -175,7 +183,7 @@
           "in": {
             "column": "ts",
             "max_value": {
-              "$PARAMETER": "now() - timedelta(weeks=52*1000)"
+              "$PARAMETER": "now() - timedelta(weeks=52*100)"
             }
           }
         },

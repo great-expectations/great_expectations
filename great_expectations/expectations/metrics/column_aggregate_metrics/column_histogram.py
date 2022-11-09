@@ -69,12 +69,71 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
 
-        case_conditions = []
-        idx = 0
         if isinstance(bins, np.ndarray):
             bins = bins.tolist()
         else:
             bins = list(bins)
+
+        case_conditions = []
+        if len(bins) == 1 and not (
+            (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_np", negative=True
+                )
+            )
+            or (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_cast", negative=True
+                )
+            )
+            or (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_np", negative=False
+                )
+            )
+            or (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_cast", negative=False
+                )
+            )
+        ):
+            # Single-valued column data are modeled using "impulse" (or "sample") distributions (on open interval).
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (
+                                sa.and_(
+                                    float(bins[0] - np.finfo(float).eps)
+                                    < sa.column(column),
+                                    sa.column(column)
+                                    < float(bins[0] + np.finfo(float).eps),
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
+                ).label("bin_0")
+            )
+            query = (
+                sa.select(case_conditions)
+                .where(
+                    sa.column(column) != None,
+                )
+                .select_from(selectable)
+            )
+
+            # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
+            return convert_to_json_serializable(
+                list(execution_engine.engine.execute(query).fetchone())
+            )
+
+        idx = 0
 
         # If we have an infinite lower bound, don't express that in sql
         if (
@@ -163,10 +222,9 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         )
 
         # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
-        hist = convert_to_json_serializable(
+        return convert_to_json_serializable(
             list(execution_engine.engine.execute(query).fetchone())
         )
-        return hist
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
@@ -187,6 +245,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         bins = list(
             copy.deepcopy(bins)
         )  # take a copy since we are inserting and popping
+
         if bins[0] == -np.inf or bins[0] == -float("inf"):
             added_min = False
             bins[0] = -float("inf")

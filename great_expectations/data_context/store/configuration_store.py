@@ -137,10 +137,8 @@ class ConfigurationStore(Store):
         len_keys: int = report_object["len_keys"]
 
         if pretty_print:
-            if report_object["len_keys"] == 0:
-                print(f"\t{len_keys} keys found")
-            else:
-                print(f"\t{len_keys} keys found:")
+            print(f"\t{len_keys} keys found")
+            if report_object["len_keys"] > 0:
                 for key in report_object["keys"][:10]:
                     print(f"		{str(key)}")
             if len_keys > 10:

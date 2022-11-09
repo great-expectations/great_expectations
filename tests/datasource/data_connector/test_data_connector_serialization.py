@@ -26,7 +26,7 @@ from great_expectations.data_context.types.base import (
         pytest.param(
             DataConnectorConfig(
                 class_name="RuntimeDataConnector",
-                id_="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
+                id="dd8fe6df-254b-4e37-9c0e-2c8205d1e988",
                 batch_identifiers=["default_identifier_name"],
             ),
             {
