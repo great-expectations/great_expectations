@@ -3,7 +3,6 @@ from __future__ import annotations
 import configparser
 import copy
 import datetime
-import errno
 import json
 import logging
 import os
@@ -93,7 +92,6 @@ from great_expectations.data_context.util import (
     build_store_from_config,
     instantiate_class_from_config,
     substitute_all_config_variables,
-    substitute_config_variable,
 )
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
