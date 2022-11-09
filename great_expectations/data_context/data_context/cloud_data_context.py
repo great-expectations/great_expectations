@@ -521,7 +521,7 @@ class CloudDataContext(AbstractDataContext):
         )
 
         if not overwrite_existing:
-            self._validate_suite_unique_constaints_before_save(key)
+            self._validate_suite_unique_constraints_before_save(key)
 
         self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = (
@@ -536,7 +536,7 @@ class CloudDataContext(AbstractDataContext):
         if isinstance(response, GeCloudResourceRef):
             expectation_suite.ge_cloud_id = response.ge_cloud_id
 
-    def _validate_suite_unique_constaints_before_save(
+    def _validate_suite_unique_constraints_before_save(
         self, key: GeCloudIdentifier
     ) -> None:
         ge_cloud_id = key.ge_cloud_id
