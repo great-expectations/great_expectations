@@ -137,7 +137,7 @@ def get_default_expectation_suite_name(
 def tell_user_suite_exists(
     data_context: DataContext,
     expectation_suite_name: str,
-    usage_event: str,
+    usage_event: Union[str, None],
     suppress_usage_message: bool = False,
 ) -> None:
     exit_with_failure_message_and_stats(
@@ -184,7 +184,7 @@ def get_validator(
 def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
     data_context: DataContext,
     expectation_suite_name: str,
-    usage_event: str,
+    usage_event: Union[str, None],
     suppress_usage_message: bool = False,
     create_if_not_exist: bool = True,
 ) -> ExpectationSuite:
@@ -226,7 +226,7 @@ def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
 
 def exit_with_failure_message_and_stats(
     data_context: DataContext,
-    usage_event: str,
+    usage_event: Union[str, None],
     suppress_usage_message: bool = False,
     message: Optional[str] = None,
 ) -> None:
