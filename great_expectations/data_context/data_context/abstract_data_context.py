@@ -43,7 +43,12 @@ from great_expectations.core.batch import (
     IDDict,
     get_batch_request_from_acceptable_arguments,
 )
-from great_expectations.core.config_provider import ConfigurationProvider
+from great_expectations.core.config_provider import (
+    ConfigurationProvider,
+    ConfigurationVariablesConfigurationProvider,
+    EnvironmentConfigurationProvider,
+    RuntimeEnvironmentConfigurationProvider,
+)
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
@@ -213,17 +218,21 @@ class AbstractDataContext(ABC):
 
     def _init_config_provider(self) -> ConfigurationProvider:
         config_provider = ConfigurationProvider()
-        self._register_config_providers(config_provider)
-        return config_provider
+        config_provider.register_provider(EnvironmentConfigurationProvider())
 
-    @abstractmethod
-    def _register_config_providers(
-        self, config_provider: ConfigurationProvider
-    ) -> None:
-        """
-        TODO
-        """
-        raise NotImplementedError
+        config_variables_file_path = self._project_config.config_variables_file_path
+        if config_variables_file_path:
+            config_provider.register_provider(
+                ConfigurationVariablesConfigurationProvider(
+                    config_variables_file_path=config_variables_file_path,
+                    root_directory=self.root_directory,
+                )
+            )
+
+        config_provider.register_provider(
+            RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
+        )
+        return config_provider
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:

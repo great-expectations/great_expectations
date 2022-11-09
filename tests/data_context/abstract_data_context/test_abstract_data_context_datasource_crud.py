@@ -32,10 +32,6 @@ class FakeAbstractDataContext(AbstractDataContext):
         self._usage_statistics_handler = None
         self._substitutions = substitutions or {}
 
-    def _register_config_providers(self, _):
-        """Abstract method. Only a stub is needed."""
-        pass
-
     def _init_variables(self):
         """Using EphemeralDataContextVariables to store in memory."""
         return EphemeralDataContextVariables(config=DataContextConfig())

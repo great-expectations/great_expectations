@@ -315,24 +315,6 @@ class CloudDataContext(AbstractDataContext):
     def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
 
-    def _register_config_providers(
-        self, config_provider: ConfigurationProvider
-    ) -> None:
-        config_provider.register_provider(EnvironmentConfigurationProvider())
-
-        config_variables_file_path = self._project_config.config_variables_file_path
-        if config_variables_file_path:
-            config_provider.register_provider(
-                ConfigurationVariablesConfigurationProvider(
-                    config_variables_file_path=config_variables_file_path,
-                    root_directory=self.root_directory,
-                )
-            )
-
-        config_provider.register_provider(
-            RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
-        )
-
     def _init_variables(self) -> CloudDataContextVariables:
         ge_cloud_base_url: str = self._ge_cloud_config.base_url
         ge_cloud_organization_id: str = self._ge_cloud_config.organization_id  # type: ignore[assignment]
