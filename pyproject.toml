@@ -50,7 +50,6 @@ exclude = [
     'core/expectation_validation_result\.py', # 9
     'core/usage_statistics/anonymizers', # 96
     'core/usage_statistics/usage_statistics\.py', # 19
-    'core/usage_statistics/util\.py', # 2
     'core/util\.py', # 18
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
