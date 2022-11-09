@@ -10,15 +10,15 @@ from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
 )
-from great_expectations.render.renderer import (
-    ExpectationSuitePageRenderer,
-    ValidationResultsPageRenderer,
-)
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedDocumentContent,
     RenderedHeaderContent,
     RenderedSectionContent,
     RenderedTableContent,
+)
+from great_expectations.render.renderer import (
+    ExpectationSuitePageRenderer,
+    ValidationResultsPageRenderer,
 )
 from great_expectations.render.view import DefaultMarkdownPageView
 from great_expectations.validation_operators.types.validation_operator_result import (
