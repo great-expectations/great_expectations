@@ -220,6 +220,9 @@ class AbstractDataContext(ABC):
         return config_provider
 
     def _register_providers(self, config_provider: ConfigurationProvider) -> None:
+        """
+        TODO
+        """
         config_variables_file_path = self._project_config.config_variables_file_path
         if config_variables_file_path:
             config_provider.register_provider(
@@ -626,7 +629,7 @@ class AbstractDataContext(ABC):
         if not config:
             config = self._project_config
 
-        substitutions: dict = self._retrieve_config_values()
+        substitutions: dict = self._determine_substitutions()
 
         return DataContextConfig(
             **substitute_all_config_variables(
@@ -987,7 +990,7 @@ class AbstractDataContext(ABC):
         raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
         raw_config = datasourceConfigSchema.load(raw_config_dict)
 
-        substitutions: dict = self._retrieve_config_values()
+        substitutions: dict = self._determine_substitutions()
         substituted_config = substitute_all_config_variables(
             raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
         )
@@ -1014,7 +1017,7 @@ class AbstractDataContext(ABC):
         Returns:
             Dict of config with substitutions and sanitizations applied.
         """
-        substitutions: dict = self._retrieve_config_values()
+        substitutions: dict = self._determine_substitutions()
         datasource_dict: dict = serializer.serialize(datasource_config)
 
         substituted_config: dict = cast(
@@ -2629,7 +2632,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         # By always recalculating substitutions with each call, we ensure we stay up-to-date
         # with the latest changes to env vars and config vars
-        substitutions: dict = self._retrieve_config_values()
+        substitutions: dict = self._determine_substitutions()
         self._variables.substitutions = substitutions
 
         return self._variables
@@ -2695,7 +2698,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         self._config_variables = self._load_config_variables()
 
-    def _retrieve_config_values(self) -> Dict:
+    def _determine_substitutions(self) -> Dict:
         return self._config_provider.get_values()
 
     def _initialize_usage_statistics(
@@ -2720,7 +2723,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             Dict[str, DatasourceConfig], config.datasources
         )
 
-        substitutions = self._retrieve_config_values()
+        substitutions = self._determine_substitutions()
 
         for datasource_name, datasource_config in datasources.items():
             try:
@@ -2833,7 +2836,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             Datasource Config with substitutions performed.
         """
-        substitutions: dict = self._retrieve_config_values()
+        substitutions: dict = self._determine_substitutions()
 
         substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         raw_config: dict = substitution_serializer.serialize(config)

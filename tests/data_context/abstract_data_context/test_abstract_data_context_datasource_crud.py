@@ -24,21 +24,21 @@ class StubDatasourceStore(DatasourceStore):
 
 
 class FakeAbstractDataContext(AbstractDataContext):
-    def __init__(self, config_values: Optional[dict] = None) -> None:
+    def __init__(self, substitutions: Optional[dict] = None) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
         self._cached_datasources: dict = {}
         self._usage_statistics_handler = None
-        self._config_values = config_values or {}
+        self._substitutions = substitutions or {}
 
     def _init_variables(self):
         """Using EphemeralDataContextVariables to store in memory."""
         return EphemeralDataContextVariables(config=DataContextConfig())
 
-    def _retrieve_config_values(self):
-        """No config values required for these tests."""
-        return self._config_values
+    def _determine_substitutions(self):
+        """No substitutions required for these tests."""
+        return self._substitutions
 
     def save_expectation_suite(self):
         """Abstract method. Only a stub is needed."""
@@ -130,8 +130,8 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
     # Set up fake with desired env var
     variable = "DATA_DIR"
     value_associated_with_variable = "a/b/c"
-    config_values = {variable: value_associated_with_variable}
-    context = FakeAbstractDataContext(config_values=config_values)
+    substitutions = {variable: value_associated_with_variable}
+    context = FakeAbstractDataContext(substitutions=substitutions)
 
     # Ensure that config references the above env var
     data_connector_name = tuple(datasource_config_with_names.data_connectors.keys())[0]
