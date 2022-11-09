@@ -1746,11 +1746,34 @@ def _pandas_map_condition_index(
     result_format = metric_value_kwargs["result_format"]
 
     df = df[boolean_mapped_unexpected_values]
+    # then we are going to do something else here?
+    if "unexpected_index_columns" in metric_value_kwargs["result_format"]:
+        index_column_names = metric_value_kwargs["result_format"].get(
+            "unexpected_index_columns"
+        )
+        # a better way to do this?
+        for index_column_name in index_column_names:
+            if index_column_name not in metrics["table.columns"]:
+                raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                    message=f'Error: The index column: "{index_column_name}" in does not exist.'
+                )
+        unexpected_index_list: Optional[List[dict]] = []
+        indices = list(df.index)
+        for index in indices:
+            temp = dict()
+            for column in index_column_names:
+                temp[column] = df.at[index, column]
+            unexpected_index_list.append(temp)
 
-    if result_format["result_format"] == "COMPLETE":
-        return list(df.index)
+        if result_format["result_format"] == "COMPLETE":
+            return unexpected_index_list
+        return unexpected_index_list[result_format["partial_unexpected_count"]]
 
-    return list(df.index[: result_format["partial_unexpected_count"]])
+    else:
+        if result_format["result_format"] == "COMPLETE":
+            return list(df.index)
+
+        return list(df.index[: result_format["partial_unexpected_count"]])
 
 
 def _pandas_column_map_condition_value_counts(
