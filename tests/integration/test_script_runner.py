@@ -9,6 +9,7 @@ import sys
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
+import pkg_resources
 import pytest
 
 from assets.scripts.build_gallery import execute_shell_command
@@ -1847,7 +1848,9 @@ def _execute_integration_test(
         base_dir = file_relative_path(__file__, "../../")
         os.chdir(base_dir)
         # Ensure GE is installed in our environment
-        execute_shell_command("pip install .")
+        installed_packages = [pkg.key for pkg in pkg_resources.working_set]
+        if "great-expectations" not in installed_packages:
+            execute_shell_command("pip install .")
         os.chdir(tmp_path)
 
         #

@@ -10,14 +10,14 @@ from great_expectations.expectations.registry import (
     _registered_renderers,
     get_renderer_impl,
 )
-from great_expectations.render import LegacyRendererType
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     CollapseContent,
+    LegacyRendererType,
     RenderedMarkdownContent,
     RenderedStringTemplateContent,
     TextContent,
 )
+from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
