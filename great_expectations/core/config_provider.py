@@ -130,15 +130,23 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
 
 
 class CloudConfigurationProvider(AbstractConfigurationProvider):
+    """
+    TODO
+    """
+
     def __init__(self, cloud_config: GeCloudConfig) -> None:
         self._cloud_config = cloud_config
 
     def get_values(self) -> Dict[str, str]:
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            GECloudEnvironmentVariable,
+        )
+
         return cast(
             Dict[str, str],
             {
-                "GE_CLOUD_BASE_URL": self._cloud_config.base_url,
-                "GE_CLOUD_ACCESS_TOKEN": self._cloud_config.access_token,
-                "GE_CLOUD_ORGANIZATION_ID": self._cloud_config.organization_id,
+                GECloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
+                GECloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
+                GECloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,
             },
         )
