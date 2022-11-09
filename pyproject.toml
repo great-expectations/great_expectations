@@ -39,10 +39,8 @@ exclude = [
     'cli/checkpoint\.py',  # 9
     'cli/cli\.py',  # 10
     'cli/datasource\.py',  # 12
-    'cli/docs\.py',  # 1
     'cli/project\.py',  # 5
     'cli/python_subprocess\.py', # 6
-    'cli/store\.py',  # 2
     'cli/suite\.py',  # 24
     'cli/toolkit\.py',  # 27
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
