@@ -205,7 +205,7 @@ class CheckpointResult(SerializableDictDot):
         return self._validation_results_by_data_asset_name
 
     def list_data_assets_validated(
-        self, group_by: str = None
+        self, group_by: Optional[str] = None
     ) -> Union[List[dict], dict]:
         if group_by is None:
             if self._data_assets_validated is None:

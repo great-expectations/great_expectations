@@ -438,7 +438,6 @@ specified (empty "metric_name" value detected)."""
                 metric_name=metric_name,
                 metric_domain_kwargs=kwargs_pair_cursor[0],
                 metric_value_kwargs=kwargs_pair_cursor[1],
-                metric_dependencies=None,
             )
             for kwargs_pair_cursor in kwargs_combinations
         ]
@@ -563,7 +562,6 @@ specified (empty "metric_name" value detected)."""
                     "metric_value_kwargs": metric_value_kwargs[0]
                     if len(metric_value_kwargs) == 1
                     else metric_value_kwargs,
-                    "metric_dependencies": None,
                 },
                 "num_batches": len(batch_ids),
             },

@@ -72,20 +72,18 @@ from great_expectations.expectations.sql_tokens_and_types import (
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
+    CollapseContent,
     LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
-    renderedAtomicValueSchema,
-)
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    CollapseContent,
     RenderedContentBlockContainer,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
     ValueListContent,
+    renderedAtomicValueSchema,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
@@ -964,7 +962,7 @@ class Expectation(metaclass=MetaExpectation):
     def get_runtime_kwargs(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> dict:
         if not configuration:
             configuration = self.configuration
@@ -990,7 +988,7 @@ class Expectation(metaclass=MetaExpectation):
     def get_result_format(
         self,
         configuration: ExpectationConfiguration,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Union[Dict[str, Union[str, int, bool]], str]:
         default_result_format: Optional[Any] = self.default_kwarg_values.get(
             "result_format"
@@ -2317,7 +2315,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
@@ -2537,7 +2535,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
