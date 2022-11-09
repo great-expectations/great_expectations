@@ -3,6 +3,12 @@ from typing import Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.config_provider import (
+    ConfigurationProvider,
+    ConfigurationVariablesConfigurationProvider,
+    EnvironmentConfigurationProvider,
+    RuntimeEnvironmentConfigurationProvider,
+)
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -142,6 +148,24 @@ class FileDataContext(AbstractDataContext):
 
         """
         return self._context_root_directory
+
+    def _register_config_providers(
+        self, config_provider: ConfigurationProvider
+    ) -> None:
+        config_provider.register_provider(EnvironmentConfigurationProvider())
+
+        config_variables_file_path = self._project_config.config_variables_file_path
+        if config_variables_file_path:
+            config_provider.register_provider(
+                ConfigurationVariablesConfigurationProvider(
+                    config_variables_file_path=config_variables_file_path,
+                    root_directory=self.root_directory,
+                )
+            )
+
+        config_provider.register_provider(
+            RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
+        )
 
     def _init_variables(self) -> FileDataContextVariables:
         variables = FileDataContextVariables(

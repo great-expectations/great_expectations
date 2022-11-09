@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.util import substitute_config_variable
 
 yaml = YAMLHandler()
 

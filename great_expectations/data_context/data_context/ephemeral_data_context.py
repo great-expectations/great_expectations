@@ -3,6 +3,11 @@ from typing import Mapping, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.config_provider import (
+    ConfigurationProvider,
+    EnvironmentConfigurationProvider,
+    RuntimeEnvironmentConfigurationProvider,
+)
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -48,6 +53,14 @@ class EphemeralDataContext(AbstractDataContext):
         self._config_variables: dict = self._load_config_variables()
         self._variables: EphemeralDataContextVariables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
+
+    def _register_config_providers(
+        self, config_provider: ConfigurationProvider
+    ) -> None:
+        config_provider.register_provider(EnvironmentConfigurationProvider())
+        config_provider.register_provider(
+            RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
+        )
 
     def _init_variables(self) -> EphemeralDataContextVariables:
         variables = EphemeralDataContextVariables(

@@ -26,8 +26,8 @@ from typing import (
 )
 
 from great_expectations.core.config_provider import (
+    AbstractConfigurationProvider,
     ConfigurationProvider,
-    ConfigurationVariablesConfigurationProvider,
     EnvironmentConfigurationProvider,
     RuntimeEnvironmentConfigurationProvider,
 )
@@ -171,9 +171,9 @@ class AbstractDataContext(ABC):
         """
         if runtime_environment is None:
             runtime_environment = {}
-        self._config_provider = self._init_config_provider(
-            runtime_environment=runtime_environment
-        )
+        self.runtime_environment = runtime_environment
+
+        self._config_provider = self._init_config_provider()
 
         # These attributes that are set downstream.
         self._variables: Optional[DataContextVariables] = None
@@ -217,22 +217,16 @@ class AbstractDataContext(ABC):
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
 
-    def _init_config_provider(self, runtime_environment: dict) -> ConfigurationProvider:
+    def _init_config_provider(self) -> ConfigurationProvider:
         config_provider = ConfigurationProvider()
-        config_provider.register_provider(
-            RuntimeEnvironmentConfigurationProvider(
-                runtime_environment=runtime_environment
-            )
-        )
-        config_provider.register_provider(EnvironmentConfigurationProvider())
-        config_variables_file_path = self.variables.config_variables_file_path
-        if config_variables_file_path:
-            config_provider.register_provider(
-                ConfigurationVariablesConfigurationProvider(
-                    config_variables_file_path, self.root_directory
-                )
-            )
+        self._register_config_providers(config_provider)
         return config_provider
+
+    @abstractmethod
+    def _register_config_providers(
+        self, config_provider: ConfigurationProvider
+    ) -> None:
+        raise NotImplementedError
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
