@@ -268,7 +268,7 @@ def delete_checkpoint(
     context.delete_checkpoint(name=checkpoint_name)
 
 
-def run_checkpoint(
+def run_checkpoint(  # type: ignore[return] # sys.exit if no result
     context: DataContext,
     checkpoint_name: str,
     usage_event: str,
@@ -316,7 +316,7 @@ def validate_checkpoint(
         )
 
 
-def load_checkpoint(
+def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
     context: DataContext,
     checkpoint_name: str,
     usage_event: str,
