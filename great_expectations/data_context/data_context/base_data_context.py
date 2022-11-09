@@ -270,11 +270,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
 
         # NOTE: <DataContextRefactor> This will ensure that parameters set in _data_context are persisted to self.
-        # It is rather clunkly and we should explore other ways of ensuring that BaseDataContext has all of the
+        # It is rather clunky and we should explore other ways of ensuring that BaseDataContext has all of the
         # necessary properties / overrides
         self._synchronize_self_with_underlying_data_context()
 
-        self._config_provider = self._data_context._config_provider
+        self._config_provider = self._data_context._config_provider  # type: ignore
         self._variables = self._data_context.variables  # type: ignore[assignment,union-attr]
 
         # Init validation operators

@@ -1,10 +1,12 @@
 """
 TODO
 """
+from __future__ import annotations
+
 import errno
 import os
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict, Optional, Type
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import substitute_config_variable
@@ -27,7 +29,9 @@ class ConfigurationProvider(AbstractConfigurationProvider):
     """
 
     def __init__(self) -> None:
-        self._providers = {}
+        self._providers: Dict[
+            Type[AbstractConfigurationProvider], AbstractConfigurationProvider
+        ] = {}
 
     def register_provider(self, provider: AbstractConfigurationProvider):
         type_ = type(provider)
