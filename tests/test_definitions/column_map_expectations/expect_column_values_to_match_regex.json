@@ -32,6 +32,23 @@
       },
       "suppress_test_for": ["sqlite", "mssql"]
     },
+      {
+      "title": "negative_test_insufficient_mostly_and_one_non_matching_value_summary_output",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "result_format": "SUMMARY",
+      "in": {
+        "column": "a",
+        "regex": "^a",
+        "mostly": 0.9
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["pandas"]
+    },
     {
       "title": "positive_test_exact_mostly_w_one_non_matching_value",
       "include_in_gallery": true,
