@@ -221,7 +221,13 @@ class AbstractDataContext(ABC):
 
     def _register_providers(self, config_provider: ConfigurationProvider) -> None:
         """
-        TODO
+        Registers any relevant ConfigurationProvider instances to self._config_provider.
+
+        Note that order matters here - if there is a namespace collision, later providers will overwrite
+        the values derived from previous ones. The order of precedence is as follows:
+            - Config variables
+            - Environment variables
+            - Runtime environment
         """
         config_variables_file_path = self._project_config.config_variables_file_path
         if config_variables_file_path:

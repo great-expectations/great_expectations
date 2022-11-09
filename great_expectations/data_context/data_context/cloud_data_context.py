@@ -98,7 +98,10 @@ class CloudDataContext(AbstractDataContext):
 
     def _register_providers(self, config_provider: ConfigurationProvider) -> None:
         """
-        TODO
+        To ensure that Cloud credentials are accessible downstream, we want to ensure that
+        we register a CloudConfigurationProvider.
+
+        Note that it is registered last as it takes the highest precedence.
         """
         super()._register_providers(config_provider)
         config_provider.register_provider(

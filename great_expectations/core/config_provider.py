@@ -1,6 +1,3 @@
-"""
-TODO
-"""
 from __future__ import annotations
 
 import errno
@@ -23,51 +20,14 @@ class AbstractConfigurationProvider(ABC):
     @abstractmethod
     def get_values(self) -> Dict[str, str]:
         """
-        TODO
+        Retrieve any configuration variables relevant to the provider's environment.
         """
         pass
 
 
-class ConfigurationProvider(AbstractConfigurationProvider):
-    """
-    TODO
-    """
-
-    def __init__(self) -> None:
-        self._providers: OrderedDict[
-            Type[AbstractConfigurationProvider], AbstractConfigurationProvider
-        ] = OrderedDict()
-
-    def register_provider(self, provider: AbstractConfigurationProvider):
-        """
-        TODO
-        """
-        type_ = type(provider)
-        if type_ in self._providers:
-            raise ValueError(f"Provider of type {type_} has already been registered!")
-        self._providers[type_] = provider
-
-    def get_provider(
-        self, type_: Type[AbstractConfigurationProvider]
-    ) -> Optional[AbstractConfigurationProvider]:
-        """
-        TODO
-        """
-        return self._providers.get(type_)
-
-    def get_values(self) -> Dict[str, str]:
-        """
-        TODO
-        """
-        values: Dict[str, str] = {}
-        for provider in self._providers.values():
-            values.update(provider.get_values())
-        return values
-
-
 class RuntimeEnvironmentConfigurationProvider(AbstractConfigurationProvider):
     """
-    TODO
+    Responsible for the management of the runtime_environment dictionary provided at runtime.
     """
 
     def __init__(self, runtime_environment: Dict[str, str]) -> None:
@@ -79,7 +39,7 @@ class RuntimeEnvironmentConfigurationProvider(AbstractConfigurationProvider):
 
 class EnvironmentConfigurationProvider(AbstractConfigurationProvider):
     """
-    TODO
+    Responsible for the management of environment variables.
     """
 
     def get_values(self) -> Dict[str, str]:
@@ -88,7 +48,9 @@ class EnvironmentConfigurationProvider(AbstractConfigurationProvider):
 
 class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider):
     """
-    TODO
+    Responsible for the management of user-defined configuration variables.
+
+    These can be found in the user's /uncommitted/config_variables.yml file.
     """
 
     def __init__(
@@ -126,7 +88,10 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
 
 class CloudConfigurationProvider(AbstractConfigurationProvider):
     """
-    TODO
+    Responsible for the management of a user's GX Cloud credentials.
+
+    See `GeCloudConfig` for more information. Note that this is only registered on the primary
+    config provider when in a Cloud-backend environment.
     """
 
     def __init__(self, cloud_config: GeCloudConfig) -> None:
@@ -145,3 +110,60 @@ class CloudConfigurationProvider(AbstractConfigurationProvider):
                 GECloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,
             },
         )
+
+
+class ConfigurationProvider(AbstractConfigurationProvider):
+    """
+    Wrapper class around the other environment-specific configuraiton provider classes.
+
+    Based on relevance, specific providers are registered to this object and are invoked
+    using the API defined by the AbstractConfigurationProvider.
+
+    In short, this class' purpose is to aggregate all configuration variables that may
+    be present for a given user environment (config variables, env vars, runtime environment, etc.)
+    """
+
+    def __init__(self) -> None:
+        self._providers: OrderedDict[
+            Type[AbstractConfigurationProvider], AbstractConfigurationProvider
+        ] = OrderedDict()
+
+    def register_provider(self, provider: AbstractConfigurationProvider) -> None:
+        """
+        Saves a configuration provider to the object's state for downstream usage.
+        See `get_values()` for more information.
+
+        Args:
+            provider: An instance of a provider to register.
+        """
+        type_ = type(provider)
+        if type_ in self._providers:
+            raise ValueError(f"Provider of type {type_} has already been registered!")
+        self._providers[type_] = provider
+
+    def get_provider(
+        self, type_: Type[AbstractConfigurationProvider]
+    ) -> Optional[AbstractConfigurationProvider]:
+        """
+        Retrieves a registered configuration provider (if available).
+
+        Args:
+            type_: The class of the configuration provider to retrieve.
+
+        Returns:
+            A registered provider if available.
+            If not, None is returned.
+        """
+        return self._providers.get(type_)
+
+    def get_values(self) -> Dict[str, str]:
+        """
+        Iterates through all registered providers to aggregate a list of configuration values.
+
+        Values are generated based on the order of registration; if there is a conflict,
+        subsequent providers will overwrite existing values.
+        """
+        values: Dict[str, str] = {}
+        for provider in self._providers.values():
+            values.update(provider.get_values())
+        return values
