@@ -362,14 +362,12 @@ def docker(
     help={
         "clean": "Clean out existing documentation first. Defaults to True.",
         "api_docs": "Build api docs stubs. Defaults to False.",
-        "start_server": "Start the server locally. Defaults to True."
     }
 )
 def docs(
     ctx,
     clean=True,
     api_docs=False,
-    start_server=True,
 ):
     """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
