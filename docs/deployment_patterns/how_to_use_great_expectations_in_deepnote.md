@@ -3,6 +3,7 @@ title: How to use Great Expectations in Deepnote
 ---
 
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 _This piece of documentation was authored by [Allan Campopiano](https://www.linkedin.com/in/allan-campopiano-703394120)._
 
@@ -103,7 +104,7 @@ We're defining three Expectations on our DataFrame:
 2. The `quantities` column cannot contain null values
 3. The `dates` column must have dates between January 1st and January 8th
 
-These Expectations together form an Expectation Suite that will be validated against our data.
+These Expectations together form an <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> that will be validated against our data.
 
 :::tip
 Replace the sample Expectations below with those that relate to your data.
@@ -129,7 +130,7 @@ df.expect_column_values_to_be_between(
 ### 5. Set project configurations
 
 Before we can validate our expectations against our data, we need to tell Great Expectations more about our project's configuration. 
-Great Expectations keeps track of many configurations with a [Data Context](../reference/data_context.md). 
+Great Expectations keeps track of many configurations with a <TechnicalTag tag="data_context" text="Data Context"/>. 
 These configurations are used to manage aspects of your project behind the scenes.
 
 :::info
@@ -170,15 +171,15 @@ context.save_expectation_suite(
 
 ### 6. Setting up a Batch and Checkpoint
 
-In order to populate the documentation ([Data Docs](../reference/data_docs.md)) for our tests, 
-we need to set up at least one [Batch](../reference/datasources.md#batches) and a [Checkpoint](../reference/checkpoints_and_actions.md). 
+In order to populate the documentation (<TechnicalTag tag="data_docs" text="Data Docs"/>) for our tests, 
+we need to set up at least one <TechnicalTag tag="batch" text="Batch"/> and a <TechnicalTag tag="checkpoint" text="Checkpoint"/>. 
 
 A Batch is a pairing of data and metadata to be validated. A Checkpoint is a bundle of at least:
 - One Batch (the data to be validated)
 - One Expectation Suite (our Expectations for that data)
-- One [Action](../reference/checkpoints_and_actions.md#validation-actions) (saving our validation results, rebuilding Data Docs, sending a Slack notification, etc.)
+- One <TechnicalTag tag="action" text="Action"/> (saving our validation results, rebuilding Data Docs, sending a Slack notification, etc.)
 
-In the cell below, one Batch is constructed from our DataFrame with a [RuntimeBatchRequest](../reference/datasources.md#runtimedataconnector-and-runtimebatchrequest). 
+In the cell below, one Batch is constructed from our DataFrame with a <TechnicalTag tag="batch_request" text="RuntimeBatchRequest"/>. 
 
 We then create a Checkpoint, and pass in our `batch_request`. 
 
@@ -221,7 +222,7 @@ context.build_data_docs();
 #!python -m http.server 8080 --directory great_expectations/uncommitted/data_docs/local_site
 ```
 
-When served, the Data Docs site provides the details of each [Validation](../reference/validation.md) we've run and Expectation Suite we've created.
+When served, the Data Docs site provides the details of each <TechnicalTag tag="validation" text="Validation"/> we've run and Expectation Suite we've created.
 
 For example, the following image shows a run where three Expectations were validated against our DataFrame and two of them failed.
 

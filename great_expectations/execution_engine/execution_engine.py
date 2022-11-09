@@ -336,7 +336,7 @@ class ExecutionEngine(ABC):
         metric_provider_kwargs: dict
         metric_to_resolve: MetricConfiguration
         metric_dependencies: dict
-        k: Tuple[str, str, str]
+        k: str
         v: MetricConfiguration
         for metric_to_resolve in metrics_to_resolve:
             metric_dependencies = {}

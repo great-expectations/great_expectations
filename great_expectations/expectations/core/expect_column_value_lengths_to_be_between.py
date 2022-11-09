@@ -4,14 +4,14 @@ from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.render import LegacyRendererType
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
+    LegacyRendererType,
     RenderedBulletListContent,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
@@ -377,10 +377,10 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration: ExpectationConfiguration = None,
-        result: ExpectationValidationResult = None,
-        language: str = None,
-        runtime_configuration: dict = None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        language: Optional[str] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> List[
         Union[

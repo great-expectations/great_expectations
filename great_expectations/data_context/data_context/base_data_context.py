@@ -4,14 +4,13 @@ import datetime
 import logging
 import os
 from collections import OrderedDict
-from typing import Any, Callable, List, Mapping, Optional, Union
+from typing import Any, List, Mapping, Optional, Union
 
 from marshmallow import ValidationError
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
@@ -449,7 +448,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             yaml.dump(config_variables, config_variables_file)
 
     def delete_datasource(  # type: ignore[override]
-        self, datasource_name: str, save_changes: bool = False
+        self, datasource_name: str, save_changes: Optional[bool] = None
     ) -> None:
         """Delete a data source
         Args:
@@ -540,99 +539,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 **kwargs,
             )
 
-    def get_batch_list(
-        self,
-        datasource_name: Optional[str] = None,
-        data_connector_name: Optional[str] = None,
-        data_asset_name: Optional[str] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        batch_data: Optional[Any] = None,
-        data_connector_query: Optional[dict] = None,
-        batch_identifiers: Optional[dict] = None,
-        limit: Optional[int] = None,
-        index: Optional[Union[int, list, tuple, slice, str]] = None,
-        custom_filter_function: Optional[Callable] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        query: Optional[str] = None,
-        path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        **kwargs,
-    ) -> List[Batch]:
-        """Get the list of zero or more batches, based on a variety of flexible input types.
-        This method applies only to the new (V3) Datasource schema.
-
-        Args:
-            batch_request
-
-            datasource_name
-            data_connector_name
-            data_asset_name
-
-            batch_request
-            batch_data
-            query
-            path
-            runtime_parameters
-            data_connector_query
-            batch_identifiers
-            batch_filter_parameters
-
-            limit
-            index
-            custom_filter_function
-
-            sampling_method
-            sampling_kwargs
-
-            splitter_method
-            splitter_kwargs
-
-            batch_spec_passthrough
-
-            **kwargs
-
-        Returns:
-            (Batch) The requested batch
-
-        `get_batch` is the main user-facing API for getting batches.
-        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
-        Instead, this method is intended to help the user pick the right parameters
-
-        This method attempts to return any number of batches, including an empty list.
-        """
-        return super().get_batch_list(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
-            batch_data=batch_data,
-            data_connector_query=data_connector_query,
-            batch_identifiers=batch_identifiers,
-            limit=limit,
-            index=index,
-            custom_filter_function=custom_filter_function,
-            sampling_method=sampling_method,
-            sampling_kwargs=sampling_kwargs,
-            splitter_method=splitter_method,
-            splitter_kwargs=splitter_kwargs,
-            runtime_parameters=runtime_parameters,
-            query=query,
-            path=path,
-            batch_filter_parameters=batch_filter_parameters,
-            batch_spec_passthrough=batch_spec_passthrough,
-            **kwargs,
-        )
-
     def add_datasource(
         self,
         name: str,
         initialize: bool = True,
-        save_changes: bool = False,
+        save_changes: Optional[bool] = None,
         **kwargs: dict,
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """
@@ -645,7 +556,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             name (str): Name of Datasource
             initialize (bool): Should GE add and initialize the Datasource? If true then current
                 method will return initialized Datasource
-            save_changes (bool): should GE save the Datasource config?
+            save_changes (Optional[bool]): should GE save the Datasource config?
             **kwargs Optional[dict]: Additional kwargs that define Datasource initialization kwargs
 
         Returns:
@@ -1213,8 +1124,8 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
         config: DatasourceConfig,
-        initialize: bool = True,
-        save_changes: bool = False,
+        initialize: bool,
+        save_changes: bool,
     ) -> Optional[Datasource]:
         """Instantiate datasource and optionally persist datasource config to store and/or initialize datasource for use.
 

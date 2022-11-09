@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 
 def column_function_partial(
     engine: Type[ExecutionEngine],
-    partial_fn_type: str = None,
+    partial_fn_type: Optional[str] = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -510,7 +510,7 @@ def column_condition_partial(
 
 
 def column_pair_function_partial(
-    engine: Type[ExecutionEngine], partial_fn_type: str = None, **kwargs
+    engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
@@ -946,7 +946,7 @@ def column_pair_condition_partial(
 
 
 def multicolumn_function_partial(
-    engine: Type[ExecutionEngine], partial_fn_type: str = None, **kwargs
+    engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
@@ -3260,19 +3260,16 @@ class ColumnMapMetricProvider(MapMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies
 
@@ -3324,19 +3321,16 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies
 
@@ -3386,18 +3380,15 @@ class MulticolumnMapMetricProvider(MapMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies

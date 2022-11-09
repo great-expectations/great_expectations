@@ -180,7 +180,6 @@ module.exports = {
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
-            { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' }
           ]
         },
@@ -188,9 +187,9 @@ module.exports = {
           type: 'category',
           label: 'Profilers and Data Assistants',
           items: [
+            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
             'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
-            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant'
+            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file'
           ]
         },
         {
@@ -217,16 +216,13 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
             'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
-            // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
             {
               type: 'category',
               label: 'Adding Features to Custom Expectations',
               items: [
                 'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                // 'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
-                // 'guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
               ]
@@ -274,7 +270,7 @@ module.exports = {
           label: 'Advanced',
           items: [
             'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
-            'guides/validation/advanced/how_to_implement_custom_notifications',
+            'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
             'guides/validation/advanced/how_to_validate_data_without_a_checkpoint',
             'guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint'
           ]
@@ -370,7 +366,6 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
             { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/data_discovery' },
             { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         },
