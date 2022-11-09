@@ -18,7 +18,7 @@ def store(ctx: click.Context) -> None:
         end_event_name,
     ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
         noun=cli_event_noun,
-        verb=ctx.invoked_subcommand,  # type: ignore[arg-type] # could be None
+        verb=ctx.invoked_subcommand,
     )
     send_usage_message(
         data_context=ctx.obj.data_context,
