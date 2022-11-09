@@ -40,7 +40,7 @@ class FileAsset(DataAsset):
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 
-class MyOtherAsset(DataAsset):
+class OtherAsset(DataAsset):
     type: Literal["other"] = "other"
 
     food: Literal["pizza", "bad pizza"]
@@ -53,7 +53,7 @@ class PandasDatasource(Datasource):
     execution_engine: ClassVar = PandasExecutionEngine()
     asset_types: ClassVar[List[Type[DataAsset]]] = [
         FileAsset,
-        MyOtherAsset,
+        OtherAsset,
     ]
     engine: Literal["pandas"] = "pandas"
     name: str
@@ -66,7 +66,7 @@ class PandasDatasource(Datasource):
         """TODO"""
         pass
 
-    def add_my_other_asset(self, asset_name: str) -> MyOtherAsset:
+    def add_my_other_asset(self, asset_name: str) -> OtherAsset:
         """Create `MyOtherAsset` add it to `self.assets` and return it."""
         print(f"Adding {MyOtherAsset.__name__} - {asset_name}")
         asset = MyOtherAsset(name=asset_name)
