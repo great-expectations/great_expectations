@@ -3,17 +3,20 @@ from __future__ import annotations
 import dataclasses
 import logging
 from pprint import pformat as pf
-from typing import Any, Dict, List, Mapping, Optional, Set, Type
+from typing import Any, Dict, List, Mapping, Optional, Set, Type, TYPE_CHECKING
 
 import pydantic
 from typing_extensions import ClassVar, TypeAlias
 
-from great_expectations.core.batch import BatchDataType
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.zep.metadatasource import MetaDatasource
 from great_expectations.zep.sources import _SourceFactories
 
 LOGGER = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDataType
+    from great_expectations.execution_engine import ExecutionEngine
+
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants returned. The keys represent dimensions one can slice the data along

@@ -1451,10 +1451,14 @@ class AbstractDataContext(ABC):
         )
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        batch_definition: BatchDefinition = batch_list[-1].batch_definition
-        execution_engine: ExecutionEngine = self.datasources[  # type: ignore[union-attr]
-            batch_definition.datasource_name
-        ].execution_engine
+        execution_engine: ExecutionEngine
+        if hasattr(batch_list[-1], "execution_engine"):
+            # ZEP batches are execution engine aware.
+            execution_engine = batch_list[-1].execution_engine
+        else:
+            execution_engine = self.datasources[  # type: ignore[union-attr]
+                batch_list[-1].batch_definition.datasource_name
+            ].execution_engine
         validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,

@@ -4,7 +4,7 @@ import dataclasses
 import itertools
 from datetime import datetime
 from pprint import pformat as pf
-from typing import Dict, Iterable, List, Optional, Type, cast
+from typing import Dict, Iterable, List, Optional, Type, TYPE_CHECKING, cast
 
 import dateutil.tz
 from pydantic import Field
@@ -12,7 +12,6 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.zep.interfaces import (
     Batch,
     BatchRequest,
@@ -20,6 +19,29 @@ from great_expectations.zep.interfaces import (
     DataAsset,
     Datasource,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+
+# _EXECUTION_ENGINE allows us to inject a mock execution engine for testing.
+# It also allows us to delay importing SqlAlchemyExecutionEngine until we use it. This is
+# useful to avoid circular dependencies which happens because we want to load this
+# Datasource when someone imports zep. In particular, great_expectations/core/batch.py imports
+# zep.interfaces so it can do runtime checking of the BatchRequest type. That would be fine
+# except this forces this datasource to get loaded, which imports ExecutionEngine which imports
+# batch.py.
+_EXECUTION_ENGINE: Optional[Type[SqlAlchemyExecutionEngine]] = None
+
+
+def get_execution_engine() -> Optional[Type[SqlAlchemyExecutionEngine]]:
+    return _EXECUTION_ENGINE
+
+
+def set_execution_engine(execution_engine: Optional[Type[SqlAlchemyExecutionEngine]]) -> Optional[Type[SqlAlchemyExecutionEngine]]:
+    global _EXECUTION_ENGINE
+    _EXECUTION_ENGINE = execution_engine
+    return _EXECUTION_ENGINE
 
 
 class PostgresDatasourceError(Exception):

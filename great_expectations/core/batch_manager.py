@@ -4,16 +4,18 @@ import logging
 from collections import OrderedDict
 from typing import TYPE_CHECKING, Dict, List, Optional
 
+from great_expectations.zep.interfaces import Batch as ZepBatch
 from great_expectations.core.batch import (
     Batch,
     BatchData,
     BatchDefinition,
     BatchMarkers,
 )
-from great_expectations.core.id_dict import BatchSpec
+
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.core.id_dict import BatchSpec
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -151,7 +153,7 @@ class BatchManager:
         for batch in batch_list:
             try:
                 assert isinstance(
-                    batch, Batch
+                    batch, (Batch, ZepBatch)
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
                 logger.error(str(e))

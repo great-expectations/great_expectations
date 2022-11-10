@@ -19,12 +19,6 @@ from typing import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchData,
-    BatchDataType,
-    BatchMarkers,
-    BatchSpec,
-)
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
@@ -42,6 +36,12 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     from great_expectations.expectations.metrics import MetricProvider
+    from great_expectations.core.batch import (
+        BatchData,
+        BatchDataType,
+        BatchMarkers,
+        BatchSpec,
+    )
 
 logger = logging.getLogger(__name__)
 
