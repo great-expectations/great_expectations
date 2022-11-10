@@ -10,13 +10,20 @@ the snippets that are specified for use in documentation are maintained.  These 
 
 --documentation--
     https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource
+
+To run this code as a local test, use the following console command:
+```
+pytest -v --docs-tests -m integration -k "how_to_configure_a_spark_datasource" tests/integration/test_script_runner.py
+```
 """
 
 # The following imports are used as part of verifying that all example snippets are consistent.
 # Users may disregard them.
 
-from datasource_configuration_test_utilities import is_subset
-from full_datasource_configurations import (
+from tests.integration.docusaurus.connecting_to_your_data.datasource_configuration.datasource_configuration_test_utilities import (
+    is_subset,
+)
+from tests.integration.docusaurus.connecting_to_your_data.datasource_configuration.full_datasource_configurations import (
     get_full_config_spark_configured_datasource_multi_batch,
     get_full_config_spark_configured_datasource_single_batch,
     get_full_config_spark_inferred_datasource_multi_batch,
@@ -158,7 +165,7 @@ def section_7_configure_your_individual_data_connectors__inferred():
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
                 "class_name": "InferredAssetFilesystemDataConnector",
-                "base_directory": "./data",
+                "base_directory": "../data",
                 "default_regex": {},
                 "batch_spec_passthrough": {},
             }
@@ -180,7 +187,7 @@ def section_7_configure_your_individual_data_connectors__inferred():
                 "class_name": "InferredAssetFilesystemDataConnector",
                 # </snippet>
                 # <snippet name="inferred data connector define base_directory">
-                "base_directory": "./data",
+                "base_directory": "../data",
                 # </snippet>
                 "default_regex": {},
                 "batch_spec_passthrough": {},
@@ -206,7 +213,7 @@ def section_7_configure_your_individual_data_connectors__inferred():
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
                 "class_name": "InferredAssetFilesystemDataConnector",
-                "base_directory": "./data",
+                "base_directory": "../data",
                 # <snippet name="define glob_directive">
                 "glob_directive": "*/*",
                 # </snippet>
@@ -228,7 +235,7 @@ def section_7_configure_your_individual_data_connectors__inferred():
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
                 "class_name": "InferredAssetFilesystemDataConnector",
-                "base_directory": "./data",
+                "base_directory": "../data",
                 "glob_directive": "*/*",
                 "default_regex": {},
                 "batch_spec_passthrough": {},
@@ -274,7 +281,7 @@ def section_7_configure_your_individual_data_connectors__configured():
         "data_connectors": {
             "name_of_my_configured_data_connector": {
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "base_directory": "./data",
+                "base_directory": "../data",
                 "assets": {},
                 "batch_spec_passthrough": {},
             }
@@ -296,7 +303,7 @@ def section_7_configure_your_individual_data_connectors__configured():
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
                 # </snippet>
                 # <snippet name="configured data connector define base_directory">
-                "base_directory": "./data",
+                "base_directory": "../data",
                 # </snippet>
                 "assets": {},
                 "batch_spec_passthrough": {},
@@ -469,10 +476,323 @@ def section_8_configure_the_values_for_batch_spec_passthrough__universal():
     )
 
 
+def section_8_configure_the_values_for_batch_spec_passthrough__inferred():
+    # <snippet name="inferred spark datasource_config post batch_spec_passthrough definition"
+    datasource_config: dict = {
+        "name": "my_datasource_name",  # Preferably name it something relevant
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "base_directory": "../data",
+                "default_regex": {},
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
+            }
+        },
+    }
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_single_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_multi_batch()
+    )
+
+
+def section_8_configure_the_values_for_batch_spec_passthrough__configured():
+    # <snippet name="configured spark datasource_config post batch_spec_passthrough definition"
+    datasource_config: dict = {
+        "name": "my_datasource_name",  # Preferably name it something relevant
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_configured_data_connector": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "base_directory": "../data",
+                "assets": {},
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
+            }
+        },
+    }
+    # </snippet>
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_single_batch()
+    )
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_multi_batch()
+    )
+
+
+def section_8_configure_the_values_for_batch_spec_passthrough__runtime():
+    # <snippet name="runtime spark datasource_config post batch_spec_passthrough definition"
+    datasource_config: dict = {
+        "name": "my_datasource_name",  # Preferably name it something relevant
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_runtime_data_connector": {
+                "class_name": "RuntimeDataConnector",
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
+                "batch_identifiers": [],
+            }
+        },
+    }
+    # </snippet>
+    is_subset(datasource_config, get_full_config_spark_runtime_datasource())
+
+
+def section_9_configure_your_data_connectors_data_assets__inferred__single_batch():
+    single_line_snippets: dict = {
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "default_regex": {
+                    # <snippet name="inferred spark single batch pattern">
+                    "pattern": "(.*)\\.csv",
+                    # </snippet>
+                    # <snippet name="inferred spark single batch group_names">
+                    "group_names": ["data_asset_name"]
+                    # </snippet>
+                },
+            },
+        },
+    }
+    is_subset(
+        single_line_snippets, get_full_config_spark_inferred_datasource_single_batch()
+    )
+
+    data_connector_snippet: dict = {
+        "data_connectors": {
+            # <snippet name="inferred spark single batch data connector config">
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "base_directory": "../data",
+                "default_regex": {
+                    "pattern": "(.*)\\.csv",
+                    "group_names": ["data_asset_name"],
+                },
+            },
+            # </snippet>
+        },
+    }
+    is_subset(
+        data_connector_snippet, get_full_config_spark_inferred_datasource_single_batch()
+    )
+
+    # <snippet name="full datasource_config for inferred spark single batch datasource">
+    datasource_config: dict = {
+        "name": "my_datasource_name",  # Preferably name it something relevant
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "base_directory": "../data",
+                "default_regex": {
+                    "pattern": "(.*)\\.csv",
+                    "group_names": ["data_asset_name"],
+                },
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
+            }
+        },
+    }
+    # </snippet>
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_single_batch()
+    )
+
+
+def section_9_configure_your_data_connectors_data_assets__inferred__multi_batch():
+    single_line_snippets: dict = {
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "default_regex": {
+                    # <snippet name="inferred spark multi batch pattern">
+                    "pattern": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv",
+                    # </snippet>
+                    # <snippet name="inferred spark multi batch group_names">
+                    "group_names": ["data_asset_name", "month"]
+                    # </snippet>
+                },
+            },
+        },
+    }
+    is_subset(
+        single_line_snippets, get_full_config_spark_inferred_datasource_multi_batch()
+    )
+
+    data_connector_snippet: dict = {
+        "data_connectors": {
+            # <snippet name="inferred spark multi batch data connector config">
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "base_directory": "../data",
+                "default_regex": {
+                    "pattern": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv",
+                    "group_names": ["data_asset_name", "month"],
+                },
+            },
+            # </snippet>
+        },
+    }
+    is_subset(
+        data_connector_snippet, get_full_config_spark_inferred_datasource_multi_batch()
+    )
+
+    # <snippet name="full datasource_config for inferred spark multi batch datasource">
+    datasource_config: dict = {
+        "name": "my_datasource_name",  # Preferably name it something relevant
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "name_of_my_inferred_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "base_directory": "../data",
+                "default_regex": {
+                    "pattern": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv",
+                    "group_names": ["data_asset_name", "month"],
+                },
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
+            }
+        },
+    }
+    # </snippet>
+    is_subset(
+        datasource_config, get_full_config_spark_inferred_datasource_multi_batch()
+    )
+
+
+def section_9_configure_your_data_connectors_data_assets__configured__single_batch():
+    pass
+
+
+def section_9_configure_your_data_connectors_data_assets__configured__multi_batch():
+    datasource_config: dict = {
+        "data_connectors": {
+            "name_of_my_configured_data_connector": {
+                # <snippet name="empty asset for configured spark multi batch datasource">
+                "yellow_tripdata_2020": {}
+                # </snippet>
+            }
+        }
+    }
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_multi_batch()
+    )
+
+    # <snippet name="full datasource_config for inferred spark multi batch datasource">
+    datasource_config: dict = {
+        "name": "my_datasource_name",  # Preferably name it something relevant
+        "class_name": "Datasource",
+        "module_name": "great_expectations.datasource",
+        "execution_engine": {
+            "class_name": "SparkDFExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            # <snippet name="configured spark multi batch data connector config">
+            "name_of_my_configured_data_connector": {
+                "class_name": "ConfiguredAssetFilesystemDataConnector",
+                "base_directory": "../data",
+                "assets": {
+                    # <snippet name="configured spark multi batch asset">
+                    "yellow_tripdata_2020": {
+                        # <snippet name="configured spark multi batch pattern">
+                        "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
+                        # </snippet>
+                        # <snippet name="configured spark multi batch group_names">
+                        "group_names": ["month"],
+                        # </snippet>
+                    },
+                    # </snippet>
+                },
+                "batch_spec_passthrough": {
+                    "reader_method": "csv",
+                    "reader_options": {
+                        "header": True,
+                        "inferSchema": True,
+                    },
+                },
+            }
+            # </snippet>
+        },
+    }
+    # </snippet>
+    is_subset(
+        datasource_config, get_full_config_spark_configured_datasource_multi_batch()
+    )
+
+
+def section_9_configure_your_data_connectors_data_assets__runtime():
+    pass
+
+
 validate_universal_config_elements()
+
 section_5_add_the_spark_execution_engine_to_your_datasource_configuration()
+
 section_6_add_a_dictionary_as_the_value_of_the_data_connectors_key()
+
 section_7_configure_your_individual_data_connectors__inferred()
 section_7_configure_your_individual_data_connectors__configured()
 section_7_configure_your_individual_data_connectors__runtime()
+
 section_8_configure_the_values_for_batch_spec_passthrough__universal()
+section_8_configure_the_values_for_batch_spec_passthrough__inferred()
+section_8_configure_the_values_for_batch_spec_passthrough__configured()
+section_8_configure_the_values_for_batch_spec_passthrough__runtime()
+
+section_9_configure_your_data_connectors_data_assets__inferred__single_batch()
+section_9_configure_your_data_connectors_data_assets__inferred__multi_batch()
+# section_9_configure_your_data_connectors_data_assets__configured__single_batch()
+section_9_configure_your_data_connectors_data_assets__configured__multi_batch()
+# section_9_configure_your_data_connectors_data_assets__runtime()

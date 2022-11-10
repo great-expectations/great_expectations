@@ -84,7 +84,7 @@ def is_subset(subset, superset, test_mode=True):
 
         assert all(
             [items_test, keys_test]
-        ), f"\nEITHER:\n{subset_items} is not a subset of \n{superset_items}\nOR:\n{subset_full_paths} is not a subset of \n{superset_full_paths}"
+        ), f"\nEITHER:\n{subset_items}\n is not a subset of \n{superset_items}\n\nOR:\n\n{subset_full_paths}\n is not a subset of \n{superset_full_paths}"
 
     else:
         # Test that populated subset items correspond to items in the superset

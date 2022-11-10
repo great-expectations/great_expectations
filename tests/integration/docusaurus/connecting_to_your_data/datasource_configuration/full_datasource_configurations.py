@@ -8,11 +8,15 @@ def get_partial_config_universal_datasource_config_elements() -> dict:
     Returns:
          a dictionary containing a partial configuration for a Datasource
     """
+    # <snippet name="testerific">
     datasource_config: dict = {
+        # <snippet name="test">
         "name": "my_datasource_name",
         "class_name": "Datasource",
         "module_name": "great_expectations.datasource",
+        # </snippet>
     }
+    # </snippet>
     return datasource_config
 
 
@@ -26,7 +30,6 @@ def get_full_config_spark_inferred_datasource_single_batch() -> dict:
     Returns:
          a dictionary containing a full configuration for a Spark Datasource
     """
-    # <snippet name="full datasource_config for Spark inferred singlebatch Datasource">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -38,7 +41,7 @@ def get_full_config_spark_inferred_datasource_single_batch() -> dict:
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
                 "class_name": "InferredAssetFilesystemDataConnector",
-                "base_directory": "./data",
+                "base_directory": "../data",
                 "default_regex": {
                     "pattern": "(.*)\\.csv",
                     "group_names": ["data_asset_name"],
@@ -53,7 +56,6 @@ def get_full_config_spark_inferred_datasource_single_batch() -> dict:
             }
         },
     }
-    # </snippet>
     return datasource_config
 
 
@@ -64,7 +66,6 @@ def get_full_config_spark_inferred_datasource_multi_batch() -> dict:
     Returns:
          a dictionary containing a full configuration for a Spark Datasource
     """
-    # <snippet name="full datasource_config for Spark inferred multibatch Datasource">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -76,7 +77,7 @@ def get_full_config_spark_inferred_datasource_multi_batch() -> dict:
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
                 "class_name": "InferredAssetFilesystemDataConnector",
-                "base_directory": "./data",
+                "base_directory": "../data",
                 "default_regex": {
                     "pattern": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv",
                     "group_names": ["data_asset_name", "month"],
@@ -91,7 +92,6 @@ def get_full_config_spark_inferred_datasource_multi_batch() -> dict:
             }
         },
     }
-    # </snippet>
     return datasource_config
 
 
@@ -102,7 +102,6 @@ def get_full_config_spark_configured_datasource_single_batch() -> dict:
     Returns:
          a dictionary containing a full configuration for a Spark Datasource
     """
-    # <snippet name="full datasource_config for Spark configured singlebatch Datasource">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -114,7 +113,7 @@ def get_full_config_spark_configured_datasource_single_batch() -> dict:
         "data_connectors": {
             "name_of_my_configured_data_connector": {
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "base_directory": "./data",
+                "base_directory": "../data",
                 "assets": {
                     "yellow_tripdata_jan": {
                         "pattern": "yellow_tripdata_sample_2020-(01)\\.csv",
@@ -131,7 +130,6 @@ def get_full_config_spark_configured_datasource_single_batch() -> dict:
             }
         },
     }
-    # </snippet>
     return datasource_config
 
 
@@ -142,7 +140,6 @@ def get_full_config_spark_configured_datasource_multi_batch() -> dict:
     Returns:
          a dictionary containing a full configuration for a Spark Datasource
     """
-    # <snippet name="full datasource_config for Spark configured multibatch Datasource">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -154,7 +151,7 @@ def get_full_config_spark_configured_datasource_multi_batch() -> dict:
         "data_connectors": {
             "name_of_my_configured_data_connector": {
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "base_directory": "./data",
+                "base_directory": "../data",
                 "assets": {
                     "yellow_tripdata_2020": {
                         "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
@@ -171,7 +168,6 @@ def get_full_config_spark_configured_datasource_multi_batch() -> dict:
             }
         },
     }
-    # </snippet>
     return datasource_config
 
 
@@ -182,7 +178,6 @@ def get_full_config_spark_runtime_datasource() -> dict:
     Returns:
          a dictionary containing a full configuration for a Spark Datasource
     """
-    # <snippet name="full datasource_config for Spark runtime Datasource">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -205,5 +200,4 @@ def get_full_config_spark_runtime_datasource() -> dict:
             }
         },
     }
-    # </snippet>
     return datasource_config
