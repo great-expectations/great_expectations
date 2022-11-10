@@ -2278,9 +2278,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
-        if result_format_str in ["BASIC", "SUMMARY"]:
-            return dependencies
-
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_rows",
@@ -2295,6 +2292,10 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
+        if result_format_str in ["BASIC"]:
+            return dependencies
+
+        # only for SUMMARY and COMPLETE
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_index_list",

@@ -85,6 +85,23 @@
           "unexpected_list": [1.1, 2.2]
         }
       },
+      {"title": "negative_test_float_set_two_out_of_three_column_values_included_mostly_summary_output",
+        "exact_match_out": false,
+        "result_format": "SUMMARY",
+        "in": {
+          "column": "y",
+          "value_set": [1.1, 2.2],
+          "mostly": 0.65
+        },
+        "out": {
+          "success": false,
+          "unexpected_index_list": [0, 1],
+          "unexpected_list": [1.1, 2.2]
+        },
+        "only_for": [
+            "pandas"
+          ]
+      },
       {
         "title": "positive_test_float_set_two_out_of_three_column_values_included_mostly",
         "exact_match_out": false,
