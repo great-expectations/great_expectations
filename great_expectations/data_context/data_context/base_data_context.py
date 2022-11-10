@@ -199,14 +199,17 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     _data_context = None
 
     @classmethod
-    def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
+    def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> DataContextConfig:
         if isinstance(project_config, DataContextConfig):
-            return True
+            return project_config 
         try:
-            dataContextConfigSchema.load(project_config)
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            project_config_dict = dataContextConfigSchema.dump(project_config)
+            project_config_dict = dataContextConfigSchema.load(project_config_dict)
+            context_config: DataContextConfig = DataContextConfig(**project_config_dict)
+            return context_config
         except ValidationError:
             raise
-        return True
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
