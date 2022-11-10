@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -5,7 +7,7 @@ import subprocess
 import sys
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 import click
 
@@ -27,6 +29,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.datasource import BaseDatasource
 from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    from great_expectations.datasource import LegacyDatasource
 
 logger = logging.getLogger(__name__)
 
@@ -346,10 +351,10 @@ def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
 
 def select_datasource(
     context: DataContext, datasource_name: Optional[str] = None
-) -> BaseDatasource:
+) -> Union[BaseDatasource, LegacyDatasource, None]:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
-    data_source: Optional[BaseDatasource] = None
+    data_source: Union[BaseDatasource, LegacyDatasource, None] = None
 
     if datasource_name is None:
         data_sources: List[BaseDatasource] = cast(
