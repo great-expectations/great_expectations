@@ -736,21 +736,16 @@ def upgrade_project_zero_versions_increment(
     return context
 
 
-class UpgradeResults(NamedTuple):
-    increment_version: bool
-    exception_occurred: bool
-
-
 def upgrade_project_up_to_one_version_increment(
     context_root_dir: str,
     ge_config_version: float,
     continuation_message: str,
     update_version: bool,
     from_cli_upgrade_command: bool = False,
-) -> UpgradeResults:
+) -> Tuple[bool, bool]:  # Returns increment_version, exception_occurred:
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
     if not upgrade_helper_class:
-        return UpgradeResults(increment_version=False, exception_occurred=False)
+        return False, False
 
     # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
     DataContext.set_ge_config_version(
