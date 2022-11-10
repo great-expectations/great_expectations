@@ -17,8 +17,9 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
-    """Expect the column entries to be strings that can be matched to either any of or all of a list of regular
-    expressions. Matches can be anywhere in the string.
+    """Expect the column entries to be strings that can be matched to either any of or all of a list of regular expressions.
+
+    Matches can be anywhere in the string.
 
     expect_column_values_to_match_regex_list is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine

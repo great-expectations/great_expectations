@@ -21,7 +21,7 @@ except ImportError:
 
 
 class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
-    """Expect column entries to be JSON objects matching a given JSON schema.
+    """Expect the column entries to be JSON objects matching a given JSON schema.
 
     expect_column_values_to_match_json_schema is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine

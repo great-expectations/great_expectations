@@ -22,7 +22,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnValuesToBeNull(ColumnMapExpectation):
-    """Expect column values to be null.
+    """Expect the column values to be null.
 
     expect_column_values_to_be_null is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
