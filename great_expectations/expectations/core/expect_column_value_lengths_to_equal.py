@@ -16,7 +16,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
-    """Expect column entries to be strings with length equal to the provided value.
+    """Expect the column entries to be strings with length equal to the provided value.
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
