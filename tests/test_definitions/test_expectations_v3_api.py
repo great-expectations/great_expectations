@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations.execution_engine.polars_batch_data import PolarsBatchData
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -201,6 +202,14 @@ def pytest_generate_tests(metafunc):
                                     or int(major) >= 1
                                 ):
                                     generate_test = True
+
+                            elif validator_with_data and isinstance(
+                                validator_with_data.active_batch_data,
+                                PolarsBatchData,
+                            ):
+                                if "polars" in only_for:
+                                    generate_test = True
+
                             elif validator_with_data and isinstance(
                                 validator_with_data.active_batch_data,
                                 SparkDFBatchData,
@@ -328,6 +337,14 @@ def pytest_generate_tests(metafunc):
                                     and isinstance(
                                         validator_with_data.active_batch_data,
                                         PandasBatchData,
+                                    )
+                                )
+                                or (
+                                    "polars" in suppress_test_for
+                                    and validator_with_data
+                                    and isinstance(
+                                        validator_with_data.active_batch_data,
+                                        PolarsBatchData,
                                     )
                                 )
                                 or (

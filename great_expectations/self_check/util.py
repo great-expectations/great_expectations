@@ -1222,6 +1222,10 @@ def get_dataset(  # noqa: C901 - 110
             columns = list(data.keys())
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
+
+    elif dataset_type == "polars":
+        return None
+
     else:
         raise ValueError(f"Unknown dataset_type {str(dataset_type)}")
 
