@@ -656,7 +656,7 @@ def upgrade_project_one_or_multiple_versions_increment(
             # Don't fail for usage stats
             pass
     else:
-        context = None
+        return None
 
     return context
 
@@ -707,6 +707,7 @@ def upgrade_project_zero_versions_increment(
         update_version=False,
         from_cli_upgrade_command=from_cli_upgrade_command,
     )
+    context: Optional[DataContext]  # type: ignore[no-redef] # allow re-def here
     if exception_occurred or increment_version:
         context = None
     else:
@@ -1025,11 +1026,11 @@ def add_citation_with_batch_request(
         expectation_suite is not None
         and batch_request
         and isinstance(batch_request, dict)
-        and BatchRequest(**batch_request)
+        and BatchRequest(**batch_request)  # type: ignore[arg-type] # values union
     ):
         expectation_suite.add_citation(
             comment="Created suite added via CLI",
-            batch_request=batch_request,
+            batch_request=batch_request,  # type: ignore[arg-type] # values union
         )
         data_context.save_expectation_suite(expectation_suite=expectation_suite)
 
@@ -1048,7 +1049,7 @@ def get_batch_request_from_json_file(
         usage_event=usage_event,
     )
     try:
-        batch_request = BatchRequest(**batch_request).to_json_dict()
+        batch_request = BatchRequest(**batch_request).to_json_dict()  # type: ignore[arg-type] # values union
     except TypeError as e:
         cli_message(
             string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
@@ -1078,7 +1079,7 @@ def get_batch_request_using_datasource_name(
         string="\nA batch of data is required to edit the suite - let's help you to specify it.\n"
     )
 
-    datasource: BaseDatasource = select_datasource(
+    datasource = select_datasource(
         context=data_context, datasource_name=datasource_name
     )
 
@@ -1095,7 +1096,7 @@ def get_batch_request_using_datasource_name(
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = get_batch_request(
-        datasource=datasource,
+        datasource=datasource,  # type: ignore[arg-type] # could be LegacyDatasource
         additional_batch_request_args=additional_batch_request_args,
     )
 

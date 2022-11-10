@@ -41,7 +41,6 @@ exclude = [
     'cli/datasource\.py',  # 12
     'cli/python_subprocess\.py', # 6
     'cli/suite\.py',  # 24
-    # 'cli/toolkit\.py',  # 15
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
     'core/batch\.py', # 29
