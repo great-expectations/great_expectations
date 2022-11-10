@@ -1,18 +1,15 @@
 datasources:
   my_demo_datasource:
     type: pandas
-    engine: pandas # TODO: remove this in favor of `type`??
-    version: 2.0
+    engine: pandas # TODO: remove this in favor of `type`
     name: my_demo_datasource # TODO: remove name
     assets:
       my_demo_file_asset:
         type: file
         name: my_demo_file_asset # TODO: remove name
-        # TODO: combine root dir with this value in code
         file_path: great_expectations/zep/my_file.csv
         delimiter: "|"
       another_asset:
         type: other
         name: another_asset # TODO: remove name
-        # TODO: combine root dir with this value in code
         food: "pizza"

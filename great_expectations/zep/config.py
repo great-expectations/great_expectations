@@ -27,11 +27,12 @@ class GxConfig(BaseModel):
     datasources: Dict[str, Datasource]
 
     @classmethod
-    def parse_yaml(cls, f: Union[pathlib.Path, str]) -> GxConfig:
+    def parse_yaml(cls, f: Union[pathlib.Path, str], debug_: bool = False) -> GxConfig:
         loaded = yaml.load(f)
         LOGGER.debug(f"loaded from yaml ->\n{pf(loaded)}\n")
         config = cls(**loaded)
-        pp(config)
+        if debug_:
+            pp(config)
         return config
 
     @validator("datasources", pre=True)

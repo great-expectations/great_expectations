@@ -44,7 +44,7 @@ class FileAsset(DataAsset):
 class OtherAsset(DataAsset):
     type: Literal["other"] = "other"
 
-    food: Literal["pizza", "bad pizza"]
+    food: Literal["pizza", "bad pizza", "good pizza"]
 
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
