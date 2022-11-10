@@ -90,7 +90,7 @@ def get_or_create_expectation_suite(
         )
         while True:
             expectation_suite_name = cast(
-                str,
+                str,  # click.prompt doesn't know the default type
                 click.prompt(
                     "\nName the new Expectation Suite",
                     default=default_expectation_suite_name,
