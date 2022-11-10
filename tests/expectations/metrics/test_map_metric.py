@@ -352,7 +352,7 @@ def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_
     }
 
 
-def test_pandas_default_unexpected_index_columns_complete_result_format(
+def test_pandas_default_complete_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
     expectationConfiguration = ExpectationConfiguration(
@@ -398,7 +398,7 @@ def test_pandas_default_unexpected_index_columns_complete_result_format(
     }
 
 
-def test_pandas_single_unexpected_index_columns_complete_result_format(
+def test_pandas_single_unexpected_index_column_names_complete_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
     expectationConfiguration = ExpectationConfiguration(
@@ -408,7 +408,7 @@ def test_pandas_single_unexpected_index_columns_complete_result_format(
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_columns": ["pk_1"],  # Single column
+                "unexpected_index_column_names": ["pk_1"],  # Single column
             },
         },
     )
@@ -456,7 +456,7 @@ def test_pandas_single_unexpected_index_columns_complete_result_format(
     }
 
 
-def test_pandas_multiple_unexpected_index_columns_complete_result_format(
+def test_pandas_multiple_unexpected_index_column_names_complete_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
     expectationConfiguration = ExpectationConfiguration(
@@ -466,7 +466,7 @@ def test_pandas_multiple_unexpected_index_columns_complete_result_format(
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_columns": ["pk_1", "pk_2"],  # Multiple columns
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
             },
         },
     )
@@ -506,7 +506,7 @@ def test_pandas_multiple_unexpected_index_columns_complete_result_format(
     }
 
 
-def test_pandas_multiple_unexpected_index_columns_summary_result_format(
+def test_pandas_multiple_unexpected_index_column_names_summary_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
     expectationConfiguration = ExpectationConfiguration(
@@ -516,7 +516,7 @@ def test_pandas_multiple_unexpected_index_columns_summary_result_format(
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
-                "unexpected_index_columns": ["pk_1", "pk_2"],  # Multiple columns
+                "unexpected_index_column_names": ["pk_1", "pk_2"],  # Multiple columns
             },
         },
     )
@@ -551,7 +551,7 @@ def test_pandas_multiple_unexpected_index_columns_summary_result_format(
     }
 
 
-def test_pandas_multiple_unexpected_index_columns_basic_result_format(
+def test_pandas_multiple_unexpected_index_column_names_basic_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
     expectationConfiguration = ExpectationConfiguration(
@@ -560,8 +560,8 @@ def test_pandas_multiple_unexpected_index_columns_basic_result_format(
             "column": "numbers_with_duplicates",
             "value_set": [1, 5, 22],
             "result_format": {
-                "result_format": "BASIC",  # SUMMARY will include partial_unexpected_list only, which means unexpected_index_columns will have no effect
-                "unexpected_index_columns": ["pk_1", "pk_2"],
+                "result_format": "BASIC",  # SUMMARY will include partial_unexpected_list only, which means unexpected_index_column_names will have no effect
+                "unexpected_index_column_names": ["pk_1", "pk_2"],
             },
         },
     )
@@ -588,7 +588,7 @@ def test_pandas_multiple_unexpected_index_columns_basic_result_format(
     }
 
 
-def test_pandas_single_unexpected_index_columns_complete_result_format_non_existing_column(
+def test_pandas_single_unexpected_index_column_names_complete_result_format_non_existing_column(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
     expectationConfiguration = ExpectationConfiguration(
@@ -598,7 +598,7 @@ def test_pandas_single_unexpected_index_columns_complete_result_format_non_exist
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_columns": ["i_dont_exist"],  # Single column
+                "unexpected_index_column_names": ["i_dont_exist"],  # Single column
             },
         },
     )
@@ -621,7 +621,7 @@ def test_pandas_single_unexpected_index_columns_complete_result_format_non_exist
     )
 
 
-def test_pandas_multiple_unexpected_index_columns_complete_result_format_non_existing_column(
+def test_pandas_multiple_unexpected_index_column_names_complete_result_format_non_existing_column(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
     expectationConfiguration = ExpectationConfiguration(
@@ -631,7 +631,7 @@ def test_pandas_multiple_unexpected_index_columns_complete_result_format_non_exi
             "value_set": [1, 5, 22],
             "result_format": {
                 "result_format": "COMPLETE",
-                "unexpected_index_columns": [
+                "unexpected_index_column_names": [
                     "pk_1",
                     "i_dont_exist",
                 ],  # Only 1 column is valid
