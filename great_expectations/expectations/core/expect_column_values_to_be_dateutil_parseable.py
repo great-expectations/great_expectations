@@ -15,7 +15,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
-    """Expect column entries to be parsable using dateutil.
+    """Expect the column entries to be parsable using dateutil.
 
     expect_column_values_to_be_dateutil_parseable is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
