@@ -159,11 +159,8 @@ class CloudConfigurationProvider(AbstractConfigurationProvider):
             GECloudEnvironmentVariable,
         )
 
-        return cast(
-            Dict[str, str],
-            {
-                GECloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
-                GECloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
-                GECloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,
-            },
-        )
+        return {
+            GECloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
+            GECloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
+            GECloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[arg-type]
+        }
