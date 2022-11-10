@@ -224,7 +224,7 @@ module.exports = {
                 'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
-                'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
+                'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_polars_support_for_an_expectation'
               ]
             }
