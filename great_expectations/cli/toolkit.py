@@ -709,7 +709,7 @@ def upgrade_project_zero_versions_increment(
     )
     context: Optional[DataContext]  # type: ignore[no-redef] # allow re-def here
     if exception_occurred or increment_version:
-        context = None
+        context = None  # type: ignore[assignment] # see redef above
     else:
         if manual_steps_required:
             upgrade_message = "Your project requires manual upgrade steps in order to be up-to-date.\n"
