@@ -1701,6 +1701,7 @@ class Expectation(metaclass=MetaExpectation):
                 "PandasExecutionEngine",
                 "SqlAlchemyExecutionEngine",
                 "SparkDFExecutionEngine",
+                "PolarsExecutionEngine",
             ]
 
         execution_engines = {}

@@ -1309,11 +1309,13 @@ def get_test_validator_with_data(  # noqa: C901 - 31
                 )
                 typed_df[x] = typed_df[x].cast(polars_schema[x], strict=False)
 
+            return build_polars_validator_with_data(df=typed_df)
+
         if table_name is None:
             # noinspection PyUnusedLocal
             table_name = generate_test_table_name()
 
-        return build_polars_validator_with_data(df=typed_df)
+        return build_polars_validator_with_data(df=df)
 
     elif execution_engine in SQL_DIALECT_NAMES:
         if not create_engine:
