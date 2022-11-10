@@ -3,10 +3,9 @@ import pytest
 
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationSuite,
     ExpectationValidationResult,
 )
-from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.core.batch import Batch
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -32,6 +31,25 @@ def dataframe_for_unexpected_rows():
         {
             "a": [1, 5, 22, 3, 5, 10],
             "b": ["cat", "fish", "dog", "giraffe", "lion", "zebra"],
+        }
+    )
+
+
+@pytest.fixture
+def pandas_dataframe_for_unexpected_rows_with_index():
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "numbers_with_duplicates": [1, 5, 22, 3, 5, 10],
+            "animal_names_no_duplicates": [
+                "cat",
+                "fish",
+                "dog",
+                "giraffe",
+                "lion",
+                "zebra",
+            ],
         }
     )
 
@@ -332,6 +350,310 @@ def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_
         "unexpected_percent_total": 33.33333333333333,
         "unexpected_percent_nonmissing": 33.33333333333333,
     }
+
+
+def test_pandas_default_unexpected_index_columns_complete_result_format(
+    pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_index_list": [
+            3,
+            5,
+        ],  # Default pandas index applied, compatible with existing functionality (list of ints)
+        "partial_unexpected_index_list": [3, 5],
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "unexpected_list": [3, 10],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_pandas_single_unexpected_index_columns_complete_result_format(
+    pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_columns": ["pk_1"],  # Single column
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_index_list": [
+            {
+                "pk_1": 3,
+            },
+            {
+                "pk_1": 5,
+            },
+        ],  # Dicts since a column was provided
+        "partial_unexpected_index_list": [
+            {
+                "pk_1": 3,
+            },
+            {
+                "pk_1": 5,
+            },
+        ],  # Dicts since a column was provided
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "unexpected_list": [3, 10],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_pandas_multiple_unexpected_index_columns_complete_result_format(
+    pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_columns": ["pk_1", "pk_2"],  # Multiple columns
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 5, "pk_2": "five"},
+        ],  # Dicts since columns were provided
+        "partial_unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 5, "pk_2": "five"},
+        ],  # Dicts since columns were provided
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "unexpected_list": [3, 10],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_pandas_multiple_unexpected_index_columns_summary_result_format(
+    pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
+                "unexpected_index_columns": ["pk_1", "pk_2"],  # Multiple columns
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "partial_unexpected_index_list": [
+            {"pk_1": 3, "pk_2": "three"},
+            {"pk_1": 5, "pk_2": "five"},
+        ],  # Dicts since columns were provided
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "partial_unexpected_counts": [
+            {"value": 3, "count": 1},
+            {"value": 10, "count": 1},
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_pandas_multiple_unexpected_index_columns_basic_result_format(
+    pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "BASIC",  # SUMMARY will include partial_unexpected_list only, which means unexpected_index_columns will have no effect
+                "unexpected_index_columns": ["pk_1", "pk_2"],
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_list": [3, 10],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_pandas_single_unexpected_index_columns_complete_result_format_non_existing_column(
+    pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_columns": ["i_dont_exist"],  # Single column
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    assert result.success is False
+    assert result.exception_info
+    assert (
+        result.exception_info["exception_message"]
+        == 'Error: The unexpected_index_column: "i_dont_exist" in does not exist in Dataframe. Please check your configuration and try again.'
+    )
+
+
+def test_pandas_multiple_unexpected_index_columns_complete_result_format_non_existing_column(
+    pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "numbers_with_duplicates",
+            "value_set": [1, 5, 22],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_columns": [
+                    "pk_1",
+                    "i_dont_exist",
+                ],  # Only 1 column is valid
+            },
+        },
+    )
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch: Batch = Batch(data=pandas_dataframe_for_unexpected_rows_with_index)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    assert result.success is False
+    assert result.exception_info
+    assert (
+        result.exception_info["exception_message"]
+        == 'Error: The unexpected_index_column: "i_dont_exist" in does not exist in Dataframe. Please check your configuration and try again.'
+    )
 
 
 def test_pandas_default_to_not_include_unexpected_rows(
