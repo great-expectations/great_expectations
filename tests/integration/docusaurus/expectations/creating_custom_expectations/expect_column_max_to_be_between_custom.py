@@ -7,6 +7,7 @@ from great_expectations.exceptions.exceptions import (
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
+    PolarsExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
@@ -33,13 +34,23 @@ from great_expectations.render.util import (
 )
 
 
+# <snippet>
 class ColumnCustomMax(ColumnAggregateMetricProvider):
+    # </snippet>
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
-
+    # <snippet>
     metric_name = "column.custom_max"
-
+    # </snippet>
+    # <snippet>
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
+        """Pandas Max Implementation"""
+        return column.max()
+
+    # </snippet>
+
+    @column_aggregate_value(engine=PolarsExecutionEngine)
+    def _polars(cls, column, **kwargs):
         """Pandas Max Implementation"""
         return column.max()
 
@@ -79,10 +90,15 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         return F.max(column)
 
 
+# <snippet>
 class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
+    # </snippet
+    # <snippet>
     """Expect column max to be between a given range."""
+    # </snippet>
 
     # Defining test cases
+    # <snippet>
     examples = [
         {
             "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
@@ -127,12 +143,18 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
                     "backend": "spark",
                     "dialects": None,
                 },
+                {
+                    "backend": "polars",
+                    "dialects": None,
+                },
             ],
         }
     ]
-
+    # </snippet>
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
+    # <snippet>
     metric_dependencies = ("column.custom_max",)
+    # </snippet>
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
@@ -193,6 +215,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    # <snippet>
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -230,6 +253,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
 
         return {"success": success, "result": {"observed_value": column_max}}
 
+    # </snippet>
     @renderer(renderer_type="render.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -305,14 +329,20 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         ]
 
     # This dictionary contains metadata for display in the public gallery
+    # <snippet>
     library_metadata = {
         "tags": ["flexible max comparisons"],
         "contributors": ["@joegargery"],
     }
 
 
+# </snippet>
+
+
 if __name__ == "__main__":
+    # <snippet>
     ExpectColumnMaxToBeBetweenCustom().print_diagnostic_checklist()
+#     < /snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
