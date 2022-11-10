@@ -1,5 +1,3 @@
-from pprint import pprint
-
 import pandas as pd
 import pytest
 
@@ -378,7 +376,6 @@ def test_pandas_default_unexpected_index_columns_complete_result_format(
         ],
     )
     result = expectation.validate(validator)
-    pprint(convert_to_json_serializable(result.result))
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "unexpected_count": 2,
@@ -426,7 +423,6 @@ def test_pandas_single_unexpected_index_columns_complete_result_format(
         ],
     )
     result = expectation.validate(validator)
-    pprint(convert_to_json_serializable(result.result))
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "unexpected_count": 2,
@@ -485,7 +481,6 @@ def test_pandas_multiple_unexpected_index_columns_complete_result_format(
         ],
     )
     result = expectation.validate(validator)
-    pprint(convert_to_json_serializable(result.result))
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "unexpected_count": 2,
@@ -514,21 +509,13 @@ def test_pandas_multiple_unexpected_index_columns_complete_result_format(
 def test_pandas_multiple_unexpected_index_columns_summary_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    """
-    SUMMARY does include unexpected_index_list. Let's get this right
-    Args:
-        pandas_dataframe_for_unexpected_rows_with_index ():
-
-    Returns:
-
-    """
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
             "value_set": [1, 5, 22],
             "result_format": {
-                "result_format": "SUMMARY",
+                "result_format": "SUMMARY",  # SUMMARY will include partial_unexpected* values only
                 "unexpected_index_columns": ["pk_1", "pk_2"],  # Multiple columns
             },
         },
@@ -567,17 +554,14 @@ def test_pandas_multiple_unexpected_index_columns_summary_result_format(
 def test_pandas_multiple_unexpected_index_columns_basic_result_format(
     pandas_dataframe_for_unexpected_rows_with_index: pd.DataFrame,
 ):
-    """
-    BASIC does not include unexpected_index_list
-    """
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "numbers_with_duplicates",
             "value_set": [1, 5, 22],
             "result_format": {
-                "result_format": "BASIC",
-                "unexpected_index_columns": ["pk_1", "pk_2"],  # Multiple columns
+                "result_format": "BASIC",  # SUMMARY will include partial_unexpected_list only, which means unexpected_index_columns will have no effect
+                "unexpected_index_columns": ["pk_1", "pk_2"],
             },
         },
     )
