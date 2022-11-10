@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, List, Type
+from typing import TYPE_CHECKING, List, Set, Type
 
 import pydantic
 
@@ -19,6 +19,9 @@ LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
 
 
 class MetaDatasource(pydantic.main.ModelMetaclass):
+
+    __cls_set: Set[Type] = set()
+
     def __new__(
         meta_cls: Type[MetaDatasource], cls_name: str, bases: tuple[type], cls_dict
     ) -> MetaDatasource:
@@ -37,6 +40,10 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
         LOGGER.debug(f"1b. Extracting Asset details - {asset_types}")
 
         cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
+
+        meta_cls.__cls_set.add(cls)
+        LOGGER.debug(f"MetaDatasources: {len(meta_cls.__cls_set)}")
+
         LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
 
         if cls_name == "Datasource":
@@ -51,8 +58,13 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
 
         # TODO: generate schemas from `cls` if needed
 
-        _SourceFactories.register_factory(
-            cls, _datasource_factory, asset_types=asset_types
-        )
+        if cls.__module__ == "__main__":
+            LOGGER.warning(
+                "Datasource should not be defined as part of __main__ skipping registration to avoid collisions"
+            )
+        else:
+            _SourceFactories.register_factory(
+                cls, _datasource_factory, asset_types=asset_types
+            )
 
         return cls
