@@ -708,30 +708,37 @@ def upgrade_project_zero_versions_increment(
     )
     if exception_occurred or increment_version:
         return None
+
+    if manual_steps_required:
+        upgrade_message = (
+            "Your project requires manual upgrade steps in order to be up-to-date.\n"
+        )
+        cli_message(f"<yellow>{upgrade_message}</yellow>")
     else:
-        if manual_steps_required:
-            upgrade_message = "Your project requires manual upgrade steps in order to be up-to-date.\n"
-            cli_message(f"<yellow>{upgrade_message}</yellow>")
-        else:
-            upgrade_message = (
-                "Your project is up-to-date - no further upgrade is necessary.\n"
-            )
-            cli_message(f"<green>{upgrade_message}</green>")
+        upgrade_message = (
+            "Your project is up-to-date - no further upgrade is necessary.\n"
+        )
+        cli_message(f"<green>{upgrade_message}</green>")
 
-        context = DataContext(context_root_dir=directory)
+    context = DataContext(context_root_dir=directory)
 
-        # noinspection PyBroadException
-        try:
-            send_usage_message(
-                data_context=context,
-                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
-                success=True,
-            )
-        except Exception:
-            # Don't fail for usage stats
-            pass
+    # noinspection PyBroadException
+    try:
+        send_usage_message(
+            data_context=context,
+            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
+            success=True,
+        )
+    except Exception:
+        # Don't fail for usage stats
+        pass
 
     return context
+
+
+class UpgradeResults(NamedTuple):
+    increment_version: bool
+    exception_occurred: bool
 
 
 def upgrade_project_up_to_one_version_increment(
@@ -740,10 +747,10 @@ def upgrade_project_up_to_one_version_increment(
     continuation_message: str,
     update_version: bool,
     from_cli_upgrade_command: bool = False,
-) -> Tuple[bool, bool]:  # Returns increment_version, exception_occurred
+) -> UpgradeResults:
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
     if not upgrade_helper_class:
-        return False, False
+        return UpgradeResults(increment_version=False, exception_occurred=False)
 
     # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
     DataContext.set_ge_config_version(
