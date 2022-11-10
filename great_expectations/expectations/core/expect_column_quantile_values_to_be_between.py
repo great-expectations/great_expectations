@@ -42,7 +42,7 @@ from great_expectations.util import isclose
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     # noinspection PyUnresolvedReferences
-    """Expect specific provided column quantiles to be between provided minimum and maximum values.
+    """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
 
            ``quantile_ranges`` must be a dictionary with two keys:
 

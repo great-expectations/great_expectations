@@ -39,7 +39,7 @@ from great_expectations.render.renderer.renderer import renderer
 
 
 class ExpectColumnMaxToBeBetween(ColumnExpectation):
-    """Expect the column max to be between an min and max value
+    """Expect the column maximum to be between a minimum value and a maximum value.
 
            expect_column_max_to_be_between is a \
            :func:`column_aggregate_expectation
