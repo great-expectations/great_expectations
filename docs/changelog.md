@@ -2,6 +2,30 @@
 title: Changelog
 ---
 
+### 0.15.32
+* [BUGFIX] Patch broken `CloudNotificationAction` tests (#6327)
+* [BUGFIX] add create_temp_table flag to ExecutionEngineConfigSchema (#6331) (thanks @tommy-watts-depop)
+* [BUGFIX] MapMetrics now return `partial_unexpected` values for `SUMMARY` format (#6334)
+* [DOCS] Re-writes "how to implement custom notifications" as "How to get Data Docs URLs for use in custom Validation Actions" (#6281)
+* [DOCS] Removes deprecated expectation notebook exploration doc (#6298)
+* [DOCS] Removes a number of unused & deprecated docs (#6300)
+* [DOCS] Prioritizes Onboarding Data Assistant in ToC (#6302)
+* [DOCS] Add ZenML into integration table in Readme (#6144) (thanks @dnth)
+* [DOCS] add `pypi` release badge (#6324)
+* [MAINTENANCE] Remove unneeded `BaseDataContext.get_batch_list` (#6291)
+* [MAINTENANCE] Clean up implicit `Optional` errors flagged by `mypy` (#6319)
+* [MAINTENANCE] Add manual prod flags to core Expectations (#6278)
+* [MAINTENANCE] Fallback to isnot method if is_not is not available (old sqlalchemy) (#6318)
+* [MAINTENANCE] Add ZEP postgres datasource. (#6274)
+* [MAINTENANCE] Delete "metric_dependencies" from MetricConfiguration constructor arguments (#6305)
+* [MAINTENANCE] Clean up `DataContext` (#6304)
+* [MAINTENANCE] Deprecate `save_changes` flag on `Datasource` CRUD (#6258)
+* [MAINTENANCE] Deprecate `great_expectations.render.types` package (#6315)
+* [MAINTENANCE] Update range of allowable sqlalchemy versions (#6328)
+* [MAINTENANCE] Fixing checkpoint types (#6325)
+* [MAINTENANCE] Fix column_reflection_fallback for Trino and minor logging/testing improvements (#6218)
+* [MAINTENANCE] Change the number of expected Expectations in the 'quick check' stage of build_gallery pipeline (#6333)
+
 ### 0.15.31
 * [BUGFIX] Include all requirement files in the sdist (#6292) (thanks @xhochy)
 * [DOCS] Updates outdated batch_request snippet in Terms (#6283)
