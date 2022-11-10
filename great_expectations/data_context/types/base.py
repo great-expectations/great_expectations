@@ -997,6 +997,8 @@ class ExecutionEngineConfigSchema(Schema):
     # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
     credentials_info = fields.Dict(required=False, allow_none=True)
 
+    create_temp_table = fields.Boolean(required=False, allow_none=True)
+
     # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
