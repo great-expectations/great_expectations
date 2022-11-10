@@ -402,7 +402,7 @@ def load_data_context_with_error_handling(
     try:
         directory = directory or DataContext.find_context_root_dir()
         context = DataContext(context_root_dir=directory)
-        ge_config_version = context.get_config().config_version
+        ge_config_version = context.get_config().config_version  # type: ignore[union-attr] # could be dict, str
 
         if from_cli_upgrade_command:
             if ge_config_version < CURRENT_GE_CONFIG_VERSION:
