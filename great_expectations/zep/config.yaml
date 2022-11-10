@@ -1,15 +1,10 @@
 datasources:
-  my_demo_datasource:
+  my_pg_ds:
     type: postgres
-    name: real_pg_ds
+    name: my_pg_ds
     connection_str: "postgres://foo.bar"
     assets:
-      my_demo_file_asset:
-        type: file
-        name: my_demo_file_asset # TODO: remove name
-        file_path: great_expectations/zep/my_file.csv
-        delimiter: "|"
-      another_asset:
-        type: other
-        name: another_asset # TODO: remove name
-        food: "pizza"
+      my_pg_table_asset:
+        type: table
+        name: my_pg_table_asset
+        table_name: my_table

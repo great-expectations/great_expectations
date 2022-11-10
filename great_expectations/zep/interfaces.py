@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import logging
 from pprint import pformat as pf
-from typing import Any, Dict, List, Mapping, Optional, Set, Type
+from typing import Any, Dict, List, Mapping, Optional, Set, Type, Any
 
 from pydantic import BaseModel, root_validator, validator
 from typing_extensions import ClassVar, TypeAlias
@@ -67,15 +67,15 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
 
     @root_validator(pre=True)
     @classmethod
-    def _load_execution_engine(cls, values: dict):
+    def _load_execution_engine(cls, values: Dict[str, Any]):
         """
-        Lookup and instantiate an ExecutionEngine based on the 'engine' string.
+        Lookup and instantiate an ExecutionEngine based on the 'type' string.
         Assign this ExecutionEngine instance to the `execution_engine` field.
         """
         # NOTE (kilo59): this method is only ever called by the Pydantic framework.
         # Should we use name mangling? `__load_execution_engine`?
         LOGGER.info(
-            f"Loading & validating `Datasource.execution_engine' ->\n {pf(values, depth=2)}"
+            f"Loading & validating `Datasource.execution_engine' ->\n {pf(values, depth=1)}"
         )
         # TODO (kilo59): catch key errors
         engine_name: str = values["type"]
@@ -84,8 +84,10 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
         engine_kwargs = {
             k: v for (k, v) in values.items() if k not in cls._excluded_eng_args
         }
-        LOGGER.warning(f"{engine_type} - kwargs: {list(engine_kwargs.keys())}")
-        values["execution_engine"] = engine_type(**engine_kwargs)
+        LOGGER.info(f"{engine_type} - kwargs: {list(engine_kwargs.keys())}")
+        engine = engine_type(**engine_kwargs)
+        values["execution_engine"] =  engine
+        LOGGER.warning(engine)
         return values
 
     @validator("assets", pre=True)

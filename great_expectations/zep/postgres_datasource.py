@@ -5,6 +5,7 @@ from pprint import pformat as pf
 from typing import Any, Dict, List, MutableMapping, Optional, Type
 
 from typing_extensions import ClassVar, Literal
+from pydantic import dataclasses as dc
 
 # if __name__ == "__main__":
 #     # don't setup the logger unless being run as a script
@@ -28,7 +29,7 @@ class PostgresDatasourceError(Exception):
     pass
 
 
-@dataclasses.dataclass(frozen=True)
+@dc.dataclass(frozen=True)
 class ColumnSplitter:
     method_name: str
     column_name: str
