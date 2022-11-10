@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import logging
 from pprint import pformat as pf
-from typing import Any, Dict, List, Mapping, Optional, Type
+from typing import Any, Dict, List, Mapping, Optional, Set, Type
 
 from pydantic import BaseModel, root_validator, validator
 from typing_extensions import ClassVar, TypeAlias
@@ -51,6 +51,13 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
 
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
+    # Datasource instance attrs but these will be fed into the `execution_engine` constructor
+    _excluded_eng_args: ClassVar[Set[str]] = {
+        "name",
+        "type",
+        "execution_engine",
+        "assets",
+    }
 
     # instance attrs
     type: str
@@ -73,8 +80,12 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
         # TODO (kilo59): catch key errors
         engine_name: str = values["type"]
         engine_type: Type[ExecutionEngine] = _SourceFactories.engine_lookup[engine_name]
-        # datasource type
-        values["execution_engine"] = engine_type()
+
+        engine_kwargs = {
+            k: v for (k, v) in values.items() if k not in cls._excluded_eng_args
+        }
+        LOGGER.warning(f"{engine_type} - kwargs: {list(engine_kwargs.keys())}")
+        values["execution_engine"] = engine_type(**engine_kwargs)
         return values
 
     @validator("assets", pre=True)

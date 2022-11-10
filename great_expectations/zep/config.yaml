@@ -1,8 +1,8 @@
 datasources:
   my_demo_datasource:
-    type: pandas
-    engine: pandas # TODO: remove this in favor of `type`
-    name: my_demo_datasource # TODO: remove name
+    type: postgres
+    name: real_pg_ds
+    connection_str: "postgres://foo.bar"
     assets:
       my_demo_file_asset:
         type: file
