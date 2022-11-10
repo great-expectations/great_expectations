@@ -72,27 +72,26 @@ class _SourceFactories:
         -------
         `class PandasDatasource` -> `add_pandas()`
         """
-        simplified_name = _get_simplified_name_from_type(
-            ds_type, suffix_to_remove="_datasource"
-        )
+        ds_type_name = ds_type.__fields__["type"].default
+        # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
 
-        method_name = f"add_{simplified_name}"
+        method_name = f"add_{ds_type_name}"
         LOGGER.info(
-            f"2a. Registering {ds_type.__name__} as {simplified_name} with {method_name}() factory"
+            f"2a. Registering {ds_type.__name__} as {ds_type_name} with {method_name}() factory"
         )
 
         pre_existing = cls.__source_factories.get(method_name)
         if pre_existing:
-            raise ValueError(f"{simplified_name} factory already exists")
+            raise ValueError(f"{ds_type_name} factory already exists")
 
         # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
         cls._register_assets(ds_type)
 
-        cls.type_lookup[ds_type] = simplified_name
-        LOGGER.debug(f"'{simplified_name}' added to `type_lookup`")
+        cls.type_lookup[ds_type] = ds_type_name
+        LOGGER.debug(f"'{ds_type_name}' added to `type_lookup`")
         cls.__source_factories[method_name] = fn
 
-        cls._register_engine(ds_type)
+        cls._register_engine(ds_type, type_lookup_name=ds_type_name)
 
     @property
     def factories(self) -> List[str]:
@@ -117,7 +116,7 @@ class _SourceFactories:
         return [*self.factories, *super().__dir__()]
 
     @classmethod
-    def _register_engine(cls, ds_type: Type[Datasource]):
+    def _register_engine(cls, ds_type: Type[Datasource], type_lookup_name: str):
         try:
             exec_engine_type: Type[ExecutionEngine] = ds_type.__fields__[
                 "execution_engine"
@@ -128,20 +127,19 @@ class _SourceFactories:
                 f"No `execution_engine` found for {ds_type.__name__} unable to register `ExecutionEngine` type"
             ) from exc
 
-        class_name: str = exec_engine_type.__name__
-        engine_simple_name: str = _get_simplified_name_from_type(
-            exec_engine_type, suffix_to_remove="_execution_engine"
-        )
+        eng_class_name: str = exec_engine_type.__name__
 
         LOGGER.info(
-            f"2b. Registering engine type `{class_name}` as '{engine_simple_name}'"
+            f"2b. Registering engine type `{eng_class_name}` for '{type_lookup_name}'"
         )
-        cls.engine_lookup[engine_simple_name] = exec_engine_type
+        cls.engine_lookup[type_lookup_name] = exec_engine_type
         LOGGER.info(list(cls.engine_lookup.keys()))
 
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource]):
         asset_types: List[Type[DataAsset]] = ds_type.asset_types
+
+        # TODO: pull from the `type` field
         asset_type_names: List[str] = [
             _get_simplified_name_from_type(t, suffix_to_remove="_asset")
             for t in asset_types

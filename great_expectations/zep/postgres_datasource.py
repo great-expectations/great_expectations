@@ -208,4 +208,10 @@ class PostgresDatasource(Datasource):
 
 
 if __name__ == "__main__":
-    pass
+    import pathlib
+
+    from great_expectations.zep.config import GxConfig
+
+    yaml_file = pathlib.Path(__file__).parent / "config.yaml"
+
+    config = GxConfig.parse_yaml(yaml_file, debug_=True)

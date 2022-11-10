@@ -71,7 +71,7 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
             f"Loading & validating `Datasource.execution_engine' ->\n {pf(values, depth=2)}"
         )
         # TODO (kilo59): catch key errors
-        engine_name: str = values["engine"]
+        engine_name: str = values["type"]
         engine_type: Type[ExecutionEngine] = _SourceFactories.engine_lookup[engine_name]
         # datasource type
         values["execution_engine"] = engine_type()
