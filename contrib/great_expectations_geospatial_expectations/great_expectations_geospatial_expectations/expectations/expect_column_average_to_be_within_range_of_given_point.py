@@ -10,7 +10,11 @@ from typing import Any, Dict, List, Union
 
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    PolarsExecutionEngine,
+)
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     render_evaluation_parameter_string,
@@ -40,6 +44,17 @@ class ColumnCoordinatesDistance(ColumnAggregateMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
+        center_point = kwargs.get("center_point")
+
+        avg_lat = mean([point[0] for point in column])
+        avg_lon = mean([point[1] for point in column])
+
+        distance = cls.fcc_projection((avg_lat, avg_lon), center_point)
+
+        return distance
+
+    @column_aggregate_value(engine=PolarsExecutionEngine)
+    def _polars(cls, column, **kwargs):
         center_point = kwargs.get("center_point")
 
         avg_lat = mean([point[0] for point in column])
