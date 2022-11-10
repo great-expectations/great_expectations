@@ -116,12 +116,38 @@ function parseFile (file) {
  * @returns {string} The sanitized string.
  */
 function sanitizeText (text) {
+  // Remove leading carriage return
+  if (text.startsWith('\n') || text.startsWith('\r')) {
+    text = text.substring(1, text.length)
+  }
+
+  // Determine indentation
+  let indent = "";
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === " ") {
+      indent += " ";
+    } else {
+      break;
+    }
+  }
+
+  // Remove any Python comment remnants
   text = text.trim()
   if (text.endsWith('#')) {
     text = text.substring(0, text.length - 1)
   }
+
+  // Uniformly remove indentation across snippet
+  function unindent(line) {
+    if (line.startsWith(indent)) {
+      line = line.substring(indent.length, text.length)
+    }
+    return line
+  }
+
   return text
     .split('\n')
+    .map(unindent)
     .filter((l) => !(l.includes('<snippet') || l.includes('snippet>')))
     .join('\n')
     .trim()
