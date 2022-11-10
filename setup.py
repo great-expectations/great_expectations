@@ -6,8 +6,6 @@ from setuptools import find_packages, setup
 
 import versioneer
 
-# adding to push
-
 
 def get_extras_require():
     results = {}
