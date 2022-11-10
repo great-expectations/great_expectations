@@ -1,7 +1,7 @@
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )
-from great_expectations.render.types import RenderedStringTemplateContent
 
 
 class ExpectationStringRenderer(ContentBlockRenderer):

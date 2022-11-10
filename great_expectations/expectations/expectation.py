@@ -43,13 +43,14 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationMetricDiagnostics,
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
+    Maturity,
     RendererTestDiagnostics,
 )
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import convert_to_json_serializable, nested_update
+from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
     GreatExpectationsError,
@@ -71,20 +72,18 @@ from great_expectations.expectations.sql_tokens_and_types import (
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
+    CollapseContent,
     LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
-    renderedAtomicValueSchema,
-)
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    CollapseContent,
     RenderedContentBlockContainer,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
     ValueListContent,
+    renderedAtomicValueSchema,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
@@ -174,12 +173,16 @@ class MetaExpectation(ABCMeta):
     attribute, or, if that is not set, by snake-casing the name of the class.
     """
 
+    default_kwarg_values: Dict[str, object] = {}
+
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
         # noinspection PyUnresolvedReferences
         if not newclass.is_abstract():
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
+        else:
+            newclass.expectation_type = ""
 
         # noinspection PyUnresolvedReferences
         newclass._register_renderer_functions()
@@ -227,19 +230,22 @@ class Expectation(metaclass=MetaExpectation):
     """
 
     version = ge_version
-    domain_keys: Union[tuple, Tuple[str]] = ()
-    success_keys: Union[tuple, Tuple[str]] = ()
-    runtime_keys: Union[tuple, Tuple[str]] = (
+    domain_keys: Tuple[str, ...] = ()
+    success_keys: Tuple[str, ...] = ()
+    runtime_keys: Tuple[str, ...] = (
         "include_config",
         "catch_exceptions",
         "result_format",
     )
-    default_kwarg_values: Dict[str, Optional[Any]] = {
+    default_kwarg_values = {
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
     args_keys = None
+
+    expectation_type: str
+    examples: List[dict] = []
 
     def __init__(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -956,7 +962,7 @@ class Expectation(metaclass=MetaExpectation):
     def get_runtime_kwargs(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> dict:
         if not configuration:
             configuration = self.configuration
@@ -982,9 +988,9 @@ class Expectation(metaclass=MetaExpectation):
     def get_result_format(
         self,
         configuration: ExpectationConfiguration,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Union[Dict[str, Union[str, int, bool]], str]:
-        default_result_format: Optional[str] = self.default_kwarg_values.get(
+        default_result_format: Optional[Any] = self.default_kwarg_values.get(
             "result_format"
         )
         configuration_result_format: Union[
@@ -1007,8 +1013,8 @@ class Expectation(metaclass=MetaExpectation):
             configuration = self.configuration
         try:
             assert (
-                configuration.expectation_type == self.expectation_type  # type: ignore[attr-defined]
-            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"  # type: ignore[attr-defined]
+                configuration.expectation_type == self.expectation_type
+            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -1045,44 +1051,6 @@ class Expectation(metaclass=MetaExpectation):
                 "cannot access configuration: expectation has not yet been configured"
             )
         return self._configuration
-
-    @classmethod
-    def build_configuration(cls, *args, **kwargs: dict) -> ExpectationConfiguration:
-        # Combine all arguments into a single new "all_args" dictionary to name positional parameters
-        all_args = dict(zip(cls.validation_kwargs, args))  # type: ignore[attr-defined]
-        all_args.update(kwargs)
-
-        # Unpack display parameters; remove them from all_args if appropriate
-        if "include_config" in kwargs:
-            include_config = kwargs["include_config"]
-            del all_args["include_config"]
-        else:
-            include_config = cls.default_expectation_args["include_config"]  # type: ignore[attr-defined]
-
-        if "catch_exceptions" in kwargs:
-            catch_exceptions = kwargs["catch_exceptions"]
-            del all_args["catch_exceptions"]
-        else:
-            catch_exceptions = cls.default_expectation_args["catch_exceptions"]  # type: ignore[attr-defined]
-
-        if "result_format" in kwargs:
-            result_format = kwargs["result_format"]
-        else:
-            result_format = cls.default_expectation_args["result_format"]  # type: ignore[attr-defined]
-
-        # Extract the meta object for use as a top-level expectation_config holder
-        if "meta" in kwargs:
-            meta = kwargs["meta"]
-            del all_args["meta"]
-        else:
-            meta = None
-
-        # Construct the expectation_config object
-        return ExpectationConfiguration(
-            expectation_type=cls.expectation_type,  # type: ignore[attr-defined]
-            kwargs=convert_to_json_serializable(deepcopy(all_args)),
-            meta=meta,
-        )
 
     def run_diagnostics(
         self,
@@ -1121,7 +1089,7 @@ class Expectation(metaclass=MetaExpectation):
             _debug = lambda x: x
             _error = lambda x: x
 
-        library_metadata: ExpectationDescriptionDiagnostics = (
+        library_metadata: AugmentedLibraryMetadata = (
             self._get_augmented_library_metadata()
         )
         examples: List[ExpectationTestDataCases] = self._get_examples(
@@ -1146,7 +1114,7 @@ class Expectation(metaclass=MetaExpectation):
         ] = self._get_expectation_configuration_from_examples(examples)
         if not _expectation_config:
             _error(
-                f"Was NOT able to get Expectation configuration for {self.expectation_type}. "  # type: ignore[attr-defined]
+                f"Was NOT able to get Expectation configuration for {self.expectation_type}. "
                 "Is there at least one sample test where 'success' is True?"
             )
         metric_diagnostics_list: List[
@@ -1211,7 +1179,7 @@ class Expectation(metaclass=MetaExpectation):
             _num_backends + _num_engines + _total_passed - (1.5 * _total_failed)
         )
         _debug(
-            f"coverage_score: {coverage_score} for {self.expectation_type} ... "  # type: ignore[attr-defined]
+            f"coverage_score: {coverage_score} for {self.expectation_type} ... "
             f"engines: {_num_engines}, backends: {_num_backends}, "
             f"passing tests: {_total_passed}, failing tests:{_total_failed}"
         )
@@ -1223,11 +1191,11 @@ class Expectation(metaclass=MetaExpectation):
         all_beta = all([check.passed for check in maturity_checklist.beta])
         all_production = all([check.passed for check in maturity_checklist.production])
         if all_production and all_beta and all_experimental:
-            library_metadata.maturity = "PRODUCTION"  # type: ignore[attr-defined]
+            library_metadata.maturity = Maturity.PRODUCTION
         elif all_beta and all_experimental:
-            library_metadata.maturity = "BETA"  # type: ignore[attr-defined]
+            library_metadata.maturity = Maturity.BETA
         else:
-            library_metadata.maturity = "EXPERIMENTAL"  # type: ignore[attr-defined]
+            library_metadata.maturity = Maturity.EXPERIMENTAL
 
         # Set the errors found when running tests
         errors = [
@@ -1301,13 +1269,8 @@ class Expectation(metaclass=MetaExpectation):
         :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
         :return: list of examples or [], if no examples exist
         """
-        try:
-            # Currently, only community contrib expectations have an examples attribute
-            all_examples = self.examples  # type: ignore[attr-defined]
-        except AttributeError:
-            all_examples = self._get_examples_from_json()
-            if all_examples == []:
-                return []
+        # Currently, only community contrib expectations have an examples attribute
+        all_examples: List[dict] = self.examples or self._get_examples_from_json()
 
         included_examples = []
         for example in all_examples:
@@ -1399,7 +1362,7 @@ class Expectation(metaclass=MetaExpectation):
                     for test in tests:
                         if test.output.get("success"):
                             return ExpectationConfiguration(
-                                expectation_type=self.expectation_type,  # type: ignore[attr-defined]
+                                expectation_type=self.expectation_type,
                                 kwargs=test.input,
                             )
 
@@ -1410,7 +1373,7 @@ class Expectation(metaclass=MetaExpectation):
                     for test in tests:
                         if test.input:
                             return ExpectationConfiguration(
-                                expectation_type=self.expectation_type,  # type: ignore[attr-defined]
+                                expectation_type=self.expectation_type,
                                 kwargs=test.input,
                             )
         return None
@@ -1433,7 +1396,7 @@ class Expectation(metaclass=MetaExpectation):
                 f"Expectation {name} was not found in the list of registered Expectations. "
                 f"Please check your configuration and try again"
             )
-        if "auto" in expectation_impl.default_kwarg_values:  # type: ignore[attr-defined]
+        if "auto" in expectation_impl.default_kwarg_values:
             print(
                 f"The Expectation {name} is able to be self-initialized. Please run by using the auto=True parameter."
             )
@@ -1794,7 +1757,7 @@ class Expectation(metaclass=MetaExpectation):
         """Introspect the Expectation's library_metadata object (if it exists), and augment it with additional information."""
 
         augmented_library_metadata = {
-            "maturity": "CONCEPT_ONLY",
+            "maturity": Maturity.CONCEPT_ONLY,
             "tags": [],
             "contributors": [],
             "requirements": [],
@@ -1890,7 +1853,7 @@ class Expectation(metaclass=MetaExpectation):
 
 
 class TableExpectation(Expectation, ABC):
-    domain_keys = (
+    domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
         "row_condition",
@@ -2102,7 +2065,7 @@ class QueryExpectation(TableExpectation, ABC):
         "condition_parser": None,
     }
 
-    domain_keys = (  # type: ignore[assignment]
+    domain_keys = (
         "batch_id",
         "row_condition",
         "condition_parser",
@@ -2169,7 +2132,7 @@ class QueryExpectation(TableExpectation, ABC):
 
 
 class ColumnExpectation(TableExpectation, ABC):
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")  # type: ignore[assignment]
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
     def validate_configuration(
@@ -2189,7 +2152,7 @@ class ColumnExpectation(TableExpectation, ABC):
 
 class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")  # type: ignore[assignment]
+    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
     success_keys = ("mostly",)
     default_kwarg_values = {
@@ -2315,9 +2278,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
-        if result_format_str in ["BASIC", "SUMMARY"]:
-            return dependencies
-
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_rows",
@@ -2332,6 +2292,10 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
+        if result_format_str in ["BASIC"]:
+            return dependencies
+
+        # only for SUMMARY and COMPLETE
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_index_list",
@@ -2352,7 +2316,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
@@ -2413,7 +2377,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
 class ColumnPairMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = (  # type: ignore[assignment]
+    domain_keys = (
         "batch_id",
         "table",
         "column_A",
@@ -2572,7 +2536,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
+        runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
@@ -2625,7 +2589,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
 
 class MulticolumnMapExpectation(TableExpectation, ABC):
     map_metric = None
-    domain_keys = (  # type: ignore[assignment]
+    domain_keys = (
         "batch_id",
         "table",
         "column_list",

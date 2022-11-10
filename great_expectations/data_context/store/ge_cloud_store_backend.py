@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import requests
 
 from great_expectations.core.http import create_session
+from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
@@ -15,7 +16,7 @@ from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
 try:
-    from typing import TypedDict  # type: ignore[attr-defined]
+    from typing import TypedDict
 except ImportError:
     from typing_extensions import TypedDict
 
@@ -176,12 +177,10 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
-    DEFAULT_BASE_URL = "https://app.greatexpectations.io/"
-
     def __init__(
         self,
         ge_cloud_credentials: Dict,
-        ge_cloud_base_url: str = DEFAULT_BASE_URL,
+        ge_cloud_base_url: str = CLOUD_DEFAULT_BASE_URL,
         ge_cloud_resource_type: Optional[Union[str, GeCloudRESTResource]] = None,
         ge_cloud_resource_name: Optional[str] = None,
         suppress_store_backend_id: bool = True,
@@ -531,7 +530,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to delete object in GE Cloud Store Backend: {e}"
             )
 
-    def _has_key(self, key: Tuple[str, ...]) -> bool:  # type: ignore[override]
+    def _has_key(self, key: Tuple[str, ...]) -> bool:
         # Due to list_keys being inconsistently sized (due to the possible of resource names),
         # we remove any resource names and assert against key ids.
 

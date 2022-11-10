@@ -6,9 +6,8 @@ from great_expectations.expectations.expectation import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -148,9 +147,9 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-            template_str = f"Values must be unique across columns, at least $mostly_pct % of the time: "
+            template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
         else:
-            template_str = f"Values must always be unique across columns: "
+            template_str = "Values must always be unique across columns: "
 
         column_list = params.get("column_list") if params.get("column_list") else []
         if len(column_list) > 0:
@@ -219,9 +218,9 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-            template_str = f"Values must be unique across columns, at least $mostly_pct % of the time: "
+            template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
         else:
-            template_str = f"Values must always be unique across columns: "
+            template_str = "Values must always be unique across columns: "
 
         for idx in range(len(params["column_list"]) - 1):
             template_str += f"$column_list_{str(idx)}, "

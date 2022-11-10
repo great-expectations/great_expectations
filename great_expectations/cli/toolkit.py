@@ -342,7 +342,7 @@ def load_checkpoint(
 
 
 def select_datasource(
-    context: DataContext, datasource_name: str = None
+    context: DataContext, datasource_name: Optional[str] = None
 ) -> BaseDatasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
@@ -471,7 +471,7 @@ def upgrade_project_strictly_multiple_versions_increment(
         try:
             send_usage_message(
                 data_context=context,
-                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
                 success=True,
             )
         except Exception:
@@ -518,7 +518,7 @@ def upgrade_project(
         confirm_prompt=upgrade_prompt,
         continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
         data_context=data_context,
-        usage_stats_event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
+        usage_stats_event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
     )
     cli_message(string=SECTION_SEPARATOR)
 
@@ -560,7 +560,7 @@ To learn more about the upgrade process, visit \
         data_context = DataContext(context_root_dir=context_root_dir)
         send_usage_message(
             data_context=data_context,
-            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
+            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
             success=True,
         )
     except Exception:
@@ -580,7 +580,7 @@ def upgrade_project_one_or_multiple_versions_increment(
     try:
         send_usage_message(
             data_context=context,
-            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN.value,
+            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN,
             success=True,
         )
     except Exception:
@@ -641,7 +641,7 @@ def upgrade_project_one_or_multiple_versions_increment(
         try:
             send_usage_message(
                 data_context=context,
-                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
                 success=True,
             )
         except Exception:
@@ -682,7 +682,7 @@ def upgrade_project_zero_versions_increment(
         try:
             send_usage_message(
                 data_context=context,
-                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN.value,
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN,
                 success=True,
             )
         except Exception:
@@ -717,7 +717,7 @@ def upgrade_project_zero_versions_increment(
         try:
             send_usage_message(
                 data_context=context,
-                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
                 success=True,
             )
         except Exception:

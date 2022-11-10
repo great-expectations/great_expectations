@@ -12,9 +12,9 @@ from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyDiagnosticRendererType,
     LegacyRendererType,
+    RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -309,8 +309,8 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration

@@ -128,6 +128,11 @@ def postgresql_sqlalchemy_datasource(postgresql_engine):
     )
 
 
+@pytest.fixture
+def mysql_sqlalchemy_datasource(mysql_engine):
+    return SqlAlchemyDatasource("mysql_sqlalchemy_datasource", engine=mysql_engine)
+
+
 @pytest.fixture(scope="module")
 def basic_sparkdf_datasource(test_backends):
     if "SparkDFDataset" not in test_backends:

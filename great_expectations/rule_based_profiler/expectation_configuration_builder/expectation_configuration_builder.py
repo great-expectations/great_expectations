@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -15,6 +17,11 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -31,7 +38,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         validation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
         **kwargs,
     ) -> None:
         """
@@ -42,7 +49,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
             fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance.
             These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
-            data_context: BaseDataContext associated with this ExpectationConfigurationBuilder
+            data_context: AbstractDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
         """
 
@@ -142,8 +149,8 @@ class ExpectationConfigurationBuilder(ABC, Builder):
 
 def init_rule_expectation_configuration_builders(
     expectation_configuration_builder_configs: List[dict],
-    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-) -> List["ExpectationConfigurationBuilder"]:  # noqa: F821
+    data_context: Optional[AbstractDataContext] = None,
+) -> List[ExpectationConfigurationBuilder]:
     expectation_configuration_builder_config: dict
     return [
         init_expectation_configuration_builder(
@@ -156,16 +163,16 @@ def init_rule_expectation_configuration_builders(
 
 def init_expectation_configuration_builder(
     expectation_configuration_builder_config: Union[
-        "ExpectationConfigurationBuilder", dict  # noqa: F821
+        ExpectationConfigurationBuilder, dict
     ],
-    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-) -> "ExpectationConfigurationBuilder":  # noqa: F821
+    data_context: Optional[AbstractDataContext] = None,
+) -> ExpectationConfigurationBuilder:
     if not isinstance(expectation_configuration_builder_config, dict):
         expectation_configuration_builder_config = (
             expectation_configuration_builder_config.to_dict()
         )
 
-    expectation_configuration_builder: "ExpectationConfigurationBuilder" = instantiate_class_from_config(  # noqa: F821
+    expectation_configuration_builder: ExpectationConfigurationBuilder = instantiate_class_from_config(
         config=expectation_configuration_builder_config,
         runtime_environment={"data_context": data_context},
         config_defaults={

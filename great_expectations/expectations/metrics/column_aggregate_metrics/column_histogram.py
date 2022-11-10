@@ -118,7 +118,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                         ],
                         else_=0,
                     )
-                ).label(f"bin_0")
+                ).label("bin_0")
             )
             query = (
                 sa.select(case_conditions)

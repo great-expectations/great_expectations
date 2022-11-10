@@ -54,7 +54,7 @@ context.add_datasource(**datasource_config)
 batch_request = RuntimeBatchRequest(
     datasource_name="my_trino_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="schema.taxi_data",  # this can be anything that identifies this data
+    data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )

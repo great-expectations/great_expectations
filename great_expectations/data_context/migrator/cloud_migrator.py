@@ -116,7 +116,7 @@ class CloudMigrator:
         Returns:
             CloudMigrator instance
         """
-        event = UsageStatsEvents.CLOUD_MIGRATE.value
+        event = UsageStatsEvents.CLOUD_MIGRATE
         event_payload = {"organization_id": ge_cloud_organization_id}
         try:
             cloud_migrator: CloudMigrator = cls(
