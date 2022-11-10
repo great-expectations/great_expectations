@@ -17,6 +17,8 @@ except ImportError:
 
 
 class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
+    """Expect the column entries to be strings that match a given like pattern expression."""
+
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],

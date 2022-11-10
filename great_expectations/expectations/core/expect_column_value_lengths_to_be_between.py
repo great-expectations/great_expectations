@@ -42,7 +42,7 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
-    """Expect column entries to be strings with length between a minimum value and a maximum value (inclusive).
+    """Expect the column entries to be strings with length between a minimum value and a maximum value (inclusive).
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 

@@ -28,7 +28,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
-    """Expect column entries to be strings that match a given regular expression.
+    """Expect the column entries to be strings that match a given regular expression.
 
     Valid matches can be found \
     anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
