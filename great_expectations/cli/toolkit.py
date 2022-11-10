@@ -84,10 +84,10 @@ def get_or_create_expectation_suite(
             batch_request=batch_request,
         )
         while True:
-            expectation_suite_name = click.prompt(
+            expectation_suite_name = cast(str, click.prompt(
                 "\nName the new Expectation Suite",
                 default=default_expectation_suite_name,
-            )
+            ))
             if (
                 expectation_suite_name
                 not in data_context.list_expectation_suite_names()
