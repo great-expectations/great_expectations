@@ -91,7 +91,7 @@ Each example is a dictionary with two keys:
 
 In our example, `data` will have two columns, "x" and "y", each with five rows. If you define multiple columns, make sure that they have the same number of rows. When possible, include test data and tests that includes null values (`None` in the Python test definition).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L88
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L114
 ```
 
 When you define data in your examples, we will mostly guess the type of the columns. 
@@ -134,9 +134,9 @@ You will need to:
 3. Decide how precisely you want to test the output of your tests (`exact_match_out`)
 4. Define the expected output for your tests (`out`)
 
-If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publically displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
+If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publicly displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L132
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L112-L162
 ```
 
 :::note
