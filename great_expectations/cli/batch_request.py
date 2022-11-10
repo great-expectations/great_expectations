@@ -48,7 +48,7 @@ DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
 def get_batch_request(
     datasource: BaseDatasource,
     additional_batch_request_args: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Union[str, Dict[str, Any]]]:
+) -> Dict[str, Union[str, int, Dict[str, Any]]]:
     """
     This method manages the interaction with user necessary to obtain batch_request for a batch of a data asset.
 
