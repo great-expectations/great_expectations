@@ -6,7 +6,8 @@ Welcome to great_expectations's documentation!
    :caption: Contents:
 
 .. autoclass:: great_expectations.data_context.data_context.DataContext
-   :members: create, test_yaml_config
+   :members:
+   :inherited-members:
 
 
 Indices and tables

@@ -41,3 +41,15 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'pydata_sphinx_theme'
 html_static_path = ['_static']
+
+
+# Skip autodoc unless part of the Public API
+WHITELISTED_TAG = "--Public API--"
+def skip(app, what, name, obj, would_skip, options):
+    if WHITELISTED_TAG in obj.__doc__:
+        # breakpoint()
+        return False
+    return True
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)
