@@ -424,9 +424,7 @@ def _get_batch_spec_passthrough(
     elif isinstance(datasource, SimpleSqlalchemyDatasource):
         # Some backends require named temporary table parameters.  We specifically elicit those and add them
         # where appropriate.
-        execution_engine: SqlAlchemyExecutionEngine = cast(
-            SqlAlchemyExecutionEngine, datasource.execution_engine
-        )
+        datasource.execution_engine
     else:
         raise ge_exceptions.DataContextError(
             "Datasource {:s} of unsupported type {:s} was encountered.".format(

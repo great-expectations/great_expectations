@@ -450,7 +450,7 @@ execution_engine:
             yaml_str += f"""
     drivername: {self.driver}"""
 
-        yaml_str += f'''
+        yaml_str += '''
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector

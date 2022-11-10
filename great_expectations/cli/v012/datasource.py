@@ -452,7 +452,10 @@ Great Expectations will now add a new Datasource '{:s}' to your deployment, by a
     return datasource_name
 
 
-def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
+def _add_sqlalchemy_datasource(  # noqa: C901 - 21
+    context,
+    prompt_for_datasource_name=True,
+):
 
     msg_success_database = (
         "\n<green>Great Expectations connected to your database!</green>"
@@ -1075,7 +1078,7 @@ def get_batch_kwargs(
     return (datasource_name, batch_kwargs_generator_name, data_asset_name, batch_kwargs)
 
 
-def _get_batch_kwargs_from_generator_or_from_file_path(
+def _get_batch_kwargs_from_generator_or_from_file_path(  # noqa: C901 - 26
     context,
     datasource_name,
     batch_kwargs_generator_name=None,
@@ -1227,7 +1230,7 @@ We could not determine the format of the file. What is it?
                             "\nDoes this file contain a header row?", default=True
                         )
                         batch_kwargs["reader_options"] = {"header": header_row}
-                    batch = datasource.get_batch(batch_kwargs=batch_kwargs)
+                    datasource.get_batch(batch_kwargs=batch_kwargs)
                     break
         else:
             try:
@@ -1243,7 +1246,7 @@ We could not determine the format of the file. What is it?
                         "\nDoes this file contain a header row?", default=True
                     )
                     batch_kwargs["reader_options"] = {"header": header_row}
-                batch = datasource.get_batch(batch_kwargs=batch_kwargs)
+                datasource.get_batch(batch_kwargs=batch_kwargs)
                 break
             except Exception as e:
                 file_load_error_message = """
