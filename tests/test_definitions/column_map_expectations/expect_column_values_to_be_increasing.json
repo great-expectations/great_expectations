@@ -56,7 +56,10 @@
         "unexpected_list": [4,3,2,1],
         "unexpected_index_list": [6,7,8,9],
         "success": false
-      }
+      },
+      "only_for": [
+            "pandas"
+          ]
     },{
       "title" : "positive_test_with_parse_strings_as_datetimes",
       "exact_match_out" : false,
