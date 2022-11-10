@@ -37,3 +37,4 @@ title: "Create Expectations: Index"
 - [How to add input validation and type checking for a Custom Expectation](../../guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation.md)
 - [How to add Spark support for Custom Expectations](../../guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation.md)
 - [How to add SQLAlchemy support for Custom Expectations](../../guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation.md)
+- [How to add Polars support for Custom Expectations](../../guides/expectations/features_custom_expectations/how_to_add_polars_support_for_an_expectation.md)
