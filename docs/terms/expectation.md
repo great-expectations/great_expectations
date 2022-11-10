@@ -81,7 +81,7 @@ For more information, please see our [reference guide on Distributional Expectat
 
 Conditional Expectations are those that are intended to be applied not to an entire dataset, but to a particular subset of the data.  Additionally, Conditional Expectations include those where what one expects of one variable depends on the value of another.  An example of this would be an Expectation that a column not have a null value only if another column's value falls into a specific subset.  Conditional Expectations represent a facet of map Expectations, including such things as `expect_column_values_to_be_in_set`.
 
-Conditional Expectations are currently only available for the Pandas backend.
+Conditional Expectations are **experimentally** available for Pandas, Spark, and SQLAlchemy backends.
 
 For more information on these Expectations, please see [our reference guide for Conditional Expectations](../reference/expectations/conditional_expectations.md).
 
@@ -89,7 +89,7 @@ For more information on these Expectations, please see [our reference guide for 
 
 Unfortunately, not all Expectations are implemented for all source data systems.  To see a list of what Expectations are implemented for a given backend, please reference our [guide to implemented Expectations](../reference/expectations/implemented_expectations.md).
 
-Likewise, Conditional Expectations are considered **experimental** and are only available for the Pandas backend; not for the Spark and SQLAlchemy backends.  You can reference our [documentation on Conditional Expectations](../reference/expectations/conditional_expectations.md) for more information.
+Likewise, Conditional Expectations are considered **experimental** and may exhibit unexpected behavior when utilized with Spark and SQLAlchemy backends.  You can reference our [documentation on Conditional Expectations](../reference/expectations/conditional_expectations.md) for more information.
 
 ## API basics
 

@@ -96,16 +96,28 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         )
         column: str = accessor_domain_kwargs["column"]
 
-        query: sa_sql_expression_Select = (
-            sa.select(
-                [
-                    sa.column(column).label("value"),
-                    sa.func.count(sa.column(column)).label("count"),
-                ]
+        if hasattr(sa.column(column), "is_not"):
+            query: sa_sql_expression_Select = (
+                sa.select(
+                    [
+                        sa.column(column).label("value"),
+                        sa.func.count(sa.column(column)).label("count"),
+                    ]
+                )
+                .where(sa.column(column).is_not(None))
+                .group_by(sa.column(column))
             )
-            .where(sa.column(column).is_not(None))
-            .group_by(sa.column(column))
-        )
+        else:
+            query: sa_sql_expression_Select = (
+                sa.select(
+                    [
+                        sa.column(column).label("value"),
+                        sa.func.count(sa.column(column)).label("count"),
+                    ]
+                )
+                .where(sa.column(column).isnot(None))
+                .group_by(sa.column(column))
+            )
         if sort == "value":
             # NOTE: depending on the way the underlying database collates columns,
             # ordering can vary. postgresql collate "C" matches default sort
@@ -125,7 +137,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             data=[row[1] for row in results],
             index=pd.Index(data=[row[0] for row in results], name="value"),
             name="count",
-            dtype=np.object,
+            dtype="object",
         )
         return series
 
@@ -157,15 +169,23 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         value_counts_df: pyspark_sql_DataFrame = (
             df.select(column).where(F.col(column).isNotNull()).groupBy(column).count()
         )
+
         if sort == "value":
             value_counts_df = value_counts_df.orderBy(column)
         elif sort == "count":
             value_counts_df = value_counts_df.orderBy(F.desc("count"))
+
         value_counts: List[pyspark_sql_Row] = value_counts_df.collect()
+
         # Numpy does not always infer the correct DataTypes for Spark df, so we cannot use vectorized approach.
-        values: Any
-        counts: int
-        values, counts = zip(*value_counts)
+        values: List[Any]
+        counts: List[int]
+        if len(value_counts) > 0:
+            values, counts = zip(*value_counts)
+        else:
+            values = []
+            counts = []
+
         series = pd.Series(
             counts,
             index=pd.Index(data=values, name="value"),

@@ -441,11 +441,11 @@ appropriately typed and structured dictionary for that View.
 
 Built-in Views and corresponding input types:
 
-  * :py:class:`great_expectations.render.view.DefaultJinjaPageView`: :py:class:`great_expectations.render.types.RenderedDocumentContent`
+  * :py:class:`great_expectations.render.view.DefaultJinjaPageView`: :py:class:`great_expectations.render.RenderedDocumentContent`
 
-  * :py:class:`great_expectations.render.view.DefaultJinjaSectionView`: :py:class:`great_expectations.render.types.RenderedSectionContent`
+  * :py:class:`great_expectations.render.view.DefaultJinjaSectionView`: :py:class:`great_expectations.render.RenderedSectionContent`
 
-  * :py:class:`great_expectations.render.view.DefaultJinjaComponentView`: :py:class:`great_expectations.render.types.RenderedComponentContent`
+  * :py:class:`great_expectations.render.view.DefaultJinjaComponentView`: :py:class:`great_expectations.render.RenderedComponentContent`
 
 An example of a custom page Renderer, using all built-in UI elements is provided below.
 

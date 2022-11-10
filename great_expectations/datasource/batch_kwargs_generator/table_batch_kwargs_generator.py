@@ -9,6 +9,7 @@ from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator
 )
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +150,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             split_data_asset_name = data_asset_name.split(".")
             if len(split_data_asset_name) == 2:
                 schema_name = split_data_asset_name[0]
-                if self.engine.dialect.name.lower() == "bigquery":
+                if self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
                     table_name = data_asset_name
                 else:
                     table_name = split_data_asset_name[1]
@@ -159,14 +160,14 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
 
             elif (
                 len(split_data_asset_name) == 3
-                and self.engine.dialect.name.lower() == "bigquery"
+                and self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY
             ):
                 project_id = split_data_asset_name[0]  # noqa: F841
                 schema_name = split_data_asset_name[1]
                 table_name = data_asset_name
             else:
                 shape = "[SCHEMA.]TABLE"
-                if self.engine.dialect.name.lower() == "bigquery":
+                if self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
                     shape = f"[PROJECT_ID.]{shape}"
 
                 raise ValueError(
@@ -225,7 +226,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 if schema_name in known_information_schemas:
                     continue
 
-                if self.engine.dialect.name.lower() == "bigquery":
+                if self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
                     tables.extend(
                         [
                             (table_name, "table")
@@ -237,7 +238,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                     )
                 else:
                     # set default_schema_name
-                    if self.engine.dialect.name.lower() == "sqlite":
+                    if self.engine.dialect.name.lower() == GESqlDialect.SQLITE:
                         # Workaround for compatibility with sqlalchemy < 1.4.0 and is described in issue #2641
                         default_schema_name = None
                     else:

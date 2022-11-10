@@ -74,6 +74,5 @@ class TableColumnCount(TableMetricProvider):
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies

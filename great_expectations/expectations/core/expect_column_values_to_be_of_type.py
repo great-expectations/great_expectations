@@ -14,11 +14,14 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    render_evaluation_parameter_string,
+)
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -261,7 +264,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         return (template_str, params_with_json_schema, styling)
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
@@ -375,7 +378,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 # bigquery geography requires installing an extra package
                 if (
                     expected_type.lower() == "geography"
-                    and execution_engine.engine.dialect.name.lower() == "bigquery"
+                    and execution_engine.engine.dialect.name.lower()
+                    == GESqlDialect.BIGQUERY
                     and not BIGQUERY_GEO_SUPPORT
                 ):
                     logger.warning(
@@ -513,8 +517,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         column_name = configuration.kwargs.get("column")
         expected_type = configuration.kwargs.get("type_")

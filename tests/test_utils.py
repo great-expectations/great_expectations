@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import uuid
 import warnings
 from contextlib import contextmanager
@@ -597,6 +598,7 @@ def convert_string_columns_to_datetime(
 def load_data_into_test_database(
     table_name: str,
     connection_string: str,
+    schema_name: Optional[str] = None,
     csv_path: Optional[str] = None,
     csv_paths: Optional[List[str]] = None,
     load_full_dataset: bool = False,
@@ -612,6 +614,7 @@ def load_data_into_test_database(
     Args:
         table_name: name of the table to write to.
         connection_string: used to connect to the database.
+        schema_name: optional name of schema
         csv_path: path of a single csv to write.
         csv_paths: list of paths of csvs to write.
         load_full_dataset: if False, load only the first 10 rows.
@@ -686,6 +689,7 @@ def load_data_into_test_database(
             all_dfs_concatenated.to_sql(
                 name=table_name,
                 con=engine,
+                schema=schema_name,
                 index=False,
                 if_exists="append",
                 method=to_sql_method,
@@ -982,3 +986,18 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
         logger.info(f"Could not find the following target strings: {strings}")
 
     return success
+
+
+@contextmanager
+def working_directory(directory: Union[str, Path]):
+    """
+    Resets working directory to cwd() after changing to 'directory' passed in as parameter.
+    Reference:
+    https://stackoverflow.com/questions/431684/equivalent-of-shell-cd-command-to-change-the-working-directory/431747#431747
+    """
+    owd = os.getcwd()
+    try:
+        os.chdir(directory)
+        yield directory
+    finally:
+        os.chdir(owd)

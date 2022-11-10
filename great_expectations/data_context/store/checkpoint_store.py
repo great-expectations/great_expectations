@@ -173,7 +173,7 @@ class CheckpointStore(ConfigurationStore):
         key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=ge_cloud_id
         )
-        checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment,func-returns-value]
+        checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment]
         checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
             ge_cloud_id = checkpoint_ref.ge_cloud_id

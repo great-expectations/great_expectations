@@ -1,19 +1,28 @@
 import os.path
-from glob import glob
+import pathlib
+from typing import List
 
 import requirements as rp
 
-from great_expectations.data_context.util import file_relative_path
+
+def collect_requirements_files() -> List[pathlib.Path]:
+    project_root = pathlib.Path(__file__).parents[1]
+    assert project_root.exists()
+    reqs_dir = project_root.joinpath("reqs")
+    assert reqs_dir.exists()
+
+    pattern = "requirements*.txt"
+    return list(project_root.glob(pattern)) + list(reqs_dir.glob(pattern))
 
 
 def test_requirements_files():
     """requirements.txt should be a subset of requirements-dev.txt"""
 
     req_set_dict = {}
-    for req_file in glob(
-        file_relative_path(__file__, os.path.join("..", "requirements*.txt"))
-    ):
-        key = req_file.rsplit(os.path.sep, 1)[-1]
+    req_files = collect_requirements_files()
+    for req_file in req_files:
+        abs_path = req_file.absolute().as_posix()
+        key = abs_path.rsplit(os.path.sep, 1)[-1]
         with open(req_file) as f:
             req_set_dict[key] = {
                 f'{line.name}{"".join(line.specs[0])}'
@@ -61,6 +70,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-teradata.txt"]
         | req_set_dict["requirements-dev-trino.txt"]
         | req_set_dict["requirements-dev-hive.txt"]
+        | req_set_dict["requirements-dev-vertica.txt"]
     ) == req_set_dict["requirements-dev-sqlalchemy.txt"]
 
     assert (
@@ -94,4 +104,5 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-snowflake.txt"]
         | req_set_dict["requirements-dev-teradata.txt"]
         | req_set_dict["requirements-dev-trino.txt"]
+        | req_set_dict["requirements-dev-vertica.txt"]
     ) <= {"numpy>=1.21.0", "scipy>=1.7.0"}
