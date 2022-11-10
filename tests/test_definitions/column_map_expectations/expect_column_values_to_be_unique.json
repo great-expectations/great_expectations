@@ -63,6 +63,7 @@
         "mult_dup": "VARCHAR"
       }
     },
+    "suppress_test_for": ["polars"],
     "tests" : [
       {
         "title": "basic_positive_test_case",
@@ -221,5 +222,124 @@
         }
       }
     ]
-  }]
+  },
+    {
+      "data" : {
+        "a" : ["2", "2", "2", "null"],
+        "b" : [1, 2, 2, 3],
+        "c" : [1, 1, 2, null],
+        "d" : [1, 1, 2, 2],
+        "unique" : [1, 2, 3, 4],
+        "null": [null, null, null, null],
+        "mult_dup": ["1", "1", "2", "2"]
+      },
+      "schemas": {
+        "polars": {
+          "a": "Utf8",
+          "b": "Int64",
+          "c": "Int64",
+          "d": "Int64",
+          "unique": "Int64",
+          "null": "Null",
+          "mult_dup": "Utf8"
+        }
+      },
+      "only_for": ["polars"],
+      "tests" : [
+        {
+          "title": "basic_positive_test_case",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "unique"
+          },
+          "out": {
+            "success": true,
+            "unexpected_list": []
+          }
+        },
+        {
+          "title": "basic_negative_case_all_non_unique_character_values",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "a"
+          },
+          "out": {
+            "success": false,
+            "unexpected_list": ["2", "2", "2"]
+          }
+        },
+        {
+          "title": "multi_type_column_null",
+          "exact_match_out": false,
+          "in": {
+            "column": "c",
+            "mostly": 0.3
+          },
+          "out": {},
+          "error": {
+            "traceback_substring" : "not implemented"
+          }
+        },
+        {
+        "title": "positive_case_using_mostly",
+        "exact_match_out": false,
+        "in": {
+          "column": "b",
+          "mostly": 0.5
+        },
+        "out": {
+          "success": true,
+          "unexpected_list": [2, 2]
+        }
+        },
+        {
+          "title": "negative_case_using_mostly",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "mostly": 0.6
+          },
+          "out": {
+            "success": false,
+            "unexpected_list": [2, 2]
+          }
+        },
+        {
+          "title": "null_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "null"
+          },
+          "out": {
+            "success": true,
+            "unexpected_list": []
+          }
+        },
+        {
+          "title": "negative_case_non_unique_numeric_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "c"
+          },
+          "out": {
+            "success": false,
+            "unexpected_list": [1, 1]
+          }
+        },
+        {
+          "title": "negative_multiple_duplicate_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "mult_dup"
+          },
+          "out": {
+            "success": false,
+            "unexpected_list": ["1", "1", "2", "2"]
+          }
+        }
+      ]
+    }
+  ]
 }

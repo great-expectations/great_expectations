@@ -1,5 +1,6 @@
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
+    PolarsExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
@@ -20,6 +21,10 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return ~column.duplicated(keep=False)
+
+    @column_condition_partial(engine=PolarsExecutionEngine)
+    def _polars(cls, column, **kwargs):
+        return ~column.is_duplicated()
 
     # NOTE: 20201119 - JPC - We cannot split per-dialect into window and non-window functions
     # @column_condition_partial(
