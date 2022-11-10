@@ -39,7 +39,7 @@ except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 
-@click.command()
+@click.command()  # noqa: C901 - 21
 @click.option(
     "--target-directory",
     "-d",

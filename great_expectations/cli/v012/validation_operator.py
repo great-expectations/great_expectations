@@ -78,7 +78,7 @@ def validation_operator_list(directory):
         raise e
 
 
-@validation_operator.command(name="run")
+@validation_operator.command(name="run")  # noqa: C901 - 24
 @click.option(
     "--validation_config_file",
     "-f",
