@@ -429,7 +429,7 @@ def load_data_context_with_error_handling(
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or DataContext.find_context_root_dir()
-        ge_config_version = DataContext.get_ge_config_version(
+        ge_config_version = DataContext.get_ge_config_version(  # type: ignore[assignment] # version could be None
             context_root_dir=directory
         )
         context = upgrade_project_strictly_multiple_versions_increment(
