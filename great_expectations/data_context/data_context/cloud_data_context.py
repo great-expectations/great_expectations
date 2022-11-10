@@ -402,6 +402,7 @@ class CloudDataContext(AbstractDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
+            # TODO: NF 09-11-2022 - Replace this logic once retrieving expectations suites by name is possible
             identifiers: Optional[
                 Union[List[str], List[GeCloudIdentifier]]
             ] = self.list_expectation_suites()
@@ -509,14 +510,14 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             None
         """
-        id = (
+        ge_cloud_id = (
             str(expectation_suite.ge_cloud_id)
             if expectation_suite.ge_cloud_id
             else None
         )
         key = GeCloudIdentifier(
             resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=id,
+            ge_cloud_id=ge_cloud_id,
             resource_name=expectation_suite.expectation_suite_name,
         )
 
