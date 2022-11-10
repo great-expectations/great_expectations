@@ -6,6 +6,13 @@ from typing import Any, Dict, List, MutableMapping, Optional, Type
 
 from typing_extensions import ClassVar, Literal
 
+# if __name__ == "__main__":
+#     # don't setup the logger unless being run as a script
+#     # TODO: remove this before release
+from great_expectations.zep.logger import init_logger
+
+init_logger(level=10)
+
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.zep.interfaces import (
@@ -15,13 +22,6 @@ from great_expectations.zep.interfaces import (
     DataAsset,
     Datasource,
 )
-
-if __name__ == "__main__":
-    # don't setup the logger unless being run as a script
-    # TODO: remove this before release
-    from great_expectations.zep.logger import init_logger
-
-    init_logger(level=30)
 
 
 class PostgresDatasourceError(Exception):
