@@ -15,6 +15,8 @@ from great_expectations.render.util import (
 
 
 class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
+    """Expect the compound columns to be unique."""
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",

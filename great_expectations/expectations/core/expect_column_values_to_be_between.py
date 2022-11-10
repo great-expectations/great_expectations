@@ -28,7 +28,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
-    """Expect column entries to be between a minimum value and a maximum value (inclusive).
+    """Expect the column entries to be between a minimum value and a maximum value (inclusive).
 
     expect_column_values_to_be_between is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine

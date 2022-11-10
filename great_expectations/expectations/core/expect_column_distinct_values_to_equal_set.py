@@ -18,6 +18,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
+    """Expect the set of distinct column values to equal a given set."""
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

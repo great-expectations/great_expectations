@@ -45,7 +45,6 @@ class EphemeralDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        self._config_variables: dict = self._load_config_variables()
         self._variables: EphemeralDataContextVariables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
 
