@@ -12,7 +12,6 @@ title: Changelog
 * [DOCS] Prioritizes Onboarding Data Assistant in ToC (#6302)
 * [DOCS] Add ZenML into integration table in Readme (#6144) (thanks @dnth)
 * [DOCS] add `pypi` release badge (#6324)
-* [DOCS] DOC-308 update CLI command in docs when working with RBPs instead of Data Assistants (#6222)
 * [MAINTENANCE] Remove unneeded `BaseDataContext.get_batch_list` (#6291)
 * [MAINTENANCE] Clean up implicit `Optional` errors flagged by `mypy` (#6319)
 * [MAINTENANCE] Add manual prod flags to core Expectations (#6278)
