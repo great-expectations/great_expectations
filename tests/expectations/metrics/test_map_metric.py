@@ -222,6 +222,95 @@ def test_pandas_unexpected_rows_basic_result_format(dataframe_for_unexpected_row
     }
 
 
+def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly_false(
+    dataframe_for_unexpected_rows,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "b",
+            "mostly": 0.9,
+            "value_set": ["cat", "fish", "dog", "giraffe"],
+            "result_format": {
+                "result_format": "SUMMARY",
+                "include_unexpected_rows": False,  # this is the default value, but making explicit for testing purposes
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch = Batch(data=dataframe_for_unexpected_rows)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
+        ],
+        "partial_unexpected_index_list": [4, 5],
+        "partial_unexpected_list": ["lion", "zebra"],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+    }
+
+
+def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_unexpected_rows(
+    dataframe_for_unexpected_rows,
+):
+    expectationConfiguration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "b",
+            "mostly": 0.9,
+            "value_set": ["cat", "fish", "dog", "giraffe"],
+            "result_format": {
+                "result_format": "SUMMARY",
+                "include_unexpected_rows": True,
+            },
+        },
+    )
+
+    expectation = ExpectColumnValuesToBeInSet(expectationConfiguration)
+    batch = Batch(data=dataframe_for_unexpected_rows)
+    engine = PandasExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "unexpected_count": 2,
+        "unexpected_percent": 33.33333333333333,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
+        ],
+        "partial_unexpected_index_list": [4, 5],
+        "partial_unexpected_list": ["lion", "zebra"],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 33.33333333333333,
+        "unexpected_percent_nonmissing": 33.33333333333333,
+        "unexpected_rows": [{"a": 5, "b": "lion"}, {"a": 10, "b": "zebra"}],
+    }
+
+
 def test_pandas_unexpected_rows_complete_result_format(dataframe_for_unexpected_rows):
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
