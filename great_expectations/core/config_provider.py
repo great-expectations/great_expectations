@@ -162,5 +162,5 @@ class CloudConfigurationProvider(AbstractConfigurationProvider):
         return {
             GECloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
             GECloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
-            GECloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[arg-type]
+            GECloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[dict-item]
         }
