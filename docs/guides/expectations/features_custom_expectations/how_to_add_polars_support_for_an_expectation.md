@@ -16,7 +16,7 @@ Great Expectations supports a number of <TechnicalTag tag="execution_engine" tex
 
 If you decide to contribute your <TechnicalTag tag="expectation" text="Expectation" />, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Execution Engines that it supports.
 
-We will add Polars support for the Custom Expectations implemented in our guide on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
+We will add Polars support for the Custom Expectation implemented in our guide on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
 
 ## Steps
 
@@ -26,7 +26,7 @@ To avoid surprises and help clearly define your Custom Expectation, it can be he
 
 Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
     
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L132
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L112-L162
 ```
 
 :::note
@@ -35,53 +35,45 @@ You may have noticed that specifying `test_backends` isn't required for successf
 If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.
 :::
 
-### 2. Implement the Spark logic for your Custom Expectation
+### 2. Implement the Polars logic for your Custom Expectation
 
-Great Expectations provides a variety of ways to implement an Expectation in Spark. Two of the most common include: 
+Great Expectations supports all standard Polars DataFrame & Series operations, allowing for much of the logic 
+to be abstracted away by specifying metric behavior as a partial function.
 
-1.  Defining a partial function that takes a Spark DataFrame column as input
-2.  Directly executing queries on Spark DataFrames to determine the value of your Expectation's metric directly
+To do this, we use one of the following decorators:
 
-Great Expectations allows for much of the PySpark DataFrame logic to be abstracted away by specifying metric behavior as a partial function. 
-
-To do this, we use one of the `@column_*_partial` decorators:
-
-- `@column_aggregate_partial` for Column Aggregate Expectations
+- `@column_aggregate_value` for Column Aggregate Expectations
 - `@column_condition_partial` for Column Map Expectations
 - `@column_pair_condition_partial` for Column Pair Map Expectations
 - `@multicolumn_condition_partial` for Multicolumn Map Expectations
+- `@metric_value` for Table Expectation
 
-These decorators expect an appropriate `engine` argument. In this case, we'll pass our `SparkDFExecutionEngine`.
+These decorators expect an appropriate `engine` argument. In this case, we'll pass our `PolarsExecutionEngine`.
 
-The decorated method takes in a Spark `Column` object and will either return a `pyspark.sql.functions.function` or a `pyspark.sql.Column.function` that Great Expectations will use to generate the appropriate SQL queries.
+The decorated method takes in a Polars `Series` or `DataFrame` object and will return a `polars.internals.frame.DataFrame`, `polars.internals.series.Series`, or value that Great Expectations will use to validate your data.
 
-For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to leverage PySpark's `max` SQL Function and the `@column_aggregate_partial` decorator.
+For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to leverage Polars' `Series.max` method and the `@column_aggregate_value` decorator.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L76-L79
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L52-L55
 ```
-
-If we need a builtin function from `pyspark.sql.functions`, usually aliased to `F`, the import logic in 
-`from great_expectations.expectations.metrics.import_manager import F`
-allows us to access these functions even when PySpark is not installed.
 
 <details>
 <summary>Applying Python Functions</summary>
-<code>F.udf</code> allows us to use a Python function as a Spark User Defined Function for Column Map Expectations, 
+Polars' <code>.apply</code> method allows us to create a User-Defined Function to do our calculations, 
 giving us the ability to define custom functions and apply them to our data.
 <br/><br/>
-Here is an example of <code>F.udf</code> applied to <code>ExpectColumnValuesToEqualThree</code>:
+Here is an example of <code>column.apply</code> applied to <code>ExpectColumnValuesToEqualThree</code>:
 
 ```python
-@column_condition_partial(engine=SparkDFExecutionEngine)
-def _spark(cls, column, strftime_format, **kwargs):
+@column_condition_partial(engine=PolarsExecutionEngine)
+def _polars(cls, column, **kwargs):
     def is_equal_to_three(val):
         return (val == 3)
 
-    success_udf = F.udf(is_equal_to_three, sparktypes.BooleanType())
-    return success_udf(column)
+    return column.apply(is_equal_to_three)
 ```
 
-For more on <code>F.udf</code> and the functionality it provides, see the <a href="https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.functions.udf.html">Apache Spark UDF documentation</a>.
+For more on <code>.apply</code> and the functionality it provides, see the <a href="https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.apply.html">Polars UDF documentation</a>.
 </details>
 
 
@@ -95,8 +87,9 @@ If your implementation is correctly defined, and the rest of the core logic in y
 ✔ Has at least one positive and negative example case, and all test cases pass
 ```
 
-If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md) 
-and the SQLAlchemy backend covered in our guide on [how to add SQLAlchemy support for Custom Expectations](./how_to_add_sqlalchemy_support_for_an_expectation.md), 
+If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md), 
+the SQLAlchemy backend covered in our guide on [how to add SQLAlchemy support for Custom Expectations](./how_to_add_sqlalchemy_support_for_an_expectation.md), 
+and the Spark backend covered in our guide on [how to add Spark support for Custom Expectations](./how_to_add_spark_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
 ```console
@@ -105,7 +98,7 @@ you should see the following in your Diagnostic Checklist:
 
 <div style={{"text-align":"center"}}>
 <p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
-Congratulations!<br/>&#127881; You've successfully implemented Spark support for a Custom Expectation! &#127881;
+Congratulations!<br/>&#127881; You've successfully implemented Polars support for a Custom Expectation! &#127881;
 </b></p>
 </div>
 
@@ -121,7 +114,6 @@ If you believe your Custom Expectation is otherwise ready for contribution at a 
 :::note
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
-To view the full scripts used in this page, see them on GitHub:
+To view the full script used in this page, see it on GitHub:
 - [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
-- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
 :::
