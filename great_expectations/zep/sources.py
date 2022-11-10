@@ -119,8 +119,11 @@ class _SourceFactories:
     @classmethod
     def _register_engine(cls, ds_type: Type[Datasource]):
         try:
-            exec_engine_type: Type[ExecutionEngine] = ds_type.execution_engine.__class__
-        except AttributeError as exc:
+            exec_engine_type: Type[ExecutionEngine] = ds_type.__fields__[
+                "execution_engine"
+            ].type_
+        except (AttributeError, KeyError) as exc:
+            LOGGER.warning(f"{exc.__class__.__name__}:{exc}")
             raise TypeError(
                 f"No `execution_engine` found for {ds_type.__name__} unable to register `ExecutionEngine` type"
             ) from exc

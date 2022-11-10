@@ -111,9 +111,8 @@ class PostgresDatasource(Datasource):
 
     type: Literal["postgres"] = "postgres"
     connection_str: str
-    assets: MutableMapping[str, TableAsset]
-    # TODO: should be instance attr
     execution_engine: SqlAlchemyExecutionEngine
+    assets: MutableMapping[str, TableAsset]
 
     def add_table_asset(self, name: str, table_name: str) -> TableAsset:
         """Adds a table asset to this datasource.

@@ -51,11 +51,11 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
 
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
-    execution_engine: ClassVar[ExecutionEngine]
 
     # instance attrs
+    type: str
     name: str
-    engine: str
+    execution_engine: ExecutionEngine
     assets: Mapping[str, DataAsset]
 
     @root_validator(pre=True)
