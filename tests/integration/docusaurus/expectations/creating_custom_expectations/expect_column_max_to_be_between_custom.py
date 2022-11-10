@@ -48,12 +48,14 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         return column.max()
 
     # </snippet>
-
+    # <snippet>
     @column_aggregate_value(engine=PolarsExecutionEngine)
     def _polars(cls, column, **kwargs):
         """Pandas Max Implementation"""
         return column.max()
 
+    # </snippet>
+    # <snippet>
     @metric_value(
         engine=SqlAlchemyExecutionEngine,
         metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
@@ -67,6 +69,8 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         metrics,
         runtime_configuration,
     ):
+        # </snippet>
+        # <snippet>
         (
             selectable,
             compute_domain_kwargs,
@@ -78,16 +82,22 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
-
+        # </snippet>
+        # <snippet>
         query = sa.select([sa.func.max(column)]).select_from(selectable)
         result = sqlalchemy_engine.execute(query).fetchone()
 
         return result[0]
 
+    # </snippet>
+    # <snippet>
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _table, _column_name, **kwargs):
         """Spark Max Implementation"""
         return F.max(column)
+
+
+#     </snippet>
 
 
 # <snippet>
@@ -167,7 +177,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         "strict_max": None,
         "mostly": 1,
     }
-
+    # <snippet>
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -185,13 +195,15 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
-
+        # </snippet>
+        # <snippet>
         min_value = configuration.kwargs["min_value"]
         max_value = configuration.kwargs["max_value"]
         strict_min = configuration.kwargs["strict_min"]
         strict_max = configuration.kwargs["strict_max"]
-
+        # </snippet>
         # Validating that min_val, max_val, strict_min, and strict_max are of the proper format and type
+        # <snippet>
         try:
             assert (
                 min_value is not None or max_value is not None
@@ -214,6 +226,8 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
             ), "strict_max must be a boolean value"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+
+    #     </snippet>
 
     # <snippet>
     def _validate(
