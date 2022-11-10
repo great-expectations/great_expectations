@@ -42,9 +42,7 @@ def pytest_generate_tests(metafunc):
         )
         backends = build_test_backends_list_v2_api(metafunc)
         for c in backends:
-            if c in [
-                "trino",
-            ]:
+            if c in ["trino", "polars"]:
                 continue
             for filename in test_configuration_files:
                 file = open(filename)
