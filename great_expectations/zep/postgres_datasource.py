@@ -16,6 +16,13 @@ from great_expectations.zep.interfaces import (
     Datasource,
 )
 
+if __name__ == "__main__":
+    # don't setup the logger unless being run as a script
+    # TODO: remove this before release
+    from great_expectations.zep.logger import init_logger
+
+    init_logger(level=30)
+
 
 class PostgresDatasourceError(Exception):
     pass
@@ -98,16 +105,15 @@ class TableAsset(DataAsset):
         return self
 
 
-class PostgresDatasource:
+class PostgresDatasource(Datasource):
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset]
 
     type: Literal["postgres"] = "postgres"
-    engine: Literal["sql_alchemy"] = "sql_alchemy"
     connection_str: str
     assets: MutableMapping[str, TableAsset]
     # TODO: should be instance attr
-    execution_engine: ClassVar[SqlAlchemyExecutionEngine]
+    execution_engine: SqlAlchemyExecutionEngine
 
     def add_table_asset(self, name: str, table_name: str) -> TableAsset:
         """Adds a table asset to this datasource.
@@ -200,3 +206,7 @@ class PostgresDatasource:
                 data=data,
             )
         ]
+
+
+if __name__ == "__main__":
+    pass
