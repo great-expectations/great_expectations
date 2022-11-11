@@ -19,6 +19,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
+from great_expectations.core.config_provider import ConfigurationProvider
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
@@ -32,10 +33,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    substitute_all_config_variables,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -114,9 +112,11 @@ class _YamlConfigValidator:
     def __init__(
         self,
         data_context: AbstractDataContext,
+        config_provider: ConfigurationProvider,
     ):
         """Init _YamlConfigValidator with a Data Context"""
         self._data_context = data_context
+        self._config_provider = config_provider
 
     @property
     def usage_statistics_handler(self):
@@ -338,26 +338,7 @@ class _YamlConfigValidator:
         self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
     ) -> str:
         try:
-            substituted_config_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                self.config_variables,
-                dict(os.environ),
-            )
-
-            substitutions: dict = {
-                **substituted_config_variables,  # type: ignore[list-item]
-                **dict(os.environ),
-                **runtime_environment,
-            }
-
-            config_str_with_substituted_variables: str = (
-                substitute_all_config_variables(
-                    yaml_config,
-                    substitutions,
-                )
-            )
-            return config_str_with_substituted_variables
+            return self._config_provider.substitute_config(yaml_config)
         except Exception as e:
             usage_stats_event_payload: dict = {
                 "diagnostic_info": ["__substitution_error__"],

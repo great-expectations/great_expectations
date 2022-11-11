@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional
 
+from great_expectations.core.config_provider import ConfigurationProvider
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -18,7 +19,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
-from great_expectations.data_context.util import substitute_all_config_variables
 
 if TYPE_CHECKING:
     from great_expectations.data_context import DataContext
@@ -67,12 +67,11 @@ class DataContextVariables(ABC):
 
     Args:
         config:        A reference to the DataContextConfig to perform CRUD on.
-        substitutions: A dictionary used to perform substitutions of ${VARIABLES}; to be used with GET requests.
         _store:        An instance of a DataContextStore with the appropriate backend to persist config changes.
     """
 
     config: DataContextConfig
-    substitutions: Optional[dict] = None
+    _config_provider: ConfigurationProvider
     _store: Optional[DataContextStore] = None
 
     def __post_init__(self) -> None:
@@ -111,7 +110,7 @@ class DataContextVariables(ABC):
     def _get(self, attr: DataContextVariableSchema) -> Any:
         key: str = attr.value
         val: Any = self.config[key]
-        substituted_val: Any = substitute_all_config_variables(val, self.substitutions)
+        substituted_val: Any = self._config_provider.substitute_config(val)
         return substituted_val
 
     def save_config(self) -> Any:
