@@ -21,6 +21,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
+    """Expect the set of distinct column values to contain a given set."""
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
