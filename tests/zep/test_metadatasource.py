@@ -161,12 +161,8 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
 
     class PurpleDatasource(Datasource):
         asset_types = [RedAsset, BlueAsset]
-        execution_engine = DummyExecutionEngine()
-
-        def __init__(self, name: str) -> None:
-            self.name = name
-            self.assets = {}
-            # self.execution_engine = DummyExecutionEngine()
+        type: str = "purple"
+        execution_engine: DummyExecutionEngine
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)
