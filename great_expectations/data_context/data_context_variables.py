@@ -74,10 +74,6 @@ class DataContextVariables(ABC):
     config_provider: ConfigurationProvider
     _store: Optional[DataContextStore] = None
 
-    def __post_init__(self) -> None:
-        if self.substitutions is None:
-            self.substitutions = {}
-
     def __str__(self) -> str:
         return str(self.config)
 

@@ -3170,7 +3170,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         yaml_config_validator = _YamlConfigValidator(
             data_context=self,
-            config_provider=self._config_provider,
         )
         return yaml_config_validator.test_yaml_config(
             yaml_config=yaml_config,
