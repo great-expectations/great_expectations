@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Union, cast
 
 import requests
 
@@ -56,7 +56,7 @@ class CloudDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: DataContextConfig = None,
+        project_config: Optional[Union[DataContextConfig, Mapping]] = None,
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         ge_cloud_base_url: Optional[str] = None,
