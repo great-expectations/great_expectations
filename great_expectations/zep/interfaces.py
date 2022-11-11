@@ -91,8 +91,12 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
             f"Selecting & instantiating `Datasource.execution_engine' ->\n {pf(values, depth=1)}"
         )
         # TODO (kilo59): catch key errors
-        engine_name: str = values["type"]
-        engine_type: Type[ExecutionEngine] = _SourceFactories.engine_lookup[engine_name]
+        ds_type_default = cls.__fields__["type"].default
+        registered_ds_type_name: str = values.get("type", ds_type_default)
+
+        engine_type: Type[ExecutionEngine] = _SourceFactories.engine_lookup[
+            registered_ds_type_name
+        ]
 
         engine_kwargs = {
             k: v for (k, v) in values.items() if k not in cls._excluded_eng_args
@@ -100,7 +104,7 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
         LOGGER.debug(f"{engine_type} - kwargs: {list(engine_kwargs.keys())}")
         engine = engine_type(**engine_kwargs)
         values["execution_engine"] = engine
-        LOGGER.warning(engine)
+        LOGGER.info(f"{registered_ds_type_name} - {engine_type.__name__} - {engine}")
         return values
 
     @validator("assets", pre=True)
