@@ -91,7 +91,6 @@ from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
     instantiate_class_from_config,
-    substitute_all_config_variables,
 )
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -634,14 +633,7 @@ class AbstractDataContext(ABC):
         """
         if not config:
             config = self._project_config
-
-        substitutions: dict = self._determine_substitutions()
-
-        return DataContextConfig(
-            **substitute_all_config_variables(
-                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            )
-        )
+        return DataContextConfig(**self._config_provider.substitute_config(config))
 
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
@@ -996,10 +988,7 @@ class AbstractDataContext(ABC):
         raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
         raw_config = datasourceConfigSchema.load(raw_config_dict)
 
-        substitutions: dict = self._determine_substitutions()
-        substituted_config = substitute_all_config_variables(
-            raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-        )
+        substituted_config = self._config_provider.substitute_config(raw_config_dict)
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
         datasource_config = datasourceConfigSchema.load(substituted_config)
@@ -1023,14 +1012,10 @@ class AbstractDataContext(ABC):
         Returns:
             Dict of config with substitutions and sanitizations applied.
         """
-        substitutions: dict = self._determine_substitutions()
         datasource_dict: dict = serializer.serialize(datasource_config)
 
         substituted_config: dict = cast(
-            dict,
-            substitute_all_config_variables(
-                datasource_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
-            ),
+            dict, self._config_provider.substitute_config(datasource_dict)
         )
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
@@ -2638,7 +2623,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         # By always recalculating substitutions with each call, we ensure we stay up-to-date
         # with the latest changes to env vars and config vars
-        substitutions: dict = self._determine_substitutions()
+        substitutions: dict = self._config_provider.get_values()
         self._variables.substitutions = substitutions
 
         return self._variables
@@ -2704,9 +2689,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         self._config_variables = self._load_config_variables()
 
-    def _determine_substitutions(self) -> Dict:
-        return self._config_provider.get_values()
-
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
     ) -> None:
@@ -2729,15 +2711,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             Dict[str, DatasourceConfig], config.datasources
         )
 
-        substitutions = self._determine_substitutions()
-
         for datasource_name, datasource_config in datasources.items():
             try:
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
 
                 raw_config_dict = dict(datasourceConfigSchema.dump(config))
-                substituted_config_dict: dict = substitute_all_config_variables(
-                    raw_config_dict, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+                substituted_config_dict: dict = self._config_provider.substitute_config(
+                    raw_config_dict
                 )
 
                 raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
@@ -2842,13 +2822,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             Datasource Config with substitutions performed.
         """
-        substitutions: dict = self._determine_substitutions()
-
         substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         raw_config: dict = substitution_serializer.serialize(config)
 
-        substituted_config_dict: dict = substitute_all_config_variables(
-            raw_config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+        substituted_config_dict: dict = self._config_provider.substitute_config(
+            raw_config
         )
 
         substituted_config: DatasourceConfig = datasourceConfigSchema.load(

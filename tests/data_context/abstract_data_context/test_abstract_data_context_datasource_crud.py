@@ -24,21 +24,17 @@ class StubDatasourceStore(DatasourceStore):
 
 
 class FakeAbstractDataContext(AbstractDataContext):
-    def __init__(self, substitutions: Optional[dict] = None) -> None:
+    def __init__(self, config_provider: Optional[dict] = None) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
         self._cached_datasources: dict = {}
         self._usage_statistics_handler = None
-        self._substitutions = substitutions or {}
+        self._config_provider = config_provider
 
     def _init_variables(self):
         """Using EphemeralDataContextVariables to store in memory."""
         return EphemeralDataContextVariables(config=DataContextConfig())
-
-    def _determine_substitutions(self):
-        """No substitutions required for these tests."""
-        return self._substitutions
 
     def save_expectation_suite(self):
         """Abstract method. Only a stub is needed."""

@@ -361,7 +361,7 @@ class CloudDataContext(AbstractDataContext):
         if not config:
             config = self.config
 
-        substitutions: dict = self._determine_substitutions()
+        substitutions: dict = self._config_provider.get_values()
 
         ge_cloud_config_variable_defaults = {
             "plugins_directory": self._normalize_absolute_or_relative_path(
