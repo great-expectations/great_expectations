@@ -34,7 +34,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
-from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
@@ -332,6 +331,7 @@ class CloudDataContext(AbstractDataContext):
 
         variables = CloudDataContextVariables(
             config=self._project_config,
+            _config_provider=self._config_provider,
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_organization_id=ge_cloud_organization_id,
             ge_cloud_access_token=ge_cloud_access_token,

@@ -2620,12 +2620,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def variables(self) -> DataContextVariables:
         if self._variables is None:
             self._variables = self._init_variables()
-
-        # By always recalculating substitutions with each call, we ensure we stay up-to-date
-        # with the latest changes to env vars and config vars
-        substitutions: dict = self._config_provider.get_values()
-        self._variables.substitutions = substitutions
-
         return self._variables
 
     @property
@@ -3176,6 +3170,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         yaml_config_validator = _YamlConfigValidator(
             data_context=self,
+            config_provider=self._config_provider,
         )
         return yaml_config_validator.test_yaml_config(
             yaml_config=yaml_config,

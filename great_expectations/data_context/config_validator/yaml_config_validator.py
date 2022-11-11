@@ -112,11 +112,9 @@ class _YamlConfigValidator:
     def __init__(
         self,
         data_context: AbstractDataContext,
-        config_provider: ConfigurationProvider,
     ):
         """Init _YamlConfigValidator with a Data Context"""
         self._data_context = data_context
-        self._config_provider = config_provider
 
     @property
     def usage_statistics_handler(self):
@@ -338,7 +336,11 @@ class _YamlConfigValidator:
         self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
     ) -> str:
         try:
-            return self._config_provider.substitute_config(yaml_config)
+            config_values = self._data_context._config_provider.get_values()
+            config_values.update(runtime_environment)
+            return self._data_context._config_provider.substitute_config(
+                config=yaml_config, config_values=config_values
+            )
         except Exception as e:
             usage_stats_event_payload: dict = {
                 "diagnostic_info": ["__substitution_error__"],

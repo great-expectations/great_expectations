@@ -423,8 +423,11 @@ class ConfigurationProvider(AbstractConfigurationProvider):
             values.update(provider.get_values())
         return values
 
-    def substitute_config(self, config: Any) -> Any:
-        config_values = self.get_values()
+    def substitute_config(
+        self, config: Any, config_values: Optional[Dict[str, str]] = None
+    ) -> Any:
+        if config_values is None:
+            config_values = self.get_values()
         return self._substitutor.substitute_all_config_variables(config, config_values)
 
 
