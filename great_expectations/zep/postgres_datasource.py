@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import dataclasses
 from pprint import pformat as pf
 from typing import Any, Dict, List, MutableMapping, Optional, Type
 
 from typing_extensions import ClassVar, Literal
 from pydantic import dataclasses as dc
+from pydantic import PrivateAttr
 
 # if __name__ == "__main__":
 #     # don't setup the logger unless being run as a script
@@ -38,12 +38,18 @@ class ColumnSplitter:
 
 
 class TableAsset(DataAsset):
-    # Instance variables
+    # Instance fields
     type: Literal["table"] = "table"
     table_name: str
     column_splitter: Optional[ColumnSplitter] = None
     name: str
-    datasource: Datasource
+
+    # non-field private attrs
+    _datasource: PostgresDatasource = PrivateAttr()
+
+    @property
+    def datasource(self) -> PostgresDatasource:
+        return self._datasource
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
