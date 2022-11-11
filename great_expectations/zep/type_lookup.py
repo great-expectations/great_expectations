@@ -18,6 +18,7 @@ class TypeLookup(
     """
     Dict-like Mapping object that creates keys from values and values from keys.
     Because of this, all values must be Hashable.
+    `NoneType` / `None` is not allowed.
 
     If a Mapping-like object is passed as the first parameter, its key/values will be
     unpacked (and combined with kwargs) into the new `TypeDict` object.
@@ -49,10 +50,18 @@ class TypeLookup(
         super().pop(value, None)
 
     def __setitem__(self, key: ValidTypes, value: ValidTypes):
+        if key is None:
+            raise TypeLookupError(
+                f"`{type(key).__name__}` for {value} is not allowed - bad key"
+            )
+        if value is None:
+            raise TypeLookupError(
+                f"`{type(value).__name__}` for {key} is not allowed - bad value"
+            )
         if key in self:
-            raise TypeLookupError(f"`{key}` already set - key")
+            raise TypeLookupError(f"`{key}` already set - bad key")
         if value in self:
-            raise TypeLookupError(f"`{value}` already set - value")
+            raise TypeLookupError(f"`{value}` already set - bad value")
         super().__setitem__(key, value)
         super().__setitem__(value, key)
 
