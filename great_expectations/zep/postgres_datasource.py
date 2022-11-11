@@ -3,9 +3,9 @@ from __future__ import annotations
 from pprint import pformat as pf
 from typing import Any, Dict, List, MutableMapping, Optional, Type
 
-from typing_extensions import ClassVar, Literal
-from pydantic import dataclasses as dc
 from pydantic import PrivateAttr
+from pydantic import dataclasses as dc
+from typing_extensions import ClassVar, Literal
 
 # if __name__ == "__main__":
 #     # don't setup the logger unless being run as a script
@@ -43,13 +43,6 @@ class TableAsset(DataAsset):
     table_name: str
     column_splitter: Optional[ColumnSplitter] = None
     name: str
-
-    # non-field private attrs
-    _datasource: PostgresDatasource = PrivateAttr()
-
-    @property
-    def datasource(self) -> PostgresDatasource:
-        return self._datasource
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None

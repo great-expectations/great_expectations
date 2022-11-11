@@ -3,9 +3,9 @@ from __future__ import annotations
 import dataclasses
 import logging
 from pprint import pformat as pf
-from typing import Any, Dict, List, Mapping, Optional, Set, Type, Any
+from typing import Any, Dict, List, Mapping, Optional, Set, Type, Union
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, PrivateAttr, root_validator, validator
 from typing_extensions import ClassVar, TypeAlias
 
 from great_expectations.core.batch import BatchDataType
@@ -39,6 +39,14 @@ class BatchRequest:
 class DataAsset(BaseModel):
     name: str
     type: str
+
+
+    # non-field private attrs
+    _datasource: Union[Datasource, None] = PrivateAttr(default=None)
+
+    @property
+    def datasource(self) -> Union[Datasource, None]:
+        return self._datasource
 
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         raise NotImplementedError
