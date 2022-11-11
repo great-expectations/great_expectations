@@ -93,7 +93,6 @@ class CloudDataContext(AbstractDataContext):
         super().__init__(
             runtime_environment=runtime_environment,
         )
-        self._variables = self._init_variables()
 
     def _register_providers(self, config_provider: ConfigurationProvider) -> None:
         """

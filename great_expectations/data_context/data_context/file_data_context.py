@@ -54,7 +54,6 @@ class FileDataContext(AbstractDataContext):
             config=project_config
         )
         super().__init__(runtime_environment=runtime_environment)
-        self._variables: FileDataContextVariables = self._init_variables()
 
     def _init_datasource_store(self) -> None:
         from great_expectations.data_context.store.datasource_store import (

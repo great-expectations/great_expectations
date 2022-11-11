@@ -46,7 +46,6 @@ class EphemeralDataContext(AbstractDataContext):
             config=project_config
         )
         super().__init__(runtime_environment=runtime_environment)
-        self._variables: EphemeralDataContextVariables = self._init_variables()
 
     def _init_variables(self) -> EphemeralDataContextVariables:
         variables = EphemeralDataContextVariables(

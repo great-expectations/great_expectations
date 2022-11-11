@@ -171,9 +171,7 @@ class AbstractDataContext(ABC):
 
         self._config_provider = self._init_config_provider()
         self._config_variables = self._load_config_variables()
-
-        # These attributes that are set downstream.
-        self._variables: Optional[DataContextVariables] = None
+        self._variables = self._init_variables()
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
