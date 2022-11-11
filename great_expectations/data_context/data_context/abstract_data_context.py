@@ -17,11 +17,14 @@ from typing import (
     Callable,
     Dict,
     List,
+    Mapping,
     Optional,
     Tuple,
     Union,
     cast,
 )
+
+from marshmallow import ValidationError
 
 try:
     from typing import Literal
@@ -79,6 +82,7 @@ from great_expectations.data_context.types.base import (
     NotebookConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
+    dataContextConfigSchema,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
@@ -2435,6 +2439,21 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                         )
 
         return metric_configurations_list
+
+    @classmethod
+    def validate_config(
+        cls, project_config: Union[DataContextConfig, Mapping]
+    ) -> DataContextConfig:
+        if isinstance(project_config, DataContextConfig):
+            return project_config
+        try:
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            project_config_dict = dataContextConfigSchema.dump(project_config)
+            project_config_dict = dataContextConfigSchema.load(project_config_dict)
+            context_config: DataContextConfig = DataContextConfig(**project_config_dict)
+            return context_config
+        except ValidationError:
+            raise
 
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]

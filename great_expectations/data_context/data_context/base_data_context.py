@@ -6,7 +6,6 @@ import os
 from collections import OrderedDict
 from typing import Any, List, Mapping, Optional, Union
 
-from marshmallow import ValidationError
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
@@ -39,7 +38,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     DatasourceConfig,
     GeCloudConfig,
-    dataContextConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
@@ -198,21 +196,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     _data_context = None
 
-    @classmethod
-    def validate_config(
-        cls, project_config: Union[DataContextConfig, Mapping]
-    ) -> DataContextConfig:
-        if isinstance(project_config, DataContextConfig):
-            return project_config
-        try:
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-            project_config_dict = dataContextConfigSchema.dump(project_config)
-            project_config_dict = dataContextConfigSchema.load(project_config_dict)
-            context_config: DataContextConfig = DataContextConfig(**project_config_dict)
-            return context_config
-        except ValidationError:
-            raise
-
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
     )
@@ -236,9 +219,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
+
         project_data_context_config: DataContextConfig = (
             BaseDataContext.validate_config(project_config)
         )
+
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
         if context_root_dir is not None:
