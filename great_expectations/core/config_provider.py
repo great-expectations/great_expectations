@@ -39,6 +39,13 @@ yaml = YAMLHandler()
 
 
 class ConfigurationSubstitutor:
+    def __init__(self) -> None:
+        # Using the @lru_cache decorator on method calls can create memory leaks - an attr is preferred here.
+        # Ref: https://stackoverflow.com/a/68550238
+        self._secret_store_cache = lru_cache(maxsize=None)(
+            self._substitute_value_from_secret_store
+        )
+
     def substitute_all_config_variables(
         self, data, replace_variables_dict, dollar_sign_escape_string: str = r"\$"
     ):
@@ -137,7 +144,6 @@ class ConfigurationSubstitutor:
         template_str = self._substitute_value_from_secret_store(template_str)
         return template_str
 
-    @lru_cache(maxsize=None)
     def _substitute_value_from_secret_store(self, value):
         """
         This method takes a value, tries to parse the value to fetch a secret from a secret manager
