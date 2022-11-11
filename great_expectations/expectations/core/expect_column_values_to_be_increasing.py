@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
-    """Expect column values to be increasing.
+    """Expect the column values to be increasing.
 
     By default, this expectation only works for numeric or datetime data.
     When `parse_strings_as_datetimes=True`, it can also parse strings to datetimes.

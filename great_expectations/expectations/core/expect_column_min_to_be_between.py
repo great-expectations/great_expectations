@@ -32,7 +32,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 class ExpectColumnMinToBeBetween(ColumnExpectation):
-    """Expect the column minimum to be between an min and max value
+    """Expect the column minimum to be between a minimum value and a maximum value.
 
             expect_column_min_to_be_between is a \
             :func:`column_aggregate_expectation
