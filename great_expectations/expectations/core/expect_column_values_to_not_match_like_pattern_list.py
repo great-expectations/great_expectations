@@ -12,7 +12,7 @@ from great_expectations.render.util import substitute_none_for_missing
 
 
 class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
-    """Expect column entries to be strings that do NOT match any of a provided list of like patterns expressions.
+    """Expect the column entries to be strings that do NOT match any of a provided list of like pattern expressions.
 
     expect_column_values_to_not_match_like_pattern_list is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
