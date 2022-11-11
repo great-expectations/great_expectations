@@ -88,7 +88,7 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
         # NOTE (kilo59): this method is only ever called by the Pydantic framework.
         # Should we use name mangling? `__load_execution_engine`?
         LOGGER.info(
-            f"Loading & validating `Datasource.execution_engine' ->\n {pf(values, depth=1)}"
+            f"Selecting & instantiating `Datasource.execution_engine' ->\n {pf(values, depth=1)}"
         )
         # TODO (kilo59): catch key errors
         engine_name: str = values["type"]
@@ -97,7 +97,7 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
         engine_kwargs = {
             k: v for (k, v) in values.items() if k not in cls._excluded_eng_args
         }
-        LOGGER.info(f"{engine_type} - kwargs: {list(engine_kwargs.keys())}")
+        LOGGER.debug(f"{engine_type} - kwargs: {list(engine_kwargs.keys())}")
         engine = engine_type(**engine_kwargs)
         values["execution_engine"] = engine
         LOGGER.warning(engine)
@@ -116,7 +116,7 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
             LOGGER.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
             loaded_assets[asset_name] = asset_type(**config)
 
-        LOGGER.info(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
+        LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
 
     class Config:

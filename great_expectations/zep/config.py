@@ -29,7 +29,7 @@ class GxConfig(BaseModel):
     @classmethod
     def parse_yaml(cls, f: Union[pathlib.Path, str], debug_: bool = False) -> GxConfig:
         loaded = yaml.load(f)
-        LOGGER.debug(f"loaded from yaml ->\n{pf(loaded)}\n")
+        LOGGER.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
         config = cls(**loaded)
         if debug_:
             pp(config)
@@ -38,7 +38,7 @@ class GxConfig(BaseModel):
     @validator("datasources", pre=True)
     @classmethod
     def _load_datasource_subtype(cls, v: Dict[str, dict]):
-        LOGGER.info(f"Loading 'datasources' ->\n{pf(v, depth=3)}")
+        LOGGER.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
         loaded_datasources: Dict[str, Datasource] = {}
 
         # TODO (kilo59): catch key errors
