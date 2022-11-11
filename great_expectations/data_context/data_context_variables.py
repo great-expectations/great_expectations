@@ -71,7 +71,7 @@ class DataContextVariables(ABC):
     """
 
     config: DataContextConfig
-    _config_provider: ConfigurationProvider
+    config_provider: ConfigurationProvider
     _store: Optional[DataContextStore] = None
 
     def __post_init__(self) -> None:
@@ -110,7 +110,7 @@ class DataContextVariables(ABC):
     def _get(self, attr: DataContextVariableSchema) -> Any:
         key: str = attr.value
         val: Any = self.config[key]
-        substituted_val: Any = self._config_provider.substitute_config(val)
+        substituted_val: Any = self.config_provider.substitute_config(val)
         return substituted_val
 
     def save_config(self) -> Any:
