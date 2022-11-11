@@ -41,15 +41,15 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
 
         cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
 
-        meta_cls.__cls_set.add(cls)
-        LOGGER.debug(f"MetaDatasources: {len(meta_cls.__cls_set)}")
-
-        LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
-
         if cls_name == "Datasource":
             # NOTE: the above check is brittle and must be kept in-line with the Datasource.__name__
             LOGGER.debug("1c. Skip factory registration of base `Datasource`")
             return cls
+
+        LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
+
+        meta_cls.__cls_set.add(cls)
+        LOGGER.info(f"Datasources: {len(meta_cls.__cls_set)}")
 
         def _datasource_factory(*args, **kwargs) -> Datasource:
             # TODO: update signature to match Datasource __init__ (ex update __signature__)
@@ -60,11 +60,10 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
 
         if cls.__module__ == "__main__":
             LOGGER.warning(
-                "Datasource should not be defined as part of __main__ skipping registration to avoid collisions"
+                f"Datasource `{cls_name}` should not be defined as part of __main__ this may cause typing lookup collisions"
             )
-        else:
-            _SourceFactories.register_factory(
-                cls, _datasource_factory, asset_types=asset_types
-            )
+        _SourceFactories.register_factory(
+            cls, _datasource_factory, asset_types=asset_types
+        )
 
         return cls
