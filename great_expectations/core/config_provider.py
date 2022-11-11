@@ -27,6 +27,16 @@ class AbstractConfigurationProvider(ABC):
     def substitute_config(
         self, config: Any, config_values: Optional[Dict[str, str]] = None
     ) -> Any:
+        """
+        TODO
+
+        Args:
+            config: ...
+            config_values: ...
+
+        Returns:
+            ...
+        """
         if config_values is None:
             config_values = self.get_values()
         return self._substitutor.substitute_all_config_variables(config, config_values)
