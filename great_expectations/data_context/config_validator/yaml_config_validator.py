@@ -11,7 +11,6 @@ This validator evaluates YAML configurations of core Great Expectations componen
 """
 from __future__ import annotations
 
-import os
 import traceback
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
@@ -19,7 +18,6 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
-from great_expectations.core.config_provider import ConfigurationProvider
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
@@ -30,7 +28,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.data_context.store import Store
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    DataContextConfig,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
