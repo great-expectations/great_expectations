@@ -40,7 +40,6 @@ class DataAsset(BaseModel):
     name: str
     type: str
 
-
     # non-field private attrs
     _datasource: Union[Datasource, None] = PrivateAttr(default=None)
 
@@ -94,7 +93,7 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
         }
         LOGGER.info(f"{engine_type} - kwargs: {list(engine_kwargs.keys())}")
         engine = engine_type(**engine_kwargs)
-        values["execution_engine"] =  engine
+        values["execution_engine"] = engine
         LOGGER.warning(engine)
         return values
 
