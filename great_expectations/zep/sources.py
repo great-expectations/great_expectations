@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Type, Union
 
 from typing_extensions import ClassVar
 
-from great_expectations.util import camel_to_snake
 from great_expectations.zep.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
@@ -17,22 +16,6 @@ if TYPE_CHECKING:
 SourceFactoryFn = Callable[..., "Datasource"]
 
 LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
-
-
-def _remove_suffix(s: str, suffix: str) -> str:
-    # NOTE: str.remove_suffix() added in python 3.9
-    if s.endswith(suffix):
-        s = s[: -len(suffix)]
-    return s
-
-
-def _get_simplified_name_from_type(
-    t: type, suffix_to_remove: Optional[str] = None
-) -> str:
-    result = camel_to_snake(t.__name__)
-    if suffix_to_remove:
-        return _remove_suffix(result, suffix_to_remove)
-    return result
 
 
 class _SourceFactories:
@@ -130,7 +113,7 @@ class _SourceFactories:
         eng_class_name: str = exec_engine_type.__name__
 
         LOGGER.info(
-            f"2b. Registering engine type `{eng_class_name}` for '{type_lookup_name}'"
+            f"2c. Registering `ExecutionEngine` type `{eng_class_name}` for '{type_lookup_name}'"
         )
         cls.engine_lookup[type_lookup_name] = exec_engine_type
         LOGGER.info(list(cls.engine_lookup.keys()))
@@ -139,11 +122,17 @@ class _SourceFactories:
     def _register_assets(cls, ds_type: Type[Datasource]):
         asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
-        # TODO: pull from the `type` field
-        asset_type_names: List[str] = [
-            _get_simplified_name_from_type(t, suffix_to_remove="_asset")
-            for t in asset_types
-        ]
+        try:
+            asset_type_names: List[str] = [
+                t.__fields__["type"].default for t in asset_types
+            ]
+        except (AttributeError, KeyError) as exc:
+            LOGGER.warning(f"{exc.__class__.__name__}:{exc}")
+            raise TypeError(
+                f"No `type` found for {ds_type.__name__} unable to register `DataAsset` type"
+            ) from exc
+
+        LOGGER.info(f"2b. Registering `DataAsset` types: {asset_type_names}")
 
         cls.type_lookup.raise_if_contains([*asset_types, *asset_type_names])
 
