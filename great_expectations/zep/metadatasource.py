@@ -51,10 +51,10 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
         meta_cls.__cls_set.add(cls)
         LOGGER.info(f"Datasources: {len(meta_cls.__cls_set)}")
 
-        def _datasource_factory(*args, **kwargs) -> Datasource:
+        def _datasource_factory(name: str, **kwargs) -> Datasource:
             # TODO: update signature to match Datasource __init__ (ex update __signature__)
-            LOGGER.info(f"5. Adding `{args[0] if args else ''}` {cls_name}")
-            return cls(*args, **kwargs)
+            LOGGER.info(f"5. Adding '{name}' {cls_name}")
+            return cls(name=name, **kwargs)
 
         # TODO: generate schemas from `cls` if needed
 

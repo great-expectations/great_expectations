@@ -80,19 +80,19 @@ class _SourceFactories:
     def factories(self) -> List[str]:
         return list(self.__source_factories.keys())
 
-    def __getattr__(self, name):
+    def __getattr__(self, attr_name: str):
         try:
-            fn = self.__source_factories[name]
+            ds_constructor = self.__source_factories[attr_name]
 
-            def wrapped(*args, **kwargs):
-                datasource = fn(*args, **kwargs)
+            def wrapped(name: str, **kwargs):
+                datasource = ds_constructor(name=name, **kwargs)
                 # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
                 self._data_context._attach_datasource_to_context(datasource)
                 return datasource
 
             return wrapped
         except KeyError:
-            raise AttributeError(f"No factory {name} in {self.factories}")
+            raise AttributeError(f"No factory {attr_name} in {self.factories}")
 
     def __dir__(self) -> List[str]:
         """Preserves autocompletion for dynamic attributes."""
