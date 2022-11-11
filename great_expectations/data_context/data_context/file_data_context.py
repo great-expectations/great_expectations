@@ -53,8 +53,8 @@ class FileDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        self._variables: FileDataContextVariables = self._init_variables()
         super().__init__(runtime_environment=runtime_environment)
+        self._variables: FileDataContextVariables = self._init_variables()
 
     def _init_datasource_store(self) -> None:
         from great_expectations.data_context.store.datasource_store import (

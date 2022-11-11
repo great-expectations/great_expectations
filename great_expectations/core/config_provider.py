@@ -37,6 +37,7 @@ class ConfigurationProvider(AbstractConfigurationProvider):
     """
 
     def __init__(self) -> None:
+        super().__init__()
         self._providers: OrderedDict[
             Type[AbstractConfigurationProvider], AbstractConfigurationProvider
         ] = OrderedDict()
@@ -95,6 +96,7 @@ class RuntimeEnvironmentConfigurationProvider(AbstractConfigurationProvider):
     """
 
     def __init__(self, runtime_environment: Dict[str, str]) -> None:
+        super().__init__()
         self._runtime_environment = runtime_environment
 
     def get_values(self) -> Dict[str, str]:
@@ -105,6 +107,9 @@ class EnvironmentConfigurationProvider(AbstractConfigurationProvider):
     """
     Responsible for the management of environment variables.
     """
+
+    def __init__(self) -> None:
+        super().__init__()
 
     def get_values(self) -> Dict[str, str]:
         return dict(os.environ)
@@ -120,6 +125,7 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
     def __init__(
         self, config_variables_file_path: str, root_directory: Optional[str] = None
     ) -> None:
+        super().__init__()
         self._config_variables_file_path = config_variables_file_path
         self._root_directory = root_directory
 

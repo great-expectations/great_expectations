@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.core.config_provider import ConfigurationProvider
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,
@@ -23,8 +24,19 @@ class StubDatasourceStore(DatasourceStore):
         pass
 
 
+class StubConfigurationProvider(ConfigurationProvider):
+    def __init__(self, config_values=None) -> None:
+        self._config_values = config_values or {}
+        super().__init__()
+
+    def get_values(self):
+        return self._config_values
+
+
 class FakeAbstractDataContext(AbstractDataContext):
-    def __init__(self, config_provider: Optional[dict] = None) -> None:
+    def __init__(
+        self, config_provider: StubConfigurationProvider = StubConfigurationProvider()
+    ) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
         self._variables: Optional[DataContextVariables] = None
@@ -34,7 +46,9 @@ class FakeAbstractDataContext(AbstractDataContext):
 
     def _init_variables(self):
         """Using EphemeralDataContextVariables to store in memory."""
-        return EphemeralDataContextVariables(config=DataContextConfig())
+        return EphemeralDataContextVariables(
+            config=DataContextConfig(), config_provider=self._config_provider
+        )
 
     def save_expectation_suite(self):
         """Abstract method. Only a stub is needed."""
@@ -126,8 +140,10 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
     # Set up fake with desired env var
     variable = "DATA_DIR"
     value_associated_with_variable = "a/b/c"
-    substitutions = {variable: value_associated_with_variable}
-    context = FakeAbstractDataContext(substitutions=substitutions)
+    config_values = {variable: value_associated_with_variable}
+    context = FakeAbstractDataContext(
+        config_provider=StubConfigurationProvider(config_values=config_values)
+    )
 
     # Ensure that config references the above env var
     data_connector_name = tuple(datasource_config_with_names.data_connectors.keys())[0]

@@ -497,10 +497,8 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 ) -> None:
     config = data_context_config
 
-    substitutions_key = "my_sensitive_information"
-    substitutions = {substitutions_key: "*****"}
     variables = EphemeralDataContextVariables(
-        config=data_context_config, substitutions=substitutions
+        config=data_context_config, config_provider=None
     )
 
     variables_str = str(variables)
@@ -508,10 +506,6 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 
     assert variables_str == str(config)
     assert variables_repr == repr(config)
-    assert (
-        substitutions_key not in variables_str
-        and substitutions_key not in variables_repr
-    )
 
 
 @pytest.mark.integration

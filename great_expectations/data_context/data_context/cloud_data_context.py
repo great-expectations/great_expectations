@@ -90,10 +90,10 @@ class CloudDataContext(AbstractDataContext):
         self._project_config = self._apply_global_config_overrides(
             config=project_config
         )
-        self._variables = self._init_variables()
         super().__init__(
             runtime_environment=runtime_environment,
         )
+        self._variables = self._init_variables()
 
     def _register_providers(self, config_provider: ConfigurationProvider) -> None:
         """
