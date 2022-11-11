@@ -19,9 +19,10 @@ from great_expectations.zep.logger import init_logger
 init_logger(level=10)
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    SqlAlchemyExecutionEngine,
+
+# from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.zep.fakes import (
+    FakeSqlAlchemyExecutionEngine as SqlAlchemyExecutionEngine,
 )
 from great_expectations.zep.interfaces import (
     Batch,
@@ -30,24 +31,6 @@ from great_expectations.zep.interfaces import (
     DataAsset,
     Datasource,
 )
-
-
-# TODO: remove this "fake" SqlAlchemyExecutionEngine
-class FakeSqlAlchemyExecutionEngine(ExecutionEngine):
-    def __init__(
-        self,
-        name=None,
-        caching=True,
-        batch_spec_defaults=None,
-        batch_data_dict=None,
-        validator=None,
-        connection_str=None,
-    ) -> None:
-        print(f"{self.__class__.__name__} - __init__")
-        super().__init__(name, caching, batch_spec_defaults, batch_data_dict, validator)
-
-    def get_batch_data_and_markers(self, batch_spec):
-        return super().get_batch_data_and_markers(batch_spec)
 
 
 class PostgresDatasourceError(Exception):
@@ -68,6 +51,10 @@ class TableAsset(DataAsset):
     table_name: str
     column_splitter: Optional[ColumnSplitter] = None
     name: str
+
+    @property
+    def datasource(self) -> PostgresDatasource:
+        return super().datasource  # type: ignore[return-value] # subclass of Datasource
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -134,9 +121,11 @@ class PostgresDatasource(Datasource):
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset]
 
+    # right side of the operator determines the type name
+    # left side enforces the names on instance creation
     type: Literal["postgres"] = "postgres"
     connection_str: str
-    execution_engine: FakeSqlAlchemyExecutionEngine
+    execution_engine: SqlAlchemyExecutionEngine
     assets: MutableMapping[str, TableAsset]
 
     def add_table_asset(self, name: str, table_name: str) -> TableAsset:

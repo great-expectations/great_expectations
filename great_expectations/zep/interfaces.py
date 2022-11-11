@@ -41,11 +41,17 @@ class DataAsset(BaseModel):
     type: str
 
     # non-field private attrs
-    _datasource: Union[Datasource, None] = PrivateAttr(default=None)
+    _datasource: Datasource = PrivateAttr()
 
     @property
-    def datasource(self) -> Union[Datasource, None]:
+    def datasource(self) -> Datasource:
         return self._datasource
+
+    # TODO (kilo): remove setter and add custom init for DataAsset to inject datasource in constructor??
+    @datasource.setter
+    def datasource(self, ds: Datasource):
+        assert isinstance(ds, Datasource)
+        self._datasource = ds
 
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         raise NotImplementedError
