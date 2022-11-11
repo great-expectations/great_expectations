@@ -46,7 +46,13 @@ class GxConfig(BaseModel):
             ds_type_name: str = config["type"]
             ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_type_name]
             LOGGER.debug(f"Instantiating '{ds_name}' as {ds_type}")
-            loaded_datasources[ds_type_name] = ds_type(**config)
+
+            datasource = ds_type(**config)
+            loaded_datasources[datasource.name] = datasource
+
+            # TODO: move this to a different 'validator' method
+            for asset in datasource.assets.values():
+                asset._datasource = datasource
 
         LOGGER.info(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
         return loaded_datasources
