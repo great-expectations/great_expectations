@@ -1,9 +1,11 @@
 import pathlib
 import shutil
-from typing import Dict, List, Literal, Optional, Type
+from typing import Dict, List, Literal, Optional, Type, Union
 
 from pydantic import FilePath, ValidationError
 from typing_extensions import ClassVar
+
+from great_expectations.zep.config import GxConfig
 
 try:
     from devtools import debug as pp
@@ -18,7 +20,7 @@ if __name__ == "__main__":
     # TODO: remove this before release
     from great_expectations.zep.logger import init_logger
 
-    init_logger(level=30)
+    init_logger()
 
 
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -35,7 +37,7 @@ class FileAsset(DataAsset):
     type: Literal["file"] = "file"
 
     file_path: FilePath
-    delimiter: str = ","
+    delimiter: Literal[",", "|", "\t", " "] = ","
 
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
@@ -51,14 +53,14 @@ class OtherAsset(DataAsset):
 
 
 class PandasDatasource(Datasource):
-    execution_engine: ClassVar = PandasExecutionEngine()
     asset_types: ClassVar[List[Type[DataAsset]]] = [
         FileAsset,
         OtherAsset,
     ]
-    engine: Literal["pandas"] = "pandas"
-    name: str
-    assets: Dict[str, DataAsset]
+
+    type: Literal["pandas"] = "pandas"
+    execution_engine: PandasExecutionEngine
+    assets: Dict[str, Union[FileAsset, OtherAsset]]
 
     def __repr__(self):
         return f"{self.__class__.__name__}(name='{self.name}')"
@@ -142,16 +144,41 @@ def from_yaml_config():
     context = get_context(context_root_dir=root_dir)
     print(f"\n  Context loaded from {root_dir}")
 
-    my_ds: PandasDatasource = context.get_datasource("my_demo_datasource")
+    my_ds: PandasDatasource = context.get_datasource("my_demo_pd_datasource")
     print(f"\n  Retrieved '{my_ds.name}'->")
     pp(my_ds)
     assert my_ds
 
-    my_asset = my_ds.assets["my_demo_file_asset"]
+    my_asset = my_ds.get_asset("my_demo_file_asset")
 
     print(f"\n Retrieved '{my_asset.name}'->")
     pp(my_asset)
     assert my_asset.file_path.exists()
+
+
+def pg_ds_nested_within_asset():
+    print(
+        f"\n  Postgres datasource asset with nested datasource (from config)\n{SEPARATOR}"
+    )
+
+    yaml_file = pathlib.Path(__file__).parent / "config.yaml"
+
+    config = GxConfig.parse_yaml(yaml_file, debug_=True)
+
+    my_ds = config.datasources["my_pg_ds"]
+    pp(my_ds)
+
+    my_asset = my_ds.get_asset("my_table_asset_wo_splitters")
+
+    assert (
+        my_ds.execution_engine is my_asset.datasource.execution_engine
+    ), "Engine Failed Identity check"
+
+    assert my_ds.connection_str == my_asset.datasource.connection_str
+
+    assert my_ds == my_asset.datasource, "DS Failed Equality check"
+
+    # assert my_ds is my_asset.datasource, "DS Failed Identity check"  # this fails
 
 
 if __name__ == "__main__":
@@ -159,3 +186,4 @@ if __name__ == "__main__":
     # type_lookup()
     # add_real_asset()
     from_yaml_config()
+    pg_ds_nested_within_asset()

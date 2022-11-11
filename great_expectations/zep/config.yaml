@@ -20,3 +20,12 @@ datasources:
                 - alpha
                 - bravo
                 - charlie
+  my_demo_pd_datasource:
+    type: pandas
+    name: my_demo_pd_datasource
+    assets:
+      my_demo_file_asset:
+        type: file
+        name: my_demo_file_asset
+        delimiter: "|"
+        file_path: "great_expectations/zep/my_file.csv"

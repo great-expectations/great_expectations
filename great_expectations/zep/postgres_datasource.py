@@ -6,17 +6,9 @@ from typing import Any, Dict, List, MutableMapping, Optional, Type
 from pydantic import dataclasses as dc
 from typing_extensions import ClassVar, Literal
 
-try:
-    from devtools import debug as pp
-except ImportError:
-    from pprint import pprint as pp  # type: ignore[assignment]
-
-# if __name__ == "__main__":
-#     # don't setup the logger unless being run as a script
-#     # TODO: remove this before release
 from great_expectations.zep.logger import init_logger
 
-init_logger(level=10)
+init_logger()
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 
@@ -214,25 +206,3 @@ class PostgresDatasource(Datasource):
                 data=data,
             )
         ]
-
-
-if __name__ == "__main__":
-    import pathlib
-
-    from great_expectations.zep.config import GxConfig
-
-    yaml_file = pathlib.Path(__file__).parent / "config.yaml"
-
-    config = GxConfig.parse_yaml(yaml_file, debug_=True)
-
-    my_ds = config.datasources["my_pg_ds"]
-    pp(my_ds)
-
-    my_asset = my_ds.assets["my_pg_table_asset"]
-
-    assert my_ds == my_asset.datasource
-    assert my_ds.execution_engine is my_asset.datasource.execution_engine
-    assert my_ds.connection_str == my_asset.datasource.connection_str
-
-    assert my_ds is my_asset.datasource  # this fails
-    # print(my_asset.datasource)
