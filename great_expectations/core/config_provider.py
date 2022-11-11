@@ -24,6 +24,13 @@ class AbstractConfigurationProvider(ABC):
         """
         pass
 
+    def substitute_config(
+        self, config: Any, config_values: Optional[Dict[str, str]] = None
+    ) -> Any:
+        if config_values is None:
+            config_values = self.get_values()
+        return self._substitutor.substitute_all_config_variables(config, config_values)
+
 
 class ConfigurationProvider(AbstractConfigurationProvider):
     """
@@ -37,10 +44,10 @@ class ConfigurationProvider(AbstractConfigurationProvider):
     """
 
     def __init__(self) -> None:
-        super().__init__()
         self._providers: OrderedDict[
             Type[AbstractConfigurationProvider], AbstractConfigurationProvider
         ] = OrderedDict()
+        super().__init__()
 
     def register_provider(self, provider: AbstractConfigurationProvider) -> None:
         """
@@ -82,13 +89,6 @@ class ConfigurationProvider(AbstractConfigurationProvider):
             values.update(provider.get_values())
         return values
 
-    def substitute_config(
-        self, config: Any, config_values: Optional[Dict[str, str]] = None
-    ) -> Any:
-        if config_values is None:
-            config_values = self.get_values()
-        return self._substitutor.substitute_all_config_variables(config, config_values)
-
 
 class RuntimeEnvironmentConfigurationProvider(AbstractConfigurationProvider):
     """
@@ -96,8 +96,8 @@ class RuntimeEnvironmentConfigurationProvider(AbstractConfigurationProvider):
     """
 
     def __init__(self, runtime_environment: Dict[str, str]) -> None:
-        super().__init__()
         self._runtime_environment = runtime_environment
+        super().__init__()
 
     def get_values(self) -> Dict[str, str]:
         return self._runtime_environment
@@ -125,9 +125,9 @@ class ConfigurationVariablesConfigurationProvider(AbstractConfigurationProvider)
     def __init__(
         self, config_variables_file_path: str, root_directory: Optional[str] = None
     ) -> None:
-        super().__init__()
         self._config_variables_file_path = config_variables_file_path
         self._root_directory = root_directory
+        super().__init__()
 
     def get_values(self) -> Dict[str, str]:
         env_vars = dict(os.environ)
