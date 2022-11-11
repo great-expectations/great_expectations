@@ -12,6 +12,8 @@ from great_expectations.core.batch_spec import (
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.zep.interfaces import BatchRequestOptions
 
+# TODO (kilo59) swap the registered engine_type_lookup (use engine_type_lookup.data directly)
+
 
 @contextmanager
 def sqlachemy_execution_engine_mock(
