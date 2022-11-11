@@ -175,9 +175,7 @@ def test_substitute_config_variable():
             "abc${arg1} def${foo}", config_variables_dict
         )  # does NOT equal "abc${arg1}"
     assert (
-        """Unable to find a match for config substitution variable: `arg1`.
-Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
-See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials"""
+        "Unable to find a match for config substitution variable: `arg1`."
         in exc.value.message
     )
     assert (
