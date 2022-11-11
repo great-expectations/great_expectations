@@ -199,14 +199,16 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
     _data_context = None
 
     @classmethod
-    def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> DataContextConfig:
+    def validate_config(
+        cls, project_config: Union[DataContextConfig, Mapping]
+    ) -> DataContextConfig:
         if isinstance(project_config, DataContextConfig):
-            return project_config 
+            return project_config
         try:
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             project_config_dict = dataContextConfigSchema.dump(project_config)
-            project_config_dict = dataContextConfigSchema.load(project_config_dict)
-            context_config: DataContextConfig = DataContextConfig(**project_config_dict)
+            project_config_dict = dataContextConfigSchema.load(project_config)
+            context_config: DataContextConfig = DataContextConfig(**project_config_dict)  # type: ignore
             return context_config
         except ValidationError:
             raise
@@ -234,10 +236,9 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if not BaseDataContext.validate_config(project_config):
-            raise ge_exceptions.InvalidConfigError(
-                "Your project_config is not valid. Try using the CLI check-config command."
-            )
+        project_data_context_config: DataContextConfig = (
+            BaseDataContext.validate_config(project_config)
+        )
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
         if context_root_dir is not None:
@@ -254,7 +255,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 ge_cloud_access_token = ge_cloud_config.access_token
                 ge_cloud_organization_id = ge_cloud_config.organization_id
             self._data_context = CloudDataContext(
-                project_config=project_config,
+                project_config=project_data_context_config,
                 runtime_environment=runtime_environment,
                 context_root_dir=context_root_dir,
                 ge_cloud_base_url=ge_cloud_base_url,
@@ -263,13 +264,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         elif self._context_root_directory:
             self._data_context = FileDataContext(  # type: ignore[assignment]
-                project_config=project_config,
+                project_config=project_data_context_config,
                 context_root_dir=context_root_dir,  # type: ignore[arg-type]
                 runtime_environment=runtime_environment,
             )
         else:
             self._data_context = EphemeralDataContext(  # type: ignore[assignment]
-                project_config=project_config, runtime_environment=runtime_environment
+                project_config=project_data_context_config,
+                runtime_environment=runtime_environment,
             )
 
         # NOTE: <DataContextRefactor> This will ensure that parameters set in _data_context are persisted to self.

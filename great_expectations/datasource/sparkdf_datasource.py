@@ -2,7 +2,6 @@ import datetime
 import logging
 import uuid
 import warnings
-from typing import Any, Optional
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import get_or_create_spark_application

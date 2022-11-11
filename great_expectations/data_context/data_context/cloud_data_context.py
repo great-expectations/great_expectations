@@ -52,7 +52,7 @@ class CloudDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: Optional[Union[DataContextConfig, Mapping]] = None,
+        project_config: DataContextConfig = None,
         context_root_dir: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         ge_cloud_base_url: Optional[str] = None,

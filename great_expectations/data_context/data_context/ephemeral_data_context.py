@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Optional, Union
+from typing import Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
