@@ -68,7 +68,12 @@ class DataContext:
     def get_datasource(self, datasource_name: str) -> Datasource:
         # NOTE: this same method exists on AbstractDataContext
         # TODO (kilo59): implement as __getitem__ ?
-        return self._datasources[datasource_name]
+        try:
+            return self._datasources[datasource_name]
+        except KeyError as exc:
+            raise LookupError(
+                f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"
+            ) from exc
 
 
 def get_context(

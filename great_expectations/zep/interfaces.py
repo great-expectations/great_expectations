@@ -142,7 +142,12 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
     def get_asset(self, asset_name: str) -> DataAsset:
         """Returns the DataAsset referred to by name"""
         # This default implementation will be used if protocol is inherited
-        return self.assets[asset_name]
+        try:
+            return self.assets[asset_name]
+        except KeyError as exc:
+            raise LookupError(
+                f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
+            ) from exc
 
 
 class Batch:

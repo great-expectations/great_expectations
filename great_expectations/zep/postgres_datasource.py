@@ -144,12 +144,7 @@ class PostgresDatasource(Datasource):
 
     def get_asset(self, asset_name: str) -> TableAsset:
         """Returns the TableAsset referred to by name"""
-        try:
-            return self.assets[asset_name]
-        except KeyError as e:
-            raise PostgresDatasourceError(
-                f"No table asset named {asset_name}. Available assets are {self.assets.keys()}"
-            ) from e
+        return super().get_asset(asset_name)  # type: ignore[return-value] # value is subclass
 
     # When we have multiple types of DataAssets on a datasource, the batch_request argument will be a Union type.
     # To differentiate we could use single dispatch or use an if/else (note pattern matching doesn't appear until
