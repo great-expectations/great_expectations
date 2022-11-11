@@ -69,7 +69,8 @@ class TestMetaDatasource:
 
         class MyTestDatasource(Datasource):
             asset_types: ClassVar[List[Type[DataAsset]]] = []
-            execution_engine = DummyExecutionEngine()
+            type: str = "my_test"
+            execution_engine: DummyExecutionEngine
 
         expected_registrants = 1
 
@@ -88,7 +89,8 @@ class TestMetaDatasource:
 
         class MyTestDatasource(Datasource):
             asset_types: ClassVar[List[Type[DataAsset]]] = []
-            execution_engine = DummyExecutionEngine()
+            type: str = "my_test"
+            execution_engine: DummyExecutionEngine
 
         ds_factory_method_final = getattr(
             context_sources_cleanup, expected_method_name, None
@@ -104,14 +106,15 @@ class TestMetaDatasource:
         type_lookup = context_sources_cleanup.type_lookup
 
         class FooAsset(DummyDataAsset):
-            pass
+            type: str = "foo"
 
         class BarAsset(DummyDataAsset):
-            pass
+            type: str = "bar"
 
         class FooBarDatasource(Datasource):
-            asset_types = [FooAsset, BarAsset]
-            execution_engine = DummyExecutionEngine()
+            asset_types: ClassVar = [FooAsset, BarAsset]
+            type: str = "foo_bar"
+            execution_engine: DummyExecutionEngine
 
         print(f" type_lookup ->\n{pf(type_lookup)}\n")
         asset_types = FooBarDatasource.asset_types
@@ -138,7 +141,8 @@ class TestMetaDatasource:
 
         class FooBarDatasource(Datasource):
             asset_types = []
-            execution_engine = DummyExecutionEngine()
+            type: str = "foo_bar"
+            execution_engine: DummyExecutionEngine
 
         print(f" engine_lookup ->\n{pf(engine_lookup)}\n")
 
