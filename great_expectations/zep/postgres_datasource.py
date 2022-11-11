@@ -15,7 +15,10 @@ from great_expectations.zep.logger import init_logger
 init_logger(level=10)
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.zep.interfaces import (
     Batch,
     BatchRequest,
@@ -24,6 +27,16 @@ from great_expectations.zep.interfaces import (
     Datasource,
 )
 
+
+# TODO: remove this "fake" SqlAlchemyExecutionEngine
+class FakeSqlAlchemyExecutionEngine(ExecutionEngine):
+
+    def __init__(self, name=None, caching=True, batch_spec_defaults=None, batch_data_dict=None, validator=None, connection_str=None) -> None:
+        print(f"{self.__class__.__name__} - __init__")
+        super().__init__(name, caching, batch_spec_defaults, batch_data_dict, validator)
+
+    def get_batch_data_and_markers(self, batch_spec):
+        return super().get_batch_data_and_markers(batch_spec)
 
 class PostgresDatasourceError(Exception):
     pass
@@ -111,7 +124,7 @@ class PostgresDatasource(Datasource):
 
     type: Literal["postgres"] = "postgres"
     connection_str: str
-    execution_engine: SqlAlchemyExecutionEngine
+    execution_engine: FakeSqlAlchemyExecutionEngine
     assets: MutableMapping[str, TableAsset]
 
     def add_table_asset(self, name: str, table_name: str) -> TableAsset:
@@ -215,3 +228,13 @@ if __name__ == "__main__":
     yaml_file = pathlib.Path(__file__).parent / "config.yaml"
 
     config = GxConfig.parse_yaml(yaml_file, debug_=True)
+
+    my_ds = config.datasources["my_pg_ds"]
+    my_asset = my_ds.assets["my_pg_table_asset"]
+
+    assert my_ds == my_asset.datasource
+    assert my_ds.execution_engine is my_asset.datasource.execution_engine
+    assert my_ds.connection_str == my_asset.datasource.connection_str
+
+    assert my_ds is my_asset.datasource # this fails
+    # print(my_asset.datasource)
