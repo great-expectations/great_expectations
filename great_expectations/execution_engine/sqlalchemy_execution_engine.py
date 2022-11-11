@@ -788,11 +788,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             SqlAlchemy column
         """
-        selectable = self.get_domain_records(domain_kwargs)
-
-        split_domain_kwargs = self._split_domain_kwargs(
+        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
+
+        selectable: Selectable = self.get_domain_records(domain_kwargs=domain_kwargs)
 
         return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
@@ -993,8 +993,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         for query in queries.values():
             domain_kwargs: dict = query["domain_kwargs"]
-            selectable: Any = self.get_domain_records(
-                domain_kwargs=domain_kwargs,
+            selectable: Selectable = self.get_domain_records(
+                domain_kwargs=domain_kwargs
             )
 
             assert len(query["select"]) == len(query["ids"])
