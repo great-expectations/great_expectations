@@ -76,13 +76,13 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
     type: str
     name: str
     execution_engine: ExecutionEngine
-    assets: Mapping[str, DataAsset]
+    assets: Mapping[str, DataAsset] = {}
 
     @root_validator(pre=True)
     @classmethod
     def _load_execution_engine(cls, values: Dict[str, Any]):
         """
-        Lookup and instantiate an ExecutionEngine based on the 'type' string.
+        Lookup and instantiate an ExecutionEngine based on the 'type' string of the datasource.
         Assign this ExecutionEngine instance to the `execution_engine` field.
         """
         # NOTE (kilo59): this method is only ever called by the Pydantic framework.
