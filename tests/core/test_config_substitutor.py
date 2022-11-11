@@ -26,17 +26,17 @@ def does_not_raise():
         ("secret|any_value", None, "secret|any_value"),
         (
             "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret",
-            "great_expectations.data_context.util.substitute_value_from_aws_secrets_manager",
+            "great_expectations.core.config_substitutor._ConfigurationSubstitutor.substitute_value_from_aws_secrets_manager",
             "success",
         ),
         (
             "secret|projects/project_id/secrets/my_secret",
-            "great_expectations.data_context.util.substitute_value_from_gcp_secret_manager",
+            "great_expectations.core.config_substitutor._ConfigurationSubstitutor.substitute_value_from_gcp_secret_manager",
             "success",
         ),
         (
             "secret|https://my-vault-name.vault.azure.net/secrets/my_secret",
-            "great_expectations.data_context.util.substitute_value_from_azure_keyvault",
+            "great_expectations.core.config_substitutor._ConfigurationSubstitutor.substitute_value_from_azure_keyvault",
             "success",
         ),
     ],
@@ -122,7 +122,7 @@ def test_substitute_value_from_aws_secrets_manager(
 ):
     with raises:
         with mock.patch(
-            "great_expectations.data_context.util.boto3.session.Session",
+            "great_expectations.core.config_substitutor.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
         ):
             assert (
@@ -190,7 +190,7 @@ def test_substitute_value_from_gcp_secret_manager(
 ):
     with raises:
         with mock.patch(
-            "great_expectations.data_context.util.secretmanager.SecretManagerServiceClient",
+            "great_expectations.core.config_substitutor.secretmanager.SecretManagerServiceClient",
             return_value=MockedSecretManagerServiceClient(secret_response),
         ):
             assert (
@@ -215,7 +215,9 @@ class MockedSecretClient:
         return response
 
 
-@mock.patch("great_expectations.data_context.util.DefaultAzureCredential", new=object)
+@mock.patch(
+    "great_expectations.core.config_substitutor.DefaultAzureCredential", new=object
+)
 @pytest.mark.parametrize(
     "input_value,secret_response,raises,expected",
     [
@@ -250,7 +252,7 @@ def test_substitute_value_from_azure_keyvault(
 ):
     with raises:
         with mock.patch(
-            "great_expectations.data_context.util.SecretClient",
+            "great_expectations.core.config_substitutor.SecretClient",
             return_value=MockedSecretClient(secret_response),
         ):
             assert (
