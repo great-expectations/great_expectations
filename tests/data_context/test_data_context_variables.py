@@ -7,6 +7,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.core.config_provider import ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -90,11 +91,22 @@ def data_context_config(data_context_config_dict: dict) -> DataContextConfig:
     return config
 
 
+class StubConfigurationProvider(ConfigurationProvider):
+    def __init__(self, config_values=None) -> None:
+        self._config_values = config_values or {}
+        super().__init__()
+
+    def get_values(self):
+        return self._config_values
+
+
 @pytest.fixture
 def ephemeral_data_context_variables(
     data_context_config: DataContextConfig,
 ) -> EphemeralDataContextVariables:
-    return EphemeralDataContextVariables(config=data_context_config)
+    return EphemeralDataContextVariables(
+        config=data_context_config, config_provider=StubConfigurationProvider()
+    )
 
 
 @pytest.fixture
@@ -102,7 +114,9 @@ def file_data_context_variables(
     data_context_config: DataContextConfig, empty_data_context: DataContext
 ) -> FileDataContextVariables:
     return FileDataContextVariables(
-        data_context=empty_data_context, config=data_context_config
+        data_context=empty_data_context,
+        config=data_context_config,
+        config_provider=StubConfigurationProvider(),
     )
 
 
@@ -118,6 +132,7 @@ def cloud_data_context_variables(
         ge_cloud_organization_id=ge_cloud_organization_id,
         ge_cloud_access_token=ge_cloud_access_token,
         config=data_context_config,
+        config_provider=StubConfigurationProvider(),
     )
 
 
@@ -316,12 +331,12 @@ def test_data_context_variables_get_with_substitutions(
         DataContextVariableSchema.CONFIG_VERSION
     ] = f"${env_var_name}"
     config: DataContextConfig = DataContextConfig(**data_context_config_dict)
-    substitutions: dict = {
+    config_values: dict = {
         env_var_name: value_associated_with_env_var,
     }
-
     variables: DataContextVariables = EphemeralDataContextVariables(
-        config=config, substitutions=substitutions
+        config=config,
+        config_provider=StubConfigurationProvider(config_values=config_values),
     )
     assert variables.config_version == value_associated_with_env_var
 
@@ -498,7 +513,8 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
     config = data_context_config
 
     variables = EphemeralDataContextVariables(
-        config=data_context_config, config_provider=None
+        config=data_context_config,
+        config_provider=StubConfigurationProvider(),
     )
 
     variables_str = str(variables)
