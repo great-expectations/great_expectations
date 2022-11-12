@@ -84,9 +84,20 @@ class _SourceFactories:
         cls._register_assets(ds_type)
 
     @classmethod
-    def _register_datasource_and_factory_method(cls, ds_type, factory_fn) -> str:
+    def _register_datasource_and_factory_method(
+        cls, ds_type: Type[Datasource], factory_fn: SourceFactoryFn
+    ) -> str:
+        """
+        Register the `Datasource` class and add a factory method for the class on `sources`.
+        The method name is pulled from the `Datasource.type` attribute.
+        """
         # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
         ds_type_name = ds_type.__fields__["type"].default
+
+        if not ds_type_name:
+            raise TypeRegistrationError(
+                f"`{ds_type.__name__}` is missing a `type` attribute with an assigned string value"
+            )
 
         method_name = f"add_{ds_type_name}"
         LOGGER.info(

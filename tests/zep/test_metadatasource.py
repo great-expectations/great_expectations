@@ -154,7 +154,8 @@ class TestMisconfiguredMetaDatasource:
     def test_ds_type_field_not_set(self, empty_sources: _SourceFactories):
 
         with pytest.raises(
-            TypeRegistrationError, match=r"`NoneType` for <class .*> is not allowed"
+            TypeRegistrationError,
+            match=r"`MissingTypeDatasource` is missing a `type` attribute",
         ):
 
             class MissingTypeDatasource(Datasource):
