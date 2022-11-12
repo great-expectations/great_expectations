@@ -76,29 +76,30 @@ class _SourceFactories:
         >>>     execution_engine: PandasExecutionEngine
         """
 
-        ds_type_name = cls._register_datasource_and_factory_method(ds_type, factory_fn)
-
-        cls._register_engine(ds_type, type_lookup_name=ds_type_name)
-
-        # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
-        cls._register_assets(ds_type)
-
-    @classmethod
-    def _register_datasource_and_factory_method(
-        cls, ds_type: Type[Datasource], factory_fn: SourceFactoryFn
-    ) -> str:
-        """
-        Register the `Datasource` class and add a factory method for the class on `sources`.
-        The method name is pulled from the `Datasource.type` attribute.
-        """
         # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
         ds_type_name = ds_type.__fields__["type"].default
-
         if not ds_type_name:
             raise TypeRegistrationError(
                 f"`{ds_type.__name__}` is missing a `type` attribute with an assigned string value"
             )
 
+        # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
+        cls._register_assets(ds_type)
+
+        cls._register_engine(ds_type, type_lookup_name=ds_type_name)
+
+        cls._register_datasource_and_factory_method(
+            ds_type, factory_fn=factory_fn, ds_type_name=ds_type_name
+        )
+
+    @classmethod
+    def _register_datasource_and_factory_method(
+        cls, ds_type: Type[Datasource], factory_fn: SourceFactoryFn, ds_type_name: str
+    ) -> str:
+        """
+        Register the `Datasource` class and add a factory method for the class on `sources`.
+        The method name is pulled from the `Datasource.type` attribute.
+        """
         method_name = f"add_{ds_type_name}"
         LOGGER.info(
             f"2a. Registering {ds_type.__name__} as {ds_type_name} with {method_name}() factory"
@@ -148,6 +149,11 @@ class _SourceFactories:
         errored_on: Optional[Type[DataAsset]] = None
         try:
             asset_types: List[Type[DataAsset]] = ds_type.asset_types
+
+            if not asset_types:
+                LOGGER.warning(
+                    f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
+                )
 
             asset_type_names: List[str] = []
             for t in asset_types:
