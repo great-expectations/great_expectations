@@ -75,25 +75,8 @@ class _SourceFactories:
         >>>     asset_types = [FileAsset]
         >>>     execution_engine: PandasExecutionEngine
         """
-        ds_type_name = ds_type.__fields__["type"].default
-        # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
 
-        method_name = f"add_{ds_type_name}"
-        LOGGER.info(
-            f"2a. Registering {ds_type.__name__} as {ds_type_name} with {method_name}() factory"
-        )
-
-        pre_existing = cls.__source_factories.get(method_name)
-        if pre_existing:
-            raise TypeRegistrationError(
-                f"'{ds_type_name}' - `sources.{method_name}()` factory already exists",
-                field_name="type",
-                type_=ds_type,
-            )
-
-        cls.type_lookup[ds_type] = ds_type_name
-        LOGGER.info(f"'{ds_type_name}' added to `type_lookup`")
-        cls.__source_factories[method_name] = factory_fn
+        ds_type_name = cls._register_datasource_and_factory_method(ds_type, factory_fn)
 
         cls._register_engine(ds_type, type_lookup_name=ds_type_name)
 
@@ -121,6 +104,29 @@ class _SourceFactories:
     def __dir__(self) -> List[str]:
         """Preserves autocompletion for dynamic attributes."""
         return [*self.factories, *super().__dir__()]
+
+    @classmethod
+    def _register_datasource_and_factory_method(cls, ds_type, factory_fn) -> str:
+        # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
+        ds_type_name = ds_type.__fields__["type"].default
+
+        method_name = f"add_{ds_type_name}"
+        LOGGER.info(
+            f"2a. Registering {ds_type.__name__} as {ds_type_name} with {method_name}() factory"
+        )
+
+        pre_existing = cls.__source_factories.get(method_name)
+        if pre_existing:
+            raise TypeRegistrationError(
+                f"'{ds_type_name}' - `sources.{method_name}()` factory already exists",
+                field_name="type",
+                type_=ds_type,
+            )
+
+        cls.type_lookup[ds_type] = ds_type_name
+        LOGGER.info(f"'{ds_type_name}' added to `type_lookup`")
+        cls.__source_factories[method_name] = factory_fn
+        return ds_type_name
 
     @classmethod
     def _register_engine(cls, ds_type: Type[Datasource], type_lookup_name: str):
