@@ -11,11 +11,7 @@ from great_expectations.zep.logger import init_logger
 init_logger()
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-
-# from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.zep.fakes import (
-    FakeSqlAlchemyExecutionEngine as SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.zep.interfaces import (
     Batch,
     BatchRequest,
@@ -44,10 +40,6 @@ class TableAsset(DataAsset):
     column_splitter: Optional[ColumnSplitter] = None
     name: str
 
-    @property
-    def datasource(self) -> PostgresDatasource:
-        return super().datasource  # type: ignore[return-value] # subclass of Datasource
-
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
@@ -63,7 +55,7 @@ class TableAsset(DataAsset):
             get_batch_list_from_batch_request method.
         """
         return BatchRequest(
-            datasource_name=self.datasource.name,
+            datasource_name=self._datasource.name,
             data_asset_name=self.name,
             options=options or {},
         )
@@ -130,7 +122,10 @@ class PostgresDatasource(Datasource):
         Returns:
             The TableAsset that is added to the datasource.
         """
-        asset = TableAsset(name=name, datasource=self, table_name=table_name)
+        asset = TableAsset(name=name, table_name=table_name)
+        # TODO (kilo59): custom init for `DataAsset` to accept datasource in constructor?
+        # Will most DataAssets require a `Datasource` attribute?
+        asset._datasource = self  # type: ignore[misc] # setter defined on super class
         self.assets[name] = asset
         return asset
 
