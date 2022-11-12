@@ -184,6 +184,25 @@ class TestMisconfiguredMetaDatasource:
         assert len(empty_sources.type_lookup) < 1
         assert len(empty_sources.engine_lookup) < 1
 
+    def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
+
+        with pytest.raises(
+            TypeRegistrationError,
+            match=r".*'No `type` field found for `BadAssetDatasource.asset_types`",
+        ):
+
+            class MissingTypeAsset(DataAsset):
+                pass
+
+            class BadAssetDatasource(Datasource):
+                type: str = "valid"
+                execution_engine: DummyExecutionEngine
+                asset_types: ClassVar = [MissingTypeAsset]
+
+        # check that no types were registered
+        assert len(empty_sources.type_lookup) < 1
+        assert len(empty_sources.engine_lookup) < 1
+
 
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets
