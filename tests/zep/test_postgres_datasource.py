@@ -141,9 +141,9 @@ def test_add_table_asset(config):
 def test_construct_table_asset_directly_with_no_splitter():
     with sqlachemy_execution_engine_mock(lambda x: None):
         source = _source()
-        asset = postgres_datasource.TableAsset(
-            name="my_asset", table_name="my_table", datasource=source
-        )
+        asset = postgres_datasource.TableAsset(name="my_asset", table_name="my_table")
+        # TODO: asset custom init
+        asset._datasource = source
         assert_batch_request(asset.get_batch_request(), "my_datasource", "my_asset", {})
 
 
@@ -159,9 +159,10 @@ def test_construct_table_asset_directly_with_nameless_splitter():
         asset = postgres_datasource.TableAsset(
             name="my_asset",
             table_name="my_table",
-            datasource=source,
             column_splitter=splitter,
         )
+        # TODO: asset custom init
+        asset._datasource = source
         assert_table_asset(
             asset, "my_asset", "my_table", source, {"a": "<value>", "b": "<value>"}
         )
@@ -186,9 +187,10 @@ def test_construct_table_asset_directly_with_named_splitter():
         asset = postgres_datasource.TableAsset(
             name="my_asset",
             table_name="my_table",
-            datasource=source,
             column_splitter=splitter,
         )
+        # TODO: asset custom init
+        asset._datasource = source
         assert_table_asset(
             asset,
             "my_asset",
@@ -322,5 +324,5 @@ def test_datasource_gets_batch_list_using_invalid_splitter_name():
 def test_datasource_gets_nonexistent_asset():
     with sqlachemy_execution_engine_mock(lambda x: None):
         source = _source()
-        with pytest.raises(postgres_datasource.PostgresDatasourceError):
+        with pytest.raises(LookupError):
             source.get_asset("my_asset")
