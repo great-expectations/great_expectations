@@ -13,36 +13,17 @@ from great_expectations.cli.v012.python_subprocess import (
 )
 from great_expectations.util import import_library_module, is_library_loadable
 
-try:
-    from termcolor import colored
-except ImportError:
-    colored = None
-
 
 def cli_message(string) -> None:
-    print(cli_colorize_string(string))
+    from great_expectations.cli.pretty_printing import cli_message as fn
+
+    fn(string)
 
 
 def cli_colorize_string(string):
-    # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
-    flags = re.DOTALL
-    mod_string = re.sub(
-        "<blue>(.*?)</blue>", colored(r"\g<1>", "blue"), string, flags=flags
-    )
-    mod_string = re.sub(
-        "<cyan>(.*?)</cyan>", colored(r"\g<1>", "cyan"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<green>(.*?)</green>", colored(r"\g<1>", "green"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<yellow>(.*?)</yellow>", colored(r"\g<1>", "yellow"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<red>(.*?)</red>", colored(r"\g<1>", "red"), mod_string, flags=flags
-    )
+    from great_expectations.cli.pretty_printing import cli_colorize_string as fn
 
-    return colored(mod_string)
+    return fn(string)
 
 
 def cli_message_list(string_list, list_intro_string=None) -> None:

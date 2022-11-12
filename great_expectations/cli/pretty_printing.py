@@ -2,7 +2,15 @@ import re
 import sys
 from typing import List, Optional
 
-from termcolor import colored
+import click
+
+try:
+    from typing import Final
+except ImportError:
+    # Fallback for python < 3.8
+    from typing_extensions import Final
+
+SUPPORTED_CLI_COLORS: Final[List[str]] = ["blue", "cyan", "green", "yellow", "red"]
 
 
 def cli_message(string: str) -> None:
@@ -10,25 +18,15 @@ def cli_message(string: str) -> None:
 
 
 def cli_colorize_string(string: str) -> str:
-    # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
-    flags = re.DOTALL
-    mod_string = re.sub(
-        "<blue>(.*?)</blue>", colored(r"\g<1>", "blue"), string, flags=flags
-    )
-    mod_string = re.sub(
-        "<cyan>(.*?)</cyan>", colored(r"\g<1>", "cyan"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<green>(.*?)</green>", colored(r"\g<1>", "green"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<yellow>(.*?)</yellow>", colored(r"\g<1>", "yellow"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<red>(.*?)</red>", colored(r"\g<1>", "red"), mod_string, flags=flags
-    )
-
-    return colored(mod_string)
+    for color in SUPPORTED_CLI_COLORS:
+        string = re.sub(
+            f"<{color}>(.*?)</{color}>",
+            click.style(string, fg=color),
+            string,
+            # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
+            flags=re.DOTALL,
+        )
+    return string
 
 
 def display_not_implemented_message_and_exit() -> None:
