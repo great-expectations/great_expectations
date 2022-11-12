@@ -60,6 +60,7 @@ class DummyExecutionEngine(ExecutionEngine):
         raise NotImplementedError
 
 
+@pytest.mark.unit
 class TestMetaDatasource:
     def test__new__only_registers_expected_number_of_datasources_factories_and_types(
         self, empty_sources: _SourceFactories
@@ -150,6 +151,7 @@ class TestMetaDatasource:
         assert len(engine_lookup) == num_engines_initial + 2
 
 
+@pytest.mark.unit
 class TestMisconfiguredMetaDatasource:
     def test_ds_type_field_not_set(self, empty_sources: _SourceFactories):
 

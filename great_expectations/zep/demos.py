@@ -6,6 +6,7 @@ from pydantic import FilePath, ValidationError
 from typing_extensions import ClassVar
 
 from great_expectations.zep.config import GxConfig
+from great_expectations.zep.fakes import sqlachemy_execution_engine_mock
 
 try:
     from devtools import debug as pp
@@ -185,5 +186,7 @@ if __name__ == "__main__":
     # round_trip()
     # type_lookup()
     # add_real_asset()
-    from_yaml_config()
-    pg_ds_nested_within_asset()
+
+    with sqlachemy_execution_engine_mock(lambda: None):
+        from_yaml_config()
+        pg_ds_nested_within_asset()

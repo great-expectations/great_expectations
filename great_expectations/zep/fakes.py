@@ -1,18 +1,43 @@
-from great_expectations.execution_engine import ExecutionEngine
+from contextlib import contextmanager
+from typing import Callable, Tuple
+
+import great_expectations.zep.postgres_datasource as postgres_datasource
+from great_expectations.core.batch import BatchData
+from great_expectations.core.batch_spec import (
+    BatchMarkers,
+    SqlAlchemyDatasourceBatchSpec,
+)
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.zep.sources import _SourceFactories
 
 
-class FakeSqlAlchemyExecutionEngine(ExecutionEngine):
-    def __init__(
-        self,
-        name=None,
-        caching=True,
-        batch_spec_defaults=None,
-        batch_data_dict=None,
-        validator=None,
-        connection_str=None,
-    ) -> None:
-        print(f"{self.__class__.__name__} - __init__")
-        super().__init__(name, caching, batch_spec_defaults, batch_data_dict, validator)
+@contextmanager
+def sqlachemy_execution_engine_mock(
+    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None]
+):
+    ds_type_name: str = postgres_datasource.PostgresDatasource.__fields__[
+        "type"
+    ].default
+    assert ds_type_name
 
-    def get_batch_data_and_markers(self, batch_spec):
-        return super().get_batch_data_and_markers(batch_spec)
+    class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def get_batch_data_and_markers(
+            self, batch_spec: SqlAlchemyDatasourceBatchSpec
+        ) -> Tuple[BatchData, BatchMarkers]:
+            validate_batch_spec(batch_spec)
+            return BatchData(self), BatchMarkers(ge_load_time=None)
+
+    original_engine = postgres_datasource.SqlAlchemyExecutionEngine
+    try:
+        postgres_datasource.SqlAlchemyExecutionEngine = MockSqlAlchemyExecutionEngine
+        # swapping engine_lookup entry
+        _SourceFactories.engine_lookup.data[
+            ds_type_name
+        ] = MockSqlAlchemyExecutionEngine
+        yield postgres_datasource.SqlAlchemyExecutionEngine
+    finally:
+        postgres_datasource.SqlAlchemyExecutionEngine = original_engine
+        _SourceFactories.engine_lookup.data[ds_type_name] = original_engine
