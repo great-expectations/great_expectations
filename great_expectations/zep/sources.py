@@ -85,16 +85,20 @@ class _SourceFactories:
 
         pre_existing = cls.__source_factories.get(method_name)
         if pre_existing:
-            raise ValueError(f"{ds_type_name} factory already exists")
+            raise TypeRegistrationError(
+                f"'{ds_type_name}' - `sources.{method_name}()` factory already exists",
+                field_name="type",
+                type_=ds_type,
+            )
+
+        cls.type_lookup[ds_type] = ds_type_name
+        LOGGER.info(f"'{ds_type_name}' added to `type_lookup`")
+        cls.__source_factories[method_name] = factory_fn
+
+        cls._register_engine(ds_type, type_lookup_name=ds_type_name)
 
         # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
         cls._register_assets(ds_type)
-
-        cls.type_lookup[ds_type] = ds_type_name
-        LOGGER.debug(f"'{ds_type_name}' added to `type_lookup`")
-        cls.__source_factories[method_name] = fn
-
-        cls._register_engine(ds_type, type_lookup_name=ds_type_name)
 
     @property
     def factories(self) -> List[str]:
