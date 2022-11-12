@@ -165,6 +165,25 @@ class TestMisconfiguredMetaDatasource:
         assert len(empty_sources.type_lookup) < 1
         assert len(empty_sources.engine_lookup) < 1
 
+    def test_ds_execution_engine_type_hint_not_set(
+        self, empty_sources: _SourceFactories
+    ):
+
+        with pytest.raises(
+            TypeRegistrationError,
+            match=(
+                r"`MissingExecEngineTypeDatasource.execution_engine`"
+                r" must be annotated with a concrete `ExecutionEngine`"
+            ),
+        ):
+
+            class MissingExecEngineTypeDatasource(Datasource):
+                type: str = "valid"
+
+        # check that no types were registered
+        assert len(empty_sources.type_lookup) < 1
+        assert len(empty_sources.engine_lookup) < 1
+
 
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 1. Define Datasource & Assets

@@ -130,6 +130,12 @@ class _SourceFactories:
             ) from exc
 
         eng_class_name: str = exec_engine_type.__name__
+        if eng_class_name == "ExecutionEngine":
+            raise TypeRegistrationError(
+                f"`{ds_type.__name__}.execution_engine` must be annotated with a concrete `ExecutionEngine`",
+                type_=ds_type,
+                field_name="execution_engine",
+            )
 
         LOGGER.info(
             f"2c. Registering `ExecutionEngine` type `{eng_class_name}` for '{type_lookup_name}'"
