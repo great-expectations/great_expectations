@@ -34,11 +34,6 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
         """
         LOGGER.debug(f"1a. {meta_cls.__name__}.__new__() for `{cls_name}`")
 
-        # TODO: extract asset type details to build factory method signature etc. (pull args from __init__)
-
-        asset_types: List[Type[DataAsset]] = cls_dict.get("asset_types")
-        LOGGER.debug(f"1b. Extracting Asset details - {asset_types}")
-
         cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
 
         if cls_name == "Datasource":
@@ -62,8 +57,6 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
             LOGGER.warning(
                 f"Datasource `{cls_name}` should not be defined as part of __main__ this may cause typing lookup collisions"
             )
-        _SourceFactories.register_factory(
-            cls, _datasource_factory, asset_types=asset_types
-        )
+        _SourceFactories.register_types_and_ds_factory(cls, _datasource_factory)
 
         return cls

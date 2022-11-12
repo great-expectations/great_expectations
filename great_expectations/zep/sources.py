@@ -37,23 +37,28 @@ class _SourceFactories:
         self._data_context = data_context
 
     @classmethod
-    def register_factory(
+    def register_types_and_ds_factory(
         cls,
         ds_type: Type[Datasource],
-        fn: SourceFactoryFn,
-        asset_types: List[Type[DataAsset]],
+        factory_fn: SourceFactoryFn,
     ) -> None:
         """
-        Add/Register a datasource factory function.
+        Add/Register a datasource factory function and all related `Datasource`,
+        `DataAsset` and `ExecutionEngine` types.
 
-        Derives a SIMPLIFIED_NAME from the provided `Datasource` type.
-        Attaches a method called `add_<SIMPLIFIED_NAME>()`.
+        Creates mapping table between the `DataSource`/`DataAsset` classes and their
+        declared `type` string.
 
-        Also registers related `DataAsset` types.
 
         Example
         -------
-        `class PandasDatasource` -> `add_pandas()`
+
+        An `.add_pandas()` pandas factory method will be added to `context.sources`.
+
+        >>> class PandasDatasource(Datasource):
+        >>>     type: str = 'pandas'`
+        >>>     asset_types = [FileAsset]
+        >>>     execution_engine: PandasExecutionEngine
         """
         ds_type_name = ds_type.__fields__["type"].default
         # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)

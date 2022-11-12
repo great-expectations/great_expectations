@@ -14,7 +14,7 @@ from great_expectations.zep.interfaces import (
     Datasource,
 )
 from great_expectations.zep.metadatasource import MetaDatasource
-from great_expectations.zep.sources import _SourceFactories
+from great_expectations.zep.sources import TypeRegistrationError, _SourceFactories
 
 
 class DummyDataAsset(DataAsset):
@@ -148,6 +148,21 @@ class TestMetaDatasource:
 
         assert DummyExecutionEngine in engine_lookup
         assert len(engine_lookup) == num_engines_initial + 2
+
+
+class TestMisconfiguredMetaDatasource:
+    def test_ds_type_field_not_set(self, empty_sources: _SourceFactories):
+
+        with pytest.raises(
+            TypeRegistrationError, match=r"`NoneType` for <class .*> is not allowed"
+        ):
+
+            class MissingTypeDatasource(Datasource):
+                execution_engine: DummyExecutionEngine
+
+        # check that no types were registered
+        assert len(empty_sources.type_lookup) < 1
+        assert len(empty_sources.engine_lookup) < 1
 
 
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
