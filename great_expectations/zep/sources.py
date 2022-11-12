@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, List, Type, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type, Union
 
 from typing_extensions import ClassVar
 
@@ -16,6 +16,21 @@ if TYPE_CHECKING:
 SourceFactoryFn = Callable[..., "Datasource"]
 
 LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
+
+
+class TypeRegistrationError(TypeError):
+    type_: Optional[Type]
+    field_name: Optional[str]
+
+    def __init__(
+        self,
+        message: Union[str, Exception],
+        type_: Optional[Type] = None,
+        field_name: Optional[str] = None,
+    ) -> None:
+        self.type = type_
+        self.field_name = field_name
+        super().__init__(message, type_, field_name)
 
 
 class _SourceFactories:
@@ -125,29 +140,38 @@ class _SourceFactories:
 
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource]):
-        asset_types: List[Type[DataAsset]] = ds_type.asset_types
+        errored_on: Optional[Type[DataAsset]] = None
+        try:
+            asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
-        asset_type_names: List[str] = []
-        for t in asset_types:
-            try:
-                type_name = t.__fields__["type"].default
-                if type_name is None:
-                    raise TypeError(
-                        f"{t.__name__} `type` field must be assigned and cannot be `None`"
+            asset_type_names: List[str] = []
+            for t in asset_types:
+                try:
+                    type_name = t.__fields__["type"].default
+                    if type_name is None:
+                        raise TypeError(
+                            f"{t.__name__} `type` field must be assigned and cannot be `None`"
+                        )
+                    asset_type_names.append(type_name)
+                except (AttributeError, KeyError, TypeError) as bad_field_exc:
+                    errored_on = t
+                    LOGGER.warning(
+                        f"{bad_field_exc.__class__.__name__}:{bad_field_exc}"
                     )
-                asset_type_names.append(type_name)
-            except (AttributeError, KeyError, TypeError) as exc:
-                LOGGER.warning(f"{exc.__class__.__name__}:{exc}")
-                raise TypeError(
-                    f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type"
-                ) from exc
+                    raise TypeError(
+                        f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type"
+                    ) from bad_field_exc
 
-        LOGGER.info(f"2b. Registering `DataAsset` types: {asset_type_names}")
+            LOGGER.info(f"2b. Registering `DataAsset` types: {asset_type_names}")
 
-        # TODO (kilo59): TypeLookup could support a transaction to prevent 2 loops in this method
-        # transaction rollback key additions if conflict occurs
-        cls.type_lookup.raise_if_contains([*asset_types, *asset_type_names])
+            # TODO (kilo59): TypeLookup could support a transaction to prevent 2 loops in this method
+            # transaction rollback key additions if conflict occurs
+            cls.type_lookup.raise_if_contains([*asset_types, *asset_type_names])
 
-        for type_, asset_type_name in zip(asset_types, asset_type_names):
-            cls.type_lookup[type_] = asset_type_name
-            LOGGER.debug(f"'{asset_type_name}' added to `type_lookup`")
+            for type_, asset_type_name in zip(asset_types, asset_type_names):
+                cls.type_lookup[type_] = asset_type_name
+                LOGGER.debug(f"'{asset_type_name}' added to `type_lookup`")
+        except TypeError as exc:
+            raise TypeRegistrationError(
+                exc, type_=errored_on, field_name="asset_types"
+            ) from exc
