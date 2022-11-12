@@ -83,28 +83,6 @@ class _SourceFactories:
         # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
         cls._register_assets(ds_type)
 
-    @property
-    def factories(self) -> List[str]:
-        return list(self.__source_factories.keys())
-
-    def __getattr__(self, attr_name: str):
-        try:
-            ds_constructor = self.__source_factories[attr_name]
-
-            def wrapped(name: str, **kwargs):
-                datasource = ds_constructor(name=name, **kwargs)
-                # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
-                self._data_context._attach_datasource_to_context(datasource)
-                return datasource
-
-            return wrapped
-        except KeyError:
-            raise AttributeError(f"No factory {attr_name} in {self.factories}")
-
-    def __dir__(self) -> List[str]:
-        """Preserves autocompletion for dynamic attributes."""
-        return [*self.factories, *super().__dir__()]
-
     @classmethod
     def _register_datasource_and_factory_method(cls, ds_type, factory_fn) -> str:
         # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
@@ -185,3 +163,25 @@ class _SourceFactories:
             raise TypeRegistrationError(
                 exc, type_=errored_on, field_name="asset_types"
             ) from exc
+
+    @property
+    def factories(self) -> List[str]:
+        return list(self.__source_factories.keys())
+
+    def __getattr__(self, attr_name: str):
+        try:
+            ds_constructor = self.__source_factories[attr_name]
+
+            def wrapped(name: str, **kwargs):
+                datasource = ds_constructor(name=name, **kwargs)
+                # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
+                self._data_context._attach_datasource_to_context(datasource)
+                return datasource
+
+            return wrapped
+        except KeyError:
+            raise AttributeError(f"No factory {attr_name} in {self.factories}")
+
+    def __dir__(self) -> List[str]:
+        """Preserves autocompletion for dynamic attributes."""
+        return [*self.factories, *super().__dir__()]
