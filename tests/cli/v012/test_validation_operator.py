@@ -322,7 +322,7 @@ def test_validation_operator_list_with_one_validation_operator(
     )
     assert result.exit_code == 0
     # _capture_ansi_codes_to_file(result)
-    assert escape_ansi(result.output.strip()) == expected_result
+    assert escape_ansi(result.output).strip() == expected_result.strip()
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -380,7 +380,7 @@ def test_validation_operator_list_with_multiple_validation_operators(
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert escape_ansi(result.output.strip()) == expected_result
+    assert escape_ansi(result.output).strip() == expected_result.strip()
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,

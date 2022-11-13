@@ -450,7 +450,7 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout = escape_ansi(result.stdout)
+    stdout = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -458,7 +458,7 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
             "../../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_expected_v012_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v20_project_directory
         )

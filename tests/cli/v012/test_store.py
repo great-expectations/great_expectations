@@ -63,7 +63,7 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
     )
 
     assert result.exit_code == 0
-    assert escape_ansi(result.output.strip()) == expected_result
+    assert escape_ansi(result.output).strip() == expected_result.strip()
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -110,6 +110,6 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
     )
     print(result.output)
     assert result.exit_code == 0
-    assert escape_ansi(result.output.strip()) == expected_result
+    assert escape_ansi(result.output).strip() == expected_result.strip()
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
