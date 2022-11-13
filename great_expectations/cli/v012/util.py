@@ -19,14 +19,14 @@ def cli_message(string) -> None:
     print(cli_colorize_string(string))
 
 
-def cli_colorize_string(string):
-    for color in ("blue", "cyan", "green", "yellow", "red"):
+def cli_colorize_string(string: str) -> str:
+    colors = ("blue", "cyan", "green", "yellow", "red")
+    for color in colors:
         string = re.sub(
             f"<{color}>(.*?)</{color}>",
-            click.style(string, fg=color),
+            click.style(r"\g<1>", fg=color),
             string,
-            # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
-            flags=re.DOTALL,
+            flags=re.DOTALL,  # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
         )
     return string
 
