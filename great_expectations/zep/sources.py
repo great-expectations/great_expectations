@@ -83,19 +83,24 @@ class _SourceFactories:
                 f"`{ds_type.__name__}` is missing a `type` attribute with an assigned string value"
             )
 
-        # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
-        cls._register_assets(ds_type, asset_registrar=cls.type_lookup)
+        # rollback type registrations if exception occurs
+        with cls.type_lookup.transaction() as type_lookup:
 
-        cls._register_engine(
-            ds_type, type_lookup_name=ds_type_name, engine_registrar=cls.engine_lookup
-        )
+            # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
+            cls._register_assets(ds_type, asset_type_lookup=type_lookup)
 
-        cls._register_datasource_and_factory_method(
-            ds_type,
-            factory_fn=factory_fn,
-            ds_type_name=ds_type_name,
-            datasource_registrar=cls.type_lookup,
-        )
+            cls._register_datasource_and_factory_method(
+                ds_type,
+                factory_fn=factory_fn,
+                ds_type_name=ds_type_name,
+                datasource_type_lookup=type_lookup,
+            )
+
+            cls._register_engine(
+                ds_type,
+                type_lookup_name=ds_type_name,
+                engine_type_lookup=cls.engine_lookup,
+            )
 
     @classmethod
     def _register_datasource_and_factory_method(
@@ -103,7 +108,7 @@ class _SourceFactories:
         ds_type: Type[Datasource],
         factory_fn: SourceFactoryFn,
         ds_type_name: str,
-        datasource_registrar: TypeLookup,
+        datasource_type_lookup: TypeLookup,
     ) -> str:
         """
         Register the `Datasource` class and add a factory method for the class on `sources`.
@@ -122,7 +127,7 @@ class _SourceFactories:
                 type_=ds_type,
             )
 
-        datasource_registrar[ds_type] = ds_type_name
+        datasource_type_lookup[ds_type] = ds_type_name
         LOGGER.info(f"'{ds_type_name}' added to `type_lookup`")
         cls.__source_factories[method_name] = factory_fn
         return ds_type_name
@@ -132,7 +137,7 @@ class _SourceFactories:
         cls,
         ds_type: Type[Datasource],
         type_lookup_name: str,
-        engine_registrar: TypeLookup,
+        engine_type_lookup: TypeLookup,
     ):
         try:
             exec_engine_type: Type[ExecutionEngine] = ds_type.__fields__[
@@ -155,44 +160,43 @@ class _SourceFactories:
         LOGGER.info(
             f"2c. Registering `ExecutionEngine` type `{eng_class_name}` for '{type_lookup_name}'"
         )
-        engine_registrar[type_lookup_name] = exec_engine_type
-        LOGGER.info(list(engine_registrar.keys()))
+        engine_type_lookup[type_lookup_name] = exec_engine_type
+        LOGGER.info(list(engine_type_lookup.keys()))
 
     @classmethod
-    def _register_assets(cls, ds_type: Type[Datasource], asset_registrar: TypeLookup):
-        with asset_registrar.transaction() as asset_registrar:
-            errored_on: Optional[Type[DataAsset]] = None
-            try:
-                asset_types: List[Type[DataAsset]] = ds_type.asset_types
+    def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
+        errored_on: Optional[Type[DataAsset]] = None
+        try:
+            asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
-                if not asset_types:
-                    LOGGER.warning(
-                        f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
-                    )
+            if not asset_types:
+                LOGGER.warning(
+                    f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
+                )
 
-                for t in asset_types:
-                    try:
-                        asset_type_name = t.__fields__["type"].default
-                        if asset_type_name is None:
-                            raise TypeError(
-                                f"{t.__name__} `type` field must be assigned and cannot be `None`"
-                            )
-                        LOGGER.info(
-                            f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
-                        )
-                        asset_registrar[t] = asset_type_name
-                    except (AttributeError, KeyError, TypeError) as bad_field_exc:
-                        errored_on = t
-                        LOGGER.warning(
-                            f"{bad_field_exc.__class__.__name__}:{bad_field_exc}"
-                        )
+            for t in asset_types:
+                try:
+                    asset_type_name = t.__fields__["type"].default
+                    if asset_type_name is None:
                         raise TypeError(
-                            f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type"
-                        ) from bad_field_exc
-            except TypeError as exc:
-                raise TypeRegistrationError(
-                    exc, type_=errored_on, field_name="asset_types"
-                ) from exc
+                            f"{t.__name__} `type` field must be assigned and cannot be `None`"
+                        )
+                    LOGGER.info(
+                        f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
+                    )
+                    asset_type_lookup[t] = asset_type_name
+                except (AttributeError, KeyError, TypeError) as bad_field_exc:
+                    errored_on = t
+                    LOGGER.warning(
+                        f"{bad_field_exc.__class__.__name__}:{bad_field_exc}"
+                    )
+                    raise TypeError(
+                        f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type"
+                    ) from bad_field_exc
+        except TypeError as exc:
+            raise TypeRegistrationError(
+                exc, type_=errored_on, field_name="asset_types"
+            ) from exc
 
     @property
     def factories(self) -> List[str]:
