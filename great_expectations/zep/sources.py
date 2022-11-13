@@ -84,17 +84,26 @@ class _SourceFactories:
             )
 
         # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
-        cls._register_assets(ds_type)
+        cls._register_assets(ds_type, asset_registrar=cls.type_lookup)
 
-        cls._register_engine(ds_type, type_lookup_name=ds_type_name)
+        cls._register_engine(
+            ds_type, type_lookup_name=ds_type_name, engine_registrar=cls.engine_lookup
+        )
 
         cls._register_datasource_and_factory_method(
-            ds_type, factory_fn=factory_fn, ds_type_name=ds_type_name
+            ds_type,
+            factory_fn=factory_fn,
+            ds_type_name=ds_type_name,
+            datasource_registrar=cls.type_lookup,
         )
 
     @classmethod
     def _register_datasource_and_factory_method(
-        cls, ds_type: Type[Datasource], factory_fn: SourceFactoryFn, ds_type_name: str
+        cls,
+        ds_type: Type[Datasource],
+        factory_fn: SourceFactoryFn,
+        ds_type_name: str,
+        datasource_registrar: TypeLookup,
     ) -> str:
         """
         Register the `Datasource` class and add a factory method for the class on `sources`.
@@ -113,13 +122,18 @@ class _SourceFactories:
                 type_=ds_type,
             )
 
-        cls.type_lookup[ds_type] = ds_type_name
+        datasource_registrar[ds_type] = ds_type_name
         LOGGER.info(f"'{ds_type_name}' added to `type_lookup`")
         cls.__source_factories[method_name] = factory_fn
         return ds_type_name
 
     @classmethod
-    def _register_engine(cls, ds_type: Type[Datasource], type_lookup_name: str):
+    def _register_engine(
+        cls,
+        ds_type: Type[Datasource],
+        type_lookup_name: str,
+        engine_registrar: TypeLookup,
+    ):
         try:
             exec_engine_type: Type[ExecutionEngine] = ds_type.__fields__[
                 "execution_engine"
@@ -141,11 +155,11 @@ class _SourceFactories:
         LOGGER.info(
             f"2c. Registering `ExecutionEngine` type `{eng_class_name}` for '{type_lookup_name}'"
         )
-        cls.engine_lookup[type_lookup_name] = exec_engine_type
-        LOGGER.info(list(cls.engine_lookup.keys()))
+        engine_registrar[type_lookup_name] = exec_engine_type
+        LOGGER.info(list(engine_registrar.keys()))
 
     @classmethod
-    def _register_assets(cls, ds_type: Type[Datasource]):
+    def _register_assets(cls, ds_type: Type[Datasource], asset_registrar: TypeLookup):
         errored_on: Optional[Type[DataAsset]] = None
         try:
             asset_types: List[Type[DataAsset]] = ds_type.asset_types
@@ -177,10 +191,10 @@ class _SourceFactories:
 
             # TODO (kilo59): TypeLookup could support a transaction to prevent 2 loops in this method
             # transaction rollback key additions if conflict occurs
-            cls.type_lookup.raise_if_contains([*asset_types, *asset_type_names])
+            asset_registrar.raise_if_contains([*asset_types, *asset_type_names])
 
             for type_, asset_type_name in zip(asset_types, asset_type_names):
-                cls.type_lookup[type_] = asset_type_name
+                asset_registrar[type_] = asset_type_name
                 LOGGER.debug(f"'{asset_type_name}' added to `type_lookup`")
         except TypeError as exc:
             raise TypeRegistrationError(
