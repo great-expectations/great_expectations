@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 import pandas as pd
 import pytest
@@ -174,7 +174,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], Any] = {}
 
     table_columns_metric: MetricConfiguration
     results: dict
@@ -258,7 +258,7 @@ def test_resolve_metrics_with_extraneous_value_key():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], Any] = {}
 
     table_columns_metric: MetricConfiguration
     results: dict
