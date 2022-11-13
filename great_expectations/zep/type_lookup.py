@@ -119,6 +119,10 @@ class TypeLookup(
         if intersection:
             raise TypeLookupError(f"Items are already present - {intersection}")
 
+    def clear(self) -> None:
+        """Clear all data. Deletes all keys and values."""
+        return self.data.clear()
+
     @contextlib.contextmanager
     def transaction(self) -> Generator[TypeLookup, None, None]:
         initial_keys: Set[ValidTypes] = set(self.keys())

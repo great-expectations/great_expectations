@@ -52,6 +52,8 @@ def empty_sources(context_sources_cleanup) -> _SourceFactories:
     _SourceFactories._SourceFactories__source_factories.clear()
     _SourceFactories.type_lookup.clear()
     _SourceFactories.engine_lookup.clear()
+    assert not _SourceFactories.type_lookup
+    assert not _SourceFactories.engine_lookup
     yield context_sources_cleanup
 
 
