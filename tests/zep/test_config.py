@@ -16,7 +16,7 @@ p = pytest.param
 
 ZEP_TEST_DIR = pathlib.Path(__file__).parent
 
-PG_CONFIG_YAML = ZEP_TEST_DIR / "pg_config.yaml"
+PG_CONFIG_YAML_FILE = ZEP_TEST_DIR / "pg_config.yaml"
 SIMPLE_DS_DICT = {
     "datasources": {
         "my_ds": {
@@ -33,7 +33,12 @@ SIMPLE_DS_DICT = {
     [
         p(GxConfig.parse_obj, SIMPLE_DS_DICT, id="simple pg config dict"),
         p(GxConfig.parse_raw, json.dumps(SIMPLE_DS_DICT), id="simple pg json"),
-        p(GxConfig.parse_yaml, PG_CONFIG_YAML, id="pg_config.yaml"),
+        p(GxConfig.parse_yaml, PG_CONFIG_YAML_FILE, id="pg_config.yaml file"),
+        p(
+            GxConfig.parse_yaml,
+            PG_CONFIG_YAML_FILE.read_text(),
+            id="pg_config yaml string",
+        ),
     ],
 )
 def test_load_config(inject_engine_lookup_double, load_method: Callable, input_):
