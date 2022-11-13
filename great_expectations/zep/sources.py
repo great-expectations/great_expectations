@@ -160,46 +160,39 @@ class _SourceFactories:
 
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource], asset_registrar: TypeLookup):
-        errored_on: Optional[Type[DataAsset]] = None
-        try:
-            asset_types: List[Type[DataAsset]] = ds_type.asset_types
+        with asset_registrar.transaction() as asset_registrar:
+            errored_on: Optional[Type[DataAsset]] = None
+            try:
+                asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
-            if not asset_types:
-                LOGGER.warning(
-                    f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
-                )
-
-            asset_type_names: List[str] = []
-            for t in asset_types:
-                try:
-                    type_name = t.__fields__["type"].default
-                    if type_name is None:
-                        raise TypeError(
-                            f"{t.__name__} `type` field must be assigned and cannot be `None`"
-                        )
-                    asset_type_names.append(type_name)
-                except (AttributeError, KeyError, TypeError) as bad_field_exc:
-                    errored_on = t
+                if not asset_types:
                     LOGGER.warning(
-                        f"{bad_field_exc.__class__.__name__}:{bad_field_exc}"
+                        f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
                     )
-                    raise TypeError(
-                        f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type"
-                    ) from bad_field_exc
 
-            LOGGER.info(f"2b. Registering `DataAsset` types: {asset_type_names}")
-
-            # TODO (kilo59): TypeLookup could support a transaction to prevent 2 loops in this method
-            # transaction rollback key additions if conflict occurs
-            asset_registrar.raise_if_contains([*asset_types, *asset_type_names])
-
-            for type_, asset_type_name in zip(asset_types, asset_type_names):
-                asset_registrar[type_] = asset_type_name
-                LOGGER.debug(f"'{asset_type_name}' added to `type_lookup`")
-        except TypeError as exc:
-            raise TypeRegistrationError(
-                exc, type_=errored_on, field_name="asset_types"
-            ) from exc
+                for t in asset_types:
+                    try:
+                        asset_type_name = t.__fields__["type"].default
+                        if asset_type_name is None:
+                            raise TypeError(
+                                f"{t.__name__} `type` field must be assigned and cannot be `None`"
+                            )
+                        LOGGER.info(
+                            f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
+                        )
+                        asset_registrar[t] = asset_type_name
+                    except (AttributeError, KeyError, TypeError) as bad_field_exc:
+                        errored_on = t
+                        LOGGER.warning(
+                            f"{bad_field_exc.__class__.__name__}:{bad_field_exc}"
+                        )
+                        raise TypeError(
+                            f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type"
+                        ) from bad_field_exc
+            except TypeError as exc:
+                raise TypeRegistrationError(
+                    exc, type_=errored_on, field_name="asset_types"
+                ) from exc
 
     @property
     def factories(self) -> List[str]:
