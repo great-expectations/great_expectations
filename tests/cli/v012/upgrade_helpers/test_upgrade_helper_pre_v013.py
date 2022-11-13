@@ -136,7 +136,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout = escape_ansi(result.stdout)
+    stdout = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -144,7 +144,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
             "../../../test_fixtures/upgrade_helper/test_basic_project_upgrade_expected_v012_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
@@ -242,7 +242,7 @@ def test_project_upgrade_with_manual_steps(
         input="\n",
         catch_exceptions=False,
     )
-    stdout = escape_ansi(result.stdout)
+    stdout = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -250,7 +250,7 @@ def test_project_upgrade_with_manual_steps(
             "../../../test_fixtures/upgrade_helper/test_project_upgrade_with_manual_steps_expected_v012_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
@@ -353,7 +353,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout = escape_ansi(result.stdout)
+    stdout = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -361,7 +361,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
             "../../../test_fixtures/upgrade_helper/test_project_upgrade_with_exception_expected_v012_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout = f.read().strip()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )

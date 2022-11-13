@@ -132,8 +132,8 @@ def test_upgrade_helper_intervention_on_cli_command(
         in stdout
     )
     assert (
-        "Ok, exiting now. To upgrade at a later time, use the following command: [36mgreat_expectations project "
-        "upgrade[0m" in stdout
+        "Ok, exiting now. To upgrade at a later time, use the following command: great_expectations project "
+        "upgrade" in stdout
     )
     assert (
         "To learn more about the upgrade process, visit ["
@@ -198,7 +198,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = escape_ansi(result.stdout)
+    stdout: str = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -206,7 +206,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
             "../../test_fixtures/upgrade_helper/test_basic_project_upgrade_expected_stdout.fixture",
         )
     ) as f:
-        expected_stdout: str = f.read()
+        expected_stdout: str = f.read().strip()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
@@ -304,7 +304,7 @@ def test_project_upgrade_with_manual_steps(
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = escape_ansi(result.stdout)
+    stdout: str = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -312,7 +312,7 @@ def test_project_upgrade_with_manual_steps(
             "../../test_fixtures/upgrade_helper/test_project_upgrade_with_manual_steps_expected_stdout.fixture",
         )
     ) as f:
-        expected_stdout: str = f.read()
+        expected_stdout: str = f.read().strip()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
@@ -415,7 +415,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = escape_ansi(result.stdout)
+    stdout: str = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -423,7 +423,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
             "../../test_fixtures/upgrade_helper/test_project_upgrade_with_exception_expected_stdout.fixture",
         )
     ) as f:
-        expected_stdout: str = f.read()
+        expected_stdout: str = f.read().strip()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
@@ -512,7 +512,7 @@ def test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = escape_ansi(result.stdout)
+    stdout: str = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -520,7 +520,7 @@ def test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_
             "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints_datasources_validation_operators_expected_stdout.fixture",
         )
     ) as f:
-        expected_stdout: str = f.read()
+        expected_stdout: str = f.read().strip()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v20_project_directory
         )
@@ -619,7 +619,7 @@ def test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints(
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = escape_ansi(result.stdout)
+    stdout: str = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -627,7 +627,7 @@ def test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints(
             "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints.fixture",
         )
     ) as f:
-        expected_stdout: str = f.read()
+        expected_stdout: str = f.read().strip()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR",
             v20_project_directory_with_v30_configuration_and_v20_checkpoints,
@@ -733,7 +733,7 @@ def test_v2_to_v3_project_upgrade_without_manual_steps(
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = escape_ansi(result.stdout)
+    stdout: str = escape_ansi(result.stdout).strip()
 
     with open(
         file_relative_path(
@@ -741,7 +741,7 @@ def test_v2_to_v3_project_upgrade_without_manual_steps(
             "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_without_manual_steps_expected_stdout.fixture",
         )
     ) as f:
-        expected_stdout: str = f.read()
+        expected_stdout: str = f.read().strip()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR",
             v20_project_directory_with_v30_configuration_and_no_checkpoints,

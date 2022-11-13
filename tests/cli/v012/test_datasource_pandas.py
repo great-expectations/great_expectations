@@ -79,7 +79,7 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
      class_name: PandasDataset""".format(
         base_directory
     ).strip()
-    stdout = escape_ansi(result.stdout.strip())
+    stdout = escape_ansi(result.stdout).strip()
     assert stdout == expected_output
     assert_no_logging_messages_or_tracebacks(caplog, result)
 

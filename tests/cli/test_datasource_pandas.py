@@ -81,7 +81,7 @@ def test_cli_datasource_list_on_project_with_one_datasource(
  - name: my_datasource
    class_name: Datasource
 """.strip()
-    stdout = escape_ansi(result.stdout.strip())
+    stdout = escape_ansi(result.stdout).strip()
     assert stdout == expected_output
     assert_no_logging_messages_or_tracebacks(caplog, result)
 

@@ -52,7 +52,7 @@ Using v3 (Batch Request) API
  - name: wow_a_datasource
    class_name: SqlAlchemyDatasource
 """.strip()
-    stdout = escape_ansi(result.stdout.strip())
+    stdout = escape_ansi(result.stdout).strip()
 
     assert stdout == expected_output
 

@@ -55,7 +55,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
 """.format(
         url
     ).strip()
-    stdout = escape_ansi(result.stdout.strip())
+    stdout = escape_ansi(result.stdout).strip()
 
     assert stdout == expected_output
 
