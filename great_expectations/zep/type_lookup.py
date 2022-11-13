@@ -125,6 +125,24 @@ class TypeLookup(
 
     @contextlib.contextmanager
     def transaction(self) -> Generator[TypeLookup, None, None]:
+        """
+        Context manager that waits until end of transaction to commit changes.
+        Any exceptions that happen within the context will prevent any of the changes from being committed.
+
+        Any exceptions encountered will be re-raised on exit.
+
+        Example
+        -------
+        >>> t = TypeLookup()
+        >>> with t.transaction() as txn_t:
+        ...     txn_t["my_type"] = tuple
+        ...     print(tuple in txn_t)
+        ...     print(tuple in t)
+        True
+        False
+        >>> print(tuple in t)
+        True
+        """
         initial_keys: Set[ValidTypes] = set(self.keys())
         txn_exc: Union[Exception, None] = None
 
@@ -151,3 +169,9 @@ class TypeLookup(
                 LOGGER.info(f"Transaction committing {len(net_new_items)} items")
                 self.update(net_new_items)
             LOGGER.info("Completed TypeLookup transaction")
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(report=True, verbose=True)
