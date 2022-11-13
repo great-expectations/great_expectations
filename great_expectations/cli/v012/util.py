@@ -1,8 +1,10 @@
 import importlib
+import re
 import sys
 from types import ModuleType
 from typing import Optional
 
+import click
 import pkg_resources
 from pkg_resources import Distribution, WorkingSet
 
@@ -14,15 +16,19 @@ from great_expectations.util import import_library_module, is_library_loadable
 
 
 def cli_message(string) -> None:
-    from great_expectations.cli.pretty_printing import cli_message as fn
-
-    fn(string)
+    print(cli_colorize_string(string))
 
 
 def cli_colorize_string(string):
-    from great_expectations.cli.pretty_printing import cli_colorize_string as fn
-
-    return fn(string)
+    for color in ("blue", "cyan", "green", "yellow", "red"):
+        string = re.sub(
+            f"<{color}>(.*?)</{color}>",
+            click.style(string, fg=color),
+            string,
+            # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
+            flags=re.DOTALL,
+        )
+    return string
 
 
 def cli_message_list(string_list, list_intro_string=None) -> None:
