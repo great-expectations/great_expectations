@@ -51,6 +51,7 @@ class TypeLookup(
         **kwargs: Hashable,
     ):
         __dict = __dict or {}
+        self._original_keys: Set[ValidTypes] = set()
         super().__init__(__dict, **kwargs)
 
     @overload
@@ -67,6 +68,7 @@ class TypeLookup(
     def __delitem__(self, key: ValidTypes):
         value = self.data.pop(key)
         super().pop(value, None)
+        self._original_keys.remove(key)
 
     def __setitem__(self, key: ValidTypes, value: ValidTypes):
         if key is None:
@@ -81,6 +83,7 @@ class TypeLookup(
             raise TypeLookupError(f"`{key}` already set - bad key")
         if value in self:
             raise TypeLookupError(f"`{value}` already set - bad value")
+        self._original_keys.add(key)
         super().__setitem__(key, value)
         super().__setitem__(value, key)
 
@@ -89,6 +92,19 @@ class TypeLookup(
 
     def __str__(self) -> str:
         return str(self.data)
+
+    def original_keys(self) -> Iterator[ValidTypes]:
+        """Iterate over only the original key values."""
+        for key in self._original_keys:
+            yield key
+
+    def original_items(self) -> Iterator[Tuple[ValidTypes, ValidTypes]]:
+        """
+        Iterate over items as if it were a traditional dict.
+        Use this to prevent iterating over items twice (as both a key & value).
+        """
+        for key in self.original_keys():
+            yield key, self[key]  # type: ignore[index]
 
     def intersection(self, collection_: Iterable[ValidTypes]) -> Set[ValidTypes]:
         """
@@ -108,19 +124,22 @@ class TypeLookup(
         initial_keys: Set[ValidTypes] = set(self.keys())
         txn_exc: Union[Exception, None] = None
 
-        txn_lookup_copy = self.__class__(copy.copy(self.data))
+        txn_lookup_copy = self.__class__()
+        txn_lookup_copy.data = copy.copy(self.data)
         LOGGER.info("Beginning TypeLookup transaction")
         try:
             yield txn_lookup_copy
         except Exception as exc:
             txn_exc = exc
             LOGGER.info(
-                f"{exc.__class__.__name__} encountered during TypeLookup transaction"
+                f"{exc.__class__.__name__}:{exc} - encountered during TypeLookup transaction"
             )
             raise
         finally:
             net_new_items = {
-                k: v for k, v in txn_lookup_copy.items() if k not in initial_keys
+                k: v
+                for k, v in txn_lookup_copy.original_items()
+                if k not in initial_keys
             }
             if txn_exc:
                 LOGGER.info(f"Transaction of {len(net_new_items)} items rolled back")

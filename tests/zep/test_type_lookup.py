@@ -88,6 +88,35 @@ def test_raise_if_contains_does_not_raise(collection_to_check: Iterable[ValidTyp
     type_lookup.raise_if_contains(collection_to_check)
 
 
+def test_original_keys():
+    t = TypeLookup({"a_list": list, "a_tuple": tuple, "a_set": set})
+    keys = set(t.keys())
+    original_keys = set(t.original_keys())
+
+    print(keys)
+    print(original_keys)
+
+    assert original_keys.issubset(keys)
+    assert original_keys != keys
+
+
+def test_original_items():
+    t = TypeLookup({"a_list": list, "a_tuple": tuple, "a_set": set})
+    keys = set(t.keys())
+    original_keys = set(t.original_keys())
+
+    print("keys\t\t", keys)
+    print("original keys\t", original_keys)
+
+    assert original_keys.issubset(keys)
+    assert original_keys != keys
+    original_values = original_keys.symmetric_difference(keys)
+    print("original values\t", original_values)
+
+    for _, o_value in t.original_items():
+        assert o_value in original_values
+
+
 class TestTransactions:
     def test_transaction_happy_path(self):
         t = TypeLookup({"a_list": list, "a_dict": dict})
@@ -99,14 +128,41 @@ class TestTransactions:
             txn_t["a_set"] = set
             print(f"t\t{len(t)}")
             print(f"txn_t\t{len(txn_t)}\n")
+            assert set in txn_t
+            assert set not in t
 
             txn_t["a_tuple"] = tuple
             print(f"t\t{len(t)}")
             print(f"txn_t\t{len(txn_t)}\n")
+            assert tuple in txn_t
+            assert tuple not in t
 
         pp(t.data)
         assert set in t
         assert tuple in t
+
+    def test_transaction_exit_early(self):
+        t = TypeLookup({"a_list": list, "a_dict": dict})
+
+        with pytest.raises(ValueError, match="oh uh"):
+            with t.transaction() as txn_t:
+                print(f"t\t{len(t)}")
+                print(f"txn_t\t{len(txn_t)}\n")
+
+                txn_t["a_set"] = set
+                print(f"t\t{len(t)}")
+                print(f"txn_t\t{len(txn_t)}\n")
+                assert set not in t
+
+                txn_t["a_tuple"] = tuple
+                print(f"t\t{len(t)}")
+                print(f"txn_t\t{len(txn_t)}\n")
+
+                raise ValueError("oh uh")
+
+        pp(t.data)
+        assert set not in t
+        assert tuple not in t
 
 
 if __name__ == "__main__":
