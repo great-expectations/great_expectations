@@ -5,9 +5,8 @@ from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -16,6 +15,8 @@ from great_expectations.render.util import (
 
 
 class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
+    """Expect the compound columns to be unique."""
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",

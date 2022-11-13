@@ -16,13 +16,11 @@ from great_expectations.render import (
     LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
     renderedAtomicValueSchema,
 )
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-)
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -44,7 +42,7 @@ from great_expectations.util import isclose
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     # noinspection PyUnresolvedReferences
-    """Expect specific provided column quantiles to be between provided minimum and maximum values.
+    """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
 
            ``quantile_ranges`` must be a dictionary with two keys:
 

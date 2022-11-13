@@ -6,9 +6,12 @@ from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    LegacyRendererType,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -34,7 +37,9 @@ except ImportError:
 
 
 class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
-    """Expect column entries to be strings that do NOT match a given regular expression. The regex must not match \
+    """Expect the column entries to be strings that do NOT match a given regular expression.
+
+    The regex must not match \
     any portion of the provided string. For example, "[at]+" would identify the following strings as expected: \
     "fish", "dog", and the following as unexpected: "cat", "hat".
 

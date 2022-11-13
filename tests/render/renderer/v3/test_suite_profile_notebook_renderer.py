@@ -174,7 +174,6 @@ EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT: List[
                 "profiler_details": {
                     "metric_configuration": {
                         "domain_kwargs": {},
-                        "metric_dependencies": None,
                         "metric_name": "table.row_count",
                         "metric_value_kwargs": None,
                     },
@@ -628,7 +627,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {},
-                            "metric_dependencies": None,
                             "metric_name": "table.row_count",
                             "metric_value_kwargs": None,
                         },
@@ -645,7 +643,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Unnamed: 0"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -667,7 +664,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Unnamed: 0"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -689,7 +685,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Age"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -711,7 +706,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Age"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -733,7 +727,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Survived"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -755,7 +748,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Survived"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -777,7 +769,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "SexCode"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -799,7 +790,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "SexCode"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },

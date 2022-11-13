@@ -1387,9 +1387,7 @@ def _pandas_column_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
-    df = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -1447,9 +1445,7 @@ def _pandas_column_pair_map_condition_values(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
         raise ValueError(
@@ -1504,9 +1500,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
         raise ValueError(
@@ -1550,9 +1544,7 @@ def _pandas_multicolumn_map_condition_values(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
         raise ValueError(
@@ -1598,9 +1590,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
         raise ValueError(
@@ -1645,9 +1635,7 @@ def _pandas_column_map_series_and_domain_values(
     assert (
         accessor_domain_kwargs == accessor_domain_kwargs_2
     ), "map_series and condition must have the same accessor kwargs"
-    df = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -1711,9 +1699,7 @@ def _pandas_map_condition_index(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column" in accessor_domain_kwargs:
         column_name = accessor_domain_kwargs["column"]
@@ -1767,9 +1753,7 @@ def _pandas_column_map_condition_value_counts(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
-    df = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     column_name = accessor_domain_kwargs["column"]
 
@@ -1840,9 +1824,7 @@ def _pandas_map_condition_rows(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column" in accessor_domain_kwargs:
         column_name = accessor_domain_kwargs["column"]
@@ -1926,9 +1908,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     # The integral values are cast to SQL Numeric in order to avoid a bug in AWS Redshift (converted to integer later).
     count_case_statement: List[Label] = sa.case(
@@ -2021,7 +2001,7 @@ def _sqlalchemy_column_map_condition_values(
         "unexpected_condition"
     )
     selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=compute_domain_kwargs
     )
 
     if "column" not in accessor_domain_kwargs:
@@ -2082,9 +2062,7 @@ def _sqlalchemy_column_pair_map_condition_values(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     # noinspection PyPep8Naming
     column_A_name = accessor_domain_kwargs["column_A"]
@@ -2135,9 +2113,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     # noinspection PyPep8Naming
     column_A_name = accessor_domain_kwargs["column_A"]
@@ -2176,9 +2152,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
         raise ValueError(
@@ -2223,9 +2197,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
         raise ValueError(
@@ -2263,7 +2235,7 @@ def _sqlalchemy_column_map_condition_value_counts(
         "unexpected_condition"
     )
     selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=compute_domain_kwargs
     )
 
     if "column" not in accessor_domain_kwargs:
@@ -2313,9 +2285,7 @@ def _sqlalchemy_map_condition_rows(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     table_columns = metrics.get("table.columns")
     column_selector = [sa.column(column_name) for column_name in table_columns]
@@ -2371,9 +2341,7 @@ def _spark_map_condition_unexpected_count_value(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
@@ -2394,9 +2362,7 @@ def _spark_column_map_condition_values(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    df = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -2443,9 +2409,7 @@ def _spark_column_map_condition_value_counts(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    df = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -2491,9 +2455,7 @@ def _spark_map_condition_rows(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
@@ -2526,9 +2488,7 @@ def _spark_column_pair_map_condition_values(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     # noinspection PyPep8Naming
     column_A_name = accessor_domain_kwargs["column_A"]
@@ -2586,9 +2546,7 @@ def _spark_column_pair_map_condition_filtered_row_count(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     # noinspection PyPep8Naming
     column_A_name = accessor_domain_kwargs["column_A"]
@@ -2625,9 +2583,7 @@ def _spark_multicolumn_map_condition_values(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
         raise ValueError(
@@ -2685,9 +2641,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs,
-    )
+    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
         raise ValueError(
@@ -3260,19 +3214,16 @@ class ColumnMapMetricProvider(MapMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies
 
@@ -3324,19 +3275,16 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies
 
@@ -3386,18 +3334,15 @@ class MulticolumnMapMetricProvider(MapMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies

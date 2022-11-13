@@ -5,9 +5,8 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
@@ -29,7 +28,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
-    """Expect column entries to be between a minimum value and a maximum value (inclusive).
+    """Expect the column entries to be between a minimum value and a maximum value (inclusive).
 
     expect_column_values_to_be_between is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine

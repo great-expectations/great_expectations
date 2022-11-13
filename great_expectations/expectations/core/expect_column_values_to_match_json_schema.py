@@ -6,9 +6,8 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -22,7 +21,7 @@ except ImportError:
 
 
 class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
-    """Expect column entries to be JSON objects matching a given JSON schema.
+    """Expect the column entries to be JSON objects matching a given JSON schema.
 
     expect_column_values_to_match_json_schema is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine

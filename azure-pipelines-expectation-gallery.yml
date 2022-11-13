@@ -145,7 +145,7 @@ stages:
               secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
 
-          - bash: python ./build_gallery.py --backends "pandas" --outfile-name "quick_check.json" ; exp_count=$(grep "^ *\"expect_" quick_check.json | wc -l); package_summary=$(grep "\"package\":" quick_check.json | sort | uniq -c | sort -nr) ; echo -e "\n\n$exp_count Expectations in quick_check.json\n";  echo -e "$package_summary"; [[ $exp_count -lt 298 ]] && echo "Fewer than 298 Expectations" && exit 1 ; [[ $(echo -e "$package_summary" | wc -l) -lt 6 ]] && echo "Fewer than 6 packages" && exit 1 ; echo "ok"
+          - bash: python ./build_gallery.py --backends "pandas" --outfile-name "quick_check.json" ; exp_count=$(grep "^ *\"expect_" quick_check.json | wc -l); package_summary=$(grep "\"package\":" quick_check.json | sort | uniq -c | sort -nr) ; echo -e "\n\n$exp_count Expectations in quick_check.json\n";  echo -e "$package_summary"; [[ $exp_count -lt 297 ]] && echo "Fewer than 297 Expectations" && exit 1 ; [[ $(echo -e "$package_summary" | wc -l) -lt 6 ]] && echo "Fewer than 6 packages" && exit 1 ; echo "ok"
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery Quick Check'
 
