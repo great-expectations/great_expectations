@@ -77,8 +77,8 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
         "upgrade" in stdout
     )
     assert (
-        "To learn more about the upgrade process, visit ["
-        "36mhttps://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
+        "To learn more about the upgrade process, visit "
+        "https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
         in stdout
     )
     assert_no_logging_messages_or_tracebacks(caplog, result)
