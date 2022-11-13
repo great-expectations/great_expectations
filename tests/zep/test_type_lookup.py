@@ -1,3 +1,4 @@
+from pprint import pprint as pp
 from typing import Hashable, Iterable, Mapping, Optional, Tuple
 
 import pytest
@@ -85,6 +86,27 @@ def test_raise_if_contains_does_not_raise(collection_to_check: Iterable[ValidTyp
     type_lookup = TypeLookup(a_list=list, a_dict=dict)
 
     type_lookup.raise_if_contains(collection_to_check)
+
+
+class TestTransactions:
+    def test_transaction_happy_path(self):
+        t = TypeLookup({"a_list": list, "a_dict": dict})
+
+        with t.transaction() as txn_t:
+            print(f"t\t{len(t)}")
+            print(f"txn_t\t{len(txn_t)}\n")
+
+            txn_t["a_set"] = set
+            print(f"t\t{len(t)}")
+            print(f"txn_t\t{len(txn_t)}\n")
+
+            txn_t["a_tuple"] = tuple
+            print(f"t\t{len(t)}")
+            print(f"txn_t\t{len(txn_t)}\n")
+
+        pp(t.data)
+        assert set in t
+        assert tuple in t
 
 
 if __name__ == "__main__":

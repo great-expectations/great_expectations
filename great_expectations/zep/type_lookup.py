@@ -1,7 +1,26 @@
+from __future__ import annotations
+
+import contextlib
+import copy
+import logging
 from collections import UserDict
-from typing import Hashable, Iterable, Mapping, Optional, Set, Type, Union, overload
+from typing import (
+    Generator,
+    Hashable,
+    Iterable,
+    Iterator,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    overload,
+)
 
 from typing_extensions import TypeAlias
+
+LOGGER = logging.getLogger(__name__)
 
 
 class TypeLookupError(ValueError):
@@ -83,3 +102,29 @@ class TypeLookup(
         intersection = self.intersection(collection_)
         if intersection:
             raise TypeLookupError(f"Items are already present - {intersection}")
+
+    @contextlib.contextmanager
+    def transaction(self) -> Generator[TypeLookup, None, None]:
+        initial_keys: Set[ValidTypes] = set(self.keys())
+        txn_exc: Union[Exception, None] = None
+
+        txn_lookup_copy = self.__class__(copy.copy(self.data))
+        LOGGER.info("Beginning TypeLookup transaction")
+        try:
+            yield txn_lookup_copy
+        except Exception as exc:
+            txn_exc = exc
+            LOGGER.info(
+                f"{exc.__class__.__name__} encountered during TypeLookup transaction"
+            )
+            raise
+        finally:
+            net_new_items = {
+                k: v for k, v in txn_lookup_copy.items() if k not in initial_keys
+            }
+            if txn_exc:
+                LOGGER.info(f"Transaction of {len(net_new_items)} items rolled back")
+            else:
+                LOGGER.info(f"Transaction committing {len(net_new_items)} items")
+                self.update(net_new_items)
+            LOGGER.info("Completed TypeLookup transaction")
