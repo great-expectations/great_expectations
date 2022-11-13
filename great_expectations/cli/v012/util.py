@@ -1,5 +1,4 @@
 import importlib
-import re
 import sys
 from types import ModuleType
 from typing import Optional

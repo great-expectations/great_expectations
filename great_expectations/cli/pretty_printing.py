@@ -4,21 +4,13 @@ from typing import List, Optional
 
 import click
 
-try:
-    from typing import Final
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Final
-
-SUPPORTED_CLI_COLORS: Final[List[str]] = ["blue", "cyan", "green", "yellow", "red"]
-
 
 def cli_message(string: str) -> None:
     print(cli_colorize_string(string))
 
 
 def cli_colorize_string(string: str) -> str:
-    for color in SUPPORTED_CLI_COLORS:
+    for color in ("blue", "cyan", "green", "yellow", "red"):
         string = re.sub(
             f"<{color}>(.*?)</{color}>",
             click.style(string, fg=color),
