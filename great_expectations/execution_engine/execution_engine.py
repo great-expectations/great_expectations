@@ -307,7 +307,7 @@ class ExecutionEngine(ABC):
     def resolve_metrics(  # noqa: C901 - 16
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], Any]] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> Dict[Tuple[str, str, str], Any]:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
