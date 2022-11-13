@@ -120,7 +120,7 @@ def test_upgrade_helper_intervention_on_cli_command(
         input="n\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
+    stdout: str = escape_ansi(result.stdout).strip()
 
     assert (
         "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 3."

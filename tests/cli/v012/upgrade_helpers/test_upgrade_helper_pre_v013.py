@@ -61,7 +61,7 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
         input="n\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout = escape_ansi(result.stdout).strip()
 
     assert (
         "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 3."
