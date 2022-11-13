@@ -73,7 +73,7 @@ class PandasDatasource(Datasource):
     def add_my_other_asset(self, asset_name: str) -> OtherAsset:
         """Create `MyOtherAsset` add it to `self.assets` and return it."""
         print(f"Adding {OtherAsset.__name__} - {asset_name}")
-        asset = OtherAsset(name=asset_name)
+        asset = OtherAsset(name=asset_name, food="bad pizza")
         self.assets[asset_name] = asset
         return asset
 
@@ -85,7 +85,7 @@ class PandasDatasource(Datasource):
         return asset
 
 
-def round_trip():
+def round_trip() -> None:
     """Demo Creating Datasource -> Adding Assets -> Retrieving asset by name"""
     print(f"\n  Adding and round tripping a toy DataAsset ...\n{SEPARATOR}")
     context = get_context()
@@ -139,25 +139,25 @@ def add_real_asset() -> None:
     pp(my_asset)
 
 
-def from_yaml_config():
+def from_yaml_config() -> None:
     print(f"\n  Load from a yaml config file\n{SEPARATOR}")
     root_dir = pathlib.Path(__file__).parent
     context = get_context(context_root_dir=root_dir)
     print(f"\n  Context loaded from {root_dir}")
 
-    my_ds: PandasDatasource = context.get_datasource("my_demo_pd_datasource")
+    my_ds: PandasDatasource = context.get_datasource("my_demo_pd_datasource")  # type: ignore[assignment]
     print(f"\n  Retrieved '{my_ds.name}'->")
     pp(my_ds)
     assert my_ds
 
-    my_asset = my_ds.get_asset("my_demo_file_asset")
+    my_asset: FileAsset = my_ds.get_asset("my_demo_file_asset")  # type: ignore[assignment]
 
     print(f"\n Retrieved '{my_asset.name}'->")
     pp(my_asset)
     assert my_asset.file_path.exists()
 
 
-def pg_ds_nested_within_asset():
+def pg_ds_nested_within_asset() -> None:
     print(
         f"\n  Postgres datasource asset with nested datasource (from config)\n{SEPARATOR}"
     )
@@ -175,7 +175,7 @@ def pg_ds_nested_within_asset():
         my_ds.execution_engine is my_asset.datasource.execution_engine
     ), "Engine Failed Identity check"
 
-    assert my_ds.connection_str == my_asset.datasource.connection_str
+    assert my_ds.connection_str == my_asset.datasource.connection_str  # type: ignore[attr-defined]
 
     assert my_ds == my_asset.datasource, "DS Failed Equality check"
 
@@ -187,6 +187,6 @@ if __name__ == "__main__":
     # type_lookup()
     # add_real_asset()
 
-    with sqlachemy_execution_engine_mock(lambda: None):
+    with sqlachemy_execution_engine_mock(lambda x: None):
         from_yaml_config()
         pg_ds_nested_within_asset()
