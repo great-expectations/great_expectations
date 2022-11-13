@@ -14,6 +14,7 @@ from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
+from tests.cli.utils import escape_ansi
 from tests.cli.v012.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
@@ -72,8 +73,8 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
         in stdout
     )
     assert (
-        "Ok, exiting now. To upgrade at a later time, use the following command: [36mgreat_expectations project "
-        "upgrade[0m" in stdout
+        "Ok, exiting now. To upgrade at a later time, use the following command: great_expectations project "
+        "upgrade" in stdout
     )
     assert (
         "To learn more about the upgrade process, visit ["
@@ -135,7 +136,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout = escape_ansi(result.stdout)
 
     with open(
         file_relative_path(
@@ -241,7 +242,7 @@ def test_project_upgrade_with_manual_steps(
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout = escape_ansi(result.stdout)
 
     with open(
         file_relative_path(
@@ -352,7 +353,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout = escape_ansi(result.stdout)
 
     with open(
         file_relative_path(
@@ -449,7 +450,7 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout = escape_ansi(result.stdout)
 
     with open(
         file_relative_path(

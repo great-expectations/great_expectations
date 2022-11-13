@@ -15,6 +15,7 @@ from great_expectations.util import gen_directory_tree_str
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
+    escape_ansi,
 )
 
 
@@ -197,7 +198,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
+    stdout: str = escape_ansi(result.stdout)
 
     with open(
         file_relative_path(
@@ -303,7 +304,7 @@ def test_project_upgrade_with_manual_steps(
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
+    stdout: str = escape_ansi(result.stdout)
 
     with open(
         file_relative_path(
@@ -414,7 +415,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
+    stdout: str = escape_ansi(result.stdout)
 
     with open(
         file_relative_path(
@@ -511,7 +512,7 @@ def test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
+    stdout: str = escape_ansi(result.stdout)
 
     with open(
         file_relative_path(
@@ -618,7 +619,7 @@ def test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints(
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
+    stdout: str = escape_ansi(result.stdout)
 
     with open(
         file_relative_path(
@@ -732,7 +733,7 @@ def test_v2_to_v3_project_upgrade_without_manual_steps(
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
+    stdout: str = escape_ansi(result.stdout)
 
     with open(
         file_relative_path(
