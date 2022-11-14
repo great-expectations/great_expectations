@@ -310,7 +310,7 @@ def validate_checkpoint(
     failure_message: Optional[str] = None,
 ) -> None:
     try:
-        load_checkpoint(
+        _ = load_checkpoint(
             context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
         )
     except ge_exceptions.CheckpointError as e:

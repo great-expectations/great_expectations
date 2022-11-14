@@ -1230,7 +1230,7 @@ We could not determine the format of the file. What is it?
                             "\nDoes this file contain a header row?", default=True
                         )
                         batch_kwargs["reader_options"] = {"header": header_row}
-                    datasource.get_batch(batch_kwargs=batch_kwargs)
+                    _ = datasource.get_batch(batch_kwargs=batch_kwargs)
                     break
         else:
             try:
@@ -1246,7 +1246,7 @@ We could not determine the format of the file. What is it?
                         "\nDoes this file contain a header row?", default=True
                     )
                     batch_kwargs["reader_options"] = {"header": header_row}
-                datasource.get_batch(batch_kwargs=batch_kwargs)
+                _ = datasource.get_batch(batch_kwargs=batch_kwargs)
                 break
             except Exception as e:
                 file_load_error_message = """
