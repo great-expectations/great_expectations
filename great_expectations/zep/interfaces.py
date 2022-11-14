@@ -16,16 +16,12 @@ from great_expectations.zep.sources import _SourceFactories
 LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
-# Batches one wants returned. In the simple case the keys represent dimensions one can
-# slice the data along and the values are the values. One can also namespace these key/value
-# pairs, hence the Dict[str, BatchRequestValue], allowed values. For example:
-#   options = {
-#       "month": "3"
-#       "year_splitter": {
-#           "year": "2020"
-#       }
-#    }
-# The month key is in the global namespace while the year key is in the year_splitter namespace.
+# Batches one wants returned. The keys represent dimensions one can slice the data along
+# and the values are the realized. If a value is None or unspecified, the batch_request
+# will capture all data along this dimension. For example, if we have a year and month
+# splitter and we want to query all months in the year 2020, the batch request options
+# would look like:
+#   options = { "year": 2020 }
 BatchRequestOptions: TypeAlias = Dict[str, Any]
 
 
