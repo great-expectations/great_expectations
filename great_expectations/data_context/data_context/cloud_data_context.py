@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-from enum import Enum
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Union, cast
 
 import requests
@@ -15,15 +14,16 @@ from great_expectations.core.config_provider import (
     ConfigurationProvider,
 )
 from great_expectations.core.serializer import JsonConfigSerializer
-from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
+from great_expectations.data_context.cloud_constants import (
+    CLOUD_DEFAULT_BASE_URL,
+    GECloudEnvironmentVariable,
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
-)
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
 )
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
@@ -41,12 +41,6 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
-
-
-class GECloudEnvironmentVariable(str, Enum):
-    BASE_URL = "GE_CLOUD_BASE_URL"
-    ORGANIZATION_ID = "GE_CLOUD_ORGANIZATION_ID"
-    ACCESS_TOKEN = "GE_CLOUD_ACCESS_TOKEN"
 
 
 class CloudDataContext(AbstractDataContext):
