@@ -155,7 +155,7 @@ class CloudConfigurationProvider(AbstractConfigurationProvider):
         self._cloud_config = cloud_config
 
     def get_values(self) -> Dict[str, str]:
-        from great_expectations.data_context.data_context.cloud_data_context import (
+        from great_expectations.data_context.cloud_constants import (
             GECloudEnvironmentVariable,
         )
 
