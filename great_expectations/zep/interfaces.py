@@ -5,7 +5,7 @@ import logging
 from pprint import pformat as pf
 from typing import Any, Dict, List, Mapping, Optional, Set, Type, Union
 
-from pydantic import BaseModel, PrivateAttr, root_validator, validator
+import pydantic
 from typing_extensions import ClassVar, TypeAlias
 
 from great_expectations.core.batch import BatchDataType
@@ -29,6 +29,11 @@ LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
 BatchRequestOptions: TypeAlias = Dict[str, Any]
 
 
+class ZepBaseModel(pydantic.BaseModel):
+    class Config:
+        extra = pydantic.Extra.forbid
+
+
 @dataclasses.dataclass(frozen=True)
 class BatchRequest:
     datasource_name: str
@@ -36,12 +41,12 @@ class BatchRequest:
     options: BatchRequestOptions
 
 
-class DataAsset(BaseModel):
+class DataAsset(ZepBaseModel):
     name: str
     type: str
 
     # non-field private attrs
-    _datasource: Datasource = PrivateAttr()
+    _datasource: Datasource = pydantic.PrivateAttr()
 
     @property
     def datasource(self) -> Datasource:
@@ -56,11 +61,8 @@ class DataAsset(BaseModel):
     def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
         raise NotImplementedError
 
-    class Config:
-        extra = "forbid"
 
-
-class Datasource(BaseModel, metaclass=MetaDatasource):
+class Datasource(ZepBaseModel, metaclass=MetaDatasource):
 
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
@@ -78,7 +80,12 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
     execution_engine: ExecutionEngine
     assets: Mapping[str, DataAsset] = {}
 
-    @root_validator(pre=True)
+    class Config:
+        # TODO: revisit this (1 option - define __get_validator__ on ExecutionEngine)
+        # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
+        arbitrary_types_allowed = True
+
+    @pydantic.root_validator(pre=True)
     @classmethod
     def _load_execution_engine(cls, values: Dict[str, Any]):
         """
@@ -107,7 +114,7 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
         LOGGER.info(f"{registered_ds_type_name} - {engine_type.__name__} - {engine}")
         return values
 
-    @validator("assets", pre=True)
+    @pydantic.validator("assets", pre=True)
     @classmethod
     def _load_asset_subtype(cls, v: Dict[str, dict]):
         LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
@@ -122,11 +129,6 @@ class Datasource(BaseModel, metaclass=MetaDatasource):
 
         LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
-
-    class Config:
-        # TODO: revisit this (1 option - define __get_validator__ on ExecutionEngine)
-        # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
-        arbitrary_types_allowed = True
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
