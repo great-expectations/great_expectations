@@ -158,8 +158,8 @@ function sanitizeText (text) {
  * Organize parsed snippets by source filename.
  * If provided, input filenames will filter this output.
  *
- * Note that is what is run if this file is invoked by Node.
- * An alias `yarn snippet-check` should be defined in `package.json` for convenience.
+ * Note that this is what is run if this file is invoked by Node.
+ * An alias `yarn snippet-check` is defined in `package.json` for convenience.
  */
 function main() {
   const snippets = parseDirectory(".")
