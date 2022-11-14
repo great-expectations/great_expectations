@@ -47,7 +47,7 @@ class FakeAbstractDataContext(AbstractDataContext):
     def _init_variables(self):
         """Using EphemeralDataContextVariables to store in memory."""
         return EphemeralDataContextVariables(
-            config=DataContextConfig(), config_provider=self._config_provider
+            config=DataContextConfig(), config_provider=self.config_provider
         )
 
     def save_expectation_suite(self):

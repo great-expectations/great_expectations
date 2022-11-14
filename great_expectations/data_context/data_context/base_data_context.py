@@ -276,7 +276,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         # necessary properties / overrides
         self._synchronize_self_with_underlying_data_context()
 
-        self._config_provider = self._data_context._config_provider
+        self._config_provider = self._data_context.config_provider
         self._variables = self._data_context.variables
 
         # Init validation operators

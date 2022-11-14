@@ -297,6 +297,10 @@ class AbstractDataContext(ABC):
         return self.variables.config
 
     @property
+    def config_provider(self) -> ConfigurationProvider:
+        return self._config_provider
+
+    @property
     def root_directory(self) -> Optional[str]:
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located.
@@ -631,7 +635,7 @@ class AbstractDataContext(ABC):
         """
         if not config:
             config = self._project_config
-        return DataContextConfig(**self._config_provider.substitute_config(config))
+        return DataContextConfig(**self.config_provider.substitute_config(config))
 
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
@@ -986,7 +990,7 @@ class AbstractDataContext(ABC):
         raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
         raw_config = datasourceConfigSchema.load(raw_config_dict)
 
-        substituted_config = self._config_provider.substitute_config(raw_config_dict)
+        substituted_config = self.config_provider.substitute_config(raw_config_dict)
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
         datasource_config = datasourceConfigSchema.load(substituted_config)
@@ -1013,7 +1017,7 @@ class AbstractDataContext(ABC):
         datasource_dict: dict = serializer.serialize(datasource_config)
 
         substituted_config: dict = cast(
-            dict, self._config_provider.substitute_config(datasource_dict)
+            dict, self.config_provider.substitute_config(datasource_dict)
         )
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
@@ -2506,7 +2510,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return config_with_global_config_overrides
 
     def _load_config_variables(self) -> Dict:
-        config_var_provider = self._config_provider.get_provider(
+        config_var_provider = self.config_provider.get_provider(
             ConfigurationVariablesConfigurationProvider
         )
         if config_var_provider:
@@ -2708,7 +2712,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
 
                 raw_config_dict = dict(datasourceConfigSchema.dump(config))
-                substituted_config_dict: dict = self._config_provider.substitute_config(
+                substituted_config_dict: dict = self.config_provider.substitute_config(
                     raw_config_dict
                 )
 
@@ -2817,7 +2821,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
         raw_config: dict = substitution_serializer.serialize(config)
 
-        substituted_config_dict: dict = self._config_provider.substitute_config(
+        substituted_config_dict: dict = self.config_provider.substitute_config(
             raw_config
         )
 

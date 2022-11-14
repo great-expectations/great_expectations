@@ -299,7 +299,7 @@ class BaseCheckpoint(ConfigPeer):
         return self._substitute_config_variables(config=substituted_config)
 
     def _substitute_config_variables(self, config: dict) -> dict:
-        return self.data_context._config_provider.substitute_config(config)
+        return self.data_context.config_provider.substitute_config(config)
 
     def _run_validation(
         self,

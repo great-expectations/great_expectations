@@ -333,9 +333,10 @@ class _YamlConfigValidator:
         self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
     ) -> str:
         try:
-            config_values = self._data_context._config_provider.get_values()
+            config_provider = self._data_context.config_provider
+            config_values = config_provider.get_values()
             config_values.update(runtime_environment)
-            return self._data_context._config_provider.substitute_config(
+            return config_provider.substitute_config(
                 config=yaml_config, config_values=config_values
             )
         except Exception as e:

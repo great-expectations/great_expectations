@@ -330,7 +330,7 @@ class CloudDataContext(AbstractDataContext):
 
         variables = CloudDataContextVariables(
             config=self._project_config,
-            config_provider=self._config_provider,
+            config_provider=self.config_provider,
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_organization_id=ge_cloud_organization_id,
             ge_cloud_access_token=ge_cloud_access_token,
@@ -360,7 +360,7 @@ class CloudDataContext(AbstractDataContext):
         if not config:
             config = self.config
 
-        substitutions: dict = self._config_provider.get_values()
+        substitutions: dict = self.config_provider.get_values()
 
         ge_cloud_config_variable_defaults = {
             "plugins_directory": self._normalize_absolute_or_relative_path(
@@ -380,7 +380,7 @@ class CloudDataContext(AbstractDataContext):
                 )
                 substitutions[config_variable] = value
 
-        return DataContextConfig(**self._config_provider.substitute_config(config))
+        return DataContextConfig(**self.config_provider.substitute_config(config))
 
     def create_expectation_suite(
         self,
