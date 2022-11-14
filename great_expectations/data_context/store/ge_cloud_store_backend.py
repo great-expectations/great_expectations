@@ -144,6 +144,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         **{  # type: ignore[arg-type]
             GeCloudRESTResource.BATCH: "batches",
             GeCloudRESTResource.CHECKPOINT: "checkpoints",
+            # Chetan - 20220811 - CONTRACT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
+            GeCloudRESTResource.CONTRACT: "contracts",
             GeCloudRESTResource.DATA_ASSET: "data_assets",
             GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
             GeCloudRESTResource.DATASOURCE: "datasources",
@@ -152,6 +154,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "expectation_validation_results",
             GeCloudRESTResource.PROFILER: "profilers",
             GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
+            # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
+            GeCloudRESTResource.SUITE_VALIDATION_RESULT: "suite_validation_results",
             GeCloudRESTResource.VALIDATION_RESULT: "validation_results",
         }
     )
