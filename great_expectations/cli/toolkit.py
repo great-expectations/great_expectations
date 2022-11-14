@@ -1093,7 +1093,7 @@ def get_batch_request_using_datasource_name(
             )
         sys.exit(1)
 
-    batch_request = get_batch_request(
+    batch_request: Dict[str, Union[str, int, Dict[str, Any]]] = get_batch_request(
         datasource=datasource,  # type: ignore[arg-type] # could be LegacyDatasource
         additional_batch_request_args=additional_batch_request_args,
     )
