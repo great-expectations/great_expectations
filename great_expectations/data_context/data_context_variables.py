@@ -66,8 +66,9 @@ class DataContextVariables(ABC):
     Should maintain parity with the `DataContextConfig`.
 
     Args:
-        config:        A reference to the DataContextConfig to perform CRUD on.
-        _store:        An instance of a DataContextStore with the appropriate backend to persist config changes.
+        config:          A reference to the DataContextConfig to perform CRUD on.
+        config_provider: Responsible for determining config values and substituting them in GET calls.
+        _store:          An instance of a DataContextStore with the appropriate backend to persist config changes.
     """
 
     config: DataContextConfig
