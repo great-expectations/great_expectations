@@ -1,11 +1,13 @@
 import os
-from typing import Any, Dict, Tuple
+from typing import Dict, Tuple
 from unittest import mock
 
 import pandas as pd
 import pytest
 
 # noinspection PyBroadException
+from great_expectations.validator.resolved_metric import MetricValue
+
 try:
     # noinspection PyUnresolvedReferences
     from azure.storage.blob import BlobServiceClient
@@ -369,7 +371,7 @@ def test_resolve_metric_bundle():
     # Building engine and configurations in attempt to resolve metrics
     engine = PandasExecutionEngine(batch_data_dict={"made-up-id": df})
 
-    metrics: Dict[Tuple[str, str, str], Any] = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
     results: dict
