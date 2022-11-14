@@ -2,11 +2,12 @@ import importlib
 import re
 import sys
 from types import ModuleType
-from typing import Optional
+from typing import List, Optional
 
 import click
 import pkg_resources
 from pkg_resources import Distribution, WorkingSet
+from typing_extensions import Final
 
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.python_subprocess import (
@@ -14,16 +15,17 @@ from great_expectations.cli.v012.python_subprocess import (
 )
 from great_expectations.util import import_library_module, is_library_loadable
 
+SUPPORTED_CLI_COLORS: Final[List[str]] = ["blue", "cyan", "green", "yellow", "red"]
 
-def cli_message(string) -> None:
+
+def cli_message(string: str) -> None:
     print(cli_colorize_string(string))
 
 
 def cli_colorize_string(string: str) -> str:
-    colors = ("blue", "cyan", "green", "yellow", "red")
-    for color in colors:
+    for color in SUPPORTED_CLI_COLORS:
         string = re.sub(
-            f"<{color}>(.*?)</{color}>",
+            f"<[ color ]>(.*?)</{color}>",
             click.style(r"\g<1>", fg=color),
             string,
             flags=re.DOTALL,  # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
