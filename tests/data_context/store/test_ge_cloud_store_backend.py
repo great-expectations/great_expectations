@@ -16,9 +16,11 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
-from great_expectations.data_context.store.ge_cloud_store_backend import (
+from great_expectations.data_context.cloud_constants import (
+    CLOUD_DEFAULT_BASE_URL,
     GeCloudRESTResource,
+)
+from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudStoreBackend,
     construct_json_payload,
     construct_url,
