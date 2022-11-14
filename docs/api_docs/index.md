@@ -5,6 +5,8 @@ These API docs are under heavy development. This warning will be removed once th
 ```
 
 
+# This is rendered from our README.md:
+
 ```{include} ../../README.md
 :relative-images:
 ```
@@ -12,13 +14,8 @@ These API docs are under heavy development. This warning will be removed once th
 ```{toctree}
 :caption: 'Contents:'
 :maxdepth: 2
-```
 
-```{eval-rst}
-.. autoclass:: great_expectations.data_context.data_context.DataContext
-   :members:
-   :inherited-members:
-
+data_context
 ```
 
 # Indices and tables
