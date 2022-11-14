@@ -3,6 +3,9 @@ import sys
 from typing import List, Optional
 
 import click
+from typing_extensions import Final
+
+SUPPORTED_CLI_COLORS: Final[List[str]] = ["blue", "cyan", "green", "yellow", "red"]
 
 
 def cli_message(string: str) -> None:
@@ -10,10 +13,9 @@ def cli_message(string: str) -> None:
 
 
 def cli_colorize_string(string: str) -> str:
-    colors = ("blue", "cyan", "green", "yellow", "red")
-    for color in colors:
+    for color in SUPPORTED_CLI_COLORS:
         string = re.sub(
-            f"<{color}>(.*?)</{color}>",
+            f"<[ color ]>(.*?)</{color}>",
             click.style(r"\g<1>", fg=color),
             string,
             flags=re.DOTALL,  # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
