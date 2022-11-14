@@ -1676,7 +1676,7 @@ def get_context(
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
     ge_cloud_mode: Optional[bool] = None,
-) -> Union[DataContext, BaseDataContext, CloudDataContext]:
+) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
     """
     Method to return the appropriate DataContext depending on parameters and environment.
 
