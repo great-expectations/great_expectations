@@ -1669,14 +1669,14 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 
 def get_context(
-    project_config: Optional[Union["DataContextConfig", Mapping]] = None,
+    project_config: Optional[Union[DataContextConfig, Mapping]] = None,
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
     ge_cloud_base_url: Optional[str] = None,
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
     ge_cloud_mode: Optional[bool] = None,
-) -> Union["DataContext", "BaseDataContext", "CloudDataContext"]:
+) -> Union[DataContext, BaseDataContext, CloudDataContext]:
     """
     Method to return the appropriate DataContext depending on parameters and environment.
 

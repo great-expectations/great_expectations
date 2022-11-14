@@ -2486,7 +2486,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         validation_errors: dict = {}
         config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
-        usage_stats_enabled: bool = self._get_global_usage_statistics_override()
+        usage_stats_enabled: bool = self._is_usage_stats_enabled()
         if not usage_stats_enabled:
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
@@ -2546,7 +2546,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return {}
 
     @staticmethod
-    def _get_global_usage_statistics_override() -> bool:
+    def _is_usage_stats_enabled() -> bool:
         """
         Checks the following locations to see if usage_statistics is disabled in any of the following locations:
             - GE_USAGE_STATS, which is an environment_variable
