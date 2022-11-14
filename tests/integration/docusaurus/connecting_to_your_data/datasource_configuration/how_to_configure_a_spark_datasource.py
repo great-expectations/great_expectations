@@ -481,7 +481,7 @@ def section_8_configure_the_values_for_batch_spec_passthrough__universal():
 
 
 def section_8_configure_the_values_for_batch_spec_passthrough__inferred():
-    # <snippet name="inferred spark datasource_config post batch_spec_passthrough definition"
+    # <snippet name="inferred spark datasource_config post batch_spec_passthrough definition">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -505,6 +505,7 @@ def section_8_configure_the_values_for_batch_spec_passthrough__inferred():
             }
         },
     }
+    # </snippet>
     is_subset(
         datasource_config, get_full_config_spark_inferred_datasource_single_batch()
     )
@@ -514,7 +515,7 @@ def section_8_configure_the_values_for_batch_spec_passthrough__inferred():
 
 
 def section_8_configure_the_values_for_batch_spec_passthrough__configured():
-    # <snippet name="configured spark datasource_config post batch_spec_passthrough definition"
+    # <snippet name="configured spark datasource_config post batch_spec_passthrough definition">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -548,7 +549,7 @@ def section_8_configure_the_values_for_batch_spec_passthrough__configured():
 
 
 def section_8_configure_the_values_for_batch_spec_passthrough__runtime():
-    # <snippet name="runtime spark datasource_config post batch_spec_passthrough definition"
+    # <snippet name="runtime spark datasource_config post batch_spec_passthrough definition">
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
@@ -607,6 +608,7 @@ def section_9_configure_your_data_connectors_data_assets__inferred__single_batch
             },
             # </snippet>
         },
+        # </snippet>
     }
     is_subset(
         data_connector_snippet, get_full_config_spark_inferred_datasource_single_batch()
