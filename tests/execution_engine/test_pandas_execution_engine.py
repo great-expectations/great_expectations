@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 # noinspection PyBroadException
-from great_expectations.validator.resolved_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue
 
 try:
     # noinspection PyUnresolvedReferences

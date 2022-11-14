@@ -10,7 +10,7 @@ from great_expectations.rule_based_profiler.metric_computation_result import (
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
-from great_expectations.validator.resolved_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue
 
 
 def _condition_metric_values(metric_values: MetricValues) -> MetricValues:

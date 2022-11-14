@@ -1,7 +1,7 @@
 from dataclasses import make_dataclass
 from typing import Any, Dict, List, Set, Tuple, Union
 
-from great_expectations.validator.resolved_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue
 
 MetricValues = Union[
     MetricValue, List[MetricValue], Set[MetricValue], Tuple[MetricValue, ...]

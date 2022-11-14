@@ -25,8 +25,8 @@ from great_expectations.self_check.util import (
     build_spark_engine,
 )
 from great_expectations.util import isclose
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.resolved_metric import MetricValue
 from tests.expectations.test_util import get_table_columns_metric
 
 

@@ -58,7 +58,7 @@ from great_expectations.util import (
     is_ndarray_decimal_dtype,
     is_numeric,
 )
-from great_expectations.validator.resolved_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (

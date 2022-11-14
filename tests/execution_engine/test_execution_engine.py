@@ -10,10 +10,10 @@ from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 # Testing ordinary process of adding column row condition
-from great_expectations.validator.resolved_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
