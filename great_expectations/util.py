@@ -1669,7 +1669,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 
 def get_context(
-    project_config: Optional[Union[DataContextConfig, Mapping]] = None,
+    project_config: Optional[Union["DataContextConfig", Mapping]] = None,
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
     ge_cloud_base_url: Optional[str] = None,
