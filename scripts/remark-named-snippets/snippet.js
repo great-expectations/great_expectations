@@ -153,9 +153,15 @@ function sanitizeText (text) {
     .trim()
 }
 
+/**
+ * Organize parsed snippets by source filename.
+ * If provided, input filenames will filter this output.
+ *
+ * Note that is what is run if this file is invoked by Node.
+ * An alias `yarn snippet-check` should be defined in `package.json` for convenience.
+ */
 function main() {
   const snippets = parseDirectory(".")
-  // Remove call to `node scripts/remark-named-snippets/snippet.js`
   const targetFiles = process.argv.slice(2)
 
   let out = {}
