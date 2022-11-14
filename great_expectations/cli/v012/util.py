@@ -2,7 +2,7 @@ import importlib
 import re
 import sys
 from types import ModuleType
-from typing import List, Optional
+from typing import Optional, Tuple
 
 import click
 import pkg_resources
@@ -15,7 +15,13 @@ from great_expectations.cli.v012.python_subprocess import (
 )
 from great_expectations.util import import_library_module, is_library_loadable
 
-SUPPORTED_CLI_COLORS: Final[List[str]] = ["blue", "cyan", "green", "yellow", "red"]
+SUPPORTED_CLI_COLORS: Final[Tuple[str, ...]] = (
+    "blue",
+    "cyan",
+    "green",
+    "yellow",
+    "red",
+)
 
 
 def cli_message(string: str) -> None:

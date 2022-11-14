@@ -1,11 +1,17 @@
 import re
 import sys
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import click
 from typing_extensions import Final
 
-SUPPORTED_CLI_COLORS: Final[List[str]] = ["blue", "cyan", "green", "yellow", "red"]
+SUPPORTED_CLI_COLORS: Final[Tuple[str, ...]] = (
+    "blue",
+    "cyan",
+    "green",
+    "yellow",
+    "red",
+)
 
 
 def cli_message(string: str) -> None:
