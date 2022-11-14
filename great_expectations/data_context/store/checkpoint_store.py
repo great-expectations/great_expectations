@@ -9,10 +9,8 @@ from marshmallow import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.data_context.cloud_constants import GeCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfigDefaults,
