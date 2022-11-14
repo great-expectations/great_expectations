@@ -88,8 +88,13 @@ class CloudDataContext(AbstractDataContext):
             project_config = self.retrieve_data_context_config_from_ge_cloud(
                 ge_cloud_config=self._ge_cloud_config,
             )
+
+        project_data_context_config: DataContextConfig = (
+            CloudDataContext.get_or_create_data_context_config(project_config)
+        )
+
         self._project_config = self._apply_global_config_overrides(
-            config=project_config
+            config=project_data_context_config
         )
         self._variables = self._init_variables()
         super().__init__(

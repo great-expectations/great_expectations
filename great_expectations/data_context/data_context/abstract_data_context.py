@@ -24,6 +24,8 @@ from typing import (
     cast,
 )
 
+from marshmallow import ValidationError
+
 try:
     from typing import Literal
 except ImportError:
@@ -80,6 +82,7 @@ from great_expectations.data_context.types.base import (
     NotebookConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
+    dataContextConfigSchema,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
@@ -2437,6 +2440,21 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         return metric_configurations_list
 
+    @classmethod
+    def get_or_create_data_context_config(
+        cls, project_config: Union[DataContextConfig, Mapping]
+    ) -> DataContextConfig:
+        if isinstance(project_config, DataContextConfig):
+            return project_config
+        try:
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            project_config_dict = dataContextConfigSchema.dump(project_config)
+            project_config_dict = dataContextConfigSchema.load(project_config_dict)
+            context_config: DataContextConfig = DataContextConfig(**project_config_dict)
+            return context_config
+        except ValidationError:
+            raise
+
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
     ) -> Optional[str]:
@@ -2451,7 +2469,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return os.path.join(self.root_directory, path)  # type: ignore[arg-type]
 
     def _apply_global_config_overrides(
-        self, config: Union[DataContextConfig, Mapping]
+        self, config: DataContextConfig
     ) -> DataContextConfig:
 
         """
@@ -2467,12 +2485,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             DataContextConfig with the appropriate overrides
         """
         validation_errors: dict = {}
-        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)  # type: ignore[assignment]
-        usage_stats_opted_out: bool = self._check_global_usage_statistics_opt_out()
-        # if usage_stats_opted_out then usage_statistics is false
-        # NOTE: <DataContextRefactor> 202207 Refactor so that this becomes usage_stats_enabled
-        # (and we don't have to flip a boolean in our minds)
-        if usage_stats_opted_out:
+        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
+        usage_stats_enabled: bool = self._is_usage_stats_enabled()
+        if not usage_stats_enabled:
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
@@ -2530,21 +2545,24 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return config_var_provider.get_values()
         return {}
 
-    def _check_global_usage_statistics_opt_out(self) -> bool:
+    @staticmethod
+    def _is_usage_stats_enabled() -> bool:
         """
-        Method to retrieve config value.
-        This method can be overridden in child classes (like FileDataContext) when we need to look for
-        config values in other locations like config files.
+        Checks the following locations to see if usage_statistics is disabled in any of the following locations:
+            - GE_USAGE_STATS, which is an environment_variable
+            - GLOBAL_CONFIG_PATHS
+        If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
+        Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for anonymous_usage_statistics
+        Returns True otherwise
 
         Returns:
-            bool that tells you whether usage_statistics is opted out
+            bool that tells you whether usage_statistics is on or off
         """
-        # NOTE: <DataContextRefactor> Refactor so that opt_out is no longer used, and we don't have to flip boolean in
-        # our minds.
+        usage_statistics_enabled: bool = True
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
-                return True
+                usage_statistics_enabled = False
             else:
                 logger.warning(
                     "GE_USAGE_STATS environment variable must be one of: {}".format(
@@ -2562,12 +2580,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             config.BOOLEAN_STATES = states  # type: ignore[misc] # Cannot assign to class variable via instance
             config.read(config_path)
             try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
-                    return True
+                if not config.getboolean("anonymous_usage_statistics", "enabled"):
+                    usage_statistics_enabled = False
+
             except (ValueError, configparser.Error):
                 pass
-        return False
+        return usage_statistics_enabled
 
     def _get_data_context_id_override(self) -> Optional[str]:
         """

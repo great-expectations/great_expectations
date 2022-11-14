@@ -6,7 +6,6 @@ import os
 from collections import OrderedDict
 from typing import Any, List, Mapping, Optional, Union
 
-from marshmallow import ValidationError
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
@@ -39,7 +38,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     DatasourceConfig,
     GeCloudConfig,
-    dataContextConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
@@ -198,16 +196,6 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
 
     _data_context = None
 
-    @classmethod
-    def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
-        if isinstance(project_config, DataContextConfig):
-            return True
-        try:
-            dataContextConfigSchema.load(project_config)
-        except ValidationError:
-            raise
-        return True
-
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
     )
@@ -231,10 +219,11 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         Returns:
             None
         """
-        if not BaseDataContext.validate_config(project_config):
-            raise ge_exceptions.InvalidConfigError(
-                "Your project_config is not valid. Try using the CLI check-config command."
-            )
+
+        project_data_context_config: DataContextConfig = (
+            BaseDataContext.get_or_create_data_context_config(project_config)
+        )
+
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = ge_cloud_config
         if context_root_dir is not None:
@@ -251,7 +240,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
                 ge_cloud_access_token = ge_cloud_config.access_token
                 ge_cloud_organization_id = ge_cloud_config.organization_id
             self._data_context = CloudDataContext(
-                project_config=project_config,
+                project_config=project_data_context_config,
                 runtime_environment=runtime_environment,
                 context_root_dir=context_root_dir,
                 ge_cloud_base_url=ge_cloud_base_url,
@@ -260,13 +249,14 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
             )
         elif self._context_root_directory:
             self._data_context = FileDataContext(  # type: ignore[assignment]
-                project_config=project_config,
+                project_config=project_data_context_config,
                 context_root_dir=context_root_dir,  # type: ignore[arg-type]
                 runtime_environment=runtime_environment,
             )
         else:
             self._data_context = EphemeralDataContext(  # type: ignore[assignment]
-                project_config=project_config, runtime_environment=runtime_environment
+                project_config=project_data_context_config,
+                runtime_environment=runtime_environment,
             )
 
         assert self._data_context is not None
