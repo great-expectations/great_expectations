@@ -31,9 +31,13 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class _ConfigurationSubstitutor:
+class ConfigurationSubstitutor:
     """
-    TODO
+    Responsible for encapsulating all logic around $VARIABLE (or ${VARIABLE}) substitution.
+
+    While the config variables utilized for substitution are provided at runtime, all the
+    behavior necessary to actually update config objects with their appropriate runtime values
+    should be defined herein.
     """
 
     def __init__(self) -> None:

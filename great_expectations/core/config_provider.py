@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from typing import Any, Dict, Optional, Type, cast
 
-from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
+from great_expectations.core.config_substitutor import ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import GeCloudConfig
 
@@ -15,7 +15,7 @@ yaml = YAMLHandler()
 
 class AbstractConfigurationProvider(ABC):
     def __init__(self) -> None:
-        self._substitutor = _ConfigurationSubstitutor()
+        self._substitutor = ConfigurationSubstitutor()
 
     @abstractmethod
     def get_values(self) -> Dict[str, str]:
@@ -28,14 +28,16 @@ class AbstractConfigurationProvider(ABC):
         self, config: Any, config_values: Optional[Dict[str, str]] = None
     ) -> Any:
         """
-        TODO
+        Utilizes the underlying ConfigurationSubstitutor instance to substitute any
+        $VARIABLES with their corresponding config variable value.
 
         Args:
-            config: ...
-            config_values: ...
+            config: The config object to update.
+            config_values: The dictionary of values to use during the substitution process.
+                           If omitted, any values derived from registered providers will be used.
 
         Returns:
-            ...
+            The input config object with any $VARIABLES replaced with their corresponding config values.
         """
         if config_values is None:
             config_values = self.get_values()
