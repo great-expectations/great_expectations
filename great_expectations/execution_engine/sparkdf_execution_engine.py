@@ -50,6 +50,7 @@ from great_expectations.expectations.row_conditions import (
     parse_condition_to_spark,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.resolved_metric import MetricValue
 
 logger = logging.getLogger(__name__)
 
