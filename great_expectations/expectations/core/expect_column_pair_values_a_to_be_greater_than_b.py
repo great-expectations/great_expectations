@@ -17,7 +17,7 @@ from great_expectations.render.util import (
 
 class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     """
-    Expect values in column A to be greater than column B.
+    Expect the values in column A to be greater than column B.
 
     Args:
         column_A (str): The first column name

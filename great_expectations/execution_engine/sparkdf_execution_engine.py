@@ -36,6 +36,7 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.bundled_metric_configuration import (
     BundledMetricConfiguration,
 )
+from great_expectations.execution_engine.execution_engine import SplitDomainKwargs
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
     SparkDataSampler,
@@ -614,15 +615,15 @@ illegal.  Please check your config."""
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
-        data = self.get_domain_records(domain_kwargs)
-
-        table = domain_kwargs.get("table", None)
+        table: str = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
-        split_domain_kwargs = self._split_domain_kwargs(
+        data: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
+
+        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
 
@@ -721,9 +722,7 @@ illegal.  Please check your config."""
 
         for aggregate in aggregates.values():
             domain_kwargs: dict = aggregate["domain_kwargs"]
-            df: Optional[DataFrame] = self.get_domain_records(
-                domain_kwargs=domain_kwargs,
-            )
+            df: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
 

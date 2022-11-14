@@ -15,7 +15,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
-    """Expect column values to be decreasing.
+    """Expect the column values to be decreasing.
 
     By default, this expectation only works for numeric or datetime data.
     When `parse_strings_as_datetimes=True`, it can also parse strings to datetimes.

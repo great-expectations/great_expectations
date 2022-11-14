@@ -28,7 +28,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 class ExpectColumnSumToBeBetween(ColumnExpectation):
-    """Expect the column to sum to be between an min and max value
+    """Expect the column to sum to be between a minimum value and a maximum value.
 
            expect_column_sum_to_be_between is a \
            :func:`column_aggregate_expectation

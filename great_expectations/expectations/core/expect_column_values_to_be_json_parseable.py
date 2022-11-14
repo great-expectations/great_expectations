@@ -20,7 +20,7 @@ except ImportError:
 
 
 class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
-    """Expect column entries to be data written in JavaScript Object Notation.
+    """Expect the column entries to be data written in JavaScript Object Notation.
 
     expect_column_values_to_be_json_parseable is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine

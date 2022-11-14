@@ -29,7 +29,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
-    """Expect column entries to be strings representing a date or time with a given format.
+    """Expect the column entries to be strings representing a date or time with a given format.
 
     expect_column_values_to_match_strftime_format is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine

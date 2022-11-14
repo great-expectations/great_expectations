@@ -3,7 +3,6 @@ from __future__ import annotations
 import configparser
 import copy
 import datetime
-import errno
 import json
 import logging
 import os
@@ -42,6 +41,12 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     IDDict,
     get_batch_request_from_acceptable_arguments,
+)
+from great_expectations.core.config_provider import (
+    ConfigurationProvider,
+    ConfigurationVariablesConfigurationProvider,
+    EnvironmentConfigurationProvider,
+    RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -87,7 +92,6 @@ from great_expectations.data_context.util import (
     build_store_from_config,
     instantiate_class_from_config,
     substitute_all_config_variables,
-    substitute_config_variable,
 )
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -166,9 +170,11 @@ class AbstractDataContext(ABC):
             runtime_environment = {}
         self.runtime_environment = runtime_environment
 
+        self._config_provider = self._init_config_provider()
+        self._config_variables = self._load_config_variables()
+
         # These attributes that are set downstream.
         self._variables: Optional[DataContextVariables] = None
-        self._config_variables: Optional[dict] = None
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -207,6 +213,34 @@ class AbstractDataContext(ABC):
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
+
+    def _init_config_provider(self) -> ConfigurationProvider:
+        config_provider = ConfigurationProvider()
+        self._register_providers(config_provider)
+        return config_provider
+
+    def _register_providers(self, config_provider: ConfigurationProvider) -> None:
+        """
+        Registers any relevant ConfigurationProvider instances to self._config_provider.
+
+        Note that order matters here - if there is a namespace collision, later providers will overwrite
+        the values derived from previous ones. The order of precedence is as follows:
+            - Config variables
+            - Environment variables
+            - Runtime environment
+        """
+        config_variables_file_path = self._project_config.config_variables_file_path
+        if config_variables_file_path:
+            config_provider.register_provider(
+                ConfigurationVariablesConfigurationProvider(
+                    config_variables_file_path=config_variables_file_path,
+                    root_directory=self.root_directory,
+                )
+            )
+        config_provider.register_provider(EnvironmentConfigurationProvider())
+        config_provider.register_provider(
+            RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
+        )
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
@@ -2490,37 +2524,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return config_with_global_config_overrides
 
     def _load_config_variables(self) -> Dict:
-        """
-        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
-        have already been interpolated before being sent from the Cloud API.
-
-        """
-        config_variables_file_path = self._project_config.config_variables_file_path
-        if config_variables_file_path:
-            try:
-                # If the user specifies the config variable path with an environment variable, we want to substitute it
-                defined_path: str = substitute_config_variable(  # type: ignore[assignment]
-                    config_variables_file_path, dict(os.environ)
-                )
-                if not os.path.isabs(defined_path) and hasattr(self, "root_directory"):
-                    # A BaseDataContext will not have a root directory; in that case use the current directory
-                    # for any non-absolute path
-                    root_directory: str = self.root_directory or os.curdir
-                else:
-                    root_directory = ""
-                var_path = os.path.join(root_directory, defined_path)
-                with open(var_path) as config_variables_file:
-                    contents = config_variables_file.read()
-
-                variables = yaml.load(contents) or {}
-                return dict(variables)
-
-            except OSError as e:
-                if e.errno != errno.ENOENT:
-                    raise
-                return {}
-        else:
-            return {}
+        config_var_provider = self._config_provider.get_provider(
+            ConfigurationVariablesConfigurationProvider
+        )
+        if config_var_provider:
+            return config_var_provider.get_values()
+        return {}
 
     def _check_global_usage_statistics_opt_out(self) -> bool:
         """
@@ -2697,25 +2706,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self._config_variables = self._load_config_variables()
 
     def _determine_substitutions(self) -> Dict:
-        """Aggregates substitutions from the project's config variables file, any environment variables, and
-        the runtime environment.
-
-        Returns: A dictionary containing all possible substitutions that can be applied to a given object
-                 using `substitute_all_config_variables`.
-        """
-        substituted_config_variables: dict = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-
-        substitutions: dict = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
-
-        return substitutions
+        return self._config_provider.get_values()
 
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
