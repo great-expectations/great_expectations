@@ -26,17 +26,17 @@ def does_not_raise():
         ("secret|any_value", None, "secret|any_value"),
         (
             "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret",
-            "great_expectations.core.config_substitutor._ConfigurationSubstitutor.substitute_value_from_aws_secrets_manager",
+            "great_expectations.core.config_substitutor.ConfigurationSubstitutor.substitute_value_from_aws_secrets_manager",
             "success",
         ),
         (
             "secret|projects/project_id/secrets/my_secret",
-            "great_expectations.core.config_substitutor._ConfigurationSubstitutor.substitute_value_from_gcp_secret_manager",
+            "great_expectations.core.config_substitutor.ConfigurationSubstitutor.substitute_value_from_gcp_secret_manager",
             "success",
         ),
         (
             "secret|https://my-vault-name.vault.azure.net/secrets/my_secret",
-            "great_expectations.core.config_substitutor._ConfigurationSubstitutor.substitute_value_from_azure_keyvault",
+            "great_expectations.core.config_substitutor.ConfigurationSubstitutor.substitute_value_from_azure_keyvault",
             "success",
         ),
     ],
