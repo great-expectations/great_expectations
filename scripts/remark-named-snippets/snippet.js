@@ -19,6 +19,7 @@ function constructSnippetMap (dir) {
         `A snippet named ${name} has already been defined elsewhere`
       )
     }
+    delete snippet.name // Remove duplicate filename to clean up stdout
     snippetMap[name] = snippet
   }
 
