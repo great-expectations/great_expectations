@@ -28,7 +28,8 @@ author = 'The Great Expectations Team'
 
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    "myst_parser",
 ]
 
 templates_path = ['_templates']
