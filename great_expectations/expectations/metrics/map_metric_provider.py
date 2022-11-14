@@ -1750,9 +1750,14 @@ def _pandas_map_condition_index(
                     )
                 primary_key_dict[column_name] = df.at[index, column_name]
             unexpected_index_list.append(primary_key_dict)
-        return unexpected_index_list
+        if result_format["result_format"] == "COMPLETE":
+            return unexpected_index_list
+        return unexpected_index_list[: result_format["partial_unexpected_count"]]
+
     else:
-        return list(df.index)
+        if result_format["result_format"] == "COMPLETE":
+            return list(df.index)
+        return list(df.index[: result_format["partial_unexpected_count"]])
 
 
 def _pandas_column_map_condition_value_counts(
