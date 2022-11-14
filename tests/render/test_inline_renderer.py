@@ -16,6 +16,18 @@ from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.inline_renderer import InlineRenderer
 
 
+def clean_serialized_rendered_atomic_content_graphs(
+    serialized_rendered_atomic_content: List[dict],
+) -> List[dict]:
+    for content_block in serialized_rendered_atomic_content:
+        if content_block["value_type"] == "GraphType":
+            content_block["value"]["graph"].pop("$schema")
+            content_block["value"]["graph"].pop("data")
+            content_block["value"]["graph"].pop("datasets")
+
+    return serialized_rendered_atomic_content
+
+
 @pytest.mark.integration
 def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite):
     expectation_suite: ExpectationSuite = basic_expectation_suite
@@ -29,7 +41,7 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "expectation_configuration,result,expected_serialized_expectation_configuration_rendered_atomic_content,expected_serialized_expectation_validation_result_rendered_atomic_content",
+    "expectation_configuration,result,expected_serialized_expectation_configuration_prescriptive_rendered_atomic_content,expected_serialized_expectation_validation_result_diagnostic_rendered_atomic_content",
     [
         pytest.param(
             ExpectationConfiguration(
@@ -516,8 +528,8 @@ def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite
 def test_inline_renderer_rendered_content_return_value(
     expectation_configuration: ExpectationConfiguration,
     result: dict,
-    expected_serialized_expectation_configuration_rendered_atomic_content: dict,
-    expected_serialized_expectation_validation_result_rendered_atomic_content: dict,
+    expected_serialized_expectation_configuration_prescriptive_rendered_atomic_content: dict,
+    expected_serialized_expectation_validation_result_diagnostic_rendered_atomic_content: dict,
 ):
 
     expectation_validation_result = ExpectationValidationResult(
@@ -547,54 +559,30 @@ def test_inline_renderer_rendered_content_return_value(
         RenderedAtomicContent
     ] = inline_renderer.get_rendered_content()
 
-    actual_serialized_expectation_configuration_rendered_atomic_content: List[dict] = [
-        rendered_atomic_content.to_json_dict()
-        for rendered_atomic_content in expectation_configuration_rendered_atomic_content
-    ]
-    if (
-        actual_serialized_expectation_configuration_rendered_atomic_content[0][
-            "value_type"
+    actual_serialized_expectation_configuration_rendered_atomic_content: List[
+        dict
+    ] = clean_serialized_rendered_atomic_content_graphs(
+        serialized_rendered_atomic_content=[
+            rendered_atomic_content.to_json_dict()
+            for rendered_atomic_content in expectation_configuration_rendered_atomic_content
         ]
-        == "GraphType"
-    ):
-        actual_serialized_expectation_configuration_rendered_atomic_content[0]["value"][
-            "graph"
-        ].pop("$schema")
-        actual_serialized_expectation_configuration_rendered_atomic_content[0]["value"][
-            "graph"
-        ].pop("data")
-        actual_serialized_expectation_configuration_rendered_atomic_content[0]["value"][
-            "graph"
-        ].pop("datasets")
+    )
 
     assert (
         actual_serialized_expectation_configuration_rendered_atomic_content
-        == expected_serialized_expectation_configuration_rendered_atomic_content
+        == expected_serialized_expectation_configuration_prescriptive_rendered_atomic_content
     )
 
     actual_serialized_expectation_validation_result_rendered_atomic_content: List[
         dict
-    ] = [
-        rendered_atomic_content.to_json_dict()
-        for rendered_atomic_content in expectation_validation_result_rendered_atomic_content
-    ]
-    if (
-        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
-            "value_type"
+    ] = clean_serialized_rendered_atomic_content_graphs(
+        serialized_rendered_atomic_content=[
+            rendered_atomic_content.to_json_dict()
+            for rendered_atomic_content in expectation_validation_result_rendered_atomic_content
         ]
-        == "GraphType"
-    ):
-        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
-            "value"
-        ]["graph"].pop("$schema")
-        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
-            "value"
-        ]["graph"].pop("data")
-        actual_serialized_expectation_validation_result_rendered_atomic_content[0][
-            "value"
-        ]["graph"].pop("datasets")
+    )
 
     assert (
         actual_serialized_expectation_validation_result_rendered_atomic_content
-        == expected_serialized_expectation_validation_result_rendered_atomic_content
+        == expected_serialized_expectation_validation_result_diagnostic_rendered_atomic_content
     )
