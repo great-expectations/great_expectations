@@ -7,9 +7,7 @@ from typing import Any, List, Optional, Tuple
 import great_expectations.exceptions as exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GeCloudRESTResource
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
