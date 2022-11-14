@@ -338,7 +338,6 @@ class _YamlConfigValidator:
 
             # While normally we'd just call `self.config_provider.substitute_config()`,
             # we need to account for `runtime_environment` values that may have been passed.
-            # in `test_yaml_config`.
             config_values.update(runtime_environment)
 
             return config_provider.substitute_config(
