@@ -54,7 +54,6 @@ class GEDependencies:
             "requests",
             "ruamel.yaml",
             "scipy",
-            "termcolor",
             "tqdm",
             "typing-extensions",
             "urllib3",
