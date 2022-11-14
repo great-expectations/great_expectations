@@ -71,6 +71,7 @@ from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
+from great_expectations.validator.resolved_metric import MetricValue
 from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
     MetricEdge,
