@@ -112,8 +112,6 @@ def get_user_friendly_error_message(
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     PAYLOAD_ATTRIBUTES_KEYS: Dict[GeCloudRESTResource, str] = {
         GeCloudRESTResource.CHECKPOINT: "checkpoint_config",
-        # Chetan - 20220811 - CONTRACT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-        GeCloudRESTResource.CONTRACT: "checkpoint_config",
         GeCloudRESTResource.DATASOURCE: "datasource_config",
         GeCloudRESTResource.DATA_CONTEXT: "data_context_config",
         GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
@@ -121,19 +119,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "result",
         GeCloudRESTResource.PROFILER: "profiler",
         GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
-        # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-        GeCloudRESTResource.SUITE_VALIDATION_RESULT: "result",
         GeCloudRESTResource.VALIDATION_RESULT: "result",
     }
 
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GeCloudRESTResource, Set[str]] = {
         GeCloudRESTResource.EXPECTATION_SUITE: {"clause_id"},
         GeCloudRESTResource.RENDERED_DATA_DOC: {"source_type", "source_id"},
-        # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-        GeCloudRESTResource.SUITE_VALIDATION_RESULT: {
-            "checkpoint_id",
-            "expectation_suite_id",
-        },
         GeCloudRESTResource.VALIDATION_RESULT: {
             "checkpoint_id",
             "expectation_suite_id",
@@ -144,8 +135,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         **{  # type: ignore[arg-type]
             GeCloudRESTResource.BATCH: "batches",
             GeCloudRESTResource.CHECKPOINT: "checkpoints",
-            # Chetan - 20220811 - CONTRACT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-            GeCloudRESTResource.CONTRACT: "contracts",
             GeCloudRESTResource.DATA_ASSET: "data_assets",
             GeCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
             GeCloudRESTResource.DATASOURCE: "datasources",
@@ -154,8 +143,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "expectation_validation_results",
             GeCloudRESTResource.PROFILER: "profilers",
             GeCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
-            # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-            GeCloudRESTResource.SUITE_VALIDATION_RESULT: "suite_validation_results",
             GeCloudRESTResource.VALIDATION_RESULT: "validation_results",
         }
     )
@@ -287,6 +274,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response = self._session.put(url, json=data)
             response_status_code = response.status_code
 
+            # Is this still true? - Pending Cloud response
             # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
             # for the ExpectationSuite endpoint. As such, this is a temporary fork to
             # ensure that legacy PATCH behavior is supported.
@@ -343,6 +331,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         ge_cloud_id: str = key[1]
 
         # if key has ge_cloud_id, perform _update instead
+
+        # Is this still true? - Pending Cloud response
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
         if (

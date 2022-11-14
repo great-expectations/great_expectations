@@ -6,6 +6,7 @@ import pytest
 import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext, CloudDataContext
+from great_expectations.data_context.cloud_constants import GECloudEnvironmentVariable
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import ConfigNotFoundError
 from tests.test_utils import working_directory
@@ -158,6 +159,10 @@ def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
 def test_cloud_missing_env_throws_exception(
     monkeypatch, empty_ge_cloud_data_context_config
 ):
+    # Delete local env vars (if present)
+    for env_var in GECloudEnvironmentVariable:
+        monkeypatch.delenv(env_var, raising=False)
+
     with pytest.raises(Exception):
         gx.get_context(ge_cloud_mode=True),
 
