@@ -2441,7 +2441,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return metric_configurations_list
 
     @classmethod
-    def validate_config(
+    def get_or_create_data_context_configg(
         cls, project_config: Union[DataContextConfig, Mapping]
     ) -> DataContextConfig:
         if isinstance(project_config, DataContextConfig):
