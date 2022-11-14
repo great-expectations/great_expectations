@@ -9,6 +9,7 @@ import requests
 from great_expectations.core.http import create_session
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
+    SUPPORT_EMAIL,
     GXCloudRESTResource,
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -23,8 +24,6 @@ except ImportError:
     from typing_extensions import TypedDict
 
 logger = logging.getLogger(__name__)
-
-SUPPORT_EMAIL = "support@greatexpectations.io"
 
 
 class ErrorDetail(TypedDict):
