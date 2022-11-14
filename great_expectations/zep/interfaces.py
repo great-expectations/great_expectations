@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import logging
 from pprint import pformat as pf
-from typing import Any, Dict, List, Mapping, Optional, Set, Type, Union
+from typing import Any, Dict, List, Mapping, Optional, Set, Type
 
 import pydantic
 from typing_extensions import ClassVar, TypeAlias

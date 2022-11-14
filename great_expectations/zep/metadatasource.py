@@ -5,14 +5,14 @@ from __future__ import annotations
 
 import logging
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, List, Set, Type
+from typing import TYPE_CHECKING, Set, Type
 
 import pydantic
 
 from great_expectations.zep.sources import _SourceFactories
 
 if TYPE_CHECKING:
-    from great_expectations.zep.interfaces import DataAsset, Datasource
+    from great_expectations.zep.interfaces import Datasource
 
 
 LOGGER = logging.getLogger(__name__.lstrip("great_expectations."))
