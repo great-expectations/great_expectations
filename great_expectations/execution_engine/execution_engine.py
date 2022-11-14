@@ -38,6 +38,7 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.resolved_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.expectations.metrics import MetricProvider
