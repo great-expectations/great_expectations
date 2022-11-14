@@ -13,6 +13,7 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.resolved_metric import MetricValue
 from great_expectations.validator.validation_graph import ValidationGraph
 
 logger = logging.getLogger(__name__)
