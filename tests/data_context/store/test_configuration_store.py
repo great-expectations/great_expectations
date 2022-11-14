@@ -10,7 +10,7 @@ from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -315,7 +315,7 @@ def test_self_check(capsys) -> None:
             None,
             "abc123",
             GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.CHECKPOINT, ge_cloud_id="abc123"
+                resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id="abc123"
             ),
             id="id",
         ),

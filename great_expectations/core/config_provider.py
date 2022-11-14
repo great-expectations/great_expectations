@@ -156,11 +156,11 @@ class CloudConfigurationProvider(AbstractConfigurationProvider):
 
     def get_values(self) -> Dict[str, str]:
         from great_expectations.data_context.cloud_constants import (
-            GECloudEnvironmentVariable,
+            GXCloudEnvironmentVariable,
         )
 
         return {
-            GECloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
-            GECloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
-            GECloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[dict-item]
+            GXCloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
+            GXCloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
+            GXCloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[dict-item]
         }

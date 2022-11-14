@@ -5,13 +5,13 @@ from typing_extensions import Final
 CLOUD_DEFAULT_BASE_URL: Final[str] = "https://api.greatexpectations.io/"
 
 
-class GECloudEnvironmentVariable(str, Enum):
+class GXCloudEnvironmentVariable(str, Enum):
     BASE_URL = "GE_CLOUD_BASE_URL"
     ORGANIZATION_ID = "GE_CLOUD_ORGANIZATION_ID"
     ACCESS_TOKEN = "GE_CLOUD_ACCESS_TOKEN"
 
 
-class GeCloudRESTResource(str, Enum):
+class GXCloudRESTResource(str, Enum):
     BATCH = "batch"
     CHECKPOINT = "checkpoint"
     DATASOURCE = "datasource"

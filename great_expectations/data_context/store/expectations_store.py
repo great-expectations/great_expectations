@@ -4,7 +4,7 @@ from typing import Dict
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
@@ -216,7 +216,7 @@ class ExpectationsStore(Store):
         )
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
-                resource_type=GeCloudRESTResource.CHECKPOINT,
+                resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
         else:

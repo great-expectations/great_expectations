@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
@@ -363,12 +363,12 @@ def test_list_profilers(
 
     assert profilers == [
         GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.PROFILER,
+            resource_type=GXCloudRESTResource.PROFILER,
             ge_cloud_id=profiler_id_1,
             resource_name=profiler_name_1,
         ),
         GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.PROFILER,
+            resource_type=GXCloudRESTResource.PROFILER,
             ge_cloud_id=profiler_id_2,
             resource_name=profiler_name_2,
         ),

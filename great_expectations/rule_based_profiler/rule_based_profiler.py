@@ -26,7 +26,7 @@ from great_expectations.core.util import (
     determine_progress_bar_method_by_environment,
     nested_update,
 )
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -1139,7 +1139,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if data_context.ge_cloud_mode:
-            key = GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER)
+            key = GeCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER)
         else:
             key = ConfigurationIdentifier(
                 configuration_key=config.name,
@@ -1191,7 +1191,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(
@@ -1241,7 +1241,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)

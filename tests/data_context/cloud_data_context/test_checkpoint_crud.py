@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -464,12 +464,12 @@ def test_list_checkpoints(
 
     assert checkpoints == [
         GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.CHECKPOINT,
+            resource_type=GXCloudRESTResource.CHECKPOINT,
             ge_cloud_id=checkpoint_id_1,
             resource_name=checkpoint_name_1,
         ),
         GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.CHECKPOINT,
+            resource_type=GXCloudRESTResource.CHECKPOINT,
             ge_cloud_id=checkpoint_id_2,
             resource_name=checkpoint_name_2,
         ),

@@ -5,7 +5,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -161,7 +161,7 @@ class ConfigurationStore(Store):
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)  # type: ignore[arg-type]

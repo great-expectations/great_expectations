@@ -12,7 +12,7 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GeCloudIdentifier,
@@ -372,11 +372,11 @@ class ActionListValidationOperator(ValidationOperator):
             for batch, async_batch_validation_result in batch_and_async_result_tuples:
                 if self.data_context.ge_cloud_mode:
                     expectation_suite_identifier = GeCloudIdentifier(
-                        resource_type=GeCloudRESTResource.EXPECTATION_SUITE,
+                        resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
                         ge_cloud_id=batch._expectation_suite.ge_cloud_id,
                     )
                     validation_result_id = GeCloudIdentifier(
-                        resource_type=GeCloudRESTResource.VALIDATION_RESULT
+                        resource_type=GXCloudRESTResource.VALIDATION_RESULT
                     )
                 else:
                     expectation_suite_identifier = ExpectationSuiteIdentifier(

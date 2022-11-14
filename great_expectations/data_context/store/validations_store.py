@@ -6,7 +6,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
@@ -204,7 +204,7 @@ class ValidationsStore(Store):
 
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(
-                resource_type=GeCloudRESTResource.CHECKPOINT,
+                resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
 

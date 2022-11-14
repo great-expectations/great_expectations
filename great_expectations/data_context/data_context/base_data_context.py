@@ -21,7 +21,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -1085,7 +1085,7 @@ class BaseDataContext(EphemeralDataContext, ConfigPeer):
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
             key = GeCloudIdentifier(
-                resource_type=GeCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)

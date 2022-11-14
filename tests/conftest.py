@@ -30,7 +30,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext, CloudDataContext
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -2759,7 +2759,7 @@ def ge_cloud_profiler_id() -> str:
 
 @pytest.fixture
 def ge_cloud_profiler_key() -> GeCloudIdentifier:
-    return GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER)
+    return GeCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER)
 
 
 @pytest.fixture

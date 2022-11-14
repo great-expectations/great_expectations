@@ -7,7 +7,7 @@ from typing import Any, List, Optional, Tuple
 import great_expectations.exceptions as exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
@@ -464,7 +464,7 @@ class DefaultSiteSectionBuilder:
                 if self.ge_cloud_mode:
                     self.target_store.set(
                         GeCloudIdentifier(
-                            resource_type=GeCloudRESTResource.RENDERED_DATA_DOC
+                            resource_type=GXCloudRESTResource.RENDERED_DATA_DOC
                         ),
                         rendered_content,
                         source_type=resource_key.resource_type,

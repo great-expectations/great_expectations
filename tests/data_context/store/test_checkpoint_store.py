@@ -9,7 +9,7 @@ from marshmallow.exceptions import ValidationError
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -417,7 +417,7 @@ def test_delete_checkpoint_with_cloud_id(
 
     mock_backend.remove_key.assert_called_once_with(
         GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.CHECKPOINT, ge_cloud_id="abc123"
+            resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id="abc123"
         )
     )
 

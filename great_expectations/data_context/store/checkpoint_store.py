@@ -9,7 +9,7 @@ from marshmallow import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -62,7 +62,7 @@ class CheckpointStore(ConfigurationStore):
         )
         if self.ge_cloud_mode:
             test_key: GeCloudIdentifier = self.key_class(  # type: ignore[call-arg,assignment]
-                resource_type=GeCloudRESTResource.CHECKPOINT,
+                resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )
         else:
