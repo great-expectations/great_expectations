@@ -21,6 +21,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.cloud_constants import GeCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -29,9 +30,6 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 )
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
-)
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
 )
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
