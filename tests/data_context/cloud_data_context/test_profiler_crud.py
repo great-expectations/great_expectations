@@ -3,13 +3,11 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.data_context.cloud_constants import GeCloudRESTResource
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
 )
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.base import DataContextConfig, GeCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.rule_based_profiler.config.base import (
