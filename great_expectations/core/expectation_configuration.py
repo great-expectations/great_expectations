@@ -987,22 +987,22 @@ class ExpectationConfiguration(SerializableDictDot):
         interactive_evaluation: bool = True,
         data_context: Optional[DataContext] = None,
     ) -> None:
-        if self._raw_kwargs is not None:
+        if self._raw_kwargs is None:
+            (evaluation_args, substituted_parameters,) = build_evaluation_parameters(
+                self._kwargs,
+                evaluation_parameters,
+                interactive_evaluation,
+                data_context,
+            )
+
+            self._raw_kwargs = self._kwargs
+            self._kwargs = evaluation_args
+            if len(substituted_parameters) > 0:
+                self.meta["substituted_parameters"] = substituted_parameters
+        else:
             logger.debug(
                 "evaluation_parameters have already been built on this expectation"
             )
-
-        (evaluation_args, substituted_parameters,) = build_evaluation_parameters(
-            self._kwargs,
-            evaluation_parameters,
-            interactive_evaluation,
-            data_context,
-        )
-
-        self._raw_kwargs = self._kwargs
-        self._kwargs = evaluation_args
-        if len(substituted_parameters) > 0:
-            self.meta["substituted_parameters"] = substituted_parameters
 
     def get_raw_configuration(self) -> ExpectationConfiguration:
         # return configuration without substituted evaluation parameters

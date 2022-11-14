@@ -112,9 +112,6 @@ class ExpectTableRowCountToEqual(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -127,6 +124,16 @@ class ExpectTableRowCountToEqual(TableExpectation):
             },
         }
         template_str = "Must have exactly $value rows."
+        if configuration._raw_kwargs:
+            evaluation_params = substitute_none_for_missing(
+                configuration._raw_kwargs,
+                ["value"],
+            )
+            params_with_json_schema["evaluation_parameters"] = {
+                "schema": {"type": ""},
+                "value": evaluation_params.get("value"),
+            }
+            template_str += "   $evaluation_parameters"
 
         return (template_str, params_with_json_schema, styling)
 
@@ -143,9 +150,6 @@ class ExpectTableRowCountToEqual(TableExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
