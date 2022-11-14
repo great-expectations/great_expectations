@@ -153,4 +153,32 @@ function sanitizeText (text) {
     .trim()
 }
 
+function main() {
+  const snippets = parseDirectory(".")
+  // Remove call to `node scripts/remark-named-snippets/snippet.js`
+  const targetFiles = process.argv.slice(2)
+
+  let out = {}
+  for (const snippet of snippets) {
+    // If no explicit args are provided, default to all snippets
+    // Else, ensure that the snippet's source file was requested by the user
+    const file = snippet.file
+    if (targetFiles.length > 0 && !(targetFiles.includes(file))) {
+      continue
+    }
+    if (!(file in out)) {
+      out[file] = []
+    }
+    delete snippet.file // Remove duplicate filename to clean up stdout
+    out[file].push(snippet)
+  }
+  console.log(out)
+}
+
+
+if (require.main === module) {
+  main();
+}
+
+
 module.exports = constructSnippetMap
