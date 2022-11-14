@@ -21,7 +21,7 @@ def cli_message(string: str) -> None:
 def cli_colorize_string(string: str) -> str:
     for color in SUPPORTED_CLI_COLORS:
         string = re.sub(
-            f"<[ color ]>(.*?)</{color}>",
+            f"<{color}>(.*?)</{color}>",
             click.style(r"\g<1>", fg=color),
             string,
             flags=re.DOTALL,  # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
