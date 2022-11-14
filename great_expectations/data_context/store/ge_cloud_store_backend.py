@@ -274,7 +274,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response = self._session.put(url, json=data)
             response_status_code = response.status_code
 
-            # Is this still true? - Pending Cloud response
             # 2022-07-28 - Chetan - GX Cloud does not currently support PUT requests
             # for the ExpectationSuite endpoint. As such, this is a temporary fork to
             # ensure that legacy PATCH behavior is supported.
@@ -332,7 +331,6 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         # if key has ge_cloud_id, perform _update instead
 
-        # Is this still true? - Pending Cloud response
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
         if (
