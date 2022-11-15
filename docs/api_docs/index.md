@@ -16,6 +16,7 @@ These API docs are under heavy development. This warning will be removed once th
 :maxdepth: 2
 
 data_context
+notebooks/taxi
 ```
 
 # Indices and tables
