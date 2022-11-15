@@ -117,23 +117,27 @@ stages:
         name: InstallDependencies
 
     - job: type_hint_checker
+      dependsOn: install_dependencies
       steps:
       - script: |
           invoke type-coverage
         name: TypeHintChecker
 
     - job: static_type_check
+      dependsOn: install_dependencies
       steps:
       - script: |
           invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
     - job: docstring_checker
+      dependsOn: install_dependencies
       steps:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
 
     - job: unused_import_checker
+      dependsOn: install_dependencies
       steps:
       - script: |
           # https://www.flake8rules.com/rules/F401.html

@@ -92,6 +92,7 @@ stages:
         name: InstallDependencies
 
     - job: type_hint_checker
+      dependsOn: install_dependencies
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
@@ -99,6 +100,7 @@ stages:
         name: TypeHintChecker
 
     - job: static_type_check
+      dependsOn: install_dependencies
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
@@ -106,12 +108,14 @@ stages:
         name: StaticTypeCheck
 
     - job: docstring_checker
+      dependsOn: install_dependencies
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
 
     - job: unused_import_checker
+      dependsOn: install_dependencies
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
