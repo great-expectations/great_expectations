@@ -77,7 +77,7 @@ except ImportError:
 try:
     import black
 except ImportError:
-    black = None
+    black = None  # type: ignore[assignment]
 
 try:
     # This library moved in python 3.8
@@ -1925,7 +1925,7 @@ def numpy_quantile(
     As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
     """
-    quantile: np.ndarray
+    quantile: Union[np.float64, np.ndarray]
     if version.parse(np.__version__) >= version.parse("1.22.0"):
         quantile = np.quantile(
             a=a,
@@ -1934,7 +1934,7 @@ def numpy_quantile(
             method=method,
         )
     else:
-        quantile = np.quantile(
+        quantile = np.quantile(  # type: ignore[call-overload]
             a=a,
             q=q,
             axis=axis,
