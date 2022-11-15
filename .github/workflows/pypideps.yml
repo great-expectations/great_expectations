@@ -32,6 +32,6 @@ jobs:
         run: |
           pip install pipdeptree
 
-      - name: Run pipdeptree
+      - name: Run script
         run: |
-          pipdeptree --json-tree
+          python scripts/pypideptree.py
