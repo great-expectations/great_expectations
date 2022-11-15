@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
+from typing_extensions import TypedDict
 
 from great_expectations.core.http import create_session
 from great_expectations.data_context.cloud_constants import (
@@ -17,11 +18,6 @@ from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
-
-try:
-    from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
 
 logger = logging.getLogger(__name__)
 
