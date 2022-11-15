@@ -1609,6 +1609,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     return df.shape[0]
 
 
+# TODO: <Alex>11/15/2022: Please DO_NOT_DELETE this method (even though it is not currently utilized).  Thanks.</Alex>
 def _pandas_column_map_series_and_domain_values(
     cls,
     execution_engine: PandasExecutionEngine,
@@ -3094,16 +3095,6 @@ class MapMetricProvider(MetricProvider):
                 metric_name = cls.function_metric_name
                 metric_domain_keys = cls.function_domain_keys
                 metric_value_keys = cls.function_value_keys
-                metric_definition_kwargs = getattr(
-                    map_function_provider, "metric_definition_kwargs", {}
-                )
-                domain_type = getattr(
-                    map_function_provider,
-                    "domain_type",
-                    metric_definition_kwargs.get(
-                        "domain_type", MetricDomainTypes.TABLE
-                    ),
-                )
                 register_metric(
                     metric_name=f"{metric_name}.map",
                     metric_domain_keys=metric_domain_keys,
@@ -3113,17 +3104,6 @@ class MapMetricProvider(MetricProvider):
                     metric_provider=map_function_provider,
                     metric_fn_type=metric_fn_type,
                 )
-                if issubclass(engine, PandasExecutionEngine):
-                    if domain_type == MetricDomainTypes.COLUMN:
-                        register_metric(
-                            metric_name=f"{metric_name}.unexpected_map_series_and_domain_values",
-                            metric_domain_keys=metric_domain_keys,
-                            metric_value_keys=metric_value_keys,
-                            execution_engine=engine,
-                            metric_class=cls,
-                            metric_provider=_pandas_column_map_series_and_domain_values,
-                            metric_fn_type=metric_fn_type,
-                        )
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -3158,14 +3138,6 @@ class MapMetricProvider(MetricProvider):
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
-
-        metric_suffix = ".unexpected_map_series_and_domain_values"
-        if metric_name.endswith(metric_suffix):
-            dependencies["metric_partial_fn"] = MetricConfiguration(
-                metric_name=f"{metric_name}.map",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs=base_metric_value_kwargs,
-            )
 
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
         for metric_suffix in [

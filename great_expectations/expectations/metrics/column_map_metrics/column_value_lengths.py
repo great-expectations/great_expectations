@@ -60,7 +60,7 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
         return dependencies
 
 
-class ColumnValuesValueLengthBetween(ColumnMapMetricProvider):
+class ColumnValuesValueLength(ColumnMapMetricProvider):
     condition_metric_name = "column_values.value_length.between"
     function_metric_name = "column_values.value_length"
 
