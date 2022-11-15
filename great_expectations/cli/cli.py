@@ -119,13 +119,6 @@ class CLI(click.MultiCommand):
 @click.group(cls=CLI, name="great_expectations")
 @click.version_option(version=ge_version)
 @click.option(
-    "--v3-api/--v2-api",
-    "v3_api",
-    is_flag=True,
-    default=True,
-    help="Default to v3 (Batch Request) API. Use --v2-api for v2 (Batch Kwargs) API",
-)
-@click.option(
     "--verbose",
     "-v",
     is_flag=True,
@@ -171,19 +164,7 @@ def cli(
     ctx.obj = CLIState(
         v3_api=v3_api, config_file_location=config_file_location, assume_yes=assume_yes
     )
-
-    if v3_api:
-        cli_message("Using v3 (Batch Request) API")
-    else:
-        cli_message("Using v2 (Batch Kwargs) API")
-
-        ge_config_version: float = (
-            ctx.obj.get_data_context_from_config_file().get_config().config_version
-        )
-        if ge_config_version >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
-            raise ge_exceptions.InvalidDataContextConfigError(
-                f"Using the legacy v2 (Batch Kwargs) API with a recent config version ({ge_config_version}) is illegal."
-            )
+    cli_message("Using v3 (Batch Request) API")
 
 
 def main() -> None:
