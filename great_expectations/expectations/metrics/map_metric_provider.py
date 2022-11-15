@@ -3142,11 +3142,11 @@ class MapMetricProvider(MetricProvider):
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
         for metric_suffix in [
             ".unexpected_count.aggregate_fn",
-            ".unexpected_map_series_and_domain_values",
             ".unexpected_value_counts",
             ".unexpected_index_list",
-            ".unexpected_rows",
             ".filtered_row_count",
+            ".unexpected_values",
+            ".unexpected_rows",
         ]:
             if metric_name.endswith(metric_suffix):
                 dependencies["unexpected_condition"] = MetricConfiguration(
