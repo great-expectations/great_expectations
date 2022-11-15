@@ -41,7 +41,7 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.expectations.metrics import MetricProvider
+    from great_expectations.expectations.metrics.metric_provider import MetricProvider
 
 logger = logging.getLogger(__name__)
 

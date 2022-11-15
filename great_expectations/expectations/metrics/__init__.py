@@ -22,4 +22,3 @@ from .map_metric_provider import (
 from .multicolumn_map_metrics import *
 from .query_metrics import *
 from .table_metrics import *
-from .table_metrics import table_row_count
