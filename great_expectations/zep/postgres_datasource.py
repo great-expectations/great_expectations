@@ -7,6 +7,7 @@ from pprint import pformat as pf
 from typing import Dict, Iterable, List, MutableMapping, Optional, Type, cast
 
 import dateutil.tz
+from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal
 
@@ -42,7 +43,7 @@ class ColumnSplitter:
     # param_defaults is a Dict where the keys are the parameters of the splitter and the values are the default
     # values are the default values if a batch request using the splitter leaves the parameter unspecified.
     # template_params: List[str]
-    param_defaults: Dict[str, Iterable]
+    param_defaults: Dict[str, Iterable] = Field(default_factory=dict)
 
     @property
     def param_names(self) -> List[str]:
