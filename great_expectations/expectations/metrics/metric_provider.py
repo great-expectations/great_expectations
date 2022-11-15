@@ -211,9 +211,9 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name + metric_suffix,
-                    metric.metric_domain_kwargs,
-                    metric.metric_value_kwargs,
+                    metric_name=metric_name + metric_suffix,
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=metric.metric_value_kwargs,
                 )
 
         return dependencies
