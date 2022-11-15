@@ -19,18 +19,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TypeRegistrationError(TypeError):
-    type_: Optional[Type]
-    field_name: Optional[str]
-
-    def __init__(
-        self,
-        message: Union[str, Exception],
-        type_: Optional[Type] = None,
-        field_name: Optional[str] = None,
-    ) -> None:
-        self.type = type_
-        self.field_name = field_name
-        super().__init__(message, type_, field_name)
+    pass
 
 
 class _SourceFactories:
@@ -125,8 +114,6 @@ class _SourceFactories:
         if pre_existing:
             raise TypeRegistrationError(
                 f"'{ds_type_name}' - `sources.{method_name}()` factory already exists",
-                field_name="type",
-                type_=ds_type,
             )
 
         datasource_type_lookup[ds_type] = ds_type_name
@@ -155,8 +142,6 @@ class _SourceFactories:
         if eng_class_name == "ExecutionEngine":
             raise TypeRegistrationError(
                 f"`{ds_type.__name__}.execution_engine` must be annotated with a concrete `ExecutionEngine`",
-                type_=ds_type,
-                field_name="execution_engine",
             )
 
         LOGGER.info(
@@ -167,7 +152,6 @@ class _SourceFactories:
 
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
-        errored_on: Optional[Type[DataAsset]] = None
 
         asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
@@ -188,11 +172,8 @@ class _SourceFactories:
                 )
                 asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
-                errored_on = t
                 raise TypeRegistrationError(
                     f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",
-                    type_=errored_on,
-                    field_name="type",
                 ) from bad_field_exc
 
     @property
