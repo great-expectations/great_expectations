@@ -127,12 +127,12 @@ These will be used to execute our query and compute the results of our metric.
 
 To do this, we need to access our Compute Domain directly:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L67-L76
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L69-L78
 ```
 
 This allows us to build and return a query to be executed, providing the result of our metric:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L77-L80
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L81-L83
 ```
 
 :::note
