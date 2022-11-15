@@ -14,9 +14,7 @@ from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierS
 from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.store.ge_cloud_store_backend import (
-        GeCloudRESTResource,
-    )
+    from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
 logger = logging.getLogger(__name__)
 
@@ -202,10 +200,10 @@ class ValidationResultIdentifier(DataContextKey):
         )
 
 
-class GeCloudIdentifier(DataContextKey):
+class GXCloudIdentifier(DataContextKey):
     def __init__(
         self,
-        resource_type: GeCloudRESTResource,
+        resource_type: GXCloudRESTResource,
         ge_cloud_id: Optional[str] = None,
         resource_name: Optional[str] = None,
     ) -> None:

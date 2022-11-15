@@ -6,6 +6,7 @@ from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
+from tests.cli.utils import escape_ansi
 from tests.cli.v012.test_cli import yaml
 from tests.cli.v012.utils import (
     assert_no_logging_messages_or_tracebacks,
@@ -38,23 +39,23 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
     )
     url = str(empty_sqlite_db.engine.url)
     expected_output = """\
-1 Datasource found:[0m
-[0m
- - [36mname:[0m wow_a_datasource[0m
-   [36mmodule_name:[0m great_expectations.datasource[0m
-   [36mclass_name:[0m SqlAlchemyDatasource[0m
-   [36mbatch_kwargs_generators:[0m[0m
-     [36mdefault:[0m[0m
-       [36mclass_name:[0m TableBatchKwargsGenerator[0m
-   [36mcredentials:[0m[0m
-     [36murl:[0m {}[0m
-   [36mdata_asset_type:[0m[0m
-     [36mclass_name:[0m SqlAlchemyDataset[0m
-     [36mmodule_name:[0m None[0m
+1 Datasource found:
+
+ - name: wow_a_datasource
+   module_name: great_expectations.datasource
+   class_name: SqlAlchemyDatasource
+   batch_kwargs_generators:
+     default:
+       class_name: TableBatchKwargsGenerator
+   credentials:
+     url: {}
+   data_asset_type:
+     class_name: SqlAlchemyDataset
+     module_name: None
 """.format(
         url
     ).strip()
-    stdout = result.stdout.strip()
+    stdout = escape_ansi(result.stdout).strip()
 
     assert stdout == expected_output
 

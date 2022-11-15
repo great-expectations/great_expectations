@@ -7,9 +7,7 @@ from typing import Any, List, Optional, Tuple
 import great_expectations.exceptions as exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
@@ -17,7 +15,7 @@ from great_expectations.data_context.store.html_site_store import (
 from great_expectations.data_context.store.json_site_store import JsonSiteStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -421,7 +419,7 @@ class DefaultSiteSectionBuilder:
             if resource_identifiers and resource_key not in resource_identifiers:
                 continue
 
-            if self.run_name_filter and not isinstance(resource_key, GeCloudIdentifier):
+            if self.run_name_filter and not isinstance(resource_key, GXCloudIdentifier):
                 if not resource_key_passes_run_name_filter(
                     resource_key, self.run_name_filter
                 ):
@@ -465,8 +463,8 @@ class DefaultSiteSectionBuilder:
 
                 if self.ge_cloud_mode:
                     self.target_store.set(
-                        GeCloudIdentifier(
-                            resource_type=GeCloudRESTResource.RENDERED_DATA_DOC
+                        GXCloudIdentifier(
+                            resource_type=GXCloudRESTResource.RENDERED_DATA_DOC
                         ),
                         rendered_content,
                         source_type=resource_key.resource_type,

@@ -36,6 +36,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Mapping,
     Optional,
     Set,
     Tuple,
@@ -51,7 +52,7 @@ from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.exceptions import (
-    GeCloudConfigurationError,
+    GXCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -267,8 +268,8 @@ def get_project_distribution() -> Optional[Distribution]:
         except ValueError:
             pass
         else:
-            if relative_path in distr.files:  # type: ignore[operator]
-                return distr  # type: ignore[return-value]
+            if relative_path in distr.files:
+                return distr
     return None
 
 
@@ -364,7 +365,7 @@ def verify_dynamic_loading_support(
     """
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[attr-defined]
+        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[assignment]
             module_name, package=package_name
         )
     except ModuleNotFoundError:
@@ -1668,7 +1669,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 
 def get_context(
-    project_config: Optional[Union["DataContextConfig", dict]] = None,
+    project_config: Optional[Union["DataContextConfig", Mapping]] = None,
     context_root_dir: Optional[str] = None,
     runtime_environment: Optional[dict] = None,
     ge_cloud_base_url: Optional[str] = None,
@@ -1753,7 +1754,7 @@ def get_context(
         )
 
     if ge_cloud_mode and not config_available:
-        raise GeCloudConfigurationError(
+        raise GXCloudConfigurationError(
             "GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
         )
 

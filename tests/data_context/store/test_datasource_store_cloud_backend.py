@@ -4,15 +4,13 @@ from unittest import mock
 import pytest
 
 from great_expectations.core.serializer import DictConfigSerializer
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import DatasourceStore
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
 from tests.data_context.conftest import MockResponse
 
@@ -34,8 +32,8 @@ def test_datasource_store_set(
     """
 
     # Note: id will be provided by the backend on create
-    key = GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.DATASOURCE,
+    key = GXCloudIdentifier(
+        resource_type=GXCloudRESTResource.DATASOURCE,
     )
 
     with mock.patch(
@@ -89,8 +87,8 @@ def test_datasource_store_get_by_id(
 
     id: str = "example_id_normally_uuid"
 
-    key = GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id
+    key = GXCloudIdentifier(
+        resource_type=GXCloudRESTResource.DATASOURCE, ge_cloud_id=id
     )
 
     def mocked_response(*args, **kwargs):
@@ -178,8 +176,8 @@ def test_datasource_store_delete_by_id(
     """
     id: str = "example_id_normally_uuid"
 
-    key = GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id
+    key = GXCloudIdentifier(
+        resource_type=GXCloudRESTResource.DATASOURCE, ge_cloud_id=id
     )
 
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
@@ -225,8 +223,8 @@ def test_datasource_http_error_handling(
 ):
     id: str = "example_id_normally_uuid"
 
-    key = GeCloudIdentifier(
-        resource_type=GeCloudRESTResource.DATASOURCE, ge_cloud_id=id
+    key = GXCloudIdentifier(
+        resource_type=GXCloudRESTResource.DATASOURCE, ge_cloud_id=id
     )
     with pytest.raises(
         StoreBackendError, match=r"Unable to \w+ object in GE Cloud Store Backend: .*"

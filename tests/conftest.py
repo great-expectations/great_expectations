@@ -30,22 +30,20 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import BaseDataContext, CloudDataContext
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
-    GeCloudConfig,
+    GXCloudConfig,
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -2442,7 +2440,7 @@ def request_headers(ge_cloud_access_token: str) -> Dict[str, str]:
 
 @pytest.fixture
 def ge_cloud_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token):
-    return GeCloudConfig(
+    return GXCloudConfig(
         base_url=ge_cloud_base_url,
         organization_id=ge_cloud_organization_id,
         access_token=ge_cloud_access_token,
@@ -2516,14 +2514,14 @@ include_rendered_content:
 
 
 @pytest.fixture
-def ge_cloud_config_e2e() -> GeCloudConfig:
+def ge_cloud_config_e2e() -> GXCloudConfig:
     """
     Uses live credentials stored in the Great Expectations Cloud backend.
     """
     base_url = os.environ["GE_CLOUD_BASE_URL"]
     organization_id = os.environ["GE_CLOUD_ORGANIZATION_ID"]
     access_token = os.environ["GE_CLOUD_ACCESS_TOKEN"]
-    ge_cloud_config = GeCloudConfig(
+    ge_cloud_config = GXCloudConfig(
         base_url=base_url,
         organization_id=organization_id,
         access_token=access_token,
@@ -2540,7 +2538,7 @@ def empty_base_data_context_in_cloud_mode(
     mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
-    ge_cloud_config: GeCloudConfig,
+    ge_cloud_config: GXCloudConfig,
 ) -> BaseDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
@@ -2559,7 +2557,7 @@ def empty_base_data_context_in_cloud_mode(
 @pytest.fixture
 def empty_data_context_in_cloud_mode(
     tmp_path: pathlib.Path,
-    ge_cloud_config: GeCloudConfig,
+    ge_cloud_config: GXCloudConfig,
     empty_ge_cloud_data_context_config: DataContextConfig,
 ):
     """This fixture is a DataContext in cloud mode that mocks calls to the cloud backend during setup so that it can be instantiated in tests."""
@@ -2570,7 +2568,7 @@ def empty_data_context_in_cloud_mode(
     def mocked_config(*args, **kwargs) -> DataContextConfig:
         return empty_ge_cloud_data_context_config
 
-    def mocked_get_ge_cloud_config(*args, **kwargs) -> GeCloudConfig:
+    def mocked_get_ge_cloud_config(*args, **kwargs) -> GXCloudConfig:
         return ge_cloud_config
 
     with mock.patch(
@@ -2595,7 +2593,7 @@ def empty_data_context_in_cloud_mode(
 def empty_cloud_data_context(
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
-    ge_cloud_config: GeCloudConfig,
+    ge_cloud_config: GXCloudConfig,
 ) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
@@ -2620,7 +2618,7 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     mock_list_keys: mock.MagicMock,  # Avoid making a call to Cloud backend during datasource instantiation
     tmp_path: pathlib.Path,
     empty_ge_cloud_data_context_config: DataContextConfig,
-    ge_cloud_config: GeCloudConfig,
+    ge_cloud_config: GXCloudConfig,
 ) -> BaseDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
@@ -2760,8 +2758,8 @@ def ge_cloud_profiler_id() -> str:
 
 
 @pytest.fixture
-def ge_cloud_profiler_key() -> GeCloudIdentifier:
-    return GeCloudIdentifier(resource_type=GeCloudRESTResource.PROFILER)
+def ge_cloud_profiler_key() -> GXCloudIdentifier:
+    return GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER)
 
 
 @pytest.fixture

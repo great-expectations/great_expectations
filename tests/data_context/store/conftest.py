@@ -1,10 +1,8 @@
 import pytest
 
 from great_expectations.core.serializer import JsonConfigSerializer
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import DatasourceStore
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.types.base import datasourceConfigSchema
 
 
@@ -18,7 +16,7 @@ def datasource_store_ge_cloud_backend(
     ge_cloud_store_backend_config: dict = {
         "class_name": "GeCloudStoreBackend",
         "ge_cloud_base_url": ge_cloud_base_url,
-        "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
+        "ge_cloud_resource_type": GXCloudRESTResource.DATASOURCE,
         "ge_cloud_credentials": {
             "access_token": ge_cloud_access_token,
             "organization_id": ge_cloud_organization_id,

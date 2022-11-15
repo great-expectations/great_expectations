@@ -19,6 +19,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -117,14 +118,14 @@ class DomainBuilder(ABC, Builder):
         }
 
         resolved_metrics_by_batch_id: Dict[
-            str, Dict[Tuple[str, str, str], Any]
+            str, Dict[Tuple[str, str, str], MetricValue]
         ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metric_configurations_by_batch_id,
         )
 
         batch_id: str
-        resolved_metrics: Dict[Tuple[str, str, str], Any]
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         metric_value: Any
         table_row_count_lists_by_batch_id: Dict[str, List[int]] = {
             batch_id: [metric_value for metric_value in resolved_metrics.values()]
