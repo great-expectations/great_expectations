@@ -39,7 +39,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValue,
     MetricValues,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -59,6 +58,7 @@ from great_expectations.util import (
     is_ndarray_decimal_dtype,
     is_numeric,
 )
+from great_expectations.validator.computed_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (

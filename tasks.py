@@ -159,7 +159,7 @@ def type_check(
     else:
         bin = "mypy"
 
-    ge_pkgs = [f"great_expectations/{p}" for p in packages]
+    ge_pkgs = [f"great_expectations.{p}" for p in packages]
     cmds = [
         bin,
         *ge_pkgs,

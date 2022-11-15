@@ -14,11 +14,11 @@ from great_expectations.rule_based_profiler.helpers.util import (
     build_numeric_range_estimation_result,
     datetime_semantic_domain_type,
 )
-from great_expectations.rule_based_profiler.metric_computation_result import MetricValue
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effort
+from great_expectations.validator.computed_metric import MetricValue
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

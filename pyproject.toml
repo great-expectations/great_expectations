@@ -13,6 +13,7 @@ skip_gitignore = true
 extend_skip_glob = ['venv/*', 'docs/*']
 
 [tool.mypy]
+python_version = "3.7"
 files = [
     "great_expectations",
     # "contrib" # ignore entire `contrib` package
