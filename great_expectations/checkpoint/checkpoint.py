@@ -323,7 +323,7 @@ class BaseCheckpoint(ConfigPeer):
         substituted_runtime_config: dict,
         async_validation_operator_results: List[AsyncResult],
         async_executor: AsyncExecutor,
-        result_format: Optional[dict],
+        result_format: Union[dict, None],
         run_id: Optional[Union[str, RunIdentifier]],
         idx: Optional[int] = 0,
         validation_dict: Optional[dict] = None,

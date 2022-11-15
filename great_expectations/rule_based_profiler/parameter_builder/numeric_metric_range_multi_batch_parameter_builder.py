@@ -127,7 +127,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         bw_method: Optional[Union[str, float, Callable]] = None,
         include_estimator_samples_histogram_in_details: Union[str, bool] = False,
         truncate_values: Optional[
-            Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
+            Union[str, Dict[str, Union[Union[int, None], Union[float, None]]]]
         ] = None,
         round_decimals: Optional[Union[str, int]] = None,
         evaluation_parameter_builder_configs: Optional[
@@ -289,7 +289,7 @@ detected.
     @property
     def truncate_values(
         self,
-    ) -> Optional[Union[str, Dict[str, Union[Optional[int], Optional[float]]]]]:
+    ) -> Optional[Union[str, Dict[str, Union[Union[int, None], Union[float, None]]]]]:
         return self._truncate_values
 
     @property
@@ -528,8 +528,8 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        lower_bound: Optional[float] = truncate_values.get("lower_bound")
-        upper_bound: Optional[float] = truncate_values.get("upper_bound")
+        lower_bound: Union[float, None] = truncate_values.get("lower_bound")
+        upper_bound: Union[float, None] = truncate_values.get("upper_bound")
 
         min_value: Number
         max_value: Number
@@ -718,7 +718,7 @@ detected.
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Dict[str, Union[Optional[int], Optional[float]]]:
+    ) -> Dict[str, Union[Union[int, None], Union[float, None]]]:
         # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         truncate_values: Dict[
             str, Optional[Number]
