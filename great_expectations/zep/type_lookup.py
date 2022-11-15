@@ -27,7 +27,7 @@ class TypeLookupError(ValueError):
     pass
 
 
-ValidTypes: TypeAlias = Union[Hashable, Type]
+ValidTypes: TypeAlias = Union[str, Type]
 
 
 class TypeLookup(
