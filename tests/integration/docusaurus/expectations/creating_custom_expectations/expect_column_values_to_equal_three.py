@@ -81,8 +81,8 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         query = F.when(column == 3, F.lit(False)).otherwise(F.lit(True))
 
         return (query, compute_domain_kwargs, accessor_domain_kwargs)
+        # </snippet>
 
-    # </snippet>
 
     # <snippet>
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
