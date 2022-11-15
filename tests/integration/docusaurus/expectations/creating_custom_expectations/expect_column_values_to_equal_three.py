@@ -73,9 +73,10 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
-        # </snippet>
+
         column_name = accessor_domain_kwargs["column"]
         column = F.col(column_name)
+        # </snippet>
         # <snippet>
         query = F.when(column == 3, F.lit(False)).otherwise(F.lit(True))
 
