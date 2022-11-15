@@ -24,16 +24,10 @@ from typing import (
     cast,
 )
 
-from marshmallow import ValidationError
-
-try:
-    from typing import Literal
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[assignment]
-
 from dateutil.parser import parse
+from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
+from typing_extensions import Literal
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite

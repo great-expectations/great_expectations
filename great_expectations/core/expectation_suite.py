@@ -752,7 +752,6 @@ class ExpectationSuite(SerializableDictDot):
         pprint.pprint(
             object=pprint_objects,
             indent=2,
-            sort_dicts=False,
         )
 
     def get_grouped_and_ordered_expectations_by_domain_type(
