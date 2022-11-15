@@ -219,9 +219,9 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
         "tags": ["uniqueness"],
         "contributors": ["@joegargery"],
     }
+    # </snippet>
 
 
-# </snippet>
 if __name__ == "__main__":
     # <snippet>
     ExpectTableColumnsToBeUnique().print_diagnostic_checklist()

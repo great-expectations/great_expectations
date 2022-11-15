@@ -131,9 +131,8 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
         "tags": ["set-based"],
         "contributors": ["@joegargery"],
     }
+    # </snippet>
 
-
-#     </snippet>
 
 if __name__ == "__main__":
     # <snippet>
