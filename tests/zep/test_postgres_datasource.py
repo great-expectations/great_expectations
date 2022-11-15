@@ -264,7 +264,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options()
 def test_datasource_gets_nonexistent_asset():
     with sqlachemy_execution_engine_mock(lambda: None):
         source = _source()
-        with pytest.raises(postgres_datasource.PostgresDatasourceError):
+        with pytest.raises(LookupError):
             source.get_asset("my_asset")
 
 
@@ -295,7 +295,7 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
         with pytest.raises(
             (
                 postgres_datasource.BatchRequestError,
-                postgres_datasource.PostgresDatasourceError,
+                LookupError,
             )
         ):
             source.get_batch_list_from_batch_request(batch_request)
