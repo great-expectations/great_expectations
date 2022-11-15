@@ -3116,21 +3116,12 @@ class MapMetricProvider(MetricProvider):
                 if issubclass(engine, PandasExecutionEngine):
                     if domain_type == MetricDomainTypes.COLUMN:
                         register_metric(
-                            metric_name=metric_name + ".unexpected_values.aggregate_fn",
+                            metric_name=f"{metric_name}.unexpected_map_series_and_domain_values",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
                             metric_class=cls,
                             metric_provider=_pandas_column_map_series_and_domain_values,
-                            metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
-                        )
-                        register_metric(
-                            metric_name=f"{metric_name}.unexpected_values",
-                            metric_domain_keys=metric_domain_keys,
-                            metric_value_keys=metric_value_keys,
-                            execution_engine=engine,
-                            metric_class=cls,
-                            metric_provider=None,
                             metric_fn_type=metric_fn_type,
                         )
 
@@ -3168,10 +3159,18 @@ class MapMetricProvider(MetricProvider):
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
 
+        metric_suffix = ".unexpected_map_series_and_domain_values"
+        if metric_name.endswith(metric_suffix):
+            dependencies["metric_partial_fn"] = MetricConfiguration(
+                metric_name=f"{metric_name}.map",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+                metric_value_kwargs=base_metric_value_kwargs,
+            )
+
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
         for metric_suffix in [
             ".unexpected_count.aggregate_fn",
-            ".unexpected_values",
+            ".unexpected_map_series_and_domain_values",
             ".unexpected_value_counts",
             ".unexpected_index_list",
             ".unexpected_rows",
