@@ -85,7 +85,7 @@ from great_expectations.data_context.types.base import (
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
+from great_expectations.data_context.types.refs import GXCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -131,7 +131,7 @@ if TYPE_CHECKING:
         EvaluationParameterStore,
     )
     from great_expectations.data_context.types.resource_identifiers import (
-        GeCloudIdentifier,
+        GXCloudIdentifier,
     )
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -1292,7 +1292,7 @@ class AbstractDataContext(ABC):
 
     def list_expectation_suites(
         self,
-    ) -> Optional[Union[List[str], List[GeCloudIdentifier]]]:
+    ) -> Optional[Union[List[str], List[GXCloudIdentifier]]]:
         """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
@@ -2017,7 +2017,7 @@ class AbstractDataContext(ABC):
             value=validation_results,
         )
 
-        if isinstance(validation_ref, GeCloudIdAwareRef):
+        if isinstance(validation_ref, GXCloudIdAwareRef):
             ge_cloud_id = validation_ref.ge_cloud_id
             validation_results.ge_cloud_id = uuid.UUID(ge_cloud_id)
 

@@ -29,11 +29,11 @@ from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     DataContextConfig,
     DataContextConfigDefaults,
-    GeCloudConfig,
+    GXCloudConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GeCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions.exceptions import DataContextError
 
@@ -156,7 +156,7 @@ class CloudDataContext(AbstractDataContext):
 
     @classmethod
     def retrieve_data_context_config_from_ge_cloud(
-        cls, ge_cloud_config: GeCloudConfig
+        cls, ge_cloud_config: GXCloudConfig
     ) -> DataContextConfig:
         """
         Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
@@ -181,7 +181,7 @@ class CloudDataContext(AbstractDataContext):
 
         response = requests.get(ge_cloud_url, headers=headers)
         if response.status_code != 200:
-            raise ge_exceptions.GeCloudError(
+            raise ge_exceptions.GXCloudError(
                 f"Bad request made to GE Cloud; {response.text}"
             )
         config = response.json()
@@ -193,7 +193,7 @@ class CloudDataContext(AbstractDataContext):
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
-    ) -> GeCloudConfig:
+    ) -> GXCloudConfig:
         """
         Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
         runtime, environment variables, or a global great_expectations.conf file (in order of precedence).
@@ -242,7 +242,7 @@ class CloudDataContext(AbstractDataContext):
             GXCloudEnvironmentVariable.ORGANIZATION_ID
         ]
 
-        return GeCloudConfig(
+        return GXCloudConfig(
             base_url=base_url,
             access_token=access_token,
             organization_id=organization_id,
@@ -317,7 +317,7 @@ class CloudDataContext(AbstractDataContext):
         return [suite_key.resource_name for suite_key in self.list_expectation_suites()]  # type: ignore[union-attr]
 
     @property
-    def ge_cloud_config(self) -> Optional[GeCloudConfig]:
+    def ge_cloud_config(self) -> Optional[GXCloudConfig]:
         return self._ge_cloud_config
 
     @property
@@ -418,24 +418,24 @@ class CloudDataContext(AbstractDataContext):
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
             identifiers: Optional[
-                Union[List[str], List[GeCloudIdentifier]]
+                Union[List[str], List[GXCloudIdentifier]]
             ] = self.list_expectation_suites()
             if identifiers:
                 for ge_cloud_identifier in identifiers:
-                    if isinstance(ge_cloud_identifier, GeCloudIdentifier):
+                    if isinstance(ge_cloud_identifier, GXCloudIdentifier):
                         ge_cloud_identifier_tuple = ge_cloud_identifier.to_tuple()
                         name: str = ge_cloud_identifier_tuple[2]
                         if name == expectation_suite_name:
                             ge_cloud_id = ge_cloud_identifier_tuple[1]
                             expectation_suite.ge_cloud_id = ge_cloud_id
 
-        key = GeCloudIdentifier(
+        key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
         )
 
-        response: Union[bool, GeCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
-        if isinstance(response, GeCloudResourceRef):
+        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        if isinstance(response, GXCloudResourceRef):
             expectation_suite.ge_cloud_id = response.ge_cloud_id
 
         return expectation_suite
@@ -453,7 +453,7 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             True for Success and False for Failure.
         """
-        key = GeCloudIdentifier(
+        key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
         )
@@ -480,7 +480,7 @@ class CloudDataContext(AbstractDataContext):
         Returns:
             An existing ExpectationSuite
         """
-        key = GeCloudIdentifier(
+        key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=ge_cloud_id,
         )
@@ -529,7 +529,7 @@ class CloudDataContext(AbstractDataContext):
             if expectation_suite.ge_cloud_id
             else None
         )
-        key = GeCloudIdentifier(
+        key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             ge_cloud_id=id,
             resource_name=expectation_suite.expectation_suite_name,
@@ -548,11 +548,11 @@ class CloudDataContext(AbstractDataContext):
             expectation_suite.render()
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
-        if isinstance(response, GeCloudResourceRef):
+        if isinstance(response, GXCloudResourceRef):
             expectation_suite.ge_cloud_id = response.ge_cloud_id
 
     def _validate_suite_unique_constaints_before_save(
-        self, key: GeCloudIdentifier
+        self, key: GXCloudIdentifier
     ) -> None:
         ge_cloud_id = key.ge_cloud_id
         if ge_cloud_id:

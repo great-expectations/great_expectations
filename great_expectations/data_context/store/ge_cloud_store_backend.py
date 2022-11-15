@@ -13,8 +13,8 @@ from great_expectations.data_context.cloud_constants import (
     GXCloudRESTResource,
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.data_context.types.refs import GeCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
@@ -323,7 +323,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         key: Tuple[GXCloudRESTResource, ...],
         value: Any,
         **kwargs: dict,
-    ) -> Union[bool, GeCloudResourceRef]:
+    ) -> Union[bool, GXCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
         ge_cloud_resource = key[0]
         ge_cloud_id: str = key[1]
@@ -366,7 +366,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             object_id = response_json["data"]["id"]
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
-            return GeCloudResourceRef(
+            return GXCloudResourceRef(
                 resource_type=resource_type,
                 ge_cloud_id=object_id,
                 url=object_url,
@@ -521,9 +521,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self,
         id: Optional[str] = None,
         name: Optional[str] = None,
-    ) -> GeCloudIdentifier:
+    ) -> GXCloudIdentifier:
         """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
-        return GeCloudIdentifier(
+        return GXCloudIdentifier(
             resource_type=self.ge_cloud_resource_type,
             ge_cloud_id=id,
             resource_name=name,

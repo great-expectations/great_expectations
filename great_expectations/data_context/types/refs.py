@@ -1,4 +1,4 @@
-class GeCloudIdAwareRef:
+class GXCloudIdAwareRef:
     """
     This class serves as a base class for refs tied to a Great Expectations Cloud ID.
     """
@@ -11,7 +11,7 @@ class GeCloudIdAwareRef:
         return self._ge_cloud_id
 
 
-class GeCloudResourceRef(GeCloudIdAwareRef):
+class GXCloudResourceRef(GXCloudIdAwareRef):
     """
     This class represents a reference to a Great Expectations object persisted to Great Expectations Cloud.
     """

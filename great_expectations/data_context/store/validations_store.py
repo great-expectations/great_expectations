@@ -14,7 +14,7 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
@@ -203,7 +203,7 @@ class ValidationsStore(Store):
         )
 
         if self.ge_cloud_mode:
-            test_key: GeCloudIdentifier = self.key_class(
+            test_key: GXCloudIdentifier = self.key_class(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
             )

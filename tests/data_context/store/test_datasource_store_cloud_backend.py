@@ -10,7 +10,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
 from tests.data_context.conftest import MockResponse
 
@@ -32,7 +32,7 @@ def test_datasource_store_set(
     """
 
     # Note: id will be provided by the backend on create
-    key = GeCloudIdentifier(
+    key = GXCloudIdentifier(
         resource_type=GXCloudRESTResource.DATASOURCE,
     )
 
@@ -87,7 +87,7 @@ def test_datasource_store_get_by_id(
 
     id: str = "example_id_normally_uuid"
 
-    key = GeCloudIdentifier(
+    key = GXCloudIdentifier(
         resource_type=GXCloudRESTResource.DATASOURCE, ge_cloud_id=id
     )
 
@@ -176,7 +176,7 @@ def test_datasource_store_delete_by_id(
     """
     id: str = "example_id_normally_uuid"
 
-    key = GeCloudIdentifier(
+    key = GXCloudIdentifier(
         resource_type=GXCloudRESTResource.DATASOURCE, ge_cloud_id=id
     )
 
@@ -223,7 +223,7 @@ def test_datasource_http_error_handling(
 ):
     id: str = "example_id_normally_uuid"
 
-    key = GeCloudIdentifier(
+    key = GXCloudIdentifier(
         resource_type=GXCloudRESTResource.DATASOURCE, ge_cloud_id=id
     )
     with pytest.raises(

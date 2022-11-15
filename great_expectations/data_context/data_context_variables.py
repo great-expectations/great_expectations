@@ -16,7 +16,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import substitute_all_config_variables
 
@@ -388,7 +388,7 @@ class CloudDataContextVariables(DataContextVariables):
         )
         return store
 
-    def get_key(self) -> GeCloudIdentifier:
+    def get_key(self) -> GXCloudIdentifier:
         """
         Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
         """
@@ -396,7 +396,7 @@ class CloudDataContextVariables(DataContextVariables):
             GXCloudRESTResource,
         )
 
-        key = GeCloudIdentifier(
+        key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.DATA_CONTEXT_VARIABLES
         )
         return key

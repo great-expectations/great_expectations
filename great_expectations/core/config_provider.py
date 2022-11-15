@@ -7,7 +7,7 @@ from collections import OrderedDict
 from typing import Dict, Optional, Type, cast
 
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.types.base import GeCloudConfig
+from great_expectations.data_context.types.base import GXCloudConfig
 from great_expectations.data_context.util import (
     substitute_all_config_variables,
     substitute_config_variable,
@@ -151,7 +151,7 @@ class CloudConfigurationProvider(AbstractConfigurationProvider):
     config provider when in a Cloud-backend environment.
     """
 
-    def __init__(self, cloud_config: GeCloudConfig) -> None:
+    def __init__(self, cloud_config: GXCloudConfig) -> None:
         self._cloud_config = cloud_config
 
     def get_values(self) -> Dict[str, str]:

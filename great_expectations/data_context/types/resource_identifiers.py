@@ -200,7 +200,7 @@ class ValidationResultIdentifier(DataContextKey):
         )
 
 
-class GeCloudIdentifier(DataContextKey):
+class GXCloudIdentifier(DataContextKey):
     def __init__(
         self,
         resource_type: GXCloudRESTResource,

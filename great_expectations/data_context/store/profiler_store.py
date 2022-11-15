@@ -6,7 +6,7 @@ from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
@@ -30,7 +30,7 @@ class ProfilerStore(ConfigurationStore):
             rules={},
         )
 
-        test_key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        test_key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if self.ge_cloud_mode:
             test_key = self.key_class(  # type: ignore[assignment,call-arg]
                 resource_type=GXCloudRESTResource.PROFILER,

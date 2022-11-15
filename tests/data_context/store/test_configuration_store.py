@@ -15,7 +15,7 @@ from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.util import gen_directory_tree_str
@@ -314,7 +314,7 @@ def test_self_check(capsys) -> None:
         pytest.param(
             None,
             "abc123",
-            GeCloudIdentifier(
+            GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id="abc123"
             ),
             id="id",

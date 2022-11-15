@@ -11,7 +11,7 @@ from great_expectations.data_context.store.tuple_store_backend import TupleStore
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import (
@@ -153,14 +153,14 @@ class ConfigurationStore(Store):
     @staticmethod
     def determine_key(
         name: Optional[str], ge_cloud_id: Optional[str]
-    ) -> Union[GeCloudIdentifier, ConfigurationIdentifier]:
+    ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id."
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
-            key = GeCloudIdentifier(
+            key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
             )
         else:
