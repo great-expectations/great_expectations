@@ -211,8 +211,8 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
             "success": success,
             "result": {"observed_value": {"duplicate_columns": duplicate_columns}},
         }
+        # </snippet>
 
-    # </snippet>
     # This dictionary contains metadata for display in the public gallery
     # <snippet>
     library_metadata = {
