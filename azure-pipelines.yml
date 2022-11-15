@@ -84,41 +84,33 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-    - job: install_dependencies
+    - job: type_hint_checker
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
           pip install --requirement reqs/requirements-dev-contrib.txt
-        name: InstallDependencies
-
-    - job: type_hint_checker
-      dependsOn: install_dependencies
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-      - script: |
           invoke type-coverage
         name: TypeHintChecker
 
     - job: static_type_check
-      dependsOn: install_dependencies
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
+          pip install --requirement reqs/requirements-dev-contrib.txt
           invoke type-check --install-types --warn-unused-ignores --pretty
         name: StaticTypeCheck
 
     - job: docstring_checker
-      dependsOn: install_dependencies
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
 
     - job: unused_import_checker
-      dependsOn: install_dependencies
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
+          pip install --requirement reqs/requirements-dev-contrib.txt
           # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
