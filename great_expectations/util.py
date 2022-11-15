@@ -52,7 +52,7 @@ from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.exceptions import (
-    GeCloudConfigurationError,
+    GXCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
@@ -1754,7 +1754,7 @@ def get_context(
         )
 
     if ge_cloud_mode and not config_available:
-        raise GeCloudConfigurationError(
+        raise GXCloudConfigurationError(
             "GE Cloud Mode enabled, but missing env vars: GE_CLOUD_ORGANIZATION_ID, GE_CLOUD_ACCESS_TOKEN"
         )
 

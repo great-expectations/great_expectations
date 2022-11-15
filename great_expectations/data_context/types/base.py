@@ -1540,7 +1540,7 @@ class ConcurrencyConfigSchema(Schema):
     enabled = fields.Boolean(default=False)
 
 
-class GeCloudConfig(DictDot):
+class GXCloudConfig(DictDot):
     def __init__(
         self,
         base_url: str,
