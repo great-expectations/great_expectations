@@ -532,7 +532,7 @@ class CloudDataContext(AbstractDataContext):
         )
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            ge_cloud_id=id,
+            ge_cloud_id=ge_cloud_id,
             resource_name=expectation_suite.expectation_suite_name,
         )
 
@@ -552,7 +552,7 @@ class CloudDataContext(AbstractDataContext):
         if isinstance(response, GXCloudResourceRef):
             expectation_suite.ge_cloud_id = response.ge_cloud_id
 
-    def _validate_suite_unique_constaints_before_save(
+    def _validate_suite_unique_constraints_before_save(
         self, key: GXCloudIdentifier
     ) -> None:
         ge_cloud_id = key.ge_cloud_id
