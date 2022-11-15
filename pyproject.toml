@@ -14,7 +14,7 @@ extend_skip_glob = ['venv/*', 'docs/*']
 
 [tool.mypy]
 python_version = "3.7"
-# plugins = ["pydantic.mypy"]
+plugins = ["pydantic.mypy"]
 files = [
     "great_expectations",
     # "contrib" # ignore entire `contrib` package

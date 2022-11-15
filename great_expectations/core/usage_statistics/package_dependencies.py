@@ -48,6 +48,7 @@ class GEDependencies:
             "numpy",
             "packaging",
             "pandas",
+            "pydantic",
             "pyparsing",
             "python-dateutil",
             "pytz",
