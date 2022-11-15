@@ -16,7 +16,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
 )
 from great_expectations.data_context.types.refs import (
-    GXCloudIdAwareRef,
+    GXCloudIDAwareRef,
     GXCloudResourceRef,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -173,7 +173,7 @@ class CheckpointStore(ConfigurationStore):
         )
         checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment]
         checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
-        if isinstance(checkpoint_ref, GXCloudIdAwareRef):
+        if isinstance(checkpoint_ref, GXCloudIDAwareRef):
             ge_cloud_id = checkpoint_ref.ge_cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)  # type: ignore[misc]
 
