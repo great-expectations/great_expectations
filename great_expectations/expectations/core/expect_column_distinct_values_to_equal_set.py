@@ -9,9 +9,8 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.util import parse_value_set
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -19,6 +18,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
+    """Expect the set of distinct column values to equal a given set."""
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

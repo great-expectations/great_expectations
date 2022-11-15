@@ -23,14 +23,12 @@ from great_expectations.render import (
     LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
-    renderedAtomicValueSchema,
-)
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
     RenderedContentBlockContainer,
     RenderedGraphContent,
     RenderedStringTemplateContent,
+    renderedAtomicValueSchema,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -255,7 +253,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     metric_configuration=partition_metric_configuration,
                 )
 
-                resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+                resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
                 # updates graph with aborted metrics
                 aborted_metrics_info: Dict[

@@ -35,7 +35,6 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
-    get_datetime_string_from_strftime_format,
     nested_update,
     parse_string_to_datetime,
 )
@@ -43,6 +42,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
     ClassInstantiationError,
     DataContextError,
+    GreatExpectationsTypeError,
     InvalidExpectationConfigurationError,
 )
 from great_expectations.render import (
@@ -129,15 +129,22 @@ class ExpectationSuite(SerializableDictDot):
         if "citations" not in self.meta:
             self.meta["citations"] = []
 
-        if isinstance(citation_date, str):
-            citation_date = parse_string_to_datetime(datetime_string=citation_date)  # type: ignore[assignment]
+        citation_date_obj: datetime.datetime
+        _citation_date_types = (type(None), str, datetime.datetime)
 
-        citation_date = citation_date or datetime.datetime.now(datetime.timezone.utc)
+        if citation_date is None:
+            citation_date_obj = datetime.datetime.now(datetime.timezone.utc)
+        elif isinstance(citation_date, str):
+            citation_date_obj = parse_string_to_datetime(datetime_string=citation_date)
+        elif isinstance(citation_date, datetime.datetime):
+            citation_date_obj = citation_date
+        else:
+            raise GreatExpectationsTypeError(
+                f"citation_date should be of type - {' '.join(str(t) for t in _citation_date_types)}"
+            )
+
         citation: Dict[str, Any] = {
-            "citation_date": get_datetime_string_from_strftime_format(
-                format_str="%Y-%m-%dT%H:%M:%S.%fZ",
-                datetime_obj=citation_date,  # type: ignore[arg-type]
-            ),
+            "citation_date": citation_date_obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "batch_request": batch_request,
             "batch_definition": batch_definition,
             "batch_spec": batch_spec,
@@ -745,7 +752,6 @@ class ExpectationSuite(SerializableDictDot):
         pprint.pprint(
             object=pprint_objects,
             indent=2,
-            sort_dicts=False,
         )
 
     def get_grouped_and_ordered_expectations_by_domain_type(

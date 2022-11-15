@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-from collections import OrderedDict
 from unittest.mock import patch
 
 import boto3
@@ -20,7 +19,6 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store import (
-    GeCloudStoreBackend,
     InMemoryStoreBackend,
     StoreBackend,
     TupleAzureBlobStoreBackend,
@@ -28,16 +26,10 @@ from great_expectations.data_context.store import (
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    DataContextConfig,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,

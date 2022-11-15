@@ -13,6 +13,7 @@ skip_gitignore = true
 extend_skip_glob = ['venv/*', 'docs/*']
 
 [tool.mypy]
+python_version = "3.7"
 files = [
     "great_expectations",
     # "contrib" # ignore entire `contrib` package
@@ -31,7 +32,7 @@ exclude = [
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
     'checkpoint/actions\.py',  # 18
-    'checkpoint/checkpoint\.py',  # 26
+    'checkpoint/checkpoint\.py',  # 22
     'checkpoint/configurator\.py', # 2
     'checkpoint/types',  # 34
     'checkpoint/util\.py',  # 5

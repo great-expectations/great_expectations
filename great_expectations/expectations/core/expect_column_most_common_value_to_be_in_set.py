@@ -8,9 +8,8 @@ from great_expectations.expectations.expectation import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyRendererType
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -18,7 +17,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
-    """Expect the most common value to be within the designated value set
+    """Expect the most common value to be within the designated value set.
 
             expect_column_most_common_value_to_be_in_set is a \
             :func:`column_aggregate_expectation

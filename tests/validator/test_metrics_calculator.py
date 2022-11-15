@@ -90,7 +90,6 @@ def test_column_partition_metric(
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies=None,
     )
     results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 
@@ -110,7 +109,6 @@ def test_column_partition_metric(
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies=None,
     )
     results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
 

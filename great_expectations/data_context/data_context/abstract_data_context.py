@@ -3,7 +3,6 @@ from __future__ import annotations
 import configparser
 import copy
 import datetime
-import errno
 import json
 import logging
 import os
@@ -25,14 +24,10 @@ from typing import (
     cast,
 )
 
-try:
-    from typing import Literal
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Literal  # type: ignore[assignment]
-
 from dateutil.parser import parse
+from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
+from typing_extensions import Literal
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -42,6 +37,12 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     IDDict,
     get_batch_request_from_acceptable_arguments,
+)
+from great_expectations.core.config_provider import (
+    ConfigurationProvider,
+    ConfigurationVariablesConfigurationProvider,
+    EnvironmentConfigurationProvider,
+    RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -75,6 +76,7 @@ from great_expectations.data_context.types.base import (
     NotebookConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
+    dataContextConfigSchema,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
@@ -87,7 +89,6 @@ from great_expectations.data_context.util import (
     build_store_from_config,
     instantiate_class_from_config,
     substitute_all_config_variables,
-    substitute_config_variable,
 )
 from great_expectations.dataset.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
@@ -166,9 +167,11 @@ class AbstractDataContext(ABC):
             runtime_environment = {}
         self.runtime_environment = runtime_environment
 
+        self._config_provider = self._init_config_provider()
+        self._config_variables = self._load_config_variables()
+
         # These attributes that are set downstream.
         self._variables: Optional[DataContextVariables] = None
-        self._config_variables: Optional[dict] = None
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -207,6 +210,34 @@ class AbstractDataContext(ABC):
 
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         self.validation_operators: dict = {}
+
+    def _init_config_provider(self) -> ConfigurationProvider:
+        config_provider = ConfigurationProvider()
+        self._register_providers(config_provider)
+        return config_provider
+
+    def _register_providers(self, config_provider: ConfigurationProvider) -> None:
+        """
+        Registers any relevant ConfigurationProvider instances to self._config_provider.
+
+        Note that order matters here - if there is a namespace collision, later providers will overwrite
+        the values derived from previous ones. The order of precedence is as follows:
+            - Config variables
+            - Environment variables
+            - Runtime environment
+        """
+        config_variables_file_path = self._project_config.config_variables_file_path
+        if config_variables_file_path:
+            config_provider.register_provider(
+                ConfigurationVariablesConfigurationProvider(
+                    config_variables_file_path=config_variables_file_path,
+                    root_directory=self.root_directory,
+                )
+            )
+        config_provider.register_provider(EnvironmentConfigurationProvider())
+        config_provider.register_provider(
+            RuntimeEnvironmentConfigurationProvider(self.runtime_environment)
+        )
 
     @abstractmethod
     def _init_variables(self) -> DataContextVariables:
@@ -515,7 +546,7 @@ class AbstractDataContext(ABC):
         self,
         name: str,
         initialize: bool = True,
-        save_changes: bool = False,
+        save_changes: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
@@ -529,6 +560,8 @@ class AbstractDataContext(ABC):
         Returns:
             datasource (Datasource)
         """
+        save_changes = self._determine_save_changes_flag(save_changes)
+
         logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
 
         module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
@@ -561,7 +594,7 @@ class AbstractDataContext(ABC):
     def update_datasource(
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
-        save_changes: bool = False,
+        save_changes: Optional[bool] = None,
     ) -> None:
         """
         Updates a DatasourceConfig that already exists in the store.
@@ -570,6 +603,8 @@ class AbstractDataContext(ABC):
             datasource_config: The config object to persist using the DatasourceStore.
             save_changes: do I save changes to disk?
         """
+        save_changes = self._determine_save_changes_flag(save_changes)
+
         datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
         datasource_name: str = datasource.name
@@ -1037,7 +1072,7 @@ class AbstractDataContext(ABC):
         return datasources
 
     def delete_datasource(
-        self, datasource_name: Optional[str], save_changes: bool = False
+        self, datasource_name: Optional[str], save_changes: Optional[bool] = None
     ) -> None:
         """Delete a datasource
         Args:
@@ -1046,6 +1081,8 @@ class AbstractDataContext(ABC):
         Raises:
             ValueError: If the datasource name isn't provided or cannot be found.
         """
+        save_changes = self._determine_save_changes_flag(save_changes)
+
         if not datasource_name:
             raise ValueError("Datasource names must be a datasource name")
 
@@ -2397,6 +2434,21 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         return metric_configurations_list
 
+    @classmethod
+    def get_or_create_data_context_config(
+        cls, project_config: Union[DataContextConfig, Mapping]
+    ) -> DataContextConfig:
+        if isinstance(project_config, DataContextConfig):
+            return project_config
+        try:
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            project_config_dict = dataContextConfigSchema.dump(project_config)
+            project_config_dict = dataContextConfigSchema.load(project_config_dict)
+            context_config: DataContextConfig = DataContextConfig(**project_config_dict)
+            return context_config
+        except ValidationError:
+            raise
+
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
     ) -> Optional[str]:
@@ -2411,7 +2463,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return os.path.join(self.root_directory, path)  # type: ignore[arg-type]
 
     def _apply_global_config_overrides(
-        self, config: Union[DataContextConfig, Mapping]
+        self, config: DataContextConfig
     ) -> DataContextConfig:
 
         """
@@ -2427,12 +2479,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             DataContextConfig with the appropriate overrides
         """
         validation_errors: dict = {}
-        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)  # type: ignore[assignment]
-        usage_stats_opted_out: bool = self._check_global_usage_statistics_opt_out()
-        # if usage_stats_opted_out then usage_statistics is false
-        # NOTE: <DataContextRefactor> 202207 Refactor so that this becomes usage_stats_enabled
-        # (and we don't have to flip a boolean in our minds)
-        if usage_stats_opted_out:
+        config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
+        usage_stats_enabled: bool = self._is_usage_stats_enabled()
+        if not usage_stats_enabled:
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
@@ -2483,53 +2532,31 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return config_with_global_config_overrides
 
     def _load_config_variables(self) -> Dict:
+        config_var_provider = self._config_provider.get_provider(
+            ConfigurationVariablesConfigurationProvider
+        )
+        if config_var_provider:
+            return config_var_provider.get_values()
+        return {}
+
+    @staticmethod
+    def _is_usage_stats_enabled() -> bool:
         """
-        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
-        have already been interpolated before being sent from the Cloud API.
-
-        """
-        config_variables_file_path = self._project_config.config_variables_file_path
-        if config_variables_file_path:
-            try:
-                # If the user specifies the config variable path with an environment variable, we want to substitute it
-                defined_path: str = substitute_config_variable(  # type: ignore[assignment]
-                    config_variables_file_path, dict(os.environ)
-                )
-                if not os.path.isabs(defined_path) and hasattr(self, "root_directory"):
-                    # A BaseDataContext will not have a root directory; in that case use the current directory
-                    # for any non-absolute path
-                    root_directory: str = self.root_directory or os.curdir
-                else:
-                    root_directory = ""
-                var_path = os.path.join(root_directory, defined_path)
-                with open(var_path) as config_variables_file:
-                    contents = config_variables_file.read()
-
-                variables = yaml.load(contents) or {}
-                return dict(variables)
-
-            except OSError as e:
-                if e.errno != errno.ENOENT:
-                    raise
-                return {}
-        else:
-            return {}
-
-    def _check_global_usage_statistics_opt_out(self) -> bool:
-        """
-        Method to retrieve config value.
-        This method can be overridden in child classes (like FileDataContext) when we need to look for
-        config values in other locations like config files.
+        Checks the following locations to see if usage_statistics is disabled in any of the following locations:
+            - GE_USAGE_STATS, which is an environment_variable
+            - GLOBAL_CONFIG_PATHS
+        If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
+        Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for anonymous_usage_statistics
+        Returns True otherwise
 
         Returns:
-            bool that tells you whether usage_statistics is opted out
+            bool that tells you whether usage_statistics is on or off
         """
-        # NOTE: <DataContextRefactor> Refactor so that opt_out is no longer used, and we don't have to flip boolean in
-        # our minds.
+        usage_statistics_enabled: bool = True
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
-                return True
+                usage_statistics_enabled = False
             else:
                 logger.warning(
                     "GE_USAGE_STATS environment variable must be one of: {}".format(
@@ -2547,12 +2574,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             config.BOOLEAN_STATES = states  # type: ignore[misc] # Cannot assign to class variable via instance
             config.read(config_path)
             try:
-                if config.getboolean("anonymous_usage_statistics", "enabled") is False:
-                    # If stats are disabled, then opt out is true
-                    return True
+                if not config.getboolean("anonymous_usage_statistics", "enabled"):
+                    usage_statistics_enabled = False
+
             except (ValueError, configparser.Error):
                 pass
-        return False
+        return usage_statistics_enabled
 
     def _get_data_context_id_override(self) -> Optional[str]:
         """
@@ -2690,25 +2717,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self._config_variables = self._load_config_variables()
 
     def _determine_substitutions(self) -> Dict:
-        """Aggregates substitutions from the project's config variables file, any environment variables, and
-        the runtime environment.
-
-        Returns: A dictionary containing all possible substitutions that can be applied to a given object
-                 using `substitute_all_config_variables`.
-        """
-        substituted_config_variables: dict = substitute_all_config_variables(
-            self.config_variables,
-            dict(os.environ),
-            self.DOLLAR_SIGN_ESCAPE_STRING,
-        )
-
-        substitutions: dict = {
-            **substituted_config_variables,
-            **dict(os.environ),
-            **self.runtime_environment,
-        }
-
-        return substitutions
+        return self._config_provider.get_values()
 
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
@@ -2863,8 +2872,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _instantiate_datasource_from_config_and_update_project_config(
         self,
         config: DatasourceConfig,
-        initialize: bool = True,
-        save_changes: bool = False,
+        initialize: bool,
+        save_changes: bool,
     ) -> Optional[Datasource]:
         """Perform substitutions and optionally initialize the Datasource and/or store the config.
 
@@ -3129,6 +3138,28 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             else:
                 return False
         return include_rendered_content
+
+    @staticmethod
+    def _determine_save_changes_flag(save_changes: Optional[bool]) -> bool:
+        """
+        This method is meant to enable the gradual deprecation of the `save_changes` boolean
+        flag on various Datasource CRUD methods. Moving forward, we will always persist changes
+        made by these CRUD methods (a.k.a. the behavior created by save_changes=True).
+
+        As part of this effort, `save_changes` has been set to `None` as a default value
+        and will be automatically converted to `True` within this method. If a user passes in a boolean
+        value (thereby bypassing the default arg of `None`), a deprecation warning will be raised.
+        """
+        if save_changes is not None:
+            # deprecated-v0.15.32
+            warnings.warn(
+                'The parameter "save_changes" is deprecated as of v0.15.32; moving forward, '
+                "changes made to Datasources will always be persisted by Store implementations. "
+                "As support will be removed in v0.18, please omit the argument moving forward.",
+                DeprecationWarning,
+            )
+            return save_changes
+        return True
 
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,

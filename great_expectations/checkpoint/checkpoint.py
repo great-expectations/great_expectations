@@ -37,11 +37,8 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GeCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -127,6 +124,10 @@ class BaseCheckpoint(ConfigPeer):
         run_time = run_time or datetime.datetime.now()
         runtime_configuration = runtime_configuration or {}
         result_format = result_format or runtime_configuration.get("result_format")
+        _result_format_types = (type(None), str, dict)
+        assert isinstance(
+            result_format, _result_format_types
+        ), f"result_format should be of type - {' '.join(str(t) for t in _result_format_types)}"
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
         validations = get_validations_with_batch_request_as_dict(
@@ -161,9 +162,7 @@ class BaseCheckpoint(ConfigPeer):
             )
 
         if run_name is None and run_name_template is not None:
-            run_name = get_datetime_string_from_strftime_format(
-                format_str=run_name_template, datetime_obj=run_time
-            )
+            run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 

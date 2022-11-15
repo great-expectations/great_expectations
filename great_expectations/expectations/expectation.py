@@ -72,20 +72,18 @@ from great_expectations.expectations.sql_tokens_and_types import (
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
+    CollapseContent,
     LegacyDiagnosticRendererType,
     LegacyRendererType,
     RenderedAtomicContent,
-    renderedAtomicValueSchema,
-)
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    CollapseContent,
     RenderedContentBlockContainer,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
     ValueListContent,
+    renderedAtomicValueSchema,
 )
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
@@ -2280,9 +2278,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
-        if result_format_str in ["BASIC", "SUMMARY"]:
-            return dependencies
-
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_rows",
@@ -2297,6 +2292,10 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
+        if result_format_str in ["BASIC"]:
+            return dependencies
+
+        # only for SUMMARY and COMPLETE
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
                 f"{self.map_metric}.unexpected_index_list",

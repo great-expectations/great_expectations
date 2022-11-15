@@ -6,9 +6,12 @@ from great_expectations.expectations.expectation import (
     ColumnExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.render import LegacyDescriptiveRendererType, LegacyRendererType
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    LegacyRendererType,
+    RenderedStringTemplateContent,
+)
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
@@ -29,7 +32,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 class ExpectColumnMinToBeBetween(ColumnExpectation):
-    """Expect the column minimum to be between an min and max value
+    """Expect the column minimum to be between a minimum value and a maximum value.
 
             expect_column_min_to_be_between is a \
             :func:`column_aggregate_expectation

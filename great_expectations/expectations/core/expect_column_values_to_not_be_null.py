@@ -12,9 +12,9 @@ from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyDiagnosticRendererType,
     LegacyRendererType,
+    RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
@@ -23,7 +23,7 @@ from great_expectations.render.util import (
 
 
 class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
-    """Expect column values to not be null.
+    """Expect the column values to not be null.
 
     To be counted as an exception, values must be explicitly null or missing, such as a NULL in PostgreSQL or an
     np.NaN in pandas. Empty strings don't count as null unless they have been coerced to a null type.

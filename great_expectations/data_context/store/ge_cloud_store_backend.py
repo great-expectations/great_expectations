@@ -1,24 +1,22 @@
 import json
 import logging
 from abc import ABCMeta
-from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
+from typing_extensions import TypedDict
 
 from great_expectations.core.http import create_session
-from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
+from great_expectations.data_context.cloud_constants import (
+    CLOUD_DEFAULT_BASE_URL,
+    GeCloudRESTResource,
+)
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
-
-try:
-    from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
 
 logger = logging.getLogger(__name__)
 
@@ -105,25 +103,6 @@ def get_user_friendly_error_message(
     except json.JSONDecodeError:
         support_message.append(f"Please contact superconductive at {SUPPORT_EMAIL}")
     return " ".join(support_message)
-
-
-class GeCloudRESTResource(str, Enum):
-    BATCH = "batch"
-    CHECKPOINT = "checkpoint"
-    # Chetan - 20220811 - CONTRACT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-    CONTRACT = "contract"
-    DATASOURCE = "datasource"
-    DATA_ASSET = "data_asset"
-    DATA_CONTEXT = "data_context"
-    DATA_CONTEXT_VARIABLES = "data_context_variables"
-    EXPECTATION = "expectation"
-    EXPECTATION_SUITE = "expectation_suite"
-    EXPECTATION_VALIDATION_RESULT = "expectation_validation_result"
-    PROFILER = "profiler"
-    RENDERED_DATA_DOC = "rendered_data_doc"
-    # Chetan - 20220812 - SUITE_VALIDATION_RESULT is deprecated by GX Cloud and is to be removed upon migration of E2E tests
-    SUITE_VALIDATION_RESULT = "suite_validation_result"
-    VALIDATION_RESULT = "validation_result"
 
 
 class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
