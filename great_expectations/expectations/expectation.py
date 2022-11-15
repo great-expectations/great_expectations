@@ -777,7 +777,7 @@ class Expectation(metaclass=MetaExpectation):
         """
         template_str = "Rendering of Expectation Validation Result failed for $expectation_type(**$kwargs)."
 
-        if result:
+        if result and result.expectation_config:
             params_with_json_schema = {
                 "expectation_type": {
                     "schema": {"type": "string"},
