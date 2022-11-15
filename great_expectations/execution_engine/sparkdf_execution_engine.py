@@ -726,13 +726,6 @@ illegal.  Please check your config."""
 
             assert len(aggregate["column_aggregates"]) == len(aggregate["metric_ids"])
 
-            aggregate_cols: List[str] = []
-
-            idx: int
-            for idx in range(len(aggregate["column_aggregates"])):
-                column_aggregate: Any = aggregate["column_aggregates"][idx]
-                aggregate_cols.append(column_aggregate)
-
             res = df.agg(*aggregate["column_aggregates"]).collect()
 
             logger.debug(
