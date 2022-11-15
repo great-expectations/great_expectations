@@ -769,7 +769,7 @@ class Expectation(metaclass=MetaExpectation):
     @renderer(renderer_type=AtomicDiagnosticRendererType.FAILED)
     def _atomic_diagnostic_failed(
         cls,
-        configuration: ExpectationConfiguration,
+        result: Optional[ExpectationValidationResult] = None,
         **kwargs: dict,
     ) -> RenderedAtomicContent:
         """
@@ -777,13 +777,19 @@ class Expectation(metaclass=MetaExpectation):
         """
         template_str = "Rendering of Expectation Validation Result failed for $expectation_type(**$kwargs)."
 
-        params_with_json_schema = {
-            "expectation_type": {
-                "schema": {"type": "string"},
-                "value": configuration.expectation_type,
-            },
-            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
-        }
+        if result:
+            params_with_json_schema = {
+                "expectation_type": {
+                    "schema": {"type": "string"},
+                    "value": result.expectation_config.expectation_type,
+                },
+                "kwargs": {
+                    "schema": {"type": "string"},
+                    "value": result.expectation_config.kwargs,
+                },
+            }
+        else:
+            params_with_json_schema = {}
         value_obj = renderedAtomicValueSchema.load(
             {
                 "template": template_str,
