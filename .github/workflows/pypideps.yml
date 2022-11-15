@@ -12,10 +12,16 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.7
-      - name: Install dependencies
+      - name: Install GX dependencies
         run: |
           pip install .
           pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
           for file in reqs/*;
             pip install --requirement $file
           done
+      - name: Install pipdeptree
+        run: |
+          pip install pipdeptree
+      - name: Run pipdeptree
+        run: |
+          pipdeptree --json-tree
