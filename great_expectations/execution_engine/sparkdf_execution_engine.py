@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
-import uuid
 import warnings
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
@@ -688,7 +687,7 @@ illegal.  Please check your config."""
 
         res: List[Row]
 
-        aggregates: Dict[Tuple, dict] = {}
+        aggregates: Dict[Tuple[str, str, str], dict] = {}
 
         aggregate: dict
 
@@ -714,30 +713,27 @@ illegal.  Please check your config."""
             if domain_id not in aggregates:
                 aggregates[domain_id] = {
                     "column_aggregates": [],
-                    "ids": [],
+                    "metric_ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
 
             aggregates[domain_id]["column_aggregates"].append(metric_fn)
-            aggregates[domain_id]["ids"].append(metric_to_resolve.id)
+            aggregates[domain_id]["metric_ids"].append(metric_to_resolve.id)
 
         for aggregate in aggregates.values():
             domain_kwargs: dict = aggregate["domain_kwargs"]
             df: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
-            assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
+            assert len(aggregate["column_aggregates"]) == len(aggregate["metric_ids"])
 
-            condition_ids: List[str] = []
             aggregate_cols: List[str] = []
 
             idx: int
             for idx in range(len(aggregate["column_aggregates"])):
                 column_aggregate: Any = aggregate["column_aggregates"][idx]
-                aggregate_id: str = str(uuid.uuid4())
-                condition_ids.append(aggregate_id)
                 aggregate_cols.append(column_aggregate)
 
-            res = df.agg(*aggregate_cols).collect()
+            res = df.agg(*aggregate["column_aggregates"]).collect()
 
             logger.debug(
                 f"""SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id \
@@ -747,13 +743,13 @@ illegal.  Please check your config."""
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
-            assert len(aggregate["ids"]) == len(
+            assert len(aggregate["metric_ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
 
             idx: int
             metric_id: Tuple[str, str, str]
-            for idx, metric_id in enumerate(aggregate["ids"]):
+            for idx, metric_id in enumerate(aggregate["metric_ids"]):
                 # Converting DataFrame.collect() results into JSON-serializable format produces simple data types,
                 # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
                 resolved_metrics[metric_id] = convert_to_json_serializable(

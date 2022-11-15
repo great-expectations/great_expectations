@@ -117,10 +117,11 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     raise ValueError(
                         "metric functions must be defined with an Execution Engine"
                     )
-                metric_fn = attr_obj
                 if metric_name is None:
                     # No metric name has been defined
                     continue
+
+                metric_fn = attr_obj
                 metric_definition_kwargs = getattr(
                     metric_fn, "metric_definition_kwargs", {}
                 )
@@ -214,4 +215,5 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     metric.metric_domain_kwargs,
                     metric.metric_value_kwargs,
                 )
+
         return dependencies
