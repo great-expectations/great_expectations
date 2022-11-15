@@ -1,6 +1,8 @@
 import logging
 from typing import Callable, List, Optional, Union
 
+from typing_extensions import TypedDict
+
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -17,11 +19,6 @@ from great_expectations.render import (
 )
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.render.renderer.renderer import Renderer
-
-try:
-    from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
 
 logger = logging.getLogger(__name__)
 
